@@ -203,7 +203,7 @@ startup:     &gt;&gt;&gt; Note: run summary with case in file names   &quot;mini
 <p>A first basic plot of particle tracks</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># read output files</span>
 
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files</span> <span class="kn">import</span>  <span class="n">load_output_files</span>
+<span class="kn">from</span> <span class="nn">read_oceantracker.python</span> <span class="kn">import</span>  <span class="n">load_output_files</span>
 
 <span class="c1"># use run info file, to get name of file with detailed information about the single case from case_info json file,</span>
 <span class="c1">#   this case_info file holds all the output file names pls lots of other run info</span>
@@ -214,7 +214,7 @@ startup:     &gt;&gt;&gt; Note: run summary with case in file names   &quot;mini
 
 <span class="nb">print</span><span class="p">(</span><span class="n">tracks</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="c1"># show what is in tracks dictionary</span>
 
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting.plot_tracks</span> <span class="kn">import</span> <span class="n">plot_tracks</span>
+<span class="kn">from</span> <span class="nn">plot_oceantracker.plot_tracks</span> <span class="kn">import</span> <span class="n">plot_tracks</span>
 
 <span class="n">ax</span><span class="o">=</span> <span class="p">[</span><span class="mi">1591000</span><span class="p">,</span> <span class="mi">1601500</span><span class="p">,</span> <span class="mi">5478500</span><span class="p">,</span> <span class="mi">5491000</span><span class="p">]</span>  <span class="c1"># aread to plot</span>
 <span class="n">plot_tracks</span><span class="p">(</span><span class="n">tracks</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
@@ -237,7 +237,7 @@ example.</p>
 cell and will not be released if the release location lies within a dry
 cell.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span>
+<span class="kn">from</span> <span class="nn">plot_oceantracker.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span>
 
 <span class="c1"># need to do animation in separate window</span>
 

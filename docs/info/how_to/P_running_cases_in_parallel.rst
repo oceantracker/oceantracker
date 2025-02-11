@@ -47,9 +47,13 @@ Run parallel with helper class
 .. code:: ipython3
 
     # run in parallel using helper class method
-    from oceantracker.main import OceanTracker
+    from oceantracker import main
+    from  importlib import reload # force a reload to get around notebooks single name space
+    reload(main)
     
-    ot = OceanTracker()
+    
+    ot = main.OceanTracker()
+    
     # setup base case
     # by default settings and classes are added to base case
     ot.settings(output_file_base= 'parallel_test2',      # name used as base for output files
@@ -57,10 +61,8 @@ Run parallel with helper class
         time_step = 120,  #  2 min time step as seconds  
         )
     
-    ot.add_class('reader',
-                input_dir='../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                file_mask= 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-                )
+    ot.add_class('reader',input_dir= '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                          file_mask=  'demo_hindcast_schisim3D*.nc')  # hindcast file mask
     
     # now put a release group with one point into case list
     # define the required release  points
@@ -69,16 +71,16 @@ Run parallel with helper class
                 [1598886.4247, 5489464.0424],
                 [1597917.3387, 5489000],
             ]
-    
-    # build a list of params for each case, with one release group fot each point
+    # run each point release in parrallel
     for n, p in enumerate(points):
         # add a release group with one point to case "n"
         ot.add_class('release_groups',
-                    name ='mypoint'+str(n),
-                    points= [p],  # needs to be 1, by 2 list for single 2D point
+                    case=n, # this adds release group to the n'th case to run in //
+                    name ='mypoint'+str(n), # optional name for each group
+                    points= p,  # needs to be 1, by 2 list for single 2D point
                     release_interval= 3600,           # seconds between releasing particles
                     pulse_size= 10,                   # number of particles released each release_interval
-                    case=n) # this adds release group to the nth case to run in //
+                    )
     
     # to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
     if __name__ == '__main__':
@@ -95,33 +97,47 @@ Run parallel with helper class
 
 .. parsed-literal::
 
-    helper: --------------------------------------------------------------------------
-    helper: Starting OceanTracker helper class
-    helper:   - Adding parallel case number # "0"
-    helper:   - Adding parallel case number # "1"
-    helper:   - Adding parallel case number # "2"
-    helper:   - Adding parallel case number # "3"
-    helper:   - Starting run using helper class
-    main: --------------------------------------------------------------------------
-    main:  OceanTracker version 0.4.01.004 2023-07-14 - preliminary setup
-    main:      Python version: 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:00:38) [MSC v.1934 64 bit (AMD64)]
-    main:   - found hydro-model files of type SCHISIM
-    main:       -  sorted hyrdo-model files in time order,	  0.009 sec
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test2
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test2_raw_user_params.json"
-    main:   -  oceantracker:multiProcessing: processors:4
-    main:   - parallel pool complete
-    main:     >>> Note: run summary with case file names   "parallel_test2_runInfo.json"
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test2
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test2_raw_user_params.json"
-    main:     >>> Note: run summary with case file names   "parallel_test2_runInfo.json"
-    main: --------------------------------------------------------------------------
-    main: OceanTracker summary:  elapsed time =0:00:17.630557
-    main:       Cases -   0 errors,   0 warnings,   8 notes, check above
-    main:       Helper-   0 errors,   0 warnings,   0 notes, check above
-    main:       Main  -   0 errors,   0 warnings,   3 notes, check above
-    main: --------------------------------------------------------------------------
+    helper ----------------------------------------------------------------------
+    helper Starting OceanTracker helper class
+    helper   - Starting run using helper class
+    Main      Python version: 3.11.9 | packaged by conda-forge | (main, Apr 19 2024, 18:27:10) [MSC v.1938 64 bit (AMD64)]
+    Main >>> Warning: Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4
+    Main ----------------------------------------------------------------------
+    Main OceanTracker starting main:
+    Main     Starting package set up
+    Main         -  Built OceanTracker package tree,	  0.603 sec
+    Main         -  Built OceanTracker sort name map,	  0.000 sec
+    Main     -  Done package set up to setup ClassImporter,	  0.603 sec
+    Main >>> Warning: Deleted contents of existing output dir
+    Main Output is in dir "f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test2"
+    Main       hint: see for copies of screen output and user supplied parameters, plus all other output
+    Main     >>> Note: to help with debugging, parameters as given by user  are in "user_given_params.json"
+    Main ----------------------------------------------------------------------
+    Main  OceanTracker version 0.50.0010-2024-03-30 - preliminary setup
+    Main   - Found input dir "../demos/demo_hindcast/schsim3D"
+    Main   - found hydro-model files of type  "SCHISM"
+    Main Cataloging hindcast with 1 files in dir ../demos/demo_hindcast/schsim3D
+    Main     -  Cataloged hydro-model files/variables in time order,	  0.008 sec
+    Main >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
+    Main     -  sorted hyrdo-model files in time order,	  0.034 sec
+    Main   - oceantracker:multiProcessing: processors:4
+    Main   - parallel pool complete
+    End --- Summary ----------------------------------------------------------
+    End     >>> Note: Run summary with case file names in "*_runInfo.json"
+    End     >>> Note: to help with debugging, parameters as given by user  are in "user_given_params.json"
+    End >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
+    End     >>> Note: Run summary with case file names in "*_runInfo.json"
+    End >>> Warning: Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4
+    End >>> Warning: Deleted contents of existing output dir
+    End ----------------------------------------------------------------------
+    End ----------------------------------------------------------------------
+    End OceanTracker summary:  elapsed time =0:00:17.406447
+    End       Cases -   0 errors,   0 warnings,  12 notes, check above
+    End       Main  -   0 errors,   2 warnings,   3 notes, check above
+    End   Output in None
+    End ----------------------------------------------------------------------
     
+
 
 
 
@@ -131,17 +147,19 @@ Run parallel using param. dicts.
 .. code:: ipython3
 
     # oceantracker parallel demo, run different release groups as parallel processes
-    from oceantracker import main
+    from oceantracker.main import OceanTracker
+    
+    # make instance of oceantracker to use to set parameters using code, then run
+    ot = OceanTracker()
     
     # first build base case, params used for all cases
-    base_case={
-        'output_file_base' :'parallel_test1',      # name used as base for output files
-        'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
-        'time_step' : 120,  #  2 min time step as seconds  
-        'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                    'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-            },
-            }
+    params=dict(debug =True,
+        output_file_base= 'parallel_test1',      # name used as base for output files
+        root_output_dir= 'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
+        time_step = 120,  #  2 min time step as seconds 
+        ) 
+    params['reader']= dict(input_dir= '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                          file_mask=  'demo_hindcast_schisim3D*.nc')
     
     # define the required release  points
     points = [  [1597682.1237, 5489972.7479],
@@ -150,26 +168,24 @@ Run parallel using param. dicts.
                 [1597917.3387, 5489000],
             ]
     
-    # build a list of params for each case, with one release group fot each point
-    case_list=[]
+    # build a list of params for each case, with one release group for each point
+    params['case_list'] =[]
     for n,p in enumerate(points):
-        case_param = main.param_template()
         # add one point as a release group to this case
-        case_param['release_groups']['mypoint'+str(n)] = {  # better to give release group a unique name
-                                                'points':[p],  # needs to be 1, by 2 list for single 2D point
-                                                'release_interval': 3600,           # seconds between releasing particles
-                                                'pulse_size': 10,                   # number of particles released each release_interval
-                                    }
-        case_list.append(case_param)  # add this case to the list
-    
-    
+        d = dict( name= 'mypoint'+str(n),# better to give release group a unique name
+                points= [p],  # needs to be 1, by 2 list for single 2D point
+                release_interval= 3600,           # seconds between releasing particles
+                pulse_size= 10,                   # number of particles released each release_interval
+                )
+        case_param =dict(release_groups=[d]) # release group list of one or more releases
+        params['case_list'].append(case_param)
     
     # to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
     if __name__ == '__main__':
     
         # run as parallel set of cases
-        #    by default uses one less than the number of physical processors at one time, use setting "processors"
-        case_info_files= main.run_parallel(base_case, case_list)
+        #    by default uses two less than the number of physical processors at one time, use setting "processors"
+        case_info_files= main.run(params)
         
         # NOTE for parallel runs case_info_files is a list, one for each case run
         # so to load track files use    
@@ -180,23 +196,42 @@ Run parallel using param. dicts.
 
 .. parsed-literal::
 
-    main: --------------------------------------------------------------------------
-    main:  OceanTracker version 0.4.01.004 2023-07-14 - preliminary setup
-    main:      Python version: 3.10.10 | packaged by conda-forge | (main, Mar 24 2023, 20:00:38) [MSC v.1934 64 bit (AMD64)]
-    main:   - found hydro-model files of type SCHISIM
-    main:       -  sorted hyrdo-model files in time order,	  0.007 sec
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test1
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test1_raw_user_params.json"
-    main:   -  oceantracker:multiProcessing: processors:4
-    main:   - parallel pool complete
-    main:     >>> Note: run summary with case file names   "parallel_test1_runInfo.json"
-    main:     >>> Note: output is in dir= e:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test1
-    main:     >>> Note: to help with debugging, parameters as given by user  are in "parallel_test1_raw_user_params.json"
-    main:     >>> Note: run summary with case file names   "parallel_test1_runInfo.json"
-    main: --------------------------------------------------------------------------
-    main: OceanTracker summary:  elapsed time =0:00:17.336455
-    main:       Cases -   0 errors,   0 warnings,   8 notes, check above
-    main:       Helper-   0 errors,   0 warnings,   0 notes, check above
-    main:       Main  -   0 errors,   0 warnings,   3 notes, check above
-    main: --------------------------------------------------------------------------
+    helper ----------------------------------------------------------------------
+    helper Starting OceanTracker helper class
+    Main      Python version: 3.11.9 | packaged by conda-forge | (main, Apr 19 2024, 18:27:10) [MSC v.1938 64 bit (AMD64)]
+    Main >>> Warning: Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4
+    Main ----------------------------------------------------------------------
+    Main OceanTracker starting main:
+    Main     Starting package set up
+    Main         -  Built OceanTracker package tree,	  0.010 sec
+    Main         -  Built OceanTracker sort name map,	  0.000 sec
+    Main     -  Done package set up to setup ClassImporter,	  0.010 sec
+    Main >>> Warning: Deleted contents of existing output dir
+    Main Output is in dir "f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\parallel_test1"
+    Main       hint: see for copies of screen output and user supplied parameters, plus all other output
+    Main     >>> Note: to help with debugging, parameters as given by user  are in "user_given_params.json"
+    Main ----------------------------------------------------------------------
+    Main  OceanTracker version 0.50.0010-2024-03-30 - preliminary setup
+    Main   - Found input dir "../demos/demo_hindcast/schsim3D"
+    Main   - found hydro-model files of type  "SCHISM"
+    Main Cataloging hindcast with 1 files in dir ../demos/demo_hindcast/schsim3D
+    Main     -  Cataloged hydro-model files/variables in time order,	  0.009 sec
+    Main >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
+    Main     -  sorted hyrdo-model files in time order,	  0.024 sec
+    Main   - oceantracker:multiProcessing: processors:4
+    Main   - parallel pool complete
+    End --- Summary ----------------------------------------------------------
+    End     >>> Note: Run summary with case file names in "*_runInfo.json"
+    End     >>> Note: to help with debugging, parameters as given by user  are in "user_given_params.json"
+    End >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
+    End     >>> Note: Run summary with case file names in "*_runInfo.json"
+    End >>> Warning: Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4
+    End >>> Warning: Deleted contents of existing output dir
+    End ----------------------------------------------------------------------
+    End ----------------------------------------------------------------------
+    End OceanTracker summary:  elapsed time =0:00:16.965963
+    End       Cases -   0 errors,   0 warnings,  12 notes, check above
+    End       Main  -   0 errors,   2 warnings,   3 notes, check above
+    End   Output in None
+    End ----------------------------------------------------------------------
     

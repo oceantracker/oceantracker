@@ -2,13 +2,13 @@
 SplitParticles
 ###############
 
-**Description:** 
+**Doc:**     Splits  particles in two at  given time interval,    for given status values and  given particle age range.    Simulates reproduction, but can produce large numbers fast!    
 
-**class_name:** oceantracker.trajectory_modifiers.split_particles.SplitParticles
+**short class_name:** SplitParticles
 
-**File:** oceantracker/trajectory_modifiers/split_particles.py
+**full class_name :** oceantracker.trajectory_modifiers.split_particles.SplitParticles
 
-**Inheritance:** _BaseTrajectoryModifier> SplitParticles
+**Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier> SplitParticles
 
 
 Parameters:
@@ -18,24 +18,62 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
-	* ``probability_of_splitting`` :   ``<class 'float'>``   *<optional>*
+	* ``interval`` :   ``<class 'float'>``   *<optional>*
+		Description: time interval between splits
+
+		- default: ``86400``
+		- data_type: ``<class 'float'>``
+		- units: ``sec``
+		- min: ``60``
+
+	* ``max_age`` :   ``<class 'float'>``   *<optional>*
+		Description: maximum particle age to split
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``sec``
+
+	* ``min_age`` :   ``<class 'float'>``   *<optional>*
+		Description: minumim particle age to start splitting
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``sec``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``probability`` :   ``<class 'float'>``   *<optional>*
+		Description: probability of splitting at each given interval
+
 		- default: ``1.0``
+		- data_type: ``<class 'float'>``
 		- min: ``0.0``
 		- max: ``1.0``
 
-	* ``split_status_equal_to`` :   ``<class 'str'>``   *<optional>*
-		- default: ``None``
-		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
+	* ``statuses``:  *<optional>*
+		Description: - list of status names to cull
 
-	* ``split_status_greater_than`` :   ``<class 'str'>``   *<optional>*
-		- default: ``dead``
-		- possible_values: ``dict_keys(['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving'])``
-
-	* ``splitting_interval`` :   ``<class 'float'>``   *<optional>*
-		- default: ``3600``
-		- min: ``1``
+		- a list containing type:  ``[]``
+		- default list : ``['moving', 'on_bottom', 'stranded_by_tide', 'stationary']``
+		- data_type: ``<class 'str'>``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``1``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+
+
+Expert Parameters:
+*******************
+
 

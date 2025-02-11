@@ -2,15 +2,16 @@
 fields
 #######
 
-**Module:** oceantracker.fields
-
 
 .. toctree::
 	:maxdepth: 1
 
+	CustomFieldBase.rst
 	FrictionVelocity.rst
-	UserFieldBase.rst
+	ReaderField.rst
+	TotalWaterDepth.rst
 	VerticalGradient.rst
+	_BaseField.rst
 
 **Role:** 
 

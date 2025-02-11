@@ -2,13 +2,13 @@
 ResidentInPolygon
 ##################
 
-**Description:** 
+**Doc:** 
 
-**class_name:** oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
+**short class_name:** ResidentInPolygon
 
-**File:** oceantracker/particle_statistics/resident_in_polygon.py
+**full class_name :** oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
 
-**Inheritance:** _BaseParticleLocationStats> ResidentInPolygon
+**Inheritance:** > ParameterBaseClass> _BaseParticleLocationStats> ResidentInPolygon
 
 
 Parameters:
@@ -18,85 +18,126 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
-	* ``count_end_date`` :   ``iso8601date``   *<optional>*
-		Description: Stop particle counting from this date
+	* ``coords_in_lat_lon_order`` :   ``<class 'bool'>``   *<optional>*
+		Description: Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees
 
-		- default: ``None``
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
-	* ``count_start_date`` :   ``iso8601date``   *<optional>*
-		Description: Start particle counting from this date
-
-		- default: ``None``
-
-	* ``max_water_depth`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles in water depths less than this value
+	* ``duration`` :   ``<class 'float'>``   *<optional>*
+		Description: How long to do counting after start time, can be used instead of "end" parameter
 
 		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``sec``
+		- min: ``0.0``
 
-	* ``max_z`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical position <= to this value
-
-		- default: ``None``
-
-	* ``min_water_depth`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles in water depths greater than this value
+	* ``end`` :   ``['str', 'float', 'datetime64', 'int', 'float64', 'float32']``   *<optional>*
+		Description: Stop particle counting from this iso date-time, default is end of model run
 
 		- default: ``None``
+		- possible_types: ``[<class 'str'>, <class 'float'>, <class 'numpy.datetime64'>, <class 'int'>, <class 'numpy.float64'>, <class 'numpy.float32'>]``
+		- units: ``ISO8601  date as string eg. "2017-01-01T00:30:00",np.datetime64, or float of seconds since 1/1/1970``
 
-	* ``min_z`` :   ``<class 'float'>``   *<optional>*
-		Description: Count only those particles with vertical position >=  to this value
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``name_of_polygon_release_group`` :   ``<class 'str'>`` **<isrequired>**
 		Description: "name" parameter of polygon release group to count paticles for residence time , (release group "name"  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``particle_property_list``:  *<optional>*
-		Description: - Create statistics for these named particle properties, list = ["water_depth"], for statics on water depth at particle locations inside the counted regions
+		Description: - Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions
 
-		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``[]``
-		- can_be_empty_list: ``True``
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
 		- make_list_unique: ``True``
+		- min_len: ``0``
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``residence``
+		- data_type: ``<class 'str'>``
 
-	* ``status_max`` :   ``[<class 'str'>]``   *<optional>*
+	* ``start`` :   ``['str', 'float', 'datetime64', 'int', 'float64', 'float32']``   *<optional>*
+		Description: Start particle counting from this date-time, default is start of model run
+
+		- default: ``None``
+		- possible_types: ``[<class 'str'>, <class 'float'>, <class 'numpy.datetime64'>, <class 'int'>, <class 'numpy.float64'>, <class 'numpy.float32'>]``
+		- units: ``ISO8601  date as string eg. "2017-01-01T00:30:00",np.datetime64, or float of seconds since 1/1/1970``
+
+	* ``status_max`` :   ``<class 'str'>``   *<optional>*
 		Description: Count only those particles with status  <= to this value
 
 		- default: ``moving``
-		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- data_type: ``<class 'str'>``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
-	* ``status_min`` :   ``[<class 'str'>]``   *<optional>*
-		Description: Count only those particles with status >= to thsi value
+	* ``status_min`` :   ``<class 'str'>``   *<optional>*
+		Description: Count only those particles with status >= to this value
 
-		- default: ``frozen``
-		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'frozen', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- default: ``stationary``
+		- data_type: ``<class 'str'>``
+		- possible_values: ``['unknown', 'bad_cord', 'cell_search_failed', 'notReleased', 'dead', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
-		Description: Time in seconds between calculating statistics
+		Description: Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step
 
 		- default: ``3600.0``
+		- data_type: ``<class 'float'>``
 		- units: ``sec``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``water_depth_max`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles in water depths less than this value
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- min: ``0.0``
+
+	* ``water_depth_min`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles in water depths greater than this value
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- min: ``0.0``
 
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		Description: Write statistcs to disk
 
 		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
-	* ``z_range``:  *<optional>*
-		Description: - z range = [zmin, zmax] count particles in this z range in 3D
+	* ``z_max`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical position <= to this value
 
-		- a list containing type:  ``[<class 'float'>, <class 'int'>]``
-		- default list : ``[]``
-		- can_be_empty_list: ``True``
-		- min_length: ``2``
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``meters above mean water level, so is < 0 at depth``
+
+	* ``z_min`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles with vertical position >=  to this value
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``meters above mean water level, so is < 0 at depth``
+
+
+
+Expert Parameters:
+*******************
+
 

@@ -1,8 +1,9 @@
 import numpy as np
 from numba import njit
 from numba.typed import List as NumbaList
+from oceantracker.util.numba_util import  njitOT
 
-@njit()
+@njitOT
 def set_dry_cell_flag_from_zlevel( triangles, zlevel, bottom_cell_index, minimum_total_water_depth, is_dry_cell,buffer_index):
     #  flag cells dry if cell any node is dry
     for nb in buffer_index:
@@ -14,7 +15,7 @@ def set_dry_cell_flag_from_zlevel( triangles, zlevel, bottom_cell_index, minimum
                 if h < minimum_total_water_depth: n_dry += 1
             is_dry_cell[nb, ntri] = 1 if n_dry > 0 else 0
 
-@njit()
+@njitOT
 def set_dry_cell_flag_from_tide(triangles, tide, depth, minimum_total_water_depth, is_dry_cell, buffer_index ):
     #  flag cells dry if cell any node is dry, seems to give closest to schism dry cells, rather than using > 1 or 2
     for nb in buffer_index:
@@ -26,7 +27,7 @@ def set_dry_cell_flag_from_tide(triangles, tide, depth, minimum_total_water_dept
                 if h < minimum_total_water_depth : n_dry+=1
             is_dry_cell[nb, ntri] = 1 if n_dry > 0 else 0
 
-@njit
+@njitOT
 def find_open_boundary_faces(triangles, is_boundary_triangle, adjacency, is_open_boundary_node):
     # amongst boundary triangles find those with 2 open face nodes
     is_open_boundary_adjacent = np.full((triangles.shape[0],3),False)
@@ -55,12 +56,12 @@ def find_open_boundary_faces(triangles, is_boundary_triangle, adjacency, is_open
 
 
 
-def append_split_cell_data(grid,data,axis=0):
+def append_split_cell_data(grid,data, axis=0):
     # for cell based data add split cell data below given data
     return  np.concatenate((data, data[:, grid['quad_cells_to_split']]), axis=axis)
 
 
-@njit()
+@njitOT
 def get_values_at_bottom(field_data4D, bottom_cell_index, out=None):
     # get values from bottom cell of LSC grid from a 3D time dependent field, (ie 4D with time)
     if out is None:
@@ -68,11 +69,11 @@ def get_values_at_bottom(field_data4D, bottom_cell_index, out=None):
         out = np.full(s[:2]+(s[3],), np.nan,dtype=field_data4D.dtype)
 
     for n in range(field_data4D.shape[1]):
-        out[:,n,:] = field_data4D[:, :, bottom_cell_index[n], :]
+        out[:,n,:] = field_data4D[:, n, bottom_cell_index[n], :]
     return out
 
 
-@njit
+@njitOT
 def depth_aver_SlayerLSC_in4D(field_data4D, zlevel, first_cell_offset):
     # depth average time varying reader 4D data dim(time, node, depth, components) and return for LSC vertical grid
     # return as 4D variable dim(time, node, 1, components)
@@ -97,7 +98,7 @@ def depth_aver_SlayerLSC_in4D(field_data4D, zlevel, first_cell_offset):
     return out
 
 
-@njit()
+@njitOT
 def get_time_dependent_triangle_water_depth_from_total_water_depth_at_nodes(total_water_depth_at_nodes, buffer_index, triangles, out):
     # get total time dependent water for grid triangles for use in calc like depth averaged concentrations
     # not used at the moment
@@ -107,7 +108,7 @@ def get_time_dependent_triangle_water_depth_from_total_water_depth_at_nodes(tota
             for v in range(3):
                 out[nt,m] += total_water_depth_at_nodes[nt, triangles[m,v]] / 3.0  # todo use simple average, but better way?
 
-@njit()
+@njitOT
 def zlevel_node_to_vertex(zlevel, triangles, zlevel_vertex):
     # get zlevel at triangle vertices
     for nt in range(zlevel.shape[0]):
@@ -115,4 +116,16 @@ def zlevel_node_to_vertex(zlevel, triangles, zlevel_vertex):
             for nz in range(zlevel.shape[2]):
                 for m in range(3):
                     zlevel_vertex[nt, ntri, nz, m] = zlevel[nt, triangles[ntri,m],  nz]
+
+
+@njitOT
+def patch_bottom_velocity_to_make_it_zero(vel_data, bottom_cell_index):
+    # ensure velocity vector at bottom is zero, as patch LSC vertical grid issue with nodal values spanning change in number of depth levels
+    # needed in schsoim LSC grids due to interplotion bug
+    for nt in range(vel_data.shape[0]):
+        for node in range(vel_data.shape[1]):
+            bottom_node= bottom_cell_index[node]
+            for component in range(vel_data.shape[3]):
+                vel_data[nt, node, bottom_node, component] = 0.
+    return vel_data
 

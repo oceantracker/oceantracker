@@ -4,20 +4,19 @@ from glob import  glob
 import inspect
 import importlib
 
-import oceantracker.common_info_default_param_dict_templates as common_info
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import _ParameterBaseDataClassChecker, ParameterTimeChecker as PTC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util import package_util
-
-root_param_ref_dir = path.join(package_util.get_root_package_dir(),'docs', 'info', 'parameter_ref')
-
+from oceantracker.shared_info import shared_info as si
+si._setup()
+from oceantracker import definitions
 
 class RSTfileBuilder(object):
     def __init__(self, file_name, title):
         self.lines=[]
         self.toc_dict = {}
         self.file_name = file_name + '.rst'
-
+        self.docs_dir= path.join(definitions.ot_root_dir,'docs','info','parameter_ref')
         self.add_lines((len(title)+1) * '#')
         self.add_lines(title)
         self.add_lines((len(title)+1)  * '#')
@@ -46,7 +45,7 @@ class RSTfileBuilder(object):
 
 
     def collapsable_code(self,file_name):
-        a=1
+        pass
         '''
             ..raw:: html
         
@@ -63,7 +62,7 @@ class RSTfileBuilder(object):
         '''
 
     def write(self):
-        file_name = path.join(root_param_ref_dir, self.file_name)
+        file_name = path.join(self.docs_dir, self.file_name)
         with open(file_name ,'w') as f:
             for l in self.lines:
                 indent=l['indent'] * '\t'
@@ -88,134 +87,130 @@ class RSTfileBuilder(object):
 
         self.toc_dict[toc_name]['body'].append(linked_toc.file_name.replace('\\', '/'))
 
-    def write_param_dict_defaults(self, params):
-        self.add_lines()
-        #self.add_directive('warning', body='Lots more to add here and work on layout!!')
+    def add_params_from_dict(self,params, indent=0, expert=False):
 
-        self.add_heading('Parameters:', level=0)
-
-        self.add_params_from_dict(params)
-
-        self.write()
-
-    def add_params_from_dict(self,params, indent=0):
-
-        for key in sorted(params.keys()):
-            item= params[key]
+        if expert:
+            p = {key: item for key, item in params.items() if isinstance(item,_ParameterBaseDataClassChecker) and item.expert}
+            self.add_heading('Expert Parameters:', level=0)
+        else:
+            p = {key: item for key, item in params.items() if isinstance(item,_ParameterBaseDataClassChecker ) and not item.expert}
+            self.add_heading('Parameters:', level=0)
+        # loop over params
+        dont_include= ['default','type', 'default_value', 'is_required', 'doc_str' ,'expert','obsolete']
+        for key in sorted(p.keys()):
+            item= p[key]
 
             if type(item) == dict:
                 self.add_lines('* ``' + key + '``:' + ' nested parameter dictionary' , indent=indent+1)
-                self.add_params_from_dict( item, indent=1)
+                self.add_params_from_dict( item, indent=1,expert=False) # dont split expert for nested params
                 continue
 
+            if item.obsolete: continue  # dont write obsolete params
+
             if type(item) == PVC:
+                self.add_lines('* ``' + key + '`` :   ``' + str(item.data_type) + '`` '
+                               + ('  *<optional>*' if not item.is_required else '**<isrequired>**') , indent=indent+1)
 
-                if item.info['obsolete'] is not None: continue # dont write obsolete params
-                self.add_lines('* ``' + key + '`` :   ``' + str(item.info['type']) + '`` '
-                               + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**') , indent=indent+1)
-
-                if item.info['doc_str'] is not None:
-                    self.add_lines('Description: ' + str(item.info['doc_str'].strip()), indent=indent+2)
+                if item.doc_str is not None:
+                    self.add_lines('Description: ' + str(item.doc_str.strip()), indent=indent+2)
                     self.add_lines()
 
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
 
-                for k, v in item.info.items():
-                    if k not in ['type', 'default_value', 'is_required', 'doc_str'] and v is not None:
+                for k, v in item.asdict().items():
+                    if k not in dont_include and v is not None:
+                        self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
+                self.add_lines()
+
+            elif type(item) == PTC:
+
+                self.add_lines('* ``' + key + '`` :   ``' + str([x.__name__ for x in item.possible_types ]) + '`` '
+                               + ('  *<optional>*' if not item.is_required else '**<isrequired>**') , indent=indent+1)
+
+                if item.doc_str is not None:
+                    self.add_lines('Description: ' + str(item.doc_str.strip()), indent=indent+2)
+                    self.add_lines()
+
+                self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
+                if hasattr(item,'possible_values')  and len(item.possible_values) > 0:
+                    self.add_lines('- ' + 'possible_values' + ': ``' + str(v) + '``', indent=indent + 2)
+
+                for k, v in item.asdict().items():
+                    if (k not in dont_include and v is not None):
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
 
                 self.add_lines()
 
             elif type(item) == PLC:
 
-                self.add_lines('* ``' + key + '``:' + ('  *<optional>*' if not item.info['is_required'] else '**<isrequired>**'), indent=indent + 1)
-                if item.info['doc_str'] is not None:
-                    self.add_lines('Description: - ' + str(item.info['doc_str'].strip()), indent=indent + 2)
+                self.add_lines('* ``' + key + '``:' + ('  *<optional>*' if not item.is_required else '**<isrequired>**'), indent=indent + 1)
+                if item.doc_str is not None:
+                    self.add_lines('Description: - ' + str(item.doc_str.strip()), indent=indent + 2)
                     self.add_lines()
 
-                if  type(item.info['acceptable_types']) == dict or type(item.info['default_list']) == dict or type(item.info['default_value']) == dict:
-                    self.add_lines()
-                    self.add_lines(key + ': still working on display  of lists of dict, eg nested polygon list ', indent=indent+0)
-                    self.add_lines()
-                    continue
 
-                self.add_lines('- a list containing type:  ``' + str(item.info['acceptable_types']) + '``', indent=indent+2)
+                self.add_lines('- a list containing type:  ``' + str(item.possible_types) + '``', indent=indent+2)
                 self.add_lines('- default list : ``'
-                               + str(item.info['default_list']) + '``', indent=indent+2)
+                               + str(item.default) + '``', indent=indent+2)
 
-                for k, v in item.info.items():
-                    if k not in ['default_list','acceptable_types', 'default_value', 'is_required', 'doc_str'] and v is not None:
+                for k, v in item.asdict().items():
+                    if k not in dont_include and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
 
                 self.add_lines()
             else:
                 self.add_lines()
-                self.add_lines(key +': still working on display  of default params of  type ' + str(type(params[key])),indent=indent+0)
+                self.add_lines(key +': still working on display  of default params of  type ' + str(type(p[key])),indent=indent+0)
                 self.add_lines()
 
 
 def make_class_sub_pages(class_role, link_tag=''):
     # make doc pages from defaults of all python in named dir
 
-    mod_name=package_util.get_package_name() + '.' + class_role
-
-    mod = importlib.import_module( mod_name)
-
-    package_dir= package_util.get_package_dir()
+    mods= si._class_importer.class_tree[class_role]
 
     toc = RSTfileBuilder(class_role+'_toc', class_role + link_tag)
 
-    toc.add_lines('**Module:** ' + package_util.package_relative_file_name(mod.__name__).strip())
-    toc.add_lines()
-
     toc.add_new_toc_to_page(class_role, maxdepth=1,sort_body=True)
     instance = None
-    for f in glob(path.join( package_dir,class_role,'*.py')):
+    for name, info in mods.items():
+        #if name[0] == '_':   continue  # ignore internal/base classes flagged with underscore
+        instance= info['class_obj']()
+        p = RSTfileBuilder(name, name)
+        doc_str = info["class_obj"].__doc__
 
-        mod_str= path.splitext(f)[0].split(package_util.get_root_package_dir() +'\\')[-1].replace('\\','.')
-        mod = importlib.import_module(mod_str)
-        package_util.get_package_name()
+        p.add_lines('**Doc:** ' + ('' if doc_str is None else doc_str.replace("\n","")) )
+        p.add_lines()
+        short_name = info["mod_str"].split(".")[-1]
+        p.add_lines(f'**short class_name:** {short_name}')
+        p.add_lines()
+        p.add_lines(f'**full class_name :** {info["mod_str"]}')
+        p.add_lines()
 
-        for name, c in  inspect.getmembers(mod):
-            if not inspect.isclass(c) : continue
-            #print(name)
-            if name[0] == '_':   continue  # ignore internal/base classes flagged with underscore
+        if instance.development is not None or  short_name.lower().startswith('dev') :
+            m = 'Class is under development may not yet work in all cases, if errors contact developer' \
+                    if instance.deveplment is None else instance.development
 
-            if not issubclass(c, ParameterBaseClass): continue
-            if c.__module__ !=  mod.__name__ : continue  # only work on locally declared claseses
-            instance= c()
+            p.add_directive('warning',body=m)
+
+        # show inheritance
+        parents=''
+        for b in info['class_obj'].__mro__[:-2][::-1]:
+            parents = parents  + '> ' + b.__name__
+
+        p.add_lines(f'**Inheritance:** {parents}')
+        p.add_lines()
 
 
-            p = RSTfileBuilder(name, name)
+        # write params
+        params = instance.default_params
+        p.add_params_from_dict(params,expert=False)
+        p.add_lines()
+        p.add_params_from_dict(params, expert=True)
+        p.add_lines()
 
-            p.add_lines('**Description:** ' + (instance.docs['description'] if instance.docs['description'] is not None else '' ) )
-            p.add_lines()
-            p.add_lines('**class_name:** ' + c.__module__ + '.' + c.__name__)
-            p.add_lines()
-
-            p.add_lines('**File:** ' + package_util.package_relative_file_name(mod.__file__))
-            p.add_lines()
-
-            # show pinhertince
-            parents=''
-            for b in inspect.getmro(c)[1:]:
-                #print(b.__name__, parents)
-                if b.__name__ in ['object',  'ParameterBaseClass'] :continue
-                parents = b.__name__ + '> ' + parents
-
-            p.add_lines('**Inheritance:** ' + parents + c.__name__)
-            p.add_lines()
-
-            # get all defaults and wrte to yaml
-            #instance.merge_with_class_defaults({},{})
-            #write_YAML(name+'.yaml',instance.params)
-
-            p.add_heading('Parameters:', level=0)
-
-            p.add_params_from_dict(instance.default_params)
-
-            p.write()
-            toc.add_toc_link(class_role,p)
+        p.write()
+        toc.add_toc_link(class_role,p)
 
     # add role from last instance, as it derives from base class
     if instance is not None:
@@ -234,23 +229,21 @@ def build_param_ref():
 
     # settings sub page
     sp = RSTfileBuilder('settings', 'Settings')
-    settings_dict = common_info.shared_settings_defaults
-    settings_dict.update(common_info.case_settings_defaults)
+    settings_dict = si.settings.as_dict()
     sp.add_heading('Top level settings/parameters', level=2)
-    sp.write_param_dict_defaults(settings_dict)
+    sp.add_params_from_dict(settings_dict,expert=False)
+    sp.add_params_from_dict(settings_dict, expert=True)
+    sp.write()
 
     page.add_heading('Top level settings', level=2)
     page.add_new_toc_to_page('Settings', maxdepth=1)
     page.add_toc_link('Settings',sp)
 
-
     # core classes
     page.add_heading('Core "class" roles',level=2)
     page.add_lines('Only one core class per role. These have singular role names.')
     page.add_new_toc_to_page('core', maxdepth=1)
-    for key in sorted(common_info.core_classes.keys()):
-        #if key in ['run_params'] or  type(common_info.core_classes[key])==list: continue
-
+    for key in sorted(si.core_class_roles.possible_values()):
         toc = make_class_sub_pages(key)
         page.add_toc_link('core', toc)
 
@@ -258,10 +251,11 @@ def build_param_ref():
 
     page.add_heading('Multiple classes for each role',level=2)
     page.add_lines('Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.')
-    page.add_new_toc_to_page('role_dicts', maxdepth=1, sort_body=True)
+    page.add_new_toc_to_page('roles_dict', maxdepth=1, sort_body=True)
 
     page.add_new_toc_to_page('user', maxdepth=1)
-    for key in sorted(common_info.class_dicts.keys()):
+    for key in sorted(si.class_roles.possible_values()):
+        if key in ['nested_readers'] : continue
         toc = make_class_sub_pages(key)
         page.add_toc_link('user', toc)
 

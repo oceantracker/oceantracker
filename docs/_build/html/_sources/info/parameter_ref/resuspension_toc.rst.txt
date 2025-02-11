@@ -2,13 +2,12 @@
 resuspension
 #############
 
-**Module:** oceantracker.resuspension
-
 
 .. toctree::
 	:maxdepth: 1
 
-	BasicResuspension.rst
+	BaseResuspension.rst
+	Resuspension.rst
 
 **Role:** 
 

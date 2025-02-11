@@ -2,20 +2,21 @@
 particle_properties
 ####################
 
-**Module:** oceantracker.particle_properties
-
 
 .. toctree::
 	:maxdepth: 1
 
 	AgeDecay.rst
+	CustomParticleProperty.rst
 	DistanceTravelled.rst
+	FieldParticleProperty.rst
 	InsidePolygonsNonOverlapping2D.rst
+	ManuallyUpdatedParticleProperty.rst
 	ParticleLoad.rst
 	ParticleParameterFromNormalDistribution.rst
-	ParticleProperty.rst
-	TimeVaryingInfo.rst
+	Speed.rst
 	TotalWaterDepth.rst
+	_BaseParticleProperty.rst
 
 **Role:** Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be 
  * core properties set internally (eg particle location x )

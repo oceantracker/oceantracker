@@ -77,10 +77,8 @@ ot.settings(time_step =120) #  2 min model time step as seconds
 # add a compulsory reader class
 # no class_name setting is required 
 # as will detect that it needs a a schism reader class
-ot.add_class('reader', #  class_role is reader
-            input_dir= '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-            file_mask = 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-            )
+ot.add_class('reader',input_dir= '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                      file_mask=  'demo_hindcast_schisim3D*.nc')  # hindcast file mask
 
 # add some release groups
 # release_groups are one or more release groups 
@@ -95,12 +93,12 @@ ot.add_class('release_groups',  #  class_role is release_groups
                     [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
                     release_interval= 3600,           # seconds between releasing particles
                     pulse_size = 10,                   # number of particles released each release_interval
-                    # no class_name setting, so assumes a point release
+                    # no class_name setting, so default is a point release
                     ) 
 # add a second release group, from random locations within a polygon
 ot.add_class('release_groups', #  class_role is release_group
             name ='my_polygon_release1',
-            class_name= 'oceantracker.release_groups.polygon_release.PolygonRelease', # use a polygon release
+            class_name= 'PolygonRelease', # use a polygon release
             # this time is a polygon , so below points are polygon cords
             points = [  [1597682.1237, 5489972.7479],
                         [1598604.1667, 5490275.5488],
@@ -121,58 +119,10 @@ ot.add_class('resuspension', critical_friction_velocity = .005) # only re-suspen
 # here a fall velocity with a given  value is added to the computation 
 ot.add_class('velocity_modifiers',  #  class_role is velocity_modifiers
              name ='my_fall_velocity',
-            class_name = 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 
+            class_name = 'TerminalVelocity', 
             value= -0.001, # mean terminal vel < 0 for falling
             # optionally variance can also be use to give each particle its own fall velocity 
             )
-
-
-# ## Running OceanTracker
-# 
-# There are several ways to run OceanTracker 
-#     
-# 1) By coding 
-#     - user "class helper" method to build parameters (as above)  then run
-#     - build parameters dictionary in code then run
-#     - read parameter file and then run  
-# 
-# 2) Without coding
-# 
-#     - run from command line with parameter file which is built by editing a json/yaml text file
-# 
-# Here we use the "class helper" method approach, the other ways to run directly using parameter dictionaries  outlined in E_run_using_parameter_dictionaries.ipynb, add link...
-# 
-# Note:
-# 
-# There are many ways to run the code, eg. with IDE like Pycharm, Visual Studio Code. It can also, as here, be run in iPython notebooks. However the way notebooks are implemented can sometimes result in issues.
-# 
-# See ... for more details
-# 
-# Below runs oceantracker using the helper class.
-# 
-# ## See all parameters
-
-# In[2]:
-
-
-# first see the parameters build using the helper class instance
-# this is a dictionary ot.params
-print(ot.params)  # ugly!
-
-# use json.dumps() to make it pretty
-import json 
-print(json.dumps(ot.params, indent=4))
-
-# lots of params are shown 
-# as filling a template given by from user callable main.param_template() 
-# null or None are optional ones which will use defaults
-
-
-# ## Start run using helper
-
-# In[3]:
-
-
 # now run oceantracker 
 # as helper "ot" has set params above, simply run it
 
@@ -186,23 +136,30 @@ case_info_file_name = ot.run()
 print('case file name=',case_info_file_name)
 
 
-# ## Basic plots of tracks
-# 
-# also see ... for more on plotting notebook
+# In[2]:
 
-# In[4]:
+
+# can  see the parameters used to build 
+# using the helper class instance in ot.params
+import json 
+print(json.dumps(ot.params, indent=4))
+
+
+# ## Basic plots of tracks
+
+# In[3]:
 
 
 # plot animation of results
 from matplotlib import pyplot as plt
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles
-from oceantracker.post_processing.read_output_files import  load_output_files
+from plot_oceantracker.plot_tracks import animate_particles
+from read_oceantracker.python import  load_output_files
 from IPython.display import HTML # show animation in note book
 
 # read particle track data into a dictionary using case_info_file_name
 tracks = load_output_files.load_track_data(case_info_file_name)
 
-ax= [1591000, 1601500, 5478500, 5491000]  # area to plot
+ax= [1591000, 1601500, 5479500, 5491000]  # area to plot
 # animate particles
 anim = animate_particles(tracks, axis_lims=ax,title='Fall vel.+  re-sus., grey part. are on bottom when flows too weak to resuspend', 
                          show_dry_cells=True, show_grid=True, show=False) # use ipython to show video, rather than matplotlib plt.show()

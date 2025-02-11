@@ -2,35 +2,59 @@
 RandomWalkVaryingAZ
 ####################
 
-**Description:** 
+**Doc:** 
 
-**class_name:** oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ
+**short class_name:** RandomWalkVaryingAZ
 
-**File:** oceantracker/dispersion/random_walk_varyingAz.py
+**full class_name :** oceantracker.dispersion.random_walk_varyingAz.RandomWalkVaryingAZ
 
-**Inheritance:** _BaseTrajectoryModifer> RandomWalk> RandomWalkVaryingAZ
+**Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifer> RandomWalk> RandomWalkVaryingAZ
 
 
 Parameters:
 ************
 
 	* ``A_H`` :   ``<class 'float'>``   *<optional>*
-		- default: ``1.0``
+		- default: ``0.1``
+		- default: ``0.1``
+		- data_type: ``<class 'float'>``
+		- expert: ``False``
+		- obsolete: ``False``
 		- min: ``0.0``
 
 	* ``A_V`` :   ``<class 'float'>``   *<optional>*
-		- default: ``0.001``
+		- default: ``0.01``
+		- default: ``0.01``
+		- data_type: ``<class 'float'>``
+		- expert: ``False``
+		- obsolete: ``False``
 		- min: ``0.0``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+		- expert: ``False``
+		- obsolete: ``False``
 
 	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- expert: ``False``
+		- obsolete: ``False``
 		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+		- expert: ``False``
+		- obsolete: ``False``
+
+
+
+Expert Parameters:
+*******************
+
 

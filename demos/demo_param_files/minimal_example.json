@@ -1,34 +1,26 @@
 {
-    "shared_params": {
-        "output_file_base": "minimal_example",
-        "root_output_dir": "output"
-    },
+    "output_file_base": "minimal_example",
+    "root_output_dir": "output",
+    "time_step": 120.0,
     "reader": {
-        "class_name": "oceantracker.reader.schism_reader.SCHSIMreaderNCDF",
-        "input_dir": "demo_hindcast",
-        "file_mask": "demoHindcastSchism3D.nc"
+        "input_dir": "..\\demos\\demo_hindcast",
+        "file_mask": "demoHindcastSchism*.nc"
     },
-    "base_case_params": {
-        "solver": {
-            "n_sub_steps": 12
-        },
-        "particle_release_groups": [
-            {
-                "points": [
-                    [
-                        1595000,
-                        5483300,
-                        -2
-                    ],
-                    [
-                        1596000,
-                        5487200,
-                        -2
-                    ]
+    "release_groups": {
+        "my_release_point": {
+            "class_name": null,
+            "points": [
+                [
+                    1595000,
+                    5482600
                 ],
-                "pulse_size": 10,
-                "release_interval": 3600
-            }
-        ]
+                [
+                    1599000,
+                    5486200
+                ]
+            ],
+            "release_interval": 3600,
+            "pulse_size": 10
+        }
     }
 }

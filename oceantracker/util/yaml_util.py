@@ -1,4 +1,10 @@
 import yaml
+import numpy as np
+
+def represent_datetime64(dumper, data):
+    return dumper.represent_scalar('tag:yaml.org,2002:str', str(data))
+
+yaml.SafeDumper.add_representer(np.datetime64, represent_datetime64)
 
 def write_YAML(file_name,d):
     if '.yaml' in file_name.lower():

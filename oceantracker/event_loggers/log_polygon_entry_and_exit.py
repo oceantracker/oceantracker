@@ -1,9 +1,9 @@
 from oceantracker.event_loggers._base_event_loggers import _BaseEventLogger
 import numpy as np
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
-from oceantracker.particle_properties.util import particle_operations_util
 
+from oceantracker.particle_properties.util import particle_operations_util
+from oceantracker.shared_info import shared_info as si
 
 class LogPolygonEntryAndExit(_BaseEventLogger):
     # assumes non over lapping polygons
@@ -11,37 +11,40 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
     def __init__(self):
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'polygon_list': PLC([], [dict], can_be_empty_list=False,
-                                                     default_value= default_polygon_dict_params),
+        self.add_default_params({'polygon_list': PLC(si.default_polygon_dict_params, dict, is_required=True),
                                     'role_output_file_tag': PVC('inside_polygon_events',str)
                                                             })
 
     def check_requirements(self):
        self.check_class_required_fields_prop_etc(required_props_list=['event_polygon', 'current_polygon_for_event_logging'])
 
-
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        super().add_required_classes_and_settings(settings, reader_builder, msg_logger)
+        info = self.info
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='event_polygon', initial_value=-1, dtype='int16')
+        si.add_class('particle_properties', name='current_polygon_for_event_logging',
+                     class_name='oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
+                     polygon_list=self.params['polygon_list'], write=False)
 
     def initial_setup(self):
-
         super().initial_setup()  # set up using regular grid for  stats
-        si = self.shared_info
-        if self.info['instanceID']  > 0 :
-            #todo why only 1
-            raise FatalError('LogPolygonEntryAndExit: can only have one instance')
-
         # add particle property to show which polygon particle is in, -1 = in no polygon
-        particle = self.shared_info.classes['particle_group_manager']
-        particle.create_particle_property('event_polygon', 'manual_update',dict( initial_value=-1, dtype=np.int16))
-        particle.create_particle_property('current_polygon_for_event_logging','user',dict(class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
-                                               polygon_list=self.params['polygon_list'],  write=False))
+
+
+        ml = si.msg_logger
+        if self.info['instanceID'] > 0 :
+            #todo why only 1
+            ml.msg('LogPolygonEntryAndExit: can only have one instance',fatal_error=True )
+
+
 
         # set up output file to also write event polygon property
         self.set_up_output_file(['event_polygon'] )
 
-    def update(self,**kwargs):
+    def update(self,n_time_step, time_sec):
         self.start_update_timer()
-        si = self.shared_info
-        part_prop = si.classes['particle_properties']
+
+        part_prop = si.class_roles.particle_properties
         event_polygon = part_prop['event_polygon']
         current_polygon_for_event_logging = part_prop['current_polygon_for_event_logging']
 

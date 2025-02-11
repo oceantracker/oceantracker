@@ -1,4 +1,4 @@
-from datetime import  datetime
+from datetime import datetime
 import dateutil.parser
 import math
 
@@ -7,11 +7,10 @@ import numpy as np
 
 def seconds_to_datetime64(s):  return np.asarray(s).astype('datetime64[s]')
 
-
 def seconds_to_isostr(s): return str(seconds_to_datetime64(s))
 
 def datetime64_to_seconds(dt64):
-    return dt64.astype(np.float64)
+    return dt64.astype('datetime64[s]').astype(np.float64)
 
 def isostr_to_seconds(s):
     # seconds since epoch of 1970-01-01
@@ -20,6 +19,7 @@ def isostr_to_seconds(s):
     return np.datetime64(d).astype('datetime64[s]').astype(float)
 
 def seconds_to_pretty_duration_string(s,seconds=True):
+    if s is None: return None
     td = np.timedelta64(int(np.round(s)),'s')
     days = td.astype('timedelta64[D]').astype(int)
     hours = (td.astype('timedelta64[h]') - days * 24).astype(int)
@@ -60,3 +60,4 @@ def  day_hms(x):
     minutes =  math.floor(x/60)
 
     return "%02.0f %02.0f:%02.0f" % (days, hours, minutes)
+

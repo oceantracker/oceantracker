@@ -2,13 +2,13 @@
 SettleInPolygon
 ################
 
-**Description:** 
+**Doc:** allows particles to freeze if inside a single polygon    
 
-**class_name:** oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon
+**short class_name:** SettleInPolygon
 
-**File:** oceantracker/trajectory_modifiers/settle_in_polygon.py
+**full class_name :** oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon
 
-**Inheritance:** _BaseTrajectoryModifier> SettleInPolygon
+**Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier> SettleInPolygon
 
 
 Parameters:
@@ -18,18 +18,30 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
-	* ``polygon``: nested parameter dictionary
-		* ``points`` :   ``array`` **<isrequired>**
-			- default: ``None``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``probability_of_settlement`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
+		- data_type: ``<class 'float'>``
 
 	* ``settlement_duration`` :   ``<class 'float'>``   *<optional>*
 		- default: ``0.0``
+		- data_type: ``<class 'float'>``
 		- min: ``0.0``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+
+
+Expert Parameters:
+*******************
+
 

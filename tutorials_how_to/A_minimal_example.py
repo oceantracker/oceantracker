@@ -33,12 +33,12 @@ ot.settings(output_file_base='minimal_example', # name used as base for output f
             time_step= 120. #  2 min time step as seconds
             )
 # ot.set_class, sets parameters for a named class
-ot.add_class('reader',input_dir= '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                      file_mask=  'demoHindcastSchism*.nc')  # hindcast file mask
+ot.add_class('reader',input_dir= '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                      file_mask=  'demo_hindcast_schisim3D*.nc')  # hindcast file mask
 # add  release locations from two points,
 #               (ie locations where particles are released at the same times and locations)
 # note : can add multiple release groups
-ot.add_class('release_groups', name='my_release_point', # user must provide a name for group first
+ot.add_class('release_groups', 
                     points= [[1595000, 5482600],        #[x,y] pairs of release locations
                              [1599000, 5486200]],      # must be an N by 2 or 3 or list, convertible to a numpy array
                     release_interval= 3600,           # seconds between releasing particles
@@ -59,17 +59,16 @@ print(case_info_file_name)
 # In[2]:
 
 
-# read output files
-from oceantracker.post_processing.read_output_files import  load_output_files
+from read_oceantracker.python import load_output_files
 
 # read particle track data into a dictionary using case_info_file_name
 tracks = load_output_files.load_track_data(case_info_file_name)
 print(tracks.keys()) # show what is in tracks dictionary holds
 
-from oceantracker.post_processing.plotting.plot_tracks import plot_tracks
+from plot_oceantracker.plot_tracks import plot_tracks
 
-ax= [1591000, 1601500, 5478500, 5491000]  # area to plot
-plot_tracks(tracks, axis_lims=ax)
+ax= [1591000, 1601500, 5479500, 5491000]  # area to plot
+plot_tracks(tracks, axis_lims=ax, show_grid=True)
 
 
 # ## Add aminations 
@@ -89,7 +88,7 @@ plot_tracks(tracks, axis_lims=ax)
 
 
 from matplotlib import pyplot as plt
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+from plot_oceantracker.plot_tracks import animate_particles
 from IPython.display import HTML
 
 # animate particles

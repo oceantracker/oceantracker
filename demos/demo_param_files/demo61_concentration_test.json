@@ -2,19 +2,23 @@
     "output_file_base": "demo61_concentration_test",
     "debug": true,
     "time_step": 120,
+    "NUMBA_cache_code": false,
+    "use_A_Z_profile": false,
+    "regrid_z_to_uniform_sigma_levels": true,
     "reader": {
-        "input_dir": "E:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
-        "file_mask": "demoHindcastSchism3D.nc",
-        "field_variables": {
-            "water_temperature": "temp"
-        }
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "file_mask": "demo_hindcast_schisim3D_00.nc",
+        "load_fields": [
+            "water_temperature"
+        ]
     },
     "dispersion": {
         "A_H": 0.2,
         "A_V": 0.001
     },
-    "release_groups": {
-        "P1": {
+    "release_groups": [
+        {
+            "name": "P1",
             "points": [
                 [
                     1595000,
@@ -31,7 +35,8 @@
             "release_interval": 3600,
             "allow_release_in_dry_cells": true
         },
-        "Poly1": {
+        {
+            "name": "Poly1",
             "class_name": "oceantracker.release_groups.polygon_release.PolygonRelease",
             "points": [
                 [
@@ -59,21 +64,21 @@
                     5489972.7479
                 ]
             ],
+            "start": "2017-01-01T01:30:00",
             "pulse_size": 1000,
             "release_interval": 3600
         }
-    },
-    "particle_properties": {
-        "age_decay": {
+    ],
+    "particle_properties": [
+        {
+            "name": "age_decay",
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "decay_time_scale": 86400.0
-        },
-        "total_water_depth": {
-            "class_name": "oceantracker.particle_properties.total_water_depth.TotalWaterDepth"
         }
-    },
-    "event_loggers": {
-        "inoutpoly": {
+    ],
+    "event_loggers": [
+        {
+            "name": "inoutpoly",
             "class_name": "oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit",
             "particle_prop_to_write_list": [
                 "ID",
@@ -143,15 +148,15 @@
                 }
             ]
         }
-    },
+    ],
     "max_run_duration": 1296000.0,
     "write_tracks": false,
-    "particle_concentrations": {
-        "outfall_conc": {
+    "particle_concentrations": [
+        {
+            "name": "outfall_conc",
             "class_name": "oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D",
-            "case_output_file_tag": "siteA",
             "update_interval": 1800
         }
-    },
+    ],
     "root_output_dir": "output"
 }

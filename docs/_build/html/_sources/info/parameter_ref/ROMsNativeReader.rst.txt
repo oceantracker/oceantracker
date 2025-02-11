@@ -2,110 +2,113 @@
 ROMsNativeReader
 #################
 
-**Description:** Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names
+**Doc:** 
 
-**class_name:** oceantracker.reader.ROMS_reader.ROMsNativeReader
+**short class_name:** ROMsNativeReader
 
-**File:** oceantracker/reader/ROMS_reader.py
+**full class_name :** oceantracker.reader.ROMS_reader.ROMsNativeReader
 
-**Inheritance:** _BaseReader> GenericUnstructuredReader> ROMsNativeReader
+**Inheritance:** > ParameterBaseClass> _BaseReader> _BaseStructuredReader> ROMsNativeReader
 
 
 Parameters:
 ************
 
-	* ``EPSG_transform_code`` :   ``<class 'int'>``   *<optional>*
-		Description: Integer code needed to enable transformation from/to meters to/from lat/lon (see https://epsg.io/ to find EPSG code for hydro-models meters grid)
+	* ``EPSG_code`` :   ``<class 'int'>``   *<optional>*
+		Description: integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/
 
 		- default: ``None``
-		- min: ``0``
+		- data_type: ``<class 'int'>``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
-
-	* ``cords_in_lat_long`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``False``
-		- possible_values: ``[True, False]``
-
-	* ``dimension_map``: nested parameter dictionary
-	* ``field_variables``: nested parameter dictionary
-		* ``bottom_stress`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-
-		* ``salinity`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-
-		* ``tide`` :   ``<class 'str'>``   *<optional>*
-			- default: ``zeta``
-
-		* ``water_depth`` :   ``<class 'str'>``   *<optional>*
-			- default: ``h``
-
-		* ``water_temperature`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-
-		* ``water_velocity``:  *<optional>*
-			- a list containing type:  ``[<class 'str'>]``
-			- default list : ``['u', 'v', 'w']``
-			- can_be_empty_list: ``True``
-			- fixed_len: ``2``
-
-		* ``wind_stress`` :   ``<class 'str'>``   *<optional>*
-			- default: ``None``
-
-	* ``field_variables_to_depth_average``:  *<optional>*
-		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``[]``
-		- can_be_empty_list: ``True``
+		- data_type: ``<class 'str'>``
 
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
 		Description: Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
-	* ``grid_file`` :   ``<class 'str'>``   *<optional>*
-		Description: File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file
+	* ``hydro_model_cords_geographic`` :   ``<class 'bool'>``   *<optional>*
+		Description: Force conversion given nodal lat longs to a UTM meters grid, only used if lat long coordinates not auto detected
 
-		- default: ``None``
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
-	* ``grid_variables``: nested parameter dictionary
 	* ``input_dir`` :   ``<class 'str'>`` **<isrequired>**
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
-	* ``isodate_of_hindcast_time_zero`` :   ``iso8601date``   *<optional>*
-		- default: ``1970-01-01``
+	* ``load_fields``:  *<optional>*
+		Description: - A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``True``
+		- min_len: ``0``
 
 	* ``max_numb_files_to_load`` :   ``<class 'int'>``   *<optional>*
 		Description: Only read no more than this number of hindcast files, useful when setting up to speed run
 
 		- default: ``10000000``
+		- data_type: ``<class 'int'>``
 		- min: ``1``
 
-	* ``one_based_indices``: nested parameter dictionary
-	* ``required_file_dimensions``:  *<optional>*
-		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``['s_w', 's_rho', 'eta_u', 'eta_v']``
-		- can_be_empty_list: ``True``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
 
-	* ``required_file_variables``:  *<optional>*
-		- a list containing type:  ``[<class 'str'>]``
-		- default list : ``['ocean_time', 'mask_psi', 'lat_psi', 'lon_psi', 'h', 'zeta', 'u', 'v']``
-		- can_be_empty_list: ``True``
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``one_based_indices`` :   ``<class 'bool'>``   *<optional>*
+		Description: File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
 
 	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
 		- default: ``24``
+		- data_type: ``<class 'int'>``
 		- min: ``2``
-
-	* ``time_zone`` :   ``<class 'int'>``   *<optional>*
-		Description: time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12
-
-		- default: ``None``
-		- min: ``-12``
-		- max: ``12``
-		- units: ``hours``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``variable_signature``:  *<optional>*
+		Description: - Variable names used to test if file is this format
+
+		- a list containing type:  ``[]``
+		- default list : ``['ocean_time', 'mask_psi', 'lat_psi', 'lon_psi', 'h', 'zeta', 'u', 'v']``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
+
+	* ``vertical_regrid`` :   ``<class 'bool'>``   *<optional>*
+		Description: Convert vertical grid to same sigma levels across domain
+
+		- default: ``True``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
+
+
+
+Expert Parameters:
+*******************
+
+	* ``geographic_coords`` :   ``<class 'bool'>``   *<optional>*
+		Description: Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
+
 

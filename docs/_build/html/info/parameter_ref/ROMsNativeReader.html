@@ -1,23 +1,22 @@
 
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>ROMsNativeReader &#8212; OceanTracker Beta 0.4 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <title>ROMsNativeReader &#8212; OceanTracker Beta 0.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="SCHISMSreaderNCDF" href="SCHISMSreaderNCDF.html" />
-    <link rel="prev" title="GenericUnstructuredReader" href="GenericUnstructuredReader.html" />
+    <link rel="next" title="SCHISMreaderNCDF" href="SCHISMreaderNCDF.html" />
+    <link rel="prev" title="GLORYSreader" href="GLORYSreader.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -51,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -60,6 +59,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -75,8 +75,8 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="reader_toc.html">reader</a><ul>
-      <li>Previous: <a href="GenericUnstructuredReader.html" title="previous chapter">GenericUnstructuredReader</a></li>
-      <li>Next: <a href="SCHISMSreaderNCDF.html" title="next chapter">SCHISMSreaderNCDF</a></li>
+      <li>Previous: <a href="GLORYSreader.html" title="previous chapter">GLORYSreader</a></li>
+      <li>Next: <a href="SCHISMreaderNCDF.html" title="next chapter">SCHISMreaderNCDF</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -87,12 +87,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -102,20 +102,20 @@
           <div class="body" role="main">
             
   <section id="romsnativereader">
-<h1>ROMsNativeReader<a class="headerlink" href="#romsnativereader" title="Permalink to this heading">¶</a></h1>
-<p><strong>Description:</strong> Generic reader, reading netcdf file variables into variables using given name map between internal and file variable names</p>
-<p><strong>class_name:</strong> oceantracker.reader.ROMS_reader.ROMsNativeReader</p>
-<p><strong>File:</strong> oceantracker/reader/ROMS_reader.py</p>
-<p><strong>Inheritance:</strong> _BaseReader&gt; GenericUnstructuredReader&gt; ROMsNativeReader</p>
+<h1>ROMsNativeReader<a class="headerlink" href="#romsnativereader" title="Permalink to this headline">¶</a></h1>
+<p><strong>Doc:</strong></p>
+<p><strong>short class_name:</strong> ROMsNativeReader</p>
+<p><strong>full class_name :</strong> oceantracker.reader.ROMS_reader.ROMsNativeReader</p>
+<p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseReader&gt; _BaseStructuredReader&gt; ROMsNativeReader</p>
 <section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this heading">¶</a></h2>
+<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><ul>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">EPSG_transform_code</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Integer code needed to enable transformation from/to meters to/from lat/lon (see <a class="reference external" href="https://epsg.io/">https://epsg.io/</a> to find EPSG code for hydro-models meters grid)</p>
+<dt><code class="docutils literal notranslate"><span class="pre">EPSG_code</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: integer code for coordinate transform of hydro-model, only used if setting “use_geographic_coords”= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at <a class="reference external" href="https://spatialreference.org/">https://spatialreference.org/</a></p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -124,82 +124,7 @@
 <dt><code class="docutils literal notranslate"><span class="pre">class_name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Class name as string A.B.C, used to import this class from python path</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">cords_in_lat_long</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dimension_map</span></code>: nested parameter dictionary</p></li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">field_variables</span></code>: nested parameter dictionary</dt><dd><ul>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">bottom_stress</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">salinity</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">tide</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">zeta</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">water_depth</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">h</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">water_temperature</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">water_velocity</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['u',</span> <span class="pre">'v',</span> <span class="pre">'w']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
-<li><p>fixed_len: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">wind_stress</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">field_variables_to_depth_average</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -208,29 +133,38 @@
 <dt><code class="docutils literal notranslate"><span class="pre">file_mask</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><p>Description: Mask for file names, eg “scout*.nc”, finds all files matching in  “input_dir” and its sub dirs that match the file_mask pattern</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">grid_file</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: File name with hydrodynamic grid data, as path relative to input_dir, default is get grid from first hindasct file</p>
+<dt><code class="docutils literal notranslate"><span class="pre">hydro_model_cords_geographic</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Force conversion given nodal lat longs to a UTM meters grid, only used if lat long coordinates not auto detected</p>
 <ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">grid_variables</span></code>: nested parameter dictionary</p></li>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">input_dir</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code> <strong>&lt;isrequired&gt;</strong></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">isodate_of_hindcast_time_zero</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">iso8601date</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">1970-01-01</span></code></p></li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">load_fields</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the “field_variable_map” parameter</p>
+<ul class="simple">
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>possible_types: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>min_len: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -239,26 +173,27 @@
 <dt><code class="docutils literal notranslate"><span class="pre">max_numb_files_to_load</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Only read no more than this number of hindcast files, useful when setting up to speed run</p>
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">10000000</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">1</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><p><code class="docutils literal notranslate"><span class="pre">one_based_indices</span></code>: nested parameter dictionary</p></li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">required_file_dimensions</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['s_w',</span> <span class="pre">'s_rho',</span> <span class="pre">'eta_u',</span> <span class="pre">'eta_v']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">name</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Name used to refer to class in code and output, = None for core claseses</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">required_file_variables</span></code>:  <em>&lt;optional&gt;</em></dt><dd><ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[&lt;class</span> <span class="pre">'str'&gt;]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['ocean_time',</span> <span class="pre">'mask_psi',</span> <span class="pre">'lat_psi',</span> <span class="pre">'lon_psi',</span> <span class="pre">'h',</span> <span class="pre">'zeta',</span> <span class="pre">'u',</span> <span class="pre">'v']</span></code></p></li>
-<li><p>can_be_empty_list: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">one_based_indices</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -266,18 +201,8 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">time_buffer_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">24</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
 <li><p>min: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">time_zone</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: time zone in hours relative to UTC/GMT , eg NZ standard time is time zone 12</p>
-<ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">-12</span></code></p></li>
-<li><p>max: <code class="docutils literal notranslate"><span class="pre">12</span></code></p></li>
-<li><p>units: <code class="docutils literal notranslate"><span class="pre">hours</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -285,6 +210,47 @@
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">variable_signature</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Variable names used to test if file is this format</p>
+<ul class="simple">
+<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['ocean_time',</span> <span class="pre">'mask_psi',</span> <span class="pre">'lat_psi',</span> <span class="pre">'lon_psi',</span> <span class="pre">'h',</span> <span class="pre">'zeta',</span> <span class="pre">'u',</span> <span class="pre">'v']</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
+<li><p>possible_types: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
+<li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>min_len: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">vertical_regrid</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Convert vertical grid to same sigma levels across domain</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</section>
+<section id="expert-parameters">
+<h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">geographic_coords</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><p>Description: Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails</p>
+<ul class="simple">
+<li><p>default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'bool'&gt;</span></code></p></li>
+<li><p>possible_values: <code class="docutils literal notranslate"><span class="pre">[True,</span> <span class="pre">False]</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -302,10 +268,10 @@
     <ul>
         <li>
           &larr;
-          <a href="GenericUnstructuredReader.html" title="Previous document">GenericUnstructuredReader</a>
+          <a href="GLORYSreader.html" title="Previous document">GLORYSreader</a>
         </li>
         <li>
-          <a href="SCHISMSreaderNCDF.html" title="Next document">SCHISMSreaderNCDF</a>
+          <a href="SCHISMreaderNCDF.html" title="Next document">SCHISMreaderNCDF</a>
           &rarr;
         </li>
     </ul>
@@ -317,10 +283,10 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

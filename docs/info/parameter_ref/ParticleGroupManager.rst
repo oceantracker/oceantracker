@@ -2,13 +2,13 @@
 ParticleGroupManager
 #####################
 
-**Description:** 
+**Doc:** 
 
-**class_name:** oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager
+**short class_name:** ParticleGroupManager
 
-**File:** oceantracker/particle_group_manager/particle_group_manager.py
+**full class_name :** oceantracker.particle_group_manager.particle_group_manager.ParticleGroupManager
 
-**Inheritance:** ParticleGroupManager
+**Inheritance:** > ParameterBaseClass> ParticleGroupManager
 
 
 Parameters:
@@ -18,11 +18,21 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
-	* ``particle_buffer_chunk_size`` :   ``<class 'int'>``   *<optional>*
-		- default: ``500000``
-		- min: ``1``
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+
+
+Expert Parameters:
+*******************
+
 

@@ -9,8 +9,8 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo07_inside_polygon_events
 
 # below only required for plotting
-from oceantracker.post_processing.read_output_files.load_output_files import load_track_data, get_case_info_file_from_run_file, read_case_info_file
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles
+from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file, read_case_info_file
+from plot_oceantracker.plot_tracks import animate_particles
 from matplotlib import colors
 
 output_file= "output\demo07_inside_polygon_events"
@@ -27,5 +27,5 @@ animate_particles(track_data, colour_using_data=track_data['event_polygon'],
                                 vmax=1,
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
                                 fps=15,
-                                polygon_list_to_plot=caseInfo['full_case_params']['role_dicts']['event_loggers']['in_out_poly']['polygon_list'],
+                                polygon_list_to_plot=caseInfo['working_params']['class_roles']['event_loggers']['in_out_poly']['polygon_list'],
                                 show_dry_cells=True, interval=30)

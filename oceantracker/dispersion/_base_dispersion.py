@@ -5,7 +5,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
-class _BaseTrajectoryModifer(ParameterBaseClass):
+class _BaseDispersion(ParameterBaseClass):
 
     def __init__(self):
         # set up info/attributes
@@ -19,4 +19,7 @@ class _BaseTrajectoryModifer(ParameterBaseClass):
 
     # prototype for status modification,
     #  all particles tested to see if they need status changing, eg tidal stranding
-    def update(self, time_sec, active): pass
+    def update(self, n_time_step, time_sec, active): pass
+
+
+

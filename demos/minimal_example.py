@@ -23,14 +23,19 @@ ot.add_class('release_groups', name ='my_release_point', # user must provide a n
                     pulse_size= 10,                   # number of particles released each release_interval
                     )
 
-case_info_file_name, has_errors = ot.run()
+from oceantracker.util import json_util,yaml_util
+from os import path
+json_util.write_JSON(path.join('demo_param_files', 'minimal_example.json'), ot.params)
+yaml_util.write_YAML(path.join('demo_param_files', 'minimal_example.yaml'), ot.params)
+
+case_info_file_name = ot.run()
 # case_info_file_name is a json file with useful ingo for post processing, eg output file names
 # output now in folder output/minimal_example
 
 # below is optional code for plotting
 #-------------------------------------
-from oceantracker.post_processing.plotting.plot_tracks import animate_particles, plot_tracks
-from oceantracker.post_processing.read_output_files.load_output_files import load_track_data
+from plot_oceantracker.plot_tracks import animate_particles, plot_tracks
+from read_oceantracker.python.load_output_files import load_track_data
 
 # read particle tracks for plotting
 track_data = load_track_data(case_info_file_name)
@@ -43,4 +48,6 @@ anim = plot_tracks(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
 anim = animate_particles(track_data, axis_lims=[1591000, 1601500, 5478500, 5491000],
                          title='Minimal example of OceanTracker with 3D point release',
                          movie_file='output\\minimal_example.mp4', show_dry_cells=True)
+
+
 

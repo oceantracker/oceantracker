@@ -1,8 +1,8 @@
-from oceantracker.particle_properties._base_properties import ParticleProperty
+from oceantracker.particle_properties._base_particle_properties import ManuallyUpdatedParticleProperty
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
-class ParticleParameterFromNormalDistribution(ParticleProperty):
+class ParticleParameterFromNormalDistribution(ManuallyUpdatedParticleProperty):
     # particle property drawn from normal distribution at birth
     # eg individual particle fall velocity drawn from distribution
     def __init__(self):
@@ -24,4 +24,4 @@ class ParticleParameterFromNormalDistribution(ParticleProperty):
         self.set_values(self.params['value']+ self.params['variance']*np.random.normal(size=s), new_part_IDs)
 
 
-    def update(self, active): pass # manual update by default
+    def update(self,n_time_step, time_sec, active): pass # manual update by default

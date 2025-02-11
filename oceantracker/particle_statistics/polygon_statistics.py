@@ -1,41 +1,62 @@
 import numpy as np
-
-import oceantracker.particle_statistics.gridded_statistics as gridded_statistics
+import oceantracker.particle_statistics.gridded_statistics2D as gridded_statistics2D
 from numba import njit
-from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC,merge_params_with_defaults
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
-from oceantracker.common_info_default_param_dict_templates import default_polygon_dict_params
+from oceantracker.util.numba_util import njitOT
+from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
+from oceantracker.util.cord_transforms import fix_any_spanning180east
+from oceantracker.shared_info import shared_info as si
+
 class _CorePolygonMethods(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'polygon_list': PLC([], [dict], default_value= default_polygon_dict_params,doc_str='List of dict with polygon cords and optional nmmes, min is  {"points": [[2.,3.],....]}',
-                                                     can_be_empty_list=True),
+        self.add_default_params({'polygon_list': [],
                                  'use_release_group_polygons': PVC(False, bool,doc_str = 'Omit polygon_list param and use all polygon release polygons as statistics/counting polygons, useful for building release group polygon to polygon connectivity matrix.'),
                                  })
 
         self.remove_default_params(['grid_center','release_group_centered_grids', 'grid_span' ])
         self.file_tag = 'polygon_stats'
 
+    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+        info = self.info
+        # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
+        info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_ {self.info["instanceID"]:03d}'
+        si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D',
+                     name=info['inside_polygon_particle_prop'],
+                     polygon_list=self.params['polygon_list'], write=False)
+
     def initial_setup(self, **kwargs):
-        si = self.shared_info
+
+        ml = si.msg_logger
         params = self.params
 
         # pre fill  polygon list from release groups if requested
         if params['use_release_group_polygons']:
             params['polygon_list']=[]
-            for name, i in si.classes['release_groups'].items():
+            for name, i in si.class_roles.release_groups.items():
                 if i.info['release_type'] == 'polygon':
                     params['polygon_list'].append({'name': name, 'points':i.params['points']})
+
             if len(params['polygon_list']) == 0:
-                si.msg_logger.msg('There are no polygon releases to use as statistic polygons',
+                ml.msg('There are no polygon releases to use as statistic polygons',
                                   hint='must have at least one polygon release defined to use the use_release_group_polygons parameter, or use statistics polygon_list parameter',
-                                  crumbs=f'Polygon statistic "{i.info["name"]}" ', fatal_error=True, exit_now=True)
+                                   fatal_error=True, caller=self)
+        else:
+            # use given polygon list
+            for n, p in enumerate(params['polygon_list']):
+                p = merge_params_with_defaults(p,  si.default_polygon_dict_params,
+                                si.msg_logger, crumbs='polygon_statistics_merging polygon list')
+                if si.settings.use_geographic_coords:
+                    p['points'] = fix_any_spanning180east(p['points'],
+                                                   msg_logger=si.msg_logger, caller=self,
+                                                   crumbs=f'Polygon_list#{n}')
 
         if len(params['polygon_list'])==0:
-            si.msg_logger.msg('Must have polygon_list parameter  with at least one polygon dictionary',
-                              crumbs= f'Polygon statistic "{i.info["name"]}" ', fatal_error=True, exit_now=True,hint= 'eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
+            ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,
+                        fatal_error=True,hint= 'eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
 
         # do standard stats initialize
         super().initial_setup()  # set up using regular grid for  stats
@@ -43,18 +64,15 @@ class _CorePolygonMethods(ParameterBaseClass):
 
 
     def set_up_spatial_bins(self,nc ):
-        si= self.shared_info
-        particles = si.classes['particle_group_manager']
 
-        # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
-        self.info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_ {self.info["instanceID"]:03d}'
-        particles.create_particle_property(self.info['inside_polygon_particle_prop'],'manual_update',dict(
-                                               class_name= 'oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',
-                                               polygon_list=self.params['polygon_list'],
-                                                write=False))
+        pgm = si.core_class_roles.particle_group_manager
+
+
         nc.add_dimension('polygon_dim', len(self.params['polygon_list']))
 
-class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedStats2D_timeBased):
+        add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
+
+class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.GriddedStats2D_timeBased):
     # class to hold counts of particles inside 2D polygons squares
 
     def __init__(self):
@@ -67,11 +85,11 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         self.check_class_required_fields_prop_etc(required_props_list=['x'])
 
     def set_up_binned_variables(self,nc):
-        si = self.shared_info
+
         if not self.params['write']: return
         
         dim_names = ('time_dim', 'release_group_dim', 'polygon_dim')
-        dim_sizes  = ( None, len(si.classes['release_groups']), nc.dim_size('polygon_dim') )
+        dim_sizes  = (None, len(si.class_roles.release_groups), nc.dim_size('polygon_dim'))
 
         nc.add_dimension('release_group_dim', dim_sizes[1])
         nc.create_a_variable('count', dim_names, np.int64, description='counts of particles in each polygon at given times, for each release group')
@@ -81,18 +99,20 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
         self.count_time_slice = np.full(dim_sizes[1:], 0, np.int64)
 
         # counts in each age bin, whether inside polygon or not
-        self.count_all_particles_time_slice =  np.full((len(si.classes['release_groups']),) , 0, np.int64)
+        self.count_all_particles_time_slice =  np.full((len(si.class_roles.release_groups),), 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
-            if p_name in si.classes['particle_properties']:
+            if p_name in si.class_roles.particle_properties:
                 self.sum_binned_part_prop[p_name] = np.full(dim_sizes[1:], 0.)  # zero for  summing
                 nc.create_a_variable( 'sum_' + p_name, dim_names, np.float64,  description='sum of particle property inside polygon  ' + p_name)
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
 
-    def do_counts(self, time_sec, sel):
-        si= self.shared_info
-        part_prop = si.classes['particle_properties']
+
+
+    def do_counts(self,n_time_step, time_sec, sel):
+
+        part_prop = si.class_roles.particle_properties
         g = self.grid
 
         # update time stats  recorded
@@ -103,17 +123,17 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
 
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
-        inside_poly_prop.update(sel)
+        inside_poly_prop.update(n_time_step,time_sec,sel)
 
         # do counts
         self.do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
-                                         p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_list, self.sum_prop_list, sel)
+                                         p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_data_list, self.sum_prop_data_list, sel)
 
 
     def info_to_write_at_end(self):pass  # nothing extra to write
 
     @staticmethod
-    @njit
+    @njitOT
     def do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list, active):
 
         # zero out counts in the count time slices
@@ -134,7 +154,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics.GriddedSt
             for m in range(len(prop_list)):
                 sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
 
-class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedStats2D_agedBased):
+class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedStats2D_ageBased):
 
     def __init__(self):
         super().__init__()
@@ -146,29 +166,28 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
 
     def set_up_binned_variables(self,nc):
-        si = self.shared_info
+         
 
 
         # set up space for requested particle properties
-        dims= ( self.grid['age_bins'].shape[0], len(si.classes['release_groups']), len(self.params['polygon_list']))
+        dims= (self.grid['age_bins'].shape[0], len(si.class_roles.release_groups), len(self.params['polygon_list']))
         # working count space, row are (y,x)
         self.count_age_bins = np.full(dims, 0, np.int64)
         # counts in each age bin, whether inside polygon or not
         self.count_all_particles = np.full(dims[:-1] , 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
-            if p_name in si.classes['particle_properties']:
+            if p_name in si.class_roles.particle_properties:
                 self.sum_binned_part_prop[p_name] = np.full(dims, 0.)  # zero for  summing
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
 
-    def do_counts(self, time_sec, sel):
+    def do_counts(self,n_time_step, time_sec, sel):
 
-        part_prop = self.shared_info.classes['particle_properties']
+        part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
 
-        # update time stats  recorded
-        self.record_time_stats_last_recorded(time_sec)
+
 
         # set up pointers to particle properties, only point to those in buffer as no need to look at those beyond buffer
         p_groupID   = part_prop['IDrelease_group'].used_buffer()
@@ -177,12 +196,11 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
 
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
-        inside_poly_prop.update(sel)
-
+        inside_poly_prop.update(n_time_step, time_sec, sel)
 
         # loop over statistics polygons
         self.do_counts_and_summing_numba(inside_poly_prop.used_buffer(), p_groupID, p_x, self.count_age_bins,
-                                         self.count_all_particles, self.prop_list, self.sum_prop_list, sel, stats_grid['age_bin_edges'], p_age)
+                                         self.count_all_particles, self.prop_data_list, self.sum_prop_data_list, sel, stats_grid['age_bin_edges'], p_age)
 
     def info_to_write_at_end(self):
         # write variables whole
@@ -204,7 +222,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics.GriddedSta
             nc.write_a_new_variable('sum_' + key, item[:], ('age_bin_dim', 'release_group_dim', 'polygon_dim'), description= 'sum of particle property inside bin  ' + key)
 
     @staticmethod
-    @njit
+    @njitOT
     def do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list,
                                      active, age_bin_edges, age):
 

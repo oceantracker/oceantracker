@@ -2,35 +2,58 @@
 RandomWalk
 ###########
 
-**Description:** 
+**Doc:**     implements random walk of particles by adding equivalent random velocity    
 
-**class_name:** oceantracker.dispersion.random_walk.RandomWalk
+**short class_name:** RandomWalk
 
-**File:** oceantracker/dispersion/random_walk.py
+**full class_name :** oceantracker.dispersion.random_walk.RandomWalk
 
-**Inheritance:** _BaseTrajectoryModifer> RandomWalk
+**Inheritance:** > ParameterBaseClass> BaseTrajectoryModifer> RandomWalk
 
 
 Parameters:
 ************
 
 	* ``A_H`` :   ``<class 'float'>``   *<optional>*
-		- default: ``1.0``
+		Description: Horizontal turbulent eddy viscosity
+
+		- default: ``0.1``
+		- data_type: ``<class 'float'>``
+		- units: ``m/s^2``
 		- min: ``0.0``
 
 	* ``A_V`` :   ``<class 'float'>``   *<optional>*
-		- default: ``0.001``
+		Description: Constant vertical turbulent eddy viscosity
+
+		- default: ``0.01``
+		- data_type: ``<class 'float'>``
+		- units: ``m/s^2``
 		- min: ``0.0``
 
 	* ``class_name`` :   ``<class 'str'>``   *<optional>*
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
+		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+
+
+Expert Parameters:
+*******************
+
 

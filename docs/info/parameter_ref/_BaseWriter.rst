@@ -1,0 +1,91 @@
+############
+_BaseWriter
+############
+
+**Doc:** 
+
+**short class_name:** _BaseWriter
+
+**full class_name :** oceantracker.tracks_writer._base_tracks_writer._BaseWriter
+
+**Inheritance:** > ParameterBaseClass> _BaseWriter
+
+
+Parameters:
+************
+
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
+		Description: Class name as string A.B.C, used to import this class from python path
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
+		- default: ``tracks``
+		- data_type: ``<class 'str'>``
+
+	* ``time_steps_per_per_file`` :   ``<class 'int'>``   *<optional>*
+		Description: Split track output into files with given number of time integer steps
+
+		- default: ``None``
+		- data_type: ``<class 'int'>``
+		- min: ``1``
+
+	* ``turn_off_write_particle_properties_list``:  *<optional>*
+		Description: - Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually
+
+		- a list containing type:  ``[]``
+		- default list : ``['water_velocity', 'particle_velocity', 'velocity_modifier']``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
+
+	* ``turn_on_write_particle_properties_list``:  *<optional>*
+		Description: - Change default write param of particle properties to write to tracks file, ie  tweak write flags individually
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
+
+	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
+		Description: the time in model seconds between writes (will be rounded to model time step)
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``sec``
+		- min: ``0.01``
+
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``write_dry_cell_flag`` :   ``<class 'bool'>``   *<optional>*
+		Description: Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
+
+
+
+Expert Parameters:
+*******************
+
+	* ``NCDF_time_chunk`` :   ``<class 'int'>``   *<optional>*
+		Description: number of time steps per time chunk in the netcdf file
+
+		- default: ``24``
+		- data_type: ``<class 'int'>``
+		- min: ``1``
+
+

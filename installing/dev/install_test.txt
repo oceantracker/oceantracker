@@ -1,0 +1,25 @@
+
+
+    conda create -n oceantracker python=3.11
+
+conda install numba::numba
+
+conda install anaconda::numpy
+conda install anaconda::scipy
+conda install anaconda::pyyaml
+conda install conda-forge::psutil
+conda install conda-forge::python-dateutil
+conda install conda-forge::netcdf4
+
+conda install conda-forge::pyproj
+pip install pyproj
+
+optional
+
+conda install conda-forge::matplotlib
+pip install conda-forge::matplotlib
+
+
+Other useful?
+conda install conda-forge::geopandas
+conda install -c conda-forge nbsphinx

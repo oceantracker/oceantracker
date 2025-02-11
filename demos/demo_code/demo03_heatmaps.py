@@ -9,8 +9,8 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo03_heatmaps
 
 # below only required for plotting
-from oceantracker.post_processing.read_output_files.load_output_files import load_stats_data
-from oceantracker.post_processing.plotting.plot_statistics import plot_heat_map, animate_heat_map
+from read_oceantracker.python.load_output_files import load_stats_data
+from plot_oceantracker.plot_statistics import plot_heat_map, animate_heat_map
 
 output_file= "output\demo03_heatmaps"
 
@@ -21,5 +21,5 @@ animate_heat_map(stats_data,'myP1', axis_lims=axis_lims,
                                 heading='Particle count heatmaps built on the fly, no tracks recorded, log scale',
                                 movie_file=output_file + '.mp4' if output_file is not None else None,
                                 fps=7)
-plot_heat_map(stats_data,'myP1', axis_lims=axis_lims, var='water_depth', heading='Water depth built on the fly, no tracks recorded',
+plot_heat_map(stats_data,  'myP1', axis_lims=axis_lims, var='water_depth', heading='Water depth built on the fly, no tracks recorded',
                              plot_file_name=output_file + '_water_depth.jpeg' if output_file is not None else None)

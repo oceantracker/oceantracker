@@ -25,13 +25,17 @@
 
 # ## Run parallel with helper class
 
-# In[2]:
+# In[1]:
 
 
 # run in parallel using helper class method
-from oceantracker.main import OceanTracker
+from oceantracker import main
+from  importlib import reload # force a reload to get around notebooks single name space
+reload(main)
 
-ot = OceanTracker()
+
+ot = main.OceanTracker()
+
 # setup base case
 # by default settings and classes are added to base case
 ot.settings(output_file_base= 'parallel_test2',      # name used as base for output files
@@ -39,10 +43,8 @@ ot.settings(output_file_base= 'parallel_test2',      # name used as base for out
     time_step = 120,  #  2 min time step as seconds  
     )
 
-ot.add_class('reader',
-            input_dir='../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-            file_mask= 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-            )
+ot.add_class('reader',input_dir= '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                      file_mask=  'demo_hindcast_schisim3D*.nc')  # hindcast file mask
 
 # now put a release group with one point into case list
 # define the required release  points
@@ -51,16 +53,16 @@ points = [  [1597682.1237, 5489972.7479],
             [1598886.4247, 5489464.0424],
             [1597917.3387, 5489000],
         ]
-
-# build a list of params for each case, with one release group fot each point
+# run each point release in parrallel
 for n, p in enumerate(points):
     # add a release group with one point to case "n"
     ot.add_class('release_groups',
-                name ='mypoint'+str(n),
-                points= [p],  # needs to be 1, by 2 list for single 2D point
+                case=n, # this adds release group to the n'th case to run in //
+                name ='mypoint'+str(n), # optional name for each group
+                points= p,  # needs to be 1, by 2 list for single 2D point
                 release_interval= 3600,           # seconds between releasing particles
                 pulse_size= 10,                   # number of particles released each release_interval
-                case=n) # this adds release group to the nth case to run in //
+                )
 
 # to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
 if __name__ == '__main__':
@@ -75,25 +77,33 @@ if __name__ == '__main__':
     #   where n is the case number 0,1,2...
 
 
+# In[ ]:
+
+
+
+
+
 # 
 
 # ## Run parallel using param. dicts.
 
-# In[3]:
+# In[8]:
 
 
 # oceantracker parallel demo, run different release groups as parallel processes
-from oceantracker import main
+from oceantracker.main import OceanTracker
+
+# make instance of oceantracker to use to set parameters using code, then run
+ot = OceanTracker()
 
 # first build base case, params used for all cases
-base_case={
-    'output_file_base' :'parallel_test1',      # name used as base for output files
-    'root_output_dir':'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
-    'time_step' : 120,  #  2 min time step as seconds  
-    'reader':{'input_dir': '../demos/demo_hindcast',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
-                'file_mask': 'demoHindcastSchism*.nc',    # the file mask of the hindcast files
-        },
-        }
+params=dict(debug =True,
+    output_file_base= 'parallel_test1',      # name used as base for output files
+    root_output_dir= 'output',             #  output is put in dir   'root_output_dir'/'output_file_base'
+    time_step = 120,  #  2 min time step as seconds 
+    ) 
+params['reader']= dict(input_dir= '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                      file_mask=  'demo_hindcast_schisim3D*.nc')
 
 # define the required release  points
 points = [  [1597682.1237, 5489972.7479],
@@ -102,26 +112,24 @@ points = [  [1597682.1237, 5489972.7479],
             [1597917.3387, 5489000],
         ]
 
-# build a list of params for each case, with one release group fot each point
-case_list=[]
+# build a list of params for each case, with one release group for each point
+params['case_list'] =[]
 for n,p in enumerate(points):
-    case_param = main.param_template()
     # add one point as a release group to this case
-    case_param['release_groups']['mypoint'+str(n)] = {  # better to give release group a unique name
-                                            'points':[p],  # needs to be 1, by 2 list for single 2D point
-                                            'release_interval': 3600,           # seconds between releasing particles
-                                            'pulse_size': 10,                   # number of particles released each release_interval
-                                }
-    case_list.append(case_param)  # add this case to the list
-
-
+    d = dict( name= 'mypoint'+str(n),# better to give release group a unique name
+            points= [p],  # needs to be 1, by 2 list for single 2D point
+            release_interval= 3600,           # seconds between releasing particles
+            pulse_size= 10,                   # number of particles released each release_interval
+            )
+    case_param =dict(release_groups=[d]) # release group list of one or more releases
+    params['case_list'].append(case_param)
 
 # to run parallel in windows, must put run  call  inside the below "if __name__ == '__main__':" block
 if __name__ == '__main__':
 
     # run as parallel set of cases
-    #    by default uses one less than the number of physical processors at one time, use setting "processors"
-    case_info_files= main.run_parallel(base_case, case_list)
+    #    by default uses two less than the number of physical processors at one time, use setting "processors"
+    case_info_files= main.run(params)
     
     # NOTE for parallel runs case_info_files is a list, one for each case run
     # so to load track files use    

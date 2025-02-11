@@ -2,13 +2,13 @@
 TotalWaterDepth
 ################
 
-**Description:** 
+**Doc:** 
 
-**class_name:** oceantracker.particle_properties.total_water_depth.TotalWaterDepth
+**short class_name:** TotalWaterDepth
 
-**File:** oceantracker/particle_properties/total_water_depth.py
+**full class_name :** oceantracker.particle_properties.total_water_depth.TotalWaterDepth
 
-**Inheritance:** _BasePropertyInfo> ParticleProperty> TotalWaterDepth
+**Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ManuallyUpdatedParticleProperty> TotalWaterDepth
 
 
 Parameters:
@@ -18,60 +18,84 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``description`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
-	* ``dtype`` :   ``<class 'numpy.dtype'>``   *<optional>*
-		- default: ``<class 'numpy.float64'>``
-
-	* ``fill_value`` :   ``[<class 'int'>, <class 'float'>]``   *<optional>*
-		- default: ``None``
+	* ``dtype`` :   ``<class 'str'>``   *<optional>*
+		- default: ``float64``
+		- data_type: ``<class 'str'>``
+		- possible_values: ``['float64', 'float32', 'bool', 'int32', 'int16', 'int8', 'int64']``
 
 	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
+		Description: Value given to particle property on release
+
 		- default: ``0.0``
+		- data_type: ``<class 'float'>``
 
 	* ``is3D`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``False``
+		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
-	* ``is_time_varying`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``True``
-		- possible_values: ``[True, False]``
+	* ``name`` :   ``<class 'str'>`` **<isrequired>**
+		Description: Name used to refer to this particle property in code and output
 
-	* ``num_components`` :   ``<class 'bool'>``   *<optional>*
-		- default: ``1``
-		- possible_values: ``[True, False]``
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
+		Description: size of a 3d dimesion of particle property
+
 		- default: ``1``
+		- data_type: ``<class 'int'>``
 		- min: ``1``
 
-	* ``release_group_parameters``: nested parameter dictionary
 	* ``time_varying`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
-	* ``type`` :   ``<class 'str'>``   *<optional>*
-		Description: type of particle property, used to manage how to update particle property
-
-		- default: ``user``
-		- possible_values: ``['manual_update', 'from_fields', 'user']``
+	* ``units`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``update`` :   ``<class 'bool'>``   *<optional>*
 		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``vector_dim`` :   ``<class 'int'>``   *<optional>*
 		- default: ``1``
+		- data_type: ``<class 'int'>``
 		- min: ``1``
 
 	* ``write`` :   ``<class 'bool'>``   *<optional>*
 		Description: Write particle property to tracks or event files file
 
 		- default: ``True``
+		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
+
+
+
+Expert Parameters:
+*******************
+
+	* ``release_group_parameters``:  *<optional>*
+		Description: - In development: release group specific particle prop params
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
+
 

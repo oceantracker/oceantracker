@@ -1,7 +1,8 @@
-from oceantracker.particle_properties._base_properties import ParticleProperty
+from oceantracker.particle_properties._base_particle_properties import ManuallyUpdatedParticleProperty
 import numpy as np
+from oceantracker.shared_info import shared_info as si
 
-class eDNAdetection(ParticleProperty):
+class eDNAdetection(ManuallyUpdatedParticleProperty):
 
     def __init__(self):
         super().__init__()
@@ -11,11 +12,11 @@ class eDNAdetection(ParticleProperty):
                                 'sample_collector_area': .05**2,  # number of animals shedding dna [1, 10, 100]
                                 'retained_sample_size_ml': 100.,  # sabella
                                 'detection_limit_copies_per_ml': 0.14})
-        self.class_doc(description= 'eDNAdetection')
+
 
 
     def initial_value_at_birth(self, new_part_IDs):
-        part_prop= self.shared_info.classes['particle_properties']
+        part_prop= si.class_roles.particle_properties
         depth = part_prop['water_depth'].get(new_part_IDs)
 
         sampling_volume = abs(depth) * self.params[ 'sample_collector_area']  # depth times area of sampler pulled through full water depth
@@ -23,9 +24,9 @@ class eDNAdetection(ParticleProperty):
         initial_conc= self.params['detection_limit_copies_per_ml']*1000 * sampling_volume/retained_sample_size_vol
         self.set_values(initial_conc, new_part_IDs) # sets this properties values
 
-    def update(self,active):
+    def update(self,n_time_step,time_sec,active):
         # update c, ie growth going backwards in time,  prop each time step
-        age = self.shared_info.classes['particle_properties']['age'].get_values(active)
+        age = si.class_roles.particle_properties['age'].get_values(active)
         conc = self.params['initial_value']*np.exp( np.abs(age) / abs(self.params['decay_time_scale']))
 
         self.set_values(conc,active)

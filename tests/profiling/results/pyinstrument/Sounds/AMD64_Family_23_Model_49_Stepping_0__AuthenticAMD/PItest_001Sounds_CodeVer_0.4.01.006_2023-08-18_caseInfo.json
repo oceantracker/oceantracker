@@ -18,9 +18,9 @@
             "p12": null
         },
         "fields": {
-            "water_temperature": null,
-            "water_velocity": null,
             "water_depth": null,
+            "water_velocity": null,
+            "water_temperature": null,
             "tide": null,
             "friction_velocity": null
         },
@@ -43,9 +43,9 @@
             "z_fraction": null,
             "z_fraction_bottom_layer": null,
             "v_temp": null,
-            "water_temperature": null,
-            "water_velocity": null,
             "water_depth": null,
+            "water_velocity": null,
+            "water_temperature": null,
             "tide": null,
             "decay1": null,
             "inside_polygon_for_onfly_stats_ 001": null,
@@ -71,12 +71,11 @@
             "time": null,
             "num_part_released_so_far": null
         },
-        "reader": null,
-        "solver": null,
         "field_group_manager": null,
+        "reader": null,
         "interpolator": null,
         "particle_group_manager": null,
-        "tracks_writer": [],
+        "solver": null,
         "dispersion": null,
         "resuspension": null,
         "grid": "Sounds_grid.nc",
@@ -84,21 +83,20 @@
     },
     "caseID": 0,
     "block_timings": [
-        "  92.3% Time stepping : calls 1729, 0 days 0 hrs 13 min 14 sec",
-        "  38.3% Find cell, vertical walk : calls 10375, 0 days 0 hrs 5 min 30 sec",
-        "  19.7% Fill reader buffers : calls 1730, 0 days 0 hrs 2 min 49 sec",
-        "  10.7% Update particle properties : calls 3459, 0 days 0 hrs 1 min 32 sec",
-        "   9.7% Build grid : calls    2, 0 days 0 hrs 1 min 23 sec",
-        "   4.0% Find cell, horizontal walk : calls 10375, 0 days 0 hrs 0 min 34 sec",
+        "  91.4% Time stepping : calls 1729, 0 days 0 hrs 13 min 10 sec",
+        "  38.2% Find cell, vertical walk : calls 10375, 0 days 0 hrs 5 min 30 sec",
+        "  19.3% Fill reader buffers : calls 1730, 0 days 0 hrs 2 min 47 sec",
+        "  10.6% Update particle properties : calls 3459, 0 days 0 hrs 1 min 31 sec",
+        "   3.9% Find cell, horizontal walk : calls 10375, 0 days 0 hrs 0 min 34 sec",
         "   0.9% Update event loggers : calls 1730, 0 days 0 hrs 0 min 8 sec",
-        "   0.8% Update statistics : calls 1730, 0 days 0 hrs 0 min 7 sec",
-        "   0.5% Initial cell guess : calls  376, 0 days 0 hrs 0 min 5 sec",
+        "   0.6% Update statistics : calls 1730, 0 days 0 hrs 0 min 5 sec",
+        "   0.6% Initial cell guess : calls  355, 0 days 0 hrs 0 min 5 sec",
         "   0.0% Update concentrations : calls 1730, 0 days 0 hrs 0 min 0 sec",
-        "--- Total time 0 days 0 hrs 14 min 20 sec"
+        "--- Total time 0 days 0 hrs 14 min 25 sec"
     ],
     "version_info": {
         "version": "0.4.01.006 2023-08-18",
-        "git_revision": "70b9f23088b15ca033f3eaeb7ced91788a3b61a8",
+        "git_revision": "b5ea52bc0d2da18c6d47726a93eb3118fac461b7",
         "python_version": "3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]",
         "python_major_version": 3,
         "python_minor_version": 10,
@@ -113,29 +111,22 @@
         "CPUs_logical": 64,
         "Freq_Mhz": 3.693
     },
-    "file_written": "2023-08-18T17:14:18.625764",
+    "file_written": "2023-08-26T10:28:08.855692",
     "run_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
-        "model_run_started": "2023-08-18T17:00:50.880492",
+        "model_run_started": "2023-08-26T10:14:44.809010",
         "date_of_time_zero": [
             "1970-01-01T00:00:00"
         ],
         "time_zone": null,
         "backtracking": false,
-        "started": "2023-08-18 16:59:58.408645",
-        "ended": "2023-08-18 17:14:18.564750",
-        "duration": "0:14:20.156105",
-        "elapsed_time_sec": 860.1515552999917,
-        "number_particles_released": 507500
-    },
-    "solver_info": {
-        "time_spent_updating": 0.0,
-        "update_calls": 0,
-        "time_first_update_call": 0.0,
-        "name": "solver",
-        "class_role": "solver",
+        "started": "2023-08-26 10:13:43.871414",
+        "ended": "2023-08-26 10:28:08.795622",
+        "duration": "0:14:24.924208",
+        "elapsed_time_sec": 864.9190877999936,
+        "number_particles_released": 507500,
         "model_time_step": 300.0,
         "model_start_time": 1199147400.0,
         "model_end_time": 1199666100.0,
@@ -150,14 +141,119 @@
         "current_model_time_step": 1728,
         "current_model_time": 1199666100.0,
         "model_run_duration": 518700.0,
-        "computation_started": "2023-08-18T17:00:50.880492",
-        "computation_ended": "2023-08-18T17:14:18.564750",
-        "computation_duration": "0:13:27.684258"
+        "computation_started": "2023-08-26T10:14:44.809010",
+        "computation_ended": "2023-08-26T10:28:08.794621",
+        "computation_duration": "0:13:23.985611"
+    },
+    "solver_info": {
+        "model_time_step": 300.0,
+        "model_start_time": 1199147400.0,
+        "model_end_time": 1199666100.0,
+        "model_duration": 518400.0,
+        "model_start_date": "2008-01-01T00:30:00",
+        "model_end_date": "2008-01-07T00:35:00",
+        "model_timedelta": "0 days 0 hrs 5 min 0 sec",
+        "model_duration_timedelta": "6 days 0 hrs 0 min 0 sec",
+        "total_alive_particles": 438987500,
+        "time_steps_completed": 1729,
+        "current_model_date": "2008-01-07T00:35:00",
+        "current_model_time_step": 1728,
+        "current_model_time": 1199666100.0,
+        "model_run_duration": 518700.0,
+        "computation_started": "2023-08-26T10:14:44.809010",
+        "computation_ended": "2023-08-26T10:28:08.794621",
+        "computation_duration": "0:13:23.985611"
     },
     "hindcast_info": {
         "time_spent_updating": 0.0,
         "update_calls": 0,
         "time_first_update_call": 0.0,
+        "field_variable_info": {
+            "water_depth": {
+                "component_list": [
+                    {
+                        "file_name": "depth",
+                        "comp_per_var": 1
+                    }
+                ],
+                "params": {
+                    "is_time_varying": 1,
+                    "is3D": 1,
+                    "num_components": 1
+                },
+                "comp_per_var": 1,
+                "shape_in_memory": [
+                    1,
+                    149233,
+                    1,
+                    1
+                ]
+            },
+            "water_velocity": {
+                "component_list": [
+                    {
+                        "file_name": "hvel",
+                        "comp_per_var": 2
+                    },
+                    {
+                        "file_name": "vertical_velocity",
+                        "comp_per_var": 1
+                    }
+                ],
+                "params": {
+                    "is_time_varying": 1,
+                    "is3D": 1,
+                    "num_components": 3
+                },
+                "comp_per_var": 1,
+                "shape_in_memory": [
+                    24,
+                    149233,
+                    38,
+                    3
+                ]
+            },
+            "water_temperature": {
+                "component_list": [
+                    {
+                        "file_name": "temp",
+                        "comp_per_var": 1
+                    }
+                ],
+                "params": {
+                    "is_time_varying": 1,
+                    "is3D": 1,
+                    "num_components": 1
+                },
+                "comp_per_var": 1,
+                "shape_in_memory": [
+                    24,
+                    149233,
+                    38,
+                    1
+                ]
+            },
+            "tide": {
+                "component_list": [
+                    {
+                        "file_name": "elev",
+                        "comp_per_var": 1
+                    }
+                ],
+                "params": {
+                    "is_time_varying": 1,
+                    "is3D": 1,
+                    "num_components": 1
+                },
+                "comp_per_var": 1,
+                "shape_in_memory": [
+                    24,
+                    149233,
+                    1,
+                    1
+                ]
+            }
+        },
         "buffer_info": {
             "n_filled": 24,
             "buffer_size": 24,
@@ -465,7 +561,10 @@
             "first_date": "2008-01-01T00:30:00",
             "last_date": "2008-02-01T00:00:00",
             "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
-        }
+        },
+        "is3D": true,
+        "nz_levels": 38,
+        "vertical_grid_type": "LSC"
     },
     "full_case_params": {
         "caseID": 0,
@@ -507,31 +606,49 @@
             "reader": {
                 "input_dir": "G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD",
                 "file_mask": "schism_marl200801*.nc",
-                "field_variables": {
-                    "water_temperature": "temp",
+                "field_variables": [
+                    "water_depth",
+                    "water_velocity",
+                    "water_temperature",
+                    "tide"
+                ],
+                "class_name": "oceantracker.reader.schism_reader.SCHISMSreaderNCDF",
+                "user_note": null,
+                "time_zone": null,
+                "cords_in_lat_long": false,
+                "time_buffer_size": 24,
+                "grid_variable_map": {
+                    "time": "time",
+                    "x": [
+                        "SCHISM_hgrid_node_x",
+                        "SCHISM_hgrid_node_y"
+                    ],
+                    "zlevel": "zcor",
+                    "triangles": "SCHISM_hgrid_face_nodes",
+                    "bottom_cell_index": "node_bottom_index",
+                    "is_dry_cell": null
+                },
+                "field_variable_map": {
                     "water_velocity": [
                         "hvel",
-                        "vertical_velocity"
+                        "vertical_velocity",
+                        null
                     ],
-                    "water_depth": "depth",
                     "tide": "elev",
+                    "water_depth": "depth",
+                    "water_temperature": "temp",
                     "salinity": null,
                     "wind_stress": null,
                     "bottom_stress": null
                 },
-                "class_name": "oceantracker.reader.schism_reader.SCHISMSreaderNCDF",
-                "user_note": null,
-                "grid_file": null,
-                "time_zone": null,
-                "cords_in_lat_long": false,
-                "time_buffer_size": 24,
-                "required_file_variables": [],
-                "required_file_dimensions": [],
-                "field_variables_to_depth_average": [],
-                "one_based_indices": {},
-                "EPSG_transform_code": null,
-                "grid_variables": {},
-                "dimension_map": {},
+                "dimension_map": {
+                    "time": "time",
+                    "node": "node",
+                    "z": "nSCHISM_vgrid_layers",
+                    "vector2Ddim": "two",
+                    "vector3Ddim": "three"
+                },
+                "one_based_indices": true,
                 "isodate_of_hindcast_time_zero": "1970-01-01",
                 "max_numb_files_to_load": 10000000,
                 "hgrid_file_name": null
@@ -559,22 +676,7 @@
                 "particle_buffer_chunk_size": 500000
             },
             "tracks_writer": {
-                "class_name": "oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter",
-                "user_note": null,
-                "role_output_file_tag": "tracks_compact",
-                "update_interval": null,
-                "output_step_count": null,
-                "turn_on_write_particle_properties_list": [],
-                "turn_off_write_particle_properties_list": [
-                    "water_velocity",
-                    "particle_velocity",
-                    "velocity_modifier"
-                ],
-                "time_steps_per_per_file": null,
-                "write_dry_cell_index": true,
-                "NCDF_time_chunk": 24,
-                "NCDF_particle_chunk": 100000,
-                "retain_compact_files": false
+                "class_name": "oceantracker.tracks_writer.track_writer_compact.CompactTracksWriter"
             },
             "dispersion": {
                 "class_name": "oceantracker.dispersion.random_walk.RandomWalk",
@@ -1138,7 +1240,6 @@
             "last_date": "2008-02-01T00:00:00",
             "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
         },
-        "hindcast_is3D": true,
         "output_files": {
             "root_output_dir": "F:\\OceanTrackerOuput\\OceanTrackerProfiling",
             "run_output_dir": "F:\\OceanTrackerOuput\\OceanTrackerProfiling\\Sounds",
@@ -1157,9 +1258,9 @@
                 "p12": null
             },
             "fields": {
-                "water_temperature": null,
-                "water_velocity": null,
                 "water_depth": null,
+                "water_velocity": null,
+                "water_temperature": null,
                 "tide": null,
                 "friction_velocity": null
             },
@@ -1182,9 +1283,9 @@
                 "z_fraction": null,
                 "z_fraction_bottom_layer": null,
                 "v_temp": null,
-                "water_temperature": null,
-                "water_velocity": null,
                 "water_depth": null,
+                "water_velocity": null,
+                "water_temperature": null,
                 "tide": null,
                 "decay1": null,
                 "inside_polygon_for_onfly_stats_ 001": null,
@@ -1210,12 +1311,11 @@
                 "time": null,
                 "num_part_released_so_far": null
             },
-            "reader": null,
-            "solver": null,
             "field_group_manager": null,
+            "reader": null,
             "interpolator": null,
             "particle_group_manager": null,
-            "tracks_writer": [],
+            "solver": null,
             "dispersion": null,
             "resuspension": null,
             "grid": "Sounds_grid.nc",
@@ -5899,31 +5999,14 @@
             }
         },
         "fields": {
-            "water_temperature": {
+            "water_depth": {
                 "time_spent_updating": 0.0,
                 "update_calls": 0,
                 "time_first_update_call": 0.0,
-                "name": "water_temperature",
+                "name": "water_depth",
                 "class_role": "fields",
                 "group": "from_reader_field",
-                "instanceID": 0,
-                "shape_in_file": [
-                    24,
-                    149233,
-                    38,
-                    1
-                ],
-                "variable_info": {
-                    "component_list": [
-                        {
-                            "name_in_file": "temp",
-                            "num_components": 1
-                        }
-                    ],
-                    "is3D_in_file": true,
-                    "is_time_varying": true,
-                    "requires_depth_averaging": false
-                }
+                "instanceID": 0
             },
             "water_velocity": {
                 "time_spent_updating": 0.0,
@@ -5932,54 +6015,16 @@
                 "name": "water_velocity",
                 "class_role": "fields",
                 "group": "from_reader_field",
-                "instanceID": 1,
-                "shape_in_file": [
-                    24,
-                    149233,
-                    38,
-                    3
-                ],
-                "variable_info": {
-                    "component_list": [
-                        {
-                            "name_in_file": "hvel",
-                            "num_components": 2
-                        },
-                        {
-                            "name_in_file": "vertical_velocity",
-                            "num_components": 1
-                        }
-                    ],
-                    "is3D_in_file": true,
-                    "is_time_varying": true,
-                    "requires_depth_averaging": false
-                }
+                "instanceID": 1
             },
-            "water_depth": {
+            "water_temperature": {
                 "time_spent_updating": 0.0,
                 "update_calls": 0,
                 "time_first_update_call": 0.0,
-                "name": "water_depth",
+                "name": "water_temperature",
                 "class_role": "fields",
                 "group": "from_reader_field",
-                "instanceID": 2,
-                "shape_in_file": [
-                    1,
-                    149233,
-                    1,
-                    1
-                ],
-                "variable_info": {
-                    "component_list": [
-                        {
-                            "name_in_file": "depth",
-                            "num_components": 1
-                        }
-                    ],
-                    "is3D_in_file": false,
-                    "is_time_varying": false,
-                    "requires_depth_averaging": false
-                }
+                "instanceID": 2
             },
             "tide": {
                 "time_spent_updating": 0.0,
@@ -5988,24 +6033,7 @@
                 "name": "tide",
                 "class_role": "fields",
                 "group": "from_reader_field",
-                "instanceID": 3,
-                "shape_in_file": [
-                    24,
-                    149233,
-                    1,
-                    1
-                ],
-                "variable_info": {
-                    "component_list": [
-                        {
-                            "name_in_file": "elev",
-                            "num_components": 1
-                        }
-                    ],
-                    "is3D_in_file": false,
-                    "is_time_varying": true,
-                    "requires_depth_averaging": false
-                }
+                "instanceID": 3
             },
             "friction_velocity": {
                 "time_spent_updating": 0.0,
@@ -6247,11 +6275,11 @@
                     3
                 ]
             },
-            "water_temperature": {
+            "water_depth": {
                 "time_spent_updating": 0.0,
                 "update_calls": 0,
                 "time_first_update_call": 0.0,
-                "name": "water_temperature",
+                "name": "water_depth",
                 "class_role": "particle_properties",
                 "group": "from_fields",
                 "instanceID": 18,
@@ -6272,11 +6300,11 @@
                     3
                 ]
             },
-            "water_depth": {
+            "water_temperature": {
                 "time_spent_updating": 0.0,
                 "update_calls": 0,
                 "time_first_update_call": 0.0,
-                "name": "water_depth",
+                "name": "water_temperature",
                 "class_role": "particle_properties",
                 "group": "from_fields",
                 "instanceID": 20,
@@ -6384,9 +6412,9 @@
         "trajectory_modifiers": {},
         "particle_statistics": {
             "statas1": {
-                "time_spent_updating": 9.311030099954223,
+                "time_spent_updating": 5.810345099889673,
                 "update_calls": 98,
-                "time_first_update_call": 4.208058699994581,
+                "time_first_update_call": 2.460095200003707,
                 "output_file": "Sounds_stats_gridded_age_statas1.nc",
                 "name": "statas1",
                 "class_role": "particle_statistics",
@@ -6410,9 +6438,9 @@
                 "type": "gridded"
             },
             "statas2": {
-                "time_spent_updating": 4.304461299980176,
+                "time_spent_updating": 4.263551500072936,
                 "update_calls": 98,
-                "time_first_update_call": 1.8656144999986282,
+                "time_first_update_call": 1.8464941999991424,
                 "output_file": "Sounds_stats_polygon_age_statas2.nc",
                 "name": "statas2",
                 "class_role": "particle_statistics",
@@ -6440,22 +6468,22 @@
         "particle_concentrations": {},
         "event_loggers": {
             "event1": {
-                "time_spent_updating": 15.722306800147635,
+                "time_spent_updating": 15.84687830095936,
                 "update_calls": 3460,
-                "time_first_update_call": 0.6559808000019984,
+                "time_first_update_call": 2.6923551999934716,
                 "name": "event1",
                 "class_role": "event_loggers",
                 "group": "user",
                 "instanceID": 0,
                 "prop_to_write": [
-                    "status",
-                    "user_release_groupID",
-                    "ID",
-                    "event_polygon",
-                    "IDrelease_group",
                     "age",
+                    "event_polygon",
+                    "IDpulse",
+                    "IDrelease_group",
+                    "ID",
                     "x",
-                    "IDpulse"
+                    "status",
+                    "user_release_groupID"
                 ],
                 "output_file": "Sounds_inside_polygon_events_event1.nc"
             }
@@ -6480,10 +6508,103 @@
                 "instanceID": 1
             }
         },
+        "field_group_manager": {
+            "time_spent_updating": 0.0,
+            "update_calls": 0,
+            "time_first_update_call": 0.0,
+            "name": "field_group_manager",
+            "class_role": "field_group_manager"
+        },
         "reader": {
             "time_spent_updating": 0.0,
             "update_calls": 0,
             "time_first_update_call": 0.0,
+            "field_variable_info": {
+                "water_depth": {
+                    "component_list": [
+                        {
+                            "file_name": "depth",
+                            "comp_per_var": 1
+                        }
+                    ],
+                    "params": {
+                        "is_time_varying": 1,
+                        "is3D": 1,
+                        "num_components": 1
+                    },
+                    "comp_per_var": 1,
+                    "shape_in_memory": [
+                        1,
+                        149233,
+                        1,
+                        1
+                    ]
+                },
+                "water_velocity": {
+                    "component_list": [
+                        {
+                            "file_name": "hvel",
+                            "comp_per_var": 2
+                        },
+                        {
+                            "file_name": "vertical_velocity",
+                            "comp_per_var": 1
+                        }
+                    ],
+                    "params": {
+                        "is_time_varying": 1,
+                        "is3D": 1,
+                        "num_components": 3
+                    },
+                    "comp_per_var": 1,
+                    "shape_in_memory": [
+                        24,
+                        149233,
+                        38,
+                        3
+                    ]
+                },
+                "water_temperature": {
+                    "component_list": [
+                        {
+                            "file_name": "temp",
+                            "comp_per_var": 1
+                        }
+                    ],
+                    "params": {
+                        "is_time_varying": 1,
+                        "is3D": 1,
+                        "num_components": 1
+                    },
+                    "comp_per_var": 1,
+                    "shape_in_memory": [
+                        24,
+                        149233,
+                        38,
+                        1
+                    ]
+                },
+                "tide": {
+                    "component_list": [
+                        {
+                            "file_name": "elev",
+                            "comp_per_var": 1
+                        }
+                    ],
+                    "params": {
+                        "is_time_varying": 1,
+                        "is3D": 1,
+                        "num_components": 1
+                    },
+                    "comp_per_var": 1,
+                    "shape_in_memory": [
+                        24,
+                        149233,
+                        1,
+                        1
+                    ]
+                }
+            },
             "buffer_info": {
                 "n_filled": 24,
                 "buffer_size": 24,
@@ -6791,38 +6912,10 @@
                 "first_date": "2008-01-01T00:30:00",
                 "last_date": "2008-02-01T00:00:00",
                 "hydro_model_timedelta": "0 days 0 hrs 30 min 0 sec"
-            }
-        },
-        "solver": {
-            "time_spent_updating": 0.0,
-            "update_calls": 0,
-            "time_first_update_call": 0.0,
-            "name": "solver",
-            "class_role": "solver",
-            "model_time_step": 300.0,
-            "model_start_time": 1199147400.0,
-            "model_end_time": 1199666100.0,
-            "model_duration": 518400.0,
-            "model_start_date": "2008-01-01T00:30:00",
-            "model_end_date": "2008-01-07T00:35:00",
-            "model_timedelta": "0 days 0 hrs 5 min 0 sec",
-            "model_duration_timedelta": "6 days 0 hrs 0 min 0 sec",
-            "total_alive_particles": 438987500,
-            "time_steps_completed": 1729,
-            "current_model_date": "2008-01-07T00:35:00",
-            "current_model_time_step": 1728,
-            "current_model_time": 1199666100.0,
-            "model_run_duration": 518700.0,
-            "computation_started": "2023-08-18T17:00:50.880492",
-            "computation_ended": "2023-08-18T17:14:18.564750",
-            "computation_duration": "0:13:27.684258"
-        },
-        "field_group_manager": {
-            "time_spent_updating": 0.0,
-            "update_calls": 0,
-            "time_first_update_call": 0.0,
-            "name": "field_group_manager",
-            "class_role": "field_group_manager"
+            },
+            "is3D": true,
+            "nz_levels": 38,
+            "vertical_grid_type": "LSC"
         },
         "interpolator": {
             "time_spent_updating": 0.0,
@@ -6845,13 +6938,13 @@
             ],
             "tri_walk_full_failures": [],
             "particles_located_by_walking": [
-                2098438768
+                2097612568
             ],
             "number_of_triangles_walked": [
-                51839542
+                52389209
             ],
             "longest_triangle_walk": [
-                5
+                4
             ],
             "nans_encountered_triangle_walk": [
                 0
@@ -6863,7 +6956,7 @@
                 0
             ],
             "total_vertical_steps_walked": [
-                120323194
+                221091666
             ],
             "longest_vertical_walk": [
                 13
@@ -6884,28 +6977,12 @@
                 null
             ]
         },
-        "tracks_writer": {
+        "solver": {
             "time_spent_updating": 0.0,
             "update_calls": 0,
             "time_first_update_call": 0.0,
-            "output_file": [],
-            "file_builder": {
-                "dimensions": {
-                    "time_dim": {
-                        "size": null
-                    },
-                    "vector2D": {
-                        "size": 2
-                    },
-                    "vector3D": {
-                        "size": 3
-                    }
-                },
-                "attributes": {},
-                "variables": {}
-            },
-            "name": "tracks_writer",
-            "class_role": "tracks_writer"
+            "name": "solver",
+            "class_role": "solver"
         },
         "dispersion": {
             "time_spent_updating": 0.0,
@@ -6925,12 +7002,12 @@
             ]
         },
         "resuspension": {
-            "time_spent_updating": 6.693213199774618,
+            "time_spent_updating": 7.6880014001217205,
             "update_calls": 1730,
-            "time_first_update_call": 5.202643500000704,
+            "time_first_update_call": 6.209345699986443,
             "name": "resuspension",
             "class_role": "resuspension",
-            "number_resupended": 18000066,
+            "number_resupended": 17618968,
             "resuspension_factor": 3.3023260726609305,
             "min_resuspension_jump": 0.0
         }

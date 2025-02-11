@@ -18,11 +18,11 @@ import sphinx_toolbox
 # -- Project information -----------------------------------------------------
 
 project = 'OceanTracker'
-copyright = '2022, R. Vennell'
+copyright = '2024, R. Vennell'
 author = 'R. Vennell'
 
 # The full version, including alpha/beta/rc tags
-release = 'Beta 0.4'
+release = 'Beta 0.5'
 
 
 # -- General configuration ---------------------------------------------------

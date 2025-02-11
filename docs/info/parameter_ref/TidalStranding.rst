@@ -2,13 +2,13 @@
 TidalStranding
 ###############
 
-**Description:** 
+**Doc:** 
 
-**class_name:** oceantracker.status_modifiers.tidal_stranding.TidalStranding
+**short class_name:** TidalStranding
 
-**File:** oceantracker/status_modifiers/tidal_stranding.py
+**full class_name :** oceantracker.tidal_stranding.tidal_stranding.TidalStranding
 
-**Inheritance:** _BaseStatusModifer> TidalStranding
+**Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier> TidalStranding
 
 
 Parameters:
@@ -18,7 +18,21 @@ Parameters:
 		Description: Class name as string A.B.C, used to import this class from python path
 
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+
+
+Expert Parameters:
+*******************
+
 

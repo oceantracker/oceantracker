@@ -1,18 +1,17 @@
 
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>How to notebooks &#8212; OceanTracker Beta 0.4 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <title>How to notebooks &#8212; OceanTracker Beta 0.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -51,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
@@ -60,6 +59,7 @@
 <li class="toctree-l2"><a class="reference internal" href="installing.html">Installing</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">How to notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="change_log.html">Change log</a></li>
@@ -83,12 +83,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -98,7 +98,7 @@
           <div class="body" role="main">
             
   <section id="how-to-notebooks">
-<h1>How to notebooks<a class="headerlink" href="#how-to-notebooks" title="Permalink to this heading">¶</a></h1>
+<h1>How to notebooks<a class="headerlink" href="#how-to-notebooks" title="Permalink to this headline">¶</a></h1>
 <p>The below show a web view of ipython notebooks which are in the folder “oceantracker/tutorials_how_to”.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -110,13 +110,11 @@
 <li class="toctree-l1"><a class="reference internal" href="how_to/B_running_with_helper_class.html">Running with helper class</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="how_to/B_running_with_helper_class.html#parameters-using-helper">Parameters using helper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/B_running_with_helper_class.html#extend-the-minimal-example">Extend the minimal example</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/B_running_with_helper_class.html#running-oceantracker">Running OceanTracker</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/B_running_with_helper_class.html#see-all-parameters">See all parameters</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/B_running_with_helper_class.html#start-run-using-helper">Start run using helper</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/B_running_with_helper_class.html#basic-plots-of-tracks">Basic plots of tracks</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="how_to/C_release_groups.html">Release Groups</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_to/C_release_groups.html#plot-tracks">plot tracks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="how_to/D_output_files.html">Output files</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="how_to/D_output_files.html#reading-particle-tracks">Reading particle tracks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/D_output_files.html#load-data-method">Load data method</a></li>
@@ -124,7 +122,6 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html">Running using param. dict.</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html#build-param-dict-with-code">Build param. dict. with code</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html#build-param-dict-from-template">Build param. dict. from template</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html#run-oceantracker-from-parameters">Run OceanTracker from parameters</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html#run-with-code-built-params">Run with code built params.</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/E_run_using_parameter_dictionaries.html#run-by-reading-param-file">Run by reading param. file</a></li>
@@ -138,6 +135,9 @@
 <li class="toctree-l2"><a class="reference internal" href="how_to/G_onthefly_statistics.html#particle-property-statistics">Particle property statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/G_onthefly_statistics.html#gridded-heat-map-example">Gridded/Heat map example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/G_onthefly_statistics.html#polygon-example">Polygon example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="how_to/G_onthefly_statistics.html#add-polygon-stats-example-with-plotting">add polygon stats example with plotting</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="how_to/G_onthefly_statistics.html#read-polygon-connectivity-statistics">Read polygon/connectivity statistics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="how_to/G_onthefly_statistics.html#time-verses-age-statistics">Time verses Age statistics</a></li>
 </ul>
@@ -175,10 +175,10 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

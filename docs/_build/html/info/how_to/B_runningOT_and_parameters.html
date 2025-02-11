@@ -1,22 +1,21 @@
 
 <!DOCTYPE html>
 
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Running with helper class &#8212; OceanTracker Beta 0.4 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <title>Running with helper class &#8212; OceanTracker Beta 0.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Parameter details" href="../parameter_ref/parameter_ref_toc.html" />
+    <link rel="next" title="Trouble shooting" href="../trouble_shooting.html" />
     <link rel="prev" title="Running OceanTracker" href="../running_ocean_tracker.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -51,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -60,6 +59,7 @@
 <li class="toctree-l2"><a class="reference internal" href="../installing.html">Installing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../how_to.html">How to notebooks</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
 <li class="toctree-l2"><a class="reference internal" href="D_output_files.html">Output files</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../change_log.html">Change log</a></li>
@@ -75,7 +75,7 @@
   <li><a href="../users_guide.html">Users guide</a><ul>
   <li><a href="../running_ocean_tracker.html">Running OceanTracker</a><ul>
       <li>Previous: <a href="../running_ocean_tracker.html" title="previous chapter">Running OceanTracker</a></li>
-      <li>Next: <a href="../parameter_ref/parameter_ref_toc.html" title="next chapter">Parameter details</a></li>
+      <li>Next: <a href="../trouble_shooting.html" title="next chapter">Trouble shooting</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
@@ -85,12 +85,12 @@
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
 </div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -100,7 +100,7 @@
           <div class="body" role="main">
             
   <section id="running-with-helper-class">
-<h1>Running with helper class<a class="headerlink" href="#running-with-helper-class" title="Permalink to this heading">¶</a></h1>
+<h1>Running with helper class<a class="headerlink" href="#running-with-helper-class" title="Permalink to this headline">¶</a></h1>
 <p>[This note-book is in oceantracker/tutorials_how_to/]</p>
 <p>Oceantracker is designed so that both coders and non-coders can get
 almost the same level of adaptability to their specific needs. Also to
@@ -128,7 +128,7 @@ pipeline. The notebook E_run_using_parameter_dictionaries.ipynb, shows
 how run directly from parameter dictionaries, which are built in code or
 read from a json or yaml file.</p>
 <section id="parameters-using-helper">
-<h2>Parameters using helper<a class="headerlink" href="#parameters-using-helper" title="Permalink to this heading">¶</a></h2>
+<h2>Parameters using helper<a class="headerlink" href="#parameters-using-helper" title="Permalink to this headline">¶</a></h2>
 <p>There are two types of parameters:</p>
 <ol class="arabic simple">
 <li><p>Settings parameters</p></li>
@@ -170,7 +170,7 @@ can add multiple “release_groups”).</p></li>
 <p>Add link here</p>
 </section>
 <section id="extend-the-minimal-example">
-<h2>Extend the minimal example<a class="headerlink" href="#extend-the-minimal-example" title="Permalink to this heading">¶</a></h2>
+<h2>Extend the minimal example<a class="headerlink" href="#extend-the-minimal-example" title="Permalink to this headline">¶</a></h2>
 <p>The below extends the minimal_example, it adds:</p>
 <ul class="simple">
 <li><p>release at random locations within a polygon, at random water depths
@@ -245,7 +245,7 @@ a critical value.</p></li>
 </div>
 </section>
 <section id="running-oceantracker">
-<h2>Running OceanTracker<a class="headerlink" href="#running-oceantracker" title="Permalink to this heading">¶</a></h2>
+<h2>Running OceanTracker<a class="headerlink" href="#running-oceantracker" title="Permalink to this headline">¶</a></h2>
 <p>There are several ways to run OceanTracker</p>
 <ol class="arabic simple">
 <li><p>By coding</p>
@@ -464,12 +464,12 @@ startup:     &gt;&gt;&gt; Note: run summary with case file names   &quot;param_t
 case file name= e:OneDrive - CawthronH_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1param_test1_caseInfo.json</pre>
 </section>
 <section id="basic-plots-of-tracks">
-<h2>Basic plots of tracks<a class="headerlink" href="#basic-plots-of-tracks" title="Permalink to this heading">¶</a></h2>
+<h2>Basic plots of tracks<a class="headerlink" href="#basic-plots-of-tracks" title="Permalink to this headline">¶</a></h2>
 <p>also see … for more on plotting notebook</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot animation of results</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.plotting.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span>
-<span class="kn">from</span> <span class="nn">oceantracker.post_processing.read_output_files</span> <span class="kn">import</span>  <span class="n">load_output_files</span>
+<span class="kn">from</span> <span class="nn">plot_oceantracker.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span>
+<span class="kn">from</span> <span class="nn">read_oceantracker.python</span> <span class="kn">import</span>  <span class="n">load_output_files</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span> <span class="c1"># show animation in note book</span>
 
 <span class="c1"># read particle track data into a dictionary using case_info_file_name</span>
@@ -49575,7 +49575,7 @@ YXRhAAAAAQAAAABMYXZmNTguNDUuMTAw
           <a href="../running_ocean_tracker.html" title="Previous document">Running OceanTracker</a>
         </li>
         <li>
-          <a href="../parameter_ref/parameter_ref_toc.html" title="Next document">Parameter details</a>
+          <a href="../trouble_shooting.html" title="Next document">Trouble shooting</a>
           &rarr;
         </li>
     </ul>
@@ -49587,10 +49587,10 @@ YXRhAAAAAQAAAABMYXZmNTguNDUuMTAw
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2022, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 5.0.0</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
