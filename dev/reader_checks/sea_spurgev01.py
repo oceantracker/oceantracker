@@ -8,7 +8,7 @@ if __name__ == "__main__":
     ot.settings(output_file_base = 'sea_spurge_test01',
                 root_output_dir= r'D:\OceanTrackerOutput',
                 time_step=1800,
-                max_run_duration = 10*24*3600., # 10 days
+                max_run_duration = 30*24*3600., # 10 days
                 #display_grid_at_start=True
                 )
     # Glorys outer grid
@@ -21,6 +21,7 @@ if __name__ == "__main__":
                 input_dir=r'D:\Hindcast_reader_tests\Schisim\NZsurface2D_seaspurge',
                 file_mask = 'schism_*.nc',
                 grid_variable_map= dict(x='longitude', y= 'latitude'), # remap x to long lat
+                field_variable_map=dict(water_velocity =['vsurf']),  # remap vel to surf values in file
                 # hgrid needed for open boundary info
                 hgrid_file_name= path.join(r'D:\Hindcast_reader_tests\Schisim\NZsurface2D_seaspurge','hgridNZ_run.gr3')
                 )

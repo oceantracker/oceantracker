@@ -54,6 +54,9 @@ class DevNestedFields(ParameterBaseClass):
         # add nested grids
         checks=dict(has_A_Z_profile=[],has_bottom_stress=[], is3D=[],geographic_coords=[], start_time=[],end_time=[],
                     input_dir=[],has_open_boundary=[])
+        start_times = [info['start_time']]  # used to chech for overlaping times of all hindcasts
+        end_times = [info['end_time']]
+
         for n, nr_params in enumerate(si.working_params['nested_readers']):
             ml.progress_marker(f'Starting nested grid setup #{len(self.fgm_hydro_grids)}')
 
@@ -70,18 +73,22 @@ class DevNestedFields(ParameterBaseClass):
 
             # add to list of field_group managers
             self.fgm_hydro_grids.append(fgm_nested)
+            start_times.append(fgm_nested.info['start_time'])
+            end_times.append(fgm_nested.info['end_time'])
+
+            ml.exit_if_prior_errors(f'failed to read nested reader #{n}, see above')
 
             ml.progress_marker(f'Finished nested hydro-model grid setup #{len(self.fgm_hydro_grids)} '+
                    f'from {time_util.seconds_to_isostr(fgm_nested.info["start_time"])} to  {time_util.seconds_to_isostr(fgm_nested.info["end_time"])}', start_time=t0)
 
-        # overlapping times checks
-        for  n, d in enumerate(zip(checks['start_time'],checks['end_time'], checks['input_dir'])):
-            if not(d[0] <= info['start_time'] and  d[1] >= info['end_time']) :
-                ml.msg(f'Nested reader files do not overlap in time with outer grid for files nested grid in # {d[2]}',
-                       hint=f'Outer grid from {str(info["start_date"])}  to, {str(info["end_date"])},' +
-                            f' inner grid from {time_util.seconds_to_isostr(d[0])}  to, {time_util.seconds_to_isostr(d[1])}',
-                       error=True)
-        ml.exit_if_prior_errors('Some non-overlapping times in nested grid hydro files')
+            # overlapping times checks
+            info['start_time'] = max(start_times)
+            info['end_time'] = min(end_times)
+
+            if info['start_time'] >= info['end_time']:
+                ml.msg(f'Some nested grid reader files do not overlap in time with the outer grid',
+                       hint='check start s and ends if each grid above, or is file mask correct?', fatal_error=True)
+
 
         # settings consistency with hindcast
         info['has_A_Z_profile'] = info['has_A_Z_profile'] and all(checks['has_A_Z_profile'])
