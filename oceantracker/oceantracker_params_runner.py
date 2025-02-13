@@ -96,7 +96,7 @@ class OceanTrackerParamsRunner(object):
 
             # split params in to settings, core and class role params
             si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
-                                                                 crumbs='Buling working params')
+                                                                 crumbs='Building working params')
             ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults', caller=self)
 
             si.add_settings(si.working_params['settings'])  # add full settings to shared info
@@ -317,19 +317,17 @@ class OceanTrackerParamsRunner(object):
         if si.run_info.is3D_run and si.settings['use_resuspension']:
             ccr.resuspension.initial_setup()
 
+        if si.settings.write_tracks:
+            si.core_class_roles.tracks_writer.initial_setup()
 
         # initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for role in ['particle_properties','time_varying_info','velocity_modifiers', 'trajectory_modifiers', 'particle_statistics', 'particle_concentrations', 'event_loggers']:
             for name, i in si.class_roles[role].items():
                 i.initial_setup()
 
-        if si.settings.write_tracks:
-            si.core_class_roles.tracks_writer.initial_setup()
-
         # do integrated models last, which may add release groups
         if si.core_class_roles.integrated_model is not None:
             si.core_class_roles.integrated_model.initial_setup()
-
 
         si.msg_logger.progress_marker('Done initial setup of all classes', start_time=t0)
 

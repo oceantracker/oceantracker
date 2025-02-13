@@ -166,7 +166,6 @@ LCS = dict(name='LSC test',
 ax = [1591000, 1601500, 5478500, 5491000]
 
 
-
 def read_tracks(case_info_file):
     from read_oceantracker.python import load_output_files
     return load_output_files.load_track_data(case_info_file)

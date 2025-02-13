@@ -1,7 +1,7 @@
 {
     "output_file_base": "unit_test_01_check-against-ref_00",
     "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
-    "time_step": 1800,
+    "time_step": 3600,
     "use_random_seed": true,
     "NCDF_time_chunk": 1,
     "debug": true,
@@ -9,8 +9,9 @@
     "screen_output_time_interval": 1800,
     "use_A_Z_profile": true,
     "regrid_z_to_uniform_sigma_levels": true,
+    "max_time_steps_per_file": 100,
     "tracks_writer": {
-        "update_interval": 3600,
+        "update_interval": 900,
         "write_dry_cell_flag": false
     },
     "reader": {

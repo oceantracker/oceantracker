@@ -202,7 +202,7 @@ class Solver(ParameterBaseClass):
         if si.settings.write_tracks:
             t0_write = perf_counter()
             tracks_writer = si.core_class_roles.tracks_writer
-            opened_file = tracks_writer.open_file_if_needed()
+            tracks_writer.open_file_if_needed()
             if new_particleIDs.size > 0:
                 tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
@@ -210,9 +210,7 @@ class Solver(ParameterBaseClass):
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
 
-            if opened_file:
-                # note file opening and time to open file set up chucks and write first block
-                si.msg_logger.progress_marker(f'Opened tracks output and done written first time step in: "{tracks_writer.info["output_file"][-1]}"', start_time=t0_write)
+
 
 
     def do_time_step(self, time_sec, is_moving):

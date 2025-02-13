@@ -21,6 +21,7 @@ if __name__ == "__main__":
                 input_dir=r'D:\Hindcast_reader_tests\Schisim\NZsurface2D_seaspurge',
                 file_mask = 'schism_*.nc',
                 grid_variable_map= dict(x='longitude', y= 'latitude'), # remap x to long lat
+                field_variable_map=dict(water_velocity=['vsurf']),  # remap velocity
                 # hgrid needed for open boundary info
                 hgrid_file_name= path.join(r'D:\Hindcast_reader_tests\Schisim\NZsurface2D_seaspurge','hgridNZ_run.gr3')
                 )
@@ -36,11 +37,11 @@ if __name__ == "__main__":
                  pulse_size=10,
                  release_interval=1800)
 
-    if True:
-        case_info_file= ot.run()
-    else:
-        # plot only
-        case_info_file = r'D:\OceanTrackerOutput\sea_spurge01\f'
+    # note all param can be seen at ot.params
+
+    # do run
+    case_info_file= ot.run()
+
 
     if case_info_file is not None:
         from plot_oceantracker import plot_tracks

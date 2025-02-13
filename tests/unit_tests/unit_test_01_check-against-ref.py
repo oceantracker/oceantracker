@@ -13,16 +13,17 @@ from tests.unit_tests import test_definitions
 def main(args):
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__,args))
-    ot.settings(time_step=1800,use_dispersion=False,
-                screen_output_time_interval=1800,
-             use_A_Z_profile=True,
+    ot.settings(time_step=3600,use_dispersion=False,
+            screen_output_time_interval=1800,
+            use_A_Z_profile=True,
             regrid_z_to_uniform_sigma_levels=True,
+            max_time_steps_per_file=100,
             #particle_buffer_initial_size= 10,
              #   NUMBA_cache_code=True,
                 #NCDF_particle_chunk= 50000
                 )
 
-    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
+    ot.add_class('tracks_writer',update_interval = 900, write_dry_cell_flag=False,
                ) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)

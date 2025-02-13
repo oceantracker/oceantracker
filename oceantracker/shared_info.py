@@ -98,12 +98,12 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Allow particles to resuspend')
     processors= PVC(None, int, min=1,
                  doc_str='Maximum number of threads to use in parallelization, default is one less than the number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')
-    NCDF_time_chunk = PVC(24, int, min=1,expert=True,
+    max_time_steps_per_file = PVC(10**4, int, min=1, expert=True,
+                     doc_str='Maximum file size of time series output files, before writing output into the next file in the sequence, eg applies to particle tracks, gridded time serries stats, ')
+    NCDF_time_chunk = PVC(24, int, min=1, expert=True,
                  doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
-
     particle_buffer_initial_size = PVC(None, int, min=1, expert=True,
-                   doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive'
-                                    )
+                   doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive')
     NCDF_particle_chunk =  PVC(None, int, min=1,  expert=True,
                    doc_str='Chunk size for particle variable Net CDF output files, default is estimated max. particles alive',
                                     )

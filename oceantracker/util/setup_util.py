@@ -213,6 +213,7 @@ def merge_settings(settings, default_settings, msg_logger, settings_to_merge=Non
             msg_logger.spell_check(f'Unrecognized setting "{key}"',key, all_settings,
                             crumbs = crumbs + f'> {key}', caller=caller, error=True)
         pass
+
     return settings
 
 def _build_working_params(params, msg_logger, crumbs=''):
@@ -243,6 +244,8 @@ def _build_working_params(params, msg_logger, crumbs=''):
     # get defaults of settings only
     working_params['settings'] = merge_settings(working_params['settings'], si.default_settings,
                                                            ml, crumbs=crumbs)
+
+    ml.exit_if_prior_errors('parameters have errors')
     return working_params
 
 

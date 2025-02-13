@@ -255,6 +255,17 @@ class NetCDFhandler(object):
         self.file_handle.close()
         self.file_handle = None  # parallel pool cant pickle nc so void
 
+    def estimate_open_file_size(self):
+        # estimate  size of open file from chunks allocated so far
+        bytes_total = 0
+        for name, v, in self.file_handle.variables.items():
+            chunks = np.asarray(v.chunking())
+            chunks_allocated = np.ceil(np.asarray(v.shape) / chunks)
+            bytes_allocated = int(np.prod(chunks_allocated * chunks)*v.dtype.itemsize)
+            bytes_total += bytes_allocated
+
+        return bytes_total
+
 def compute_scale_and_offset_int16(data, missing_value=None):
     # scale data into int32's
     # mask and get min

@@ -1,11 +1,44 @@
 # reads rectangular or flat output into buffer, reads whole file
 from  oceantracker.util.ncdf_util import NetCDFhandler
 import numpy as np
-
+from os import path
 
 from oceantracker.util import json_util
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util.triangle_utilities import make_domain_mask
+
+def read_particle_tracks_file_list(file_list, dir=None, var_list=None,file_number=None,
+                                   release_group= None, fraction_to_read=None):
+    # load files in list, in optional given dir, can only read 1 of list in file_numb given
+    if file_number is not None: file_list=[file_list[file_number]]
+
+    result = dict()
+    for file_name in file_list:
+        fn = file_name if dir is None else path.join(dir,file_name)
+        d = read_particle_tracks_file(fn, var_list=var_list,
+                                      release_group=release_group,
+                                      fraction_to_read=fraction_to_read)
+        # append files
+        for key, val in d.items():
+            if not isinstance(val, np.ndarray):
+                result[key] = val # record scalars dict etc as is
+                continue
+
+            if key not in result:
+                # keep array
+                result[key] = val  # recode scalars dict etc
+                continue
+
+            continue
+            # now append arrays, which have different numbers of particles/columns
+            if val.ndim == 1:
+                result[key] = np.append(result[key], val)
+                continue
+            # 2 or 3d array
+
+
+    return result
+
 def read_particle_tracks_file(file_name, var_list=None, release_group= None, fraction_to_read=None):
     # release group is 1 based
     nc = NetCDFhandler(file_name, mode='r')
@@ -24,7 +57,7 @@ def read_particle_tracks_file(file_name, var_list=None, release_group= None, fra
                 working_var_list.append(var)
 
     if nc.is_dim( 'time_particle_dim'):
-        d=  _read_compact_tracks(nc,working_var_list,release_group)
+        d=  _read_compact_tracks(nc, working_var_list,release_group)
     else:
         d= _read_rectangular_tracks(nc, working_var_list,release_group)
 
@@ -69,21 +102,18 @@ def _read_rectangular_tracks(nc,var_list, release_group):
 def _read_compact_tracks(nc, var_list, release_groupID):
     # read compact file with stream of values  with given in timestep and particle ID in time_particle dimension
 
-
     d = nc.global_attrs()# read all  global attibutes
     d['dimensions'] =  nc.dims()
-
     num_released = d['total_num_particles_released']
-
     particle_IDs = nc.read_a_variable('particle_ID') # this is time_particle particleID to allow unpacking
 
-    time_steps_written= nc.global_attr('time_steps_written')
+    num_time_steps= nc.global_attr('time_steps_written')
 
     n_time_step =  nc.read_a_variable('write_step_index')
 
     # todo status is special as last value for each particle when it is alive is needed to continue after death???
     # '_FillValue'
-    d['status'] =  np.full((time_steps_written, num_released), nc.global_attr('status_notReleased'), dtype=nc.var_dtype('status'))
+    d['status'] =  np.full((num_time_steps, num_released), nc.global_attr('status_notReleased'), dtype=nc.var_dtype('status'))
     _insertMatrixValues(d['status'], n_time_step, particle_IDs, nc.read_a_variable('status'))
     last_recordedID = _get_last_alive(d['status'], nc.global_attr('status_notReleased'), nc.global_attr('status_dead'))
     rg = nc.read_a_variable('IDrelease_group')
@@ -96,7 +126,7 @@ def _read_compact_tracks(nc, var_list, release_groupID):
         if nc.is_var_dim(name,'time_particle_dim'):
             # compact time varying variablesF
             s = nc.var_shape(name)
-            d[name] = np.full((time_steps_written, num_released) + tuple(s[1:]),
+            d[name] = np.full((num_time_steps, num_released) + tuple(s[1:]),
                                nc.var_fill_value(name), dtype=nc.var_dtype(name))
 
             data = np.array(nc.read_a_variable(name))
@@ -107,8 +137,8 @@ def _read_compact_tracks(nc, var_list, release_groupID):
             if release_groupID is not None:
                  d[name] = d[name][:, rg == release_groupID, ...]
 
-        elif   nc.is_var_dim(name,'particle_dim'):
-            d[name] =nc.read_a_variable(name)[:num_released]
+        elif nc.is_var_dim(name,'particle_dim'):
+            d[name] = nc.read_a_variable(name)[:num_released]
             if release_groupID is not None:
                 d[name] = d[name][rg == release_groupID, ...]
         else:
@@ -129,7 +159,7 @@ def _read_compact_tracks(nc, var_list, release_groupID):
 @njitOT
 def _insertMatrixValues(x,row,col,values):
     for n in range(values.shape[0]):
-        x[row[n],col[n],...] = values[n]
+        x[row[n], col[n], ...] = values[n]
 @njitOT
 def _get_last_alive(status,status_notReleased, status_dead):
     # return last row/time when each  particle is alive

@@ -153,9 +153,9 @@ class ParamValueChecker(_ParameterBaseDataClassChecker):
             return None
 
         # check max/mins
-        if self.data_type in [ float, int]:
+        if self.data_type in [float, int]:
             if self.min is not None and value < self.min:
-                msg_logger.msg(f'{msg}, value {str(value)} must  be greater than {str(self.min)}', caller=caller, error=True, crumbs=crumbs)
+                msg_logger.msg(f'{msg}, value= {str(value)} must  be greater than {str(self.min)}', caller=caller, error=True, crumbs=crumbs)
             if self.max is not None and value > self.max:
                 msg_logger.msg(f'{msg}, value {str(value)} must  be less than {str(self.max)}', caller=caller, error=True, crumbs=crumbs)
 
