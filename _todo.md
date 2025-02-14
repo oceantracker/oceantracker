@@ -9,12 +9,11 @@
     1. matab read polygon
 1. write of case info file even if errors, trap json encoding erorrs 
 2. centalize polygon list creation and param checking 
-3. Note if pending  memory issues and log sizes used. write error log
 4. ensure error log is written on caught error
 1. slow start up
    1. after  - Starting time stepping:
    1. after -  read  24 time steps in  9.2 sec
-1. small track differences after moving to threaded version with unit test 1, need to recalc bc cords if move back?
+1. better spell check sugesttions when short or long module name not found
 1. Thread stats counts, events counts etc
 
 ##  Internal Structure
