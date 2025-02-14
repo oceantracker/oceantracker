@@ -46,23 +46,22 @@ class OceanTrackerParamsRunner(object):
         except OTerror as e:
             ml.msg(f'Parameters/setup has errors', hint= 'see above')
 
-        except OTfatal_error as e :
-            ml.write_error_log_file(e, traceback.format_exc(e.__traceback__))
+        except OTfatal_error as e:
+
+            ml.write_error_log_file(e)
             ml.msg(f'Single parameter/setup error requiring immediate exit', hint='see above')
 
         except FileNotFoundError as e:
-            ml.write_error_log_file(e, traceback.format_exc(e.__traceback__))
+            ml.write_error_log_file(e)
             ml.msg(f'Could not find hindcast? or other required file', hint='see above')
 
         except OSError as e:
             # path may already exist, but if not through other error, exit
-            tb = traceback.format_exc(e.__traceback__)
+            ml.write_error_log_file(e)
             si.msg_logger.msg(f'Failed to make run output dir or invalid file name', hint='see above' )
 
         except Exception as e:
-            tb = traceback.format_exc(e.__traceback__)
-            ml.write_error_log_file(e,tb )
-
+            ml.write_error_log_file(e)
             ml.msg(f' Unexpected error  ', error=True,hint='check above or .err file')
 
 
