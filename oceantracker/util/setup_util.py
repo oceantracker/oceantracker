@@ -37,13 +37,7 @@ def setup_output_dir(params, crumbs='', caller=None):
         si.msg_logger.msg('Deleted contents of existing output dir', warning=True)
 
     # make a new dir
-    try:
-        makedirs(run_output_dir)  # make  and clear out dir for output
-    except OSError as e:
-        # path may already exist, but if not through other error, exit
-        si.msg_logger.msg(f'Failed to make run output dir:{run_output_dir}',
-                          crumbs=crumbs, caller=caller,
-                          exception=e, traceback_str=traceback.print_exc(), fatal_error=True)
+    makedirs(run_output_dir)  # make  and clear out dir for output
 
     # write a copy of user given parameters, to help with debugging and code support
     fb = 'users_params_' + params['output_file_base']

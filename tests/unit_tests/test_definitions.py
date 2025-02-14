@@ -173,6 +173,9 @@ def read_tracks(case_info_file):
 
 def compare_reference_run(case_info_file, args):
     from read_oceantracker.python import load_output_files
+
+    if case_info_file is None : return
+
     reference_case_info_file = case_info_file.replace('unit_tests', 'unit_test_reference_cases')
     if args.reference_case:
         # rewrite reference case output

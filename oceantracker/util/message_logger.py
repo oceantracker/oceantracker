@@ -6,13 +6,14 @@ import difflib
 from time import sleep
 import inspect
 
-class GracefulError(Exception):
+class OTerror(Exception):
     def __init__(self, message='-no error message given',hint=None):
         # Call the base class constructor with the parameters it needs
         msg= 'Error >> ' + message + '\n hint= ' + hint if hint is not None else ' Look at messages above or in .err file'
-        super(GracefulError, self).__init__(msg)
+        super(OTerror, self).__init__(msg)
 
-
+class OTfatal_error(OTerror): pass
+class OTunexpected_error(OTerror): pass
 
 class MessageLogger(object ):
     def __init__(self):
@@ -142,7 +143,7 @@ class MessageLogger(object ):
 
         # todo add traceback to message?
         if fatal_error:
-            raise GracefulError('Fatal error cannot continue')
+            raise OTerror('Fatal error cannot continue')
         pass
     def _append_message(self, m, msg, tabs):
         # append allowing  line breaks
@@ -161,7 +162,7 @@ class MessageLogger(object ):
                 self.msg(m)
             self.hori_line()
             sleep(1) # allow time for messages to print
-            raise GracefulError('Fatal error cannot continue >>> ' +msg if msg is not None else '', hint='Check above or run.err file for errors')
+            raise OTerror('Fatal error cannot continue >>> ' + msg if msg is not None else '', hint='Check above or run.err file for errors')
 
     def hori_line(self, text=None):
         n= 70

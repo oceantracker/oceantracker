@@ -97,11 +97,11 @@ class OceanTrackerDataSet(object):
             # open file and read
             ds = self._open_file(fi['name'])
             nt_file = nt_available-nt0 # file offset
-            if files_read ==0:
+            if files_read == 0:
                 try:
                     out = ds[file_var_name][{time_dim: nt_file}].compute()
-                except Exception:
-                    pass
+                except Exception as e:
+                    raise(e)
             else:
                 # time invariant
                 t0= perf_counter()
@@ -114,7 +114,10 @@ class OceanTrackerDataSet(object):
         return out
 
     def _open_file(self, file_name):
-        ds = xr.open_dataset(file_name, decode_times=False)
+        try:
+            ds = xr.open_dataset(file_name, decode_times=False)
+        except Exception as e:
+            raise (e)
         return ds
 
 

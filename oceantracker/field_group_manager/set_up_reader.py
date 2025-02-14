@@ -128,7 +128,7 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
         p['class_name'] = class_name
         r = si.class_importer.make_class_instance_from_params('reader',p,
                               check_for_unknown_keys=False,  # dont flag unknown keys
-                              crumbs=crumbs + f'> loading reader "{name}"  class name "{class_name}"')
+                              crumbs=crumbs + f'> loading reader = class name "{class_name}"')
         gmap = r.params['grid_variable_map']
         fmap= r.params['field_variable_map']
 

@@ -2,7 +2,7 @@ from copy import  copy, deepcopy
 
 
 from oceantracker import definitions
-from oceantracker.util.message_logger import GracefulError, MessageLogger
+from oceantracker.util.message_logger import OTerror, MessageLogger
 from oceantracker.oceantracker_params_runner import OceanTrackerParamsRunner
 from  oceantracker.shared_info import shared_info
 
