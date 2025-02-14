@@ -181,13 +181,8 @@ class FieldGroupManager(ParameterBaseClass):
         self._move_back(sel_hit_dry)
 
     def _fix_those_outside_open_boundary(self, sel_outside):
-        part_prop = si.class_roles.particle_properties
-        # deal with open boundary
-
-        if self.info['use_open_boundary']:
-            # dont move back
-            part_prop['status'].set_values(si.particle_status_flags.outside_open_boundary, sel_outside)
-        else:
+        # deal with open boundary if none
+        if not self.info['use_open_boundary']:
             # outside and no open boundary so move back
             self._move_back(sel_outside)
 
