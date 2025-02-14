@@ -151,34 +151,27 @@ class ClassImporter():
 
             # import module/file
 
-            m = self._import_module_from_string(mod)
+            m = self._import_module_from_string(mod, c)
 
 
             # now return get class within module/file
             try:
                 return getattr(m, c)  # get class as module attribute
             except Exception as e:
-                self.msg_logger.spell_check(f'Cannot find class "{c}" within module/file "{mod}"' ,
+                self.msg_logger.spell_check(f'Cannot find class "{c}" within module/file "{mod}"',
                                             f'{mod}.{c}', list(self.full_name_class_map.keys()),
                                             hint='A miss-spelt short class_name? or missing custom class?',
-                                            exception=e,
                                             fatal_error=True)
-    def _import_module_from_string(self, mod):
+    def _import_module_from_string(self, mod, c = None):
         try:
             m = importlib.import_module(mod)
 
             return m
         except Exception as e:
-
-            self.msg_logger.msg(f'Cannot find module "{mod}"  or syntax error in module?',
-                                        hint='A miss-spelt module name? or missing custom module python file',
-                                        error=True)
-            # try a spell sheck
-            self.msg_logger.spell_check(f'Cannot find module "{mod}" ',
-                                        mod, self.module_list,
-                                        error=True)
-            self.msg_logger.msg(f'Exiting "{mod}" ',
-                                fatal_error=True, exception = e)
+            # try a spell check
+            self.msg_logger.spell_check(f'Cannot find module "{mod}" class_name="{c}"',
+                                        f'{mod}.{c}', self.module_list, exception = e,
+                                        fatal_error=True)
 
     def build_short_and_full_name_maps(self, class_tree):
         # build short and full name maps to oceantracker's parameter classes
