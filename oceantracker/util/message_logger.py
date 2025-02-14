@@ -188,9 +188,12 @@ class MessageLogger(object ):
                     if self.log_file is not None:
                         self.log_file.write(l + '\n')
 
-    def write_error_log_file(self, e,traceback_str):
+    def write_error_log_file(self, e):
         sleep(.5)
-        self.msg(traceback_str)
+        self.msg(str(e))
+        tb = traceback.format_exc()
+        self.msg(tb)
+
         with open(path.normpath(self.error_file_name),'w') as f:
             f.write('_____ Known warnings and Errors ________________________________\n')
             for t in [self.notes_list, self.warnings_list, self.errors_list]:
@@ -199,8 +202,7 @@ class MessageLogger(object ):
 
             f.write('________Trace back_____________________________\n')
             f.write(str(e))
-            f.write(traceback_str)
-
+            f.write(tb)
 
     def spell_check(self, msg, key: str, possible_values: list,hint=None, **kwargs):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''

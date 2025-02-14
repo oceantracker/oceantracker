@@ -161,7 +161,8 @@ class ClassImporter():
                 self.msg_logger.spell_check(f'Cannot find class "{c}" within module/file "{mod}"',
                                             f'{mod}.{c}', list(self.full_name_class_map.keys()),
                                             hint='A miss-spelt short class_name? or missing custom class?',
-                                            fatal_error=True)
+                                            error=True)
+                raise(e)
     def _import_module_from_string(self, mod, c = None):
         try:
             m = importlib.import_module(mod)
@@ -170,8 +171,8 @@ class ClassImporter():
         except Exception as e:
             # try a spell check
             self.msg_logger.spell_check(f'Cannot find module "{mod}" class_name="{c}"',
-                                        f'{mod}.{c}', self.module_list, exception = e,
-                                        fatal_error=True)
+                                        f'{mod}.{c}', self.module_list, error=True)
+            raise(e)
 
     def build_short_and_full_name_maps(self, class_tree):
         # build short and full name maps to oceantracker's parameter classes
