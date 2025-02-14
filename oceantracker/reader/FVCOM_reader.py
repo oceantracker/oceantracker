@@ -48,7 +48,6 @@ class FVCOMreader(_BaseUnstructuredReader):
                         ),
                 variable_signature = PLC(['u', 'v', 'zeta'], str,
                                       doc_str='Variable names used to test if file is this format'),
-                drop_variables= PLC(['Itime2'], str,doc_str='Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant'),
                 )
 
     def add_hindcast_info(self):
