@@ -47,7 +47,7 @@ if __name__ == "__main__":
         from plot_oceantracker import plot_tracks
         from read_oceantracker.python import load_output_files
         tracks =load_output_files.load_track_data(case_info_file,
-                                        gridID=1) # plot inner gridID=1, not outer gridID = 0
+                                        gridID=0) # plot inner gridID=1, not outer gridID = 0
         anim = plot_tracks.animate_particles(tracks,colour_using_data=tracks['hydro_model_gridID'],
                                              back_ground_depth=False, vmin=0,vmax=1,
                                              show_grid=True, show_dry_cells=True, axis_labels=True,

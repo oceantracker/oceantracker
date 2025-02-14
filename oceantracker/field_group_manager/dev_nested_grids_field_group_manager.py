@@ -35,7 +35,10 @@ class DevNestedFields(ParameterBaseClass):
                                caller= self, crumbs='adding outer hydro-grid field manager for nested grid run')
         fgm_outer_grid.initial_setup(gridID=0,  caller=self)
         fgm_outer_grid.build_reader_fields()
-        fgm_outer_grid.final_setup()
+
+        # outer grid is not required to have open boundary nodes, but can if provided
+        if not fgm_outer_grid.info['has_open_boundary'] and si.settings.use_open_boundary:
+            fgm_outer_grid.info['use_open_boundary'] = True
 
         # setup outer grid first and for presence of key reader fields in all hindcasts, outer first
         info['has_A_Z_profile'] = si.settings.use_A_Z_profile and fgm_outer_grid.info['has_A_Z_profile']
@@ -45,8 +48,6 @@ class DevNestedFields(ParameterBaseClass):
 
         info['geographic_coords'] =  fgm_outer_grid.info['geographic_coords']
         info['is3D'] = fgm_outer_grid.info['is3D']
-
-
 
         # first grid is outer grid
         self.fgm_hydro_grids = [fgm_outer_grid]
@@ -78,6 +79,11 @@ class DevNestedFields(ParameterBaseClass):
 
             ml.exit_if_prior_errors(f'failed to read nested reader #{n}, see above')
 
+            if not fgm_nested.info['has_open_boundary']:
+                ml.msg(f'Nested grids must have open boundary nodes defined, nested grid {n} " does not',
+                                  fatal_error=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter "hgrid_file" to load open boundary nodes')
+            fgm_nested.info['use_open_boundary'] = True
+
             ml.progress_marker(f'Finished nested hydro-model grid setup #{len(self.fgm_hydro_grids)} '+
                    f'from {time_util.seconds_to_isostr(fgm_nested.info["start_time"])} to  {time_util.seconds_to_isostr(fgm_nested.info["end_time"])}', start_time=t0)
 
@@ -89,14 +95,9 @@ class DevNestedFields(ParameterBaseClass):
                 ml.msg(f'Some nested grid reader files do not overlap in time with the outer grid',
                        hint='check start s and ends if each grid above, or is file mask correct?', fatal_error=True)
 
-
-        # settings consistency with hindcast
+        # settings consistency with all hindcasts
         info['has_A_Z_profile'] = info['has_A_Z_profile'] and all(checks['has_A_Z_profile'])
         info['has_bottom_stress'] = info['has_bottom_stress'] and all(checks['has_bottom_stress'])
-
-        info['geographic_coords'] = info['geographic_coords'] or any(checks['geographic_coords'])
-
-        #todo check which fgs dont have geograhpic and no EPGS code for conversion
 
         if not all ([ x== info['is3D']for x in checks['is3D']]):
             ml.msg(f'Cannot mix 2D and 3D nestd grids ',
@@ -120,18 +121,9 @@ class DevNestedFields(ParameterBaseClass):
     def final_setup(self):
         ml = si.msg_logger
         # do final setup for each grid
-        self.fgm_hydro_grids[0].final_setup()
-
         # check nested grids
-        for n, fgm in enumerate(self.fgm_hydro_grids[1:]):
-            if not fgm.info['has_open_boundary']:
-                ml.msg(f'Nested grids must have open boundary nodes defined, nested grid {n} " does not',
-                                  fatal_error=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter ""hgrid_file" to load open boundary nodes')
-
-        # outer grid is not required to have open boundary nodes, but can if provided
-        fgm = self.fgm_hydro_grids[0]
-        if not fgm.info['has_open_boundary'] and si.settings.use_open_boundary: fgm.info['use_open_boundary'] = True
-        pass
+        for n, fgm in enumerate(self.fgm_hydro_grids):
+            fgm.final_setup()
 
 
     def get_hindcast_info(self):
@@ -207,7 +199,6 @@ class DevNestedFields(ParameterBaseClass):
 
         part_prop = si.class_roles.particle_properties
 
-
         # update outer grid
         fgm_outer_grid = self.fgm_hydro_grids[0]
         on_outer_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', 0, out=self.get_partID_buffer('fgmID0'))
@@ -240,13 +231,13 @@ class DevNestedFields(ParameterBaseClass):
             fgm.setup_time_step(time_sec, xq, on_inner_grid)
 
             # find those outside  this inner grid open boundary and move to outer
-            outside_inner = part_prop['status'].find_subset_where(on_inner_grid, 'eq', si.particle_status_flags.outside_open_boundary, out=self.get_partID_subset_buffer('fgmID2'))
+            outside_inner = part_prop['status'].find_subset_where(on_inner_grid, 'eq', si.particle_status_flags.outside_open_boundary,
+                                                                  out=self.get_partID_subset_buffer('fgmID2'))
             if outside_inner.size > 0:
                 inside_outer, pp = fgm_outer_grid.are_points_inside_domain(np.take(xq,outside_inner,axis =0), include_dry_cells=True)
                 if np.any(inside_outer):
                     # move those now inside inner grid and copy in values
                     s = outside_inner[inside_outer]  # IDs of those outside inner and inside outer
-
 
                     part_prop['status'].set_values(si.particle_status_flags.moving, s)
                     part_prop['hydro_model_gridID'].set_values(0, s)  # put on outer grid
@@ -259,8 +250,7 @@ class DevNestedFields(ParameterBaseClass):
                     pass
                 if np.any(~inside_outer):
                     fgm._move_back(outside_inner[~inside_outer] ) # move back to last good position on inner grid
-                    #part_prop['hydro_model_gridID'].set_values(-1,outside_inner[~inside_outer] )
-                    #print('xx could not be moved to outer grid=',n,'count=', np.count_nonzero(~inside_outer))
+
             pass
             #print('xx10', part_prop['status'].data[:1], part_prop['x'].data[:1],    part_prop['hydro_model_gridID'].data[:1])
             #todo any still outside the inner or outer grid? move back?
