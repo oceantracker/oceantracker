@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as clr
 from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import matplotlib.font_manager as font_manager
-from oceantracker.definitions import node_types
+from oceantracker.definitions import _NodeTypes
+node_types = _NodeTypes()
+
 from time import perf_counter
 
 #from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
@@ -42,6 +44,9 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
 
     if 'water_depth' in grid and back_ground_depth:
         plot_coloured_depth(grid, ax=ax,color_map= back_ground_color_map,zorder=0)
+    else:
+        # light blue
+        ax.set_facecolor('#eafffe')
 
     if show_grid:
         ax.triplot(grid['x'][:, 0], grid['x'][:, 1], grid['triangles'], color=(0.8, 0.8, 0.8), linewidth=.5, zorder=1)

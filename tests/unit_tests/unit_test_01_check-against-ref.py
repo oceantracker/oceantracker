@@ -17,11 +17,13 @@ def main(args):
                 screen_output_time_interval=1800,
              use_A_Z_profile=True,
             regrid_z_to_uniform_sigma_levels=True,
+            #particle_buffer_initial_size= 10,
              #   NUMBA_cache_code=True,
+                #NCDF_particle_chunk= 50000
                 )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
-                 NCDF_particle_chunk= 500) # keep file small
+               ) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)
     hm = test_definitions.hydro_model['demoSchism3D']
@@ -29,9 +31,9 @@ def main(args):
 
     # add a point release
     ot.add_class('release_groups',**test_definitions.rg_release_interval0)
-    ot.add_class('release_groups', **test_definitions.rg_start_in_middle)
+    ot.add_class('release_groups', **test_definitions.rg_min_depth)
+    ot.add_class('release_groups', **test_definitions.rg_start_in_datetime1)
     ot.add_class('release_groups', **test_definitions.rg_outside_domain)
-    ot.add_class('release_groups', **test_definitions.rg_datetime)
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
@@ -49,6 +51,7 @@ def main(args):
 
 
     case_info_file = ot.run()
+
 
     test_definitions.compare_reference_run(case_info_file, args)
 

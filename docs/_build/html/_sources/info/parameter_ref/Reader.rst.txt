@@ -1,0 +1,42 @@
+#######
+Reader
+#######
+
+**Doc:** 
+
+**short class_name:** Reader
+
+**full class_name :** oceantracker.field_group_manager._dev_parallel_reader.Reader
+
+**Inheritance:** > ParameterBaseClass> Reader
+
+
+Parameters:
+************
+
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
+		Description: Class name as string A.B.C, used to import this class from python path
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
+		- default: ``10``
+		- data_type: ``<class 'int'>``
+
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+
+
+Expert Parameters:
+*******************
+
+

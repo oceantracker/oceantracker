@@ -2,10 +2,13 @@
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 import numpy as np
 from oceantracker.resuspension._base_resuspension import BaseResuspension
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel
 
-from numba import  njit
+from numba import  njit, prange
 from oceantracker.shared_info import shared_info as si
+
+status_on_bottom = int(si.particle_status_flags.on_bottom)
+status_moving= int(si.particle_status_flags.moving)
 
 class Resuspension(BaseResuspension):
     # based on
@@ -20,10 +23,9 @@ class Resuspension(BaseResuspension):
                 'critical_friction_velocity': PVC(0., float, min=0., doc_str='Critical friction velocity, u_* in m/s defined in terms of bottom stress (this param is not the same as near seabed velocity)'),
                                  })
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         i = si.add_custom_field('friction_velocity', dict(write_interp_particle_prop_to_tracks_file=False),
                                 default_classID='field_friction_velocity')
-
 
 
     def initial_setup(self, **kwargs):
@@ -37,35 +39,59 @@ class Resuspension(BaseResuspension):
         # compare to single critical value
         # todo add comparison to  particles critical value from distribution, add new particle property to hold  individual critical values
         part_prop = si.class_roles.particle_properties
-        on_bottom = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.on_bottom, out = self.get_partID_buffer('B1'))
+        on_bottom = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.on_bottom,
+                                                               out=self.get_partID_buffer('B1'))
 
         # compare to critical friction velocity
-        resupend = part_prop['friction_velocity'].find_subset_where(on_bottom, 'gteq',self.params['critical_friction_velocity'], out=self.get_partID_subset_buffer('B1'))
+        resupend = part_prop['friction_velocity'].find_subset_where(on_bottom, 'gteq',
+                                                                    self.params['critical_friction_velocity'],
+                                                                    out=self.get_partID_subset_buffer('B1'))
         return resupend
 
+
     # all particles checked to see if they need status changing
-    def update(self,n_time_step, time_sec, active):
+    def update(self,n_time_step, time_sec, alive):
         # do resupension
         self.start_update_timer()
         info = self.info
 
-        info['min_resuspension_jump_not_used'] = np.sqrt(info['resuspension_factor']*self.params['critical_friction_velocity'])
-
         # resuspend those on bottom and friction velocity exceeds critical value
         part_prop = si.class_roles.particle_properties
-        resuspend = self.select_particles_to_resupend(active)
+        if True:
 
-        self.resuspension_jump(part_prop['friction_velocity'].data, info['resuspension_factor'], part_prop['x'].data, part_prop['water_depth'].data,si.settings.z0, resuspend)
+            resupend= self.select_particles_to_resupend(alive)
 
-        # any z out of bounds will  be fixed by find_depth cell at start of next time step
-        part_prop['status'].set_values(si.particle_status_flags.moving, resuspend)
+
+            self.resuspension_jump(part_prop['friction_velocity'].data, part_prop['status'].data,
+                                   info['resuspension_factor'],
+                                   part_prop['x'].data, part_prop['water_depth'].data, si.settings.z0, resupend)
+
+        else:
+            # test merging select parcels into  jumping, this unexpectedly  slower as it uses branched code over all particles?
+            self.resuspension_jumpV2(part_prop['friction_velocity'].data, part_prop['status'].data,
+                                    self.params['critical_friction_velocity'],
+                                   info['resuspension_factor'],
+                                   part_prop['x'].data, part_prop['water_depth'].data,si.settings.z0, alive)
+
 
         self.stop_update_timer()
 
     @staticmethod
     @njitOT
-    def resuspension_jump(friction_velocity, resuspension_factor, x, water_depth, z0, sel):
+    def resuspension_jump(friction_velocity, status,
+                          resuspension_factor, x, water_depth, z0, sel):
         # add entrainment jump up to particle z, Book: Lynch(2015) book, Particles in the coastal ocean  eq 9.26 and 9.28
         for n in sel:
             x[n, 2] = -water_depth[n] + z0 + np.sqrt(resuspension_factor*friction_velocity[n])*np.abs(np.random.randn())
-
+            status[n] = status_moving
+    @staticmethod
+    @njitOT
+    def resuspension_jumpV2(friction_velocity, status,
+                          critical_friction_velocity,
+                          resuspension_factor, x, water_depth, z0, sel):
+        # add entrainment jump up to particle z, Book: Lynch(2015) book, Particles in the coastal ocean  eq 9.26 and 9.28
+        for nn in range(sel.size):
+            n = sel[nn]
+            if status[n] == status_on_bottom and friction_velocity[n] > critical_friction_velocity:
+                x[n, 2] = -water_depth[n] + z0 + np.sqrt(resuspension_factor*friction_velocity[n])*np.abs(np.random.randn())
+                status[n] = status_moving

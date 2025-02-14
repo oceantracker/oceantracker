@@ -13,7 +13,7 @@ First step
 
 Carefully, look back at the screen output or *_caseLog_log.txt
 file, and find the first error flagged.
-Some errors spawn other errors, so look back before the last reported error.
+Some errors spawn other errors, so look back for the first reported error.
 
 Anticipated errors
 ===================
@@ -50,9 +50,8 @@ In reporting an error to the developer, please
 
     #  *_caseInfo.json, lots of useful info
 
-    # *_raw_user_params.json, user supplied settings/parameters
+    # *_raw_user_params.json, the raw user supplied settings/parameters
 
-    # *_runInfo.json,  global information about the hindcast and run
 
 * If requested also give access to
 

@@ -8,7 +8,7 @@ RandomWalk
 
 **full class_name :** oceantracker.dispersion.random_walk.RandomWalk
 
-**Inheritance:** > ParameterBaseClass> BaseTrajectoryModifer> RandomWalk
+**Inheritance:** > ParameterBaseClass> _BaseDispersion> RandomWalk
 
 
 Parameters:

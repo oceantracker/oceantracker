@@ -12,7 +12,7 @@ from copy import copy
 
 class GLORYSreader(_BaseStructuredReader):
 
-    development = 'GORYSreader has not been tested for all variations of file variables, contact developers if reader fails unexpectedly'
+    development = True
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
@@ -27,10 +27,9 @@ class GLORYSreader(_BaseStructuredReader):
                         time=PVC('time', str, doc_str='Name of time variable in hindcast'),
                         x = PVC('longitude', str, doc_str='x location of nodes'),
                         y = PVC('latitude', str, doc_str='y location of nodes'),
-                        z=PVC('depth', str, doc_str='interface depth levels'),
+                        z = PVC('depth', str, doc_str='interface depth levels'),
                         bottom_cell_index=PVC('deptho_lev', str, doc_str='deepest vertical cell for each node'),
                         ),
-
             field_variable_map= {'water_velocity': PLC(['uo', 'vo','wo'], str),
                                    'tide': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('deptho', str, doc_str='maps standard internal field name to file variable name'),
@@ -44,49 +43,36 @@ class GLORYSreader(_BaseStructuredReader):
                                    },
             variable_signature= PLC(['time','latitude', 'uo','vo'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
-
                         )
 
-    def get_hindcast_info(self, catalog):
+    def add_hindcast_info(self):
+        params= self.params
+        info = self.info
+        dm = params['dimension_map']
+        fm = params['field_variable_map']
 
-
-        dm = self.params['dimension_map']
-        fm = self.params['field_variable_map']
-        hi = dict( )
-
-        if 'mask' not in catalog['variables']:
+        if 'mask' not in info['variables']:
             si.msg_logger.msg('For GLORYS hindcasts, must include the static variables netcdf file in same folder as the currents hindcast files, as need variables such as the land mask in that file',
+                              hint =f'reader "file_mask" param, must also include static file as  well, given mask {self.params["file_mask"]}',
                               caller = self, error=True, fatal_error=True)
-
-        xvel_dims =  catalog['variables'][fm['water_velocity'][0]]['dims']
-        hi['is3D']=any(d in xvel_dims  for d in dm['all_z_dims'])
-        # GLORYS may give unit z dim to 2D data
-        hi['is3D'] =  hi['is3D'] if dm['z'] in xvel_dims and xvel_dims[dm['z'] ] > 1 else False
-
-        if hi['is3D']:
-            hi['z_dim'] = dm['z']
-            hi['num_z_levels'] = catalog['info']['dims'][hi['z_dim']]
-            hi['all_z_dims'] = dm['all_z_dims']
-
-            if 'deptho_lev' in catalog['variables']:
-                hi['vert_grid_type'] = si.vertical_grid_types.Zfixed
+        if info['is3D']:
+            # sort out z dim and vertical grid size
+            info['z_dim'] = dm['z']
+            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['all_z_dims'] = dm['all_z_dims']
+            if 'deptho_lev' in info['variables']:
+                info['vert_grid_type'] = si.vertical_grid_types.Zfixed
             else:
                 si.msg_logger.msg('Glorys reader under development, only works for fixed zlevel grids, eg NEMO (output with "deptho_lev" variable) , contact developer to extend to sigma and other vertical grids',
                                   hint='Please provide hindcast example files to test fixes against', fatal_error=True)
-
         else:
-            hi['z_dim'] = None
-            hi['num_z_levels'] = 1
-            hi['all_z_dims'] = []
-            hi['vert_grid_type'] = None
-            fm['water_velocity'] = fm['water_velocity'][:2]
+            info['vert_grid_type'] = None
 
-        # get num nodes in each field
-        params= self.params
-        dims = catalog['info']['dims']
+        # get num nodes in each field, but glorys has either lat or latitude as dims
+        dims = info['dims']
         # nodes = rows* cols
-        hi['num_nodes'] = dims['lat' if 'lat' in dims else 'latitude'] * dims['lon' if 'lon' in dims else 'longitude']
-        return hi
+        info['num_nodes'] = dims['lat' if 'lat' in dims else 'latitude'] * dims['lon' if 'lon' in dims else 'longitude']
+
 
     def read_horizontal_grid_coords(self, grid):
         ds = self.dataset
@@ -108,7 +94,7 @@ class GLORYSreader(_BaseStructuredReader):
     def build_hori_grid(self, grid):
 
         ds = self.dataset
-        if 'mask' in ds.variables:
+        if 'mask' in self.info['variables']:
             grid['water_3D_mask'] = ds.read_variable('mask').data == 1 # water grid
             grid['water_3D_mask'] = np.transpose(grid['water_3D_mask'],(1,2,0)) # put z last
             grid['water_3D_mask'] = np.flip(grid['water_3D_mask'], axis=2) # mask 0 layer is
@@ -124,7 +110,7 @@ class GLORYSreader(_BaseStructuredReader):
         # add time invariant vertical grid variables needed for transformations
 
         ds = self.dataset
-        gm = self.grid_variable_map
+        gm = self.params['grid_variable_map']
         grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)
         grid['z'] = -grid['z'][::-1]  # z is positive down so take -ve
         grid = super().build_vertical_grid(grid)
@@ -133,11 +119,11 @@ class GLORYSreader(_BaseStructuredReader):
     def read_bottom_cell_index(self, grid):
         # bottom cell is in data files
         ds = self.dataset
-        cat = ds.catalog
-        gm = self.grid_variable_map
+        info = self.info
+        gm = self.params['grid_variable_map']
         grid['bottom_cell_index_grid'] = ds.read_variable(gm['bottom_cell_index']).data - self.params['one_based_indices']
         # file cell count is top down, convert to bottom up index
-        grid['bottom_cell_index_grid'] = cat['info']['num_z_levels'] - grid['bottom_cell_index_grid'] # do this before making an it to capture nans
+        grid['bottom_cell_index_grid'] = info['num_z_levels'] - grid['bottom_cell_index_grid'] # do this before making an it to capture nans
 
         # land nodes use 0
         sel = np.isnan(grid['bottom_cell_index_grid'])
@@ -152,7 +138,6 @@ class GLORYSreader(_BaseStructuredReader):
 
         ml = si.msg_logger
         ds = self.dataset
-        catalog = ds.catalog
         info = self.info
 
         dm = self.params['dimension_map']

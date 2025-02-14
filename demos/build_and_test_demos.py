@@ -27,13 +27,13 @@ poly_points_large=[[1597682.1237, 5489972.7479],
 demo_base_params={'output_file_base' : None,
   'add_date_to_run_output_dir': False,
     'NUMBA_cache_code': False,
-
+    'time_buffer_size': 15,
    'time_step' : 900,
     'debug': True,
     'reader': {
                 'input_dir': 'demo_hindcast\schsim2D',
                 'file_mask': 'Random_order_*.nc',
-                 'time_buffer_size': 15,
+
                 },
     'user_note':'test of notes',
     #'numba_caching': False,
@@ -90,7 +90,7 @@ p3['particle_statistics'] = [{'name':'gridstats1','class_name': 'oceantracker.pa
                 {'name':'polystats1','class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
                        'polygon_list':[ {'points':poly_points}]},]
-p3.update({'particle_buffer_chunk_size': 20000, 'write_tracks': False,  'max_run_duration': 3 * 24 * 3600  })
+p3.update({'particle_buffer_initial_size': 20000, 'write_tracks': False,  'max_run_duration': 3 * 24 * 3600  })
 
 p3.update({'output_file_base' :'demo03_heatmaps' })
 
@@ -111,18 +111,6 @@ p4['particle_statistics'] = [
 p4.update({'output_file_base' :'demo04_ageBasedHeatmaps' })
 
 params.append (p4)
-
-# demo 5 parallel
-base_case = deepcopy(p2)
-del base_case['release_groups']
-base_case.update({'output_file_base' :'demo05_parallel',
-            'processors': 2,
-          })
-case_list=[]
-for n in range(5):
-    case_list.append({ 'release_groups': p2['release_groups']})
-base_case['case_list'] = case_list
-params.append(base_case)
 
 # track animation with settlement on reef polygon
 # demo 6
@@ -257,7 +245,7 @@ s56['particle_statistics']= [ {'name':'grid1',   'class_name': 'oceantracker.par
 
 s56['resuspension'] = {'critical_friction_velocity': .005}
 #s56['resuspension'] = {'critical_friction_velocity': 1000.}
-s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_friction_vel',
+s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_frictn_vel',
             })
 s56['velocity_modifiers']= [ {'name': 'terminal_velocity','class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.001}]
 
@@ -356,7 +344,7 @@ p90= deepcopy(p2)
 p90.update({'max_run_duration': 2*24*3600.,'output_file_base': 'demo90forward',
             'use_dispersion':False,
             'backtracking': False,'debug': True,'time_step' :60 })
-p90['reader']['time_buffer_size']=2  # test with  tiny buffer
+p90['time_buffer_size']=2  # test with  tiny buffer
 p90['release_groups']= [{'name':'P1','pulse_size': 1, 'release_interval': 0,
            'points': [[1594500, 5486500], [1596500, 5489000], [1595000, 5483000] ]}]
 

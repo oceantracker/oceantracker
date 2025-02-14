@@ -29,8 +29,7 @@ class _BaseWriter(ParameterBaseClass):
                         time_steps_per_per_file =  PVC(None, int,min=1, doc_str='Split track output into files with given number of time integer steps'),
                         write_dry_cell_flag =  PVC(False, bool, doc_str='Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down '),
                         write_dry_cell_index=PVC(True, bool, obsolete=True,  doc_str='Replaced by write_dry_cell_flag, set to false by default'),
-                        NCDF_time_chunk = PVC(24, int, min=1, doc_str=' number of time steps per time chunk in the netcdf file', expert=True),
-                                )
+                        )
         self.info.update(output_file= [])
         self.total_time_steps_written = 0
         self.n_files_written = 0
@@ -88,25 +87,25 @@ class _BaseWriter(ParameterBaseClass):
     def open_file_if_needed(self):
 
         fn =si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
-
+        opened_file = False
         if self.total_time_steps_written == 0:
             if self.params['time_steps_per_per_file'] is not None: # first of the split files
                 fn += '_%03.0f' % (self.total_time_steps_written+1)
                 self.n_files_written += 1
             self._open_file(fn)
+            opened_file = True
 
         elif self.params['time_steps_per_per_file'] is not None and self.total_time_steps_written %  self.params['time_steps_per_per_file'] == 0:
             # split make a new file
             self.close()
             self.n_files_written += 1
             self._open_file(fn + '_%03.0f' % self.n_files_written)
+            opened_file = True
+        return  opened_file
 
     def _open_file(self,file_name):
         self.time_steps_written_to_current_file = 0
-        t0 = perf_counter()
         self.info['output_file'].append(file_name + '.nc')
-
-
         self.add_global_attribute('file_created', datetime.now().isoformat())
 
         self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file'][-1]), 'w')
@@ -115,8 +114,8 @@ class _BaseWriter(ParameterBaseClass):
         for name, item in self.info['file_builder']['dimensions'].items():
             nc.add_dimension(name, item['size'])
 
+        # create variables
         for name, item in self.info['file_builder']['variables'].items():
-
             # check chunk size under 4GB
             if item['chunks'] is not None:
                 c = np.asarray(item['chunks'],dtype=np.int64) # avoids float 32 over flow
@@ -126,12 +125,33 @@ class _BaseWriter(ParameterBaseClass):
                                             hint='Reduce tracks_writer param NCDF_time_chunk (will be slower), if many dead particles then use compact mode and manually set case_param particle_buffer_size to hold number alive at the same time', )
             #print('xx', name)
             nc.create_a_variable(name, item['dim_list'] , item['dtype'],  description=item['description'],  attributes=item['attributes'], chunksizes=item['chunks'],)
-        si.msg_logger.progress_marker('Opened tracks output to : ' + self.info['output_file'][-1],start_time=t0)
+
         pass
 
     def pre_time_step_write_book_keeping(self): pass
 
+    def post_time_step_write_book_keeping(self):
+        #self.estimate_open_file_size()
+        pass
 
+    def estimate_open_file_size(self):
+        # estimate  size of open file not working too big by factor of 2?
+        fh = self.nc.file_handle
+        b = 0.
+        for name, v, in fh.variables.items():
+
+            chunks = np.asarray(v.chunking())
+            chunks_allocated = np.ceil(np.asarray(v.shape) / chunks)
+            bytes_allocated = int(np.prod(chunks_allocated * chunks)*v.dtype.itemsize)
+            b += bytes_allocated
+
+            #print('xx',name,  v.size, v.dtype, v.shape,v.dtype.itemsize,  v.chunking(), chunks_allocated, bytes_allocated, b )
+            pass
+
+        b1  = sum([ v.size*v.dtype.itemsize for name, v in fh.variables.items()])
+        b_file = path.getsize(path.join(si.run_info.run_output_dir, self.info['output_file'][0])) # reports constant bad value
+        print('fx',bytes_allocated,b_file/1000, b1/1000, b/1000)
+        return b
 
     def create_variable_to_write(self,name,first_dim_name,dim_len,**kwargs): pass
 
@@ -169,6 +189,8 @@ class _BaseWriter(ParameterBaseClass):
             grid = si.core_class_roles.field_group_manager.reader.grid
             self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = grid['dry_cell_index'].reshape(1,-1)
 
+        self.post_time_step_write_book_keeping()
+
         self.time_steps_written_to_current_file += 1 # time steps in current file
         self.total_time_steps_written  += 1 # time steps written since the start
         self.stop_update_timer()
@@ -184,6 +206,8 @@ class _BaseWriter(ParameterBaseClass):
             for name, item in self.info['file_builder']['attributes'].items():
                 nc.write_global_attribute(name,item)
             nc.close()
+
+
             self.nc = None
 
 

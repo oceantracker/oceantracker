@@ -4,7 +4,7 @@ import psutil
 import numpy as np
 from oceantracker.util import time_util
 from datetime import datetime
-from oceantracker.particle_properties.util import particle_operations_util
+from oceantracker.particle_properties.util import particle_operations_util, particle_comparisons_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
@@ -20,17 +20,15 @@ class Solver(ParameterBaseClass):
         self.add_default_params({
                         'RK_order':                   PVC(4, int, possible_values=[1, 2, 4]),
                         'n_sub_steps': PVC(None, int, obsolete=True,  doc_str ='use shared_parameter "time_step", run may not have required time step'),
-                        'screen_output_step_count': PVC(None, int, obsolete=True,  doc_str='use setting "screen_output_time_interval" in seconds')
+                        'screen_output_step_count': PVC(None, int, obsolete=True,  doc_str='use main setting "screen_output_time_interval" in seconds. ie not a solver setting')
                             })
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         crumbs='Solver_initial_setup >'
         si.add_class('particle_properties', name= 'v_temp',class_name='ManuallyUpdatedParticleProperty', vector_dim= si.run_info.vector_components, write=False, crumbs=crumbs)
 
     def initial_setup(self):pass
-
-
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc( required_props_list=['x','status', 'x_last_good', 'v_temp'])
@@ -39,6 +37,7 @@ class Solver(ParameterBaseClass):
     #@profile
     def solve(self):
         # solve for data in buffer
+
         ri=si.run_info
         ml = si.msg_logger
         part_prop = si.class_roles.particle_properties
@@ -69,6 +68,8 @@ class Solver(ParameterBaseClass):
         ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)} '
                            + f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)} ')
 
+        si.msg_logger.set_screen_tag('S')
+
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
             t0_step = perf_counter()
             self.start_update_timer()
@@ -84,6 +85,8 @@ class Solver(ParameterBaseClass):
 
             # count particles of each status and count number >= stationary status
             num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
+            pgm.remove_dead_particles_from_memory(num_alive)
+
             if num_alive == 0:
                 #freewheel until more are released or end of run/hindcast
                 if not ri.free_wheeling:
@@ -107,7 +110,7 @@ class Solver(ParameterBaseClass):
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
-            is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.moving, out=self.get_partID_buffer('ID1'))
+            is_moving = pgm.find_moving_particles()
 
             # update particle velocity modification prior to integration
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
@@ -159,10 +162,8 @@ class Solver(ParameterBaseClass):
         ri.current_model_time_step = n_time_step
         ri.current_model_time = time_sec
 
-        pgm.remove_dead_particles_from_memory()
-
         # some may now have status dead so update
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('ID1'))
+        alive = pgm.find_alive_particles()
 
         # trajectory modifiers,
         for name, i in si.class_roles.trajectory_modifiers.items():
@@ -171,7 +172,7 @@ class Solver(ParameterBaseClass):
         # modify status, eg tidal stranding
         fgm.update_dry_cell_values()
 
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('ID1'))
+        alive = pgm.find_alive_particles()
 
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
@@ -197,8 +198,9 @@ class Solver(ParameterBaseClass):
 
         # write tracks
         if si.settings.write_tracks:
+            t0_write = perf_counter()
             tracks_writer = si.core_class_roles.tracks_writer
-            tracks_writer.open_file_if_needed()
+            opened_file = tracks_writer.open_file_if_needed()
             if new_particleIDs.size > 0:
                 tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
@@ -206,31 +208,25 @@ class Solver(ParameterBaseClass):
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
 
+            if opened_file:
+                # note file opening and time to open file set up chucks and write first block
+                si.msg_logger.progress_marker(f'Opened tracks output and done written first time step in: "{tracks_writer.info["output_file"][-1]}"', start_time=t0_write)
+
 
     def do_time_step(self, time_sec, is_moving):
 
         fgm = si.core_class_roles.field_group_manager
         part_prop = si.class_roles.particle_properties
 
-        part_prop['x_last_good'].copy('x', is_moving)
-        part_prop['n_cell_last_good'].copy('n_cell', is_moving)
-
+        # used  copy particle operation directly to save overhead cost
+        particle_operations_util.copy(part_prop['x_last_good'].data, part_prop['x'].data, is_moving)
+        particle_operations_util.copy(part_prop['n_cell_last_good'].data, part_prop['n_cell'].data, is_moving)
+        particle_operations_util.copy(part_prop['bc_coords_last_good'].data, part_prop['bc_coords'].data, is_moving)
 
         # do time step
         dt = si.settings.time_step*si.run_info.model_direction
         self.RK_step(time_sec, dt,is_moving)
 
-
-        # check bc coords correct
-        if si.settings['dev_debug_opt'] ==10:
-            from oceantracker.util import debug_util
-            still_bad = debug_util.check_walk_step(si.core_class_roles.reader.grid, part_prop, bad, msg_logger=si.msg_logger, crumbs='solver-post RK step')
-
-            if still_bad.size > 0:
-                si.msg_logger.msg(f'Cell search,  some still bad after fixing step  {np.count_nonzero(still_bad)} of  {is_moving.size} ', warning=True)
-                if si.settings['debug_plots']:
-                    debug_util.plot_walk_step(part_prop['x'].data, si.core_class_roles.reader.grid, part_prop, still_bad)
-                pass
         pass
 
     def RK_step(self,time_sec, dt, is_moving):
@@ -253,7 +249,6 @@ class Solver(ParameterBaseClass):
         n_cell =  part_prop['n_cell'].data
         n_cell_last_good = part_prop['n_cell_last_good'].data
 
-
         #  step 1 from current location and time
         fgm.setup_time_step(time_sec, x1, is_moving)
 
@@ -266,7 +261,7 @@ class Solver(ParameterBaseClass):
         fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
 
         self.euler_substep( x1, v_temp, velocity_modifier, dt2, is_moving, x2)
-        particle_operations_util.copy(water_velocity, v_temp, is_moving, scale=1.0 / 6.0)   # accumulate RK velocity to reduce space taken by temporary working variables
+        particle_operations_util.scale_and_copy(water_velocity, v_temp, is_moving, scale=1.0 / 6.0)   # accumulate RK velocity to reduce space taken by temporary working variables
 
         # step 2, get improved half step velocity
         t2= time_sec + 0.5 * dt
@@ -322,8 +317,9 @@ class Solver(ParameterBaseClass):
     def screen_output(self, nt, time_sec,t0_model, t0_step):
         ri = si.run_info
         fraction_done= abs((time_sec - ri.start_time) / ri.duration)
-        s = f'{100* fraction_done:02.0f}%'
-        s += f' step {nt:04d}'
+        s = f'{nt:04d}'
+        s += f': {100* fraction_done:02.0f}%'
+
         s += si.core_class_roles.field_group_manager.screen_info()
 
         t = abs(time_sec - ri.start_time)

@@ -1,14 +1,13 @@
 import datetime
 from os import path, sep
 from oceantracker.main import OceanTracker
-from read_oceantracker.python import load_output_files
-from plot_oceantracker import plot_tracks
+
+
 import  argparse
 import shutil
 import numpy as np
 from oceantracker import definitions
-from oceantracker.util import cord_transforms
-from plot_oceantracker import plot_tracks
+
 from copy import deepcopy
 
 def base_settings(fn,args,label=None):
@@ -81,15 +80,15 @@ rg_release_interval0 = dict( name='release_interval0',  # name used internal to 
          # the below are optional settings/parameters
          release_interval=0,  # seconds between releasing particles
          pulse_size=5)  # how many are released each interval
-rg_datetime = dict( name='start_in_middle1',  # name used internal to refer to this release
-         class_name='PointRelease',  # class to use
-        start=np.datetime64('2017-01-01T03:30:00'),
-        points=[[1594000, 5484200, -2]],
-        water_depth_min= 500,
-        #    tim=['2017-01-01T08:30:00','2017-01-01T01:30:00'],
-         # the below are optional settings/parameters
-         release_interval=3600,  # seconds between releasing particles
-         pulse_size=5)  # how many are released each interval
+rg_min_depth = dict(name='min_depth',  # name used internal to refer to this release
+                    class_name='PointRelease',  # class to use
+                    start=np.datetime64('2017-01-01T03:30:00'),
+                    points=[[1594000, 5484200, -2]],
+                    water_depth_min= 500,
+                    #    tim=['2017-01-01T08:30:00','2017-01-01T01:30:00'],
+                    # the below are optional settings/parameters
+                    release_interval=3600,  # seconds between releasing particles
+                    pulse_size=5)  # how many are released each interval
 rg_outside_domain = dict( name='outside_open_boundary',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
         points=[[1594000, 0, -2]],
@@ -99,13 +98,13 @@ rg_outside_domain = dict( name='outside_open_boundary',  # name used internal to
          release_interval=3600,  # seconds between releasing particles
          pulse_size=5)  # how many are released each interval
 
-rg_start_in_middle = dict( name='start_in_middl21',  # name used internal to refer to this release
-         class_name='PointRelease',  # class to use
-        points=[[1594000, 5484200, -2]],
-        start='2017-01-01T03:30:00',
-         # the below are optional settings/parameters
-         release_interval=3600,  # seconds between releasing particles
-         pulse_size=5)  # how many are released each interval
+rg_start_in_datetime1 = dict(name='start_in_datetime1',  # name used internal to refer to this release
+                             class_name='PointRelease',  # class to use
+                             points=[[1594000, 5484200, -2]],
+                             start='2017-01-01T03:30:00',
+                             # the below are optional settings/parameters
+                             release_interval=3600,  # seconds between releasing particles
+                             pulse_size=5)  # how many are released each interval
 
 rg_ploy1 = dict(name='my_polygon_release',  # name used internal to refer to this release
          class_name='PolygonRelease',  # class to use
@@ -169,9 +168,13 @@ ax = [1591000, 1601500, 5478500, 5491000]
 
 
 def read_tracks(case_info_file):
+    from read_oceantracker.python import load_output_files
     return load_output_files.load_track_data(case_info_file)
 
 def compare_reference_run(case_info_file, args):
+    from read_oceantracker.python import load_output_files
+
+    if case_info_file is None : return
 
     reference_case_info_file = case_info_file.replace('unit_tests', 'unit_test_reference_cases')
     if args.reference_case:
@@ -194,15 +197,19 @@ def compare_reference_run(case_info_file, args):
         stats_ref= load_output_files.load_stats_data(reference_case_info_file,name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
         dc = stats['count'] - stats_ref['count']
-        print(' stats  name ',  name,'counts', stats_ref['count'].sum(), stats['count'].sum(),'max counts-ref run counts =',np.nanmax(np.abs(dc)))
+        print(' stats  name ',  name,'counts', stats_ref['count'].sum(), stats['count'].sum(),'max diff counts-ref run counts =',np.nanmax(np.abs(dc)))
 
     # check times
     dt = np.abs(tracks['time'] - tracks_ref['time'])
     print('max time difference, sec', np.max(dt))
     pass
 def show_track_plot(case_info_file, args):
-
+    from plot_oceantracker import plot_tracks
     if not args.plot : return
+    if case_info_file is None :
+        print('>>> Run failed no unit test plot')
+        return
+
     tracks= read_tracks(case_info_file)
 
     movie_file1= path.join(image_dir, 'decay_movie_frame.mp4') if args.save_plots else None

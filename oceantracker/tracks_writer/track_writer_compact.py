@@ -14,10 +14,11 @@ class CompactTracksWriter(_BaseWriter):
         super().__init__()  # required in children to get parent defaultsults
 
         self.add_default_params({
-                                 'NCDF_particle_chunk': PVC(100_000, int, min=100, doc_str=' number of particles per time chunk in the netcdf file', expert = True),
-                                 #'convert': PVC(False, bool, doc_str='convert compact tracks file to rectangular for at end of the run'),
-                                 #'retain_compact_files': PVC(False, bool,  doc_str='keep  compact tracks files after conversion to rectangular format'),
-                                 'role_output_file_tag': PVC('tracks_compact', str, expert=True),
+                    'NCDF_time_chunk': PVC(None,int, obsolete=True, doc_str=' Use main setting with same name'),
+                    'NCDF_particle_chunk': PVC(None, int, obsolete=True, doc_str=' Use main setting with same name'),
+                    #'convert': PVC(False, bool, doc_str='convert compact tracks file to rectangular for at end of the run'),
+                    #'retain_compact_files': PVC(False, bool,  doc_str='keep  compact tracks files after conversion to rectangular format'),
+                    'role_output_file_tag': PVC('tracks_compact', str, expert=True),
                                  })
         self.nc = None
 
@@ -35,7 +36,6 @@ class CompactTracksWriter(_BaseWriter):
         self.add_new_variable('time_step_range', ['time_dim','range_pair_dim'],
                               description='range in time_particle_dim for each time step',
                                dtype=np.int32)
-
         self.info['time_particle_steps_written'] = 0
 
     def create_variable_to_write(self,name,is_time_varying, is_part_prop, vector_dim=None,
@@ -56,9 +56,9 @@ class CompactTracksWriter(_BaseWriter):
             if dim == 'time_dim':
                 chunks.append(si.settings.NCDF_time_chunk)
             elif dim == 'time_particle_dim':
-                chunks.append(si.settings.NCDF_time_chunk*self.params['NCDF_particle_chunk'])
+                chunks.append(si.settings.NCDF_time_chunk*si.settings.NCDF_particle_chunk)
             elif dim == 'particle_dim':
-                chunks.append(self.params['NCDF_particle_chunk'])
+                chunks.append(si.settings.NCDF_particle_chunk)
             else:
                 chunks.append(self.info['file_builder']['dimensions'][dim]['size'])
         if description is not None:attributes.update(description=description)
@@ -86,6 +86,7 @@ class CompactTracksWriter(_BaseWriter):
         nc.file_handle.variables['write_step_index'][self.file_index[0]:self.file_index[1], ...] = nWrite * np.ones((self.sel_alive.shape[0],), dtype=np.int32)
 
         self.info['time_particle_steps_written'] += self.sel_alive.shape[0]
+
 
     def write_time_varying_info(self,name,d):
         self.nc.file_handle.variables[name][self.time_steps_written_to_current_file, ...] = d.data[:]

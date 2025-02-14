@@ -38,8 +38,7 @@ class _BaseParticleProperty(ParameterBaseClass):
     def initial_setup(self):
         params = self.params
         s = (si.settings.particle_buffer_initial_size,) # initial size one chunk
-        if params['vector_dim'] > 1:
-            s += (params['vector_dim'],)
+        if params['vector_dim'] > 1: s += (params['vector_dim'],)
 
         # third matrix dim, so far only used recording vertical cell at each node  3D for 2 time steps
         if params['prop_dim3'] > 0 and params['prop_dim3'] > 1:
@@ -101,18 +100,18 @@ class _BaseParticleProperty(ParameterBaseClass):
     def copy(self, prop_name, active):
         # copy from named particle
         part_prop= si.class_roles.particle_properties
+
         particle_operations_util.copy(self.data, part_prop[prop_name].data, active)
 
     def fill_buffer(self,value):
-        n_in_buffer = si.core_class_roles.particle_group_manager.info['particles_in_buffer']
-        self.data[:n_in_buffer,...] = value
+        self.data[:si.particles_in_buffer,...] = value
 
 
     def get_values(self, sel):
         # get property values using indices sel
         return np.take(self.data,sel, axis=0)  # for integer index sel, take is faster than numpy fancy indexing and numba
 
-    def used_buffer(self): return self.data[:si.core_class_roles.particle_group_manager.info['particles_in_buffer'], ...]
+    def used_buffer(self): return self.data[:si.particles_in_buffer, ...]
 
     def full_buffer(self):  return self.data
 

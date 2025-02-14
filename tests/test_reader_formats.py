@@ -37,7 +37,7 @@ def default_params():
 
 
 
-    params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_cords'])
+    params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_coords'])
 
     return  params
 
@@ -133,6 +133,7 @@ def get_case(n):
             x0= np.flip(np.asarray(x0),axis=1)
             ax = None # Auck
             title = 'test schisim v5 - Auck'
+
         case 150:
             root_input_dir = r'F:\Hindcast_parts\pelorus2024'
             output_file_base = 'Pelourus_prelim'
@@ -200,9 +201,7 @@ def get_case(n):
             show_grid = True
         case 301:
             #ROMS MOANA
-            root_input_dir = r'F:\Hindcast_reader_tests\MOANA_project_National_hindcast\Hourly_nestfiles'
-            x0 =  [[616042, 4219971, -1], [616042, 4729971, -1], [616042, 4910000, -1],
-                   [387649.9416260512, 4636593.611571449, -1], [-132118.97253055905, 4375233.36585782, -1], [-178495.6601573273, 4132294.9876834783, -1]]
+            root_input_dir = r'D:\Hindcast_reader_tests\ROMS_samples\MOANA_project_National_hindcast\Hourly_nestfiles'
             x0 = [[-36.81612195216445, 174.82731398519584],
                   [-37.070731274878, 175.39302783837365],
                   [-36.4051733326401, 174.7771263023033],
@@ -210,7 +209,7 @@ def get_case(n):
                   ]
             x0 = np.flip(np.asarray(x0),axis=1)
             file_mask  =  'nz5km_his*.nc'
-            output_file_base= 'ROMS'
+            output_file_base= 'ROMS_moana'
             title = 'ROMS test'
             show_grid = True
         case 400:
@@ -292,7 +291,6 @@ def get_case(n):
 
         case   1101:
             # copernicus GLORYS
-
             root_input_dir = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D'
             file_mask = 'cmems*.nc'
 
@@ -315,8 +313,8 @@ def get_case(n):
         case  1102:
             # copernicus GLORYS 2D, surface values
 
-            root_input_dir = r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge2D'
-            file_mask = 'cmems*.nc'
+            root_input_dir = r'D:\Hindcast_reader_tests\Glorys\glorysRemySeaSpurgeSurfaceTestData2D'
+            file_mask = '*.nc'
 
             x0 = [[174.665532083399, -35.922300421719214],  # hen and chickes, in outer grid
                   [167.70585302583135, -41.09760403942677],
@@ -326,8 +324,8 @@ def get_case(n):
                   [178.9627420221942, -41.47295972674199]
                   ]
 
-            output_file_base = 'GLORYS3D'
-            title = 'GLORYS 3D test'
+            output_file_base = 'GLORYS_seasurge2D'
+            title = 'GLORYS 2D seaspurge test'
             use_open_boundary = True
             max_days = 10
             time_step = 1800.
@@ -410,8 +408,7 @@ def get_case(n):
         params['reader']['hgrid_file_name']= hgrid_file
 
 
-    if nested_readers is not None:
-        params['nested_readers']=nested_readers
+    params['nested_readers']=nested_readers
 
     plot_opt=dict(ax=ax,show_grid=show_grid)
     return params, plot_opt
@@ -459,7 +456,7 @@ if __name__ == '__main__':
 
         # do plot
         if not args.noplots and caseInfoFile is not None:
-            track_data = load_output_files.load_track_data(caseInfoFile)
+            track_data = load_output_files.load_track_data(caseInfoFile, gridID = 1 if len(params['nested_readers'])==1 else 0)
             if False:
                 plot_utilities.display_grid(track_data['grid'], ginput=3, axis_lims=None)
             plot_base = path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base'])
@@ -473,17 +470,19 @@ if __name__ == '__main__':
                 plot_tracks.plot_path_in_vertical_section(track_data, particleID=0,)
 
             plot_file = plot_base + '_decay_01.mp4' if args.save_plot else None
-            plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
-                              title='Ross Sea',
-                              colour_using_data=track_data['hydro_model_gridID'],
-                           #part_color_map='hot_r',
-                            part_color_map='hot',
-                              #size_using_data=track_data['part_decay'],
-                              vmax=1, vmin=-1,
-                              movie_file=plot_file,
-                              fps=24,
-                              aspect_ratio=None,
-                              interval=20, show_dry_cells=False)
+
+            if len(params['nested_readers']) > 0:
+                plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
+                                  title='Ross Sea',
+                                  colour_using_data=track_data['hydro_model_gridID'],
+                                              vmin =0, vmax=len(params['nested_readers'])+3,
+                               #part_color_map='hot_r',
+                                part_color_map='hot',
+                                  #size_using_data=track_data['part_decay'],
+                                  movie_file=plot_file,
+                                  fps=24,
+                                  aspect_ratio=None,
+                                  interval=20, show_dry_cells=False)
 
 
 

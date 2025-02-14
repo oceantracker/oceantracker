@@ -20,7 +20,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                  'role_output_file_tag': PVC('residence', str),
                                  })
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         params = self.params
         ml = si.msg_logger

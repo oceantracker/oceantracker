@@ -1,40 +1,35 @@
 # linear interploation for triangles in both space and time
 #todo  are BC cords as np.float32, faster as lower memory transfer demand and good enough?
 import numpy as np
-from scipy.spatial import cKDTree
-
 from oceantracker.interpolator._base_interp import _BaseInterp
-from oceantracker.util import basic_util
-from oceantracker.util.profiling_util import function_profiler
 from time import perf_counter
-from oceantracker.util import numpy_util
 from oceantracker.interpolator.util import triangle_interpolator_util as tri_interp_util ,  triangle_eval_interp
-from oceantracker.particle_properties.util import  particle_operations_util
-
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
-from oceantracker.definitions import cell_search_status_flags
 from oceantracker.shared_info import shared_info as si
 from oceantracker.interpolator._find_hori_cell_triangle_walk import FindHoriCellTriangleWalk
 from oceantracker.interpolator._eval_interp_triangles import EvalInterpTriangles
 from oceantracker.interpolator import _find_vertical_cell_classes
+
 class  InterpTriangularGrid(_BaseInterp):
 
     # uses tweaked sci py which allows using start triangle location
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
 
 
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        self.add_default_params({'bc_walk_tol': PVC(1.0e-4, float,min = 0.),
+        self.add_default_params({'bc_walk_tol': PVC(1.0e-3, float,min = 0.),
                                  'max_search_steps': PVC(500,int, min =1)})
         self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
 
     #@function_profiler(__name__)
+
+    
     def initial_setup(self, reader):
         super().initial_setup(reader)  # children must call this parent class to default shared_params etc
         params = self.params
@@ -137,10 +132,10 @@ class  InterpTriangularGrid(_BaseInterp):
         info = self.info
         part_prop = si.class_roles.particle_properties
 
-        self._get_hori_cell(xq, active)
+        IDs_need_fixing = self._get_hori_cell(xq, active)
 
         # try to fix any failed walks
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
+        sel = part_prop['status'].find_subset_where(IDs_need_fixing, 'eq', si.particle_status_flags.cell_search_failed, out=self.get_partID_subset_buffer('B1'))
 
         if sel.size > 0:
             # si.msg_logger.msg(f'Search retried for {sel.size} cells')
@@ -148,11 +143,12 @@ class  InterpTriangularGrid(_BaseInterp):
 
             n_cell, bc, is_inside_domain = self.find_initial_cell(xq[sel,...])
             part_prop['n_cell'].set_values(n_cell, sel)
-            part_prop['bc_cords'].set_values(bc, sel)
+            part_prop['bc_coords'].set_values(bc, sel)
 
-            # recheck for additional failures
-            sel = part_prop['cell_search_status'].find_subset_where(active, 'eq', cell_search_status_flags.failed, out=self.get_partID_subset_buffer('B1'))
-
+            # recheck for repeated failures of failed searched, which must be outside domain if not found by intial serarch
+            # , but not outside an open boundary which is flagged separately
+            sel = sel[~is_inside_domain]
+            IDs_need_fixing = IDs_need_fixing[sel]
             if sel.size > 0:
                 wf = {'x0': part_prop['x_last_good'].get_values(sel),
                       'xq': part_prop['x'].get_values(sel)}
@@ -170,6 +166,8 @@ class  InterpTriangularGrid(_BaseInterp):
 
         si.block_timer('Find cell, horizontal walk', t0)
 
+        return IDs_need_fixing
+
     def find_vertical_cell(self, fields, xq, current_buffer_steps,fractional_time_steps, active):
         # locate vertical cell in place
         self._get_vert_cell(fields, xq, current_buffer_steps, fractional_time_steps, active)
@@ -177,15 +175,15 @@ class  InterpTriangularGrid(_BaseInterp):
     #@function_profiler(__name__)
     def are_points_inside_domain(self,xq):
         n_cell, bc, is_inside_domain  = self.find_initial_cell(xq)
-        part_data = dict(x = xq, n_cell=n_cell, bc_cords=bc)
+        part_data = dict(x = xq, n_cell=n_cell, bc_coords=bc)
         # todo add interpolated water depth, tide???
         return is_inside_domain, part_data # is inside if  magnitude of all BC < 1
 
-    def get_bc_cords(self,grid, x,n_cells):
+    def get_bc_coords(self,grid, x,n_cells):
         # get BC cords for given x's
-        bc_cords = np.full((x.shape[0],3), 0.)
-        tri_interp_util.calc_BC_cords_numba(x, n_cells, grid['bc_transform'], bc_cords)
-        return bc_cords
+        bc_coords = np.full((x.shape[0],3), 0.)
+        tri_interp_util.calc_BC_cords_numba(x, n_cells, grid['bc_transform'], bc_coords)
+        return bc_coords
 
     def close(self):
         info = self.info

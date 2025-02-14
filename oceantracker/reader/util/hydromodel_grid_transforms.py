@@ -2,8 +2,9 @@ import numpy as np
 from numba import njit
 from oceantracker.interpolator.util.interp_kernals import kernal_linear_interp1D
 from copy import copy
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel
 from oceantracker.util.triangle_utilities import split_quad_cells
+import numba as nb
 
 def convert_regular_grid_to_triangles(grid,mask):
     # get nodes for each corner of quad
@@ -30,11 +31,11 @@ def convert_regular_grid_to_triangles(grid,mask):
     return grid['triangles']
 
 
-@njitOT
+@njitOTparallel
 def convert_zlevels_to_fractions(zlevels,bottom_cell_index,z0):
     # get zlevels (nodes, depths) as fraction of water depth
     z_fractions= np.full_like(zlevels,np.nan,dtype=np.float32)
-    for n in range(zlevels.shape[0]): # loop over nodes
+    for n in nb.prange(zlevels.shape[0]): # loop over nodes
         z_surface = float(zlevels[n, -1])
         z_bottom= float(zlevels[n,bottom_cell_index[n]])
         total_water_depth = abs(z_surface-z_bottom)
@@ -62,13 +63,13 @@ def find_node_with_smallest_bot_layer(z_fractions,bottom_cell_index):
 
     return node_min
 
-@njitOT
+@njitOTparallel
 def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,sigma,
                                            water_depth,tide,z0,minimum_total_water_depth,
                                            data,out, is_water_velocity):
     # assumes time invariant zlevel_fractions, linear interp
     # set up space
-    for nt in range(out.shape[0]):
+    for nt in nb.prange(out.shape[0]):
         for node in range(out.shape[1]):
             nz_bottom =  int(bottom_cell_index[node])
             nz_data = nz_bottom

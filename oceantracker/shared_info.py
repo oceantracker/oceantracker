@@ -1,24 +1,18 @@
-from typing import TypedDict
-
+import numpy as np
 from oceantracker import definitions
-from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParameterListChecker as PLC
 
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 
-from oceantracker.util import class_importer_util, basic_util
+from oceantracker.util import class_importer_util
 from oceantracker.util.message_logger import  MessageLogger
 
 from time import  perf_counter
-from oceantracker.util import cord_transforms
-import numpy as np
-from oceantracker.util.scheduler import Scheduler
-from oceantracker.particle_properties import particle_operations
 
 # useful utility classes to enable auto complete
 class _Object(object):  pass
 class _SharedStruct():
     '''
-    holds variables as clas attributes to enable auto complete hints
+    holds variables as class attributes to enable auto complete hints
     and give iterators over these variables
 
     allows both  instance.backtracking and i['instance.backtracking']
@@ -73,21 +67,24 @@ class _DefaultSettings(_SharedStruct):
     max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,min=.00001,units='sec',
                            doc_str='Useful in testing setup with shorter runs, as normally run duration is determined from release groups. This  limits the maximum duration in seconds of model runs.' )  # limit all cases to this duration
     max_particles = PVC(10**10, int, min=1, doc_str='Maximum number of particles to release, useful to restrict if splitting particles' )  # limit all cases to this number
-    processors = PVC(None, int, min=1,doc_str='number of processors used, if > 1 then cases in the case_list to run in parallel' )
+
     max_warnings = PVC(50,    int, min=0,doc_str='Number of warnings stored and written to output, useful in reducing file size when there are warnings at many time steps' )  # dont record more that this number of warnings, to keep caseInfo.json finite
     use_random_seed = PVC(False,  bool,doc_str='Makes results reproducible, only use for testing developments give the same results!', expert=True )
     NUMBA_function_cache_size = PVC(4048, int, min=128, expert=True,
                                     doc_str='Size of memory cache for compiled numba functions in kB' )
     NUMBA_cache_code = PVC(False, bool, expert=True,
                            doc_str='Speeds start-up by caching complied Numba code on disk in root output dir. Can ignore warning/bug from numba "UserWarning: Inspection disabled for cached code..."' )
-    multiprocessing_case_start_delay = PVC(0., float, min=0.,expert=True,
-                                           doc_str='Delay start of each sucessive case run parallel, to reduce congestion reading first hydo-model file' )  # which large numbers of case, sometimes locks up at start al reading same file, so ad delay
+    NUMBA_fastmath = PVC(False, bool, expert=True,
+                           doc_str='Use NUmbas fastmath mode to speed operation with slight reduction in accuracy"')
+    multiprocessing_case_start_delay = PVC(0., int,  obsolete=True , doc_str='No longer needed in threaded version of code, remove this parameter from settings' )
     write_tracks = PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes' )
     user_note = PVC('No user note', str, doc_str='Any run note to store in case info file' )
     z0 = PVC(0.005, float, units='m', doc_str='Bottom roughness, used for tolerance and log layer calcs. ', min=0.0001 )  # default bottom roughness
     water_density = PVC(1025., float, units='kg/m^3', doc_str='Water density , default is seawater, an example of use is in calculating friction velocity from bottom stress, ', min=900. )
     use_open_boundary = PVC(False, bool, doc_str='Allow particles to leave open boundary, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred for structed grids like ROMS ' )
     block_dry_cells = PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary' )
+
+    time_buffer_size = PVC(24, int, min=2, doc_str='Number of time steps held in hindcast memory buffers', expert = True)
     use_geographic_coords = PVC(False, bool,
                           doc_str='Used geographic coordniated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
                                 expert=True)
@@ -99,12 +96,17 @@ class _DefaultSettings(_SharedStruct):
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     use_resuspension = PVC(True, bool,
                 doc_str='Allow particles to resuspend')
+    processors= PVC(None, int, min=1,
+                 doc_str='Maximum number of threads to use in parallelization, default is one less than the number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                  doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
 
-    particle_buffer_initial_size= PVC(500_000, int, min=1, doc_str='Starting size of particle property memory buffer. This expands by particle_buffer_chunk_size as needed', expert=True)
-    particle_buffer_chunk_size = PVC(500_000, int, min=1, doc_str='How much particle property memory buffer sizes are increased by when they are full',
-                                     expert=True)
+    particle_buffer_initial_size = PVC(None, int, min=1, expert=True,
+                   doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive'
+                                    )
+    NCDF_particle_chunk =  PVC(None, int, min=1,  expert=True,
+                   doc_str='Chunk size for particle variable Net CDF output files, default is estimated max. particles alive',
+                                    )
         #  #'loops_over_hindcast =  PVC(0, int, min=0 )  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
         # profiler = PVC('oceantracker', str, possible_values=available_profile_types,
         #                 doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules ' )
@@ -136,20 +138,6 @@ class _CoreClassRoles(_SharedStruct):
     tidal_stranding = {}
     resuspension = {}
     integrated_model = None # this is here as there can be only one at a time
-from dataclasses import dataclass
-
-class _ParticleStatusFlags(_SharedStruct):
-    '''Particle status flags mapped to integer values'''
-    unknown  = -20
-    bad_cord = -16
-    cell_search_failed=  -15
-    notReleased = -10
-    dead = -5
-    outside_open_boundary =-2
-    stationary = 0
-    stranded_by_tide = 3
-    on_bottom = 6
-    moving =  10
 
 
 class _VerticalGridTypes(_SharedStruct):
@@ -174,12 +162,14 @@ class _RunInfo(_SharedStruct):
     duration = None
     run_output_dir = None
     output_file_base = None
-    caseID = None
     time_of_nominal_first_occurrence = None
     total_alive_particles = 0
     time_steps_completed = 0
     hindcast_start_time = None
     hindcast_end_time = None
+    has_A_Z_profile = None
+    has_bottom_stress = None
+    particle_counts = {}
 
 class _UseFullInfo(_SharedStruct):
     # default reader classes used by auto-detection of file type
@@ -193,26 +183,22 @@ class _SharedInfoClass():
         eg SharedInfo.particle_properties is a dictionary of named particle property instances
 
     """
+
     settings = _DefaultSettings() # will be overwritten with actual values by case runner
     class_roles = _ClassRoles()
     core_class_roles = _CoreClassRoles()
-    particle_operations = particle_operations
     default_settings = _DefaultSettings()
-    particle_status_flags = _ParticleStatusFlags() # need to be instances to allow particle_status_flags[key] form
+    particle_status_flags = definitions._ParticleStatusFlags()
+    node_types =  definitions._NodeTypes()
+    edge_types = definitions._EdgeTypes()
     vertical_grid_types = _VerticalGridTypes()
     run_info  = _RunInfo()
     hindcast_info = None
     msg_logger = MessageLogger()
     block_timers={}
-    classes = {}  # todo deprecated
+    class_importer = class_importer_util.ClassImporter(msg_logger)
+    particles_in_buffer = 0
     info = _UseFullInfo
-
-    # list of params only setable in base case
-    base_case_only_params = ['root_output_dir', 'output_file_base', 'processors', 'max_warnings',
-                                  'multi_processing_method', 'multiprocessing_case_start_delay',
-                                  'backtracking', 'add_date_to_run_output_dir', 'debug', 'use_random_seed']
-    base_case_only_params += [key for key in default_settings.possible_values() if 'numba' in key.lower()]
-
 
     def __init__(self):
 
@@ -227,9 +213,7 @@ class _SharedInfoClass():
 
     def _setup(self):
         # this allows shared info to make a class importer when needed
-        self.msg_logger.set_screen_tag('Prelim')
         self.msg_logger.reset()
-        self._class_importer = class_importer_util.ClassImporter(self.msg_logger)
 
         # empty out roles and core roles in case of rerunning and shared info import only happens once
         for role in self.core_class_roles.as_dict().keys():
@@ -238,7 +222,8 @@ class _SharedInfoClass():
             setattr(self.class_roles, role, {})
 
 
-    def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=False,check_for_unknown_keys=True, **kwargs):
+    def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=False,
+                  check_for_unknown_keys=True, add_required_classes_and_settings=True,  **kwargs):
         #todo get rid in initialize
         ml = self.msg_logger
         crumbs += f'Adding class {class_role}>'
@@ -261,7 +246,7 @@ class _SharedInfoClass():
         if class_role in self.core_class_roles.possible_values():
             #core  roles
             params['name'] = None
-            i =  self._class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs,
+            i =  self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs,
                                           check_for_unknown_keys=check_for_unknown_keys, caller=caller, initialize=initialize)
             i.info['instanceID'] = 0
             self.core_class_roles[class_role] = i
@@ -269,8 +254,8 @@ class _SharedInfoClass():
         elif class_role in self.class_roles.possible_values():
             #other roles
             instanceID= len(self.class_roles[class_role])
-            i = self._class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
-                                                                     crumbs=crumbs, caller=caller,initialize=initialize)
+            i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
+                    crumbs=crumbs, caller=caller,initialize=initialize,add_required_classes_and_settings=add_required_classes_and_settings)
             i.info['instanceID'] = instanceID
             if params['name'] is None:
                 # if no name in params or default param
@@ -283,15 +268,18 @@ class _SharedInfoClass():
                    error=True, crumbs=crumbs, caller=caller)
             return None
 
-        # add classes required by this class
-        i.add_required_classes_and_settings(self.settings, self.run_builder['reader_builder'], self.msg_logger)
-        i.si = self # for alternative acess to shared info
+        if i.development:
+            ml.msg(f'Class "{i.__class__.__name__}" under development, it may not work in all cases or variants of known hindcast file formats',
+                           hint=f' contact developer with any unexpected issues', warning=True)
+
+        i.si = self # for alternative access to shared info
         return i
 
     # wrapers for adding fields
     def add_reader_field(self, name, params):
         return self.core_class_roles.field_group_manager.add_reader_field(name, params)
     def add_custom_field(self, name, params, default_classID=None):
+        #todo is this redundent use filed group manager version?
         return self.core_class_roles.field_group_manager.add_custom_field(name, params, default_classID=default_classID)
 
 
@@ -314,6 +302,8 @@ class _SharedInfoClass():
             b[name] = dict(time=0.,calls=0)
         b[name]['time'] += perf_counter()-t0
         b[name]['calls'] += 1
+
+
 
 
 # make the instance used throughout code

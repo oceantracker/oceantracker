@@ -152,8 +152,9 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info['number_released'] += release_part_prop['x'].shape[0]  # count number released in this group
         info['total_number_required'] += n_required  # used to check what proportion  sucessfully release all that were required, used to find groups tha have no releaseses
 
+
         # trim or deliver points found
-        n_required = min(release_part_prop['x'].shape[0], n_required)  #
+        n_required = min(release_part_prop['x'].shape[0], n_required) #
 
         # trim initial location, cell  etc to required number
         for key in release_part_prop.keys():

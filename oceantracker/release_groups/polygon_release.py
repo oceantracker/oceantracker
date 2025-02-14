@@ -68,7 +68,7 @@ class PolygonRelease(PointRelease):
         x = xy_candidates[sel, :]
         return x
 
-    def get_number_required(self):
+    def get_number_required_per_release(self):
         return self.params['pulse_size']
 
 

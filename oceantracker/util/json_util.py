@@ -3,7 +3,6 @@ import numpy as np
 import json
 from os import path
 from datetime import datetime,date, timedelta
-import numba.core.types
 import traceback
 
 def write_JSON(file_name,d, indent=4):

@@ -9,7 +9,7 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo10_polygon_residence_demo
 
 # below only required for plotting
-from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file,load_residence_file
+from read_oceantracker.python.load_output_files import load_track_data,load_residence_file
 from plot_oceantracker.plot_tracks import animate_particles
 from plot_oceantracker.plot_statistics import plot_residence
 

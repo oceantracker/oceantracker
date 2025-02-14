@@ -14,8 +14,8 @@ particle_properties
 	ManuallyUpdatedParticleProperty.rst
 	ParticleLoad.rst
 	ParticleParameterFromNormalDistribution.rst
-	Speed.rst
 	TotalWaterDepth.rst
+	WaterSpeed.rst
 	_BaseParticleProperty.rst
 
 **Role:** Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be 

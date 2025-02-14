@@ -20,13 +20,12 @@ def main(args):
     ot.add_class('reader', **hm['reader'])
 
     # add a point release outside domain
-    rg =  deepcopy(test_definitions.rg_start_in_middle)
+    rg =  deepcopy(test_definitions.rg_start_in_datetime1)
     rg['points'] = [0,0,1]
     rg['z_min'] = -2
     ot.add_class('release_groups', **rg)
 
-    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
-                 NCDF_particle_chunk= 500) # keep file small
+    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False)
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
