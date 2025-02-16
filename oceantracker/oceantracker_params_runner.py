@@ -31,16 +31,16 @@ class OceanTrackerParamsRunner(object):
         self.start_time = perf_counter()
         case_info_file = None
         ml = si.msg_logger
-
+        err_hint = 'check for first error above or in log file.txt or .err file '
         try:
             # unpack params into working version as si.working_params
-            # and set up output directory
+            # and set up output directory and log file
             self._do_setup(user_given_params)
 
-            # _________ do run ____________________________
             ml.msg(f'Starting user param. runner: "{si.run_info.output_file_base}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
 
+            # _________ do run ____________________________
             case_info_file= self._run_case()
 
         except OTerror as e:
@@ -49,21 +49,20 @@ class OceanTrackerParamsRunner(object):
         except OTfatal_error as e:
 
             ml.write_error_log_file(e)
-            ml.msg(f'Single parameter/setup error requiring immediate exit', hint='see above')
+            ml.msg(f'Single parameter/setup error requiring immediate exit', hint=err_hint)
 
         except FileNotFoundError as e:
             ml.write_error_log_file(e)
-            ml.msg(f'Could not find hindcast? or other required file', hint='see above')
+            ml.msg(f'Could not find hindcast file? or other required file',  hint=err_hint)
 
         except OSError as e:
             # path may already exist, but if not through other error, exit
             ml.write_error_log_file(e)
-            si.msg_logger.msg(f'Failed to make run output dir or invalid file name', hint='see above' )
+            si.msg_logger.msg(f'Failed to make run output dir or invalid file name', hint=err_hint )
 
         except Exception as e:
             ml.write_error_log_file(e)
-            ml.msg(f' Unexpected error  ', error=True,hint='check above or .err file')
-
+            ml.msg(f' Unexpected error  ', error=True, hint=err_hint)
 
 
         # ----- wrap up ---------------------------------
@@ -81,7 +80,7 @@ class OceanTrackerParamsRunner(object):
 
         if num_errors > 0:
             ml.hori_line('Found errors, so some cases may not have completed')
-            ml.hori_line(' ** see above or  *_caseLog.txt and *_caseLog.err files')
+            ml.hori_line('see above or  *_caseLog.txt and *_caseLog.err files')
             ml.hori_line()
 
         ml.progress_marker('Finished "' + si.run_info.output_file_base
@@ -125,6 +124,7 @@ class OceanTrackerParamsRunner(object):
             si.output_files['run_output_dir'],
             si.output_files[
                 'output_file_base'] + '_caseLog')  # message logger output file setup
+
         si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
                hint='see for copies of screen output and user supplied parameters, plus all other output')
