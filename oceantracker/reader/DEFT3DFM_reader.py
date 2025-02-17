@@ -127,12 +127,13 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                                                 si.settings.minimum_total_water_depth, is_dry_cell_buffer, buffer_index)
         pass
 
-    def build_vertical_grid(self, grid):
+    def build_vertical_grid(self):
         # add time invariant vertical grid variables needed for transformations
         # first values in z axis is the top? so flip
         gm = self.params['grid_variable_map']
         fm = self.params['field_variable_map']
         info = self.info
+        grid = self.grid
         ds = self.dataset
 
         if info['vert_grid_type'] == si.vertical_grid_types.Sigma:
@@ -145,13 +146,13 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)  # layer boundary fractions reversed from negative values
             grid['z_layer'] = ds.read_variable(gm['z_layer']).data.astype(np.float32)   # layer center fractions
 
-        grid = super().build_vertical_grid(grid)
+        super().build_vertical_grid()
 
 
 
         # need to add a layer between first given z level and bottom
         grid['bottom_cell_index'] = np.maximum(grid['bottom_cell_index']-1, 0)
-        return  grid
+
 
     def read_bottom_cell_index(self, grid):
         gm = self.params['grid_variable_map']
@@ -172,9 +173,11 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         return bottom_cell_index
 
 
-    def build_hori_grid(self, grid):
+    def build_hori_grid(self):
 
-        super().build_hori_grid( grid)
+        super().build_hori_grid()
+        grid = self.grid
+
         ds = self.dataset
         gm = self.params['grid_variable_map']
 

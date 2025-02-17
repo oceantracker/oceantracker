@@ -23,9 +23,9 @@ class GenericUnstructuredReader(BaseGenericReader):
         return  nc.is_var_dim(var_name,self.params['dimension_map']['z'])
 
 
-    def build_hori_grid(self, nc, grid):
+    def build_hori_grid(self):
         # read nodal values and triangles
-         
+        grid = self.grid
         ml = si.msg_logger
         params = self.params
         grid_map= params['grid_variable_map']

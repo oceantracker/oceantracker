@@ -121,9 +121,9 @@ class OceanTrackerDataSet(object):
         return ds
 
 
-    def _make_time_step_to_fileID_map(self):
+    def _make_variable_time_step_to_fileID_map(self):
 
-        # make time step to fileID map, accounting for file order
+        # make time step to fileID map, accounting for each variable's file order
         info = self.info
         for v_name, item in info['variables'].items():
             if item['time_varying']:
@@ -131,11 +131,11 @@ class OceanTrackerDataSet(object):
                 for fileID in  item['fileIDs']: #IDs have aleady been time sorted
                     fi = info['files'][fileID]
                     time_step_file_map =  np.append(time_step_file_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
-                    times = fi['time']
                 item['time_step_to_fileID_map'] = np.asarray(time_step_file_map, dtype=np.int32)
         pass
     def _check_time_consistency(self):
         # check all variables have same time_step_to_fileID_map, and save one version of it
+        #todo do not currently used, reactivate?
         info= self.info
         ml = self.msg_logger
 
