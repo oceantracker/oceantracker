@@ -6,16 +6,15 @@ from oceantracker.field_group_manager.util import field_group_manager_util
 from time import  perf_counter
 from copy import deepcopy
 from oceantracker.shared_info import shared_info as si
-from  oceantracker.definitions import  node_types, cell_search_status_flags
+from  oceantracker.definitions import  cell_search_status_flags
 from oceantracker.interpolator.util import  triangle_eval_interp
-#from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
+from oceantracker.field_group_manager import set_up_reader
 
 class FieldGroupManager(ParameterBaseClass):
     # class holding data in file and ability to spatially interpolate fields that it holds
     #   all the fields in a file and interpolation which belongs to the set of fields (rather than individual variable)
     # works with 2D or 3D  with appropriate interplotor
-    known_field_types=['reader_field','custom_field']
-    # todo distingish between hydro model reader fields and auxilary fields, eg waves from another reader
+
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
@@ -26,24 +25,28 @@ class FieldGroupManager(ParameterBaseClass):
         info['fractional_time_steps']= np.zeros((2,), dtype=np.float64)
         info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
 
-    def initial_setup(self, reader_builder,  caller=None):
+    def initial_setup(self,gridID=0,  caller=None):
+
         ml = si.msg_logger
         info = self.info
+        info['gridID'] = gridID
 
+        # get params from main or nested reader
+        if gridID > 0:
+            reader_params = si.working_params['nested_readers'][gridID -1]
+        else:
+            reader_params = si.working_params['reader']
         # build  primary. ie  velocity field, reader
-        self._create_readers(reader_builder)
+
+        self.reader, add_info = self._make_a_reader(reader_params)
+        info.update(add_info)
+
+
+
+
+    def build_reader_fields(self):
         reader = self.reader
-
-        # add velocity reader to field group info
-        info.update(reader.info)
-        pass
-
-
-
-    def build_readers(self):
-
-        self.reader.build_reader()
-        self.reader.write_hydro_model_grid()
+        reader.build_fields()
 
         # todo add ancillary field readers here, eg waves
 
@@ -52,12 +55,9 @@ class FieldGroupManager(ParameterBaseClass):
         info = self.info
         grid = self.reader.grid
 
-        info['has_open_boundary_nodes'] = np.any(self.reader.grid['node_type'] == node_types.open_boundary)
-
         if 'use_open_boundary' not in info :
             # set info here if not preset by nested grids
             info['use_open_boundary'] = si.settings.use_open_boundary
-        info['use_open_boundary'] = info['has_open_boundary_nodes'] and info['use_open_boundary']
 
         # set up dry cell adjacency space for triangle walk
         grid['adjacency_with_dry_edges'] = grid['adjacency'].copy()  # working space to add dry cell boundaries to
@@ -68,6 +68,10 @@ class FieldGroupManager(ParameterBaseClass):
         i = si.add_class('tidal_stranding', {}, crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', caller=self)
         self.tidal_stranding = i
 
+        # write_grid
+        self.reader.write_grid(info['gridID'])
+
+
         pass
         if si.settings['display_grid_at_start'] and self.reader.info['gridID']==1:
             from matplotlib import pyplot as plt
@@ -76,21 +80,19 @@ class FieldGroupManager(ParameterBaseClass):
             plt.show()
 
 
+
     def add_reader_field(self,name, params):
         r = self.reader
         r._add_a_reader_field(name, params)
 
-
     def add_custom_field(self,name, params, default_classID=None):
+        # todo move to reader??
         r = self.reader
-        i = si._class_importer.make_class_instance_from_params('fields',params, name=name,
-                                            default_classID=default_classID)
-        i.initial_setup(r.params['time_buffer_size'],r.info,r.fields, r.grid)
+        i = si.class_importer.make_class_instance_from_params('fields',params, name=name,
+            add_required_classes_and_settings=False,      default_classID=default_classID)
+        i.add_required_classes_and_settings(r.info)   # add classes required by this class
+        i.initial_setup(r.info)
         r.fields[name] = i
-
-        # add classes required by this class
-        i.add_required_classes_and_settings(si.settings, r.reader_builder, self.msg_logger)
-
 
 
     def add_part_prop_from_fields_plus_book_keeping(self):
@@ -124,31 +126,33 @@ class FieldGroupManager(ParameterBaseClass):
         part_prop = si.class_roles.particle_properties
         reader = self.reader
         # find hori cell
-        self.reader.interpolator.find_hori_cell(xq, active)
+        sel_fix = self.reader.interpolator.find_hori_cell(xq, active)
 
-        # all those that need fixing, lateral boundaries and bad, ie cell_status < blocked_dry_cell
-        sel_fix = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.ok, out=self.get_partID_subset_buffer('B1'))
-
-        sel_outside_open = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', cell_search_status_flags.open_boundary_edge,
+        sel_outside_open = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.outside_open_boundary,
                                                                         out=self.get_partID_subset_buffer('B2'))
         if sel_outside_open.size > 0:
             self._fix_those_outside_open_boundary(sel_outside_open)
 
         # outside domain but not an open boundary,
-        sel_outside_domain = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
-                                                                        cell_search_status_flags.domain_edge,
+        sel_outside_domain = part_prop['status'].find_subset_where(sel_fix, 'eq',
+                                                                        si.particle_status_flags.outside_domain,
                                                                         out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel_outside_domain)
 
         if si.settings.block_dry_cells:
-            sel_hit_dry = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
-                                                                    cell_search_status_flags.dry_cell_edge,
+            sel_hit_dry = part_prop['status'].find_subset_where(sel_fix, 'eq',
+                                                                    si.particle_status_flags.hit_dry_cell,
                                                                     out=self.get_partID_subset_buffer('B2'))
             self._apply_dry_cell_boundary_condition(sel_hit_dry)
 
-        # finally move back bad cell searches, nan etc
-        sel = part_prop['cell_search_status'].find_subset_where(active, 'lt', cell_search_status_flags.dry_cell_edge, out=self.get_partID_subset_buffer('B2'))
+        # move back bad coords, nan etc
+        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.bad_coord, out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel) # those still bad, eg nan etc
+
+        # move back cell search failed
+        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.cell_search_failed,
+                                                    out=self.get_partID_subset_buffer('B2'))
+        self._move_back(sel)  # those still bad, eg nan etc
 
         if reader.info['is3D']:
             # find vertical cell
@@ -156,33 +160,29 @@ class FieldGroupManager(ParameterBaseClass):
             reader.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
             pass
 
-    def _create_readers(self, reader_builder):
-        # build a readers
-        info = self.info
 
-        self.reader = si._class_importer.make_class_instance_from_params('reader', reader_builder['params'],
-                                   caller=self, crumbs=f'setup_hydro_fields> reader class ')
-        reader = self.reader
-        reader.initial_setup(reader_builder)
+    def _make_a_reader(self,reader_params):
+        # build a readers
+        reader = set_up_reader.make_a_reader_from_params(reader_params, si.settings,  crumbs='')
+        reader.initial_setup()
+        reader.final_setup()
 
         # add request to load compulsory fields
         reader.params['load_fields'] = list(set(['water_velocity', 'tide', 'water_depth'] + reader.params['load_fields']))
 
-        #todo add ancillary file readers below here
-
-
+        # tag field group as 3D etc
+        add_info= {}
+        for n in ['is3D', 'geographic_coords','has_A_Z_profile','has_open_boundary',
+                  'has_bottom_stress','start_time','end_time','input_dir']:
+            add_info[n] = reader.info[n]
+        return reader, add_info
     def _apply_dry_cell_boundary_condition(self, sel_hit_dry):
         # dry cell boundary
         self._move_back(sel_hit_dry)
 
     def _fix_those_outside_open_boundary(self, sel_outside):
-        part_prop = si.class_roles.particle_properties
-        # deal with open boundary
-
-        if self.info['use_open_boundary']:
-            # dont move back
-            part_prop['status'].set_values(si.particle_status_flags['outside_open_boundary'], sel_outside)
-        else:
+        # deal with open boundary if none
+        if not self.info['use_open_boundary']:
             # outside and no open boundary so move back
             self._move_back(sel_outside)
 
@@ -192,6 +192,8 @@ class FieldGroupManager(ParameterBaseClass):
         if sel.size > 0:
             part_prop['x'].copy('x_last_good', sel)  # move back location
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
+            part_prop['bc_coords'].copy('bc_coords_last_good', sel)  # move back the cell
+            part_prop['status'].set_values(si.particle_status_flags.moving, sel)  # set statud to moving
 
         # debug_util.plot_walk_step(xq, si.core__class_roles.reader.grid, part_prop)
 
@@ -209,9 +211,9 @@ class FieldGroupManager(ParameterBaseClass):
         field= self.reader.fields[field_name]
         self.reader.interpolator.interp_field(field,info['current_buffer_steps'], info['fractional_time_steps'], output, active)
 
-    def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_cords, time_sec= None,hydro_model_gridID=None):
+    def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_coords, time_sec= None,hydro_model_gridID=None):
         # interp reader field_name at specfied locations,  not particle locations
-        # used for getting tide and water depth at release locations give cell and bc_cords
+        # used for getting tide and water depth at release locations give cell and bc_coords
         #todo smarter ways to do this special case using interploator class, not numba kernals?
         part_prop = si.class_roles.particle_properties
         info = self.info
@@ -223,11 +225,11 @@ class FieldGroupManager(ParameterBaseClass):
 
         if time_sec is None:
             triangle_eval_interp.time_independent_2D_scalar_field(output, field_instance.data,
-                                            self.reader.grid['triangles'],n_cell, bc_cords, active)
+                                            self.reader.grid['triangles'],n_cell, bc_coords, active)
         else:
             current_hydro_model_step, current_buffer_steps, fractional_time_steps = self.reader._time_step_and_buffer_offsets(time_sec)
             triangle_eval_interp.time_dependent_2D_scalar_field(current_buffer_steps, fractional_time_steps, output,
-                                      field_instance.data, self.reader.grid['triangles'], n_cell, bc_cords, active)
+                                      field_instance.data, self.reader.grid['triangles'], n_cell, bc_coords, active)
         return output
 
     def update_dry_cell_values(self):
@@ -265,5 +267,5 @@ class FieldGroupManager(ParameterBaseClass):
         return sel
     
     def close(self):
-        self.info.update(self.reader.info)
+        pass
 

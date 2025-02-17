@@ -10,7 +10,9 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 
 
-class AsyncReaderManager():
+class ParallelReaderManager():
+
+
     def create_shared_memory(self,grid):
 
         # below are needed to bulid async reader

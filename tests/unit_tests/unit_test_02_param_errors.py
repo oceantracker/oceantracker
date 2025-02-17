@@ -20,10 +20,9 @@ def main(args):
     ot.add_class('reader', **p)
 
     # add a point release
-    ot.add_class('release_groups',start_date='hh',release_start_date='xxx', **test_definitions.rg_start_in_middle)
+    ot.add_class('release_groups', start_date='hh', release_start_date='xxx', **test_definitions.rg_start_in_datetime1)
 
-    ot.add_class('tracks_writer',update_interval_1 = 1*3600, write_dry_cell_flag=False,
-                 NCDF_particle_chunk= 500) # keep file small
+    ot.add_class('tracks_writer',update_interval_1 = 1*3600, write_dry_cell_flag=False)
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role

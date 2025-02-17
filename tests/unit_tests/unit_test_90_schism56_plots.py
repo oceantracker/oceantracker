@@ -8,7 +8,7 @@ from copy import deepcopy
 def main(args):
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__,args))
-    ot.settings(time_step=240, use_A_Z_profile=True)
+    ot.settings(time_step=240, use_A_Z_profile=True, screen_output_time_interval=240)
 
     ot.add_class('reader', **test_definitions.reader_demo_schisim3D)
 

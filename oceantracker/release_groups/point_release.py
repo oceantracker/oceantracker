@@ -45,7 +45,7 @@ class PointRelease(_BaseReleaseGroup):
         info['bounding_box_ll_ul'] = np.stack(( np.nanmin(params['points'][:2],axis=0),
                                                 np.nanmax(params['points'][:2],axis=0)))
 
-    def get_number_required(self):
+    def get_number_required_per_release(self):
         return self.params['pulse_size']*self.params['points'].shape[0]
 
     def get_release_location_candidates(self):

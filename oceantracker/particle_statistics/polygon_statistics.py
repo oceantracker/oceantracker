@@ -20,7 +20,7 @@ class _CorePolygonMethods(ParameterBaseClass):
         self.remove_default_params(['grid_center','release_group_centered_grids', 'grid_span' ])
         self.file_tag = 'polygon_stats'
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
         info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_ {self.info["instanceID"]:03d}'

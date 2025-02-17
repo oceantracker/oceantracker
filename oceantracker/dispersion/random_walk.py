@@ -1,8 +1,8 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.dispersion._base_dispersion import _BaseDispersion
-from numba import njit, types as nbtypes
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel
+import numba as nb
 
 from random import normalvariate
 from oceantracker.util.numba_util import njitOT
@@ -19,13 +19,12 @@ class RandomWalk(_BaseDispersion):
                                 A_V=PVC(0.01, float, min=0., doc_str='Constant vertical turbulent eddy viscosity',
                                         units='m/s^2'),
                                        )
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
-        hi = reader_builder['hindcast_info']
 
         # set up mode/type of random walk
-        if hi['is3D']:
-            if settings['use_A_Z_profile'] and 'A_Z_profile' in reader_builder['reader_field_info']:
+        if si.run_info.is3D_run:
+            if si.settings.use_A_Z_profile:
                 info['mode'] = 4
                 si.add_reader_field( 'A_Z_profile', dict(write_interp_particle_prop_to_tracks_file=False))
                 si.add_custom_field('A_Z_profile_vertical_gradient', dict(class_name = 'VerticalGradient',
@@ -42,9 +41,10 @@ class RandomWalk(_BaseDispersion):
         info = self.info
         params= self.params
         dt = si.settings.time_step
-        info['random_walk_size'] = np.array((self._calc_walk(self.params['A_H'], dt), self._calc_walk(self.params['A_H'], dt)))
+        info['random_walk_size'] = np.array((self._calc_walk(self.params['A_H'], dt), self._calc_walk(self.params['A_H'], dt), 0.))
         if info['mode'] > 2:
-            info['random_walk_size'] =  np.append(info['random_walk_size'],self._calc_walk(self.params['A_V'], dt))
+            # use constant A_Z
+            info['random_walk_size'][2] =  self._calc_walk(self.params['A_V'], dt)
 
         info['random_walk_velocity'] = info['random_walk_size'] / si.settings['time_step']  # velocity equivalent of random walk distance
 
@@ -73,26 +73,31 @@ class RandomWalk(_BaseDispersion):
                                     np.abs(si.settings.time_step),
                                     active, part_prop['velocity_modifier'].data)
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _add_random_walk_velocity2D_modifier_constantAZ(random_walk_velocity, velocity_modifier, active):
-        for n in active:
+        for nn in nb.prange(active.size):
+            n = active[nn]
             for m in range(2):
                 velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _add_random_walk_velocity3D_modifier_constantAZ(random_walk_velocity, active, velocity_modifier):
-        for n in active:
+        for nn in nb.prange(active.size):
+            n = active[nn]
             for m in range(3):
                 velocity_modifier[n, m] += normalvariate(0., random_walk_velocity[m])
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _add_random_walk_velocity_modifier_A_Z_profile(A_Z, A_Z_vertical_gradient, random_walk_velocity, timestep, active, velocity_modifier):
         # add vertical advection effect of dispersion to random walk, see Lynch Particles in the Coastal Ocean: Theory and Applications
         # this avoids particle accumulating in areas of high vertical gradient of A_Z, ie top and bottom
 
-        for n in active:
+
+        for nn in nb.prange(active.size):
+            n = active[nn]
+
             # random walk velocity in horizontal
             for m in range(2):
                 velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])
@@ -100,6 +105,7 @@ class RandomWalk(_BaseDispersion):
             # pseudo-advection required by random walk to avoid accumulation
             velocity_modifier[n, 2] += A_Z_vertical_gradient[n]  # todo limit excursion by this velocity ?
 
-            # random walk in vertical
+            # random walk in vertical, must be separately from horizontal to allow threading
             random_walk_size= np.sqrt(2. * timestep * np.abs(A_Z[n]))
             velocity_modifier[n, 2] += normalvariate(0.,  random_walk_size/timestep) # apply vertical walk as a velocity
+

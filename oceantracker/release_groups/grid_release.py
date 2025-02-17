@@ -24,7 +24,7 @@ class GridRelease(_BaseReleaseGroup):
         info = self.info
         info['release_type'] = 'grid'
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         if 'grid_release_row_col' not in si.class_roles.particle_properties:
             si.add_class('particle_properties', name='grid_release_row_col',
@@ -53,7 +53,7 @@ class GridRelease(_BaseReleaseGroup):
 
         pass
 
-    def get_number_required(self):
+    def get_number_required_per_release(self):
         return self.params['pulse_size'] * self.points.shape[0]
 
     def get_release_location_candidates(self):

@@ -62,7 +62,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info['depth_range'] = np.asarray( info['depth_range'])
 
     def get_release_location_candidates(self): nopass()
-    def get_number_required(self): nopass()
+    def get_number_required_per_release(self): nopass()
 
     # optional filter on release points
     def filter_release_points(self,is_inside, release_part_prop, time_sec= None):
@@ -96,7 +96,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info= self.info
         params=self.params
 
-        n_required = self.get_number_required()
+        n_required = self.get_number_required_per_release()
 
         # there must be a particle property set up for every release_part_prop must have a
         if 'points' in params :
@@ -152,8 +152,9 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info['number_released'] += release_part_prop['x'].shape[0]  # count number released in this group
         info['total_number_required'] += n_required  # used to check what proportion  sucessfully release all that were required, used to find groups tha have no releaseses
 
+
         # trim or deliver points found
-        n_required = min(release_part_prop['x'].shape[0], n_required)  #
+        n_required = min(release_part_prop['x'].shape[0], n_required) #
 
         # trim initial location, cell  etc to required number
         for key in release_part_prop.keys():
@@ -193,11 +194,11 @@ class _BaseReleaseGroup(ParameterBaseClass):
             fgm = si.core_class_roles.field_group_manager
             release_part_prop['water_depth'] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(
                                                 'water_depth', release_part_prop['x'],
-                                                release_part_prop['n_cell'],release_part_prop['bc_cords'], time_sec=None,
+                                                release_part_prop['n_cell'],release_part_prop['bc_coords'], time_sec=None,
                                                 hydro_model_gridID=release_part_prop['hydro_model_gridID'])
             release_part_prop['tide'] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(
                                                 'tide', release_part_prop['x'],
-                                                release_part_prop['n_cell'],release_part_prop['bc_cords'], time_sec=time_sec,
+                                                release_part_prop['n_cell'],release_part_prop['bc_coords'], time_sec=time_sec,
                                                 hydro_model_gridID=release_part_prop['hydro_model_gridID'])
             return release_part_prop
 

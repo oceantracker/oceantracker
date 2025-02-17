@@ -6,7 +6,7 @@ from oceantracker.shared_info import shared_info as si
 
 class ParticleLoad(CustomParticleProperty):
     '''
-    Particle property which carries a load or mass, which can be used to calculate spatial and temporal statistics of this load or mass.
+    Particle property which carries a constant load or mass, which can be used to calculate spatial and temporal statistics of this load or mass.
     '''
     def __init__(self):
         super().__init__()
@@ -15,7 +15,7 @@ class ParticleLoad(CustomParticleProperty):
 
         self.add_default_params({'initial_value': PVC(1., float,doc_str='Value of the particle property when it is released') })
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name=self.params['name'] + '_initial_value',time_varying=False, write=False)
 
