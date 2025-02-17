@@ -126,7 +126,7 @@ class _BaseReader(ParameterBaseClass):
         # first build data set
 
         info = self.info
-        self.grid = self._build_hori_and_vert_grids()
+        self._build_hori_and_vert_grids()
 
         pass
 
@@ -152,12 +152,12 @@ class _BaseReader(ParameterBaseClass):
     def final_setup(self):      pass
 
     def _build_hori_and_vert_grids(self):
-        grid={}
-        grid = self.build_hori_grid(grid)
-        grid = self._construct_hori_grid_variables(grid)
+        grid= self.grid
+        self.build_hori_grid()
+        self._construct_hori_grid_variables()
 
         if self.info['is3D']:
-            grid = self.build_vertical_grid(grid)
+            self.build_vertical_grid()
         else:
             # 2D
             grid['zlevel'] = None
@@ -168,37 +168,18 @@ class _BaseReader(ParameterBaseClass):
                 v = grid[name]
                 if v is not None and v.dtype != np.float32:
                     si.msg_logger.msg(f'Reader type error {name} must be dtype {np.float64} ', warning=True)
-        return grid
-
-
-
-    def _time_sort_variable_fileIDs(self):
-        # sort variable fileIDs by time, now all files are read
-        info = self.info
-        fi = info['file_names']
-
-        for v_name, item in info['variables'].items():
-            if item['has_time']:
-                item['fileIDs'] = np.asarray(item['fileIDs'])
-                start_times = np.asarray([fi[x]['start_time'] for x in item['fileIDs']])
-                file_order = np.argsort(start_times)
-                item['fileIDs'] = item['fileIDs'][file_order]
-                # get first time step in the file
-                time_steps = np.asarray([fi[x]['time_steps'] for x in item['fileIDs']])
-                first_time_step_in_file = np.cumsum(time_steps) - time_steps[0]
-                # insert first time step into the file info in time order
-                # this will be unnecessarily  repeated, if more than one variable in a file
-                for n, fID in enumerate(item['fileIDs']):
-                    fi[fID]['first_time_step_in_file'] = first_time_step_in_file[n]
-            else:
-                item['fileIDs'] = item['fileIDs'][0]
 
         pass
 
-    def build_hori_grid(self, grid):
+
+
+
+    def build_hori_grid(self):
         # read nodal values and triangles
         params = self.params
         info = self.info
+        grid = self.grid
+
         grid = self.read_horizontal_grid_coords(grid) # read nodal x's
 
         if si.settings.use_geographic_coords or info['geographic_coords']:
@@ -246,12 +227,12 @@ class _BaseReader(ParameterBaseClass):
         # ensure variables have right type
         grid['x'] = grid['x'].astype(np.float64)
 
-        return grid
-
-    def _construct_hori_grid_variables(self, grid):
+    def _construct_hori_grid_variables(self):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
         info = self.info
+        grid = self.grid
+
         msg_logger = si.msg_logger
         msg_logger.progress_marker('Starting grid setup',tabs=2)
 
@@ -321,13 +302,12 @@ class _BaseReader(ParameterBaseClass):
         #for n  in range(3):
         #    pass
         msg_logger.progress_marker('Finished grid setup', tabs=2)
-        return grid
 
-    def build_vertical_grid(self, grid):
+    def build_vertical_grid(self):
         # setup transforms on the data, eg regrid vertical if 3D to same sigma levels
         params = self.params
         info = self.info
-
+        grid = self.grid
         vgt = si.vertical_grid_types
         grid['bottom_cell_index'] = self.read_bottom_cell_index(grid).astype(np.int32)
 
@@ -345,8 +325,6 @@ class _BaseReader(ParameterBaseClass):
             s = [si.settings.time_buffer_size, grid['x'].shape[0], info['num_z_levels']]
             grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
             info['read_zlevels'] = True
-
-        return grid
 
     def find_and_split_quad_cells(self, tri):
         # return indices of quad cells to split from 4th column on triangulation

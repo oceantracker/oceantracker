@@ -39,7 +39,7 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
     # sort files into time order and add info to reader builder on if 3D hindcast and mapped field
     # uses times in files containing the velocity variable
     _time_sort_files(reader, crumbs)
-    reader.dataset._make_time_step_to_fileID_map()
+    reader.dataset._make_variable_time_step_to_fileID_map()
 
     info = reader.info
     info.update(reader.dataset.info) # make data set and reader info the same
@@ -181,7 +181,7 @@ def _time_sort_files(reader, crumbs):
             f['time_steps'] = time.size
             f['ID'] = ID
             f['time'] = time
-
+            f['start_date'] = time_util.seconds_to_isostr( f['start_time'])
     # sort variable fileIDs into time order, but maintain given file order
 
     for v_name, item in ds_info['variables'].items():
@@ -191,25 +191,24 @@ def _time_sort_files(reader, crumbs):
             start_times = np.asarray([fi[x]['start_time'] for x in item['fileIDs']])
             file_order = np.argsort(start_times)
             item['fileIDs'] = item['fileIDs'][file_order]
-            # get first time step in the file
-            time_steps = np.asarray([fi[x]['time_steps'] for x in item['fileIDs']])
-            first_time_step_in_file = np.cumsum(time_steps) - time_steps[0]
-            # insert first time step into the file info in time order
-
-            # this will be unnecessarily  repeated, if more than one variable in a file
-            for n, fID in enumerate(item['fileIDs']):
-                fi[fID]['first_time_step_in_file'] = first_time_step_in_file[n]
 
         else:
             item['fileIDs'] = item['fileIDs'][0]  # todo keep as list??
 
-    # append times in order of velocity variable's file IDs,
-    # as time may appear in many files if variables are split between file
+
+    # sort out which time steps are in each file
+    #  note time may appear in many files if variables are split between file
     # eg schsim v5 than once in each file
-    time = np.empty((0,), dtype=np.float64)
-    vel_var = reader.params['field_variable_map']['water_velocity'][0]
-    for ID in ds_info['variables'][vel_var]['fileIDs']:
-        time = np.append(time, ds_info['files'][ID]['time'])
+
+    for var_name, item in ds_info['variables'].items():
+        if not(item['time_varying']): continue
+        if var_name == ds_info['time_var'] : continue
+        # only look at time varying variables, which are not time
+        time = np.empty((0,), dtype=np.float64)
+        for fID in item['fileIDs']:
+            time = np.append(time, fi[fID]['time'])
+            fi[fID]['first_time_step_in_file'] = time.size - fi[fID]['time_steps']
+            fi[fID]['last_time_step_in_file'] = time.size - 1
 
     ds_info['ref_time'] = time
 

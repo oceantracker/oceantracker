@@ -70,9 +70,10 @@ class FVCOMreader(_BaseUnstructuredReader):
 
 
 
-    def build_vertical_grid(self, grid):
+    def build_vertical_grid(self):
 
         # time invarient z fractions at layer needed for super.build_vertical_grid
+        grid = self.grid
         ds = self.dataset
         z = ds.read_variable('siglev').data.astype(np.float32).T
         zlayer = ds.read_variable('siglay').data.astype(np.float32).T
@@ -85,9 +86,8 @@ class FVCOMreader(_BaseUnstructuredReader):
         grid['vertical_grid_type'] = 'S-sigma'
 
         # now do setup
-        grid = super().build_vertical_grid(grid)
+        super().build_vertical_grid()
 
-        return grid
 
     def set_up_uniform_sigma(self, grid):
 

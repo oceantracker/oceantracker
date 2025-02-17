@@ -199,7 +199,24 @@ def get_case(n):
             output_file_base= 'ROMS'
             title = 'ROMS test'
             show_grid = True
-        case 301:
+
+        case    301:
+            # ROMS test mid atlantic
+            root_input_dir = r'D:\Hindcast_reader_tests\ROMS_samples\ROMS_Mid_Atlantic_Bight'
+            x0 = [[41.91527213998341, -70.33170368895726],  # cape code
+                  [44.78577529626732, -66.39180546827933],
+                  [33.85502775199189, -73.47506471772721],
+                  [37.01033167397936, -75.88494735794337],
+                  [35.01033167397936, -75.88494735794337],
+                  ]
+
+            x0 = np.flip(np.asarray(x0), axis=1)
+            file_mask = 'doppio_his_2017*.nc'
+            output_file_base = 'ROMS_Mid_Atlantic_Bight'
+            title = 'ROMS_Mid_Atlantic_Bight test'
+            show_grid = True
+
+        case 302:
             #ROMS MOANA
             root_input_dir = r'D:\Hindcast_reader_tests\ROMS_samples\MOANA_project_National_hindcast\Hourly_nestfiles'
             x0 = [[-36.81612195216445, 174.82731398519584],
