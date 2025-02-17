@@ -5,7 +5,7 @@ import numpy as np
 
 from oceantracker.util import json_util
 from oceantracker.util.numba_util import njitOT
-from oceantracker.util.polygon_util import make_domain_mask
+from oceantracker.util.triangle_utilities import make_domain_mask
 def read_particle_tracks_file(file_name, var_list=None, release_group= None, fraction_to_read=None):
     # release group is 1 based
     nc = NetCDFhandler(file_name, mode='r')
@@ -196,10 +196,12 @@ def read_stats_file(file_name,nt=None):
                 new_data[name] = d[var]/d['count'] # calc mean
                 d['limits'][name] = {'min' : np.nanmin(new_data[name]), 'max': np.nanmax(new_data[name])}
 
+    np.seterr(invalid='ignore')
     if d['stats_type'] == 'grid':
         d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis, np.newaxis]
     else:
         d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis]
+    np.seterr(invalid=None)
 
     d.update(new_data)
     nc.close()

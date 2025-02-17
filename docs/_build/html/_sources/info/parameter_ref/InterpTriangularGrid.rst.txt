@@ -15,7 +15,7 @@ Parameters:
 ************
 
 	* ``bc_walk_tol`` :   ``<class 'float'>``   *<optional>*
-		- default: ``0.0001``
+		- default: ``0.001``
 		- data_type: ``<class 'float'>``
 		- min: ``0.0``
 

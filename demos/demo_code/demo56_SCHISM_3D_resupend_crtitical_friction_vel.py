@@ -9,7 +9,7 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo56_SCHISM_3D_resupend_crtitical_friction_vel
 
 # below only required for plotting
-from read_oceantracker.python.load_output_files import load_track_data, get_case_info_file_from_run_file
+from read_oceantracker.python.load_output_files import load_track_data
 from plot_oceantracker.plot_tracks import animate_particles
 
 output_file= "output\demo56_SCHISM_3D_resupend_crtitical_friction_vel"

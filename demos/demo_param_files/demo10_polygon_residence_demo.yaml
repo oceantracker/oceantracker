@@ -26,7 +26,6 @@ particle_statistics:
 reader:
   file_mask: Random_order_*.nc
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
-  time_buffer_size: 15
 release_groups:
 - class_name: oceantracker.release_groups.polygon_release.PolygonRelease
   name: near_shore
@@ -46,6 +45,7 @@ release_groups:
   pulse_size: 100
   release_interval: 43200
 root_output_dir: output
+time_buffer_size: 15
 time_step: 600
 tracks_writer:
   write_dry_cell_flag: true

@@ -7,31 +7,32 @@ import pkgutil,inspect,importlib
 from oceantracker import  definitions
 import importlib
 from timeit import  timeit
+
 class ClassImporter():
     def __init__(self,msg_logger, crumbs='', caller=None):
         self.crumbs = crumbs
         self.msg_logger =msg_logger
         ml = msg_logger
         ml.msg(f'Starting package set up',tabs=2, caller=self)
-        t0 = perf_counter()
 
+
+    def _build_class_tree_ans_short_name_map(self, caller=None):
+        t0 = perf_counter()
         # build class tree of al package parameter classes, with short, long name maps
         self.class_tree = self.scan_package_for_classes(crumbs='Package set up', caller=self)
         self.short_name_class_map, self.full_name_class_map =  self.build_short_and_full_name_maps(self.class_tree)
-
+        ml = self.msg_logger
         ml.exit_if_prior_errors(f'"ClassImporter" setup errors', caller=caller)
         ml.progress_marker(f'Done package set up to setup ClassImporter', start_time=t0)
-
-
     def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None, initialize=False,
-                                        caller=None, crumbs='', merge_params=True, check_for_unknown_keys=True):
+                                        add_required_classes_and_settings=True, caller=None, crumbs='', merge_params=True, check_for_unknown_keys=True):
         ml = self.msg_logger
 
         if params is None: params = {}
         if name is not None: params['name'] = name
 
         if class_role not in self.class_tree:
-            self.msg_logger.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
+            ml.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
                                 hint= f'possible values={self.class_tree.keys()}',
                                 fatal_error=True, caller=caller)
 
@@ -45,14 +46,18 @@ class ClassImporter():
             return None
         i = class_obj() # make instance
 
-
         i.info['class_role'] = class_role
 
         if merge_params:
-            i.params  = merge_params_with_defaults(params, i.default_params, self.msg_logger, crumbs=crumbs,check_for_unknown_keys=check_for_unknown_keys, caller=i)
+            i.params  = merge_params_with_defaults(params, i.default_params, ml, crumbs=crumbs,check_for_unknown_keys=check_for_unknown_keys, caller=i)
 
         # attach the current message loger to instance
         i.msg_logger = self.msg_logger
+
+        # add classes required by this class
+        if add_required_classes_and_settings:
+            i.add_required_classes_and_settings()
+
         if initialize:
             i.initial_setup()
         return i
@@ -146,34 +151,28 @@ class ClassImporter():
 
             # import module/file
 
-            m = self._import_module_from_string(mod)
+            m = self._import_module_from_string(mod, c)
 
 
             # now return get class within module/file
             try:
                 return getattr(m, c)  # get class as module attribute
             except Exception as e:
-                self.msg_logger.spell_check(f'Cannot find class "{c}" within module/file "{mod}"' ,
+                self.msg_logger.spell_check(f'Cannot find class "{c}" within module/file "{mod}"',
                                             f'{mod}.{c}', list(self.full_name_class_map.keys()),
                                             hint='A miss-spelt short class_name? or missing custom class?',
-                                            exception=e,
-                                            fatal_error=True)
-    def _import_module_from_string(self, mod):
+                                            error=True)
+                raise(e)
+    def _import_module_from_string(self, mod, c = None):
         try:
             m = importlib.import_module(mod)
 
             return m
         except Exception as e:
-
-            self.msg_logger.msg(f'Cannot find module "{mod}"  or syntax error in module?',
-                                        hint='A miss-spelt module name? or missing custom module python file',
-                                        error=True)
-            # try a spell sheck
-            self.msg_logger.spell_check(f'Cannot find module "{mod}" ',
-                                        mod, self.module_list,
-                                        error=True)
-            self.msg_logger.msg(f'Exiting "{mod}" ',
-                                fatal_error=True, exception = e)
+            # try a spell check
+            self.msg_logger.spell_check(f'Cannot find module "{mod}" class_name="{c}"',
+                                        f'{mod}.{c}', self.module_list, error=True)
+            raise(e)
 
     def build_short_and_full_name_maps(self, class_tree):
         # build short and full name maps to oceantracker's parameter classes

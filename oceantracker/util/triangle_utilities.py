@@ -1,10 +1,10 @@
 import numpy as np
-from numba import njit, prange
+import numba as nb
 from numba.typed import List as NumbaList
-from oceantracker.util.polygon_util import make_domain_mask
+from oceantracker.util.polygon_util import make_anticlockwise_polygon
 from oceantracker.util import  basic_util, cord_transforms
 from oceantracker.util.numba_util import njitOT, njitOTparallel
-
+from oceantracker.shared_info import shared_info as si
 
 # build node to cell map
 @njitOT
@@ -40,10 +40,11 @@ def build_node_to_triangle_map(tri, x):
     return node_to_tri_map, tri_per_node
 
 # build adjacency matrix from node to triangles map
+domain_edge = int(si.edge_types.domain)
 @njitOT
 def build_adjacency_from_node_tri_map(node_to_tri_map, tri_per_node, tri):
     # build adjacency matrix for use in triangle walk and as lateral boundary of model
-    adjacency = np.full(tri.shape, -1, dtype=np.int32)
+    adjacency = np.full(tri.shape,domain_edge , dtype=np.int32) # fill with domain edges types
 
     # now look for intersection of sets of triangles  for nodes in same face to get adjacent triangles
     for nTri in range(tri.shape[0]):
@@ -169,6 +170,21 @@ def build_grid_outlines(triangles, adjacency,is_boundary_triangle,node_to_tri_ma
     # add domain mask, a polygon made up of bounding box and the domain, usedto plot domain
     out['domain_masking_polygon']=make_domain_mask(out['domain']['points'])
     return out
+
+def make_domain_mask(xy):
+    # make fillable mask outside domain xy with columns (x,y)
+    xy= make_anticlockwise_polygon(xy)
+
+    # bounds
+    bx= [np.min(xy[:, 0]),np.max(xy[:, 0])]
+    by= [np.min(xy[:, 1]),np.max(xy[:, 1])]
+
+    # put box around domain spit at southernmost point
+    n =np.argmin(xy[:,1])
+    xy= np.concatenate(( xy[:n,:],
+                    np.asarray([[bx[0],by[0]],[bx[0],by[1]], [bx[1],by[1]], [bx[1],by[0]]]),
+                    xy[n:,:] ), axis=0)
+    return xy
 
 def calcuate_triangle_areas(xy, tri, geographic_coords=False):
     if geographic_coords:

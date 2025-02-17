@@ -4,7 +4,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 from oceantracker.fields.reader_field import  ReaderField
-from oceantracker.util.polygon_util import make_domain_mask
+import dateutil
 from oceantracker.util import time_util, ncdf_util
 from datetime import datetime
 from os import path
@@ -19,7 +19,7 @@ from oceantracker.util import triangle_utilities, basic_util, cord_transforms
 
 from oceantracker.reader.util import reader_util
 
-from oceantracker.definitions import node_types, cell_search_status_flags
+from oceantracker.definitions import  cell_search_status_flags
 
 from oceantracker.shared_info import shared_info as si
 
@@ -35,12 +35,12 @@ class _BaseReader(ParameterBaseClass):
             'geographic_coords': PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
                                      expert=True),
             'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels across domain'),
-            'time_buffer_size': PVC(24, int, min=2),
+            'time_buffer_size': PVC(24, int, min=2, doc_str='This reader parameter has be removed,  now a top level setting , use  setting "time_buffer_size"', obsolete=True),
             'load_fields': PLC(None, str,
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                make_list_unique=True),
             'one_based_indices': PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
-            'variable_signature':PLC(None, str,doc_str='Variable names used to test if file is this format'),
+            'variable_signature':PLC(None, str,doc_str='Variable names used to test if file is this format, in addition to time , x and velocity variables '),
             'EPSG_code': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
             'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run'),
 
@@ -53,28 +53,31 @@ class _BaseReader(ParameterBaseClass):
                             ),
             'field_variable_map': dict(
                             water_depth=PVC(None, str, doc_str='maps standard internal field name to file variable name',
-                                is_required=True),
+                                ),
+                water_velocity=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
+                water_velocity_depth_averaged=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
                             ),
             'dimension_map': dict(
                             vector2D=PVC(None, str, doc_str='name of dimension names for 2D vectors'),
                             vector3D=PVC(None, str, doc_str='name of dimension names for 3D vectors'),
                             z=PVC( None, str, doc_str='name of dimensions for z layer boundaries '),
-                            all_z_dims=PLC(None, str, doc_str='All z dims used to identify  3D variables'),
+                            all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables', is_required=True),
                             ),
             'field_variables' : PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
-            'drop_variables' :PLC(None, str,doc_str='Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant'),
         })  # list of normal required dimensions
 
         self.info['buffer_info'] = dict( time_steps_in_buffer = [])
         self.grid={}
         self.fields ={}
 
+        self.si = si
+
 
     # Below are required  methods for any new reader
     # ---------------------------------------------------------
 
 
-    def get_hindcast_info(self, catalog): nopass()
+    def add_hindcast_info(self): nopass()
     # get is 3D, vertical grid type and
 
     def read_horizontal_grid_coords(self, grid):   nopass()
@@ -113,189 +116,48 @@ class _BaseReader(ParameterBaseClass):
     # -------------------------------------------------
     # core reader processes
 
-    def initial_setup(self, reader_builder):
-        self.reader_builder = reader_builder
-
-        self.grid_variable_map = reader_builder['grid_info']['variable_map']
-        self.reader_field_vars_map = reader_builder['reader_field_info']
-        self.catalog = reader_builder['catalog']
+    def initial_setup(self):
+        info = self.info
 
         # build dat set from reader builder catalog
-        self.open_dataset()
-        self.dataset.build_dataset_from_catalog(self.catalog)
 
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         # first build data set
 
         info = self.info
-
-        hi = self.reader_builder['hindcast_info']
-        info.update(hi)
-
-        if self.development is not None:
-            si.msg_logger.msg(self.development , warning=True)
+        self.grid = self._build_hori_and_vert_grids()
 
         pass
 
-    def catalog_dataset(self,reader_builder, msg_logger=None, crumbs=None):
-        # get files in time sorted order and info on its fields
-        params = self.params
-        self.open_dataset()
-        reader_builder['catalog'] = self.dataset.build_catalog(params['input_dir'], params['grid_variable_map']['time'],
-                                                  msg_logger=msg_logger, crumbs=crumbs,
-                                                  file_mask=params['file_mask'])
-        catalog = reader_builder['catalog']
-
-        # Builds field_info,  parameters and info  required to set up reader fields
-
-        catalog = reader_builder['catalog']
-
-        reader_builder['hindcast_info'] = catalog['info']
-
-        # additional info on vert grid etc, node dim etc
-        hi = self.get_hindcast_info(catalog)
-
-        # todo check all required fields are set
 
 
-        if hi['vert_grid_type'] is not None and hi['vert_grid_type'] not in si.vertical_grid_types.possible_values():
-            msg_logger.msg(f'Coding error, dont recognise vert_grid_type grid type, got {hi["vert_grid_type"]}, must be one of [None , "Slayer_or_LSC","Zlayer","Sigma"]',
-                hint=f'check reader codes  get_hindcast_info() ', error=True)
 
-        reader_builder['hindcast_info'].update(hi)
-
-        # categorise field variables
-        file_vars = catalog['variables']
-        reader_field_vars_map = {}
-
-        # loop over mapped variables and loaded variables
-        mapped_fields = params['field_variable_map']
-        for name in list(set(params['load_fields'] + list(mapped_fields.keys()))):
-            # if named var not in map, try to use is name as a map,
-            # ie load named field is a file varaiable name
-            if name not in mapped_fields:
-                mapped_fields[name] = name
-                if name not in catalog['variables']:
-                    msg_logger.msg(
-                        f' No  field_variable_map to load variable named "{name}" and no variable in file matching this name, so can not load this field',
-                        hint=f'Add a map for this variable readers "field_variable_map"  param or check spelling loaded variable name matches a file variable, current map is {str(mapped_fields)}',
-                        fatal_error=True)
-
-            # decompose variabele lis
-            var_list = mapped_fields[name]
-            if type(var_list) != list: var_list = [var_list]  # ensure it is a list
-
-            # use first variable to get basic info
-            v1 = var_list[0]
-            if v1 not in file_vars: continue
-
-            field_params = dict(time_varying=file_vars[v1]['has_time'],
-                                is3D=any(x in hi['all_z_dims'] for x in file_vars[v1]['dims']),
-                                )
-            field_params['zlevels'] = reader_builder['hindcast_info']['num_z_levels'] if field_params['is3D'] else 1
-
-            # work out if variable is a vector field
-            file_vars_info = {}
-
-            dm = params['dimension_map']
-            for n_var, v in enumerate(var_list):
-                if v not in file_vars: continue  # listed var not in file, eg vecotion variable has npo vertical velocity
-
-                if dm['vector2D'] is not None and dm['vector2D'] in file_vars[v]['dims']:
-                    n_comp = 2
-                elif dm['vector3D'] is not None and dm['vector2D'] in file_vars[v]['dims']:
-                    n_comp = 3
-                else:
-                    n_comp = 1
-
-                s4D = [params['time_buffer_size'] if field_params['time_varying'] else 1,
-                       hi['num_nodes'],
-                       hi['num_z_levels'] if field_params['is3D'] else 1,
-                       n_comp]
-
-                file_vars_info[v] = dict(vector_components_per_file_var=n_comp,
-                                         shape4D=np.asarray(s4D, dtype=np.int32),
-                                         time_varying= field_params['time_varying'],
-                                         is3D= field_params['is3D'] ,
-                                         dims = list(file_vars[v]['dims'].keys()))
-
-            field_params['is_vector'] = sum(x['vector_components_per_file_var'] for x in file_vars_info.values()) > 1
-            reader_field_vars_map[name] = dict(file_vars_info=file_vars_info,
-                                               params=field_params)
-            if len(file_vars_info) < len(var_list):
-                msg_logger.msg(f'not all vector components found for field {name}',
-                       hint=f'missing file variables {[x for x in var_list if x not in file_vars_info]}', warning=True)
-
-        # record field map
-        reader_builder['reader_field_info'] = reader_field_vars_map
-        catalog['reader_field_info'] = reader_field_vars_map
-        # add grid variable info
-        reader_builder['grid_info'] = dict(variable_map= params['grid_variable_map'])
-
-        msg_logger.exit_if_prior_errors('Errors matching field variables with those in the file, see above')
-
-        return reader_builder
-
-    def open_dataset(self):
-        params = self.params
-        self.dataset = OceanTrackerDataSet(drop_variables=params['drop_variables'])
-
-
-    def build_reader(self, gridID=0):
-
-        # make grid
-        self.grid = self._set_up_grid()
-        grid = self.grid
-        params = self.params
+    def build_fields(self):
         info = self.info
-        info['gridID'] = gridID
-
-        if si.settings.use_geographic_coords:
-            if not info['geographic_coords']:
-                # if not already in geographic
-                if params['EPSG_code'] is None:
-                    si.msg_logger.msg('When using geographic coords and hydromodel not already in geographic coords, Reader must have "EPSG_code" parameter set to do conversion',
-                                      hint = 'EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes for hydro model at at https://spatialreference.org/',
-                                      caller = self, fatal_error=True)
-                # do conversion
-                grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
+        # make grid
 
 
-            # fix any spanning 179 to -179
-            grid['x'] = fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
-                                                crumbs=f'setting up reader in dir=  {self.params["input_dir"]}')
-            # set up conversion of meters to degreees
-            i = self._add_a_reader_field('degrees_per_meter',dict(time_varying=False,is3D=False, is_vector=True, write_interp_particle_prop_to_tracks_file=False ),dummy=True)
-            i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'])
-            pass
-
-        reader_builder= self.reader_builder
-
-        self._set_up_interpolator(reader_builder)
-        self._setup_fields(reader_builder)
+        self._set_up_interpolator()
+        self._setup_fields()
 
         # set up ring buffer  info
         bi = self.info['buffer_info']
         bi['n_filled'] = 0
-        bi['buffer_size'] = self.params['time_buffer_size']
-        bi['buffer_available'] = bi['buffer_size']
+        bi['time_buffer_size'] = si.settings.time_buffer_size
+        bi['buffer_available'] = si.settings.time_buffer_size
         bi['nt_buffer0'] = 0
-
-
 
 
     def final_setup(self):      pass
 
-    def _set_up_grid(self):
+    def _build_hori_and_vert_grids(self):
         grid={}
         grid = self.build_hori_grid(grid)
-        grid = self.construct_grid_variables(grid)
-
+        grid = self._construct_hori_grid_variables(grid)
 
         if self.info['is3D']:
             grid = self.build_vertical_grid(grid)
-
         else:
             # 2D
             grid['zlevel'] = None
@@ -308,19 +170,65 @@ class _BaseReader(ParameterBaseClass):
                     si.msg_logger.msg(f'Reader type error {name} must be dtype {np.float64} ', warning=True)
         return grid
 
+
+
+    def _time_sort_variable_fileIDs(self):
+        # sort variable fileIDs by time, now all files are read
+        info = self.info
+        fi = info['file_names']
+
+        for v_name, item in info['variables'].items():
+            if item['has_time']:
+                item['fileIDs'] = np.asarray(item['fileIDs'])
+                start_times = np.asarray([fi[x]['start_time'] for x in item['fileIDs']])
+                file_order = np.argsort(start_times)
+                item['fileIDs'] = item['fileIDs'][file_order]
+                # get first time step in the file
+                time_steps = np.asarray([fi[x]['time_steps'] for x in item['fileIDs']])
+                first_time_step_in_file = np.cumsum(time_steps) - time_steps[0]
+                # insert first time step into the file info in time order
+                # this will be unnecessarily  repeated, if more than one variable in a file
+                for n, fID in enumerate(item['fileIDs']):
+                    fi[fID]['first_time_step_in_file'] = first_time_step_in_file[n]
+            else:
+                item['fileIDs'] = item['fileIDs'][0]
+
+        pass
+
     def build_hori_grid(self, grid):
         # read nodal values and triangles
         params = self.params
         info = self.info
         grid = self.read_horizontal_grid_coords(grid) # read nodal x's
 
-        bounds =np.asarray( [grid['x'].min(axis=0), grid['x'].max(axis=0)])
+        if si.settings.use_geographic_coords or info['geographic_coords']:
+            if not info['geographic_coords']:
+                # if not already in geographic
+                if params['EPSG_code'] is None:
+                    si.msg_logger.msg(
+                        'When using geographic coords and hydromodel not already in geographic coords, Reader must have "EPSG_code" parameter set to do conversion',
+                        hint='EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes for hydro model at at https://spatialreference.org/',
+                        caller=self, fatal_error=True)
+                # do conversion
+                grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
 
+            # fix any spanning 179 to -179
+            grid['x'] = fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
+                                                crumbs=f'setting up reader in dir=  {self.params["input_dir"]}')
+            # set up conversion of meters to degreees
+            i = self._add_a_reader_field('degrees_per_meter', dict(time_varying=False, is3D=False, is_vector=True,
+                              write_interp_particle_prop_to_tracks_file=False),  dummy=True)
+            i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'])
+            si.msg_logger.msg('Converted hindcast to geographic coords',note=True)
+            pass
+
+        # get bounding box
+        bounds =np.asarray( [grid['x'].min(axis=0), grid['x'].max(axis=0)])
         b = f'{np.array2string(bounds[0], precision=3, floatmode="fixed")} to {np.array2string(bounds[1], precision=3, floatmode="fixed")}'
 
         info['bounding_box'] = b
         si.msg_logger.msg(f'Hydro-model is "{"3D" if info["is3D"] else "2D"}", type "{self.__class__.__name__}"',
-                          tabs=2,note=True, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
+                          tabs=2, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
         si.msg_logger.msg(f'Geographic coords = "{info["geographic_coords"] }" ',tabs=4)
         si.msg_logger.msg(f'Hindcast start: {info["start_date"]}  end:  {info["end_date"]}', tabs=4)
         dt = time_util.seconds_to_pretty_duration_string(info['time_step'])
@@ -340,7 +248,7 @@ class _BaseReader(ParameterBaseClass):
 
         return grid
 
-    def construct_grid_variables(self, grid):
+    def _construct_hori_grid_variables(self, grid):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
         info = self.info
@@ -368,16 +276,16 @@ class _BaseReader(ParameterBaseClass):
         msg_logger.progress_marker('built domain and island outlines', start_time=t0,tabs=2)
 
         # make island and domain nodes, not in regular grid some nodes may be unsed so mark as land
-        grid['node_type'] = np.full(grid['x'].shape[0],  node_types.land,dtype=np.int8) # mark all as land
+        grid['node_type'] = np.full(grid['x'].shape[0],  si.node_types.land,dtype=np.int8) # mark all as land
 
         # now mark all active nodes, those in a triangle,  as inside model
-        grid['node_type'][np.unique(grid['triangles'])] = node_types.interior
+        grid['node_type'][np.unique(grid['triangles'])] = si.node_types.interior
 
         # now mark boundary nodes
         for c in grid['grid_outline']['islands']:
-            grid['node_type'][c['nodes']] = node_types.island_boundary
+            grid['node_type'][c['nodes']] = si.node_types.island_boundary
 
-        grid['node_type'][grid['grid_outline']['domain']['nodes']] = node_types.domain_boundary
+        grid['node_type'][grid['grid_outline']['domain']['nodes']] = si.node_types.domain_boundary
 
         t0 = perf_counter()
         grid['triangle_area'] = triangle_utilities.calcuate_triangle_areas(grid['x'], grid['triangles'],info['geographic_coords'])
@@ -387,22 +295,23 @@ class _BaseReader(ParameterBaseClass):
         # adjust node type and adjacent for open boundaries
         # todo define node and adjacent type values in dict, for single definition and case info output?
         is_open_boundary_node = self.read_open_boundary_data_as_boolean(grid)
-        grid['node_type'][is_open_boundary_node] = node_types.open_boundary
+        grid['node_type'][is_open_boundary_node] = si.node_types.open_boundary
+        info['has_open_boundary'] = np.any(is_open_boundary_node)
 
         is_open_boundary_adjacent = reader_util.find_open_boundary_faces(grid['triangles'], grid['is_boundary_triangle'], grid['adjacency'], is_open_boundary_node)
 
-        grid['adjacency'][is_open_boundary_adjacent] = cell_search_status_flags.open_boundary_edge
+        grid['adjacency'][is_open_boundary_adjacent] = si.edge_types.open_boundary
 
         grid['limits'] = np.asarray([np.min(grid['x'][:, 0]), np.max(grid['x'][:, 0]), np.min(grid['x'][:, 1]), np.max(grid['x'][:, 1])])
 
         # now set up time buffers
-        time_buffer_size = self.params['time_buffer_size']
+        time_buffer_size = si.settings.time_buffer_size
         grid['time'] = np.zeros((time_buffer_size,), dtype=np.float64)
         grid['date'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')  # time buffer
         grid['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
 
         # space for dry cell info
-        grid['is_dry_cell_buffer'] = np.full((self.params['time_buffer_size'], grid['triangles'].shape[0]), 1, np.int8)
+        grid['is_dry_cell_buffer'] = np.full((time_buffer_size, grid['triangles'].shape[0]), 1, np.int8)
 
         # reader working space for 0-255 index of how dry each cell is currently, used in stranding, dry cell blocking, and plots
         grid['dry_cell_index'] = np.full((grid['triangles'].shape[0],), 0, np.uint8)
@@ -433,7 +342,7 @@ class _BaseReader(ParameterBaseClass):
         if info['vert_grid_type'] in [vgt.LSC, vgt.Slayer]:
             # native  vertical grid option, could be  Schisim LCS vertical grid
             # used to size field data arrays
-            s = [self.params['time_buffer_size'], grid['x'].shape[0], info['num_z_levels']]
+            s = [si.settings.time_buffer_size, grid['x'].shape[0], info['num_z_levels']]
             grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
             info['read_zlevels'] = True
 
@@ -453,10 +362,10 @@ class _BaseReader(ParameterBaseClass):
         return quad_cells_to_split, tri
 
 
-
-    def _setup_fields(self, reader_builder):
+    def _setup_fields(self):
         # setup field classes , ie make memory buffer
-        cat =self.dataset.catalog
+        info = self.info
+        params = self.params
         fields = self.fields
 
         # add essential fields- water depth, tide, water velocity
@@ -468,7 +377,7 @@ class _BaseReader(ParameterBaseClass):
         self.setup_water_velocity_field()
 
         # first reader fields
-        load_fields= reader_builder['params']['load_fields']
+        load_fields= params['load_fields']
 
         # add reader fields
         for name  in list(set(load_fields)):
@@ -481,31 +390,31 @@ class _BaseReader(ParameterBaseClass):
                     i.data = self.read_field_data(name, i)
 
     def _add_a_reader_field(self, name, params={},dummy=False):
-        reader_builder = self.reader_builder
+        info = self.info
 
-        hi = reader_builder['hindcast_info']
         params = deepcopy(params)
         params['name'] = name
         if not dummy:
-            params.update(reader_builder['reader_field_info'][name][ 'params'])
+            params.update(info['field_info'][name][ 'params'])
 
-        i = si._class_importer.make_class_instance_from_params('fields', params,
-                                        default_classID='field_reader',
+        i = si.class_importer.make_class_instance_from_params('fields', params,
+                                       add_required_classes_and_settings=False,
+                                        default_classID='field_reader',initialize=False,
                                         check_for_unknown_keys=False, crumbs=f'Adding reader field "{name}"')
-        i.initial_setup(self.params['time_buffer_size'], hi, self.fields)
+        i.initial_setup(info)
 
         # add variable info on file variables list for reader fields
-        if name in reader_builder['reader_field_info']:
-            i.info.update(file_vars_info=reader_builder['reader_field_info'][name]['file_vars_info'],
-                          )
+        if name in info['field_info']:
+            i.info.update(file_vars_info=info['field_info'][name]['file_vars_info'] )
 
         self.fields[name] = i
         return i
 
 
-    def _set_up_interpolator(self, reader_builder):
+    def _set_up_interpolator(self):
+
         if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
-        i = si._class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
+        i = si.class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
                                              default_classID='interpolator', caller= self,
                                              crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
         i.initial_setup(self)
@@ -527,24 +436,12 @@ class _BaseReader(ParameterBaseClass):
         return data
 
     def setup_water_velocity_field(self):
-        reader_builder = self.reader_builder
-        fi = reader_builder['reader_field_info']
+        info = self.info
+        fi = info['field_info']
         #todo move check on whether vertical vel is in files here
 
-        # look for depth averaged if 3D velocity not there
-        if 'water_velocity' not in fi:
-            if 'water_velocity_depth_averaged' not in fi:
-                # use depth average if vailable
-                si.msg_logger.msg('Cannot find water_velocity components or depth averaged water velocity components in hindcast',
-                               hint=f'Found variables mapped to {str(fi.keys())} \n File variables are {str(reader_builder["catalog"]["variables"].keys())}',
-                               fatal_error=True)
-
-            fi['water_velocity'] = fi['water_velocity_depth_averaged']
-            fi.pop('water_velocity_depth_averaged')
-            si.msg_logger.msg('No 3D velocity variables in hindcast, using depth averaged water velocity instead in 2D mode',
-                note=True)
-
         i = self._add_a_reader_field('water_velocity')
+
         return i
 
     def update_water_velocity_field(self, buffer_index, nt):
@@ -558,6 +455,7 @@ class _BaseReader(ParameterBaseClass):
             data = reader_util.patch_bottom_velocity_to_make_it_zero(data, self.grid['bottom_cell_index'])
 
         field.data[buffer_index, ...] = data
+
         return data
 
     #------------------------------------------------------------------------------------------------
@@ -574,8 +472,8 @@ class _BaseReader(ParameterBaseClass):
         current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
 
         # ring buffer locations of surrounding steps
-        current_buffer_steps[0] = current_hydro_model_step % bi['buffer_size']
-        current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.model_direction)) % bi['buffer_size']
+        current_buffer_steps[0] = current_hydro_model_step % si.settings.time_buffer_size
+        current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.model_direction)) % si.settings.time_buffer_size
 
         time_hindcast = grid['time'][current_buffer_steps[0]]
 
@@ -606,10 +504,10 @@ class _BaseReader(ParameterBaseClass):
         params = self.params
         md = si.run_info.model_direction
         t0 = perf_counter()
-        hi = self.dataset.catalog['info'] # hindcast info
+
         info = self.info
         bi = info['buffer_info']
-        buffer_size = bi['buffer_size']
+        buffer_size = si.settings.time_buffer_size
 
         bi['buffer_available'] = buffer_size
         nt0_hindcast = self.time_to_hydro_model_index(time_sec)
@@ -698,14 +596,41 @@ class _BaseReader(ParameterBaseClass):
             grid['zlevel'][buffer_index,...] =  self.read_zlevel(nt)
         pass
 
-    def read_time(self, nt):
-        # assume time is seconds or datetime64
-        time_var = self.info['time_variable']
-        time = self.dataset.read_variable(time_var, nt=nt)
-        time = time.coords[time_var].data
 
-        if time.dtype == np.dtype('<M8[ns]'):
-            time = time.astype('datetime64[s]').astype(np.float64)
+    def decode_time(self,time):
+        # decode time as numpy array in seconds since 1970, input must be xarray variable
+        # defaults assumes time has units for cf complinance
+
+        units = time.attrs['units']
+
+        unit, date = units.split('since')
+        unit= unit.strip()
+
+        date = date.split('+')[0] # remove "+" time zone data
+        date = date.strip()
+        d0 = np.datetime64(date).astype('datetime64[s]').astype(np.float64) # seconds since 1970
+
+        t = time.data
+        if unit == 'seconds':
+            t = t.astype(np.float64)
+        elif  unit == 'minutes':
+            t = t.astype(np.float64)*60.
+        elif  unit == 'hours':
+            t = t.astype(np.float64)*3600.
+        elif unit == 'days':
+            t = t.astype(np.float64) * 3600.*24.
+        else:
+            si.msg_logger(f'Unrecognised time unit = {unit}', hint="must be one of [seconds,minutes,hours,days]")
+
+
+        t = t + d0
+        return t
+
+    def read_time(self, nt=None):
+        # assume time is cf convention
+        time_var = self.info['time_var']
+        time = self.dataset.read_variable(time_var, nt=nt)
+        time = self.decode_time(time)
         return  time
 
     def _vertical_regrid_Slayer_field_to_uniform_sigma(self,name, data):
@@ -732,7 +657,7 @@ class _BaseReader(ParameterBaseClass):
 
     def hydro_model_index_to_buffer_index(self, nt_hindcast):
         # ring buffer mapping
-        return nt_hindcast % self.info['buffer_info']['buffer_size']
+        return nt_hindcast % si.settings.time_buffer_size
 
 
     def are_time_steps_in_buffer(self, time_sec):
@@ -744,49 +669,42 @@ class _BaseReader(ParameterBaseClass):
         nt_hindcast = self.time_to_hydro_model_index(time_sec)
         return nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
-    def detect_lonlat_grid(self, msg_logger):
+    def detect_lonlat_grid(self):
         x = self.dataset.read_variable(self.params['grid_variable_map']['x']).data
         # look at range to see if too small to be meters grid
         islatlong=  (np.nanmax(x)- np.nanmin(x) < 360) or (np.nanmax(x)- np.nanmin(x) < 360)
 
         if islatlong:
-            msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so using a native  (lon, lat ) a grid, all input coords  should be be lon lat ', note=True,
+            si.msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so using a native  (lon, lat ) a grid, all input coords  should be be lon lat ', note=True,
                               caller = self)
 
         return islatlong
 
-    def write_hydro_model_grid(self):
+    def write_grid(self, gridID):
         # write a netcdf of the grid from first hindcast file
+        #todo
         grid = self.grid
         info = self.info
-        output_files = si.output_files
+        if 'grid' not in si.output_files: si.output_files['grid'] = []
 
-        # add to list of outptut files
-        if info['gridID'] ==0:
-            # primary/outer grid
-            f_name= output_files['raw_output_file_base'] + '_grid.nc'
-            output_files['grid'] = f_name
-        else:
-            if 'nested_grids' not in output_files: output_files['nested_grids'] = []
-            f_name = output_files['raw_output_file_base'] + f'_grid{info["gridID"]:03d}.nc'
-            output_files['nested_grids'].append(f_name)
+        f_name = si.output_files['raw_output_file_base'] + f'_grid{gridID:03d}.nc'
+        si.output_files['grid'].append(f_name)
 
-        # only  write grid for first parallel cases
-        if si.run_info.caseID > 0: return
-
-        nc = ncdf_util.NetCDFhandler(path.join(output_files['run_output_dir'], f_name), 'w')
+        nc = ncdf_util.NetCDFhandler(path.join(si.output_files['run_output_dir'], f_name), 'w')
         nc.write_global_attribute('index_note', ' all indices are zero based')
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
         nc.write_global_attribute('geographic_coords_used', 1 if self.info['geographic_coords'] else 0)
-
 
 
         nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
         nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
         nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(cell_search_status_flags.get_edge_vars()))
-        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(node_types.asdict())}, description='type of node, types are' + str(node_types.asdict()))
+        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
+        nc.write_a_new_variable('node_to_tri_map', grid['node_to_tri_map'], ('node_dim','max_nodes_per_tri'))
+        nc.write_a_new_variable('tri_per_node', grid['tri_per_node'], ('node_dim',))
+        nc.write_a_new_variable('bc_transform', grid['bc_transform'], ('triangle_dim','bc_transform_rows','bc_transform_cols'))
 
         if 'water_depth' in self.fields:
             nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))

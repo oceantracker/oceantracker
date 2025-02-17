@@ -14,7 +14,7 @@
 # 
 # 
 
-# In[7]:
+# In[1]:
 
 
 # build a more complex dictionary of parameters using code
@@ -66,7 +66,7 @@ yaml_util.write_YAML('./example_param_files/param_test1.yaml', params)
 # 
 #   yaml format has no brackets/braces and relies on tab indenting to nest items
 
-# In[8]:
+# In[2]:
 
 
 # show the params in yaml format
@@ -101,7 +101,7 @@ print( yaml.dump(p))
 # 
 # Is line below!
 
-# In[9]:
+# In[3]:
 
 
 # run oceantracker using param dict built in cells above
@@ -111,7 +111,7 @@ case_info_file_name = main.run(params)
 # case_info file is the name of a json file useful in plotting results 
 
 
-# In[10]:
+# In[4]:
 
 
 # plot animation of results
@@ -142,9 +142,15 @@ HTML(anim.to_html5_video())# this is slow to build!
 # 
 # On Windows, do this within an anaconda/miniconda prompt window with an activated environment.
 # 
-# eg. run "run_ot_cmd_line.py" script in the oceantracker/oceantracker directory with command
+# eg. run "run_oceantracker.py" script in the oceantracker/oceantracker directory with command
 # 
-# ``python  run_ot_cmd_line.py ./example_param_files/param_test1.json``
+# ``python  ../oceantracker/run_oceantracker.py ./example_param_files/param_test1.json``
+
+# In[2]:
+
+
+get_ipython().system('python  ../oceantracker/run_ot_cmd_line.py ./example_param_files/param_test1.json')
+
 
 # ### Options when running at command line
 # 
@@ -155,7 +161,7 @@ HTML(anim.to_html5_video())# this is slow to build!
 # 
 # the full arguments are below
 
-# In[11]:
+# In[3]:
 
 
 get_ipython().system('python ../oceantracker/run_ot_cmd_line.py -h')

@@ -9,6 +9,8 @@ from oceantracker.util.parameter_checking import _ParameterBaseDataClassChecker,
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.shared_info import shared_info as si
 si._setup()
+si.class_importer._build_class_tree_ans_short_name_map()
+
 from oceantracker import definitions
 
 class RSTfileBuilder(object):
@@ -63,6 +65,7 @@ class RSTfileBuilder(object):
 
     def write(self):
         file_name = path.join(self.docs_dir, self.file_name)
+        print('writing:', path.basename(file_name))
         with open(file_name ,'w') as f:
             for l in self.lines:
                 indent=l['indent'] * '\t'
@@ -75,8 +78,10 @@ class RSTfileBuilder(object):
                         f.write(indent + '\t:' + p + ': ' +str(val) + '\n')
                     f.write(indent + '\n')
                     o = sorted(l['body']) if l['direct_type'] =='toctree' and l['sort_body'] else l['body']
+
                     for b in o:
-                        f.write(indent +'\t' +b +'\n')
+                        if b is not None:
+                            f.write(indent +'\t' + b +'\n')
                     f.write(indent + '\n')
 
     def add_new_toc_to_page(self, toc_name, indent=0, maxdepth=2, sort_body=False):
@@ -167,7 +172,7 @@ class RSTfileBuilder(object):
 def make_class_sub_pages(class_role, link_tag=''):
     # make doc pages from defaults of all python in named dir
 
-    mods= si._class_importer.class_tree[class_role]
+    mods= si.class_importer.class_tree[class_role]
 
     toc = RSTfileBuilder(class_role+'_toc', class_role + link_tag)
 
@@ -181,15 +186,14 @@ def make_class_sub_pages(class_role, link_tag=''):
 
         p.add_lines('**Doc:** ' + ('' if doc_str is None else doc_str.replace("\n","")) )
         p.add_lines()
-        short_name = info["mod_str"].split(".")[-1]
+        short_name = info["class_name"].split(".")[-1]
         p.add_lines(f'**short class_name:** {short_name}')
         p.add_lines()
-        p.add_lines(f'**full class_name :** {info["mod_str"]}')
+        p.add_lines(f'**full class_name :** {info["class_name"]}')
         p.add_lines()
 
         if instance.development is not None or  short_name.lower().startswith('dev') :
-            m = 'Class is under development may not yet work in all cases, if errors contact developer' \
-                    if instance.deveplment is None else instance.development
+            m = f'Class is under development may not yet work in all cases, if errors contact developer'
 
             p.add_directive('warning',body=m)
 
@@ -241,7 +245,7 @@ def build_param_ref():
 
     # core classes
     page.add_heading('Core "class" roles',level=2)
-    page.add_lines('Only one core class per role. These have singular role names.')
+    page.add_lines('Only one class in each role role. These have singular role names.')
     page.add_new_toc_to_page('core', maxdepth=1)
     for key in sorted(si.core_class_roles.possible_values()):
         toc = make_class_sub_pages(key)
@@ -273,7 +277,7 @@ if __name__ == "__main__":
     from glob import  glob
 
     chdir(r'../tutorials_how_to')
-    print('h')
+
     dest = r'../docs/info/how_to'
     for f in glob('*.ipynb'):
         subprocess.run('jupyter nbconvert '+ f + '  --to rst')

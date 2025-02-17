@@ -6,19 +6,21 @@ import difflib
 from time import sleep
 import inspect
 
-class GracefulError(Exception):
+class OTerror(Exception):
     def __init__(self, message='-no error message given',hint=None):
         # Call the base class constructor with the parameters it needs
         msg= 'Error >> ' + message + '\n hint= ' + hint if hint is not None else ' Look at messages above or in .err file'
-        super(GracefulError, self).__init__(msg)
+        super(OTerror, self).__init__(msg)
 
-
+class OTfatal_error(OTerror): pass
+class OTunexpected_error(OTerror): pass
 
 class MessageLogger(object ):
     def __init__(self):
 
 
         self.reset()
+        self.set_screen_tag('prelim')
 
         # build links lookup
         link_map= [['parameter_ref_toc', 'info/parameter_ref/parameter_ref_toc.html'],
@@ -38,13 +40,13 @@ class MessageLogger(object ):
         self.error_count = 0
         self.warning_count = 0
         self.note_count = 0
-        self.screen_tag = 'prelim:'
         self.max_warnings = 25
 
 
     def settings(self, max_warnings=None):
         self.max_warnings = None if max_warnings is None else 25
-    def set_screen_tag(self, screen_tag:str): self.screen_tag = screen_tag
+    def set_screen_tag(self, screen_tag:str): self.screen_tag = screen_tag + ':'
+
     def set_max_warnings(self, n:int): self.max_warnings = n
 
     def set_up_files(self, run_output_dir, output_file_base, append=False):
@@ -141,7 +143,7 @@ class MessageLogger(object ):
 
         # todo add traceback to message?
         if fatal_error:
-            raise GracefulError('Fatal error cannot continue')
+            raise OTerror('Fatal error cannot continue')
         pass
     def _append_message(self, m, msg, tabs):
         # append allowing  line breaks
@@ -160,7 +162,7 @@ class MessageLogger(object ):
                 self.msg(m)
             self.hori_line()
             sleep(1) # allow time for messages to print
-            raise GracefulError('Fatal error cannot continue >>> ' +msg if msg is not None else '', hint='Check above or run.err file for errors')
+            raise OTerror('Fatal error cannot continue >>> ' + msg if msg is not None else '', hint='Check above or run.err file for errors')
 
     def hori_line(self, text=None):
         n= 70
@@ -186,9 +188,12 @@ class MessageLogger(object ):
                     if self.log_file is not None:
                         self.log_file.write(l + '\n')
 
-    def write_error_log_file(self, e,traceback_str):
+    def write_error_log_file(self, e):
         sleep(.5)
-        self.msg(traceback_str)
+        self.msg(str(e))
+        tb = traceback.format_exc()
+        self.msg(tb)
+
         with open(path.normpath(self.error_file_name),'w') as f:
             f.write('_____ Known warnings and Errors ________________________________\n')
             for t in [self.notes_list, self.warnings_list, self.errors_list]:
@@ -197,8 +202,7 @@ class MessageLogger(object ):
 
             f.write('________Trace back_____________________________\n')
             f.write(str(e))
-            f.write(traceback_str)
-
+            f.write(tb)
 
     def spell_check(self, msg, key: str, possible_values: list,hint=None, **kwargs):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''

@@ -10,10 +10,10 @@ from tests.unit_tests import test_definitions
 def main(args):
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__,args))
-    ot.settings(time_step=1800 )
+    ot.settings(time_step=1800, particle_buffer_initial_size=20000,
+                processors=1)
 
-    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
-                 NCDF_particle_chunk= 500) # keep file small
+    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False)
 
     #ot.settings(NUMBA_cache_code = True)
     hm = test_definitions.hydro_model['demoSchism3D']

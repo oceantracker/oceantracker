@@ -12,9 +12,9 @@ import oceantracker.main
 from oceantracker.util.json_util import read_JSON , write_JSON
 
 def get_params(datasource=1):
-    time_step = 300  # 5min
+    time_step = 60  # 5min
     release_interval = 3600
-    pulse_size = 1500
+    pulse_size = 50000
     calculation_interval = 3 * 3600
     if datasource==1:
         output_file_base= 'Sounds'
@@ -24,7 +24,7 @@ def get_params(datasource=1):
 
     elif datasource==2:
         output_file_base= 'Sounds'
-        input_dir =  '/hpcfreenas/hindcast/MarlbroughSounds_hindcast_10years_BenPhd_2019ver'
+        input_dir =  '/hpcfreenas/hindcast/UpperSouthIsland/MarlbroughSounds_hindcast_10years_BenPhd_2019ver/'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = '/hpcfreenas/ross/oceanTrackerOutput/profiling/'
 
@@ -37,7 +37,7 @@ def get_params(datasource=1):
         time_step = 60  # 1min
         release_interval = 600
         pulse_size = 200
-        calculation_interval = 3*3600
+        calculation_interval = 3600
 
 
     points= [[1595000, 5482600. , -1],
@@ -58,7 +58,9 @@ def get_params(datasource=1):
         {'root_output_dir': root_output_dir, 'output_file_base': output_file_base, 'debug': False,
          'time_step': time_step,
         'screen_output_time_interval':6*time_step,
-         'max_run_duration': 6 *24*3600,  # 10 days
+         'max_run_duration': 1 *24*3600,  # 1 days
+         'processors': 30,
+         #'NUMBA_cache_code' : True,
          'reader': {'input_dir': input_dir,
                     'file_mask': file_mask,
                     #'time_buffer_size': 3,
@@ -104,17 +106,16 @@ def run(profiler_name, params):
 
     results_file = 'PItest_%03.0f' % test_version + params['output_file_base']
     full_ouput_dir = path.join(params['root_output_dir'], params['output_file_base'])
-    run_info_file = path.join(full_ouput_dir, params['output_file_base'] + '_runInfo.json')
     case_info_file = path.join(full_ouput_dir, params['output_file_base'] + '_caseInfo.json')
 
     oceantracker.main.run(params)
-    ri = read_JSON(run_info_file)
+
+    ci = read_JSON(case_info_file)
     d = path.join(profile_dir, profiler_name, params['output_file_base'], platform.processor().replace(' ', '_').replace(',', '_'))
     makedirs(d, exist_ok=True)
-    fnn = path.join(d, results_file + '_CodeVer_' + ri['version_info']['str'].replace(' ', '_').replace(',', '_'))
+    fnn = path.join(d, results_file + '_CodeVer_' + ci['version_info']['str'].replace(' ', '_').replace(',', '_'))
 
     # copy case file
-    ci = read_JSON(case_info_file)
     write_JSON(fnn +'_caseInfo.json', ci)
 
     print('Profile results in ', fnn)
@@ -142,7 +143,28 @@ if __name__ == '__main__':
 
 
     if args.profiler == 0:
-        oceantracker.main.run(params)
+        import cProfile
+        import pstats
+        import time
+        profiler = cProfile.Profile()
+
+        profiler.enable()
+        fnn = run('cProfile', params)
+        profiler.disable()
+
+        prof_file = fnn + ".prof"
+        profiler.dump_stats(prof_file)  # Save results to a file
+
+        with open(fnn + "_tottime.txt", "w") as f:
+            ps = pstats.Stats(prof_file, stream=f)
+            ps.sort_stats('tottime')
+            ps.print_stats()
+
+        with open(fnn + "_cumtime.txt", "w") as f:
+            ps = pstats.Stats(prof_file, stream=f)
+            # ps.sort_stats('cumulative')
+            ps.sort_stats('cumtime')
+            ps.print_stats()
 
     elif args.profiler==1:
         import pyinstrument

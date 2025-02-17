@@ -35,7 +35,7 @@ class SplitParticles(_BaseTrajectoryModifier):
         params = self.params
         self.add_scheduler('splitter01', interval=params['interval'], caller=self)
 
-        self.statuses_to_split = IDmapToArray(si.particle_status_flags, params['statuses'])
+        self.statuses_to_split = IDmapToArray(si.particle_status_flags.asdict(), params['statuses'])
 
         self.age_bounds= np.asarray([ 0. if params['min_age'] is None else params['min_age'],
                                      si.info.large_float if params['max_age'] is None else params['max_age']
@@ -69,7 +69,7 @@ class SplitParticles(_BaseTrajectoryModifier):
                     IDrelease_group = part_prop['IDrelease_group'].get_values(split),
                     n_cell = part_prop['n_cell'].get_values(split),
                     IDpulse = part_prop['IDpulse'].get_values(split),
-                    bc_cords = part_prop['bc_cords'].get_values(split),
+                    bc_coords = part_prop['bc_coords'].get_values(split),
                     hydro_model_gridID = part_prop['hydro_model_gridID'].get_values(split),
                     )
             si.core_class_roles.particle_group_manager.release_a_particle_group_pulse(release_data, time_sec)

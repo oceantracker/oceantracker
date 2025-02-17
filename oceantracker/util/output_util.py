@@ -6,7 +6,7 @@ from oceantracker.shared_info import shared_info as si
 
 def add_particle_status_values_to_netcdf(nc):
     # write status values to file as attributes
-    for key, val in si.particle_status_flags.as_dict().items():
+    for key, val in si.particle_status_flags.asdict().items():
         nc.write_global_attribute('status_' + key, int(val))
 
 def write_release_group_netcdf():

@@ -14,9 +14,9 @@ from collections import Counter
 def run_code(F,reps=10):
     # run code with different particle sections
 
-    # randomise which cells are used and their bc_cords
+    # randomise which cells are used and their bc_coords
     n_cell =np. random.random((N,)).astype(np.int32)
-    bc_cords= np. random.random((N,3)).astype(data.dtype)
+    bc_coords= np. random.random((N,3)).astype(data.dtype)
     nz_cell =np. random.randint(0,data.shape[1]-1,N).astype(np.int32)
     z_frac= np. random.random((N,2)).astype(data.dtype)
     z_frac[:,1] = 1.0- z_frac[:,0]
@@ -26,18 +26,18 @@ def run_code(F,reps=10):
     sel = np.flatnonzero(mask).astype(np.int32)
 
     if F == DataByTri:
-        F(data_tri,bc_cords, n_cell,nz_cell, z_frac,out,sel)
+        F(data_tri,bc_coords, n_cell,nz_cell, z_frac,out,sel)
         check_sum=  out[sel,:].sum()
-        t= time_numba_code(F,data_tri,bc_cords, n_cell,nz_cell, z_frac,out,sel,number=reps )
+        t= time_numba_code(F,data_tri,bc_coords, n_cell,nz_cell, z_frac,out,sel,number=reps )
 
     elif F == DataByTriPlus:
-        F(data_tri2,bc_cords, n_cell,nz_cell, z_frac,out,sel)
+        F(data_tri2,bc_coords, n_cell,nz_cell, z_frac,out,sel)
         check_sum=  out[sel,:].sum()
-        t= time_numba_code(F,data_tri2,bc_cords, n_cell,nz_cell, z_frac,out,sel,number=reps )
+        t= time_numba_code(F,data_tri2,bc_coords, n_cell,nz_cell, z_frac,out,sel,number=reps )
     else:
-        F(data,triangles,bc_cords, n_cell,nz_cell, z_frac,out,sel)
+        F(data,triangles,bc_coords, n_cell,nz_cell, z_frac,out,sel)
         check_sum=  out[sel,:].sum()
-        t= time_numba_code(F,data,triangles,bc_cords, n_cell,nz_cell, z_frac,out,sel,number=reps )
+        t= time_numba_code(F,data,triangles,bc_coords, n_cell,nz_cell, z_frac,out,sel,number=reps )
 
     return t,check_sum
 
@@ -47,7 +47,7 @@ def sel_fraction(N,frac=0.5):
     return sel,mask
 
 @njit
-def CurrentFunc(data, triangles, bc_cords, n_cell,nz_cell, z_fraction, out, sel):
+def CurrentFunc(data, triangles, bc_coords, n_cell,nz_cell, z_fraction, out, sel):
     # 3D vector
      for n in sel:
          nodes = triangles[n_cell[n], :]
@@ -56,9 +56,9 @@ def CurrentFunc(data, triangles, bc_cords, n_cell,nz_cell, z_fraction, out, sel)
          for m in range(3):
              for n_comp in range(3):
                 temp = z_fraction[n,0]* data[nodes[m],nz_cell[n],n_comp]+z_fraction[n, 1]* data[nodes[m],nz_cell[n]+1,n_comp]
-                out[n,n_comp] += bc_cords[n,m] *temp
+                out[n,n_comp] += bc_coords[n,m] *temp
 @njit
-def CurrentFuncPlus(data, triangles, bc_cords, n_cell,nz_cell, z_fraction, out, sel):
+def CurrentFuncPlus(data, triangles, bc_coords, n_cell,nz_cell, z_fraction, out, sel):
 
      for n in sel:
          nodes = triangles[n_cell[n], :]
@@ -69,10 +69,10 @@ def CurrentFuncPlus(data, triangles, bc_cords, n_cell,nz_cell, z_fraction, out, 
              for n_comp in range(3):
                 temp = z_fraction[n, 0] * d[0,n_comp]
                 temp +=z_fraction[n, 1] * d[1,n_comp]
-                out[n,n_comp] += bc_cords[n,m] *temp
+                out[n,n_comp] += bc_coords[n,m] *temp
 
 @njit
-def DataByTri(data_tri,bc_cords, n_cell,nz_cell, z_fraction,out,sel):
+def DataByTri(data_tri,bc_coords, n_cell,nz_cell, z_fraction,out,sel):
     for n in sel:
         nc  = n_cell[n]
         for n_comp in range(3): out[n, n_comp] = 0.
@@ -80,11 +80,11 @@ def DataByTri(data_tri,bc_cords, n_cell,nz_cell, z_fraction,out,sel):
         for m in range(3):
             for n_comp in range(3):
                 temp = z_fraction[n,0]* d[0,m, n_comp]+z_fraction[n, 1]* d[1,m,n_comp]
-                out[n,n_comp] += bc_cords[n, m] * temp
+                out[n,n_comp] += bc_coords[n, m] * temp
 
 
 @njit
-def DataByTriPlus(data_tri,bc_cords, n_cell,nz_cell, z_fraction,out,sel):
+def DataByTriPlus(data_tri,bc_coords, n_cell,nz_cell, z_fraction,out,sel):
     for n in sel:
         nc  = n_cell[n]
         d = data_tri[nc,nz_cell[n]:nz_cell[n]+2,:,:]
@@ -92,11 +92,11 @@ def DataByTriPlus(data_tri,bc_cords, n_cell,nz_cell, z_fraction,out,sel):
             out[n, n_comp] = 0.
             for m in range(3):
                 temp = z_fraction[n,0]* d[0, n_comp,m]+z_fraction[n, 1]* d[1,n_comp,m]
-                out[n,n_comp] += bc_cords[n, m] * temp
+                out[n,n_comp] += bc_coords[n, m] * temp
 
 
 @njit
-def DataByTriPlusV_slow(data_tri,bc_cords, n_cell,nz_cell, z_fraction,out,sel):
+def DataByTriPlusV_slow(data_tri,bc_coords, n_cell,nz_cell, z_fraction,out,sel):
     dd =np.reshape(data_tri,(data_tri.shape[0],data_tri.shape[1],9))
 
     temp = np.full((3,),0.,dtype=data_tri.dtype)
@@ -110,7 +110,7 @@ def DataByTriPlusV_slow(data_tri,bc_cords, n_cell,nz_cell, z_fraction,out,sel):
         d = dd[nc,nz_cell[n]:nz_cell[n]+2,:]
         for i in range(9):
             temp =  z_fraction[n, 0]* d[0,i] + z_fraction[n, 1]* d[1,i]
-            out[n,n_comp_all[i]] += bc_cords[n, m_all[i]] * temp
+            out[n,n_comp_all[i]] += bc_coords[n, m_all[i]] * temp
 
 @njit()
 def D():

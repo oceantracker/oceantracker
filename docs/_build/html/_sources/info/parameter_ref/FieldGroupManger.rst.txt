@@ -1,0 +1,52 @@
+#################
+FieldGroupManger
+#################
+
+**Doc:** 
+
+**short class_name:** FieldGroupManger
+
+**full class_name :** oceantracker.field_group_manager._dev_parallel_reader.FieldGroupManger
+
+**Inheritance:** > ParameterBaseClass> FieldGroupManger
+
+
+Parameters:
+************
+
+	* ``async_pause_interval`` :   ``<class 'float'>``   *<optional>*
+		Description: time asyc reader pauses bewteen checking if action is needed
+
+		- default: ``0.005``
+		- data_type: ``<class 'float'>``
+		- units: ``s``
+
+	* ``async_progress_warning_interval`` :   ``<class 'float'>``   *<optional>*
+		Description: time asyc reader warns of time, if reader or model solver waits too long for movement by the other
+
+		- default: ``30.0``
+		- data_type: ``<class 'float'>``
+		- units: ``s``
+
+	* ``class_name`` :   ``<class 'str'>``   *<optional>*
+		Description: Class name as string A.B.C, used to import this class from python path
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Name used to refer to class in code and output, = None for core claseses
+
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+	* ``user_note`` :   ``<class 'str'>``   *<optional>*
+		- default: ``None``
+		- data_type: ``<class 'str'>``
+
+
+
+Expert Parameters:
+*******************
+
+

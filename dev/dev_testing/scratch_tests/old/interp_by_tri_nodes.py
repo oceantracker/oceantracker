@@ -19,17 +19,17 @@ from collections import Counter
 def run_code(F,data,data_tri,triangles,out,reps=10,masked=False,data_nodes=False):
     # run code with different particle sections
 
-    # randomise which cells are used and their bc_cords
+    # randomise which cells are used and their bc_coords
     n_cell =np. random.random((N,)).astype(np.int32)
-    bc_cords= np. random.random((N,3)).astype(data.dtype)
+    bc_coords= np. random.random((N,3)).astype(data.dtype)
 
     mask= np.random.choice(a=[False, True], size=(N, ), p=[1-f , f])
     sel = np.flatnonzero(mask).astype(np.int32)
     s= mask if masked else sel
     if data_nodes:
-        t= time_numba_code(F,data_tri,bc_cords, n_cell,out,s,number=reps )
+        t= time_numba_code(F,data_tri,bc_coords, n_cell,out,s,number=reps )
     else:
-        t= time_numba_code(F,data,triangles,bc_cords, n_cell,out,s,number=reps )
+        t= time_numba_code(F,data,triangles,bc_coords, n_cell,out,s,number=reps )
     return t
 
 def sel_fraction(N,frac=0.5):
@@ -38,72 +38,72 @@ def sel_fraction(N,frac=0.5):
     return sel,mask
 
 @njit
-def CurrentFunc(data, triangles, bc_cords, n_cell, out, sel):
+def CurrentFunc(data, triangles, bc_coords, n_cell, out, sel):
 
  for n in sel:
      nodes = triangles[n_cell[n], :]
      out[n] = 0.
      for m in range(3):
-        out[n] += bc_cords[n,m] * data[nodes[m]]
+        out[n] += bc_coords[n,m] * data[nodes[m]]
 
 @njit
-def CurrentFuncSubFunc(data, triangles, bc_cords, n_cell, out, sel):
+def CurrentFuncSubFunc(data, triangles, bc_coords, n_cell, out, sel):
 
     for n in sel:
         nodes = triangles[n_cell[n], :]
-        out[n] =  CFS(data,bc_cords[n,:],nodes)
+        out[n] =  CFS(data,bc_coords[n,:],nodes)
 @njit(inline='always')
-def CFS(data,bc_cords,nodes):
+def CFS(data,bc_coords,nodes):
     out = 0.
     for m in range(3):
-        out += bc_cords[m] * data[nodes[m]]
+        out += bc_coords[m] * data[nodes[m]]
     return out
 
 @njit
-def DataByTri(data_tri,bc_cords, n_cell,out,sel):
+def DataByTri(data_tri,bc_coords, n_cell,out,sel):
     for n in sel:
         nc  = n_cell[n]
         out[n] = 0.0
         for m in range(3):
-            out[n] += bc_cords[n, m] * data_tri[nc, m]
+            out[n] += bc_coords[n, m] * data_tri[nc, m]
 
 @njit
-def DataByTriTemp(data_tri,bc_cords, n_cell,out,sel):
+def DataByTriTemp(data_tri,bc_coords, n_cell,out,sel):
 
     temp = np.empty((3,),dtype=data_tri.dtype)
     for n in sel:
         nc = n_cell[n]
         for m in range(3):
-            temp[m] = bc_cords[n, m] * data_tri[nc,m]
+            temp[m] = bc_coords[n, m] * data_tri[nc,m]
 
         #out[n] = temp.sum() # has fewer mem requests, but no faster
         out[n] = 0
         for m in range(3):  out[n] +=  temp[m]
 
 @njit
-def DataByTriTempMasked(data_tri, bc_cords, n_cell, out, mask):
+def DataByTriTempMasked(data_tri, bc_coords, n_cell, out, mask):
     temp = np.empty((3,),dtype=data_tri.dtype)
     for n in range(out.size):
         if mask[n]:
             nc = n_cell[n]
             for m in range(3):
-                temp[m] = bc_cords[n, m] * data_tri[nc,m]
+                temp[m] = bc_coords[n, m] * data_tri[nc,m]
             out[n] = 0
             for m in range(3):  out[n] +=  temp[m]
 @njit()
-def DataByTriTempSubFunc(data_tri,bc_cords, n_cell,out,sel):
+def DataByTriTempSubFunc(data_tri,bc_coords, n_cell,out,sel):
 
     temp = np.empty((3,),dtype=data_tri.dtype)
     for n in sel:
         nc = n_cell[n]
-        DataByTriTempSubFuncCode(data_tri[nc,:],bc_cords[n,:],temp)
+        DataByTriTempSubFuncCode(data_tri[nc,:],bc_coords[n,:],temp)
         for m in range(3):  out[n] += temp[m]
 
 @njit()
-def DataByTriTempSubFuncCode(data_tri,bc_cords,temp):
-    #temp[:] = bc_cords[:] * data_tri[:]
+def DataByTriTempSubFuncCode(data_tri,bc_coords,temp):
+    #temp[:] = bc_coords[:] * data_tri[:]
    for m in range(3):
-            temp[m] = bc_cords[m] * data_tri[m]
+            temp[m] = bc_coords[m] * data_tri[m]
 @njit()
 def D():
     N=10**6
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     triangles=DT.simplices
     data_tri= data[triangles]
 
-    bc_cords= np. random.random((N,3)).astype(dt)
+    bc_coords= np. random.random((N,3)).astype(dt)
     out=np.zeros((N,))
     n_cell =np. random.random((N,)).astype(np.int32)
 
@@ -144,22 +144,22 @@ if __name__ == "__main__":
     mask= np.random.choice(a=[False, True], size=(N, ), p=[1-frac[1] , frac[1]])
     sel = np.flatnonzero(mask).astype(np.int32)
     # check code
-    CurrentFunc(data, triangles, bc_cords, n_cell, out, sel)
+    CurrentFunc(data, triangles, bc_coords, n_cell, out, sel)
     print(CurrentFunc.__name__,out.sum())
 
-    CurrentFuncSubFunc(data, triangles, bc_cords, n_cell, out, sel)
+    CurrentFuncSubFunc(data, triangles, bc_coords, n_cell, out, sel)
     print(CurrentFuncSubFunc.__name__,out.sum())
 
-    DataByTri(data_tri, bc_cords, n_cell,out,sel)
+    DataByTri(data_tri, bc_coords, n_cell,out,sel)
     print(DataByTri.__name__,out.sum())
 
-    DataByTriTemp(data_tri, bc_cords, n_cell,out,sel)
+    DataByTriTemp(data_tri, bc_coords, n_cell,out,sel)
     print(DataByTriTemp.__name__,out.sum())
 
-    DataByTriTempMasked(data_tri, bc_cords, n_cell, out, mask)
+    DataByTriTempMasked(data_tri, bc_coords, n_cell, out, mask)
     print(DataByTriTempMasked.__name__,out.sum())
 
-    DataByTriTempSubFunc(data_tri, bc_cords, n_cell,out,sel)
+    DataByTriTempSubFunc(data_tri, bc_coords, n_cell,out,sel)
     print(DataByTriTempSubFunc.__name__,out.sum())
 
     D() # 1D function
@@ -178,7 +178,7 @@ if __name__ == "__main__":
     for f in frac:
         mask= np.random.choice(a=[False, True], size=(N, ), p=[1-f , f])
         sel = np.flatnonzero(mask).astype(np.int32)
-        bc_cords= np. random.random((N,3)).astype(dt)
+        bc_coords= np. random.random((N,3)).astype(dt)
 
         t1.append(run_code(CurrentFunc, data, data_tri, triangles, out, reps=reps))
         t2.append(run_code(DataByTri,data,data_tri,triangles,out,reps=reps,data_nodes=True ))

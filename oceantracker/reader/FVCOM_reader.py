@@ -17,13 +17,15 @@ from oceantracker.shared_info import shared_info as si
 class FVCOMreader(_BaseUnstructuredReader):
     # loads a standard SCHISM netcdf output file with nodal data
     # variable names can be tweaked via maps in shared_params, if non-standard names used
-    development = 'FVCOMreader has not been tested for all variations of file variables, contact developers if reader fails unexpectedly'
+    development = True
     def __init__(self):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
         self.add_default_params(
                 dimension_map=dict(
                         node=PVC('node', str, doc_str='Dim oNumber of nodes in triangular grid ie unique triangle vertex node numbers'),
+                        all_z_dims=PLC( ['siglay', 'siglev'], str, doc_str='All z dims, used to identify  3D variables'),
+                        z=PVC('siglev', str, doc_str='name of dimensions for z layer boundaries '),
                         ),
                 field_variable_map= dict(
                         water_velocity= PLC(['u','v','ww'], str, fixed_len=3),
@@ -46,33 +48,26 @@ class FVCOMreader(_BaseUnstructuredReader):
                         ),
                 variable_signature = PLC(['u', 'v', 'zeta'], str,
                                       doc_str='Variable names used to test if file is this format'),
-                drop_variables= PLC(['Itime2'], str,doc_str='Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant'),
                 )
 
-    def get_hindcast_info(self, catalog):
+    def add_hindcast_info(self):
+        params = self.params
+        dm = params['dimension_map']
+        fvm = params['field_variable_map']
+        gm = params['grid_variable_map']
+        info = self.info
+        dims = info['dims']
 
-        dm = self.params['dimension_map']
-        fvm = self.params['field_variable_map']
-        gm = self.params['grid_variable_map']
-        dims = catalog['info']['dims']
-        hi = dict(is3D='siglay' in catalog['info']['dims'])
+        if info['is3D']:
+            # sort out z dim and vertical grid size
+            info['z_dim'] = dm['z']
+            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['all_z_dims'] = dm['all_z_dims']
+            info['vert_grid_type'] = si.vertical_grid_types.Slayer
 
-        if hi['is3D']:
-            hi['z_dim'] = 'siglev'
-            hi['num_z_levels'] = dims[hi['z_dim']]
-            hi['all_z_dims'] = ['siglay', 'siglev']
-            hi['vert_grid_type'] = si.vertical_grid_types.Slayer
-        else:
-            hi['z_dim'] = None
-            hi['num_z_levels'] = 1
-            hi['all_z_dims'] = []
-            hi['vert_grid_type'] = None
+        info['node_dim'] = params['dimension_map']['node']
+        info['num_nodes'] = info['dims'][info['node_dim']]
 
-        # get num nodes in each field
-        hi['node_dim'] = self.params['dimension_map']['node']
-        hi['num_nodes'] = dims[hi['node_dim']]
-
-        return  hi
 
 
     def build_vertical_grid(self, grid):
@@ -116,7 +111,7 @@ class FVCOMreader(_BaseUnstructuredReader):
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations
         ds = self.dataset
-        gm = self.grid_variable_map
+        gm = self.params['grid_variable_map']
 
         x = ds.read_variable(gm['x']).data
         y = ds.read_variable(gm['y']).data
@@ -149,7 +144,7 @@ class FVCOMreader(_BaseUnstructuredReader):
         ds = self.dataset
         grid = self.grid
 
-        if 'wet_cells' in ds.variables:
+        if 'wet_cells' in ds.info['variables']:
             wet_cells= ds.read_variable('wet_cells', nt=nt_index).data
             grid['is_dry_cell_buffer'][buffer_index,:] = wet_cells != 1
         else:

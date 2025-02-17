@@ -37,7 +37,7 @@ Parameters:
 		Description: - Change default write param of particle properties to not write to tracks file, ie  tweak write flags individually
 
 		- a list containing type:  ``[]``
-		- default list : ``['water_velocity', 'particle_velocity', 'velocity_modifier']``
+		- default list : ``['water_velocity', 'velocity_modifier']``
 		- data_type: ``<class 'str'>``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``
@@ -76,20 +76,6 @@ Parameters:
 
 Expert Parameters:
 *******************
-
-	* ``NCDF_particle_chunk`` :   ``<class 'int'>``   *<optional>*
-		Description: number of particles per time chunk in the netcdf file
-
-		- default: ``100000``
-		- data_type: ``<class 'int'>``
-		- min: ``100``
-
-	* ``NCDF_time_chunk`` :   ``<class 'int'>``   *<optional>*
-		Description: number of time steps per time chunk in the netcdf file
-
-		- default: ``24``
-		- data_type: ``<class 'int'>``
-		- min: ``1``
 
 	* ``role_output_file_tag`` :   ``<class 'str'>``   *<optional>*
 		- default: ``tracks_compact``

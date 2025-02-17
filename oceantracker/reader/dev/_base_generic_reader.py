@@ -232,7 +232,7 @@ class BaseGenericReader(_BaseReader):
 
     def hydro_model_index_to_buffer_offset(self, nt_hindcast):
         # ring buffer mapping
-        return nt_hindcast % self.info['buffer_info']['buffer_size']
+        return nt_hindcast % si.settings.time_buffer_size
 
     def are_time_steps_in_buffer(self, time_sec):
         # check if next two steps of remaining  hindcast time steps required to run  are in the buffer

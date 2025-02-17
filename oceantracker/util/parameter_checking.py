@@ -29,7 +29,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
 
     # find which keys/params are obsolete and the remainder
     obsolute_params = [key for key, item in default_params.items() if isinstance(item, _ParameterBaseDataClassChecker) and item.obsolete]
-    possible_params = [key for key, item in default_params.items() if key  not in obsolute_params]
+    possible_params = [key for key, item in default_params.items() if key not in obsolute_params]
 
     # first check if any keys in base or case params are not in defaults
     # allow pass on those starting with #

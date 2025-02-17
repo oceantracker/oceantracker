@@ -30,13 +30,15 @@ Parameters:
 		- possible_values: ``['float64', 'float32', 'bool', 'int32', 'int16', 'int8', 'int64']``
 
 	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
+		Description: start with zero distance traveled
+
 		- default: ``0.0``
 		- data_type: ``<class 'float'>``
 
-	* ``name`` :   ``<class 'str'>`` **<isrequired>**
-		Description: Name used to refer to this particle property in code and output
+	* ``name`` :   ``<class 'str'>``   *<optional>*
+		Description: Internal name of property
 
-		- default: ``None``
+		- default: ``distance_travelled``
 		- data_type: ``<class 'str'>``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*

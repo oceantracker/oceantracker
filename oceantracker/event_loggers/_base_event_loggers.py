@@ -1,13 +1,16 @@
 import os
 
 import numpy as np
-from numba  import njit
+
+
 from copy import copy,deepcopy
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.ncdf_util import  NetCDFhandler
 from oceantracker.util import  output_util
 from oceantracker.util.basic_util import nopass
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel
+from numba  import prange
+
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.shared_info import shared_info as si
 
@@ -26,7 +29,7 @@ class _BaseEventLogger(ParameterBaseClass):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['event_has_started_boolean'])
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='event_has_started_boolean', initial_value=False, dtype='bool', write=False)
         self.time_steps_written = 0

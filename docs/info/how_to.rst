@@ -1,5 +1,5 @@
 ##########################
-How to notebooks
+Tutorials
 ##########################
 
 The below show a web view of ipython notebooks which are in the folder "oceantracker/tutorials_how_to".

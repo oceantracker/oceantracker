@@ -21,7 +21,6 @@ particle_properties:
 reader:
   file_mask: Random_order_*.nc
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
-  time_buffer_size: 15
 release_groups:
 - allow_release_in_dry_cells: true
   name: point1
@@ -63,6 +62,7 @@ release_groups:
   pulse_size: 2
   release_interval: 3600
 root_output_dir: output
+time_buffer_size: 15
 time_step: 600
 tracks_writer:
   write_dry_cell_flag: true

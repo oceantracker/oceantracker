@@ -12,7 +12,7 @@ from oceantracker.util.numba_util import  njitOT
 from oceantracker.shared_info import shared_info as si
 
 class DELF3DFMreader(_BaseUnstructuredReader):
-    development =  'DELFTreader has not been tested for all variations of file variables, contact developers if reader fails unexpectedly'
+    development =  True
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
@@ -33,6 +33,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                             ),
             dimension_map=dict(
                         time=PVC('time', str, doc_str='name of time dimension in files'),
+                        all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers'], str, doc_str='All z dims, used to identify  3D variables'),
                          ),
             field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
                         'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
@@ -47,51 +48,49 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                                    },
                             )
 
-    def get_hindcast_info(self, catalog):
+    def add_hindcast_info(self):
 
         dm = self.params['dimension_map']
         fvm= self.params['field_variable_map']
         gm = self.params['grid_variable_map']
+        info = self.info
+        dims = info['dims']
 
-        dims = catalog['info']['dims']
-        hi = dict(is3D='mesh2d_nInterfaces' in  dims or 'nmesh2d_interface' in dims)
-
-        if hi['is3D']:
+        if info['is3D']:
+            # sort out z dim and vertical grid size
+            info['z_dim'] = dm['z']
+            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['all_z_dims'] = dm['all_z_dims']
             # 2 variants of fixed z layer dimension names
             if 'mesh2d_nInterfaces' in dims:
-                hi['z_dim'] = 'mesh2d_nInterfaces'
-                hi['layer_dim'] = 'mesh2d_nLayers'
-                hi['all_z_dims'] = ['mesh2d_nInterfaces','mesh2d_nLayers']
+                info['z_dim'] = 'mesh2d_nInterfaces'
+                info['layer_dim'] = 'mesh2d_nLayers'
+                info['all_z_dims'] = ['mesh2d_nInterfaces','mesh2d_nLayers']
             else:
-                hi['z_dim'] = 'nmesh2d_interface'
-                hi['layer_dim'] = 'nmesh2d_layer'
-                hi['all_z_dims'] = ['nmesh2d_interface','nmesh2d_layer']
+                info['z_dim'] = 'nmesh2d_interface'
+                info['layer_dim'] = 'nmesh2d_layer'
+                info['all_z_dims'] = ['nmesh2d_interface','nmesh2d_layer']
 
-            hi['num_z_levels'] = dims[hi['z_dim']]
-            hi['vert_grid_type'] = si.vertical_grid_types.Zfixed if 'mesh2d_interface_z' in catalog['variables']  else si.vertical_grid_types.Sigma
-        else:
-            hi['z_dim'] = None
-            hi['num_z_levels'] = 1
-            hi['all_z_dims'] = []
-            hi['vert_grid_type'] = None
+            info['num_z_levels'] = dims[info['z_dim']]
+            info['vert_grid_type'] = si.vertical_grid_types.Zfixed if 'mesh2d_interface_z' in info['variables']  else si.vertical_grid_types.Sigma
 
         # get num nodes in each field
         # is the number of nodes = uniques nodes in the quad mesh
 
-        hi['node_dim'] = 'mesh2d_nNodes' if 'mesh2d_nNodes' in dims else 'nmesh2d_node'
+        info['node_dim'] = 'mesh2d_nNodes' if 'mesh2d_nNodes' in dims else 'nmesh2d_node'
 
-        hi['num_nodes'] =  dims[hi['node_dim']]
-        hi['cell_dim'] = 'mesh2d_nFaces' if 'mesh2d_nFaces' in dims else 'nmesh2d_face'
+        info['num_nodes'] =  dims[info['node_dim']]
+        info['cell_dim'] = 'mesh2d_nFaces' if 'mesh2d_nFaces' in dims else 'nmesh2d_face'
 
-        if hi['vert_grid_type'] == si.vertical_grid_types.Sigma:
+        if info['vert_grid_type'] == si.vertical_grid_types.Sigma:
             si.msg_logger.msg('DEFT3D FM not yet tested with sigma vertical grid, only tested to work with fixed z level grid', warning=True)
 
-        return hi
+
 
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations
         ds = self.dataset
-        gm = self.grid_variable_map
+        gm = self.params['grid_variable_map']
 
         x = ds.read_variable(gm['x']).data
         y = ds.read_variable(gm['y']).data
@@ -101,7 +100,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
     def read_triangles(self, grid):
         # read nodes in triangles (N by 3) or mix of triangles and quad cells as (N by 4)
         ds = self.dataset
-        gm = self.grid_variable_map
+        gm = self.params['grid_variable_map']
 
         tri = ds.read_variable(gm['triangles']).data
         if tri.shape[1] > 4:

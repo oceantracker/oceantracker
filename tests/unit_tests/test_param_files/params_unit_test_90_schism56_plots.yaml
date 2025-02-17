@@ -64,6 +64,7 @@ release_groups:
 resuspension:
   critical_friction_velocity: 0.005
 root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
+screen_output_time_interval: 240
 time_step: 240
 use_A_Z_profile: true
 use_random_seed: true

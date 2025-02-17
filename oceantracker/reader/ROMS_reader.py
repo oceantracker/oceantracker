@@ -59,31 +59,28 @@ class ROMSreader(_BaseStructuredReader):
                             col=PVC('xi_psi', str, doc_str='column dim of grid'),
                                       ),
 
-                variable_signature= PLC(['ocean_time','mask_psi','lat_psi','lon_psi','h','zeta','u','v'], str,
+                variable_signature= PLC(['mask_psi','lat_psi','lon_psi','h','zeta'], str,
                                          doc_str='Variable names used to test if file is this format'),
                   )
         pass
 
-    def get_hindcast_info(self, catalog):
-        hi = dict(is3D=True)
-        if hi['is3D']:
-            hi['z_dim'] = self.params['dimension_map']['z']
-            hi['num_z_levels'] = catalog['info']['dims'][hi['z_dim']]
-            hi['all_z_dims'] = self.params['dimension_map']['all_z_dims']
-            hi['vert_grid_type'] = si.vertical_grid_types.Sigma  # Slayer uses zero bottom cell, so treated the dame
-        else:
-            hi['z_dim'] = None
-            hi['num_z_levels'] = 0
-            hi['num_z_levels'] = 0
-            hi['all_z_dims'] = []
-            hi['vert_grid_type'] = None
+    def add_hindcast_info(self):
+        params = self.params
+        info = self.info
+        ds_info = self.dataset.info
+        dm = params['dimension_map']
+        fvm = params['field_variable_map']
+        gm = params['grid_variable_map']
 
-        # get num nodes in each field
-        params= self.params
-        dims = catalog['info']['dims']
-        # nodes = rows* cols
-        hi['num_nodes'] = dims[params['dimension_map']['row']] * dims[params['dimension_map']['col']]
-        return hi
+        if info['is3D']:
+            # sort out z dim and vertical grid size
+            info['z_dim'] = dm['z']
+            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['all_z_dims'] = dm['all_z_dims']
+            info['vert_grid_type'] = si.vertical_grid_types.Sigma  # Slayer uses zero bottom cell, so treated the dame
+
+        dims = info['dims']
+        info['num_nodes'] = dims[params['dimension_map']['row']] * dims[params['dimension_map']['col']]
 
     def build_hori_grid(self, grid):
         # pre-read useful info

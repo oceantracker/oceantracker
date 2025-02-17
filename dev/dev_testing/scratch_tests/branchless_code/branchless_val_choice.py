@@ -12,7 +12,7 @@ from contextlib import contextmanager
 from os import getpid
 from time import sleep
 from signal import SIGINT
-
+from oceantracker.util.numba_util import njitOT
 
 @njitOT
 def F1(x1,x2,out, sel, xmin):
@@ -39,7 +39,7 @@ def F2(x1,x2,out,sel, xmin):
         #out[n] = s * x2[n] + (not s) * x1[n]
         #out[n] = s * x2[n] + (1-s) * x1[n]
         out[n] = branchless_value_choice(x1[n],x2[n],x1[n] >= xmin)
-@njitOT()
+@njitOT
 def branchless_value_choice(a,b,cond):
     return cond*a + (not cond) *b
 @njitOT
@@ -55,7 +55,7 @@ def show_llvm(f):
 if __name__ == "__main__":
     N= 10**6
 
-    reps =20
+    reps =10
     ty= np.float64
     x=np.random.random((N,)).astype(ty)
 

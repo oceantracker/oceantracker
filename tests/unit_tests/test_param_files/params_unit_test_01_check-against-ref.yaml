@@ -6,7 +6,7 @@ particle_properties:
   decay_time_scale: 7200.0
   initial_value: 1000
   name: a_pollutant
-- class_name: WaterSpeed
+- class_name: pWaterSpeed
 - class_name: AgeDecay
   name: test_decay
 - class_name: DistanceTravelled
@@ -62,7 +62,17 @@ release_groups:
   pulse_size: 5
   release_interval: 0
 - class_name: PointRelease
-  name: start_in_middl21
+  name: min_depth
+  points:
+  - - 1594000
+    - 5484200
+    - -2
+  pulse_size: 5
+  release_interval: 3600
+  start: '2017-01-01T03:30:00'
+  water_depth_min: 500
+- class_name: PointRelease
+  name: start_in_datetime1
   points:
   - - 1594000
     - 5484200
@@ -79,23 +89,12 @@ release_groups:
     - -2
   pulse_size: 5
   release_interval: 3600
-- class_name: PointRelease
-  name: start_in_middle1
-  points:
-  - - 1594000
-    - 5484200
-    - -2
-  pulse_size: 5
-  release_interval: 3600
-  start: '2017-01-01T03:30:00'
-  water_depth_min: 500
 resuspension:
   critical_friction_velocity: 0.01
 root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
 screen_output_time_interval: 1800
 time_step: 1800
 tracks_writer:
-  NCDF_particle_chunk: 500
   update_interval: 3600
   write_dry_cell_flag: false
 use_A_Z_profile: true

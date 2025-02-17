@@ -2,7 +2,7 @@
 ParticleLoad
 #############
 
-**Doc:**     Particle property which carries a load or mass, which can be used to calculate spatial and temporal statistics of this load or mass.    
+**Doc:**     Particle property which carries a constant load or mass, which can be used to calculate spatial and temporal statistics of this load or mass.    
 
 **short class_name:** ParticleLoad
 

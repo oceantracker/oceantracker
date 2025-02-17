@@ -38,7 +38,7 @@ class EvalInterpTriangles(object):
         # todo find a better way to get water depth for release points with optional args?
         part_prop = si.class_roles.particle_properties
         nc_cell = part_prop['n_cell'].data if n_cell is None else n_cell
-        bc = part_prop['bc_cords'].data if bc is None else bc
+        bc = part_prop['bc_coords'].data if bc is None else bc
         triangle_eval_interp.time_independent_2D_scalar_field(output, field_instance.data,
                                                               self.grid['triangles'], nc_cell, bc, active)
 
@@ -47,7 +47,7 @@ class EvalInterpTriangles(object):
         part_prop = si.class_roles.particle_properties
         triangle_eval_interp.time_independent_2D_vector_field(output, field_instance.data,
                                                               self.grid['triangles'],
-                                                              part_prop['n_cell'].data, part_prop['bc_cords'].data, active)
+                                                              part_prop['n_cell'].data, part_prop['bc_coords'].data, active)
     def _time_dependent_2D_scalar_field(self,field_instance,current_buffer_steps,
                                        fractional_time_steps,output, active, n_cell=None, bc=None):
         #scalar, eg water depth
@@ -55,7 +55,7 @@ class EvalInterpTriangles(object):
         triangle_eval_interp.time_dependent_2D_scalar_field(
                             current_buffer_steps, fractional_time_steps,output,
                             field_instance.data,self.grid['triangles'],
-                            part_prop['n_cell'].data,  part_prop['bc_cords'].data, active)
+                            part_prop['n_cell'].data,  part_prop['bc_coords'].data, active)
 
     def _time_dependent_2D_vector_field(self, field_instance, current_buffer_steps,
                                         fractional_time_steps, output, active):
@@ -63,7 +63,7 @@ class EvalInterpTriangles(object):
         # vector, eg 2D water velocity
         triangle_eval_interp.time_dependent_2D_vector_field(current_buffer_steps, fractional_time_steps, output,
                                                             field_instance.data, self.grid['triangles'],
-                                                            part_prop['n_cell'].data, part_prop['bc_cords'].data, active)
+                                                            part_prop['n_cell'].data, part_prop['bc_coords'].data, active)
 
     def _time_dependent_3D_scalar_field(self, field_instance, current_buffer_steps,
                                         fractional_time_steps, output, active):
@@ -76,13 +76,13 @@ class EvalInterpTriangles(object):
             triangle_eval_interp.time_dependent_3D_scalar_field_data_in_all_layers(
                                         current_buffer_steps, fractional_time_steps,
                                                      F_data ,                                                                                 grid['triangles'],
-                                                     part_prop['n_cell'].data, part_prop['bc_cords'].data, part_prop['nz_cell'].data,
+                                                     part_prop['n_cell'].data, part_prop['bc_coords'].data, part_prop['nz_cell'].data,
                                                      part_prop['z_fraction'].data,
                                                      output, active)
         else:
             triangle_eval_interp.time_dependent_3D_scalar_field_ragged_bottom(current_buffer_steps, fractional_time_steps, F_data,
                                                                          grid['triangles'], grid['bottom_cell_index'],
-                                                                         part_prop['n_cell'].data, part_prop['bc_cords'].data, part_prop['nz_cell'].data, part_prop['z_fraction'].data,
+                                                                         part_prop['n_cell'].data, part_prop['bc_coords'].data, part_prop['nz_cell'].data, part_prop['z_fraction'].data,
                                                                          output, active)
 
 
@@ -92,23 +92,25 @@ class EvalInterpTriangles(object):
         grid= self.grid
         F_data = field_instance.data
         part_prop = si.class_roles.particle_properties
-
+        field_name = field_instance.params['name']
         # use z_fractions with log layer near bottom for water velocity
-        z_fraction = part_prop['z_fraction_water_velocity'] if field_instance.params['name'] == 'water_velocity' else part_prop['z_fraction']
+        z_fraction = part_prop['z_fraction_water_velocity'] if field_name == 'water_velocity' else part_prop['z_fraction']
 
         if self.info['mode3D'] == 1:
             # these have spatially uniform and static map of z levels
             triangle_eval_interp.time_dependent_3D_vector_field_data_in_all_layers(current_buffer_steps, fractional_time_steps,
                                                                 F_data, grid['triangles'], part_prop['n_cell'].data,
-                                                                part_prop['bc_cords'].data, part_prop['nz_cell'].data,
+                                                                part_prop['bc_coords'].data, part_prop['nz_cell'].data,
                                                                 z_fraction.data, output, active)
+
+
         else :
             triangle_eval_interp.time_dependent_3D_vector_field_ragged_bottom(current_buffer_steps, fractional_time_steps, F_data,
                                                                               grid['triangles'], grid['bottom_cell_index'],
-                                                                              part_prop['n_cell'].data, part_prop['bc_cords'].data, part_prop['nz_cell'].data, part_prop['z_fraction'].data,
+                                                                              part_prop['n_cell'].data, part_prop['bc_coords'].data, part_prop['nz_cell'].data, part_prop['z_fraction'].data,
                                                                               output, active)
 
 # special case give bc and cell, used to evaluate water depth and tide  for checking release points
-# interp_named_field_at_given_locations_and_time(self, field_name, x, n_cell=None,bc_cords=None, time_sec= None ):
+# interp_named_field_at_given_locations_and_time(self, field_name, x, n_cell=None,bc_coords=None, time_sec= None ):
 # todo add??
 # pass

@@ -11,16 +11,18 @@ if __name__ == "__main__":
     if args.datadir:
         input_dir = args.datadir
     else:
-        input_dir = r'G:\Hindcasts_large\OceanNumNZ-2022-06-20\final_version\2017\01'
-
+        # Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20
+        input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\2017\01'
+        # input_dir = r'/hpcfreenas/hindcast/NZ_region/OceanNumNZ-2022-06-20/final_version/2017/01/'
     if args.root_output_dir:
         root_output_dir = args.root_output_dir
     else:
         root_output_dir = r'F:\OceanTrackerOutput\bench_marks'
+        #root_output_dir = r'/hpcfreenas/ross/oceanTrackerOutput/benchmarks'
 
     ot = OceanTracker()
     ot.settings(time_step=15*60, use_A_Z_profile=False, write_tracks=False,
-                max_run_duration= 10*24*3600,
+                max_run_duration= 30*24*3600,
                 root_output_dir=root_output_dir, output_file_base='benchmark_v01')
     ot.add_class('reader',  input_dir = input_dir,    file_mask = 'NZfinite*.nc',
                  time_buffer_size=12)

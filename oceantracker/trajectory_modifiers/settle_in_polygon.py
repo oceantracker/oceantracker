@@ -20,7 +20,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['is_stationary_in_polygon', 'time_of_settlement', 'status'])
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
         # add particle prop to track which are inside polygon, which will be automatically written to output
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='is_stationary_in_polygon', dtype='int8')

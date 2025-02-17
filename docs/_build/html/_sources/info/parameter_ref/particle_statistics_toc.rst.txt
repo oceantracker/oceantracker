@@ -8,6 +8,7 @@ particle_statistics
 
 	GriddedStats2D_ageBased.rst
 	GriddedStats2D_timeBased.rst
+	GriddedStats3D_timeBased.rst
 	PolygonStats2D_ageBased.rst
 	PolygonStats2D_timeBased.rst
 	ResidentInPolygon.rst

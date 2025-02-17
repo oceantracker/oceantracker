@@ -6,11 +6,12 @@ reader
 .. toctree::
 	:maxdepth: 1
 
-	DELFTFM.rst
+	DELF3DFMreader.rst
+	FVCOMreader.rst
 	GLORYSreader.rst
-	ROMsNativeReader.rst
-	SCHISMreaderNCDF.rst
-	SCHISMreaderNCDFv5.rst
+	ROMSreader.rst
+	SCHISMreader.rst
+	SCHISMreaderV5.rst
 	_BaseReader.rst
 	_BaseStructuredReader.rst
 	_BaseUnstructuredReader.rst

@@ -16,7 +16,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Parameter details" href="parameter_ref/parameter_ref_toc.html" />
-    <link rel="prev" title="Running with helper class" href="how_to/B_runningOT_and_parameters.html" />
+    <link rel="prev" title="Run in parallel" href="how_to/P_running_cases_in_parallel.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -55,27 +55,27 @@
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="users_guide.html">Users guide</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="installing.html">Installing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to.html">How to notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Trouble shooting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
-<li class="toctree-l2"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="change_log.html">Change log</a></li>
-<li class="toctree-l2"><a class="reference internal" href="future_dev.html">Future development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installing.html">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_to.html">Tutorials</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Trouble shooting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#first-step">First step</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#anticipated-errors">Anticipated errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#unexpected-errors">Unexpected errors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reporting-an-error">Reporting an error</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="how_to/D_output_files.html">Output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change_log.html">Change log</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-  <li><a href="users_guide.html">Users guide</a><ul>
-      <li>Previous: <a href="how_to/B_runningOT_and_parameters.html" title="previous chapter">Running with helper class</a></li>
+      <li>Previous: <a href="how_to/P_running_cases_in_parallel.html" title="previous chapter">Run in parallel</a></li>
       <li>Next: <a href="parameter_ref/parameter_ref_toc.html" title="next chapter">Parameter details</a></li>
-  </ul></li>
   </ul></li>
 </ul>
 </div>
@@ -108,7 +108,7 @@ Warnings or Notes do not cause OT to exit.</p>
 <h2>First step<a class="headerlink" href="#first-step" title="Permalink to this headline">¶</a></h2>
 <p>Carefully, look back at the screen output or <a href="#system-message-1"><span class="problematic" id="problematic-1">*</span></a>_caseLog_log.txt
 file, and find the first error flagged.
-Some errors spawn other errors, so look back before the last reported error.</p>
+Some errors spawn other errors, so look back for the first reported error.</p>
 </section>
 <section id="anticipated-errors">
 <h2>Anticipated errors<a class="headerlink" href="#anticipated-errors" title="Permalink to this headline">¶</a></h2>
@@ -136,15 +136,14 @@ OT code issues or bugs. Which could be due to:</p>
 <blockquote>
 <div><p># <a href="#system-message-2"><span class="problematic" id="problematic-2">*</span></a>_caseLog_log.txt, screen log</p>
 <p>#  <a href="#system-message-3"><span class="problematic" id="problematic-3">*</span></a>_caseInfo.json, lots of useful info</p>
-<p># <a href="#system-message-4"><span class="problematic" id="problematic-4">*</span></a>_raw_user_params.json, user supplied settings/parameters</p>
-<p># <a href="#system-message-5"><span class="problematic" id="problematic-5">*</span></a>_runInfo.json,  global information about the hindcast and run</p>
+<p># <a href="#system-message-4"><span class="problematic" id="problematic-4">*</span></a>_raw_user_params.json, the raw user supplied settings/parameters</p>
 </div></blockquote>
 </li>
 <li><p>If requested also give access to</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>all the  output files, eg. tracks etc</p></li>
-<li><p>a sample of the hindcast in order to reproduce the bug, with the given <a href="#system-message-6"><span class="problematic" id="problematic-6">*</span></a>_raw_user_params.json file.</p></li>
+<li><p>a sample of the hindcast in order to reproduce the bug, with the given <a href="#system-message-5"><span class="problematic" id="problematic-5">*</span></a>_raw_user_params.json file.</p></li>
 </ul>
 </div></blockquote>
 </li>
@@ -160,7 +159,7 @@ OT code issues or bugs. Which could be due to:</p>
     <ul>
         <li>
           &larr;
-          <a href="how_to/B_runningOT_and_parameters.html" title="Previous document">Running with helper class</a>
+          <a href="how_to/P_running_cases_in_parallel.html" title="Previous document">Run in parallel</a>
         </li>
         <li>
           <a href="parameter_ref/parameter_ref_toc.html" title="Next document">Parameter details</a>

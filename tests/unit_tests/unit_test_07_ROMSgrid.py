@@ -16,7 +16,7 @@ def main(args):
             regrid_z_to_uniform_sigma_levels=True)
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
-                 NCDF_particle_chunk= 500) # keep file small
+                 ) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)
     hm = test_definitions.hydro_model['demoROMS']

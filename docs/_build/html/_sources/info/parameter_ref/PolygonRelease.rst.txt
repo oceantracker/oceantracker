@@ -2,7 +2,7 @@
 PolygonRelease
 ###############
 
-**Doc:**     Release particles at random locations within given polygon.    Points chosen are always inside the domain, also inside wet cells unless  allow_release_in_dry_cells is True.    
+**Doc:**     Release particles at random locations within given polygon.    Points chosen are always inside the domain, also inside wet cells unless setting allow_release_in_dry_cells is True.    
 
 **short class_name:** PolygonRelease
 
@@ -59,7 +59,7 @@ Parameters:
 	* ``max_cycles_to_find_release_points`` :   ``<class 'int'>``   *<optional>*
 		Description: Maximum number of cycles to search for acceptable release points, ie. inside domain, polygon etc
 
-		- default: ``1000``
+		- default: ``100``
 		- data_type: ``<class 'int'>``
 		- min: ``1``
 
@@ -134,6 +134,20 @@ points: still working on display  of default params of  type <class 'oceantracke
 
 		- default: ``no_given``
 		- data_type: ``<class 'str'>``
+
+	* ``water_depth_max`` :   ``<class 'float'>``   *<optional>*
+		Description: max water depth to release in, normally >0
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``m``
+
+	* ``water_depth_min`` :   ``<class 'float'>``   *<optional>*
+		Description: min water depth to release in, normally >0, useful for releases with a depth rage, eg larvae from inter-tidal shellfish
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``m``
 
 	* ``z_max`` :   ``<class 'float'>``   *<optional>*
 		Description: max/ highest z vale release for to randomly release in 3D, overrides any given release z value

@@ -9,11 +9,12 @@
     1. matab read polygon
 1. write of case info file even if errors, trap json encoding erorrs 
 2. centalize polygon list creation and param checking 
-3. Note if pending  memory issues and log sizes used. write error log
 4. ensure error log is written on caught error
 1. slow start up
    1. after  - Starting time stepping:
    1. after -  read  24 time steps in  9.2 sec
+1. better spell check sugesttions when short or long module name not found
+1. Thread stats counts, events counts etc
 
 ##  Internal Structure
 
@@ -23,7 +24,14 @@
     1. trace backs
     1. always get secondary case.json info error?
 2.  have field manager with each field having its own reader, grid and interpolator
-
+1. Rebuild interp walk counts/stats
+1. set max treads before numbas import
+1. use fast math numba option?
+2. comparison tests in parallelized?
+3. restructure particle ID buffers?
+1. restructure  particle method find_those_in_range_of_values()?
+2. 1. sture feilds by triangles for faster interp? afterf asyc reader?
+3. are results of random slighly dif when threaded?
 
 ## New additions
 
@@ -36,6 +44,7 @@
 2. faster to do dry cellby updating adjacency matrix? aviods addtional decsion in cel serach
 1. throw error if all release points in a release group or all of polygon vertices  are outside domain
 1. Spell checking dictionary like class, against existing keys
+1. for nested grids, find cells of transferred particles faster with map of nearest cell in new grid too old grid cell
 
 ## Niggles that need sorting some time
 
@@ -49,6 +58,7 @@
 3.  reader grid transforms faster with pre-allocated buffers?
     
 ## Nice to haves
+1.   remove_tidally_stranded_particles option?
 1. attach name of method to message loggers crumb trail
 1.  read polygons with fiona?
 1. make param keys case insensitive?

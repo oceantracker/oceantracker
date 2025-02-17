@@ -19,18 +19,17 @@ class FrictionVelocity(CustomFieldBase):
                                  is_vector=PVC(False,bool),
                                  )
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self, reader_info):
         info = self.info
-        hi = reader_builder['hindcast_info']
 
-        if settings['use_bottom_stress']:
+        if si.settings['use_bottom_stress']:
             si.add_reader_field('bottom_stress',dict(write_interp_particle_prop_to_tracks_file=False))
             info['mode'] = 4
         else:
             # use near bottom velocity
             vgt = si.vertical_grid_types
 
-            match  hi['vert_grid_type']:
+            match  reader_info['vert_grid_type']:
                     case  vgt.Sigma : info['mode'] = 1
                     case  vgt.Slayer: info['mode'] = 2
                     case  vgt.LSC: info['mode'] = 2

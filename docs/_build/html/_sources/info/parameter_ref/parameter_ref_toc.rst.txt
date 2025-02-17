@@ -18,7 +18,7 @@ ___________________
 Core "class" roles
 ___________________
 
-Only one core class per role. These have singular role names.
+Only one class in each role role. These have singular role names.
 
 .. toctree::
 	:maxdepth: 1

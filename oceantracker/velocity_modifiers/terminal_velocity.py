@@ -16,7 +16,7 @@ class TerminalVelocity(_VelocityModiferBase):
                                  variance= PVC(None, float, min=0., doc_str='variance of normal distribution of terminal velocity, used to give each particles its own terminal velocity from random normal distribution'),
                                  )
 
-    def add_required_classes_and_settings(self, settings, reader_builder, msg_logger):
+    def add_required_classes_and_settings(self):
         info = self.info
 
         if self.params['variance'] is not None:
