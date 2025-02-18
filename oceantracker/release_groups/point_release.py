@@ -2,7 +2,6 @@ import numpy as np
 
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.release_groups._base_release_group import _BaseReleaseGroup
-from oceantracker.util.numba_util import njitOT
 from oceantracker.util.cord_transforms import fix_any_spanning180east
 
 
@@ -41,7 +40,7 @@ class PointRelease(_BaseReleaseGroup):
         if si.settings.use_geographic_coords:
             # check points for wrap around 180
             params['points'] = fix_any_spanning180east( params['points'], msg_logger=si.msg_logger, caller=self,
-                                                crumbs=f'Point release#{params["name"]}')
+                                                crumbs=f'Point release#{self.info["instanceID"]}, name "{params["name"]}"')
         info['bounding_box_ll_ul'] = np.stack(( np.nanmin(params['points'][:2],axis=0),
                                                 np.nanmax(params['points'][:2],axis=0)))
 

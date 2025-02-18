@@ -12,10 +12,8 @@ from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 def make_a_reader_from_params(reader_params, settings, crumbs=''):
     crumbs = crumbs + '>build_a_reader '
 
-
     _check_input_dir(reader_params, crumbs=crumbs)
     dataset = OceanTrackerDataSet(reader_params)
-
 
     # detect reader format and add clas_name to params
     reader = _detect_hydro_file_format(reader_params, dataset,  crumbs=crumbs)
@@ -39,22 +37,25 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
     # sort files into time order and add info to reader builder on if 3D hindcast and mapped field
     # uses times in files containing the velocity variable
     _time_sort_files(reader, crumbs)
-    reader.dataset._make_variable_time_step_to_fileID_map()
+    _make_variable_time_step_to_fileID_map(reader)
 
     info = reader.info
     info.update(reader.dataset.info) # make data set and reader info the same
 
     # additional info on is D, vert grid type, node dim etc needed to size field buffers etc
     _standard_needed_info(reader) # common to all readers
+
     reader.add_hindcast_info() # any tweaks for specific reader
 
     # checks on hindcast info
+    #_check_time_consistency(reader)
+
     # todo check all required fields are set
     if info['vert_grid_type'] is not None and info['vert_grid_type'] not in si.vertical_grid_types.possible_values():
         si.msg_logger.msg(f'Coding error, dont recognise vert_grid_type grid type, got {info["vert_grid_type"]}, must be one of [None , "Slayer_or_LSC","Zlayer","Sigma"]',
                 hint=f'check reader codes  get_hindcast_info() ', error=True)
 
-    catalog_fields(reader, crumbs=None)
+    _catalog_fields(reader, crumbs=None)
 
     # set working vertical grid type,if remapping to sigma grids
     vgt = si.vertical_grid_types
@@ -163,6 +164,7 @@ def _time_sort_files(reader, crumbs):
     ds_info= reader.dataset.info
 
     ds_info['time_var'] = reader.params['grid_variable_map']['time']
+
     time_var = ds_info['time_var']
     time_var_info = ds_info['variables'][ time_var]
     ds_info['time_dim'] = list(time_var_info['dims'].keys())[0]
@@ -182,8 +184,8 @@ def _time_sort_files(reader, crumbs):
             f['ID'] = ID
             f['time'] = time
             f['start_date'] = time_util.seconds_to_isostr( f['start_time'])
-    # sort variable fileIDs into time order, but maintain given file order
 
+    # sort variable fileIDs into time order, but maintain given file order
     for v_name, item in ds_info['variables'].items():
         item['time_varying'] = ds_info['time_dim'] in item['dims']
         if  item['time_varying']:
@@ -202,7 +204,7 @@ def _time_sort_files(reader, crumbs):
 
     for var_name, item in ds_info['variables'].items():
         if not(item['time_varying']): continue
-        if var_name == ds_info['time_var'] : continue
+        if var_name == time_var : continue
         # only look at time varying variables, which are not time
         time = np.empty((0,), dtype=np.float64)
         for fID in item['fileIDs']:
@@ -211,6 +213,10 @@ def _time_sort_files(reader, crumbs):
             fi[fID]['last_time_step_in_file'] = time.size - 1
 
     ds_info['ref_time'] = time
+
+    # if variables in different files, eg schism v5, time may be in many files, but only use file IDs for the ones in first water velocity variables
+    vel_var0= reader.params['field_variable_map']['water_velocity'][0]
+    ds_info['variables'][time_var]['fileIDs'] = ds_info['variables'][vel_var0]['fileIDs']
 
    # hindcast start and ends times
     ds_info['start_time'] = time[0]
@@ -223,7 +229,7 @@ def _time_sort_files(reader, crumbs):
     ds_info['end_date'] = time_util.seconds_to_isostr(ds_info['end_time'])
 
     pass
-def catalog_fields(reader, crumbs=None):
+def _catalog_fields(reader, crumbs=None):
     # categorise field variables
     params = reader.params
     info = reader.info
@@ -312,3 +318,55 @@ def _check_input_dir(reader_params,crumbs=''):
     if 'file_mask' not in reader_params: reader_params['file_mask'] = None
 
 
+def _make_variable_time_step_to_fileID_map(reader):
+
+    # make time step to fileID map, accounting for each variable's file order
+    info = reader.dataset.info
+    for v_name, item in info['variables'].items():
+        if item['time_varying']:
+            time_step_file_map = np.zeros((0,),dtype=np.int32)
+            for fileID in  item['fileIDs']: #IDs have aleady been time sorted
+                fi = info['files'][fileID]
+                time_step_file_map =  np.append(time_step_file_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
+            item['time_step_to_fileID_map'] = np.asarray(time_step_file_map, dtype=np.int32)
+    pass
+
+
+def _check_time_consistency(reader):
+    # check all variables have same time_step_to_fileID_map, and save one version of it
+    #todo do not currently used, reactivate?
+    info= reader.info
+    ml = si.msg_logger
+
+
+    starts = []
+    n_files=[]
+    ref_time = None
+    vars=[]
+
+    for v_name, item in info['variables'].items():
+
+        if item['time_varying']:
+            starts.append(item['global_time_step_check'][0])
+            n_files.append(len(item['fileIDs']))
+            vars.append(v_name)
+
+    # checks on hindcasts with variables in different files
+    # check if difernt number of files for any variable
+    sel = np.flatnonzero( np.abs(np.diff(np.asarray(n_files)) ) > 0)
+    if sel.size>0:
+        ml.msg('File numbers differ for some variables for hindcast where variables are in separate n files',error=True,
+                         hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
+    # check if all variables start at the same times
+    starts = np.asarray(starts).astype(np.float64)
+    sel = np.flatnonzero( np.abs(np.diff(starts)))
+    if sel.size > 0:
+        ml.msg('Start times differ for some variables for hindcast where files are split between files',error=True,
+                        hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
+
+    # for all check missing time steps
+    t = info['ref_time'].astype('datetime64[s]').astype(np.float64)
+    sel = np.flatnonzero(np.abs(np.diff(t)) > 4*info['time_step'])
+    if sel.size > 0:
+        ml.msg('There are gaps in hindcast times larger than 4 time steps',warning=True,
+                        hint= f'there may be missing hindcast files, look at dates around {[ str(x) for x in cat["ref_time"][sel]]}')

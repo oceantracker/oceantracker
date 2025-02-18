@@ -121,58 +121,6 @@ class OceanTrackerDataSet(object):
         return ds
 
 
-    def _make_variable_time_step_to_fileID_map(self):
-
-        # make time step to fileID map, accounting for each variable's file order
-        info = self.info
-        for v_name, item in info['variables'].items():
-            if item['time_varying']:
-                time_step_file_map = np.zeros((0,),dtype=np.int32)
-                for fileID in  item['fileIDs']: #IDs have aleady been time sorted
-                    fi = info['files'][fileID]
-                    time_step_file_map =  np.append(time_step_file_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
-                item['time_step_to_fileID_map'] = np.asarray(time_step_file_map, dtype=np.int32)
-        pass
-    def _check_time_consistency(self):
-        # check all variables have same time_step_to_fileID_map, and save one version of it
-        #todo do not currently used, reactivate?
-        info= self.info
-        ml = self.msg_logger
-
-
-        starts = []
-        n_files=[]
-        ref_time = None
-        vars=[]
-
-        for v_name, item in info['variables'].items():
-
-            if item['has_time']:
-                starts.append(item['global_time_step_check'][0])
-                n_files.append(len(item['fileIDs']))
-                vars.append(v_name)
-                item.pop('global_time_step_check') # discard times
-                vars.append(v_name)
-        # checks on hindcasts with variables in different files
-        # check if difernt number of files for any variable
-        sel = np.flatnonzero( np.abs(np.diff(np.asarray(n_files)) ) > 0)
-        if sel.size>0:
-            ml.msg('File numbers differ for some variables for hindcast where variables are in separate n files',error=True,
-                             hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
-        # check if all variables start at the same times
-        starts = np.asarray(starts).astype(np.float64)
-        sel = np.flatnonzero( np.abs(np.diff(starts)))
-        if sel.size > 0:
-            ml.msg('Start times differ for some variables for hindcast where files are split between files',error=True,
-                            hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
-
-        # for all check missing time steps
-        t = info['ref_time'].astype('datetime64[s]').astype(np.float64)
-        sel = np.flatnonzero(np.abs(np.diff(t)) > 4*info['time_step'])
-        if sel.size > 0:
-            ml.msg('There are gaps in hindcast times larger than 4 time steps',warning=True,
-                            hint= f'there may be missing hindcast files, look at dates around {[ str(x) for x in cat["ref_time"][sel]]}')
-
     def get_time_step(self,time, backtracking):
         #round down/up to time step for forward/backwards
         info = self.info

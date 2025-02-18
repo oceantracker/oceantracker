@@ -118,11 +118,12 @@ def get_case(n):
             output_file_base = 'Xlavin Schim v5'
             file_mask = '*.nc'
 
-            x0 = [[-41.26352277695916, 173.80657335148985],
-                  [-41.07330690449923, 173.99402755852105],
+            x0 = [[-155, 20],
+                  [-160, 21.5],
+                  [-158, 20]
                   ]
-            x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
-            ax = None # Auck
+
+            ax = None
             title = 'test schisim v5 - Calvin'
         case 142:
             #schism v5 auckland,
