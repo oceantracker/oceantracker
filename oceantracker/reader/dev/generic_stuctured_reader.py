@@ -47,12 +47,10 @@ class dev_GenericStructuredReader(BaseGenericReader):
         si.msg_logger.msg('Todo- add land mask', caller=self, warning=True)
         grid['land_mask'] = np.full_like(grid['xi'], False)
         return grid
-    def read_triangles(self, nc, grid):
+    def read_triangles(self, grid):
         # build triangles from regular grid
         grid = convert_regular_grid_to_triangles(grid, grid['land_mask'])
         # get nodes for each corner of quad
-
-        return grid
 
     def read_file_var_as_4D_nodal_values(self,nc, grid, var_name, file_index=None):
         # reformat file variable into 4D time,node,depth, components  form

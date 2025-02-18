@@ -119,14 +119,13 @@ class FVCOMreader(_BaseUnstructuredReader):
 
         grid['x_center'] = np.stack((ds.read_variable('lonc').data,
                                      ds.read_variable('latc').data), axis=1).astype(np.float64)
-        return grid
 
 
     def read_triangles(self, grid):
         ds = self.dataset
         grid['triangles'] = ds.read_variable('nv').data.T.astype(np.int32) - 1 # convert to zero base index
         grid['quad_cells_to_split'] =  np.full((0,),0, np.int32)
-        return grid
+
 
     def read_zlevel(self, nc,grid,fields, file_index, zlevel_buffer, buffer_index):
         # calcuate zlevel from depth fractions, tide and water depth
