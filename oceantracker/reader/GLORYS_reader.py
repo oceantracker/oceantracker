@@ -88,11 +88,9 @@ class GLORYSreader(_BaseStructuredReader):
 
         grid['x'] =  np.stack((grid['lon'].ravel(),grid['lat'].ravel()),  axis=1)
 
-        return grid
 
+    def build_hori_grid(self, grid):
 
-    def build_hori_grid(self):
-        grid = self.grid
         ds = self.dataset
         if 'mask' in self.info['variables']:
             grid['water_3D_mask'] = ds.read_variable('mask').data == 1 # water grid
@@ -102,7 +100,7 @@ class GLORYSreader(_BaseStructuredReader):
         else:
             pass
 
-        super().build_hori_grid()
+        super().build_hori_grid(grid)
 
 
     def build_vertical_grid(self):

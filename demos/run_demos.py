@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # run demos from build json files
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-noplot', action='store_true')
+    parser.add_argument('-plot', action='store_true')
     parser.add_argument('-skiprun', action='store_true')
     parser.add_argument('--demo', default=None, type= int)
     parser.add_argument('--root_output_dir', default='output', type=str)
@@ -113,15 +113,11 @@ if __name__ == "__main__":
         else:
             case_info_file_name =path.join('output', params['output_file_base'],params['output_file_base']+'_caseInfo.json')
 
+        if not args.plot : continue
+
+        output_file_base= output_file_base = path.join('output', params['output_file_base']) if args.plot else None
         anim= None
         fps=15
-
-        if args.noplot:
-            output_file_base= None
-        else:
-            output_file_base = path.join('output', params['output_file_base'])
-
-        if  args.noplot : continue
 
         if args.testing:
             #tracks=load_output_files.load_track_data(case_info_file_name)

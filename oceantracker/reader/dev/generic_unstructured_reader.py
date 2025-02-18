@@ -38,10 +38,10 @@ class GenericUnstructuredReader(BaseGenericReader):
 
         # read nodal x's
 
-        grid = self.read_horizontal_grid_coords(grid)
+        self.read_horizontal_grid_coords(grid)
         grid['x'] = grid['x'].astype(np.float64)
 
-        grid = self.read_triangles(nc, grid)
+        self.read_triangles(grid)
         # ensure np.int32 values
         grid['triangles']=grid['triangles'].astype(np.int32)
         grid['quad_cells_to_split'] = grid['quad_cells_to_split'].astype(np.int32)
@@ -86,9 +86,9 @@ class GenericUnstructuredReader(BaseGenericReader):
         if self.params['hydro_model_cords_geographic']:
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
 
-        return grid
 
-    def read_triangles(self, nc, grid):
+
+    def read_triangles(self, grid):
         # return triangulation
         # if triangualur has /quad cells
         params = self.params
@@ -105,8 +105,6 @@ class GenericUnstructuredReader(BaseGenericReader):
             grid['hydro_model_cords_geographic'] = True
         else:
             grid['hydro_model_cords_geographic'] = self.params['hydro_model_cords_geographic']
-
-        return grid
 
 
 

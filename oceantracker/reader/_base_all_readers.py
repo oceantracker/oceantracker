@@ -94,8 +94,6 @@ class _BaseReader(ParameterBaseClass):
 
     def preprocess_field_variable(self, name,grid, data): return data
 
-
-
     def read_bottom_cell_index(self, grid):
         # dummy bottom cell
         bottom_cell_index = np.full((self.info['num_nodes'],), 0, dtype=np.int32)
@@ -151,9 +149,9 @@ class _BaseReader(ParameterBaseClass):
 
     def final_setup(self):      pass
 
-    def _build_hori_and_vert_grids(self):
+    def _build_hori_and_vert_grids(self, ):
         grid= self.grid
-        self.build_hori_grid()
+        self.build_hori_grid(grid)
         self._construct_hori_grid_variables()
 
         if self.info['is3D']:
@@ -173,14 +171,12 @@ class _BaseReader(ParameterBaseClass):
 
 
 
-
-    def build_hori_grid(self):
+    def build_hori_grid(self, grid):
         # read nodal values and triangles
         params = self.params
         info = self.info
-        grid = self.grid
 
-        grid = self.read_horizontal_grid_coords(grid) # read nodal x's
+        self.read_horizontal_grid_coords(grid) # read nodal x's
 
         if si.settings.use_geographic_coords or info['geographic_coords']:
             if not info['geographic_coords']:
@@ -218,7 +214,7 @@ class _BaseReader(ParameterBaseClass):
         si.msg_logger.msg('grid bounding box = ' + b, tabs=5)
 
         # reader triangles
-        grid = self.read_triangles(grid)
+        self.read_triangles(grid)
         grid['quad_cells_to_split'],grid['triangles'] = self.find_and_split_quad_cells(grid['triangles'])
 
         # find nodes that are used in triangulation (ie not land)

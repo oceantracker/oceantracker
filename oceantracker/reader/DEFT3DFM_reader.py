@@ -95,7 +95,6 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         x = ds.read_variable(gm['x']).data
         y = ds.read_variable(gm['y']).data
         grid['x'] = np.stack((x, y), axis=1).astype(np.float64)
-        return grid
 
     def read_triangles(self, grid):
         # read nodes in triangles (N by 3) or mix of triangles and quad cells as (N by 4)
@@ -112,7 +111,6 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         tri[sel] = 0
         grid['triangles'] = tri.astype(np.int32) - 1 # make zero based
 
-        return grid
 
     def read_dry_cell_data(self,nt_index, buffer_index):
         # get dry cells from water depth and tide
@@ -173,10 +171,9 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         return bottom_cell_index
 
 
-    def build_hori_grid(self):
+    def build_hori_grid(self, grid):
 
-        super().build_hori_grid()
-        grid = self.grid
+        super().build_hori_grid(grid)
 
         ds = self.dataset
         gm = self.params['grid_variable_map']

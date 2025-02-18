@@ -94,7 +94,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         tri = tri.astype(np.int32)
         tri -= 1
         grid['triangles'] = tri
-        return grid
+
 
 
     def read_horizontal_grid_coords(self, grid):
@@ -105,7 +105,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         x = ds.read_variable(gm['x']).data
         y = ds.read_variable(gm['y']).data
         grid['x']  = np.stack((x, y), axis=1).astype(np.float64)
-        return grid
+
 
     def read_bottom_cell_index(self, grid):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid

@@ -82,9 +82,9 @@ class ROMSreader(_BaseStructuredReader):
         dims = info['dims']
         info['num_nodes'] = dims[params['dimension_map']['row']] * dims[params['dimension_map']['col']]
 
-    def build_hori_grid(self):
+    def build_hori_grid(self, grid):
         # pre-read useful info
-        grid = self.grid
+
         ds = self.dataset
         grid['psi_land_mask'] = ds.read_variable('mask_psi').data != 1
         grid['u_land_mask'] = ds.read_variable('mask_u').data  != 1
@@ -107,7 +107,7 @@ class ROMSreader(_BaseStructuredReader):
         grid['rho_land_mask'] = ds.read_variable('mask_rho').data != 1
 
 
-        super().build_hori_grid()
+        super().build_hori_grid(grid)
 
         if False:
 
@@ -134,8 +134,6 @@ class ROMSreader(_BaseStructuredReader):
         grid['lat'] =  ds.read_variable(gm['y']).data
 
         grid['x'] =  np.stack((grid['lon'].ravel(),grid['lat'].ravel()),  axis=1)
-
-        return grid
 
 
 

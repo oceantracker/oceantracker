@@ -36,9 +36,9 @@ class BaseGenericReader(_BaseReader):
         return  nc.is_var_dim(var_name,self.params['dimension_map']['z'])
 
 
-    def build_hori_grid(self):
+    def build_hori_grid(self, grid):
         # read nodal values and triangles
-        grid = self.grid
+
         ml = si.msg_logger
         params = self.params
         grid_map= params['grid_variable_map']
@@ -51,15 +51,14 @@ class BaseGenericReader(_BaseReader):
 
         # read nodal x's
 
-        grid = self.read_horizontal_grid_coords(nc, grid)
+        self.read_horizontal_grid_coords(nc, grid)
         grid['x'] = grid['x'].astype(np.float64)
 
-        grid = self.read_triangles(nc, grid)
+        self.read_triangles(grid)
         # ensure np.int32 values
         grid['triangles']=grid['triangles'].astype(np.int32)
         grid['quad_cells_to_split'] = grid['quad_cells_to_split'].astype(np.int32)
 
-        return grid
 
     def field_var_info(self,nc,file_var_map):
          
@@ -99,9 +98,8 @@ class BaseGenericReader(_BaseReader):
         if self.params['hydro_model_cords_geographic']:
             grid['x'] = self.convert_lon_lat_to_meters_grid(grid['x'])
 
-        return grid
 
-    def read_triangles(self, nc, grid):
+    def read_triangles(self, grid):
         # return triangulation
         # if triangualur has /quad cells
         params = self.params
@@ -114,8 +112,6 @@ class BaseGenericReader(_BaseReader):
         grid['quad_cells_to_split'] =  np.full((0,),0, np.int32)
 
 
-
-        return grid
 
 
     def set_up_uniform_sigma(self, nc, grid):
