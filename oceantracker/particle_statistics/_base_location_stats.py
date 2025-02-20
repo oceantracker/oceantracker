@@ -129,6 +129,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # other output common to all types of stats
         nc.create_a_variable('num_released_total', ['time_dim'], np.int32, description='total number released')
 
+        nc.create_a_variable('num_released',  ['time_dim', 'release_group_dim'], np.int32, description='number released so far from each release group')
+
     def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
 
@@ -189,7 +191,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # any overloaded sub-selection of particles given in child classes
         sel = self.select_particles_to_count(sel)
 
-        #update prop list data, as buffer may have expnaded
+        #update prop list data, as buffer may have expanded
         #todo do this only when expansion occurs??
         part_prop = si.class_roles.particle_properties
         for n, name in enumerate(self.sum_binned_part_prop.keys()):
@@ -222,23 +224,27 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         return out[:n_found]
 
-    def write_time_varying_stats(self, n, time):
+    def write_time_varying_stats(self, n_write, time):
         # write nth step in file
         fh = self.nc.file_handle
-        fh['time'][n] = time
+        fh['time'][n_write] = time
+
         release_groups = si.class_roles.release_groups
 
-        # add up number released
-        num_released = 0
-        for rg in release_groups.values():
-            num_released += rg.info['number_released']
-        fh['num_released_total'][n] = num_released
+        # write number released
+        num_released = np.zeros((len(release_groups),), dtype=np.int32)
+        for nrg, rg in enumerate(release_groups.values()):
+            num_released[nrg] = rg.info['number_released']
 
-        fh['count'][n, ...] = self.count_time_slice[:, ...]
-        fh['count_all_particles'][n, ...] = self.count_all_particles_time_slice[:, ...]
+        fh['num_released'][n_write, :] = num_released # for each release group so far
+        fh['num_released_total'][n_write] = num_released.sum() # total all release groups so far
+
+        fh['count'][n_write, ...] = self.count_time_slice[:, ...]
+        fh['count_all_particles'][n_write, ...] = self.count_all_particles_time_slice[:, ...]
 
         for key, item in self.sum_binned_part_prop.items():
-            self.nc.file_handle['sum_' + key][n, ...] = item[:]  # write sums  working in original view
+            self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
+
 
     def info_to_write_at_end(self) : pass
 
