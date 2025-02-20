@@ -60,7 +60,7 @@ params.append(p1)
 # demo 2 track animation
 p2= deepcopy(demo_base_params)
 p2['release_groups']=[ {'name':'point1','allow_release_in_dry_cells': True,
-            'points': two_points, 'pulse_size': 10, 'release_interval': 3 * 3600},
+            'points': two_points, 'pulse_size': 10, 'release_interval': 1 * 3600},
      {'name':'poly1','class_name':'PolygonRelease',
             'points': deepcopy(poly_points),
             'pulse_size': 10, 'release_interval': 3 * 3600},
@@ -81,7 +81,7 @@ params.append(p2)
 p3= deepcopy(demo_base_params)
 
 p3['release_groups']= [{'name': 'myP1','points': [[1596000, 5486000]], 'pulse_size': 2000, 'release_interval': 7200, 'release_radius': 100.},
-                       {'name':  'myP2','points': [[1596000, 5490000]], 'pulse_size': 2000, 'release_interval': 7200}]
+                       {'name':  'myP2','points': [[1596000, 5490000]], 'pulse_size': 3000, 'release_interval': 3600}]
 
 p3['particle_statistics'] = [{'name':'gridstats1','class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased',
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
