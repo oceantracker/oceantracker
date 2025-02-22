@@ -104,6 +104,7 @@ class Solver(ParameterBaseClass):
             fgm.update_readers(time_sec)
 
             # do stats etc updates and write tracks
+
             self._pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
 
             # print progress to screen

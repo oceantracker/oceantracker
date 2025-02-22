@@ -40,8 +40,8 @@
                     5490000
                 ]
             ],
-            "pulse_size": 2000,
-            "release_interval": 7200
+            "pulse_size": 3000,
+            "release_interval": 3600
         }
     ],
     "particle_properties": [
