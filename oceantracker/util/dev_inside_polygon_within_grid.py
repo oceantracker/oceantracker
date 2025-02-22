@@ -41,8 +41,8 @@ class InsidePolygonWithinGrid(object):
             x_node =  outer_grid['x'][outer_grid['triangles'][ :, n],:2]
             node_inside_polygon[:, n] = self._inside_polygon.is_inside(x_node)
 
-        sub_grid['tri_fully_inside'] =  np.all(node_inside_polygon, axis=1)
-        sub_grid['tri_overlaps'] = np.any(node_inside_polygon, axis=1) # outer grid cells which overlap part of polygon
+        outer_grid['tri_fully_inside'] =  np.all(node_inside_polygon, axis=1)
+        outer_grid['tri_overlaps'] = np.any(node_inside_polygon, axis=1) # outer grid cells which overlap part of polygon
 
         pass
 
@@ -53,19 +53,25 @@ class InsidePolygonWithinGrid(object):
 
         # make triangulation for subgrid from domain triangulation
         # first make a map from domain tri to subgrid tri
-        sub_grid['tri_outer_grid_nodes'] = outer_grid['triangles'][sub_grid['tri_overlaps'], :]
+        sub_grid['tri_outer_grid_nodes'] = outer_grid['triangles'][outer_grid['tri_overlaps'], :]
         sub_grid['outer_grid_nodes'] = np.unique(sub_grid['tri_outer_grid_nodes'])
         sub_grid['x'] =  outer_grid['x'][sub_grid['outer_grid_nodes'],...]
 
 
         m = np.full(( outer_grid['x'].shape[0],), -1, dtype=np.int32)
         m[sub_grid['outer_grid_nodes']] = np.arange( sub_grid['x'].shape[0])  # insert new node numbers into outer grid sized variable
+        sub_grid['triangles'] =  m[sub_grid['tri_outer_grid_nodes']]
+
+        # map sub grid tri to tri number in outer grid
+        sub_grid['map_to_outer_tri'] = np.flatnonzero(outer_grid['tri_overlaps'])
+
+        # make outer to sub grid map, -1 where cell does not overlap
+        outer_grid['map_to_subgrid_tri'] = np.full((outer_grid['triangles'].shape[0],), -1, dtype = np.int32)
+        outer_grid['map_to_subgrid_tri'][outer_grid['tri_overlaps']]  = np.arange(sub_grid['triangles'].shape[0])
+
+        sub_grid['KDtree'] = cKDTree(sub_grid['x'], leafsize=10)
         return
-        sub_grid['triangles'] =  m[sub_grid['outer_grid_nodes']]
 
-
-        #sub_grid['node_to_tri_map'], sub_grid['tri_per_node'] = triangle_utilities.build_node_to_triangle_map(sub_grid['triangles'], sub_grid['x'])
-        #self.subgrid = sub_grid
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
@@ -100,12 +106,19 @@ if __name__ == '__main__':
 
     P = InsidePolygonWithinGrid(x_polygon, grid['x'], grid['triangles'])
 
+    from timeit import timeit
+    d = cKDTree(P.outer_grid['x'], leafsize=10)
+    print('KDtree query outer', timeit(lambda: d.query(P.outer_grid['x']), number=10))
+    print('KDtree query subgrid', timeit(lambda : P.sub_grid['KDtree'].query(P.outer_grid['x']), number = 10))
+
     og = P.outer_grid
     sg = P.sub_grid
     plt.triplot(og['x'][:, 0], og['x'][:, 1], og['triangles'], c=[.8,.8,.8],lw=1)
 
-    plt.triplot(og['x'][:, 0], og['x'][:, 1], og['triangles'][sg['tri_overlaps'], :], c=[.8, .2, .2], lw=.5)
-    plt.triplot(og['x'][:, 0], og['x'][:, 1], og['triangles'][sg['tri_fully_inside'], :], c=[.2,.8,  .2], lw=.5)
+    plt.triplot(sg['x'][:, 0], sg['x'][:, 1], sg['triangles'], c=[.8,.2,  .2], lw=.5)
+    plt.triplot(og['x'][:, 0], og['x'][:, 1], og['triangles'][og['tri_fully_inside'], :], c=[.2,.8,  .2], lw=.5)
+
+
 
     plt.plot(P.x_polygon[:, 0], P.x_polygon[:, 1], c='g')
     #plt.plot(sg['x'][:,0],sg['x'][:,1],'.',c='r')

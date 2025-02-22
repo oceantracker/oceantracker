@@ -72,8 +72,8 @@ release_groups:
   points:
   - - 1596000
     - 5490000
-  pulse_size: 2000
-  release_interval: 7200
+  pulse_size: 3000
+  release_interval: 3600
 root_output_dir: output
 time_buffer_size: 15
 time_step: 900

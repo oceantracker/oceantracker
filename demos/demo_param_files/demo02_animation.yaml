@@ -30,7 +30,7 @@ release_groups:
   - - 1598000
     - 5486100
   pulse_size: 10
-  release_interval: 10800
+  release_interval: 3600
 - class_name: PolygonRelease
   name: poly1
   points:

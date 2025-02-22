@@ -31,7 +31,7 @@
                 ]
             ],
             "pulse_size": 10,
-            "release_interval": 10800
+            "release_interval": 3600
         },
         {
             "name": "poly1",
