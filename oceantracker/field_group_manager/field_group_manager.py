@@ -1,7 +1,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-
+from os import  path
 import numpy as np
-from oceantracker.util import time_util, ncdf_util, json_util, cord_transforms
+from oceantracker.util import time_util, json_util
 from oceantracker.field_group_manager.util import field_group_manager_util
 from time import  perf_counter
 from copy import deepcopy
@@ -141,16 +141,16 @@ class FieldGroupManager(ParameterBaseClass):
 
         if si.settings.block_dry_cells:
             sel_hit_dry = part_prop['status'].find_subset_where(sel_fix, 'eq',
-                                                                    si.particle_status_flags.hit_dry_cell,
+                                                                    si.cell_search_status_flags.hit_dry_cell_edge,
                                                                     out=self.get_partID_subset_buffer('B2'))
             self._apply_dry_cell_boundary_condition(sel_hit_dry)
 
         # move back bad coords, nan etc
-        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.bad_coord, out=self.get_partID_subset_buffer('B2'))
+        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.bad_coord, out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel) # those still bad, eg nan etc
 
         # move back cell search failed
-        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.cell_search_failed,
+        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.failed,
                                                     out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel)  # those still bad, eg nan etc
 
@@ -193,7 +193,7 @@ class FieldGroupManager(ParameterBaseClass):
             part_prop['x'].copy('x_last_good', sel)  # move back location
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
             part_prop['bc_coords'].copy('bc_coords_last_good', sel)  # move back the cell
-            part_prop['status'].set_values(si.particle_status_flags.moving, sel)  # set statud to moving
+            part_prop['status'].copy('status_last_good', sel)  # set status to moving
 
         # debug_util.plot_walk_step(xq, si.core__class_roles.reader.grid, part_prop)
 
@@ -265,7 +265,9 @@ class FieldGroupManager(ParameterBaseClass):
     def are_dry_cells(self, n_cell):
         sel = self.reader.grid['dry_cell_index'][n_cell] > 128  # those dry
         return sel
-    
+
+
+
     def close(self):
         pass
 

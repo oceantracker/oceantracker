@@ -192,7 +192,7 @@ class OceanTrackerParamsRunner(object):
 
         # -----------run-------------------------------
         si.msg_logger.hori_line()
-        si.msg_logger.progress_marker('Starting ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
+        si.msg_logger.progress_marker('Starting" ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
         si.msg_logger.msg(f'From {time_util.seconds_to_isostr(si.run_info.start_time)} to  {time_util.seconds_to_isostr(si.run_info.end_time)}', tabs=3)
         si.core_class_roles.solver.solve() # do time stepping
 
@@ -259,6 +259,15 @@ class OceanTrackerParamsRunner(object):
         fgm.final_setup()
         fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
 
+        # write reader info to json
+        d = dict(reader=fgm.reader.info, nested_readers=[])
+        if hasattr(fgm,'readers'):
+            # add nested readers
+            for r in fgm.readers[1:]:
+                d['nested_readers'].append(r.info)
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, f'{si.run_info.output_file_base}_hindcast_info.json'), d)
+
+
         # schedule all release groups
         number_released = np.zeros((si.run_info.times.size, ), dtype= np.int64)
         max_ages = []
@@ -267,7 +276,7 @@ class OceanTrackerParamsRunner(object):
             p = i.params
             i.initial_setup() # delayed set up
             i.add_scheduler('release',start=p['start'], end=p['end'], duration=p['duration'],
-                            interval =p['release_interval'], crumbs=f'Adding release groups scheduler {name} >')
+                            interval =p['release_interval'], crumbs=f'Adding release groups scheduler # {i.info["instanceID"]} name = "{name}" >')
             # max_ages needed for culling operations
             i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
             max_ages.append(i.params['max_age'])
@@ -275,6 +284,7 @@ class OceanTrackerParamsRunner(object):
 
         # use forcast number alive to set up particle chunking, for memory buffers and output files
         ri = si.run_info
+        ri.forcasted_total_released = number_released.sum()
         ri.forcasted_number_alive = np.cumsum(number_released)
         ri.forcasted_max_number_alive = ri.forcasted_number_alive.max()
 
@@ -345,6 +355,7 @@ class OceanTrackerParamsRunner(object):
         ri = si.run_info
         md = ri.model_direction
         fgm= si.core_class_roles.field_group_manager
+
         hi_start,hi_end = fgm.info['start_time'],fgm.info['end_time']
 
         crumbs = 'adding release groups'
@@ -359,7 +370,6 @@ class OceanTrackerParamsRunner(object):
         last_time = []
         default_start = hi_end   if si.settings.backtracking else hi_start
         default_end   = hi_start if si.settings.backtracking else hi_end
-
 
         for name, rg in si.class_roles['release_groups'].items():
             rg_params = rg.params
@@ -377,15 +387,17 @@ class OceanTrackerParamsRunner(object):
             first_time.append(start)
             last_time.append( start + md * life_span)
 
+
         # set model run start/end time allowing for back tracking
         start_time = np.min(md * np.asarray(first_time)) * md
         end_time   = np.max(md * np.asarray(last_time)) * md
 
+        if  not (hi_start <= start_time <= hi_end):
+            si.msg_logger.msg(f'Start time = "{time_util.seconds_to_isostr(start_time)}" is outside the hindcast times',fatal_error=True, caller=self,
+                              hint =f'Hindcast is {time_util.seconds_to_isostr(hi_start)} to {time_util.seconds_to_isostr(hi_end)}')
+
         # clip end time to be within hincast
-        if si.settings.backtracking:
-            end_time = max(end_time, hi_start)
-        else:
-            end_time = min(end_time, hi_end)
+        end_time = max(end_time, hi_start) if si.settings.backtracking else min(end_time, hi_end)
 
         # get duration clipped by max duration
         duration =  abs(end_time-start_time)
@@ -566,6 +578,8 @@ class OceanTrackerParamsRunner(object):
         if True:
             from oceantracker.util import numba_util
             d['numba_code_info'] = numba_util.get_numba_func_info()
+
+
 
         case_info_file = path.join(si.output_files[ 'run_output_dir'],si.output_files['caseInfo_file'])
         json_util.write_JSON(case_info_file, d)

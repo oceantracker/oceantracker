@@ -6,7 +6,7 @@ from glob import  glob
 
 from oceantracker.shared_info import shared_info as si
 from oceantracker import definitions
-from oceantracker.util import  time_util
+from oceantracker.util import  time_util, json_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
 def make_a_reader_from_params(reader_params, settings, crumbs=''):
@@ -183,6 +183,7 @@ def _time_sort_files(reader, crumbs):
             f['time_steps'] = time.size
             f['ID'] = ID
             f['time'] = time
+            f['time_attrs'] = ds[time_var].attrs
             f['start_date'] = time_util.seconds_to_isostr( f['start_time'])
 
     # sort variable fileIDs into time order, but maintain given file order

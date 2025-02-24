@@ -35,7 +35,8 @@ class ParticleGroupManager(ParameterBaseClass):
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='velocity_modifier',
                      vector_dim=nDim)
 
-        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='status', dtype='int8', )
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='status', dtype='int8' )
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='status_last_good', dtype='int8', )
 
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='age', initial_value=0.,
                      units='seconds', description='Time in seconds since particle released')
@@ -87,9 +88,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         si.run_info.particle_counts['current_status_counts'] = info['current_status_counts']
 
-        # only record bad totals to avoid overflow
-        info['total_bad_status_counts'] = {key :  0 for key  in  ['cell_search_failed','bad_coord','outside_domain']}
-        si.run_info.particle_counts['total_bad_status_counts'] = info['total_bad_status_counts']
+
 
     #@function_profiler(__name__)
     def release_particles(self,n_time_step, time_sec):
@@ -148,6 +147,7 @@ class ParticleGroupManager(ParameterBaseClass):
             part_prop['x_last_good'].set_values(release_data['x'], new_buffer_indices)
             part_prop['n_cell_last_good'].set_values(release_data['n_cell'], new_buffer_indices)
             part_prop['status'].set_values(si.particle_status_flags.moving, new_buffer_indices)  # set  status of released particles
+            part_prop['status_last_good'].set_values(si.particle_status_flags.moving, new_buffer_indices)  # set  status of released particles
             part_prop['time_released'].set_values(time_sec, new_buffer_indices)  # time released for each particle, needed to calculate age
             part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_buffer_indices)
 
@@ -234,10 +234,6 @@ class ParticleGroupManager(ParameterBaseClass):
         # transfer stats counts from array to run_info dict
         for key, val in si.particle_status_flags.asdict().items():
             pc['current_status_counts'][key] = self.status_count_array_per_thread[:, 128 + val].sum(axis=0)
-
-        for key, item in pc['total_bad_status_counts'].items():
-            item += pc['current_status_counts'][key]
-
 
         return num_alive
 

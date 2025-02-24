@@ -135,34 +135,34 @@ class  InterpTriangularGrid(_BaseInterp):
         IDs_need_fixing = self._get_hori_cell(xq, active)
 
         # try to fix any failed walks
-        sel = part_prop['status'].find_subset_where(IDs_need_fixing, 'eq', si.particle_status_flags.cell_search_failed, out=self.get_partID_subset_buffer('B1'))
+        sel_failed_walk = IDs_need_fixing == si.cell_search_status_flags.failed
 
-        if sel.size > 0:
-            # si.msg_logger.msg(f'Search retried for {sel.size} cells')
-            info['triangle_walks_retried'] += sel.size
+        if np.any(sel_failed_walk):
+            IDs_failed_walk = IDs_need_fixing[sel_failed_walk]
+            info['triangle_walks_retried'] += IDs_failed_walk.size
 
-            n_cell, bc, is_inside_domain = self.find_initial_cell(xq[sel,...])
-            part_prop['n_cell'].set_values(n_cell, sel)
-            part_prop['bc_coords'].set_values(bc, sel)
+            n_cell, bc, is_inside_domain = self.find_initial_cell(xq[IDs_failed_walk,...])
+            fixed = is_inside_domain
+            part_prop['n_cell'].set_values(n_cell[fixed], IDs_failed_walk[fixed])
+            part_prop['bc_coords'].set_values(bc[fixed,:], IDs_failed_walk[fixed])
+            part_prop['status'].set_values(si.particle_status_flags.moving, IDs_failed_walk[fixed]) # todo assumes particle was moving if walk failed?
 
             # recheck for repeated failures of failed searched, which must be outside domain if not found by intial serarch
-            # , but not outside an open boundary which is flagged separately
-            sel = sel[~is_inside_domain]
-            IDs_need_fixing = IDs_need_fixing[sel]
-            if sel.size > 0:
-                wf = {'x0': part_prop['x_last_good'].get_values(sel),
-                      'xq': part_prop['x'].get_values(sel)}
+            if np.any(~fixed):
+                sel2= IDs_failed_walk[~fixed]
+                wf = {'x0': part_prop['x_last_good'].get_values(sel2),
+                      'xq': part_prop['x'].get_values(sel2)}
 
                 info['tri_walk_full_failures'].append(wf)
-                info['particles_killed_after_triangle_walk_retry_failed'] += sel.size  # total failed walks
-                si.msg_logger.msg('walks too long after kd retry- killed ' + str(sel.shape[0]) + ' particles', warning=True, tabs=0,
+                info['particles_killed_after_triangle_walk_retry_failed'] += sel2.size  # total failed walks
+                si.msg_logger.msg('walks too long after kd retry- killed ' + str(sel2.size) + ' particles', warning=True, tabs=0,
                                   hint='Try decreasing time step or increasing interpolator parameter "max_search_steps", current value =' + str(self.params['max_search_steps']))
                 # make notes for log file enabling follow up
                 si.msg_logger.msg('particle locations of failed walks, first 3 or less ', warning=True, tabs=2)
-                si.msg_logger.msg(' location xq =' + str(xq[sel[:3], :].tolist()), warning=True, tabs=2)
-                si.msg_logger.msg(' x_old =' + str(part_prop['x_last_good'].data[sel[:3], :].tolist()), warning=True, tabs=2)
+                si.msg_logger.msg(' location xq =' + str(xq[sel2[:3], :].tolist()), warning=True, tabs=2)
+                si.msg_logger.msg(' x_old =' + str(part_prop['x_last_good'].data[sel2[:3], :].tolist()), warning=True, tabs=2)
                 # kill particles
-                part_prop['status'].set_values(si.particle_status_flags.dead, sel)
+                part_prop['status'].set_values(si.particle_status_flags.dead, sel2)
 
         si.block_timer('Find cell, horizontal walk', t0)
 

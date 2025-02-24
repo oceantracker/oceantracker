@@ -17,9 +17,9 @@ psf = si.particle_status_flags
 status_moving = int(psf.moving)
 status_on_bottom = int(psf.on_bottom)
 status_stranded_by_tide = int(psf.stranded_by_tide)
-status_outside_open_boundary = int(psf.outside_open_boundary)
+
 status_dead = int(psf.dead)
-status_bad_coord = int(psf.bad_coord)
+status_bad_coord = int(si.cell_search_status_flags.bad_coord)
 
 class FindVerticalCellSigmaGrid(object):
 

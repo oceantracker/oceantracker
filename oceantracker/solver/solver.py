@@ -30,7 +30,8 @@ class Solver(ParameterBaseClass):
         crumbs='Solver_initial_setup >'
         si.add_class('particle_properties', name= 'v_temp',class_name='ManuallyUpdatedParticleProperty', vector_dim= si.run_info.vector_components, write=False, crumbs=crumbs)
 
-    def initial_setup(self):pass
+    def initial_setup(self):
+        pass
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc( required_props_list=['x','status', 'x_last_good', 'v_temp'])
@@ -73,6 +74,7 @@ class Solver(ParameterBaseClass):
         si.msg_logger.set_screen_tag('S')
 
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
+
             t0_step = perf_counter()
             self.start_update_timer()
             time_sec = model_times[n_time_step]
@@ -140,6 +142,8 @@ class Solver(ParameterBaseClass):
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             ri.time_steps_completed += 1
             si.block_timer('Time stepping',t0_step)
+
+
             self.stop_update_timer()
             if abs(t2 - ri.start_time) > ri.duration: break
 
@@ -224,6 +228,7 @@ class Solver(ParameterBaseClass):
         # used  copy particle operation directly to save overhead cost
         particle_operations_util.copy(part_prop['x_last_good'].data, part_prop['x'].data, is_moving)
         particle_operations_util.copy(part_prop['n_cell_last_good'].data, part_prop['n_cell'].data, is_moving)
+        particle_operations_util.copy(part_prop['status_last_good'].data, part_prop['status'].data, is_moving)
         particle_operations_util.copy(part_prop['bc_coords_last_good'].data, part_prop['bc_coords'].data, is_moving)
 
         # do time step
@@ -317,11 +322,13 @@ class Solver(ParameterBaseClass):
 
     def screen_output(self, nt, time_sec,t0_model, t0_step):
         ri = si.run_info
+        fgm = si.core_class_roles.field_group_manager
+        pgm = si.core_class_roles.particle_group_manager
         fraction_done= abs((time_sec - ri.start_time) / ri.duration)
         s = f'{nt:04d}'
         s += f': {100* fraction_done:02.0f}%'
 
-        s += si.core_class_roles.field_group_manager.screen_info()
+        s += fgm.screen_info()
 
         t = abs(time_sec - ri.start_time)
         s += ' Day ' + ('-' if si.settings.backtracking else '+')
@@ -330,8 +337,9 @@ class Solver(ParameterBaseClass):
         s +=   si.core_class_roles.particle_group_manager.screen_info()
 
         elapsed_time= perf_counter() - t0_model
-        remaining_time= (1 - fraction_done) * elapsed_time / max(.01, fraction_done)
         if elapsed_time > 300.:
+            #todo better estimate of time remaining based on partcle numbers?
+            remaining_time= (1 - fraction_done) * elapsed_time / max(.01, fraction_done)
             s += ' remaining: ' + time_util.seconds_to_hours_mins_string(abs(remaining_time)) +','
 
         s += f' step time = { (perf_counter() - t0_step) * 1000:4.1f} ms'

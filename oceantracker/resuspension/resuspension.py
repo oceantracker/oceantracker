@@ -45,7 +45,7 @@ class Resuspension(BaseResuspension):
         # compare to critical friction velocity
         resupend = part_prop['friction_velocity'].find_subset_where(on_bottom, 'gteq',
                                                                     self.params['critical_friction_velocity'],
-                                                                    out=self.get_partID_subset_buffer('B1'))
+                                                                    out=self.get_partID_subset_buffer('B2'))
         return resupend
 
 
