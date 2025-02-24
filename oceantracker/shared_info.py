@@ -189,6 +189,8 @@ class _SharedInfoClass():
     core_class_roles = _CoreClassRoles()
     default_settings = _DefaultSettings()
     particle_status_flags = definitions._ParticleStatusFlags()
+    cell_search_status_flags= definitions._CellSearchStatusFlags()
+
     node_types =  definitions._NodeTypes()
     edge_types = definitions._EdgeTypes()
     vertical_grid_types = _VerticalGridTypes()

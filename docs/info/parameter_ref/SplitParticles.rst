@@ -8,6 +8,13 @@ SplitParticles
 
 **full class_name :** oceantracker.trajectory_modifiers.split_particles.SplitParticles
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier> SplitParticles
 
 

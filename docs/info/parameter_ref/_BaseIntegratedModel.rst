@@ -8,6 +8,13 @@ _BaseIntegratedModel
 
 **full class_name :** oceantracker.integrated_model._base_model._BaseIntegratedModel
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseIntegratedModel
 
 

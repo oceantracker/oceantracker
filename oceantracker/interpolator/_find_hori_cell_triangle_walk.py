@@ -20,10 +20,13 @@ status_stranded_by_tide = int(psf.stranded_by_tide)
 status_outside_domain = int(psf.outside_domain)
 status_outside_open_boundary = int(psf.outside_open_boundary)
 status_dead = int(psf.dead)
-status_bad_coord = int(psf.bad_coord)
-status_cell_search_failed = int(psf.cell_search_failed)
-status_hit_dry_cell = int(psf.hit_dry_cell)
 
+csf = si.cell_search_status_flags
+search_bad_coord = int(csf.bad_coord)
+search_failed = int(csf.failed)
+search_hit_domain_edge = int(csf.hit_domain_edge)
+search_hit_dry_cell = int(csf.hit_dry_cell_edge)
+search_open_boundary = int(csf.hit_open_boundary_edge)
 
 domain_edge =  int(si.edge_types.domain)
 open_bounday_edge=  int(si.edge_types.open_boundary)
@@ -90,6 +93,7 @@ class FindHoriCellTriangleWalk(object):
         bc_coords = part_prop['bc_coords'].data
         status = part_prop['status'].data
         need_fixingIDs = part_prop['need_fixingIDs'].data
+
         params = self.params
 
         IDs_need_fixing= self.BCwalk(xq,
@@ -125,7 +129,7 @@ class FindHoriCellTriangleWalk(object):
 
             if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
                 # if any is nan copy all and move on
-                status[n] = status_bad_coord
+                status[n] = search_bad_coord
                 thread_buffer_index[nb.get_thread_id()].append(n)
                 continue
 
@@ -165,7 +169,7 @@ class FindHoriCellTriangleWalk(object):
                 if block_dry_cells:  # is faster split into 2 ifs, not sure why
                     if dry_cell_index[next_tri] > 128:
                         # treats dry cell like a lateral boundary,  move back and keep triangle the same
-                        status[n] = status_hit_dry_cell
+                        status[n] = search_hit_dry_cell
                         cell_search_OK = False
                         break
 
@@ -173,7 +177,7 @@ class FindHoriCellTriangleWalk(object):
 
             # not found in given number of search steps
             if n_steps >= max_triangle_walk_steps:  # dont update cell
-                status[n] = status_cell_search_failed
+                status[n] = search_failed
                 cell_search_OK = False
 
             if cell_search_OK:

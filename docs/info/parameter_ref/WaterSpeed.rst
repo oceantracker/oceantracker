@@ -8,6 +8,13 @@ WaterSpeed
 
 **full class_name :** oceantracker.particle_properties.water_speed.WaterSpeed
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleProperty> CustomParticleProperty> WaterSpeed
 
 

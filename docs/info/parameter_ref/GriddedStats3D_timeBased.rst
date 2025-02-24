@@ -8,6 +8,13 @@ GriddedStats3D_timeBased
 
 **full class_name :** oceantracker.particle_statistics.gridded_statistics3D.GriddedStats3D_timeBased
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats3D_timeBased
 
 

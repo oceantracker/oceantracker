@@ -8,6 +8,13 @@ CullParticles
 
 **full class_name :** oceantracker.trajectory_modifiers.cull_particles.CullParticles
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier> CullParticles
 
 

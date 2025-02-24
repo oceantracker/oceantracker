@@ -8,6 +8,13 @@ ResidentInPolygon
 
 **full class_name :** oceantracker.particle_statistics.resident_in_polygon.ResidentInPolygon
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleLocationStats> ResidentInPolygon
 
 

@@ -8,6 +8,13 @@ _BaseEventLogger
 
 **full class_name :** oceantracker.event_loggers._base_event_loggers._BaseEventLogger
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseEventLogger
 
 

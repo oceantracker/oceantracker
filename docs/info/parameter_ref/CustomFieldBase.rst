@@ -8,6 +8,13 @@ CustomFieldBase
 
 **full class_name :** oceantracker.fields._base_field.CustomFieldBase
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseField> CustomFieldBase
 
 

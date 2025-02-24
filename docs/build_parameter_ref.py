@@ -281,11 +281,11 @@ if __name__ == "__main__":
     dest = r'../docs/info/how_to'
     for f in glob('*.ipynb'):
         subprocess.run('jupyter nbconvert '+ f + '  --to rst')
-        subprocess.run('jupyter nbconvert ' + f + '  --to script')
+        #subprocess.run('jupyter nbconvert ' + f + '  --to script')
         f_base = f.split('.')[0]
         print(f_base)
         f_base + '_files'
-        old_fn = f_base+'.rst'
+        old_fn = f_base +'.rst'
         new_fn = path.join(dest,old_fn)
         if path.isfile(new_fn):
             remove(new_fn)

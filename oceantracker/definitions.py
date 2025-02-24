@@ -72,17 +72,25 @@ class _BaseConstantsClass:
 @dataclass
 class _ParticleStatusFlags(_BaseConstantsClass):
     unknown : int = -20
-    bad_coord : int = -16
-    cell_search_failed: int = -15
     notReleased : int = -10
     dead : int = -5
-    hit_dry_cell: int = -4
-    outside_domain : int = -3
     outside_open_boundary : int = -2
+    outside_domain: int = -1
     stationary : int = 0
     stranded_by_tide : int = 3
     on_bottom : int = 6
     moving : int = 10
+
+# status of cell search
+@dataclass
+class _CellSearchStatusFlags(_BaseConstantsClass):
+    ok: int = 0
+    hit_domain_edge: int = -1
+    hit_open_boundary_edge: int = -2
+    hit_dry_cell_edge : int = -3
+    bad_coord: int = -20
+    failed: int = -30
+
 
 
 # types of node
@@ -101,15 +109,7 @@ class _EdgeTypes(_BaseConstantsClass):
     open_boundary: int = -2
 
 
-# status of cell search
-@dataclass
-class _CellSearchStatusFlags(_BaseConstantsClass):
-    ok: int = 0
-    domain_edge: int = -1
-    open_boundary_edge: int = -2
-    dry_cell_edge : int = -3
-    bad_coord: int = -20
-    failed: int = -30
+
 
     def get_edge_vars(self):
         return {key:item for key,item in self.asdict().items() if key in ['domain_edge']}

@@ -8,6 +8,13 @@ PolygonStats2D_ageBased
 
 **full class_name :** oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleLocationStats> GriddedStats2D_timeBased> GriddedStats2D_ageBased> _CorePolygonMethods> PolygonStats2D_ageBased
 
 

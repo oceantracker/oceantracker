@@ -19,8 +19,6 @@ from oceantracker.util import triangle_utilities, basic_util, cord_transforms
 
 from oceantracker.reader.util import reader_util
 
-from oceantracker.definitions import  cell_search_status_flags
-
 from oceantracker.shared_info import shared_info as si
 
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
@@ -673,7 +671,7 @@ class _BaseReader(ParameterBaseClass):
         nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
         nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
-        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(cell_search_status_flags.get_edge_vars()))
+        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(si.cell_search_status_flags))
         nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
         nc.write_a_new_variable('node_to_tri_map', grid['node_to_tri_map'], ('node_dim','max_nodes_per_tri'))

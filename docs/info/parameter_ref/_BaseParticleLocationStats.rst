@@ -8,6 +8,13 @@ _BaseParticleLocationStats
 
 **full class_name :** oceantracker.particle_statistics._base_location_stats._BaseParticleLocationStats
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleLocationStats
 
 

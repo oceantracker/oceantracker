@@ -8,6 +8,13 @@ _BaseTriangleProperties
 
 **full class_name :** oceantracker.particle_concentrations._base_user_triangle_properties._BaseTriangleProperties
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseTriangleProperties
 
 
