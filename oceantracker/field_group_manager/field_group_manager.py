@@ -43,7 +43,6 @@ class FieldGroupManager(ParameterBaseClass):
 
 
 
-
     def build_reader_fields(self):
         reader = self.reader
         reader.build_fields()
@@ -70,7 +69,6 @@ class FieldGroupManager(ParameterBaseClass):
 
         # write_grid
         self.reader.write_grid(info['gridID'])
-
 
         pass
         if si.settings['display_grid_at_start'] and self.reader.info['gridID']==1:
@@ -122,35 +120,36 @@ class FieldGroupManager(ParameterBaseClass):
         # plus global time step locations and time ftactions od timre step and put results in interpolators step info numpy structure
         info = self.info
         grid =self.reader.grid
-        info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps']= self.reader._time_step_and_buffer_offsets(time_sec)
+        info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps'] = self.reader._time_step_and_buffer_offsets(time_sec)
         part_prop = si.class_roles.particle_properties
         reader = self.reader
         # find hori cell
         sel_fix = self.reader.interpolator.find_hori_cell(xq, active)
+        #print('xx',str(part_prop['cell_search_status'].data[sel_fix]))
 
-        sel_outside_open = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.outside_open_boundary,
+        sel_outside_open = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.hit_open_boundary,
                                                                         out=self.get_partID_subset_buffer('B2'))
         if sel_outside_open.size > 0:
             self._fix_those_outside_open_boundary(sel_outside_open)
 
         # outside domain but not an open boundary,
-        sel_outside_domain = part_prop['status'].find_subset_where(sel_fix, 'eq',
-                                                                        si.particle_status_flags.outside_domain,
+        sel_outside_domain = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
+                                                                        si.cell_search_status_flags.hit_domain_boundary,
                                                                         out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel_outside_domain)
 
         if si.settings.block_dry_cells:
-            sel_hit_dry = part_prop['status'].find_subset_where(sel_fix, 'eq',
-                                                                    si.cell_search_status_flags.hit_dry_cell_edge,
-                                                                    out=self.get_partID_subset_buffer('B2'))
+            sel_hit_dry = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
+                                                                si.cell_search_status_flags.hit_dry_cell,
+                                                                out=self.get_partID_subset_buffer('B2'))
             self._apply_dry_cell_boundary_condition(sel_hit_dry)
 
         # move back bad coords, nan etc
-        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.bad_coord, out=self.get_partID_subset_buffer('B2'))
+        sel = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.bad_coord, out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel) # those still bad, eg nan etc
 
         # move back cell search failed
-        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.failed,
+        sel = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.failed,
                                                     out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel)  # those still bad, eg nan etc
 

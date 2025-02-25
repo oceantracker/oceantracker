@@ -9,6 +9,7 @@ from oceantracker.shared_info import shared_info as si
 from oceantracker.interpolator._find_hori_cell_triangle_walk import FindHoriCellTriangleWalk
 from oceantracker.interpolator._eval_interp_triangles import EvalInterpTriangles
 from oceantracker.interpolator import _find_vertical_cell_classes
+from oceantracker.particle_properties.util import particle_comparisons_util
 
 class  InterpTriangularGrid(_BaseInterp):
 
@@ -132,10 +133,13 @@ class  InterpTriangularGrid(_BaseInterp):
         info = self.info
         part_prop = si.class_roles.particle_properties
 
-        IDs_need_fixing = self._get_hori_cell(xq, active)
+        self._get_hori_cell(xq, active)
 
         # try to fix any failed walks
-        sel_failed_walk = IDs_need_fixing == si.cell_search_status_flags.failed
+        IDs_need_fixing =part_prop['cell_search_status'].compare_all_to_a_value('lt', si.cell_search_status_flags.ok,
+                                                                           out=self.get_partID_buffer('B1'))
+        # retry any failed walks, ie too long
+        sel_failed_walk = part_prop['cell_search_status'].data[IDs_need_fixing] == si.cell_search_status_flags.failed
 
         if np.any(sel_failed_walk):
             IDs_failed_walk = IDs_need_fixing[sel_failed_walk]
@@ -145,7 +149,7 @@ class  InterpTriangularGrid(_BaseInterp):
             fixed = is_inside_domain
             part_prop['n_cell'].set_values(n_cell[fixed], IDs_failed_walk[fixed])
             part_prop['bc_coords'].set_values(bc[fixed,:], IDs_failed_walk[fixed])
-            part_prop['status'].set_values(si.particle_status_flags.moving, IDs_failed_walk[fixed]) # todo assumes particle was moving if walk failed?
+
 
             # recheck for repeated failures of failed searched, which must be outside domain if not found by intial serarch
             if np.any(~fixed):

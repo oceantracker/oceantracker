@@ -253,13 +253,13 @@ class ParticleGroupManager(ParameterBaseClass):
 
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():
-                        pp.data[:num_alive,...] = pp.get_values(ID_alive)
+                        pp.data[:ID_alive.size,...] = pp.get_values(ID_alive)
 
                 # mark remaining not released to make inactive
-                notReleased = np.arange(num_alive, info['current_particle_buffer_size'])
+                notReleased = np.arange(ID_alive.size, info['current_particle_buffer_size'])
                 part_prop['status'].set_values(si.particle_status_flags.notReleased, notReleased)
 
-                si.particles_in_buffer = num_alive # record new number in buffer
+                si.particles_in_buffer = ID_alive.size # record new number in buffer
 
     def screen_info(self):
         #  return  info about particle numbers

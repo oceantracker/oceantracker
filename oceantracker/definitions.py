@@ -85,9 +85,9 @@ class _ParticleStatusFlags(_BaseConstantsClass):
 @dataclass
 class _CellSearchStatusFlags(_BaseConstantsClass):
     ok: int = 0
-    hit_domain_edge: int = -1
-    hit_open_boundary_edge: int = -2
-    hit_dry_cell_edge : int = -3
+    hit_domain_boundary: int = -1
+    hit_open_boundary: int = -2
+    hit_dry_cell : int = -3
     bad_coord: int = -20
     failed: int = -30
 

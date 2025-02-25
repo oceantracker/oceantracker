@@ -437,24 +437,32 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         bi = self.info['buffer_info']
 
-        fractional_time_steps = np.zeros((2,), dtype=np.float64)
-        current_buffer_steps = np.zeros((2,), dtype=np.int32)
+
+
 
         hindcast_fraction = (time_sec - info['start_time']) / info['duration']
+
         current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
 
+        time_hindcast = self.get_time(current_hydro_model_step)
+
         # ring buffer locations of surrounding steps
+        current_buffer_steps = np.zeros((2,), dtype=np.int32)
         current_buffer_steps[0] = current_hydro_model_step % si.settings.time_buffer_size
         current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.model_direction)) % si.settings.time_buffer_size
-
-        time_hindcast = grid['time'][current_buffer_steps[0]]
 
         # sets the fraction of time step that current time is between
         # surrounding hindcast time steps
         # abs makes it work when backtracking
         s = abs(time_sec - time_hindcast) / info['time_step']
-        fractional_time_steps[0] = 1.0 - s
+        fractional_time_steps =  np.asarray([1.0 - s, s])
         fractional_time_steps[1] = s
+
+        if np.any(np.abs(fractional_time_steps)> 1.1):
+            si.msg_logger.msg(f'unexpected error in times, fractional time steps is grater than 1 = {str(fractional_time_steps)}',
+                              hint='Error in  decoding hindcast time? hindcast files not properly sorted in time order? or code bug?',
+                              fatal_error=True, caller = self)
+
         return current_hydro_model_step, current_buffer_steps, fractional_time_steps
 
     def update(self, time_sec):
@@ -561,7 +569,6 @@ class _BaseReader(ParameterBaseClass):
     def read_time_varying_grid_variables(self, nt, buffer_index):
         # read time and  grid variables, eg time,dry cell
         grid = self.grid
-        grid['time'][buffer_index] = self.read_time(nt)
 
         if si.run_info.is3D_run and self.info['read_zlevels']:
             # read zlevel if native vertical grid of types Slayer or LSC
@@ -598,12 +605,9 @@ class _BaseReader(ParameterBaseClass):
         t = t + d0
         return t
 
-    def read_time(self, nt=None):
-        # assume time is cf convention
-        time_var = self.info['time_var']
-        time = self.dataset.read_variable(time_var, nt=nt)
-        time = self.decode_time(time)
-        return  time
+    def get_time(self, nt_hindcast):
+        # get preloaded times at given time steps
+        return  self.info['time_coord'][nt_hindcast]
 
     def _vertical_regrid_Slayer_field_to_uniform_sigma(self,name, data):
         grid = self.grid
