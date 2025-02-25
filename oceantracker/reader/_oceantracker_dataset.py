@@ -5,7 +5,7 @@ from oceantracker.shared_info import shared_info as si
 import xarray as xr
 from time import perf_counter
 from copy import  copy, deepcopy
-
+from oceantracker.util import  time_util
 class OceanTrackerDataSet(object):
     '''
     Class to wrap whole set of files into single time series like xarray
@@ -50,7 +50,7 @@ class OceanTrackerDataSet(object):
     def time_steps_available(self, nt):
         # which of  time steps are in the data set
         # used to calculate buffer index
-        sel =  np.logical_and( nt >= 0, nt < self.info['ref_time'].size)
+        sel =  np.logical_and( nt >= 0, nt < self.info['time_coord'].size)
         nt_available = nt[sel]
         return nt_available
 
@@ -86,7 +86,7 @@ class OceanTrackerDataSet(object):
         nt_required = nt.copy()
 
         # clip to full range
-        nt_required = nt_required[ np.logical_and( nt_required >= 0, nt_required < info['ref_time'].size)]
+        nt_required = nt_required[ np.logical_and( nt_required >= 0, nt_required < info['time_coord'].size)]
         files_read = 0
         while nt_required.size > 0 :
             file_no = vi['time_step_to_fileID_map'][nt_required[0]]
@@ -112,8 +112,7 @@ class OceanTrackerDataSet(object):
             nt_required = nt_required[nt_available.size:]
             files_read += 1
 
-        # return numpy array and found time steps
-        return out
+        return out # return numpy array at  found time steps
 
     def _open_file(self, file_name):
         try:

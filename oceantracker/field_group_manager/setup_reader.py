@@ -66,6 +66,9 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
         info['vert_grid_type'] = vgt.Sigma
         info['regrid_z_to_uniform_sigma_levels'] = True
 
+    elif info['vert_grid_type'] in [vgt.Slayer, vgt.LSC]  and not settings['regrid_z_to_uniform_sigma_levels']:
+        info['regrid_z_to_uniform_sigma_levels'] = False
+
     elif info['vert_grid_type'] in [vgt.Sigma, vgt.Zfixed]:
         info['regrid_z_to_uniform_sigma_levels'] = False
 
@@ -169,7 +172,7 @@ def _time_sort_files(reader, crumbs):
     time_var_info = ds_info['variables'][ time_var]
     ds_info['time_dim'] = list(time_var_info['dims'].keys())[0]
 
-
+    # add times to each files info
     # first read start times of all files
     fi = ds_info['files']  # file names etc
     for ID, f in enumerate(ds_info['files']):
@@ -186,7 +189,8 @@ def _time_sort_files(reader, crumbs):
             f['time_attrs'] = ds[time_var].attrs
             f['start_date'] = time_util.seconds_to_isostr( f['start_time'])
 
-    # sort variable fileIDs into time order, but maintain given file order
+
+    # sort variable fileIDs into time order
     for v_name, item in ds_info['variables'].items():
         item['time_varying'] = ds_info['time_dim'] in item['dims']
         if  item['time_varying']:
@@ -194,17 +198,17 @@ def _time_sort_files(reader, crumbs):
             start_times = np.asarray([fi[x]['start_time'] for x in item['fileIDs']])
             file_order = np.argsort(start_times)
             item['fileIDs'] = item['fileIDs'][file_order]
-
         else:
             item['fileIDs'] = item['fileIDs'][0]  # todo keep as list??
 
 
-    # sort out which time steps are in each file
-    #  note time may appear in many files if variables are split between file
-    # eg schsim v5 than once in each file
-
+    # sort out which hindcast time steps are in each file
+    #  note time may appear in many files if variables are split between file, eg schsim v5 than once in each file
+    # so must do this for all variables to ensure all files are covered, with some repeats
+    #  so time dine  separately  below
+    vel_var0 = reader.params['field_variable_map']['water_velocity'][0]
     for var_name, item in ds_info['variables'].items():
-        if not(item['time_varying']): continue
+        if not item['time_varying']: continue
         if var_name == time_var : continue
         # only look at time varying variables, which are not time
         time = np.empty((0,), dtype=np.float64)
@@ -212,12 +216,15 @@ def _time_sort_files(reader, crumbs):
             time = np.append(time, fi[fID]['time'])
             fi[fID]['first_time_step_in_file'] = time.size - fi[fID]['time_steps']
             fi[fID]['last_time_step_in_file'] = time.size - 1
+        item['time'] = time
 
-    ds_info['ref_time'] = time
+    # get ful time varaible from files with first water velocity variable
+
 
     # if variables in different files, eg schism v5, time may be in many files, but only use file IDs for the ones in first water velocity variables
     vel_var0= reader.params['field_variable_map']['water_velocity'][0]
-    ds_info['variables'][time_var]['fileIDs'] = ds_info['variables'][vel_var0]['fileIDs']
+    ds_info['time_coord'] = ds_info['variables'][vel_var0]['time']
+
 
    # hindcast start and ends times
     ds_info['start_time'] = time[0]

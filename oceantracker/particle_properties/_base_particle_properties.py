@@ -128,7 +128,7 @@ class _BaseParticleProperty(ParameterBaseClass):
         # to search only those in buffer use used_buffer()
         data = self.used_buffer()
         if out is None: out = np.full((data.shape[0],), -127, np.int32)
-        found = particle_comparisons_util.compared_prop_to_value(data, test, value, out)
+        found = particle_comparisons_util._compared_prop_to_value(data, test, value, out)
         return found
 
     def find_subset_where(self, active, test, value, out=None):

@@ -30,6 +30,8 @@ file_name = os.path.splitext(os.path.basename(excelFile))[0]
 projectDir = r'E:\mpiSecretFishDeposition'
 nProcessors = 30
 outputDir = r'E:/mpiSecretFishDeposition/debug2/'
+outputDir = r'D:\OceanTrackerOutput\bug_hunting'
+
 
 # hindcast values
 hindcastDir = r'U:\blueEndeavourNewModelNoDecay\outputs_non-decay'
@@ -40,8 +42,6 @@ hindcastMask = 'non-*.nc'
 
 # release and duration values
 releaseStartDate = '2018-09-30T22:00:00' # '2018-09-01T00:30:00'
-
-
 
 durationDays = 3 #*14 # this one shouldn't need changing but have put it here just in case.
 timeStep = 60*20 #30 
@@ -115,6 +115,8 @@ otFaecesNR.settings(output_file_base= f'faecesNR_debug',# name used as base for 
             max_run_duration = 3600*24*durationDays, # 90 days
             time_step = timeStep,
             screen_output_time_interval= timeStep,
+            regrid_z_to_uniform_sigma_levels=False,
+            debug=True,
             write_tracks = False) #  NB This might need decreasing
 
 # add a compulsory reader class
@@ -138,6 +140,7 @@ for index, row in pendf.iterrows():
                  #duration=durationDays*24*3600,
                  user_release_group_name=f'faecesNR_{row["unique_id"]}')
     
+#otFaecesNR.add_class('interpolator',  max_search_steps=2000)
 
 # fall velocity is a velocity modifier class
 otFaecesNR.add_class('velocity_modifiers',

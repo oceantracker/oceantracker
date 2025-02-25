@@ -57,7 +57,7 @@ class SCHISMreader(_BaseUnstructuredReader):
             d0 = np.datetime64(f'{int(s[0])}-{int(s[1]):02d}-{int(s[2]):02d}')
             d0 = d0.astype('datetime64[s]').astype(np.float64)
             d0 = d0 + float(s[3])*3600
-            t= time.data + d0
+            t = time.data + d0
             return t
 
     def add_hindcast_info(self):

@@ -271,6 +271,8 @@ def time_dependent_3D_vector_field_ragged_bottom(n_buffer, fractional_time_steps
                                 +  bc_coords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*fractional_time_steps[1]  # second time step
                 pass
 
+        pass
+
 
 # below are development ideas
 #_______________________________________________

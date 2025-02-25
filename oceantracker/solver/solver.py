@@ -89,7 +89,7 @@ class Solver(ParameterBaseClass):
 
             # count particles of each status and count number >= stationary status
             num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
-            pgm.remove_dead_particles_from_memory(num_alive)
+
 
             if num_alive == 0:
                 #freewheel until more are released or end of run/hindcast
@@ -143,6 +143,7 @@ class Solver(ParameterBaseClass):
             ri.time_steps_completed += 1
             si.block_timer('Time stepping',t0_step)
 
+            pgm.remove_dead_particles_from_memory(num_alive)
 
             self.stop_update_timer()
             if abs(t2 - ri.start_time) > ri.duration: break
