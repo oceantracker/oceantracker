@@ -276,12 +276,15 @@ if __name__ == "__main__":
     import shutil
     from glob import  glob
 
-    chdir(r'../tutorials_how_to')
 
-    dest = r'../docs/info/how_to'
-    for f in glob('*.ipynb'):
+
+    dest = path.join( definitions.ot_root_dir, 'docs/info/how_to')
+    work_dir = path.join( definitions.ot_root_dir, 'tutorials_how_to')
+    chdir(work_dir)
+    for f in glob( '*.ipynb'):
         subprocess.run('jupyter nbconvert '+ f + '  --to rst')
         #subprocess.run('jupyter nbconvert ' + f + '  --to script')
+        print('converted', f)
         f_base = f.split('.')[0]
         print(f_base)
         f_base + '_files'

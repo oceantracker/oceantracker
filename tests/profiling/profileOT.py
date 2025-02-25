@@ -1,6 +1,6 @@
 #import pprofile
 import cProfile
-from os import makedirs, path
+from os import makedirs, path, remove
 import platform
 import argparse
 from datetime import datetime
@@ -101,11 +101,12 @@ def get_params(datasource=1):
 
 def run(profiler_name, params):
 
-    profile_dir = 'results'
+    profile_dir = path.join(path.dirname(__file__),'results')
     test_version = 1
 
     results_file = 'PItest_%03.0f' % test_version + params['output_file_base']
     full_ouput_dir = path.join(params['root_output_dir'], params['output_file_base'])
+
     case_info_file = path.join(full_ouput_dir, params['output_file_base'] + '_caseInfo.json')
 
     oceantracker.main.run(params)
@@ -116,7 +117,7 @@ def run(profiler_name, params):
     fnn = path.join(d, results_file + '_CodeVer_' + ci['version_info']['str'].replace(' ', '_').replace(',', '_'))
 
     # copy case file
-    write_JSON(fnn +'_caseInfo.json', ci)
+    #write_JSON(fnn +'_caseInfo.json', ci)
 
     print('Profile results in ', fnn)
     return fnn
@@ -125,7 +126,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--datasource', default=1, type=int)
-    parser.add_argument('--profiler', default=1, type=int)
+    parser.add_argument('--profiler', default=0, type=int)
     parser.add_argument('-scatch_tests', action='store_true')
     parser.add_argument('-test', action='store_true')
     parser.add_argument('-dev', action='store_true')
@@ -155,16 +156,21 @@ if __name__ == '__main__':
         prof_file = fnn + ".prof"
         profiler.dump_stats(prof_file)  # Save results to a file
 
-        with open(fnn + "_tottime.txt", "w") as f:
+        fn = fnn + "_tottime.txt"
+        with open(fn, "w") as f:
             ps = pstats.Stats(prof_file, stream=f)
             ps.sort_stats('tottime')
             ps.print_stats()
+            print('cProfile results in' , fn)
 
-        with open(fnn + "_cumtime.txt", "w") as f:
-            ps = pstats.Stats(prof_file, stream=f)
-            # ps.sort_stats('cumulative')
-            ps.sort_stats('cumtime')
-            ps.print_stats()
+        if False:
+            with open(fnn + "_cumtime.txt", "w") as f:
+                ps = pstats.Stats(prof_file, stream=f)
+                # ps.sort_stats('cumulative')
+                ps.sort_stats('cumtime')
+                ps.print_stats()
+
+        remove(prof_file)
 
     elif args.profiler==1:
         import pyinstrument

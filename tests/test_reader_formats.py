@@ -251,6 +251,7 @@ def get_case(n):
             title = 'DELF3D-FM test'
             is3D = False
             show_grid = False
+            time_step = 10 * 60
         case 402:
             # DELFT FM -sigma, wont work as only current speed in files
             root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\AIMS_FlowFM'
@@ -286,6 +287,21 @@ def get_case(n):
             #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
             is3D = True
             show_grid = True
+
+        case 410:
+            # circular  quay
+            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\CirQuay'
+
+            x0= [[337172.6806029637, 6252142.38595879],
+                 [339878.96782871, 6255122.768058079]]
+
+            file_mask = 'CircQuay*_map.nc'
+            output_file_base = 'CircQuay'
+            title = 'CircQuay'
+            #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
+            is3D = True
+            show_grid = True
+            time_step = 5*60
 
         case   1100:
             # batic sea GLORYS

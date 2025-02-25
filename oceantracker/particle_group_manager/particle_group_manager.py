@@ -154,7 +154,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # set interp memory properties if present
         info['particles_released'] += num_released # total released
         si.particles_in_buffer += num_released # number in particle buffer
-        info['particles_in_buffer'] = si.particles_in_buffer
+
         return new_buffer_indices
 
     def _expand_particle_buffers(self,num_particles):
@@ -206,14 +206,6 @@ class ParticleGroupManager(ParameterBaseClass):
                 i.stop_update_timer()
         si.block_timer('Update particle properties',t0)
 
-    def find_alive_particles(self):
-        status = si.class_roles.particle_properties['status'].data[:si.particles_in_buffer]
-        alive = pgm_util._find_status_alive(status, self.get_partID_buffer('aliveIDs'))
-        return alive
-    def find_moving_particles(self):
-        status = si.class_roles.particle_properties['status'].data[:si.particles_in_buffer]
-        moving = pgm_util._find_status_moving(status, self.get_partID_buffer('movingIDs'))
-        return moving
 
     def status_counts_and_kill_old_particles(self, t):
         # deactivate old particles for each release group
@@ -228,7 +220,6 @@ class ParticleGroupManager(ParameterBaseClass):
                                                                    si.particles_in_buffer)
         pc = si.run_info.particle_counts
         pc['num_alive'] = num_alive
-        pc['particles_in_buffer'] = si.particles_in_buffer
         pc['particles_released']  = info['particles_released']
 
         # transfer stats counts from array to run_info dict
