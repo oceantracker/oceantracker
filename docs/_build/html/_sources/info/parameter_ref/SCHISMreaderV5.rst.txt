@@ -8,6 +8,13 @@ SCHISMreaderV5
 
 **full class_name :** oceantracker.reader.SCHISM_reader_v5.SCHISMreaderV5
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseReader> _BaseUnstructuredReader> SCHISMreader> SCHISMreaderV5
 
 
@@ -25,16 +32,6 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-
-	* ``drop_variables``:  *<optional>*
-		Description: - Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant
-
-		- a list containing type:  ``[]``
-		- default list : ``None``
-		- data_type: ``<class 'str'>``
-		- possible_types: ``[]``
-		- make_list_unique: ``False``
-		- min_len: ``0``
 
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
 		Description: Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern
@@ -80,11 +77,6 @@ Parameters:
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
-	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
-		- default: ``24``
-		- data_type: ``<class 'int'>``
-		- min: ``2``
-
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
@@ -93,7 +85,7 @@ Parameters:
 		Description: - Variable names used to test if file is this format
 
 		- a list containing type:  ``[]``
-		- default list : ``['SCHISM_hgrid_node_x', 'horizontalVelX', 'dryFlagElement']``
+		- default list : ``['depth', 'elevation', 'dryFlagElement']``
 		- data_type: ``<class 'str'>``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``

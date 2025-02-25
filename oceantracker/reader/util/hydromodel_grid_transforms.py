@@ -118,21 +118,21 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
 def convert_mid_layer_sigma_top_bot_layer_values(data, sigma_layer, sigma):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
     # used in FVCOM reader
-    data_levels = np.full((data.shape[0],) + (data.shape[1],) + (sigma.shape[0],), 0., dtype=np.float32)
+    data_interface = np.full((data.shape[0],) + (data.shape[1],) + (sigma.shape[0],), 0., dtype=np.float32)
 
     for nt in range(data.shape[0]):
         for n in range(data.shape[1]):
             for nz in range(1, data.shape[2]):
                 # linear interp levels not, first or last boundary
-                data_levels[nt, n, nz] = kernal_linear_interp1D(sigma_layer[nz - 1], data[nt, n, nz - 1], sigma_layer[nz], data[nt, n, nz], sigma[nz])
+                data_interface[nt, n, nz] = kernal_linear_interp1D(sigma_layer[nz - 1], data[nt, n, nz - 1], sigma_layer[nz], data[nt, n, nz], sigma[nz])
 
             # extrapolate to top zlevel
-            data_levels[nt, n, -1] = kernal_linear_interp1D(sigma_layer[-2], data[nt, n, -2], sigma_layer[-1], data[nt, n, -1], sigma[-1])
+            data_interface[nt, n, -1] = kernal_linear_interp1D(sigma_layer[-2], data[nt, n, -2], sigma_layer[-1], data[nt, n, -1], sigma[-1])
 
             # extrapolate to bottom zlevel
-            data_levels[nt, n, 0] = kernal_linear_interp1D(sigma_layer[0], data[nt, n, 0], sigma_layer[1], data[nt, n, 1], sigma[0])
+            data_interface[nt, n, 0] = kernal_linear_interp1D(sigma_layer[0], data[nt, n, 0], sigma_layer[1], data[nt, n, 1], sigma[0])
 
-    return data_levels
+    return data_interface
 
 @njitOT
 def convert_mid_layer_fixedZ_top_bot_layer_values(data_zlayer, z_layer, z, bottom_cell_index,water_depth):

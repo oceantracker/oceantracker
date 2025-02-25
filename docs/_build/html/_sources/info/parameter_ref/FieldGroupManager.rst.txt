@@ -8,6 +8,13 @@ FieldGroupManager
 
 **full class_name :** oceantracker.field_group_manager.field_group_manager.FieldGroupManager
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> FieldGroupManager
 
 

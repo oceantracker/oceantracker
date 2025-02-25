@@ -32,6 +32,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                         is_dry_cell=PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                             ),
             dimension_map=dict(
+                        z = PVC('mesh2d_nInterfaces', str, doc_str='z dim for interfaces'),
                         time=PVC('time', str, doc_str='name of time dimension in files'),
                         all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers'], str, doc_str='All z dims, used to identify  3D variables'),
                          ),
@@ -84,7 +85,6 @@ class DELF3DFMreader(_BaseUnstructuredReader):
 
         if info['vert_grid_type'] == si.vertical_grid_types.Sigma:
             si.msg_logger.msg('DEFT3D FM not yet tested with sigma vertical grid, only tested to work with fixed z level grid', warning=True)
-
 
 
     def read_horizontal_grid_coords(self, grid):
@@ -222,10 +222,14 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             # data is at cell center/element/triangle  move to nodes
             data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(
                                         data, grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
-        #  interp layer values to interfaces, must be done after nodal values
         if var_info['is3D'] and info['layer_dim'] in var_info['dims']:
-            data = hydromodel_grid_transforms.convert_mid_layer_fixedZ_top_bot_layer_values(
-                data, grid['z_layer'], grid['z'], grid['bottom_cell_index'], grid['water_depth'])
+            if info['vert_grid_type'] == si.vertical_grid_types.Zfixed :
+                #  interp fixed z layer values to interfaces, must be done after nodal values
+                data = hydromodel_grid_transforms.convert_mid_layer_fixedZ_top_bot_layer_values(
+                    data, grid['z_layer'], grid['z'], grid['bottom_cell_index'], grid['water_depth'])
+            else:
+                # sigma grid
+                data = hydromodel_grid_transforms. convert_mid_layer_sigma_top_bot_layer_values(data, grid['sigma_layer'], grid['sigma'])
 
         # add dummy component axis
         data = data[..., np.newaxis]

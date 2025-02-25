@@ -28,7 +28,7 @@ Parameters:
 	* ``count_status_equal_to`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-		- possible_values: ``['unknown', 'bad_coord', 'cell_search_failed', 'notReleased', 'dead', 'hit_dry_cell', 'outside_domain', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- possible_values: ``['unknown', 'notReleased', 'dead', 'outside_open_boundary', 'outside_domain', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
 		Description: Name used to refer to class in code and output, = None for core claseses

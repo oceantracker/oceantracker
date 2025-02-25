@@ -106,7 +106,6 @@ class Solver(ParameterBaseClass):
             fgm.update_readers(time_sec)
 
             # do stats etc updates and write tracks
-
             self._pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
 
             # print progress to screen
@@ -115,7 +114,8 @@ class Solver(ParameterBaseClass):
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
-            is_moving = pgm.find_moving_particles()
+            is_moving = part_prop['status'].compare_all_to_a_value('eq',si.particle_status_flags.moving, out=self.get_partID_buffer('B1'))
+
 
             # update particle velocity modification prior to integration
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
@@ -171,7 +171,7 @@ class Solver(ParameterBaseClass):
         ri.current_model_time = time_sec
 
         # some may now have status dead so update
-        alive = pgm.find_alive_particles()
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
 
         # trajectory modifiers,
         for name, i in si.class_roles.trajectory_modifiers.items():
@@ -180,7 +180,7 @@ class Solver(ParameterBaseClass):
         # modify status, eg tidal stranding
         fgm.update_dry_cell_values()
 
-        alive = pgm.find_alive_particles()
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
 
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)

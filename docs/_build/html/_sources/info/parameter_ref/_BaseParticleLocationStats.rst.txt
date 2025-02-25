@@ -8,6 +8,13 @@ _BaseParticleLocationStats
 
 **full class_name :** oceantracker.particle_statistics._base_location_stats._BaseParticleLocationStats
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleLocationStats
 
 
@@ -77,7 +84,7 @@ Parameters:
 		- a list containing type:  ``[]``
 		- default list : ``['stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 		- data_type: ``<class 'str'>``
-		- possible_values: ``['unknown', 'bad_coord', 'cell_search_failed', 'notReleased', 'dead', 'hit_dry_cell', 'outside_domain', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- possible_values: ``['unknown', 'notReleased', 'dead', 'outside_open_boundary', 'outside_domain', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``
 		- min_len: ``0``

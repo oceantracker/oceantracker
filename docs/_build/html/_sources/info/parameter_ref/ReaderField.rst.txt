@@ -8,6 +8,13 @@ ReaderField
 
 **full class_name :** oceantracker.fields.reader_field.ReaderField
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseField> ReaderField
 
 

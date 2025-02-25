@@ -32,20 +32,3 @@ def _status_counts_and_kill_old_particles(age, status, IDrelease_group,max_age_f
 
     return alive
 
-@njitOT
-def _find_status_alive(status,out):
-    nfound = 0
-    for n in range(status.size):
-        if status[n] >= status_stationary:
-            out[nfound] = n
-            nfound += 1
-    return out[:nfound]
-
-@njitOT
-def _find_status_moving(status, out):
-    nfound = 0
-    for n in range(status.size):
-        if status[n] == status_moving:
-            out[nfound] = n
-            nfound += 1
-    return out[:nfound]

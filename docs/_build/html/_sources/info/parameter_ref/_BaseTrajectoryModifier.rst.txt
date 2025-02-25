@@ -8,6 +8,13 @@ _BaseTrajectoryModifier
 
 **full class_name :** oceantracker.trajectory_modifiers._base_trajectory_modifers._BaseTrajectoryModifier
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier
 
 

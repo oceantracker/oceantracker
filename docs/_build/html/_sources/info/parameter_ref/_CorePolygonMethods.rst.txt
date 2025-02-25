@@ -8,6 +8,13 @@ _CorePolygonMethods
 
 **full class_name :** oceantracker.particle_statistics.polygon_statistics._CorePolygonMethods
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _CorePolygonMethods
 
 

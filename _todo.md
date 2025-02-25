@@ -5,7 +5,7 @@
    1. 3D sigma reader requires vertical regridder
 1. Stats
     1. matab read polygon
-1. add descriptions to particle propertis to put in netcdf if written out
+1. add descriptions to particle properties to put in netcdf if written out
 
 2. centalize polygon list creation and param checking 
 4. ensure error log is written on caught error

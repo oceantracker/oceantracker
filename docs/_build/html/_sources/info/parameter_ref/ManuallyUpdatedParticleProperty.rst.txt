@@ -8,6 +8,13 @@ ManuallyUpdatedParticleProperty
 
 **full class_name :** oceantracker.particle_properties._base_particle_properties.ManuallyUpdatedParticleProperty
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ManuallyUpdatedParticleProperty
 
 

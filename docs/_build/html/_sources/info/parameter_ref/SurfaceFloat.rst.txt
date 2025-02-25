@@ -8,6 +8,13 @@ SurfaceFloat
 
 **full class_name :** oceantracker.trajectory_modifiers.surface_float.SurfaceFloat
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseTrajectoryModifier> SurfaceFloat
 
 

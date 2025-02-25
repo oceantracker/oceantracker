@@ -8,6 +8,13 @@ VerticalGradient
 
 **full class_name :** oceantracker.fields.field_vertical_gradient.VerticalGradient
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseField> CustomFieldBase> VerticalGradient
 
 

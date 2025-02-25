@@ -8,6 +8,13 @@ InsidePolygonsNonOverlapping2D
 
 **full class_name :** oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ManuallyUpdatedParticleProperty> InsidePolygonsNonOverlapping2D
 
 
