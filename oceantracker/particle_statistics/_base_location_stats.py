@@ -115,6 +115,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
             self.info['output_file'] += f'_{self.info["instanceID"]}_{self.params["name"]}.nc'
             self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
+
+            # all stats are separated into  release groups
+            self.nc.add_dimension('release_group_dim', len(si.class_roles.release_groups))
         else:
             self.nc = None
         self.nWrites = 0

@@ -54,7 +54,7 @@ class _DefaultSettings(_SharedStruct):
     screen_output_time_interval = PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file' )
     backtracking =   PVC(False, bool, doc_str='Run model backwards in time')
     regrid_z_to_uniform_sigma_levels = PVC(True, bool,
-                doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS' )
+                doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read (eg. SCHISM), based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS' )
     display_grid_at_start = PVC(False, bool,
                 doc_str='Pause during strat up to plot the grid for checking using matplotlib, clicking om image will print a coord' )
     dev_debug_plots = PVC(False, bool,expert=True, doc_str='show any debug plot generated at give dbug_level, not for general use' )

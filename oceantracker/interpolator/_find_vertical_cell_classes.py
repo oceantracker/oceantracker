@@ -65,15 +65,18 @@ class FindVerticalCellSigmaGrid(object):
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                     current_buffer_steps, fractional_time_steps,
                                     active, z0):
-        # temp working space for interp eval
+        # view without redundant dim of 4D field
+        tide1 = tide[current_buffer_steps[0], :, 0, 0]
+        tide2 = tide[current_buffer_steps[1], :, 0, 0]
+        frac0, frac1 = fractional_time_steps[0], fractional_time_steps[1]
 
         for nn in nb.prange(active.size):  # loop over active particles
             n = active[nn]
             nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
+
             zq = float(xq[n, 2])
 
             # interp water depth
-            # z_bot = _eval_water_depth_kernel(water_depth,bc_coords[n,:], nodes)
             z_bot = 0.
             for m in range(3):
                 z_bot -= bc_coords[n, m] * water_depth[nodes[m]]
@@ -89,8 +92,7 @@ class FindVerticalCellSigmaGrid(object):
             # interp tide
             z_top = 0.
             for m in range(3):
-                z_top += bc_coords[n, m] * tide[current_buffer_steps[0], nodes[m], 0, 0] * fractional_time_steps[0]
-                z_top += bc_coords[n, m] * tide[current_buffer_steps[1], nodes[m], 0, 0] * fractional_time_steps[1]
+                z_top += bc_coords[n, m] * (tide1[nodes[m]] * frac0 + tide2[nodes[m]] * frac1)
 
             # clip z into range
             zq = min(max(zq, z_bot), z_top)
@@ -99,19 +101,19 @@ class FindVerticalCellSigmaGrid(object):
             zf = max(0., min(abs(zq - z_bot) / twd, 0.9999))  # with rounding keep, it just below surface, and at or above bottom
 
             # get  nz from evenly space sigma map, but zf always < 1, due to above
-            ns = int(zf/sigma_map_dz)  # find fraction of length of map index
+            ns = int(zf/sigma_map_dz)  # find index in f map
 
             # get approx nz from map
             nz = sigma_map_nz[ns]
 
             # correction
-            # sigma_map_nz rounds down, so correct if zf is below sigma[nz]  by subtracting 1, as nz  is 1 above approx nz
+            # sigma_map_nz rounds down, so correct if zf is above sigma[nz]  by subtracting 1, as nz  is 1 below approx nz
             nz -= zf > sigma[nz]  # faster branch-less add one
 
             # get fraction within the sigma layer
             z_fraction[n] = (zf - sigma[nz]) / (sigma[nz + 1] - sigma[nz])
 
-            # make any already on bottom active, may be flagged on bottom if found on bottom, below
+            # make any already on bottom active, may be flagged on bottom if found on bottom below
             if status[n] == status_on_bottom:
                 status[n] = status_moving
 
@@ -121,6 +123,7 @@ class FindVerticalCellSigmaGrid(object):
                 z0f = z0 / twd  # z0 as fraction of water depth
                 # set status if on the bottom set status
                 if zf < z0f:
+                    # on bottom
                     status[n] = status_on_bottom
                     zq = z_bot
                     z_fraction_water_velocity[n] = 0.0
@@ -130,7 +133,7 @@ class FindVerticalCellSigmaGrid(object):
                     z0p = z0 / z1
                     z_fraction_water_velocity[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
 
-            # record new depth cell
+            # record new depth cell and z
             nz_cell[n] = nz
             xq[n, 2] = zq
 

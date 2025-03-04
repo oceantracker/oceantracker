@@ -74,6 +74,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
         self.set_up_time_bins(self.nc)
         self.set_up_binned_variables(self.nc)
+
         self.set_up_part_prop_lists()
 
 

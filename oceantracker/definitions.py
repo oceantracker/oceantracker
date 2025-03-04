@@ -7,8 +7,8 @@ from os import path
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 0.5, revision  = 30, date = '2025-01-28', parameter_ver=0.5)
-version['str'] = f"{version['major']:.2f}.{version['revision']:04.0f}-{version['date']}"
+version= dict(major= 0.5, revision  = 40, date = '2025-03-04', parameter_ver=0.5)
+version['str'] = f"{version['major']:.2f}.{version['revision']:04d}-{version['date']}"
 
 try:
     version['git_revision'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')

@@ -56,8 +56,8 @@ def setup_output_dir(params, crumbs='', caller=None):
 
 def write_raw_user_params(output_files, params,msg_logger):
     fn= output_files['output_file_base']+'_raw_user_params.json'
-    output_files['raw_user_params'] = 'user_given_params.json'
-    json_util.write_JSON(path.join(output_files['run_output_dir'],   output_files['raw_user_params']),params)
+    output_files['raw_user_params'] = fn
+    json_util.write_JSON(path.join(output_files['run_output_dir'],  output_files['raw_user_params']),params)
     msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
 
 def build_working_params(params, msg_logger, crumbs='', caller=None):

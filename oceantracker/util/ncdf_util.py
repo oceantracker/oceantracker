@@ -32,7 +32,6 @@ class NetCDFhandler(object):
                                                'shape': v[name].shape,'dtype': v[name].datatype,
                                                'attributes': self.all_var_attr(name)}
 
-
     def add_dimension(self, name, dim_size=None):
         # add a dimension for use in netcdf
         # print('AD',name,dim_size)
@@ -54,6 +53,7 @@ class NetCDFhandler(object):
                 fill_value = np.iinfo(dtype).min
             else:
                 fill_value = None
+
 
         v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compressionLevel > 0),
                                                 complevel=compressionLevel, fill_value=fill_value)

@@ -34,8 +34,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         super().initial_setup()
         self.open_output_file()
         nc = self.nc
-        if self.params['write']:
-              nc.add_dimension('release_group_dim', len(si.class_roles.release_groups))
 
         # get release group IDs to split bt
         self.set_up_spatial_bins(nc)

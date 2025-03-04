@@ -185,15 +185,18 @@ class Solver(ParameterBaseClass):
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
 
+        # update particle properties
+        pgm.update_PartProp(n_time_step, time_sec, alive)
+
         # resuspension is a core trajectory modifier
-        if si.settings.use_resuspension and  si.run_info.is3D_run:
+        if si.settings.use_resuspension and si.run_info.is3D_run:
             # friction_velocity property  is now updated, so do resupension
             si.core_class_roles.resuspension.update(n_time_step, time_sec, alive)
 
         fgm.update_tidal_stranding_status(time_sec, alive)
 
-        # update particle properties
-        pgm.update_PartProp(n_time_step, time_sec, alive)
+
+
 
         # update writable class lists and stats at current time step now props are up to date
         self._update_stats(n_time_step, time_sec)
