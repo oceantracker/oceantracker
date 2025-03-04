@@ -204,8 +204,8 @@ def _time_sort_files(reader, crumbs):
 
     # sort out which hindcast time steps are in each file
     #  note time may appear in many files if variables are split between file, eg schsim v5 than once in each file
-    # so must do this for all variables to ensure all files are covered, with some repeats
-    #  so time dine  separately  below
+    # so must do this for all variables to ensure all files are covered, with some unnecessary repeats when more than one variable in same file
+    #   time is not done as done a below as a "coordinate"
     vel_var0 = reader.params['field_variable_map']['water_velocity'][0]
     for var_name, item in ds_info['variables'].items():
         if not item['time_varying']: continue
@@ -221,12 +221,14 @@ def _time_sort_files(reader, crumbs):
     # get ful time varaible from files with first water velocity variable
 
 
-    # if variables in different files, eg schism v5, time may be in many files, but only use file IDs for the ones in first water velocity variables
+    # if variables in different files, eg schism v5, time may be in many files,
+    #  only use file IDs for the ones for the first water velocity variable, which must always be in hindcasts
     vel_var0= reader.params['field_variable_map']['water_velocity'][0]
-    ds_info['time_coord'] = ds_info['variables'][vel_var0]['time']
+    time =  ds_info['variables'][vel_var0]['time']
+    ds_info['time_coord'] = time
 
 
-   # hindcast start and ends times
+   # hindcast start and ends times from time_coord
     ds_info['start_time'] = time[0]
     ds_info['end_time'] = time[-1]
     ds_info['duration'] = time[-1] - time[0]

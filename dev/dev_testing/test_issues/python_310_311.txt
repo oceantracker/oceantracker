@@ -1,0 +1,92 @@
+python ver= 3.10.9 numba ver= 0.56.4  llvmlite ver= 0.39.1
+    run time for diff array dims, 1-6 [0.0658185 0.0710495 0.0748301 0.0855567 0.1092856 0.1214256]
+
+    compile  time for diff array dims, 1-6 [0.2728374 0.0936454 0.0983944 0.1120687 0.1256159 0.1407173]
+
+python ver= 3.10.9 numba ver= 0.61.0  llvmlite ver= 0.44.0
+    run time for diff array dims, 1-6 [0.069057  0.0823402 0.1119022 0.1627006 0.1968087 0.2523252]
+
+    compile  time for diff array dims, 1-6 [0.3016033 4.5825322 1.9061167 1.9069733 2.0049477 2.2020411]
+
+python ver= 3.11.9 numba ver= 0.61.0  llvmlite ver= 0.44.0
+    run time for diff array dims, 1-6 [0.0583952 0.0785519 0.1062866 0.1563809 0.1963806 0.252379 ]
+
+    compile  time for diff array dims, 1-6 [0.4044082 4.0063047 1.392491  1.4474921 1.4833006 1.6251749]
+
+python ver= 3.12.9 numba ver= 0.61.0  llvmlite ver= 0.44.0
+    run time for diff array dims, 1-6 [0.027567  0.0457933 0.0743304 0.1267363 0.1693671 0.2158561]
+
+    compile  time for diff array dims, 1-6 [0.5003798 3.6437098 1.3528125 1.3874864 1.4872698 1.5749338]
+
+
+
+
+
+
+------------------------------
+python ver= 3.10.9 numba ver= 0.56.4  llvmlite ver= 0.39.1
+Fri Feb 28 13:39:46 2025    temp.prof
+------------------------------
+         2083018 function calls (1990990 primitive calls) in 1.071 seconds
+
+   Ordered by: internal time
+   List reduced from 3101 to 5 due to restriction <5>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+     3711    0.304    0.000    0.329    0.000 C:\ProgramData\miniconda3\envs\otdev310\lib\site-packages\llvmlite\binding\ffi.py:149(__call__)
+   600006    0.228    0.000    0.228    0.000 F:\H_Local_drive\ParticleTracking\oceantracker\dev\dev_testing\test_issues\python_310_311.py:10(add)
+     7179    0.021    0.000    0.038    0.000 C:\ProgramData\miniconda3\envs\otdev310\lib\site-packages\llvmlite\ir\instructions.py:13(__init__)
+       18    0.018    0.001    0.018    0.001 {built-in method _imp.create_dynamic}
+44536/20125    0.016    0.000    0.058    0.000 {method 'format' of 'str' objects}
+
+------------------------------
+python ver= 3.10.9 numba ver= 0.61.0    llvmlite ver= 0.44.0
+Fri Feb 28 13:41:09 2025    temp.prof
+------------------------------
+         9533125 function calls (9096843 primitive calls) in 13.459 seconds
+
+   Ordered by: internal time
+   List reduced from 3798 to 5 due to restriction <5>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+    29513   10.194    0.000   10.473    0.000 C:\Users\rossv\.conda\envs\ot310_numba06\lib\site-packages\llvmlite\binding\ffi.py:195(__call__)
+   600006    0.557    0.000    0.557    0.000 F:\H_Local_drive\ParticleTracking\oceantracker\dev\dev_testing\test_issues\python_310_311.py:10(add)
+250063/44806    0.121    0.000    0.205    0.000 C:\Users\rossv\.conda\envs\ot310_numba06\lib\site-packages\numba\core\ir.py:321(_rec_list_vars)
+  1545846    0.088    0.000    0.109    0.000 {built-in method builtins.isinstance}
+173230/84568    0.063    0.000    0.221    0.000 {method 'format' of 'str' objects}
+
+
+------------------------------
+python ver= 3.11.9 numba ver= 0.61.0    llvmlite ver= 0.44.0
+------------------------------
+Fri Feb 28 13:43:31 2025    temp.prof
+
+         9639121 function calls (9200213 primitive calls) in 10.834 seconds
+
+   Ordered by: internal time
+   List reduced from 4114 to 5 due to restriction <5>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+    29075    7.215    0.000    7.531    0.000 C:\ProgramData\miniconda3\envs\otdev311\Lib\site-packages\llvmlite\binding\ffi.py:195(__call__)
+   600006    0.557    0.000    0.557    0.000 F:\H_Local_drive\ParticleTracking\oceantracker\dev\dev_testing\test_issues\python_310_311.py:10(add)
+249643/44696    0.161    0.000    0.210    0.000 C:\ProgramData\miniconda3\envs\otdev311\Lib\site-packages\numba\core\ir.py:321(_rec_list_vars)
+  1550735    0.086    0.000    0.108    0.000 {built-in method builtins.isinstance}
+175946/87284    0.064    0.000    0.227    0.000 {method 'format' of 'str' objects}
+
+
+------------------------------
+python ver= 3.12.9 numba ver= 0.61.0    llvmlite ver= 0.44.0
+------------------------------
+Fri Feb 28 13:45:02 2025    temp.prof
+
+         8267806 function calls (7855225 primitive calls) in 9.944 seconds
+
+   Ordered by: internal time
+   List reduced from 3915 to 5 due to restriction <5>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+    27633    7.238    0.000    7.479    0.000 C:\ProgramData\miniconda3\envs\otdev312\Lib\site-packages\llvmlite\binding\ffi.py:195(__call__)
+217199/38898    0.122    0.000    0.187    0.000 C:\ProgramData\miniconda3\envs\otdev312\Lib\site-packages\numba\core\ir.py:321(_rec_list_vars)
+  1404299    0.102    0.000    0.124    0.000 {built-in method builtins.isinstance}
+        2    0.099    0.049    0.099    0.049 {built-in method _wmi.exec_query}
+172730/83953    0.073    0.000    0.230    0.000 {method 'format' of 'str' objects}

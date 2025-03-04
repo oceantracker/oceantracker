@@ -102,8 +102,6 @@ class EvalInterpTriangles(object):
                                                                 F_data, grid['triangles'], part_prop['n_cell'].data,
                                                                 part_prop['bc_coords'].data, part_prop['nz_cell'].data,
                                                                 z_fraction.data, output, active)
-
-
         else :
             triangle_eval_interp.time_dependent_3D_vector_field_ragged_bottom(current_buffer_steps, fractional_time_steps, F_data,
                                                                               grid['triangles'], grid['bottom_cell_index'],

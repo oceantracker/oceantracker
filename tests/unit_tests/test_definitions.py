@@ -37,7 +37,7 @@ reader_demo_schisim2D=   dict( # folder to search for hindcast files, sub-dirs w
                  input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast','schsim2D'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                 file_mask='Random_order*.nc',)
 reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_reader.dev_GenericStructuredReader',
-             input_dir=f'E:\H_Local_drive\ParticleTracking\hindcast_formats_examples\generic2D_structured_DoubleGyre',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+             input_dir=r'E:\H_Local_drive\ParticleTracking\hindcast_formats_examples\generic2D_structured_DoubleGyre',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
              file_mask='Double_gyre.nc',
              dimension_map=dict(time='t', rows='y', cols='x'),
              grid_variable_map=dict(time='Time', x=['x_grid', 'y_grid']),
