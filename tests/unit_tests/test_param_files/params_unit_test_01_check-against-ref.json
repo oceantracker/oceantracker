@@ -13,7 +13,8 @@
     "NUMBA_cache_code": true,
     "tracks_writer": {
         "update_interval": 3600,
-        "write_dry_cell_flag": false
+        "write_dry_cell_flag": false,
+        "time_steps_per_per_file": 10
     },
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast\\schsim3D",

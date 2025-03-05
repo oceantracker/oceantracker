@@ -23,7 +23,7 @@ def main(args):
                 )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
-               #time_steps_per_per_file= None if args.reference_case else 10  # dont split files ref case to test reading
+               time_steps_per_per_file= None if args.reference_case else 10  # dont split files ref case to test reading split files
                ) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)

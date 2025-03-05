@@ -86,31 +86,31 @@ class _BaseWriter(ParameterBaseClass):
     def open_file_if_needed(self):
         params = self.params
         info = self.info
-        fn =si.run_info.output_file_base + '_' + params['role_output_file_tag']
         opened_file = False
-
         n_file = len(info['output_file']) # files written so far
 
-        if n_file == 0 or self.params['time_steps_per_per_file'] is not None and info['total_time_steps_written'] %  info['total_time_steps_written'] == 0:
+        if n_file == 0 or (self.params['time_steps_per_per_file'] is not None and  info['time_steps_written_to_current_file'] // params['time_steps_per_per_file'] > 0):
+            if self.nc is not None : self._close_file()
             fn = f'{si.run_info.output_file_base }_{params["role_output_file_tag"]}_{n_file:03d}'
             self._open_file(fn)
             opened_file = True
 
         return opened_file
 
-    def _open_file(self,file_name):
-        self.time_steps_written_to_current_file = 0
-        self.info['output_file'].append(file_name + '.nc')
+    def _open_file(self, file_name):
+        info = self.info
+        info['time_steps_written_to_current_file'] = 0
+        info['output_file'].append(file_name + '.nc')
         self.add_global_attribute('file_created', datetime.now().isoformat())
 
-        self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file'][-1]), 'w')
+        self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, info['output_file'][-1]), 'w')
         nc = self.nc
 
-        for name, item in self.info['file_builder']['dimensions'].items():
+        for name, item in info['file_builder']['dimensions'].items():
             nc.add_dimension(name, item['size'])
 
         # create variables
-        for name, item in self.info['file_builder']['variables'].items():
+        for name, item in info['file_builder']['variables'].items():
             # check chunk size under 4GB
             if item['chunks'] is not None:
                 c = np.asarray(item['chunks'],dtype=np.int64) # avoids float 32 over flow
@@ -129,24 +129,6 @@ class _BaseWriter(ParameterBaseClass):
         #self.estimate_open_file_size()
         pass
 
-    def estimate_open_file_size(self):
-        # estimate  size of open file not working too big by factor of 2?
-        fh = self.nc.file_handle
-        b = 0.
-        for name, v, in fh.variables.items():
-
-            chunks = np.asarray(v.chunking())
-            chunks_allocated = np.ceil(np.asarray(v.shape) / chunks)
-            bytes_allocated = int(np.prod(chunks_allocated * chunks)*v.dtype.itemsize)
-            b += bytes_allocated
-
-            #print('xx',name,  v.size, v.dtype, v.shape,v.dtype.itemsize,  v.chunking(), chunks_allocated, bytes_allocated, b )
-            pass
-
-        b1  = sum([ v.size*v.dtype.itemsize for name, v in fh.variables.items()])
-        b_file = path.getsize(path.join(si.run_info.run_output_dir, self.info['output_file'][0])) # reports constant bad value
-        print('fx',bytes_allocated,b_file/1000, b1/1000, b/1000)
-        return b
 
     def create_variable_to_write(self,name,first_dim_name,dim_len,**kwargs): pass
 
@@ -156,17 +138,22 @@ class _BaseWriter(ParameterBaseClass):
     #  eg ID etc, releaseGroupID  etc
 
         writer = si.core_class_roles.tracks_writer
-        if si.settings.write_tracks and new_particleIDs.shape[0] > 0:
+
+        n_in_file = self.nc.var_shape('ID')[0]
+        n_write = range(n_in_file, n_in_file + new_particleIDs.size)
+
+        if si.settings.write_tracks and new_particleIDs.size > 0:
             for name, prop in si.class_roles.particle_properties.items():
                 # parameters are not time varying, so done at ends in retangular writes, or on culling particles
                 if not prop.params['time_varying'] and prop.params['write']:
-                    writer.write_non_time_varying_particle_prop(name, prop.data, new_particleIDs)
+                    writer.write_non_time_varying_particle_prop(name, prop.data, new_particleIDs, n_write)
 
     #@function_profiler(__name__)
     def write_all_time_varying_prop_and_data(self):
         # write particle data at current time step, if none the a forced write
         # write time vary info , eg "time"
         self.start_update_timer()
+        info = self.info
         self.pre_time_step_write_book_keeping()
 
         # write group data
@@ -182,27 +169,29 @@ class _BaseWriter(ParameterBaseClass):
         if si.settings['write_dry_cell_flag']:
             # wont run if nested grids
             grid = si.core_class_roles.field_group_manager.reader.grid
-            self.nc.file_handle.variables['dry_cell_index'][self.time_steps_written_to_current_file, : ] = grid['dry_cell_index'].reshape(1,-1)
+            self.nc.file_handle.variables['dry_cell_index'][info['time_steps_written_to_current_file'], : ] = grid['dry_cell_index'].reshape(1,-1)
 
         self.post_time_step_write_book_keeping()
 
-        self.time_steps_written_to_current_file += 1 # time steps in current file
+        info['time_steps_written_to_current_file'] += 1 # time steps in current file
         self.info['total_time_steps_written']  += 1 # time steps written since the start
         self.stop_update_timer()
 
+    def _close_file(self):
+        nc = self.nc
+        # write properties only written at end
+        self.add_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
+        self.add_global_attribute('time_steps_written', self.info['time_steps_written_to_current_file'])
+
+        # add all global attributes
+        for name, item in self.info['file_builder']['attributes'].items():
+            nc.write_global_attribute(name, item)
+        nc.close()
+
+        self.nc = None
+
     def close(self):
-        if si.settings.write_tracks:
-            nc = self.nc
-            # write properties only written at end
-            self.add_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
-            self.add_global_attribute('time_steps_written', self.time_steps_written_to_current_file)
-
-            # add all global attributes
-            for name, item in self.info['file_builder']['attributes'].items():
-                nc.write_global_attribute(name,item)
-            nc.close()
-
-
-            self.nc = None
+        if self.nc is not None:
+            self._close_file()
 
 

@@ -15,6 +15,7 @@ def read_particle_tracks_file(file_name_or_list,file_dir=None, var_list=None, fi
     if file_number is not None: file_list = [file_list[file_number]] # take one file only
 
     #  mege files in list
+    time_steps = 0
     for n, fn in enumerate(file_list):
         if n ==0:
             data= _read_one_track_file(fn, var_list)
@@ -24,7 +25,7 @@ def read_particle_tracks_file(file_name_or_list,file_dir=None, var_list=None, fi
             for name, val in data.items():
                 if name in data['variable_info']:
                     vi = data['variable_info'][name]
-                    if  'time_particle_dim' in vi['dimensions']:
+                    if any( [ s in vi['dimensions'] for s in ['time_particle_dim', 'particle_dim' , 'time_dim']]):
                         data[name] = np.concatenate((data[name],data1[name]), axis=0)
 
 
@@ -80,11 +81,11 @@ def _unpack_compact_tracks(data):
 
     d = dict(dimensions=dict())
 
-    num_released = attributes['total_num_particles_released']
+    num_released = data['ID'].size
 
     particle_IDs = data['particle_ID'] # this is time_particle particleID to allow unpacking
 
-    time_steps_written= attributes['time_steps_written']
+    time_steps_written= data['time'].size
 
     n_time_step =  data['write_step_index']
 
