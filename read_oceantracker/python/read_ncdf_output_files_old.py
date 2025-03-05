@@ -6,30 +6,30 @@ from os import path
 from oceantracker.util import json_util
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util.triangle_utilities import make_domain_mask
-def read_particle_tracks_file(file_name_or_list,file_dir=None, var_list=None, file_number=None, fraction_to_read=None):
+def read_particle_tracks_file(file_name, var_list=None, release_group= None, fraction_to_read=None):
     # release group is 1 based
+    nc = NetCDFhandler(file_name, mode='r')
 
-    file_list = [file_name_or_list] if type(file_name_or_list) == str else file_name_or_list
+    if var_list is  None:
+        working_var_list = nc.all_var_names()
+    else:
+        # get list plus min data set
+        var_list = list(set(['x', 'time', 'status', 'IDrelease_group', 'IDpulse', 'x0', 'dry_cell_index', 'num_part_released_so_far'] + var_list))
+        # trim list to variables in the file
+        working_var_list= []
+        for var in var_list:
+            if var not in nc.all_var_names():
+                print('Warning: read_particle_tracks_file, particle property variable not in track file ' + var)
+            elif var not in working_var_list:
+                working_var_list.append(var)
 
-    if dir is not None: file_list = [path.join(file_dir,fn) for fn in file_list]
-    if file_number is not None: file_list = [file_list[file_number]] # take one file only
+    if nc.is_dim( 'time_particle_dim'):
+        d=  _read_compact_tracks(nc,working_var_list,release_group)
+    else:
+        # legacy tracks file format
+        d= _read_rectangular_tracks(nc, working_var_list,release_group)
 
-    #  mege files in list
-    for n, fn in enumerate(file_list):
-        if n ==0:
-            data= _read_one_track_file(fn, var_list)
-        else:
-            # append
-            data1 = _read_one_track_file(fn, var_list)
-            for name, val in data.items():
-                if name in data['variable_info']:
-                    vi = data['variable_info'][name]
-                    if  'time_particle_dim' in vi['dimensions']:
-                        data[name] = np.concatenate((data[name],data1[name]), axis=0)
-
-
-    d = _unpack_compact_tracks(data)
-
+    nc.close()
 
     if d['x'].shape[2] == 3: d['z'] = d['x'][:,:,2] # make a z variable if 3D
 
@@ -46,83 +46,84 @@ def read_particle_tracks_file(file_name_or_list,file_dir=None, var_list=None, fi
 
     return d
 
-def _read_one_track_file(file_name, var_list):
+def _read_rectangular_tracks(nc,var_list, release_group):
+    # read rectangular output file, dim time and particle
+    num_released= nc.global_attr('total_num_particles_released')
+    rg = nc.read_a_variable('IDrelease_group')[:num_released]
+    d = {'dimensions': {}, 'total_num_particles_released' :num_released }
+    for var in set(var_list):
+        dims= nc.all_var_dims(var)
+        if 'particle' in dims and 'time' in dims:
+            d[var] = nc.read_a_variable(var)[:, :num_released, ...]
+            if release_group is not None: d[var] = d[var][:, rg == release_group-1, ...]
 
-    nc = NetCDFhandler(file_name, mode='r')
+        elif 'particle' in dims:
+            d[var] = nc.read_a_variable(var)[:num_released,...]
+            if release_group is not None:   d[var] = d[var][rg == release_group-1, ...]
+        else:
+            d[var] = nc.read_a_variable(var)
 
-    if var_list is  None:
-        working_var_list = nc.all_var_names()
-    else:
-        # get list plus min data set
-        var_list = list(set(['x', 'time', 'status', 'IDrelease_group', 'IDpulse', 'x0', 'dry_cell_index', 'num_part_released_so_far'] + var_list))
-        # trim list to variables in the file
-        working_var_list= []
-        for var in var_list:
-            if var not in nc.all_var_names():
-                print('Warning: read_particle_tracks_file, particle property variable not in track file ' + var)
-            elif var not in working_var_list:
-                working_var_list.append(var)
+        d['dimensions'][var] = nc.all_var_dims(var)
+    d['date'] = d['time'].astype('datetime64[s]')
+    return d
 
-    data = nc.read_variables(var_list)
-    data['variable_info']  = nc.variable_info
-    data['global_attributes']=nc.global_attrs()
-    data['dimensions'] = nc.dims()
-
-    nc.close()
-
-    return data
-
-def _unpack_compact_tracks(data):
+def _read_compact_tracks(nc, var_list, release_groupID):
     # read compact file with stream of values  with given in timestep and particle ID in time_particle dimension
 
-    attributes = data['global_attributes']
-    variable_info= data['variable_info']
 
-    d = dict(dimensions=dict())
+    d = nc.global_attrs()# read all  global attibutes
+    d['dimensions'] =  nc.dims()
 
-    num_released = attributes['total_num_particles_released']
+    num_released = d['total_num_particles_released']
 
-    particle_IDs = data['particle_ID'] # this is time_particle particleID to allow unpacking
+    particle_IDs = nc.read_a_variable('particle_ID') # this is time_particle particleID to allow unpacking
 
-    time_steps_written= attributes['time_steps_written']
+    time_steps_written= nc.global_attr('time_steps_written')
 
-    n_time_step =  data['write_step_index']
+    n_time_step =  nc.read_a_variable('write_step_index')
 
     # todo status is special as last value for each particle when it is alive is needed to continue after death???
     # '_FillValue'
-    d['status'] =  np.full((time_steps_written, num_released), attributes['status_notReleased'], dtype=variable_info['status']['dtype'])
-    _insertMatrixValues(d['status'], n_time_step, particle_IDs, data['status'])
-    last_recordedID = _get_last_alive(d['status'], attributes['status_notReleased'], attributes['status_dead'])
-    rg =  data['IDrelease_group']
+    d['status'] =  np.full((time_steps_written, num_released), nc.global_attr('status_notReleased'), dtype=nc.var_dtype('status'))
+    _insertMatrixValues(d['status'], n_time_step, particle_IDs, nc.read_a_variable('status'))
+    last_recordedID = _get_last_alive(d['status'], nc.global_attr('status_notReleased'), nc.global_attr('status_dead'))
+    rg = nc.read_a_variable('IDrelease_group')
 
     # don't reprocess status, and don't process others, not needed in rectangular format
-    var_list = list(data.keys())
-
-    for v in ['status','write_step_index','variable_attributes','variable_info','dimensions', 'global_attributes']:
+    for v in ['status','particle_IDs' ,'write_step_index']:
         if v in var_list: var_list.remove(v)
 
     for name in set(var_list): # only do unique vars
-        vi = variable_info[name]
-        if 'time_particle_dim' in vi['dimensions']:
+        if nc.is_var_dim(name,'time_particle_dim'):
             # compact time varying variablesF
-            s = vi['shape']
+            s = nc.var_shape(name)
             d[name] = np.full((time_steps_written, num_released) + tuple(s[1:]),
-                               vi['attributes']['_FillValue'], dtype=vi['dtype'])
+                               nc.var_fill_value(name), dtype=nc.var_dtype(name))
 
-            _insertMatrixValues(d[name], n_time_step, particle_IDs, data[name])
-            _filIinDeadParticles(d[name], last_recordedID, vi['attributes']['_FillValue'])
+            data = np.array(nc.read_a_variable(name))
 
-        elif  'particle_dim' in vi['dimensions']:
-            d[name] =data[name][:num_released,...]
+            _insertMatrixValues(d[name], n_time_step, particle_IDs, data)
+            _filIinDeadParticles(d[name], last_recordedID, nc.var_fill_value(name))
 
+            if release_groupID is not None:
+                 d[name] = d[name][:, rg == release_groupID, ...]
+
+        elif   nc.is_var_dim(name,'particle_dim'):
+            d[name] =nc.read_a_variable(name)[:num_released]
+            if release_groupID is not None:
+                d[name] = d[name][rg == release_groupID, ...]
         else:
-            # non time_particle varying parameters, eg time
-            d[name] = data[name]
+        # non time_particle varying parameters, eg time
+            d[name] = nc.read_a_variable(name)
 
-        d['dimensions'][name] = vi['dimensions']
+        d['dimensions'][name] = nc.all_var_dims(name)
         if d['dimensions'][name][0] == 'time_particle':
-            # output wil be retangular so correct dim
+            # output wil be retangual so correct dim
             d['dimensions'][name] = ['time', 'particle'] + d['dimensions'][name][1:]
+
+    if release_groupID is not None:
+        # finally get only  release group for status variable
+        d['status'] = d['status'][:, rg == release_groupID]
 
     return d
 
@@ -159,6 +160,20 @@ def _filIinDeadParticles(data, last_recordedID, missing_status):
             data[nrow, n, ...] =  data[n_last_write, n, ...]
 
 
+def concat_track_files(files,var_list=None,file_number=None, release_group= None, fraction_to_read=None):
+    # join track files along time dimension
+
+    if file_number is not None: files= [files[file_number]]
+    if type(files) != list:   files= [files]
+
+    for n, f in enumerate(files):
+        fn = f if dir is None else path.join(dir, f)
+
+        if n ==0:
+            # first file
+            tracks = read_particle_tracks_file(fn, var_list, release_group=release_group, fraction_to_read=fraction_to_read)
+
+    return  tracks
 
 def read_stats_file(file_name,nt=None):
     # read stats files

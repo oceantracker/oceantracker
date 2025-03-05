@@ -17,12 +17,13 @@ def main(args):
                 screen_output_time_interval=1800,
              use_A_Z_profile=True,
             regrid_z_to_uniform_sigma_levels=True,
-            #particle_buffer_initial_size= 10,
-             #NUMBA_cache_code=True,
+            particle_buffer_initial_size= 10,
+             NUMBA_cache_code=True,
                 #NCDF_particle_chunk= 50000
                 )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
+               #time_steps_per_per_file= None if args.reference_case else 10  # dont split files ref case to test reading
                ) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)

@@ -54,7 +54,6 @@ class NetCDFhandler(object):
             else:
                 fill_value = None
 
-
         v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compressionLevel > 0),
                                                 complevel=compressionLevel, fill_value=fill_value)
 
