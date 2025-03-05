@@ -26,14 +26,18 @@ def read_case_info_file(case_info_file_name):
     case_info['output_files']['root_output_dir'] = path.dirname(case_info['output_files']['run_output_dir'])
     return case_info
 
-def load_track_data(case_info_file_name, var_list=None, release_group= None, fraction_to_read=None, track_file_number=1, gridID=0):
+
+def load_track_data(case_info_file_name, var_list=None, fraction_to_read= None, file_number=None, gridID=0):
     # load one track file from squeuence of what may be split files
     # todo load split track files into  dictionary
 
     case_info = read_case_info_file(case_info_file_name)
 
-    track_file = path.join( case_info['output_files']['run_output_dir'], case_info['output_files']['tracks_writer'][track_file_number-1])
-    tracks = read_ncdf_output_files.read_particle_tracks_file(track_file, var_list, release_group=release_group, fraction_to_read=fraction_to_read)
+    tracks = read_ncdf_output_files.read_particle_tracks_file(case_info['output_files']['tracks_writer'],
+                                                       file_dir=case_info['output_files']['run_output_dir'],
+                                                       var_list=var_list,
+                                                       file_number=file_number,  fraction_to_read=fraction_to_read)
+
     tracks['grid'] = load_grid(case_info_file_name,gridID=gridID)
 
     tracks= _extract_useful_info(case_info, tracks)

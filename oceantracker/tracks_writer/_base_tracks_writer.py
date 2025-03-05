@@ -30,9 +30,8 @@ class _BaseWriter(ParameterBaseClass):
                         write_dry_cell_flag =  PVC(False, bool, doc_str='Write dry cell flag to track output file for all cells, which can be used to show dry cells on plots, off by default to keep file size down '),
                         write_dry_cell_index=PVC(True, bool, obsolete=True,  doc_str='Replaced by write_dry_cell_flag, set to false by default'),
                         )
-        self.info.update(output_file= [])
-        self.total_time_steps_written = 0
-        self.n_files_written = 0
+        self.info.update(output_file= [], total_time_steps_written = 0)
+
 
         self.info['file_builder']={'dimensions' : {}, 'attributes': {}, 'variables': {}}
         self.add_dimension('time_dim',None)
@@ -85,23 +84,19 @@ class _BaseWriter(ParameterBaseClass):
         self.info['file_builder']['variables'][name] = var
 
     def open_file_if_needed(self):
-
-        fn =si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
+        params = self.params
+        info = self.info
+        fn =si.run_info.output_file_base + '_' + params['role_output_file_tag']
         opened_file = False
-        if self.total_time_steps_written == 0:
-            if self.params['time_steps_per_per_file'] is not None: # first of the split files
-                fn += '_%03.0f' % (self.total_time_steps_written+1)
-                self.n_files_written += 1
+
+        n_file = len(info['output_file']) # files written so far
+
+        if n_file == 0 or self.params['time_steps_per_per_file'] is not None and info['total_time_steps_written'] %  info['total_time_steps_written'] == 0:
+            fn = f'{si.run_info.output_file_base }_{params["role_output_file_tag"]}_{n_file:03d}'
             self._open_file(fn)
             opened_file = True
 
-        elif self.params['time_steps_per_per_file'] is not None and self.total_time_steps_written %  self.params['time_steps_per_per_file'] == 0:
-            # split make a new file
-            self.close()
-            self.n_files_written += 1
-            self._open_file(fn + '_%03.0f' % self.n_files_written)
-            opened_file = True
-        return  opened_file
+        return opened_file
 
     def _open_file(self,file_name):
         self.time_steps_written_to_current_file = 0
@@ -192,7 +187,7 @@ class _BaseWriter(ParameterBaseClass):
         self.post_time_step_write_book_keeping()
 
         self.time_steps_written_to_current_file += 1 # time steps in current file
-        self.total_time_steps_written  += 1 # time steps written since the start
+        self.info['total_time_steps_written']  += 1 # time steps written since the start
         self.stop_update_timer()
 
     def close(self):
