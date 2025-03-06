@@ -83,19 +83,22 @@ class _BaseWriter(ParameterBaseClass):
 
         self.info['file_builder']['variables'][name] = var
 
-    def open_file_if_needed(self):
+    def open_file_if_needed(self, new_particleIDs):
         params = self.params
         info = self.info
         opened_file = False
         n_file = len(info['output_file']) # files written so far
 
-        if n_file == 0 or (self.params['time_steps_per_per_file'] is not None and  info['time_steps_written_to_current_file'] // params['time_steps_per_per_file'] > 0):
+        if self.nc is None or (self.params['time_steps_per_per_file'] is not None and  info['time_steps_written_to_current_file'] // params['time_steps_per_per_file'] > 0):
             if self.nc is not None : self._close_file()
             fn = f'{si.run_info.output_file_base }_{params["role_output_file_tag"]}_{n_file:03d}'
+            t0 = perf_counter()
             self._open_file(fn)
-            opened_file = True
+            # note file opening and time to open file set up chucks and write first block
+            si.msg_logger.progress_marker(f'Opened tracks output and done written first time step in: "{self.info["output_file"][-1]}"', start_time=t0)
 
-        return opened_file
+        if new_particleIDs.size > 0:
+                self.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
     def _open_file(self, file_name):
         info = self.info

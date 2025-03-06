@@ -34,7 +34,7 @@ known_readers = dict(
                 GLORYS =  'oceantracker.reader.GLORYS_reader.GLORYSreader',
                 DEFT3D_FM =  'oceantracker.reader.DEFT3DFM_reader.DELF3DFMreader',
                 FVCOMreader =  'oceantracker.reader.FVCOM_reader.FVCOMreader',
-                ROMSmoanaProject = 'oceantracker.reader.ROMS_reader_moana_project.ROMSreaderMonaProject'
+                ROMSmoanaProject = 'oceantracker.reader.ROMS_reader_moana_projectNZ.ROMSreaderMonaProject'
                 #generic =  'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
                 #dummy_data =  'oceantracker.reader.dummy_data_reader.DummyDataReader',
 
