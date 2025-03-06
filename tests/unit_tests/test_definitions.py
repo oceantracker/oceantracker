@@ -220,3 +220,9 @@ def show_track_plot(case_info_file, args):
                            #size_using_data=tracks['a_pollutant'],
                            #colour_using_data=tracks['a_pollutant'],
                            movie_file=movie_file1)
+
+def plot_vert_section(case_info_file):
+
+    from plot_oceantracker.plot_tracks import plot_path_in_vertical_section
+    tracks = read_tracks(case_info_file)
+    plot_path_in_vertical_section(tracks, particleID=np.arange(0,tracks['x'].shape[1],10))

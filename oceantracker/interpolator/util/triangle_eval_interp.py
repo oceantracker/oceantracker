@@ -185,7 +185,7 @@ def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps
     # loop over active particles and vector components
     for nn in nb.prange(active.size):
         n = active[nn]
-        for i in range(n_comp): F_out[n, i] = 0. # zero out for summing
+        F_out[n] = 0. # zero out for summing
         zf = z_fraction[n]
         zf1 = 1. - zf
         nz = nz_cell[n]

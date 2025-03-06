@@ -216,9 +216,10 @@ def _time_sort_files(reader, crumbs):
             time = np.append(time, fi[fID]['time'])
             fi[fID]['first_time_step_in_file'] = time.size - fi[fID]['time_steps']
             fi[fID]['last_time_step_in_file'] = time.size - 1
-        item['time'] = time
+        item['time'] =  time
 
     # get ful time varaible from files with first water velocity variable
+
 
 
     # if variables in different files, eg schism v5, time may be in many files,
@@ -227,6 +228,8 @@ def _time_sort_files(reader, crumbs):
     time =  ds_info['variables'][vel_var0]['time']
     ds_info['time_coord'] = time
 
+    if time.size < 2:
+        si.msg_logger.msg('Velocity variable in hydro files has less than 2 time steps', hint = 'need at least 2 steps for particle tracking', fatal_error=True)
 
    # hindcast start and ends times from time_coord
     ds_info['start_time'] = time[0]
