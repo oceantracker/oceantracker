@@ -59,7 +59,7 @@ class ROMSreader(_BaseStructuredReader):
                             col=PVC('xi_psi', str, doc_str='column dim of psi grid'),
                                       ),
 
-                variable_signature= PLC(['mask_psi','lat_psi','lon_psi','h','zeta'], str,
+                variable_signature= PLC(['mask_psi','lat_psi','lon_psi','h','zeta','s_w','s_rho'], str,
                                          doc_str='Variable names used to test if file is this format'),
                   )
         pass

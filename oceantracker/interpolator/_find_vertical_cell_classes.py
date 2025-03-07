@@ -165,7 +165,7 @@ class FindVerticalCellSlayerLSCGrid(object):
 
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                                       triangles, zlevel, bottom_cell_index,
                                                       n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
@@ -173,7 +173,6 @@ class FindVerticalCellSlayerLSCGrid(object):
                                                       walk_counts,
                                                       active, z0):
         # find the zlayer for each node of cell containing each particle and at two time slices of hindcast  between nz_bottom and number of z levels
-        # LSC grid means must track vertical nodes for each particle
         # nz_with_bottom is the lowest cell in grid, is 0 for slayer vertical grids, but may be > 0 for LSC grids
         # nz_with_bottom must be time independent
         # vertical walk to search for a particle's layer in the grid, nz_cell
@@ -260,10 +259,13 @@ class FindVerticalCellSlayerLSCGrid(object):
             else:
                 z_fraction[n] = (zq - z_below) / dz
 
+
             # extra work if in bottom cell
             z_fraction_water_velocity[n] = z_fraction[n]  # flag as not in bottom layer, will become >= 0 if in layer
             if nz == deepest_bottom_cell:
                 # set status if on the bottom set status
+                #print('xx', zq - z_below) # below bottom check
+
                 if zq < z_below + z0:
                     status[n] = status_on_bottom
                     zq = z_below
@@ -278,10 +280,11 @@ class FindVerticalCellSlayerLSCGrid(object):
 
             # record new depth cell
             nz_cell[n] = nz
-            xq[n, 2] = zq
+            xq[n, 2] = zq  # may differ if clipped into water depth range
+
             # step count stats, tidal stranded particles are not counted
-            walk_counts[0] += n_vertical_steps
-            walk_counts[1] = max(walk_counts[1], n_vertical_steps)  # record max number of steps
+            #walk_counts[0] += n_vertical_steps
+            #walk_counts[1] = max(walk_counts[1], n_vertical_steps)  # record max number of steps
 
 class FindVerticalCellZfixed(object):
     # find depth cell with fized z levels everywhere with differing layer thickness's

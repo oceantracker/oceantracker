@@ -18,11 +18,12 @@ def main(args):
             # use_A_Z_profile=False,
             regrid_z_to_uniform_sigma_levels=False,
             particle_buffer_initial_size= 100,
-             NUMBA_cache_code=True,
+             #NUMBA_cache_code=True,
                 #NCDF_particle_chunk= 50000
                 )
 
     ot.add_class('tracks_writer',update_interval = 600, write_dry_cell_flag=False,
+                 turn_on_write_particle_properties_list=['z_fraction', 'z_fraction_water_velocity'],
                time_steps_per_per_file= None if args.reference_case else 10  # dont split files ref case to test reading split files
                ) # keep file small
 
@@ -51,13 +52,21 @@ def main(args):
 
     case_info_file = ot.run()
 
-    test_definitions.show_track_plot(case_info_file, args)
+
     tracks= test_definitions.read_tracks(case_info_file)
 
     dz = tracks['x'][:,:,2] + tracks['water_depth']
+    sel = dz <-.001
+    print('number below bottom, ie  < -0.001 ', np.count_nonzero(sel), 'min=', np.nanmin(dz[sel]), 'mean=', np.nanmean(dz[sel]))
 
-    print('number below bottom, ie  < -0.001 ', np.count_nonzero(dz <-.001))
+    sel = tracks['z_fraction'] < 0
+    print('z fraction  < 0  ', sel.sum())
 
+    sel = tracks['z_fraction'] > 1
+    print('z fraction  >1 ', np.count_nonzero(sel))
+
+
+    test_definitions.show_track_plot(case_info_file, args)
     if args.plot:
         from matplotlib import pyplot as plt
 

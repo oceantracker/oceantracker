@@ -13,7 +13,8 @@
    1. after  - Starting time stepping:
    1. after -  read  24 time steps in  9.2 sec
 1. better spell check suggestions when short or long module name not found
-
+1. with LSC grid and large fall vel, some particles are temporally up to .3m below bottom
+   but vertical cel finder is always has z above bottom 
 ##  Internal Structure
 
 
@@ -24,7 +25,6 @@
 1. used np.datetime64  internally
 
 # Niggles that need sorting some time
-
 3. compact tracks writer to retain dead particle locations in retangular form, but flag as dead
 1. List check makes default values of None into [], should be None? Look at merging list params, better to remove, or keep for building polygon lists ?
 1. cope with time dependent water depth in write to grid

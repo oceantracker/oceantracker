@@ -1,5 +1,4 @@
 NCDF_time_chunk: 1
-NUMBA_cache_code: true
 debug: true
 output_file_base: unit_test_05_in_depth_range_00
 particle_buffer_initial_size: 100
@@ -58,6 +57,9 @@ screen_output_time_interval: 1800
 time_step: 60
 tracks_writer:
   time_steps_per_per_file: 10
+  turn_on_write_particle_properties_list:
+  - z_fraction
+  - z_fraction_water_velocity
   update_interval: 600
   write_dry_cell_flag: false
 use_random_seed: true
