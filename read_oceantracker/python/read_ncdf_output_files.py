@@ -201,7 +201,12 @@ def read_stats_file(file_name,nt=None):
 
     with np.errstate(divide='ignore', invalid='ignore'):
         if d['stats_type'] == 'grid':
-            d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis, np.newaxis]
+            if len(d['count'].shape) == 4:
+                # 2D stats
+                d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis, np.newaxis]
+            else: 
+                # 3D stats 
+                d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis, np.newaxis, np.newaxis]
         else:
             d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis]
 
