@@ -220,10 +220,10 @@ def get_case(n):
         case 302:
             #ROMS MOANA
             root_input_dir = r'D:\Hindcast_reader_tests\ROMS_samples\MOANA_project_National_hindcast\Hourly_nestfiles'
-            x0 = [[-36.81612195216445, 174.82731398519584],
-                  [-37.070731274878, 175.39302783837365],
-                  [-36.4051733326401, 174.7771263023033],
-                  [-36.85502113978176, 174.6807647189683]
+            x0 = [[-40.66135468498551, 173.30957722210422],
+                  [-41.31961522893702, 174.44623376869356],
+                  [-37.30768692090635, 176.81423536983425],
+                  [-36.31378083617751, 173.397487934100873]
                   ]
             x0 = np.flip(np.asarray(x0),axis=1)
             file_mask  =  'nz5km_his*.nc'
@@ -454,7 +454,7 @@ if __name__ == '__main__':
     parser.add_argument('--test', default=None, type= int)
     parser.add_argument('-uniform', action='store_false')
     parser.add_argument('-gridplot', action='store_true')
-    parser.add_argument('-noplots', action='store_true')
+    parser.add_argument('-plot', action='store_true')
     parser.add_argument('-skip_run', action='store_true')
     parser.add_argument('-debug_plots', action='store_true')
     parser.add_argument('-save_plot', action='store_true')
@@ -489,7 +489,7 @@ if __name__ == '__main__':
                                     params['output_file_base']+'_caseInfo.json')
 
         # do plot
-        if not args.noplots and caseInfoFile is not None:
+        if args.plot and caseInfoFile is not None:
             track_data = load_output_files.load_track_data(caseInfoFile, gridID = 1 if len(params['nested_readers'])==1 else 0)
             if False:
                 plot_utilities.display_grid(track_data['grid'], ginput=3, axis_lims=None)
