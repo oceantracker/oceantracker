@@ -92,7 +92,7 @@ class ClassImporter():
                                 class_name = mod + '.' + class_obj.__name__  # full import string
 
                                 if class_obj.__name__ in tree[sub_pkg_name]:
-                                    ml.msg(f'"{class_obj.__name__}" in module "{class_obj.__module__}" already found as "{tree[sub_pkg_name][class_obj.__name__]["class_name"]}", duplicate class names in ocean tracker pacakage',
+                                    ml.msg(f'"{class_obj.__name__}" in module "{class_obj.__module__}" already found as "{tree[sub_pkg_name][class_obj.__name__]["class_name"]}", duplicate class names in ocean tracker pacakage?',
                                                 hint=f'{definitions.package_fancy_name} in  dir {definitions.package_dir}',
                                                 error = True,  crumbs=crumbs, caller=caller)
                                 else:

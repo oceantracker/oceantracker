@@ -1,9 +1,9 @@
-# ROMS reader that reads  ROMs output varibles used in MONA MBIE project NZ ROMS model 2022
+# ROMS reader that reads  ROMs output varibles used in MOANA MBIE project NZ ROMS model 2022
 # where variabel names have changed
 from oceantracker.reader.ROMS_reader import ROMSreader
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 
-class ROMSreaderMonaProject( ROMSreader):
+class ROMSreaderMoanaProjectNZ( ROMSreader):
     development = True
     def __init__(self):
         #  update parent defaults with above
