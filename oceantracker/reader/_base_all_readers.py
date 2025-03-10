@@ -210,7 +210,7 @@ class _BaseReader(ParameterBaseClass):
         si.msg_logger.msg(f'time step = {dt}, number of time steps= {info["total_time_steps"]} ',
             tabs=5)
         si.msg_logger.msg('grid bounding box = ' + b, tabs=5)
-
+        si.msg_logger.msg(f"has:  A_Z profile={info['has_A_Z_profile']}  bottom stress={info['has_bottom_stress']}", tabs=5)
         # reader triangles
         self.read_triangles(grid)
         grid['quad_cells_to_split'],grid['triangles'] = self.find_and_split_quad_cells(grid['triangles'])

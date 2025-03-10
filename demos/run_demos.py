@@ -72,14 +72,14 @@ if __name__ == "__main__":
         if type(params) is list:
             demo_name = params[0]['output_file_base']
             if params[0]['reader'] is not None:
-                params[0]['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')
+                params[0]['reader']['input_dir'] =  '../tutorials_how_to/demo_hindcast'
             output_folder = path.join(params[0]['root_output_dir'], params[0]['output_file_base'])
             params[0]['root_output_dir'] = 'output'
         else:
             params['use_random_seed'] = True
             demo_name = params['output_file_base']
             if params['reader'] is not None:
-                params['reader']['input_dir'] = path.join(path.dirname(__file__), 'demo_hindcast')
+                params['reader']['input_dir'] =  '../tutorials_how_to/demo_hindcast'
             params['root_output_dir'] = 'output'
             output_folder = path.join(params['root_output_dir'], params['output_file_base'])
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
             ot.settings(output_file_base='demo00_helper_class_test',
                         time_step=600)
-            ot.add_class('reader', input_dir='demo_hindcast',
+            ot.add_class('reader', input_dir='../tutorials_how_to/demo_hindcast',
                          file_mask='demoHindcastSchism3D.nc')
             ot.add_class('release_groups', name='my_point1', points=two_points,case=0)
             ot.add_class('release_groups', name='my_point1', points=two_points,case=1)

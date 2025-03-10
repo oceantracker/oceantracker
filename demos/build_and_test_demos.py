@@ -31,7 +31,7 @@ demo_base_params={'output_file_base' : None,
    'time_step' : 900,
     'debug': True,
     'reader': {
-                'input_dir': 'demo_hindcast\schsim2D',
+                'input_dir': '../tutorials_how_to/demo_hindcast\schsim2D',
                 'file_mask': 'Random_order_*.nc',
 
                 },
@@ -193,7 +193,7 @@ schsim_base_params=\
             'regrid_z_to_uniform_sigma_levels': True,
                 #'numba_caching': False,
         'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreader',
-                    'input_dir': 'demo_hindcast\schsim3D',
+                    'input_dir': '../tutorials_how_to/demo_hindcast\schsim3D',
                              'file_mask': 'demo_hindcast_schisim3D_00.nc',
                      'load_fields':['water_temperature']
                           },
@@ -427,8 +427,7 @@ def build_demos(testrun=False):
     paramdir ='demo_param_files'
     if not path.isdir(paramdir): mkdir(paramdir)
 
-    demo_dir = path.dirname(__file__)
-    input_dir = path.join(demo_dir, 'demo_hindcast') # hindcast location
+    input_dir = '../tutorials_how_to/demo_hindcast' # hindcast location
 
     # make all JSONS
     for demo in params:

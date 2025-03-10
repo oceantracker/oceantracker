@@ -59,7 +59,7 @@ particle_statistics:
   update_interval: 1800
 reader:
   file_mask: Random_order_*.nc
-  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast
+  input_dir: ../tutorials_how_to/demo_hindcast
 release_groups:
 - name: myP1
   points:

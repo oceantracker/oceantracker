@@ -26,15 +26,15 @@ def base_settings(fn,args,label=None):
 
 image_dir= 'output'
 reader_demo_schisim3D=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
-                 input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast','schsim3D'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                 input_dir= path.join(path.dirname(definitions.package_dir),'tutorials_how_to','demo_hindcast','schsim3D'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                 file_mask='demo_hindcast_schisim3D*.nc',
 )  # file mask to search for
 reader_demo_ROMS = deepcopy(reader_demo_schisim3D)
-reader_demo_ROMS.update(input_dir=path.join(path.dirname(definitions.package_dir), 'demos', 'demo_hindcast', 'ROMS'),
+reader_demo_ROMS.update(input_dir=path.join(path.dirname(definitions.package_dir), 'tutorials_how_to', 'demo_hindcast', 'ROMS'),
                     file_mask='ROMS3D_00*.nc')
 
 reader_demo_schisim2D=   dict( # folder to search for hindcast files, sub-dirs will, by default, will also be searched
-                 input_dir= path.join(path.dirname(definitions.package_dir),'demos','demo_hindcast','schsim2D'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+                 input_dir= path.join(path.dirname(definitions.package_dir),'tutorials_how_to','demo_hindcast','schsim2D'),  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                 file_mask='Random_order*.nc',)
 reader_double_gyre=  dict(class_name='oceantracker.reader.generic_stuctured_reader.dev_GenericStructuredReader',
              input_dir=r'E:\H_Local_drive\ParticleTracking\hindcast_formats_examples\generic2D_structured_DoubleGyre',  # folder to search for hindcast files, sub-dirs will, by default, also be searched

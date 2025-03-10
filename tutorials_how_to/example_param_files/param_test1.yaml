@@ -1,7 +1,7 @@
 output_file_base: param_test1
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
-  input_dir: ../demos/demo_hindcast/schsim3D
+  input_dir: ./demo_hindcast/schsim3D
 release_groups:
 - name: my_release_point
   points:

@@ -116,7 +116,7 @@ if __name__ == '__main__':
         # keep copy to write in random order
         out_file_2D.append(write_file(ds_in,n_file, nodes, sel_tri, new_tri, is3D=False))
         if n_file < 1:
-            out_file = path.join('schsim3D',f'{out_file_base}3D_{n_file:02d}.nc')
+            out_file = path.join('schsim3D', f'{out_file_base}3D_{n_file:02d}.nc')
             ds_out,e, n_file =write_file(ds_in,n_file, nodes, sel_tri, new_tri, is3D=True)
             ds_out.to_netcdf(out_file,encoding=e)
 
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     random.shuffle(out_file_2D)
     for ds,e,n_file in out_file_2D:
         tag = ''.join(random.choices(string.ascii_uppercase + string.digits,k=10))
-        out_file = path.join('schsim2D',f'Random_order_{tag}_schsim2D_{n_file}.nc')
+        out_file = path.join('schsim2D', f'Random_order_{tag}_schsim2D_{n_file}.nc')
         ds.to_netcdf(out_file, encoding=e)
 
     # read and plot
