@@ -119,7 +119,7 @@ def zlevel_node_to_vertex(zlevel, triangles, zlevel_vertex):
 
 
 @njitOT
-def ensure_bottom_velocity_is_zero_ragged_bottom(vel_data, bottom_cell_index):
+def ensure_velocity_at_bottom_is_zero_ragged_bottom(vel_data, bottom_cell_index):
     # ensure velocity vector at bottom is zero, as patch LSC vertical grid issue with nodal values spanning change in number of depth levels
     # needed in schsoim LSC grids due to interplotion bug
     for nt in range(vel_data.shape[0]):

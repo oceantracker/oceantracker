@@ -424,13 +424,14 @@ class _BaseReader(ParameterBaseClass):
 
         if field.is3D():
             if info['regrid_z_to_uniform_sigma_levels']:
-                data = reader_util.ensure_bottom_velocity_is_zero_ragged_bottom(data, self.grid['bottom_cell_index']) # zero bottom before regrid
+                # applies to LSC and Slayer grids if requested (the default)
+                data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_cell_index']) # zero bottom before regrid
                 data = self._vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma('water_velocity', data)
 
             # ensure vel at bottom is zero
             if info['vert_grid_type'] in [si.vertical_grid_types.LSC, si.vertical_grid_types.Zfixed]:
                 # ragged bottom
-                data = reader_util.ensure_bottom_velocity_is_zero_ragged_bottom(data, self.grid['bottom_cell_index'])
+                data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_cell_index'])
                 if info['vert_grid_type'] == si.vertical_grid_types.Zfixed:
                     si.msg_logger.msg('Developer: check fixed z vertical grid and bottom cell ragged bottom correction is working', warning=True)
             else:
