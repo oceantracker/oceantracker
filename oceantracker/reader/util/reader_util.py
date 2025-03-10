@@ -129,3 +129,13 @@ def ensure_bottom_velocity_is_zero_ragged_bottom(vel_data, bottom_cell_index):
                 vel_data[nt, node, bottom_node, component] = 0.
     return vel_data
 
+@njitOT
+def get_values_at_ragged_bottom(data, bottom_cell_index):
+    s = data.shape
+    out = np.full(s[:2]+(s[3],), 0.,dtype=data.dtype)
+    for nt in range(data.shape[0]):
+        for node in range(data.shape[1]):
+            bottom_node= bottom_cell_index[node]
+            for component in range(data.shape[3]):
+                out[nt, node, component] = data[nt, node, bottom_node, component]
+    return out
