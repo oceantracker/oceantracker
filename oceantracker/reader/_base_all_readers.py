@@ -211,6 +211,7 @@ class _BaseReader(ParameterBaseClass):
             tabs=5)
         si.msg_logger.msg('grid bounding box = ' + b, tabs=5)
         si.msg_logger.msg(f"has:  A_Z profile={info['has_A_Z_profile']}  bottom stress={info['has_bottom_stress']}", tabs=5)
+        si.msg_logger.hori_line()
         # reader triangles
         self.read_triangles(grid)
         grid['quad_cells_to_split'],grid['triangles'] = self.find_and_split_quad_cells(grid['triangles'])
@@ -419,12 +420,21 @@ class _BaseReader(ParameterBaseClass):
     def update_water_velocity_field(self, buffer_index, nt):
         field = self.fields['water_velocity']
         data = self.read_field_data('water_velocity', field, nt)
+        info = self.info
 
         if field.is3D():
-            if self.info['regrid_z_to_uniform_sigma_levels']:
+            if info['regrid_z_to_uniform_sigma_levels']:
                 data = self._vertical_regrid_Slayer_field_to_uniform_sigma('water_velocity', data)
+
             # ensure vel at bottom is zero
-            data = reader_util.patch_bottom_velocity_to_make_it_zero(data, self.grid['bottom_cell_index'])
+            if info['vert_grid_type'] in [si.vertical_grid_types.LSC, si.vertical_grid_types.Zfixed]:
+                # ragsaed bottom
+                data = reader_util.ensure_bottom_velocity_is_zero_ragged_bottom(data, self.grid['bottom_cell_index'])
+                if info['vert_grid_type'] == si.vertical_grid_types.Zfixed:
+                    si.msg_logger.msg('Developer check, fixed z and bottom cell ragged bottom correction is working', warning=True)
+            else:
+                # First  cell is at the bottom , so set zero
+                data[:, :, 0, :]  = 0.
 
         field.data[buffer_index, ...] = data
 
