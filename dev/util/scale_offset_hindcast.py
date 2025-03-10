@@ -4,7 +4,7 @@ from glob import  glob
 from os import  path, mkdir
 from datetime import datetime
 #from oceantracker.util.xarrry_util import compute_scale_and_offset_int16
-from demos.demo_hindcast.make_demo_schism_hindcast import compute_scale_and_offset_int16
+from tutorials_how_to.demo_hindcast.make_demo_schism_hindcast import compute_scale_and_offset_int16
 import multiprocessing
 from copy import  copy
 def scale_file(args):

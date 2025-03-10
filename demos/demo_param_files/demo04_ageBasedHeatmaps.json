@@ -6,7 +6,7 @@
     "time_step": 900,
     "debug": true,
     "reader": {
-        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast",
+        "input_dir": "../tutorials_how_to/demo_hindcast",
         "file_mask": "Random_order_*.nc"
     },
     "user_note": "test of notes",
