@@ -424,17 +424,18 @@ class _BaseReader(ParameterBaseClass):
 
         if field.is3D():
             if info['regrid_z_to_uniform_sigma_levels']:
-                data = self._vertical_regrid_Slayer_field_to_uniform_sigma('water_velocity', data)
+                data = reader_util.ensure_bottom_velocity_is_zero_ragged_bottom(data, self.grid['bottom_cell_index']) # zero bottom before regrid
+                data = self._vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma('water_velocity', data)
 
             # ensure vel at bottom is zero
             if info['vert_grid_type'] in [si.vertical_grid_types.LSC, si.vertical_grid_types.Zfixed]:
-                # ragsaed bottom
+                # ragged bottom
                 data = reader_util.ensure_bottom_velocity_is_zero_ragged_bottom(data, self.grid['bottom_cell_index'])
                 if info['vert_grid_type'] == si.vertical_grid_types.Zfixed:
-                    si.msg_logger.msg('Developer check, fixed z and bottom cell ragged bottom correction is working', warning=True)
+                    si.msg_logger.msg('Developer: check fixed z vertical grid and bottom cell ragged bottom correction is working', warning=True)
             else:
                 # First  cell is at the bottom , so set zero
-                data[:, :, 0, :]  = 0.
+                data[:, :, 0, :] = 0.
 
         field.data[buffer_index, ...] = data
 
@@ -533,7 +534,7 @@ class _BaseReader(ParameterBaseClass):
             data =  self.read_field_data(name, field, nt_available)
 
             if field.is3D() and si.settings['regrid_z_to_uniform_sigma_levels']:
-                data = self._vertical_regrid_Slayer_field_to_uniform_sigma(name, data)
+                data = self._vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma(name, data)
 
             # insert data
             field.data[buffer_index, ...] = data
@@ -611,7 +612,6 @@ class _BaseReader(ParameterBaseClass):
         else:
             si.msg_logger(f'Unrecognised time unit = {unit}', hint="must be one of [seconds,minutes,hours,days]")
 
-
         t = t + d0
         return t
 
@@ -619,7 +619,7 @@ class _BaseReader(ParameterBaseClass):
         # get preloaded times at given time steps
         return  self.info['time_coord'][nt_hindcast]
 
-    def _vertical_regrid_Slayer_field_to_uniform_sigma(self,name, data):
+    def _vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma(self, name, data):
         grid = self.grid
         fields = self.fields
 
@@ -627,12 +627,12 @@ class _BaseReader(ParameterBaseClass):
         s[2] = grid['sigma'].size
         out = np.full(tuple(s), np.nan, dtype=np.float32)
         data = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
-            grid['zlevel_fractions'], grid['bottom_cell_index'],
-            grid['sigma'],
-            fields['water_depth'].data, fields['tide'].data,
-            si.settings.z0, si.settings.minimum_total_water_depth,
-            data, out,
-            name == 'water_velocity')
+                            grid['zlevel_fractions'], grid['bottom_cell_index'],
+                            grid['sigma'],
+                            fields['water_depth'].data, fields['tide'].data,
+                            si.settings.z0, si.settings.minimum_total_water_depth,
+                            data, out,
+                            name == 'water_velocity')
         return data
 
     # convert, time etc to hindcast/ buffer index
