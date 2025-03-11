@@ -1,7 +1,7 @@
 # modfiy aspects pof all isActive particles, ie moving and stranded
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 import numpy as np
-from oceantracker.resuspension._base_resuspension import BaseResuspension
+from oceantracker.resuspension._base_resuspension import _BaseResuspension
 from oceantracker.util.numba_util import njitOT, njitOTparallel
 
 from numba import  njit, prange
@@ -10,7 +10,7 @@ from oceantracker.shared_info import shared_info as si
 status_on_bottom = int(si.particle_status_flags.on_bottom)
 status_moving= int(si.particle_status_flags.moving)
 
-class Resuspension(BaseResuspension):
+class Resuspension(_BaseResuspension):
     # based on
     # Lynch, Daniel R., David A. Greenberg, Ata Bilgili, Dennis J. McGillicuddy Jr, James P. Manning, and Alfredo L. Aretxabaleta.
     # Particles in the coastal ocean: Theory and applications. Cambridge University Press, 2014.

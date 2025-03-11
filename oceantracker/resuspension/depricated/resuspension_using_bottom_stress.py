@@ -1,7 +1,7 @@
 # modfiy aspects pof all isActive particles, ie moving and stranded
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 import numpy as np
-from oceantracker.resuspension._base_resuspension import BaseResuspension
+from oceantracker.resuspension._base_resuspension import _BaseResuspension
 from oceantracker.util.numba_util import njitOT
 
 from oceantracker.resuspension.resuspension import ResuspensionUsingNearSeaBedVel

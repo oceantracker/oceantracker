@@ -16,7 +16,7 @@ def main(args):
     ot.settings(time_step=1800,use_dispersion=False,
                 screen_output_time_interval=1800,
              use_A_Z_profile=True,
-            regrid_z_to_uniform_sigma_levels=True,
+            regrid_z_to_uniform_sigma_levels=False,
             particle_buffer_initial_size= 10,
              NUMBA_cache_code=True,
                 #NCDF_particle_chunk= 50000

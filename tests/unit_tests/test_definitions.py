@@ -167,9 +167,9 @@ ax = [1591000, 1601500, 5478500, 5491000]
 
 
 
-def read_tracks(case_info_file):
+def read_tracks(case_info_file,fraction_to_read=None):
     from read_oceantracker.python import load_output_files
-    return load_output_files.load_track_data(case_info_file)
+    return load_output_files.load_track_data(case_info_file,fraction_to_read=fraction_to_read)
 
 def compare_reference_run(case_info_file, args):
     from read_oceantracker.python import load_output_files
@@ -221,8 +221,8 @@ def show_track_plot(case_info_file, args):
                            #colour_using_data=tracks['a_pollutant'],
                            movie_file=movie_file1)
 
-def plot_vert_section(case_info_file):
+def plot_vert_section(case_info_file,fraction_to_read):
 
     from plot_oceantracker.plot_tracks import plot_path_in_vertical_section
-    tracks = read_tracks(case_info_file)
+    tracks = read_tracks(case_info_file,fraction_to_read=fraction_to_read)
     plot_path_in_vertical_section(tracks, particleID=np.arange(0,tracks['x'].shape[1],10))

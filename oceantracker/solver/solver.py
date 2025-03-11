@@ -343,8 +343,6 @@ class Solver(ParameterBaseClass):
         s += f' step time = { (perf_counter() - t0_step) * 1000:4.1f} ms'
         si.msg_logger.msg(s)
 
-
-
     def _update_stats(self,n_time_step, time_sec):
         # update and write stats
         t0 = perf_counter()

@@ -1,0 +1,55 @@
+NCDF_time_chunk: 1
+NUMBA_cache_code: true
+debug: true
+output_file_base: unit_test_10_resupension_00
+particle_properties:
+- class_name: oceantracker.particle_properties.age_decay.AgeDecay
+  decay_time_scale: 7200.0
+  initial_value: 1000
+  name: a_pollutant
+- class_name: WaterSpeed
+- class_name: AgeDecay
+  name: test_decay
+- class_name: DistanceTravelled
+particle_statistics:
+- class_name: GriddedStats2D_timeBased
+  grid_size:
+  - 120
+  - 121
+  grid_span:
+  - 10000
+  - 10000
+  name: my_heatmap
+  particle_property_list:
+  - a_pollutant
+  release_group_centered_grids: true
+  start: '2017-01-01T02:30:00'
+  update_interval: 7200
+  z_min: -10.0
+reader:
+  file_mask: demo_hindcast_schisim3D*.nc
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
+regrid_z_to_uniform_sigma_levels: false
+release_groups:
+- name: point1
+  points:
+  - 1597682.1237
+  - 5489972.7479
+  pulse_size: 1000
+  release_at_surface: true
+  release_interval: 0
+resuspension:
+  class_name: BasicResuspension
+  critical_friction_velocity: 0.01
+root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
+screen_output_time_interval: 600
+time_step: 60
+tracks_writer:
+  update_interval: 600
+  write_dry_cell_flag: true
+use_A_Z_profile: false
+use_random_seed: true
+velocity_modifiers:
+- class_name: TerminalVelocity
+  name: fall_vel
+  value: -0.002
