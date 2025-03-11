@@ -53,7 +53,7 @@ particle_statistics:
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
-regrid_z_to_uniform_sigma_levels: true
+regrid_z_to_uniform_sigma_levels: false
 release_groups:
 - class_name: PointRelease
   name: release_interval0
