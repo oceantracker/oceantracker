@@ -32,15 +32,22 @@ def compute_scale_and_offset_int16(data, missing_value=None):
     return scale_factor, add_offset, missing_value
 
 def write_file(ds_in,n_file, nodes,sel_tri, tri, is3D=False):
-    # write files
+    # get subset of hindcast  write
     print('is3D=',is3D)
 
     # write 2D file
 
     sel_time = range(0, ds_in.dims['time'],2)
-    bot_cell = 21 # zero based index most be odd to get top layer in layer 1 to 38
-    sel_z= range(bot_cell,ds_in.dims['nSCHISM_vgrid_layers'], 2)
-    ds_out = ds_in.isel(time=sel_time, nSCHISM_hgrid_node=nodes, nSCHISM_vgrid_layers=sel_z)
+
+    node_bottom_index = ds_in['node_bottom_index'][nodes].compute()
+
+    # select every second depth and all cells at water depth / bottom of model
+    nz = ds_in.dims['nSCHISM_vgrid_layers']
+    sel_z= np.arange(node_bottom_index.min(), nz,2) # start 1 above smallest botom cell w( which si one
+    sel_z = np.append(np.sort(np.unique(node_bottom_index))- 1,sel_z ,axis=0)
+
+
+    ds_out = ds_in.isel(time=sel_time, nSCHISM_hgrid_node=nodes, nSCHISM_vgrid_layers=sel_z).compute()
 
     if not is3D:
         # drop 3d variables
@@ -51,7 +58,7 @@ def write_file(ds_in,n_file, nodes,sel_tri, tri, is3D=False):
     ds_out = ds_out.isel(nSCHISM_hgrid_face=sel_tri)
 
 
-    ds_out['node_bottom_index'] = ds_out['node_bottom_index'] - bot_cell
+    ds_out['node_bottom_index'] = (ds_out['node_bottom_index'] - node_bottom_index+1).astype(np.int32)
 
     # make row 1049 a quad cell and delete next row
     nn=1049
@@ -70,15 +77,16 @@ def write_file(ds_in,n_file, nodes,sel_tri, tri, is3D=False):
                            )
 
     ds_out = ds_out.isel(nSCHISM_hgrid_face=sel)
-    ds_out['SCHISM_hgrid_face_nodes'][:,:] = tri
-
+    ds_out['SCHISM_hgrid_face_nodes'][:,:] = tri.astype(np.int32)
+    ds_out['SCHISM_hgrid_face_nodes'] = ds_out['SCHISM_hgrid_face_nodes'].astype(np.int32)
     return ds_out, e, n_file
 
 if __name__ == '__main__':
 
-    data_file_mask =r'G:\Hindcasts_large\2020_MalbroughSounds_10year_benPhD\2017\schism_marl201701*_00z_3D.nc'
+    data_file_mask =r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2017\schism_marl201701*_00z_3D.nc'
     ax=    1.0e+06 *np.asarray([ 1.5903,    1.6026,    5.4795,    5.501]) # abel tasman
     out_file_base='demo_hindcast_schisim'
+    out_dir = path.dirname(__file__)
     nz0=22
     nt_step=2
     n_files=4
@@ -95,7 +103,7 @@ if __name__ == '__main__':
         x,y = ds_in['SCHISM_hgrid_node_x'].compute().data, ds_in['SCHISM_hgrid_node_y'].compute().data
         tri = ds_in['SCHISM_hgrid_face_nodes'].compute().data.astype(np.int32)
 
-        # find  triangles in sub domain
+        # find  triangles in sub-domain
         x_tri= np.mean(x[tri[:,:3]-1],axis=1)
         y_tri= np.mean(y[tri[:,:3]-1],axis=1)
 
@@ -113,27 +121,31 @@ if __name__ == '__main__':
         new_tri[required_tri[:,3] ==-99999,3] = -99 # make missing 4th values the same
         nodes = sel_nodes - 1
 
-        # keep copy to write in random order
-        out_file_2D.append(write_file(ds_in,n_file, nodes, sel_tri, new_tri, is3D=False))
+
         if n_file < 1:
-            out_file = path.join('schsim3D', f'{out_file_base}3D_{n_file:02d}.nc')
+            out_file3D = path.join(out_dir, 'schsim3D', f'{out_file_base}3D_{n_file:02d}.nc')
+            print(out_file3D)
             ds_out,e, n_file =write_file(ds_in,n_file, nodes, sel_tri, new_tri, is3D=True)
-            ds_out.to_netcdf(out_file,encoding=e)
+            ds_out.to_netcdf(out_file3D,encoding=e)
+
+        # keep 2D copy to write in random order
+        out_file_2D.append(write_file(ds_in, n_file, nodes, sel_tri, new_tri, is3D=False))
 
     # random ise name
     random.shuffle(out_file_2D)
     for ds,e,n_file in out_file_2D:
         tag = ''.join(random.choices(string.ascii_uppercase + string.digits,k=10))
-        out_file = path.join('schsim2D', f'Random_order_{tag}_schsim2D_{n_file}.nc')
+        out_file = path.join(out_dir,'schsim2D', f'Random_order_{tag}_schsim2D_{n_file}.nc')
+        print(out_file)
         ds.to_netcdf(out_file, encoding=e)
 
     # read and plot
-    print('reading',out_file)
-    r = NetCDFhandler(out_file)
+    print('reading',out_file3D)
+    r = NetCDFhandler(out_file3D)
     var = r.read_variables(r.all_var_names())
     x, y =var['SCHISM_hgrid_node_x'],var['SCHISM_hgrid_node_y']
 
-    plt.scatter(x, y ,c='k',zorder=0,s=6)
+    plt.scatter(x, y, c='k',zorder=0,s=6)
 
     tri = var['SCHISM_hgrid_face_nodes']
     nn= tri[:, 3]> 1

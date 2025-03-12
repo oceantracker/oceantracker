@@ -131,6 +131,7 @@ def ensure_velocity_at_bottom_is_zero_ragged_bottom(vel_data, bottom_cell_index)
 
 @njitOT
 def get_values_at_ragged_bottom(data, bottom_cell_index):
+    # from 4D field
     s = data.shape
     out = np.full(s[:2]+(s[3],), 0.,dtype=data.dtype)
     for nt in range(data.shape[0]):

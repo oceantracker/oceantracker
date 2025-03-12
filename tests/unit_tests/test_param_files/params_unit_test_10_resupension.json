@@ -10,7 +10,7 @@
     "regrid_z_to_uniform_sigma_levels": false,
     "NUMBA_cache_code": true,
     "tracks_writer": {
-        "update_interval": 600,
+        "update_interval": 60,
         "write_dry_cell_flag": true
     },
     "reader": {
@@ -25,13 +25,13 @@
             ],
             "release_at_surface": true,
             "release_interval": 0,
-            "pulse_size": 1000,
+            "pulse_size": 5000,
             "name": "point1"
         }
     ],
     "velocity_modifiers": [
         {
-            "value": -0.002,
+            "value": -0.01,
             "class_name": "TerminalVelocity",
             "name": "fall_vel"
         }
