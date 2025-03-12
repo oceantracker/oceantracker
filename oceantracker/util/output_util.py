@@ -39,7 +39,7 @@ def write_release_group_netcdf():
         sc = rg.schedulers['release'].info
         # add useful info to variable atributes
         attr= dict(release_type=rg.info['release_type'], is3D = is3D,
-                    release_group_name = name, instanceID= rg.info['instanceID'], pulses= rg.info['pulseID'],
+                   release_group_name = name, instanceID= rg.info['instanceID'], pulses= rg.info['pulseID'],
                    pulse_size =rg.params['pulse_size'],
                    release_interval=rg.params['release_interval'],
                    start =sc['start_time'], end =sc['end_time'], start_date= sc['start_date'], end_date =sc['end_date'],

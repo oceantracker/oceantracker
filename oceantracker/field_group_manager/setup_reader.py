@@ -140,7 +140,7 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
         t = dict(velocity = fmap['water_velocity'][0] in  file_vars  # has normal or depth average velocity
                                  or fmap['water_velocity_depth_averaged'][0] in  file_vars)
         # check if other variables in the signature are present
-        for s in r.params['variable_signature'] + [gmap['time'],gmap['x']]:
+        for s in r.params['variable_signature'] + [gmap['time'], gmap['x']]:
             t[s] = s in ds_info['variables']
 
         tests[name] = t
