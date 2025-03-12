@@ -427,7 +427,7 @@ def build_demos(testrun=False):
     paramdir ='demo_param_files'
     if not path.isdir(paramdir): mkdir(paramdir)
 
-    input_dir = '../tutorials_how_to/demo_hindcast' # hindcast location
+    input_dir = '../tutorials_how_to/demo_hindcast'  # hindcast location
 
     # make all JSONS
     for demo in params:

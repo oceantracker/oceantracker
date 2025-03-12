@@ -35,7 +35,7 @@ release_groups:
   points:
   - 1597682.1237
   - 5489972.7479
-  pulse_size: 1000
+  pulse_size: 5000
   release_at_surface: true
   release_interval: 0
 resuspension:
@@ -45,11 +45,11 @@ root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_test
 screen_output_time_interval: 600
 time_step: 60
 tracks_writer:
-  update_interval: 600
+  update_interval: 60
   write_dry_cell_flag: true
 use_A_Z_profile: false
 use_random_seed: true
 velocity_modifiers:
 - class_name: TerminalVelocity
   name: fall_vel
-  value: -0.002
+  value: -0.01
