@@ -69,9 +69,9 @@ class Resuspension(_BaseResuspension):
         else:
             # test merging select parcels into  jumping, this unexpectedly  slower as it uses branched code over all particles?
             self.resuspension_jumpV2(part_prop['friction_velocity'].data, part_prop['status'].data,
-                                    self.params['critical_friction_velocity'],
-                                   info['resuspension_factor'],
-                                   part_prop['x'].data, part_prop['water_depth'].data,si.settings.z0, alive)
+                                     self.params['critical_friction_velocity'],
+                                     info['resuspension_factor'],
+                                     part_prop['x'].data, part_prop['water_depth'].data, si.settings.z0, alive)
 
 
         self.stop_update_timer()

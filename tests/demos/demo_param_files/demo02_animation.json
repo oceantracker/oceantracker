@@ -1,0 +1,111 @@
+{
+    "output_file_base": "demo02_animation",
+    "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\demos",
+    "add_date_to_run_output_dir": false,
+    "NUMBA_cache_code": false,
+    "time_buffer_size": 15,
+    "time_step": 600,
+    "debug": true,
+    "reader": {
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast",
+        "file_mask": "Random_order_*.nc"
+    },
+    "user_note": "test of notes",
+    "dispersion": {
+        "A_H": 0.1
+    },
+    "tracks_writer": {
+        "write_dry_cell_flag": true
+    },
+    "release_groups": [
+        {
+            "name": "point1",
+            "allow_release_in_dry_cells": true,
+            "points": [
+                [
+                    1594500,
+                    5483000
+                ],
+                [
+                    1598000,
+                    5486100
+                ]
+            ],
+            "pulse_size": 10,
+            "release_interval": 3600
+        },
+        {
+            "name": "poly1",
+            "class_name": "PolygonRelease",
+            "points": [
+                [
+                    1597682.1237,
+                    5489972.7479
+                ],
+                [
+                    1598604.1667,
+                    5490275.5488
+                ],
+                [
+                    1598886.4247,
+                    5489464.0424
+                ],
+                [
+                    1597917.3387,
+                    5489000
+                ],
+                [
+                    1597300,
+                    5489000
+                ],
+                [
+                    1597682.1237,
+                    5489972.7479
+                ]
+            ],
+            "pulse_size": 10,
+            "release_interval": 10800
+        },
+        {
+            "name": "G1",
+            "class_name": "GridRelease",
+            "grid_size": [
+                3,
+                4
+            ],
+            "grid_span": [
+                1000,
+                1000
+            ],
+            "grid_center": [
+                1592500,
+                5486000
+            ],
+            "pulse_size": 2,
+            "release_interval": 3600
+        }
+    ],
+    "particle_properties": [
+        {
+            "name": "Oxygen",
+            "class_name": "AgeDecay",
+            "decay_time_scale": 86400.0,
+            "initial_value": 20.0
+        },
+        {
+            "name": "distance_travelled",
+            "class_name": "DistanceTravelled"
+        },
+        {
+            "name": "age_decay",
+            "class_name": "AgeDecay",
+            "decay_time_scale": 86400.0
+        },
+        {
+            "name": "my_constant_prop",
+            "class_name": "ParticleLoad",
+            "initial_value": 100
+        }
+    ],
+    "block_dry_cells": true
+}

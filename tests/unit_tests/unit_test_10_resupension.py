@@ -59,7 +59,7 @@ def main(args):
         from read_oceantracker.python import load_output_files
         cs = load_output_files.read_case_info_file(case_info_file1)
         from oceantracker.util.ncdf_util import NetCDFhandler
-        nc = NetCDFhandler('../tutorials_how_to/demo_hindcast/schsim3D/demo_hindcast_schisim3D_00.nc')
+        nc = NetCDFhandler('../../tutorials_how_to/demo_hindcast/schsim3D/demo_hindcast_schisim3D_00.nc')
 
         d = nc.read_variables()
         from oceantracker.reader.util import reader_util
