@@ -133,9 +133,10 @@ if __name__ == '__main__':
 
     # random ise name
     random.shuffle(out_file_2D)
+    tag = np.random.choice(np.arange(len(out_file_2D)), size=len(out_file_2D), replace=False)
     for ds,e,n_file in out_file_2D:
-        tag = ''.join(random.choices(string.ascii_uppercase + string.digits,k=10))
-        out_file = path.join(out_dir,'schsim2D', f'Random_order_{tag}_schsim2D_{n_file}.nc')
+
+        out_file = path.join(out_dir,'schsim2D', f'Random_order_{tag[n_file]:02d}_schsim2D_{n_file}.nc')
         print(out_file)
         ds.to_netcdf(out_file, encoding=e)
 
