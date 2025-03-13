@@ -74,6 +74,13 @@ hydro_model = dict(demoSchism3D=dict(reader= reader_demo_schisim3D,
 hydro_model['demoSchism2D'] =deepcopy(hydro_model['demoSchism3D'])
 hydro_model['demoSchism2D']['reader'] = reader_demo_schisim2D
 
+rg_basic = dict( name='rg_basic',  # name used internal to refer to this release
+         class_name='PointRelease',  # class to use
+         points=[[1594000, 5484200, -2]  ],
+         # the below are optional settings/parameters
+         release_interval=1800,  # seconds between releasing particles
+         pulse_size=5)  # how many are released each interval
+
 rg_release_interval0 = dict( name='release_interval0',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
          points=[[1594000, 5484200, -2]  ],

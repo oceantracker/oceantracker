@@ -1,0 +1,26 @@
+NCDF_time_chunk: 1
+NUMBA_cache_code: true
+debug: true
+output_file_base: unit_test_20_restarting_00
+particle_buffer_initial_size: 100
+reader:
+  file_mask: demo_hindcast_schisim3D*.nc
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
+regrid_z_to_uniform_sigma_levels: false
+release_groups:
+- class_name: PointRelease
+  name: rg_basic
+  points:
+  - - 1594000
+    - 5484200
+    - -2
+  pulse_size: 5
+  release_interval: 1800
+restart_interval: 10800
+root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
+screen_output_time_interval: 1800
+time_step: 1800
+use_A_Z_profile: true
+use_dispersion: false
+use_random_seed: true
+use_resuspension: false

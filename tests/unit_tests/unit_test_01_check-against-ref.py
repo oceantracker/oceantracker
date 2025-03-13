@@ -19,6 +19,7 @@ def main(args):
             regrid_z_to_uniform_sigma_levels=False,
             particle_buffer_initial_size= 10,
              NUMBA_cache_code=True,
+                use_resuspension=False,
                 #NCDF_particle_chunk= 50000
                 )
 
@@ -47,8 +48,6 @@ def main(args):
 
     ot.add_class('particle_statistics', **test_definitions.poly_stats,
                  polygon_list=[dict(points=hm['polygon'])])
-
-    ot.add_class('resuspension', critical_friction_velocity=0.01)
 
 
     case_info_file = ot.run()

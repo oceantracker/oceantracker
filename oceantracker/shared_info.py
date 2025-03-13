@@ -111,7 +111,8 @@ class _DefaultSettings(_SharedStruct):
         # profiler = PVC('oceantracker', str, possible_values=available_profile_types,
         #                 doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules ' )
         # 'debug_level =               PVC(0, int,min=0, max=10, doc_str='Gives  diferent levels of debug, in development' )
-
+    restart_interval = PVC(None, float,
+                           doc_str='Save the particle tracking state at the interval to allow restarting run', units='sec',  expert=True)
 
 # blocks that make up parts of shared info
 class _ClassRoles(_SharedStruct):
@@ -201,6 +202,7 @@ class _SharedInfoClass():
     class_importer = class_importer_util.ClassImporter(msg_logger)
     particles_in_buffer = 0
     info = _UseFullInfo
+    dim_names = definitions._DimensionNames()
 
     def __init__(self):
 

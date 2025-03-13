@@ -33,7 +33,9 @@ To ensure python/ module compatibility, recommendation is to build a conda virtu
    
    Then install these packages
 
-   ``conda install conda-forge::numba``
+   ``conda install conda-forge::numba=0.56.4``  if using python 3.10
+
+   ``conda install conda-forge::numba``  if using python 3.11 or higher
          
    ``conda install anaconda::numpy`` 
  

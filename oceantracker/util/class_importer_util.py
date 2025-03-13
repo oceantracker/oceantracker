@@ -49,7 +49,7 @@ class ClassImporter():
         i.info['class_role'] = class_role
 
         if merge_params:
-            i.params  = merge_params_with_defaults(params, i.default_params, ml, crumbs=crumbs, check_for_unknown_keys=check_for_unknown_keys, caller=i)
+            i.params = merge_params_with_defaults(params, i.default_params, ml, crumbs=crumbs, check_for_unknown_keys=check_for_unknown_keys, caller=i)
 
         # attach the current message loger to instance
         i.msg_logger = self.msg_logger

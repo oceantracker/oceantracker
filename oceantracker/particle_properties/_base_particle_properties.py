@@ -19,6 +19,7 @@ class _BaseParticleProperty(ParameterBaseClass):
 
         self.add_default_params({   'description': PVC(None,str),
                                     'units': PVC(None, str),
+                                    'extra_dimensions': PLC(None, str, doc_str='list of the names of dimensions for vectors, or those with prop_dim3 set. Partile is added automatically'),
                                     'time_varying':PVC(True, bool),
                                     'name' :PVC(None, str,doc_str='Name used to refer to this particle property in code and output',is_required=True),
                                     'vector_dim': PVC(1, int, min = 1 ),
@@ -37,8 +38,13 @@ class _BaseParticleProperty(ParameterBaseClass):
 
     def initial_setup(self):
         params = self.params
+        info = self.info
+        info['dimensions'] = ['particle_dim']
         s = (si.settings.particle_buffer_initial_size,) # initial size one chunk
-        if params['vector_dim'] > 1: s += (params['vector_dim'],)
+        if params['vector_dim'] > 1:
+            s += (params['vector_dim'],)
+            if params['extra_dimensions'] is not None:
+                pass
 
         # third matrix dim, so far only used recording vertical cell at each node  3D for 2 time steps
         if params['prop_dim3'] > 0 and params['prop_dim3'] > 1:

@@ -108,6 +108,13 @@ class _EdgeTypes(_BaseConstantsClass):
     domain: int = -1
     open_boundary: int = -2
 
+@dataclass
+class _DimensionNames(_BaseConstantsClass):
+    # used to standardise output dimension names
+    time: str = 'time_dim'
+    particle: str  = 'particle_dim'
+    vector2D: str  = 'vector2D'
+    vector3D: str = 'vector3D'
 
 
 
