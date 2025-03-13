@@ -1,0 +1,35 @@
+{
+    "output_file_base": "unit_test_20_restarting_00",
+    "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
+    "time_step": 1800,
+    "use_random_seed": true,
+    "NCDF_time_chunk": 1,
+    "debug": true,
+    "use_dispersion": false,
+    "screen_output_time_interval": 1800,
+    "use_A_Z_profile": true,
+    "regrid_z_to_uniform_sigma_levels": false,
+    "particle_buffer_initial_size": 100,
+    "NUMBA_cache_code": true,
+    "use_resuspension": false,
+    "restart_interval": 10800,
+    "reader": {
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
+        "file_mask": "demo_hindcast_schisim3D*.nc"
+    },
+    "release_groups": [
+        {
+            "points": [
+                [
+                    1594000,
+                    5484200,
+                    -2
+                ]
+            ],
+            "release_interval": 1800,
+            "pulse_size": 5,
+            "class_name": "PointRelease",
+            "name": "rg_basic"
+        }
+    ]
+}

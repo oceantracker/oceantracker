@@ -34,7 +34,6 @@ def setup_output_dir(params, crumbs='', caller=None):
     # clear existing folder
     if path.isdir(run_output_dir):
         shutil.rmtree(run_output_dir)
-        si.msg_logger.msg('Deleted contents of existing output dir', warning=True)
 
     # make a new dir
     makedirs(run_output_dir)  # make  and clear out dir for output

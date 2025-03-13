@@ -91,8 +91,6 @@ release_groups:
     - -2
   pulse_size: 5
   release_interval: 3600
-resuspension:
-  critical_friction_velocity: 0.01
 root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
 screen_output_time_interval: 1800
 time_step: 1800
@@ -103,3 +101,4 @@ tracks_writer:
 use_A_Z_profile: true
 use_dispersion: false
 use_random_seed: true
+use_resuspension: false

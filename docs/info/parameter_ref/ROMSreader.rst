@@ -81,7 +81,7 @@ Parameters:
 		Description: - Variable names used to test if file is this format
 
 		- a list containing type:  ``[]``
-		- default list : ``['mask_psi', 'lat_psi', 'lon_psi', 'h', 'zeta']``
+		- default list : ``['mask_psi', 'lat_psi', 'lon_psi', 'h', 'zeta', 's_w', 's_rho']``
 		- data_type: ``<class 'str'>``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``

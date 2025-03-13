@@ -68,7 +68,7 @@ Parameters:
 		- min: ``0``
 
 	* ``minimum_total_water_depth`` :   ``<class 'float'>``   *<optional>*
-		Description: Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering
+		Description: Min. water depth used to decide if cell is dry (only if no dry cell data in hindcast ) to decide if stranded  and to block particles from entering dry cells
 
 		- default: ``0.25``
 		- data_type: ``<class 'float'>``
@@ -82,14 +82,14 @@ Parameters:
 		- data_type: ``<class 'str'>``
 
 	* ``processors`` :   ``<class 'int'>``   *<optional>*
-		Description: Maximum number of threads to use in parallelization, default is one less than the number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking
+		Description: Maximum number of threads to use in parallelization, default = number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking
 
 		- default: ``None``
 		- data_type: ``<class 'int'>``
 		- min: ``1``
 
 	* ``regrid_z_to_uniform_sigma_levels`` :   ``<class 'bool'>``   *<optional>*
-		Description: much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS
+		Description: much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read (eg. SCHISM), based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS
 
 		- default: ``True``
 		- data_type: ``<class 'bool'>``
