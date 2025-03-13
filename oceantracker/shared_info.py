@@ -88,7 +88,7 @@ class _DefaultSettings(_SharedStruct):
     use_geographic_coords = PVC(False, bool,
                           doc_str='Used geographic coordniated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
                                 expert=True)
-    use_A_Z_profile = PVC(True, bool,
+    use_A_Z_profile = PVC(False, bool,
                 doc_str='Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files')
     use_bottom_stress = PVC(True, bool,
                 doc_str='Use hydro models bottom_stress variable for friction velocity calculation, if mapped variable is in files. Friction velocity is used in resuspension')
