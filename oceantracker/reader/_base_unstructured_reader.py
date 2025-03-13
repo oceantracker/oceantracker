@@ -40,6 +40,8 @@ class _BaseUnstructuredReader(_BaseReader):
 
     def set_up_uniform_sigma(self, grid):
         # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
+        # for use in Slayer ond LSC grids
+
         ds = self.dataset
         gm = self.params['grid_variable_map']
 
@@ -61,7 +63,7 @@ class _BaseUnstructuredReader(_BaseReader):
         zf_model = grid['zlevel_fractions'][node_thinest_bot_layer, nz_bottom:]
         nz = grid['zlevel_fractions'].shape[1]
         nz_fractions = nz - nz_bottom
-        grid['sigma'] = np.interp(np.arange(nz) / nz, np.arange(nz_fractions) / nz_fractions, zf_model)
+        grid['sigma'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
 
         if False:
             # debug plots sigma

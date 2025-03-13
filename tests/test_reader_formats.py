@@ -12,7 +12,7 @@ def default_params():
         'debug' : True,
         'time_step': 1800,
         'dev_debug_plots' :False,
-        'use_A_Z_profile': True,
+        'use_A_Z_profile': False,
         'max_run_duration': 5. * 24 * 3600,
         'write_tracks': True,
         'output_file_base': None,
@@ -34,8 +34,6 @@ def default_params():
         'use_A_Z_profile': False,
         'resuspension': {'critical_friction_velocity': 0.00}
         }
-
-
 
     params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_coords'])
 
@@ -122,7 +120,7 @@ def get_case(n):
                   [-160, 21.5],
                   [-158, 20]
                   ]
-
+            time_step = 15*60
             ax = None
             title = 'test schisim v5 - Calvin'
         case 142:
@@ -134,6 +132,7 @@ def get_case(n):
             x0= np.flip(np.asarray(x0),axis=1)
             ax = None # Auck
             title = 'test schisim v5 - Auck'
+            time_step = 5 * 60
 
         case 150:
             root_input_dir = r'F:\Hindcast_parts\pelorus2024'
@@ -301,7 +300,7 @@ def get_case(n):
             #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
             is3D = True
             show_grid = True
-            time_step = 5*60
+
 
         case   1100:
             # batic sea GLORYS
@@ -441,7 +440,7 @@ def get_case(n):
     if hgrid_file is not None:
         params['reader']['hgrid_file_name']= hgrid_file
 
-
+    params['time_step'] = time_step
     params['nested_readers']=nested_readers
 
     plot_opt=dict(ax=ax,show_grid=show_grid)

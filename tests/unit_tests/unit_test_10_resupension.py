@@ -86,14 +86,14 @@ def main(args):
 
     test_definitions.plot_vert_section(case_info_file1, fraction_to_read=0.01)
 
-    if True:
+    if args.plot:
         from read_oceantracker.python import load_output_files
         tracks1 = load_output_files.load_track_data(case_info_file1,fraction_to_read=0.01)
         plt.plot(tracks1['x'][:,:,2] + tracks1['water_depth'])
         plt.show()
 
-    if True:
-        test_definitions.show_track_plot(case_info_file1, args)
+
+    test_definitions.show_track_plot(case_info_file1, args)
 
 
 
