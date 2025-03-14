@@ -309,7 +309,7 @@ class _BaseReader(ParameterBaseClass):
         # allow vertical regridding to same sigma at all nodes
 
         if info['regrid_z_to_uniform_sigma_levels']:
-            grid = self.set_up_uniform_sigma(grid)  # add an estimated sigma to the grid
+            self.set_up_uniform_sigma(grid)  # add an estimated sigma to the grid
 
 
         # set up zlevels if needed

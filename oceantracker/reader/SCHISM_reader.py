@@ -6,7 +6,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 import numpy as np
 from oceantracker.shared_info import shared_info as si
 from oceantracker.reader.util import reader_util
-
+from oceantracker.reader.util import hydromodel_grid_transforms
 class SCHISMreader(_BaseUnstructuredReader):
 
     def __init__(self):
@@ -140,6 +140,51 @@ class SCHISMreader(_BaseUnstructuredReader):
 
         return is_open_boundary_node
 
+    def set_up_uniform_sigma(self, grid):
+        # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
+        # for use in Slayer ond LSC grids
+
+        ds = self.dataset
+        gm = self.params['grid_variable_map']
+
+        # read first zlevel time step
+        zlevel =ds.read_variable(gm['zlevel']).data[0,:,:]
+
+        # use node with thinest top/bot layers as template for all sigma levels
+        grid['zlevel_fractions'] = hydromodel_grid_transforms.convert_zlevels_to_fractions(zlevel, grid['bottom_cell_index'], si.settings.z0)
+
+        # get profile with the smallest bottom layer  tickness as basis for first sigma layer
+        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['zlevel_fractions'],grid['bottom_cell_index'])
+
+        # use layer fractions from this node to give layer fractions everywhere
+        # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
+        nz_bottom = grid['bottom_cell_index'][node_thinest_bot_layer]
+
+        # stretch sigma out to same number of depth cells,
+        # needed for LSC grid if node_min profile is not full number of cells
+        zf_model = grid['zlevel_fractions'][node_thinest_bot_layer, nz_bottom:]
+        nz = grid['zlevel_fractions'].shape[1]
+        nz_fractions = nz - nz_bottom
+        grid['sigma'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
+
+        if False:
+            # debug plots sigma
+            from matplotlib import pyplot as plt
+            sel = np.arange(0, zlevel.shape[0], 100)
+            water_depth,junk = self.read_field_var(nc, self.params['field_variable_map']['water_depth'])
+            sel=sel[water_depth[sel]> 10]
+            index_frac = (np.arange(zlevel.shape[1])[np.newaxis,:] - grid['bottom_cell_index'][sel,np.newaxis]) / (zlevel.shape[1] - grid['bottom_cell_index'][sel,np.newaxis])
+            zlevel[zlevel < -1.0e4] = np.nan
+
+            #plt.plot(index_frac.T,zlevel[sel,:].T,'.')
+            #plt.show(block=True)
+            plt.plot(index_frac.T, grid['zlevel_fractions'][sel, :].T, lw=0.1)
+            plt.plot(index_frac.T,grid['zlevel_fractions'][sel, :].T, '.')
+
+            plt.show(block=True)
+
+            pass
+
 def decompose_lines(lines, dtype=np.float64):
     cols= len(lines[0].split())
     out= np.full((len(lines),cols),0,dtype=dtype)
@@ -206,3 +251,5 @@ def read_hgrid_file(file_name):
             l0 = l0 + nodes.size + 1
 
     return d
+
+

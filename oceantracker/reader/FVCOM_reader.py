@@ -90,7 +90,7 @@ class FVCOMreader(_BaseUnstructuredReader):
 
 
     def set_up_uniform_sigma(self, grid):
-
+        # for use in Slayer vertical grids
         # get profile with the smallest bottom layer  tickness as basis for first sigma layer
         node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['zlevel_fractions'],
                                                                                               grid['bottom_cell_index'])
@@ -104,9 +104,9 @@ class FVCOMreader(_BaseUnstructuredReader):
         zf_model = grid['zlevel_fractions'][node_thinest_bot_layer, nz_bottom:]
         nz = grid['zlevel_fractions'].shape[1]
         nz_fractions = nz - nz_bottom
-        grid['sigma'] = np.interp(np.arange(nz) / nz, np.arange(nz_fractions) / nz_fractions, zf_model)
+        grid['sigma'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
 
-        return grid
+
 
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations

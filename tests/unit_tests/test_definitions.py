@@ -228,7 +228,8 @@ def show_track_plot(case_info_file, args):
                            #colour_using_data=tracks['a_pollutant'],
                            movie_file=movie_file1)
 
-def plot_vert_section(case_info_file,fraction_to_read):
+def plot_vert_section(case_info_file, args,fraction_to_read):
+    if not args.plot: return
 
     from plot_oceantracker.plot_tracks import plot_path_in_vertical_section
     tracks = read_tracks(case_info_file,fraction_to_read=fraction_to_read)
