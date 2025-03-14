@@ -83,10 +83,9 @@ def main(args):
         plt.ylabel('depth - zcor_depth')
         plt.show()
 
-
-    test_definitions.plot_vert_section(case_info_file1, fraction_to_read=0.01)
-
     if args.plot:
+        test_definitions.plot_vert_section(case_info_file1,args, fraction_to_read=0.01)
+
         from read_oceantracker.python import load_output_files
         tracks1 = load_output_files.load_track_data(case_info_file1,fraction_to_read=0.01)
         plt.plot(tracks1['x'][:,:,2] + tracks1['water_depth'])
@@ -102,7 +101,7 @@ def main(args):
         ot.add_class('resuspension', critical_friction_velocity=0.01, class_name='BasicResuspension')
         case_info_file2 = ot.run()
         test_definitions.show_track_plot(case_info_file2, args)
-        test_definitions.plot_vert_section(case_info_file2, fraction_to_read=0.01)
+        test_definitions.plot_vert_section(case_info_file2,args, fraction_to_read=0.01 )
 
 
     return  ot.params
