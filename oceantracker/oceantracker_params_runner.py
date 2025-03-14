@@ -468,6 +468,8 @@ class OceanTrackerParamsRunner(object):
         si.run_info.hindcast_end_time = fgm.info['end_time']
 
         si.msg_logger.progress_marker('Finished field group manager and readers setup', start_time=t0)
+        si.msg_logger.msg(f'using: A_Z_profile = { si.settings.use_A_Z_profile} bottom_stress = { si.settings.use_bottom_stress}', tabs=4 )
+        si.msg_logger.hori_line()
 
     # ____________________________
     # internal methods below
