@@ -37,6 +37,14 @@ class OceanTrackerParamsRunner(object):
             # and set up output directory and log file
             self._do_setup(user_given_params)
 
+            if si.settings.restart:
+                # load restart info
+                fn = path.join(si.run_info.run_output_dir, 'saved_state', 'state_info.json')
+                if not path.isfile(fn):
+                    ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
+                           fatal_error=True, hint=f'missing file  {fn}')
+                si.restart_info = json_util.read_JSON(fn)
+
             ml.msg(f'Starting user param. runner: "{si.run_info.output_file_base}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
 
@@ -83,7 +91,7 @@ class OceanTrackerParamsRunner(object):
             ml.hori_line('see above or  *_caseLog.txt and *_caseLog.err files')
             ml.hori_line()
 
-        ml.progress_marker('Finished "' + si.run_info.output_file_base
+        ml.progress_marker('Finished "' + '>> with errors, see above'  if  si.run_info.output_file_base is None else si.run_info.output_file_base
                            + '" started: ' + str(self.start_time) + ', ended: ' + str(datetime.now()))
         ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
         ml.msg(f'Output in {si.run_info.run_output_dir}', tabs=1)
@@ -129,8 +137,11 @@ class OceanTrackerParamsRunner(object):
         ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
                hint='see for copies of screen output and user supplied parameters, plus all other output')
 
+
+
         # write raw params to a file
-        setup_util.write_raw_user_params(si.output_files, user_given_params, ml)
+        if not si.settings.restart:
+            setup_util.write_raw_user_params(si.output_files, user_given_params, ml)
 
         # setup numba before first import as its environment variable settings  have to be set before first import on Numba
         # set numba config environment variables, before any import of numba, eg by readers,
@@ -157,6 +168,8 @@ class OceanTrackerParamsRunner(object):
         ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
 
         ml.exit_if_prior_errors('settings/parameters have errors')
+
+        pass
 
 
     def _run_case(self):
@@ -356,7 +369,7 @@ class OceanTrackerParamsRunner(object):
         md = ri.model_direction
         fgm= si.core_class_roles.field_group_manager
 
-        hi_start,hi_end = fgm.info['start_time'],fgm.info['end_time']
+        hi_start, hi_end = fgm.info['start_time'],fgm.info['end_time']
 
         crumbs = 'adding release groups'
    
@@ -387,9 +400,11 @@ class OceanTrackerParamsRunner(object):
             first_time.append(start)
             last_time.append( start + md * life_span)
 
-
         # set model run start/end time allowing for back tracking
         start_time = np.min(md * np.asarray(first_time)) * md
+
+        if si.settings.restart: start_time = si.restart_info['time']
+
         end_time   = np.max(md * np.asarray(last_time)) * md
 
         if  not (hi_start <= start_time <= hi_end):

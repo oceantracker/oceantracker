@@ -113,6 +113,7 @@ class _DefaultSettings(_SharedStruct):
         # 'debug_level =               PVC(0, int,min=0, max=10, doc_str='Gives  diferent levels of debug, in development' )
     restart_interval = PVC(None, float,
                            doc_str='Save the particle tracking state at the interval to allow restarting run', units='sec',  expert=True)
+    restart = PVC(False, bool, doc_str='Restart from a saved state, requires prior run setting restart_interval',  expert=True)
 
 # blocks that make up parts of shared info
 class _ClassRoles(_SharedStruct):

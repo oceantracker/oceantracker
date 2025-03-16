@@ -2,7 +2,7 @@ NCDF_time_chunk: 1
 NUMBA_cache_code: true
 debug: true
 output_file_base: unit_test_20_restarting_00
-particle_buffer_initial_size: 100
+particle_buffer_initial_size: 200
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
@@ -16,6 +16,7 @@ release_groups:
     - -2
   pulse_size: 5
   release_interval: 1800
+restart: true
 restart_interval: 10800
 root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
 screen_output_time_interval: 1800

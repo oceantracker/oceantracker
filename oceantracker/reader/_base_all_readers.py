@@ -127,8 +127,6 @@ class _BaseReader(ParameterBaseClass):
         pass
 
 
-
-
     def build_fields(self):
         info = self.info
         # make grid

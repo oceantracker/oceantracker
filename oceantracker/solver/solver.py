@@ -36,7 +36,6 @@ class Solver(ParameterBaseClass):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc( required_props_list=['x','status', 'x_last_good', 'v_temp'])
 
-
     #@profile
     def solve(self):
         # solve for data in buffer
@@ -74,7 +73,12 @@ class Solver(ParameterBaseClass):
 
         si.msg_logger.set_screen_tag('S')
         if si.settings.restart_interval is not None:
-            self.add_scheduler('restart',start=si.settings.restart_interval,  interval=si.settings.restart_interval )
+            # schedle restart saves at given interval after start of run
+            self.add_scheduler('save_state',
+                               start=si.settings.restart_interval + si.run_info.start_time,
+                               interval=si.settings.restart_interval )
+        if si.settings.restart:
+            self._load_saved_state()
 
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
 
@@ -93,7 +97,6 @@ class Solver(ParameterBaseClass):
             # count particles of each status and count number >= stationary status
             num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
 
-
             if num_alive == 0:
                 #freewheel until more are released or end of run/hindcast
                 if not ri.free_wheeling:
@@ -111,8 +114,8 @@ class Solver(ParameterBaseClass):
             # do stats etc updates and write tracks
             self._pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
 
-            if si.settings.restart_interval is not None and self.schedulers['restart'].do_task(n_time_step):
-                self.save_restarting_state(n_time_step, time_sec)
+            if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
+                self.save_state_for_restart(n_time_step, time_sec)
 
             # print progress to screen
             if n_time_step % nt_write_time_step_to_screen == 0:
@@ -384,9 +387,9 @@ class Solver(ParameterBaseClass):
         pass
 
 
-    def save_restarting_state(self, n_time_step, time_sec):
+    def save_state_for_restart(self, n_time_step, time_sec):
 
-        si.msg_logger.msg('Restarting is under development and does not yet work!!!', warning=True)
+        si.msg_logger.msg('save_state_for_restart: Restarting is under development and does not yet work!!!', warning=True)
 
         # close time varying output files, eg tracks and stats files first!
         if si.settings.write_tracks:
@@ -417,8 +420,6 @@ class Solver(ParameterBaseClass):
         nc.close()
 
         # recorded all class info
-
-        # recorded all class info
         for role, i in si.core_class_roles.items():
             if hasattr(i,'info'):
                 state['core_class_info'][role] = i.info
@@ -432,3 +433,17 @@ class Solver(ParameterBaseClass):
         # write info to json for restarting
         json_util.write_JSON(path.join(state_dir, 'state_info.json'),state)
 
+    def _load_saved_state(self):
+        ri = si.restart_info
+
+        # load particle properties
+        nc = ncdf_util.NetCDFhandler(ri['part_prop_file'])
+        num_part=nc.var_shape('water_velocity')[0]
+
+        for name, i in si.class_roles.particle_properties.items():
+            i.data = nc.read_a_variable(name)  # rely on particle buffer expansion
+        si.particles_in_buffer = num_part
+        pass
+
+        if si.settings.write_tracks:
+            si.core_class_roles.tracks_writer.info = ri['core_class_info']['tracks_writer']

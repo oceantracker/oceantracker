@@ -145,3 +145,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
                                                     msg_logger=si.msg_logger, crumbs=crumbs + f'> adding scheduler {name_scheduler}')
         self.schedulers[name_scheduler]  = s
         return s
+
+    def restart(self):
+        # code require to reload save state for this class
+        pass
