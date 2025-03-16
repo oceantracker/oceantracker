@@ -36,13 +36,6 @@ class CompactTracksWriter(_BaseWriter):
                                dtype=np.int32)
         self.info['time_particle_steps_written'] = 0
 
-    def setup_file_vars(self, nc):
-        info= self.info
-        vi = info['file_vars_to_write']
-        for name, i in si.class_roles.time_varying_info.items():
-            pass
-
-
     def create_variable_to_write(self,name,is_time_varying, is_part_prop, vector_dim=None,
                                  description=None,units=None,
                                  attributes={}, dtype=None, fill_value=None):

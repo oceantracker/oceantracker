@@ -17,7 +17,7 @@ def main(args):
                 screen_output_time_interval=1800,
              use_A_Z_profile=True,
             regrid_z_to_uniform_sigma_levels=False,
-            particle_buffer_initial_size= 100,
+            particle_buffer_initial_size= 200,
              NUMBA_cache_code=True,
                 use_resuspension = False,
                 restart_interval = 3*3600
@@ -51,7 +51,11 @@ def main(args):
                  polygon_list=[dict(points=hm['polygon'])])
 
 
-    case_info_file = ot.run()
+    #case_info_file1 = ot.run()
+
+    ot.settings(restart=True)
+
+    case_info_file2 = ot.run()
 
     if False:
         test_definitions.compare_reference_run(case_info_file, args)

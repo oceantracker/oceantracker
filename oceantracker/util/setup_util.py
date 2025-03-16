@@ -31,12 +31,10 @@ def setup_output_dir(params, crumbs='', caller=None):
     if params['add_date_to_run_output_dir']:
         run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
 
-    # clear existing folder
-    if path.isdir(run_output_dir):
+    # clear existing folder and make a new dir, if not restarting
+    if path.isdir(run_output_dir) and not si.settings.restart:
         shutil.rmtree(run_output_dir)
-
-    # make a new dir
-    makedirs(run_output_dir)  # make  and clear out dir for output
+        makedirs(run_output_dir)  # make  and clear out dir for output
 
     # write a copy of user given parameters, to help with debugging and code support
     fb = 'users_params_' + params['output_file_base']

@@ -104,12 +104,10 @@ class _BaseWriter(ParameterBaseClass):
         info = self.info
         info['time_steps_written_to_current_file'] = 0
         info['output_file'].append(file_name + '.nc')
-
         self.add_global_attribute('file_created', datetime.now().isoformat())
 
         self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, info['output_file'][-1]), 'w')
         nc = self.nc
-        self.setup_file_vars(nc)
 
         for name, item in info['file_builder']['dimensions'].items():
             nc.add_dimension(name, item['size'])
