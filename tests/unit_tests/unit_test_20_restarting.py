@@ -20,10 +20,9 @@ def main(args):
             particle_buffer_initial_size= 200,
              NUMBA_cache_code=True,
                 use_resuspension = False,
-                restart_interval = 3*3600
-                )
-
-
+                restart_interval = 3*3600,
+                restart = not args.reference_case
+    )
 
 
     hm = test_definitions.hydro_model['demoSchism3D']
@@ -51,11 +50,7 @@ def main(args):
                  polygon_list=[dict(points=hm['polygon'])])
 
 
-    #case_info_file1 = ot.run()
-
-    ot.settings(restart=True)
-
-    case_info_file2 = ot.run()
+    case_info_file = ot.run()
 
     if False:
         test_definitions.compare_reference_run(case_info_file, args)

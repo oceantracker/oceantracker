@@ -16,12 +16,12 @@ def main(args):
     ot.settings(**test_definitions.base_settings(__file__,args))
 
 
-    time_step =60
+    time_step =5*60
     ot.settings(time_step=time_step,
-                screen_output_time_interval=600,
-             use_A_Z_profile=False,
-            regrid_z_to_uniform_sigma_levels=False,
-             NUMBA_cache_code=True,
+                screen_output_time_interval=time_step,
+                use_A_Z_profile=False,
+                regrid_z_to_uniform_sigma_levels=True,
+                NUMBA_cache_code=True,
                 #NCDF_particle_chunk= 50000
                 )
 

@@ -33,7 +33,7 @@ class _BaseWriter(ParameterBaseClass):
         self.info.update(output_file= [], total_time_steps_written = 0)
 
 
-        self.info['variables_to_write']=dict(time_varying_part_prop=[], non_time_varying_part_prop=[], time_varying_info=[])
+        self.info['variables_to_write'] = dict(time_varying_part_prop=[], non_time_varying_part_prop=[], time_varying_info=[])
 
         self.nc = None
 
