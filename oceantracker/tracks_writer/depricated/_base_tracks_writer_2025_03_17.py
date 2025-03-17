@@ -137,8 +137,8 @@ class _BaseWriter(ParameterBaseClass):
 
 
     def write_all_non_time_varing_part_properties(self, new_particleIDs):
-    # to work in compact mode must write particle non-time varying  particle properties when released
-    #  eg ID etc, releaseGroupID  etc
+        # to work in compact mode must write particle non-time varying  particle properties when released
+        #  eg ID etc, releaseGroupID  etc
 
         writer = si.core_class_roles.tracks_writer
 

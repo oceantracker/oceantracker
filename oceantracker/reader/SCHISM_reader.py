@@ -25,7 +25,7 @@ class SCHISMreader(_BaseUnstructuredReader):
                         y = PVC('SCHISM_hgrid_node_y', str, doc_str='y location of nodes'),
                         zlevel=PVC('zcor', str),
                         triangles =PVC('SCHISM_hgrid_face_nodes', str),
-                        bottom_cell_index =PVC('bottom_index_node', str),
+                        bottom_cell_index =PVC('node_bottom_index', str),
                         is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                         ),
             'field_variable_map': {'water_velocity': PLC(['hvel', 'vertical_velocity'], str),
