@@ -91,8 +91,6 @@ class ROMSreader(_BaseStructuredReader):
         grid['v_land_mask'] = ds.read_variable('mask_v').data  != 1
         grid['rho_land_mask'] = ds.read_variable('mask_rho').data  != 1
 
-
-
         # build a full land mask based on the psi grid
         grid['land_mask'] = grid['psi_land_mask'].copy() # the used psi grid's mask
 

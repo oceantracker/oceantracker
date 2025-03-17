@@ -118,6 +118,7 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
                                      reader_params, check_for_unknown_keys=True,
                                      crumbs=crumbs + f'> loading given reader with class_name "{reader_params["class_name"]}"')
         reader.dataset = dataset
+        ml.progress_marker(f'Using given reader parameter class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
         return reader
 
     # lok for reader amongst known readers
