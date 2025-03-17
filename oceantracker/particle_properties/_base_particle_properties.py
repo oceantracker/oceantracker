@@ -64,7 +64,7 @@ class _BaseParticleProperty(ParameterBaseClass):
             w = si.core_class_roles.tracks_writer
             if name in w.params['turn_off_write_particle_properties_list']: params['write'] = False
             if name in w.params['turn_on_write_particle_properties_list']:  params['write'] = True
-            if params['write']:
+            if False and params['write']:
                 w.create_variable_to_write(name, is_time_varying=params['time_varying'],
                                            is_part_prop=True,
                                            fill_value=basic_util.fillvalue(params['dtype']),

@@ -22,56 +22,59 @@ class CompactTracksWriter(_BaseWriter):
 
     def initial_setup(self):
         super().initial_setup()
-        self.add_dimension('particle_dim', None)
-        self.add_dimension('time_particle_dim', None)
-        self.add_dimension('range_pair_dim', 2)
-
-        self.create_variable_to_write('particles_written_per_time_step',True, False, dtype=np.int32)
-        self.create_variable_to_write('particle_ID', True, True, dtype=np.int32)
-        self.create_variable_to_write('write_step_index', True, True, dtype=np.int32)
-
-        # variable to give index ranges of time steps within output
-        self.add_new_variable('time_step_range', ['time_dim','range_pair_dim'],
-                              description='range in time_particle_dim for each time step',
-                               dtype=np.int32)
         self.info['time_particle_steps_written'] = 0
 
     def setup_file_vars(self, nc):
         info= self.info
-        vi = info['file_vars_to_write']
+
+        nc.add_dimension(si.dim_names.time, None)
+        nc.add_dimension(si.dim_names.vector2D, 2)
+        nc.add_dimension(si.dim_names.vector3D, 3)
+        nc.add_dimension(si.dim_names.particle, None)
+        nc.add_dimension('time_particle_dim', None)
+        nc.add_dimension('range_pair_dim', 2)
+
+
+        nc.create_a_variable('particles_written_per_time_step',si.dim_names.time,dtype=np.int32,
+                             description='Number of particles written each time step')
+        nc.create_a_variable('particle_ID', 'time_particle_dim', dtype=np.int32,
+                             description='ID number of of particle recorded ')
+        nc.create_a_variable('write_step_index', 'time_particle_dim', dtype=np.int32,
+                             description='Time/write step of particle recorded ')
+        # variable to give index ranges of time steps within output
+        nc.create_a_variable('time_step_range', ['time_dim','range_pair_dim'],dtype=np.int32,
+                              description='range in time_particle_dim for each time step, could be used to unpack')
+
+        vi = info['variables_to_write']
         for name, i in si.class_roles.time_varying_info.items():
-            pass
+            if not i.params['write']: continue
+            nc.create_a_variable(name,si.dim_names.time,units=i.params['units'],dtype=i.params['dtype'],
+                                  description=i.params['description'])
+            vi['time_varying_info'].append(name)
 
-
-    def create_variable_to_write(self,name,is_time_varying, is_part_prop, vector_dim=None,
-                                 description=None,units=None,
-                                 attributes={}, dtype=None, fill_value=None):
-        # creates a variable to write with given shape, normally shape[0]= None as unlimited
-        dimList=[]
-        if is_time_varying and not is_part_prop: dimList.append('time_dim')
-        if is_time_varying and is_part_prop:dimList.append('time_particle_dim')
-        if not is_time_varying and is_part_prop: dimList.append('particle_dim')
-
-        # work out chunk dimensions from dimlist
-        chunks = []
-        for dim in dimList:
-            if dim not in self.info['file_builder']['dimensions']:
-                raise ValueError('Tracks file setup error: variable dimensions must be defined before variables are defined, variable  =' + name + ' , dim=', dim)
-
-            if dim == 'time_dim':
-                chunks.append(si.settings.NCDF_time_chunk)
-            elif dim == 'time_particle_dim':
-                chunks.append(si.settings.NCDF_time_chunk*si.settings.NCDF_particle_chunk)
-            elif dim == 'particle_dim':
-                chunks.append(si.settings.NCDF_particle_chunk)
+        for name, i in si.class_roles.particle_properties.items():
+            if not i.params['write']: continue
+            dim =[]
+            if i.params['time_varying']:
+                dim.append('time_particle_dim')
+                vi['time_varying_part_prop'].append(name)
             else:
-                chunks.append(self.info['file_builder']['dimensions'][dim]['size'])
-        if description is not None:attributes.update(description=description)
-        if units is not None: attributes.update(units=units)
+                dim.append('particle_dim')
+                vi['non_time_varying_part_prop'].append(name)
 
-        self.add_new_variable(name, dimList, description=description,fill_value=fill_value,
-                              attributes=attributes, dtype=dtype, vector_dim=vector_dim, chunking=chunks)
+            if i.params['vector_dim'] == 2: dim.append(si.dim_names.vector2D)
+            if i.params['vector_dim'] == 3: dim.append(si.dim_names.vector3D)
+            if i.params['prop_dim3'] > 1: dim.append(nc.add_dimension(f'part_prop_{name}_dim3', i.params['prop_dim3']))
 
+            nc.create_a_variable(name, dim, units=i.params['units'],dtype=i.params['dtype'],
+                                  description=i.params['description'])
+
+        if si.settings['write_dry_cell_flag']:
+            grid = si.core_class_roles.field_group_manager.reader.grid
+            nc.add_dimension(si.dim_names.triangle, grid['triangles'].shape[0])
+            nc.create_a_variable('dry_cell_index', [si.dim_names.time,si.dim_names.triangle],dtype=np.uint8,
+                                  description= 'Time series of grid dry index 0-255, > 128 is dry')
+            pass
     def pre_time_step_write_book_keeping(self):
         # write indexing variables
         #todo change to write particle shared_params when culling ?
@@ -83,38 +86,64 @@ class CompactTracksWriter(_BaseWriter):
         n_file = self.nc.var_shape('particle_ID')[0]
 
         self.file_index = [n_file, n_file + self.sel_alive.shape[0]]
-
+        fi = self.file_index
         # record range if time step in time_particle dim
-        nc.file_handle.variables['time_step_range'][nWrite,:] = np.asarray( self.file_index)
+        nc.file_handle.variables['time_step_range'][nWrite,:] = np.asarray(fi)
         nc.file_handle.variables['particles_written_per_time_step'][nWrite] =  self.sel_alive.shape[0]
 
-        nc.file_handle.variables['particle_ID'][self.file_index[0]:self.file_index[1], ...] = si.class_roles.particle_properties['ID'].get_values(self.sel_alive)
+        nc.file_handle.variables['particle_ID'][fi[0]:fi[1], ...] = si.class_roles.particle_properties['ID'].get_values(self.sel_alive)
 
-        nc.file_handle.variables['write_step_index'][self.file_index[0]:self.file_index[1], ...] = info['total_time_steps_written'] * np.ones((self.sel_alive.shape[0],), dtype=np.int32)
+        nc.file_handle.variables['write_step_index'][fi[0]:fi[1], ...] = info['total_time_steps_written'] * np.ones((self.sel_alive.shape[0],), dtype=np.int32)
 
         self.info['time_particle_steps_written'] += self.sel_alive.shape[0]
+    def write_all_non_time_varing_part_properties(self, new_particleIDs):
+        # to work in compact mode must write particle non-time varying  particle properties when released
+        #  eg ID etc, releaseGroupID  etc
 
+        info = self.info
+        nc = self.nc
+        n_in_file = self.nc.var_shape('ID')[0]
+        n_write = range(n_in_file, n_in_file + new_particleIDs.size)
+        part_prop = si.class_roles.particle_properties
+        if si.settings.write_tracks and new_particleIDs.size > 0:
+            for name in info['variables_to_write']['non_time_varying_part_prop']:
+                nc.file_handle.variables[name][n_write, ...] = part_prop[name].data[new_particleIDs, ...]
 
-    def write_time_varying_info(self,name,d):
-        self.nc.file_handle.variables[name][self.info['time_steps_written_to_current_file'], ...] = d.data[:]
+    def write_all_time_varying_prop_and_data(self):
+        # write particle data at current time step, if none the a forced write
+        # write time vary info , eg "time"
+        self.start_update_timer()
+        info = self.info
+        part_prop = si.class_roles.particle_properties
+        time_varying_info = si.class_roles.time_varying_info
+        self.pre_time_step_write_book_keeping()
+        nc = self.nc
 
-    def write_non_time_varying_particle_prop(self, prop_name, data, released, n_write):
-        # this writes prop like release ID as particles are release, so it works with both rectangular and compact writers
+        # write time varying data, eg time  data
+        for name in info['variables_to_write']['time_varying_info']:
+            nc.file_handle.variables[name][info['time_steps_written_to_current_file'], ...] = time_varying_info[name].data[:]
 
-        self.nc.file_handle.variables[prop_name][n_write, ...] = data[released, ...]
+        for name in info['variables_to_write']['time_varying_part_prop']:
+            nc.file_handle.variables[name][self.file_index[0]:self.file_index[1], ...] = part_prop[name].data[self.sel_alive, ...]
 
-    def write_time_varying_particle_prop(self, prop_name, data):
-        # only write those particles which are alive
+        if si.settings['write_dry_cell_flag']:
+            # wont run if nested grids
+            grid = si.core_class_roles.field_group_manager.reader.grid
+            nc.file_handle.variables['dry_cell_index'][info['time_steps_written_to_current_file'], :] = grid['dry_cell_index'].reshape(1, -1)
 
-        self.nc.file_handle.variables[prop_name][self.file_index[0]:self.file_index[1], ...] = data[self.sel_alive, ...]
+        self.post_time_step_write_book_keeping()
+
+        info['time_steps_written_to_current_file'] += 1  # time steps in current file
+        self.info['total_time_steps_written'] += 1  # time steps written since the start
+        self.stop_update_timer()
 
     def _close_file(self):
-
-        self.add_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
-        self.add_global_attribute('time_steps_written', self.info['time_steps_written_to_current_file'])
+        nc = self.nc
+        nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
+        nc.write_global_attribute('time_steps_written', self.info['time_steps_written_to_current_file'])
 
         # write status values to  file attribues
-        output_util.add_particle_status_values_to_netcdf(self.nc)
+        output_util.add_particle_status_values_to_netcdf(nc)
 
         super()._close_file()
 

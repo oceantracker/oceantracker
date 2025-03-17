@@ -9,7 +9,7 @@
     "screen_output_time_interval": 1800,
     "use_A_Z_profile": true,
     "regrid_z_to_uniform_sigma_levels": false,
-    "particle_buffer_initial_size": 10,
+    "particle_buffer_initial_size": 500,
     "NUMBA_cache_code": true,
     "use_resuspension": false,
     "tracks_writer": {

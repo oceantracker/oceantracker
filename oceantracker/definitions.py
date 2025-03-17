@@ -7,7 +7,7 @@ from os import path
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 0.5, revision  = 41, date = '2025-03-10', parameter_ver=0.5)
+version= dict(major= 0.5, revision  = 42, date = '2025-03-17', parameter_ver=0.5)
 version['str'] = f"{version['major']:.2f}.{version['revision']:04d}-{version['date']}"
 
 try:
@@ -115,6 +115,7 @@ class _DimensionNames(_BaseConstantsClass):
     particle: str  = 'particle_dim'
     vector2D: str  = 'vector2D'
     vector3D: str = 'vector3D'
+    triangle: str = 'triangle_dim'
 
 
 

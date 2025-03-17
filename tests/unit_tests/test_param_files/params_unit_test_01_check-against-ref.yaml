@@ -2,7 +2,7 @@ NCDF_time_chunk: 1
 NUMBA_cache_code: true
 debug: true
 output_file_base: unit_test_01_check-against-ref_00
-particle_buffer_initial_size: 10
+particle_buffer_initial_size: 500
 particle_properties:
 - class_name: oceantracker.particle_properties.age_decay.AgeDecay
   decay_time_scale: 7200.0
