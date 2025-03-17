@@ -183,7 +183,9 @@ class Solver(ParameterBaseClass):
 
         # trajectory modifiers,
         for name, i in si.class_roles.trajectory_modifiers.items():
+            i.start_update_timer()
             i.update(n_time_step, time_sec, alive)
+            i.stop_update_timer()
 
         # modify status, eg tidal stranding
         fgm.update_dry_cell_values()
@@ -199,12 +201,12 @@ class Solver(ParameterBaseClass):
         # resuspension is a core trajectory modifier
         if si.settings.use_resuspension and si.run_info.is3D_run:
             # friction_velocity property  is now updated, so do resupension
-            si.core_class_roles.resuspension.update(n_time_step, time_sec, alive)
+            i =si.core_class_roles.resuspension
+            i.start_update_timer()
+            i.update(n_time_step, time_sec, alive)
+            i.stop_update_timer()
 
         fgm.update_tidal_stranding_status(time_sec, alive)
-
-
-
 
         # update writable class lists and stats at current time step now props are up to date
         self._update_stats(n_time_step, time_sec)

@@ -29,7 +29,7 @@ particle_statistics:
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
-regrid_z_to_uniform_sigma_levels: false
+regrid_z_to_uniform_sigma_levels: true
 release_groups:
 - name: point1
   points:
@@ -42,10 +42,10 @@ resuspension:
   class_name: BasicResuspension
   critical_friction_velocity: 0.01
 root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
-screen_output_time_interval: 600
-time_step: 60
+screen_output_time_interval: 300
+time_step: 300
 tracks_writer:
-  update_interval: 60
+  update_interval: 300
   write_dry_cell_flag: true
 use_A_Z_profile: false
 use_random_seed: true
