@@ -40,7 +40,7 @@ class SCHISMreader(_BaseUnstructuredReader):
                                                 doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'one_based_indices': PVC(True, bool, doc_str='Schism has indices starting at 1 not zero'),
-            'variable_signature': PLC(['elev','depth'], str, doc_str='Variable names used to test if file is this format'),
+            'variable_signature': PLC(['elev','depth','wetdry_elem'], str, doc_str='Variable names used to test if file is this format'),
             'hgrid_file_name': PVC(None, str),
              })
 
@@ -81,7 +81,8 @@ class SCHISMreader(_BaseUnstructuredReader):
 
 
     def read_zlevel(self, nt):
-        return self.dataset.read_variable(self.params['grid_variable_map']['zlevel'], nt = nt)
+        data = self.dataset.read_variable(self.params['grid_variable_map']['zlevel'], nt = nt)
+        return data
 
     def read_triangles(self, grid):
         # read nodes in triangles (N by 3) or mix of triangles and quad cells as  (N by 4)
@@ -117,6 +118,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         else:
             # S  grid bottom cell index = zero
             bottom_cell_index = np.zeros((self.info['num_nodes'],), dtype=np.int32)
+
         return bottom_cell_index
 
     def read_dry_cell_data(self,nt_index, buffer_index):

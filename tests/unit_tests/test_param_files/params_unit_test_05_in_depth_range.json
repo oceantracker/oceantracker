@@ -87,7 +87,8 @@
             "release_group_centered_grids": true,
             "update_interval": 7200,
             "particle_property_list": [
-                "a_pollutant"
+                "a_pollutant",
+                "water_depth"
             ],
             "z_min": -10.0,
             "start": "2017-01-01T02:30:00",

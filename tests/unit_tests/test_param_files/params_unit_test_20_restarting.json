@@ -13,6 +13,7 @@
     "NUMBA_cache_code": true,
     "use_resuspension": false,
     "restart_interval": 10800,
+    "restart": true,
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
@@ -31,6 +32,5 @@
             "class_name": "PointRelease",
             "name": "rg_basic"
         }
-    ],
-    "restart": true
+    ]
 }

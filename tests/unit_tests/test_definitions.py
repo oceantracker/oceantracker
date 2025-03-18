@@ -151,7 +151,7 @@ ps1 = dict(name='my_heatmap',
         grid_span = [10000,10000],
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
-         particle_property_list=['a_pollutant'],  # request a heat map for the decaying part. prop. added above
+         particle_property_list=['a_pollutant','water_depth'],  # request a heat map for the decaying part. prop. added above
          #status_list=[],  # only count the particles which are moving
 
          z_min=-10.,  # only count particles at locations above z=-2m

@@ -466,10 +466,10 @@ class _BaseReader(ParameterBaseClass):
         fractional_time_steps =  np.asarray([1.0 - s, s])
         fractional_time_steps[1] = s
 
-        if np.any(np.abs(fractional_time_steps)> 1.1):
-            si.msg_logger.msg(f'unexpected error in times, fractional time steps is grater than 1 = {str(fractional_time_steps)}',
+        if np.any(np.abs(fractional_time_steps) > 1.1):
+            si.msg_logger.msg(f'unexpected error in times, fractional time steps is greater than 1 = {str(fractional_time_steps)}',
                               hint='Error in  decoding hindcast time? hindcast files not properly sorted in time order? or code bug?',
-                              fatal_error=True, caller = self)
+                              warning=True, caller = self)
 
         return current_hydro_model_step, current_buffer_steps, fractional_time_steps
 

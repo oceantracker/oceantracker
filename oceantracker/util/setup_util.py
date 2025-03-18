@@ -35,7 +35,7 @@ def setup_output_dir(params, crumbs='', caller=None):
     if path.isdir(run_output_dir) : #and not si.settings.restart:
         shutil.rmtree(run_output_dir)
 
-    makedirs(run_output_dir)  # make  and clear out dir for output
+    makedirs(run_output_dir)  # make  new clean folder
 
     # write a copy of user given parameters, to help with debugging and code support
     fb = 'users_params_' + params['output_file_base']
