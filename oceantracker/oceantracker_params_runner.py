@@ -269,15 +269,18 @@ class OceanTrackerParamsRunner(object):
         
         
         fgm = si.core_class_roles.field_group_manager
-        fgm.final_setup()
+        #fgm.final_setup()
         fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
 
         # write reader info to json
-        d = dict(reader=fgm.reader.info, nested_readers=[])
-        if hasattr(fgm,'readers'):
+        if hasattr(fgm,'fgm_hydro_grids'):
             # add nested readers
-            for r in fgm.readers[1:]:
-                d['nested_readers'].append(r.info)
+            d = dict(reader=fgm.fgm_hydro_grids[0].reader.info, nested_readers=[])
+            for f in fgm.fgm_hydro_grids[1:]:
+                d['nested_readers'].append(f.reader.info)
+        else:
+            d = dict(reader=fgm.reader.info, nested_readers=[])
+
         json_util.write_JSON(path.join(si.run_info.run_output_dir, f'{si.run_info.output_file_base}_hindcast_info.json'), d)
 
 
@@ -350,7 +353,7 @@ class OceanTrackerParamsRunner(object):
         # finalise alll classes setup  after all initialised
 
         for role, i in si.core_class_roles.as_dict().items():
-            if i is not None:
+            if i is not None and role not in ['field_group_manager']:
                 i.final_setup()
 
         for role, item in si.class_roles.as_dict().items():

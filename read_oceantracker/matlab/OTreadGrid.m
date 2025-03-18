@@ -1,14 +1,14 @@
-function d= OTreadGrid(filename, var_names_cell)
+function d= OTreadGrid(filename,n_grid)
 
-if nargin < 2
-    var_names_cell={};     
-end
 
-[d, info] = readNCvarsOT(filename,var_names_cell,{'triangles','adjacency'},{'triangles','x'});
+
+[d, info] = readNCvarsOT(filename);
 
 d.y= d.x(:,2);
 d.x= d.x(:,1);
 d.xy= d.x+1i*d.y; % complex node locations
+
+d.triangles = d.triangles +1; % matlab is one based indices
 
 
 

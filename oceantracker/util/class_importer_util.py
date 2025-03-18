@@ -5,7 +5,7 @@ from time import perf_counter
 from oceantracker.util.__root_parameter_base_class__ import _RootParameterBaseClass
 import pkgutil,inspect,importlib
 from oceantracker import  definitions
-import importlib
+import importlib, traceback
 from timeit import  timeit
 
 class ClassImporter():
@@ -164,15 +164,21 @@ class ClassImporter():
                                             error=True)
                 raise(e)
     def _import_module_from_string(self, mod, c = None):
+
+        # check module exists before import
+        mod_spec= importlib.util.find_spec(mod)
+        if mod_spec is None:
+            self.msg_logger.spell_check(f'Cannot find module "{mod}"',
+                                    f'{mod}.{c}', self.module_list, error=True)
+
         try:
             m = importlib.import_module(mod)
 
             return m
         except Exception as e:
             # try a spell check
-            self.msg_logger.spell_check(f'Cannot find module "{mod}" class_name="{c}"',
-                                        f'{mod}.{c}', self.module_list, error=True)
-            raise(e)
+            self.msg_logger.msg(f'Possible syntax error in module "{mod}"',fatal_error=True,
+                            exception =e, traceback_str=traceback.format_exc())
 
     def build_short_and_full_name_maps(self, class_tree):
         # build short and full name maps to oceantracker's parameter classes
