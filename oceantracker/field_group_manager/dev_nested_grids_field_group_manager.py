@@ -289,4 +289,8 @@ class DevNestedFields(ParameterBaseClass):
         # only for outer grid
         return self.fgm_hydro_grids[0].screen_info()
 
-
+    def get_reader_info(self):
+        d = dict(reader=self.fgm_hydro_grids[0].reader.info, nested_readers=[])
+        for f in self.fgm_hydro_grids[1:]:
+            d['nested_readers'].append(f.reader.info)
+        return d

@@ -273,14 +273,7 @@ class OceanTrackerParamsRunner(object):
         fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
 
         # write reader info to json
-        if hasattr(fgm,'fgm_hydro_grids'):
-            # add nested readers
-            d = dict(reader=fgm.fgm_hydro_grids[0].reader.info, nested_readers=[])
-            for f in fgm.fgm_hydro_grids[1:]:
-                d['nested_readers'].append(f.reader.info)
-        else:
-            d = dict(reader=fgm.reader.info, nested_readers=[])
-
+        d = fgm.get_reader_info()
         json_util.write_JSON(path.join(si.run_info.run_output_dir, f'{si.run_info.output_file_base}_hindcast_info.json'), d)
 
 

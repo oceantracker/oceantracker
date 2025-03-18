@@ -7,7 +7,7 @@ if __name__ == "__main__":
     ot = OceanTracker()
     ot.settings(output_file_base = 'sea_spurge_test01',
                 root_output_dir= r'D:\OceanTrackerOutput',
-                time_step=1800,
+                time_step=3600,
                 max_run_duration = 30*24*3600., # 10 days
                 #display_grid_at_start=True
                 )
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     ot.add_class('release_groups',
                  points = x0,
                  pulse_size=10,
-                 release_interval=1800)
+                 release_interval=3600)
 
     if True:
         case_info_file= ot.run()
