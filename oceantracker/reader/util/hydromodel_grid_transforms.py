@@ -39,12 +39,13 @@ def convert_zlevels_to_fractions(zlevels,bottom_cell_index,z0):
         z_surface = float(zlevels[n, -1])
         z_bottom= float(zlevels[n,bottom_cell_index[n]])
         total_water_depth = abs(z_surface-z_bottom)
-
-        for nz in range(bottom_cell_index[n], zlevels.shape[1]):
-            if total_water_depth > z0:
+        if total_water_depth > z0:
+            for nz in range(bottom_cell_index[n], zlevels.shape[1]):
                 z_fractions[n,nz] = (zlevels[n,nz]-z_bottom)/total_water_depth
-            else:
-                z_fractions[n, nz] = 0.
+        else:
+            # make linear if total depth too small, or zlevel not initialised in dry cells,  so is all zeros
+            z_fractions[n, bottom_cell_index[n]:] = np.arange(0, zlevels.shape[1]-bottom_cell_index[n] )/(zlevels.shape[1] -1 - bottom_cell_index[n])
+        pass
     return z_fractions
 
 @njitOT

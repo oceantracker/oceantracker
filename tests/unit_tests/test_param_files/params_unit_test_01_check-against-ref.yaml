@@ -1,5 +1,4 @@
 NCDF_time_chunk: 1
-NUMBA_cache_code: true
 debug: true
 output_file_base: unit_test_01_check-against-ref_00
 particle_buffer_initial_size: 500
@@ -54,7 +53,7 @@ particle_statistics:
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
-regrid_z_to_uniform_sigma_levels: false
+regrid_z_to_uniform_sigma_levels: true
 release_groups:
 - class_name: PointRelease
   name: release_interval0

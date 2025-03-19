@@ -174,9 +174,12 @@ ax = [1591000, 1601500, 5478500, 5491000]
 
 
 
-def read_tracks(case_info_file,fraction_to_read=None):
+def read_tracks(case_info_file,fraction_to_read=None, ref_case=False):
     from read_oceantracker.python import load_output_files
-    return load_output_files.load_track_data(case_info_file,fraction_to_read=fraction_to_read)
+
+    fn = case_info_file if ref_case is None else case_info_file.replace('unit_tests', 'unit_test_reference_cases')
+
+    return load_output_files.load_track_data(fn,fraction_to_read=fraction_to_read)
 
 def compare_reference_run(case_info_file, args):
     from read_oceantracker.python import load_output_files
@@ -189,7 +192,7 @@ def compare_reference_run(case_info_file, args):
         shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)
 
     tracks = read_tracks(case_info_file)
-    tracks_ref = read_tracks(reference_case_info_file)
+    tracks_ref = read_tracks(case_info_file, ref_case=True)
     dx = np.abs(tracks['x'] - tracks_ref['x'])
 
     # print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
