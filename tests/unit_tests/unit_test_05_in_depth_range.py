@@ -55,15 +55,12 @@ def main(args):
     tracks= test_definitions.read_tracks(case_info_file)
 
     dz = tracks['x'][:,:,2] + tracks['water_depth']
-    sel = dz <-.001
-    print('number below bottom, ie  < -0.001 ', np.count_nonzero(sel), 'min=', np.nanmin(dz[sel]), 'mean=', np.nanmean(dz[sel]))
 
     sel = tracks['z_fraction'] < 0
     print('z fraction  < 0  ', sel.sum())
 
     sel = tracks['z_fraction'] > 1
     print('z fraction  >1 ', np.count_nonzero(sel))
-
 
     test_definitions.show_track_plot(case_info_file, args)
     if args.plot:

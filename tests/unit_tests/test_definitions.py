@@ -177,7 +177,7 @@ ax = [1591000, 1601500, 5478500, 5491000]
 def read_tracks(case_info_file,fraction_to_read=None, ref_case=False):
     from read_oceantracker.python import load_output_files
 
-    fn = case_info_file if ref_case is None else case_info_file.replace('unit_tests', 'unit_test_reference_cases')
+    fn = case_info_file if not ref_case else case_info_file.replace('unit_tests', 'unit_test_reference_cases')
 
     return load_output_files.load_track_data(fn,fraction_to_read=fraction_to_read)
 

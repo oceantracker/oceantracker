@@ -1,4 +1,5 @@
 NCDF_time_chunk: 1
+NUMBA_cache_code: true
 debug: true
 output_file_base: unit_test_01_check-against-ref_00
 particle_buffer_initial_size: 500
@@ -98,7 +99,7 @@ tracks_writer:
   time_steps_per_per_file: 10
   update_interval: 3600
   write_dry_cell_flag: false
-use_A_Z_profile: true
+use_A_Z_profile: false
 use_dispersion: false
 use_random_seed: true
 use_resuspension: false

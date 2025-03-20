@@ -1,13 +1,13 @@
 from scipy.spatial import cKDTree
 import numpy as np
-
+import numba as nb
 from oceantracker.shared_info import shared_info as si
 from time import perf_counter
 from oceantracker.util import numpy_util
 from oceantracker.interpolator.util import triangle_interpolator_util,  find_initial_cell
 
-from oceantracker.util.numba_util import  njitOT, njitOTparallel
-import numba as nb
+from oceantracker.util.numba_util import  njitOT, njitOTparallel, prange
+
 # globals
 
 # globals to compile into numba to save pass arguments

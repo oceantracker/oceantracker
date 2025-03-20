@@ -110,7 +110,7 @@ class CompactTracksWriter(_BaseWriter):
                 nc.file_handle.variables[name][n_write, ...] = part_prop[name].data[new_particleIDs, ...]
 
     def write_all_time_varying_prop_and_data(self):
-        # write particle data at current time step, if none the a forced write
+        # write particle data at current time step, if none then a forced write
         # write time vary info , eg "time"
         self.start_update_timer()
         info = self.info
@@ -124,6 +124,7 @@ class CompactTracksWriter(_BaseWriter):
             nc.file_handle.variables[name][info['time_steps_written_to_current_file'], ...] = time_varying_info[name].data[:]
 
         for name in info['variables_to_write']['time_varying_part_prop']:
+            #print('xx',name)
             nc.file_handle.variables[name][self.file_index[0]:self.file_index[1], ...] = part_prop[name].data[self.sel_alive, ...]
 
         if si.settings['write_dry_cell_flag']:
