@@ -26,6 +26,7 @@
 1. List check makes default values of None into [], should be None? Look at merging list params, better to remove, or keep for building polygon lists ?
 1. cope with time dependent water depth in write to grid
 3.  reader grid transforms faster with pre-allocated buffers?
+4. zlevel_fractions calculated at each time step for vertical regridding
     
 ## Nice to haves
 1.   remove_tidally_stranded_particles option?

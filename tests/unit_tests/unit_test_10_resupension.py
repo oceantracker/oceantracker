@@ -3,7 +3,7 @@ from os import path, sep
 
 
 from oceantracker.main import OceanTracker
-
+from oceantracker import  definitions
 from plot_oceantracker import plot_tracks
 import  argparse
 import shutil
@@ -20,8 +20,8 @@ def main(args):
     ot.settings(time_step=time_step,
                 screen_output_time_interval=time_step,
                 use_A_Z_profile=False,
-                regrid_z_to_uniform_sigma_levels=True,
-                NUMBA_cache_code=True,
+                regrid_z_to_uniform_sigma_levels=False,
+                #NUMBA_cache_code=True,
                 #NCDF_particle_chunk= 50000
                 )
 
@@ -57,9 +57,11 @@ def main(args):
         from read_oceantracker.python import load_output_files
         cs = load_output_files.read_case_info_file(case_info_file1)
         from oceantracker.util.ncdf_util import NetCDFhandler
-        nc = NetCDFhandler('../../tutorials_how_to/demo_hindcast/schsim3D/demo_hindcast_schisim3D_00.nc')
+        #nc = NetCDFhandler('../../tutorials_how_to/demo_hindcast/schsim3D/demo_hindcast_schisim3D_00.nc', mode='r')
+        nc = NetCDFhandler(path.join(path.dirname(definitions.package_dir),'tutorials_how_to','demo_hindcast','schsim3D','demo_hindcast_schisim3D_00.nc'))
 
         d = nc.read_variables()
+
         from oceantracker.reader.util import reader_util
         zcor = d['zcor']
         depth_zcor= -reader_util.get_values_at_ragged_bottom(zcor[:,:,:,np.newaxis],d['node_bottom_index']-1)

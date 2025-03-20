@@ -59,7 +59,11 @@ class SCHISMreader(_BaseUnstructuredReader):
             d0 = d0 + float(s[3])*3600
             t = time.data + d0
             return t
-
+    def initial_setup(self):
+        super().initial_setup()
+        # use schism min water depth if in file
+        if 'minimum_depth' in self.info['variables']:
+            si.settings.minimum_total_water_depth = max( float(self.dataset.read_variable('minimum_depth')), .01)
     def add_hindcast_info(self):
         params = self.params
         info = self. info
@@ -104,8 +108,8 @@ class SCHISMreader(_BaseUnstructuredReader):
         tri[sel] = 0
         tri = tri.astype(np.int32)
         tri -= 1
-        grid['triangles'] = tri
 
+        grid['triangles'] = tri
 
 
     def read_horizontal_grid_coords(self, grid):
@@ -163,7 +167,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         zlevel =ds.read_variable(gm['zlevel']).data[0,:,:]
 
         # use node with thinest top/bot layers as template for all sigma levels
-        grid['zlevel_fractions'] = hydromodel_grid_transforms.convert_zlevels_to_fractions(zlevel, grid['bottom_cell_index'], si.settings.z0)
+        grid['zlevel_fractions'] = hydromodel_grid_transforms.convert_zlevels_to_fractions(zlevel, grid['bottom_cell_index'], si.settings.minimum_total_water_depth)
 
         # get profile with the smallest bottom layer  tickness as basis for first sigma layer
         node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['zlevel_fractions'],grid['bottom_cell_index'])

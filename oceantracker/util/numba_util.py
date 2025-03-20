@@ -4,7 +4,7 @@ import os
 
 
 import numba as nb
-
+from numba import prange
 # give direct access to some numba stuff.
 from time import perf_counter
 

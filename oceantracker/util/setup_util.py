@@ -139,6 +139,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
         environ['OCEANTRACKER_NUMBA_CACHING'] = '0'
 
     if  'debug' in settings and settings['debug']:
+        environ['NUMBA_DEVELOPER_MODE'] = '1'
         environ['NUMBA_BOUNDSCHECK'] = '1'
         environ['NUMBA_FULL_TRACEBACKS'] = '1'
 
