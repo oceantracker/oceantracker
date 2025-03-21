@@ -27,6 +27,7 @@
 1. cope with time dependent water depth in write to grid
 3.  reader grid transforms faster with pre-allocated buffers?
 4. unit test 01,  track diff. between LSC and sigma vertical regrid too large?
+5. vertical regrid using z fractions for each time step?
     
 ## Nice to haves
 1.   remove_tidally_stranded_particles option?
