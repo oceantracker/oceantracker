@@ -97,6 +97,10 @@ screen_output_time_interval: 1800
 time_step: 1800
 tracks_writer:
   time_steps_per_per_file: 10
+  turn_on_write_particle_properties_list:
+  - nz_cell
+  - z_fraction_water_velocity
+  - z_fraction
   update_interval: 3600
   write_dry_cell_flag: false
 use_A_Z_profile: false

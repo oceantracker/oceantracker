@@ -15,6 +15,11 @@
     "tracks_writer": {
         "update_interval": 3600,
         "write_dry_cell_flag": false,
+        "turn_on_write_particle_properties_list": [
+            "nz_cell",
+            "z_fraction_water_velocity",
+            "z_fraction"
+        ],
         "time_steps_per_per_file": 10
     },
     "reader": {
