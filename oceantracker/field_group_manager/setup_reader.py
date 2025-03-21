@@ -48,7 +48,7 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
     reader.add_hindcast_info() # any tweaks for specific reader
 
     # checks on hindcast info
-    #_check_time_consistency(reader)
+    _check_time_consistency(reader)
 
     # todo check all required fields are set
     if info['vert_grid_type'] is not None and info['vert_grid_type'] not in si.vertical_grid_types.possible_values():
@@ -189,6 +189,7 @@ def _time_sort_files(reader, crumbs):
             f['time'] = time
             f['time_attrs'] = ds[time_var].attrs
             f['start_date'] = time_util.seconds_to_isostr( f['start_time'])
+            f['end_date'] = time_util.seconds_to_isostr(f['end_time'])
 
 
     # sort variable fileIDs into time order
@@ -353,34 +354,15 @@ def _check_time_consistency(reader):
     ml = si.msg_logger
 
 
-    starts = []
-    n_files=[]
-    ref_time = None
-    vars=[]
+    dt = np.abs( np.diff(reader.info['time_coord']))
+    sel = np.flatnonzero(np.logical_or(dt < 0.5 * reader.info['time_step'], dt > 3 * reader.info['time_step']))
+    if np.any(sel):
+        t1 = reader.info['time_coord'][sel]
+        t2 = reader.info['time_coord'][sel+1]
 
-    for v_name, item in info['variables'].items():
+        si.msg_logger.msg('Some hindcasts time steps are less tha half the average time step or longer than 3 average time steps',
+                          hint = f'Hindcast may be missing files or othe time error, eg at {time_util. seconds_to_isostr(t1[0])} to {time_util. seconds_to_isostr(t2[0])}, see hindcast_info.json for full list of dates', warning=True)
 
-        if item['time_varying']:
-            starts.append(item['global_time_step_check'][0])
-            n_files.append(len(item['fileIDs']))
-            vars.append(v_name)
+        reader.info['time_step_errors'] =[ [time_util. seconds_to_isostr(a),time_util. seconds_to_isostr(b) ] for a,b in zip(t1,t2) ]
 
-    # checks on hindcasts with variables in different files
-    # check if difernt number of files for any variable
-    sel = np.flatnonzero( np.abs(np.diff(np.asarray(n_files)) ) > 0)
-    if sel.size>0:
-        ml.msg('File numbers differ for some variables for hindcast where variables are in separate n files',error=True,
-                         hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
-    # check if all variables start at the same times
-    starts = np.asarray(starts).astype(np.float64)
-    sel = np.flatnonzero( np.abs(np.diff(starts)))
-    if sel.size > 0:
-        ml.msg('Start times differ for some variables for hindcast where files are split between files',error=True,
-                        hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
-
-    # for all check missing time steps
-    t = info['ref_time'].astype('datetime64[s]').astype(np.float64)
-    sel = np.flatnonzero(np.abs(np.diff(t)) > 4*info['time_step'])
-    if sel.size > 0:
-        ml.msg('There are gaps in hindcast times larger than 4 time steps',warning=True,
-                        hint= f'there may be missing hindcast files, look at dates around {[ str(x) for x in cat["ref_time"][sel]]}')
+    return

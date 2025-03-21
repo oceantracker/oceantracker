@@ -622,15 +622,25 @@ class _BaseReader(ParameterBaseClass):
 
         s = list(np.asarray(data.shape, dtype=np.int32))
         s[2] = grid['sigma'].size
-        out = np.full(tuple(s), np.nan, dtype=np.float32)
-        data = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
+        out = np.full(tuple(s), np.nan, dtype=np.float32) # move to interp_4D_field_to_fixed_sigma_values?
+
+        data_out = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
                             grid['zlevel_fractions'], grid['bottom_cell_index'],
                             grid['sigma'],
                             fields['water_depth'].data, fields['tide'].data,
                             si.settings.z0, si.settings.minimum_total_water_depth,
                             data, out,
                             name == 'water_velocity')
-        return data
+        if False:
+            # check regridded profiles look reasonable
+            from matplotlib import  pyplot as plt
+            nt = 1
+            n = 75
+
+            plt.plot(grid['zlevel_fractions'][ n, :], data[nt, n, :, 0], c='g')
+            plt.plot(grid['sigma'],data_out[nt,n,:,0],c='r')
+            plt.show()
+        return data_out
 
     # convert, time etc to hindcast/ buffer index
     def time_to_hydro_model_index(self, time_sec):
