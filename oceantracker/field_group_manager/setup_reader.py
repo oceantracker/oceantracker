@@ -192,6 +192,7 @@ def _time_sort_files(reader, crumbs):
             f['end_date'] = time_util.seconds_to_isostr(f['end_time'])
 
 
+
     # sort variable fileIDs into time order
     for v_name, item in ds_info['variables'].items():
         item['time_varying'] = ds_info['time_dim'] in item['dims']
@@ -344,6 +345,7 @@ def _make_variable_time_step_to_fileID_map(reader):
                 fi = info['files'][fileID]
                 time_step_file_map =  np.append(time_step_file_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
             item['time_step_to_fileID_map'] = np.asarray(time_step_file_map, dtype=np.int32)
+            item['time_step_to_file_offset_map'] = np.arange(fi['time_steps'], dtype=np.int32)
     pass
 
 
