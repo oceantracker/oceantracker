@@ -100,12 +100,13 @@ class OceanTrackerDataSet(object):
             ds = self._open_file(fi['name'])
             nt_file = nt_available-nt0 # file offset
             if files_read == 0:
+                # first file
                 try:
                     out = ds[file_var_name][{time_dim: nt_file}].compute()
                 except Exception as e:
                     raise(e)
             else:
-                # time invariant
+                # next file
                 t0= perf_counter()
                 out = xr.concat((out,ds[file_var_name][{time_dim: nt_file}].compute()), dim=time_dim)
             ds.close()
