@@ -30,10 +30,13 @@ def time_independent_2D_vector_field(F_out, F_data, triangles, n_cell, bc_coords
     for nn in nb.prange(active.size):
         n = active[nn]
         # loop over each node in triangle
-        F_out[n] = 0.  # zero out for summing
+        for c in range(2): F_out[n,c] = 0.  # zero out for summing
+
         n_nodes = triangles[n_cell[n], :]
         for m in range(3):
-            F_out[n] += bc_coords[n, m] * F[n_nodes[m]]
+            node = n_nodes[m]
+            for c in range(2):
+                F_out[n, c] += bc_coords[n, m] * F[node, c]
 
 
 @njitOTparallel

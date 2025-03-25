@@ -198,6 +198,7 @@ class ParticleGroupManager(ParameterBaseClass):
                 i.update(n_time_step, time_sec, active)
                 i.stop_update_timer()
 
+
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for name, i in cr.particle_properties.items():
             if isinstance(i, CustomParticleProperty):

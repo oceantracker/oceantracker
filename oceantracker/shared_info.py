@@ -101,7 +101,7 @@ class _DefaultSettings(_SharedStruct):
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                  doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
 
-    particle_buffer_initial_size = PVC(None, int, min=1, expert=True,
+    particle_buffer_initial_size = PVC(10_000_000, int, min=1, expert=True,
                    doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive'
                                     )
     NCDF_particle_chunk =  PVC(None, int, min=1,  expert=True,

@@ -297,9 +297,8 @@ class OceanTrackerParamsRunner(object):
         ri.forcasted_number_alive = np.cumsum(number_released)
         ri.forcasted_max_number_alive = ri.forcasted_number_alive.max()
 
-        # particle chunking
-        if settings.particle_buffer_initial_size is None:
-             settings.particle_buffer_initial_size = ri.forcasted_max_number_alive
+        # particle chunking, chose smaler of forcasted or given buffer sise
+        settings.particle_buffer_initial_size = min(ri.forcasted_max_number_alive, settings.particle_buffer_initial_size)
 
         if settings.NCDF_particle_chunk is None:
             settings.NCDF_particle_chunk = ri.forcasted_max_number_alive
