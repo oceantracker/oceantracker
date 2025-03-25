@@ -28,6 +28,8 @@
 3.  reader grid transforms faster with pre-allocated buffers?
 4. unit test 01,  track diff. between LSC and sigma vertical regrid too large?
 5. vertical regrid using z fractions for each time step?
+6. 1. adding custion reader fields, reader fields, eg deg_t0_lat_long updating? and part prop updating ordering?
+7. 1. max_duration and end time estimates
     
 ## Nice to haves
 1.   remove_tidally_stranded_particles option?
