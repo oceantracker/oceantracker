@@ -41,6 +41,7 @@ class OceanTrackerDataSet(object):
                     vars[name] = dict( dims={key:ds.sizes[key]  for key in var.dims},
                                        fileIDs=[], attrs = var.attrs,
                                        #encoding = var.encoding,
+                                       shape= copy(var.shape),
                                        dtype = var.dtype)
 
                 info['variables'][name]['fileIDs'].append(fileID)
@@ -87,6 +88,7 @@ class OceanTrackerDataSet(object):
 
         # clip to full range
         nt_required = nt_required[ np.logical_and( nt_required >= 0, nt_required < info['time_coord'].size)]
+
         files_read = 0
         while nt_required.size > 0 :
             file_no = vi['time_step_to_fileID_map'][nt_required[0]]
@@ -96,19 +98,24 @@ class OceanTrackerDataSet(object):
             nt0 = fi['first_time_step_in_file']
             sel = np.logical_and( nt_required >= nt0, nt_required < nt0 + fi['time_steps'])
             nt_available = nt_required[sel]
+
+            # get mapped file offsets
+            file_offsets = vi['time_step_to_file_offset_map'][nt_available]
+
             # open file and read
             ds = self._open_file(fi['name'])
-            nt_file = nt_available-nt0 # file offset
             if files_read == 0:
-                # first file
+                # first files time step
                 try:
-                    out = ds[file_var_name][{time_dim: nt_file}].compute()
+                    out = ds[file_var_name][{time_dim: file_offsets}].compute()
                 except Exception as e:
                     raise(e)
             else:
-                # next file
-                t0= perf_counter()
-                out = xr.concat((out,ds[file_var_name][{time_dim: nt_file}].compute()), dim=time_dim)
+                # next files time steps
+                try:
+                    out = xr.concat((out,ds[file_var_name][{time_dim: file_offsets}].compute()), dim=time_dim)
+                except Exception as e:
+                    raise (e)
             ds.close()
             nt_required = nt_required[nt_available.size:]
             files_read += 1

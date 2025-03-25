@@ -301,6 +301,17 @@ def get_case(n):
             is3D = True
             show_grid = True
 
+        case 411:
+            # DELFT FM exmouth
+            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_version1'
+
+            x0 = [[230372.0534805571, 7581341.601568772]]
+            file_mask = 'Ha*.nc'
+            output_file_base = 'DELF3D-FM_hananui'
+            title = 'DELF3D-FM_hananui'
+            is3D = True
+            show_grid = True
+            time_step = 10 * 60
 
         case   1100:
             # batic sea GLORYS
