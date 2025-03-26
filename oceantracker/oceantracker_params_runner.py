@@ -126,7 +126,7 @@ class OceanTrackerParamsRunner(object):
         si.add_settings(si.working_params['settings'])  # add full settings to shared info
 
         # setup output dir and msg files
-        si.output_files = setup_util.setup_output_dir(si.working_params['settings'], crumbs='Setting up output dir')
+        si.output_files = setup_util.setup_output_dir(si.settings, crumbs='Setting up output dir')
 
         si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(
             si.output_files['run_output_dir'],
@@ -145,7 +145,7 @@ class OceanTrackerParamsRunner(object):
 
         # setup numba before first import as its environment variable settings  have to be set before first import on Numba
         # set numba config environment variables, before any import of numba, eg by readers,
-        setup_util.config_numba_environment_and_random_seed(si.working_params['settings'], ml, crumbs='main setup',
+        setup_util.config_numba_environment_and_random_seed(si.settings, ml, crumbs='main setup',
                                                             caller=self)  # must be done before any numba imports
 
         # import all package parameter classes and build short name package tree to shared info
@@ -174,9 +174,8 @@ class OceanTrackerParamsRunner(object):
 
     def _run_case(self):
         ml = si.msg_logger # shortcut for logger
-        si.add_settings(si.working_params['settings']) # push settings into shared info
 
-
+        # sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 
 # - -------- start set up---------------------------------------------------------------------

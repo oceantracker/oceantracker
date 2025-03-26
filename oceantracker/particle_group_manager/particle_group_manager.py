@@ -261,8 +261,8 @@ class ParticleGroupManager(ParameterBaseClass):
         counts = pc['current_status_counts']
         s =  f' Rel:{info["particles_released"]:<5,d}: '
         s += f'Active:{pc["num_alive"]:<6,d} Move:{counts["moving"]:<6,d} '
-        s += f'Bottom:{counts["on_bottom"]:4d} Strand:{counts["stranded_by_tide"]:<5,d}  '
-        s += f'Dead:{counts["dead"]:4d} Out:{counts["outside_open_boundary"]:4d} '
+        s += f'Bottom:{counts["on_bottom"]:<5,d} Strand:{counts["stranded_by_tide"]:<5,d}  '
+        s += f'Dead:{counts["dead"]:<5,d} Out:{counts["outside_open_boundary"]:4d} '
         p = int((100. * si.particles_in_buffer / si.core_class_roles.particle_group_manager.info['current_particle_buffer_size']))
         s += f'Buffer:{p:2d}% '
         return s

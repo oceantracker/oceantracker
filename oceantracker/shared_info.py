@@ -229,7 +229,7 @@ class _SharedInfoClass():
 
     def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=False,
                   check_for_unknown_keys=True, add_required_classes_and_settings=True,  **kwargs):
-        #todo get rid in initialize
+        #todo get rid in initialize????
         ml = self.msg_logger
         crumbs += f'Adding class {class_role}>'
 
