@@ -11,24 +11,24 @@ from oceantracker import definitions
 from oceantracker.shared_info import  shared_info as si
 import sys
 
-def setup_output_dir(params, crumbs='', caller=None):
+def setup_output_dir(settings, crumbs='', caller=None):
     # setus up params, opens log files/ error handling, required befor mesage loger can be used
     crumbs += '> setup_output_dir'
 
     # check output_file_base is not dir, just a test
-    if len(path.dirname(params['output_file_base'])) > 0:
+    if len(path.dirname(settings['output_file_base'])) > 0:
         si.msg_logger.msg(
-            f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{params["output_file_base"]}"',
+            f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{settings["output_file_base"]}"',
             error=True,
             hint='Use setting "root_output_dir" to designate which dir. to place output files in',
             crumbs=crumbs, caller=caller,
             fatal_error=True)
 
     # get output files location
-    root_output_dir = path.abspath(path.normpath(params['root_output_dir']))
-    run_output_dir = path.join(root_output_dir, params['output_file_base'])
+    root_output_dir = path.abspath(path.normpath(settings['root_output_dir']))
+    run_output_dir = path.join(root_output_dir, settings['output_file_base'])
 
-    if params['add_date_to_run_output_dir']:
+    if settings['add_date_to_run_output_dir']:
         run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
 
     # clear existing folder and make a new dir, if not restarting
@@ -38,15 +38,15 @@ def setup_output_dir(params, crumbs='', caller=None):
     makedirs(run_output_dir)  # make  new clean folder
 
     # write a copy of user given parameters, to help with debugging and code support
-    fb = 'users_params_' + params['output_file_base']
+    fb = 'users_params_' + settings['output_file_base']
     output_files = {'root_output_dir': root_output_dir,
                     'run_output_dir': run_output_dir,
-                    'output_file_base': params['output_file_base'],
-                    'raw_output_file_base': copy(params['output_file_base']),
+                    'output_file_base': settings['output_file_base'],
+                    'raw_output_file_base': copy(settings['output_file_base']),
                     # this is need for grid file so it does not get a case number in // runs
-                    'caseInfo_file': params['output_file_base'] + '_caseInfo.json',
-                    'runLog_file': params['output_file_base'] + '_runScreen.log',
-                    'run_error_file': params['output_file_base'] + '_run.err',
+                    'caseInfo_file': settings['output_file_base'] + '_caseInfo.json',
+                    'runLog_file': settings['output_file_base'] + '_runScreen.log',
+                    'run_error_file': settings['output_file_base'] + '_run.err',
                     'users_params_json': fb + '.json',
                     }
     return output_files
@@ -138,7 +138,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     else:
         environ['OCEANTRACKER_NUMBA_CACHING'] = '0'
 
-    if  'debug' in settings and settings['debug']:
+    if settings['debug']:
         environ['NUMBA_DEVELOPER_MODE'] = '1'
         environ['NUMBA_BOUNDSCHECK'] = '1'
         environ['NUMBA_FULL_TRACEBACKS'] = '1'
