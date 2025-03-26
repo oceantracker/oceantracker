@@ -104,8 +104,9 @@ class CompactTracksWriter(_BaseWriter):
         nc = self.nc
         n_in_file = self.nc.var_shape('ID')[0]
         n_write = range(n_in_file, n_in_file + new_particleIDs.size)
+
         part_prop = si.class_roles.particle_properties
-        if si.settings.write_tracks and new_particleIDs.size > 0:
+        if new_particleIDs.size > 0:
             for name in info['variables_to_write']['non_time_varying_part_prop']:
                 nc.file_handle.variables[name][n_write, ...] = part_prop[name].data[new_particleIDs, ...]
 

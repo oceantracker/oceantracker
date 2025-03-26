@@ -131,6 +131,11 @@ rg3= dict(name='my_grid_release',  # name used internal to refer to this release
         release_interval=1800, pulse_size=2,
         z_min=-2, z_max=-0.5)  # release at random depth between these values
 
+rg1point= dict(name='one points',
+             points=[1594500, 5487000, -1],
+             release_interval=3600,
+             pulse_size=10)
+
 rg3points= dict(name='three points',
              points=[[1594500, 5487000, -1],
                      [1594500, 5483000, -1],

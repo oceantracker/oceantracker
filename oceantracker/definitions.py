@@ -60,6 +60,38 @@ default_classes_dict = dict(
                 )
 # index values
 
+class _AttribDict():
+    '''
+    holds variables as class attributes to enable auto complete hints
+    and give iterators over these variables
+    but can act like a dictionary,  ie  allows both  instance.backtracking and instance['backtracking']
+
+    '''
+    def __init__(self):
+        # add  class variables in ._class_.__dict__
+        # to instance __dict__ by adding attributes
+        for key, item in self.__class__.__dict__.items():
+            if not key.startswith('_'):
+                setattr(self, key, item)
+    def as_dict(self):
+        d = dict()
+        for key, item in self.__dict__.items():
+            if not key.startswith('_'): d[key] = item
+        return d
+
+    def possible_values(self):
+        d = []
+        for key in self.__dict__.keys():
+            if not key.startswith('_'): d.append(key)
+        return d
+    def items(self): return self.as_dict().items()
+
+    def __getitem__(self, name:str):
+        return getattr(self,name)
+    def __setitem__(self, name:str, value):
+        setattr(self,name, value)
+
+
 # below are mapping names to index name, and are added to shared info
 @dataclass
 class _BaseConstantsClass:
@@ -69,6 +101,7 @@ class _BaseConstantsClass:
 
 
 ''' Particle status flags mapped to integer values '''
+
 @dataclass
 class _ParticleStatusFlags(_BaseConstantsClass):
     unknown : int = -20

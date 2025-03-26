@@ -130,6 +130,7 @@ def _unpack_compact_tracks(data):
 @njitOT
 def _insertMatrixValues(x,row,col,values):
     for n in range(values.shape[0]):
+        #print('xx', n,row[n],col[n] )
         x[row[n],col[n],...] = values[n]
 @njitOT
 def _get_last_alive(status,status_notReleased, status_dead):

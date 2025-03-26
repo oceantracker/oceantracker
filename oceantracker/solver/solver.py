@@ -221,9 +221,12 @@ class Solver(ParameterBaseClass):
         if si.settings.write_tracks:
             t0_write = perf_counter()
             tracks_writer = si.core_class_roles.tracks_writer
-            tracks_writer.open_file_if_needed(new_particleIDs)
+            tracks_writer.open_file_if_needed()
 
-            # write tracks file
+            if new_particleIDs.size > 0:
+                tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
+
+            # write time varying track data to file if scheduled
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
 

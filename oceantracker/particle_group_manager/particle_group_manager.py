@@ -95,33 +95,35 @@ class ParticleGroupManager(ParameterBaseClass):
         # see if any group is ready to release
 
         part_prop = si.class_roles.particle_properties
-        new_buffer_indices = np.full((0,), 0, np.int32)
+        new_buffer_index = np.full((0,), 0, np.int32)
 
         for name, rg in si.class_roles.release_groups.items():
             if rg.schedulers['release'].do_task(n_time_step):
                 rg.start_update_timer()
                 release_part_prop = rg.get_release_locations(time_sec)
-                new_index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
-                new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
+                index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
+                new_buffer_index = np.concatenate((new_buffer_index,index), dtype=np.int32)
                 rg.stop_update_timer()
 
         # aviod calling numba code with nothing to do
-        if new_buffer_indices.size==0 : return new_buffer_indices  # no releases shedulued
+        if new_buffer_index.size==0 : return new_buffer_index  # no releases shedulued
 
         # initial values  part prop derived from fields
         for name, i  in part_prop.items():
             if isinstance(i, FieldParticleProperty) :
-                i.initial_value_at_birth(new_buffer_indices)
+                i.initial_value_at_birth(new_buffer_index)
 
         # give user/custom prop their initial values at birth, eg zero distance, these may require interp that is setup above
         for name, i  in part_prop.items():
             if isinstance(i,CustomParticleProperty):
-                i.initial_value_at_birth(new_buffer_indices)
+                i.initial_value_at_birth(new_buffer_index)
 
         # update new particles props
         # todo does this update_PartProp have to be here as setup_interp_time_step and update_PartProp are run immediately after this in pre step bookkeeping ?
-        self.update_PartProp(n_time_step, time_sec, new_buffer_indices)
-        return new_buffer_indices #indices of all new particles
+        self.update_PartProp(n_time_step, time_sec, new_buffer_index)
+        #print('xx2',new_buffer_index.size,  new_buffer_index[[0,-1]])
+
+        return new_buffer_index #indices of all new particles
 
     def release_a_particle_group_pulse(self, release_data, time_sec):
         # release one pulse of particles from given group
@@ -135,7 +137,9 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # get indices within particle buffer where new particles will go, as in compact mode particle ID is not the buffer index
         new_buffer_indices= np.arange(si.particles_in_buffer, smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
-        num_released = new_buffer_indices.shape[0]
+        num_released = new_buffer_indices.size
+
+
 
         part_prop = si.class_roles.particle_properties
 
@@ -153,9 +157,9 @@ class ParticleGroupManager(ParameterBaseClass):
             part_prop['time_released'].set_values(time_sec, new_buffer_indices)  # time released for each particle, needed to calculate age
             part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_buffer_indices)
 
-        # set interp memory properties if present
-        info['particles_released'] += num_released # total released
-        si.particles_in_buffer += num_released # number in particle buffer
+        info['particles_released'] += num_released  # total released
+        si.particles_in_buffer += num_released  # number in particle buffer
+
 
         return new_buffer_indices
 
