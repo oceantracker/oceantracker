@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker import definitions
 
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC, ParameterListChecker as PLC
 
 from oceantracker.util import class_importer_util
 from oceantracker.util.message_logger import  MessageLogger
@@ -83,10 +83,10 @@ class _DefaultSettings(_SharedStruct):
     water_density = PVC(1025., float, units='kg/m^3', doc_str='Water density , default is seawater, an example of use is in calculating friction velocity from bottom stress, ', min=900. )
     use_open_boundary = PVC(False, bool, doc_str='Allow particles to leave open boundary, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred for structed grids like ROMS ' )
     block_dry_cells = PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary' )
-
+    add_path = PLC(None,str,doc_str='List of directories to add to python path containing user written classes. Enables import of user written classes outside of current working dir. ')
     time_buffer_size = PVC(24, int, min=2, doc_str='Number of time steps held in hindcast memory buffers', expert = True)
     use_geographic_coords = PVC(False, bool,
-                          doc_str='Used geographic coordniated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
+                          doc_str='Used geographic coordinated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
                                 expert=True)
     use_A_Z_profile = PVC(False, bool,
                 doc_str='Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files')

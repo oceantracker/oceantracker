@@ -99,9 +99,11 @@ class ParticleGroupManager(ParameterBaseClass):
 
         for name, rg in si.class_roles.release_groups.items():
             if rg.schedulers['release'].do_task(n_time_step):
+                rg.start_update_timer()
                 release_part_prop = rg.get_release_locations(time_sec)
                 new_index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
                 new_buffer_indices = np.concatenate((new_buffer_indices,new_index), dtype=np.int32)
+                rg.stop_update_timer()
 
         # aviod calling numba code with nothing to do
         if new_buffer_indices.size==0 : return new_buffer_indices  # no releases shedulued

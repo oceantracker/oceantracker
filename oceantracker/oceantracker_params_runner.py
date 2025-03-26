@@ -1,5 +1,5 @@
 import psutil
-
+import sys
 from copy import deepcopy, copy
 from os import path
 import numpy as np
@@ -175,7 +175,14 @@ class OceanTrackerParamsRunner(object):
     def _run_case(self):
         ml = si.msg_logger # shortcut for logger
 
-        # sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+        # add any usrer given dir to python path
+        for p in si.settings.add_path:
+            if path.isdir(p):
+                sys.path.append(path.abspath(p))
+            else:
+                si.msg_logger.msg(f'setting "add_path: : Cannot find path "{p}" to add to python package path',
+                                  error=True)
+        si.msg_logger.exit_if_prior_errors('errors in "add_path" setting')
 
 
 # - -------- start set up---------------------------------------------------------------------
