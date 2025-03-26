@@ -12,7 +12,7 @@ from oceantracker.shared_info import  shared_info as si
 import sys
 
 def setup_output_dir(settings, crumbs='', caller=None):
-    # setus up params, opens log files/ error handling, required befor mesage loger can be used
+    # setus up params, opens log files/ error handling, required before message loger can be used
     crumbs += '> setup_output_dir'
 
     # check output_file_base is not dir, just a test
