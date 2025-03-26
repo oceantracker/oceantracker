@@ -5,6 +5,7 @@
 1. Stats unit test
 1. matlab read stats check
 2.  fix demo matalb plot axes 
+3. split particles reading files
    
 1. add descriptions to particle properties to put in netcdf if written out
 
@@ -32,6 +33,7 @@
 6.  adding custion reader fields, reader fields, eg deg_t0_lat_long updating? and part prop updating ordering?
 1. max_duration and end time estimates
 8. LSC unit test slow?  release stratergies?
+9.  speed nested grids, only check if particle on outer grid is inside an inner grid if in a cell overlapping  an inner grid 
     
 ## Nice to haves
 1.   remove_tidally_stranded_particles option?
@@ -50,7 +52,7 @@
 2.  remove dimension map in favour of using get_hindcast_info() method
 1. make subgrids spaning polygons with own kdtree to speed lookup of initial cell find
 2. speed inside polygon by when cell is known, for triangles fully inside a ploygon
-3. raduis point release sererated frpm point release to do inside domain check at start  
+3. radius point release separated from point release to do inside domain check at start  
 # Other
 
 ## Docs

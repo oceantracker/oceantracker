@@ -48,7 +48,7 @@ class _BaseWriter(ParameterBaseClass):
         self.add_scheduler('write_scheduler', interval=self.params['update_interval'], caller=self)
         pass
 
-    def open_file_if_needed(self, new_particleIDs):
+    def open_file_if_needed(self):
         params = self.params
         info = self.info
         opened_file = False
@@ -62,8 +62,6 @@ class _BaseWriter(ParameterBaseClass):
             # note file opening and time to open file set up chucks and write first block
             si.msg_logger.progress_marker(f'Opened tracks output and done written first time step in: "{self.info["output_file"][-1]}"', start_time=t0)
 
-        if new_particleIDs.size > 0:
-                self.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
 
     def _open_file(self, file_name):
         info = self.info

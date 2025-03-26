@@ -10,41 +10,10 @@ from time import  perf_counter
 
 # useful utility classes to enable auto complete
 class _Object(object):  pass
-class _SharedStruct():
-    '''
-    holds variables as class attributes to enable auto complete hints
-    and give iterators over these variables
-
-    allows both  instance.backtracking and i['instance.backtracking']
-
-    '''
-    def __init__(self):
-        # add  class variables in ._class_.__dict__
-        # to instance __dict__ by adding attributes
-        for key, item in self.__class__.__dict__.items():
-            if not key.startswith('_'):
-                setattr(self, key, item)
-    def as_dict(self):
-        d = dict()
-        for key, item in self.__dict__.items():
-            if not key.startswith('_'): d[key] = item
-        return d
-
-    def possible_values(self):
-        d = []
-        for key in self.__dict__.keys():
-            if not key.startswith('_'): d.append(key) 
-        return d
-    def items(self): return self.as_dict().items()
-
-    def __getitem__(self, name:str):
-        return getattr(self,name)
-    def __setitem__(self, name:str, value):
-        setattr(self,name, value)
 
 # default settings structure
 
-class _DefaultSettings(_SharedStruct):
+class _DefaultSettings(definitions._AttribDict):
 
     root_output_dir=  PVC('root_output_dir', str, doc_str='base dir for all output files')
     add_date_to_run_output_dir =  PVC(False,bool, doc_str='Append the date to the output dir. name to help in keeping output from different runs separate' )
@@ -116,7 +85,7 @@ class _DefaultSettings(_SharedStruct):
     restart = PVC(False, bool, doc_str='Restart from a saved state, requires prior run setting restart_interval',  expert=True)
 
 # blocks that make up parts of shared info
-class _ClassRoles(_SharedStruct):
+class _ClassRoles(definitions._AttribDict):
     release_groups =[]
     fields = []  # user fields calculated from other fields  on reading
     particle_properties =  [] # user added particle properties, eg DistanceTraveled
@@ -128,7 +97,7 @@ class _ClassRoles(_SharedStruct):
     event_loggers =  [] # writes events files ,eg PolygonEntryExit
     time_varying_info = [] # particle info,eg. time,or  tide at at tide gauge, core example is particle time
 
-class _CoreClassRoles(_SharedStruct):
+class _CoreClassRoles(definitions._AttribDict):
     reader = None
     interpolator = None
     #todo below beter as None
@@ -142,14 +111,14 @@ class _CoreClassRoles(_SharedStruct):
     integrated_model = None # this is here as there can be only one at a time
 
 
-class _VerticalGridTypes(_SharedStruct):
+class _VerticalGridTypes(definitions._AttribDict):
     '''Particle status flags mapped to integer values'''
     Slayer  = 'Slayer'
     LSC = 'LSC'
     Sigma = 'Sigma'
     Zfixed = 'Zfixed'
 
-class _RunInfo(_SharedStruct):
+class _RunInfo(definitions._AttribDict):
     is3D_run = None
     backtracking =None
     vector_components = None
@@ -173,7 +142,7 @@ class _RunInfo(_SharedStruct):
     has_bottom_stress = None
     particle_counts = {}
 
-class _UseFullInfo(_SharedStruct):
+class _UseFullInfo(definitions._AttribDict):
     # default reader classes used by auto-detection of file type
     large_float = 1.0E50
 
