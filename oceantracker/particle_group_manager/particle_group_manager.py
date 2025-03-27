@@ -83,7 +83,7 @@ class ParticleGroupManager(ParameterBaseClass):
         self.status_count_array_per_thread= np.zeros((si.settings.processors, 256), np.int32) # array to insert status counts for a
 
         info['current_status_counts'] = {}
-        for name, val,  in si.particle_status_flags.asdict().items():
+        for name, val,  in si.particle_status_flags.items():
             info['current_status_counts'][name] = 0
 
         si.run_info.particle_counts['current_status_counts'] = info['current_status_counts']
@@ -230,7 +230,7 @@ class ParticleGroupManager(ParameterBaseClass):
         pc['particles_released']  = info['particles_released']
 
         # transfer stats counts from array to run_info dict
-        for key, val in si.particle_status_flags.asdict().items():
+        for key, val in si.particle_status_flags.items():
             pc['current_status_counts'][key] = self.status_count_array_per_thread[:, 128 + val].sum(axis=0)
 
         return num_alive

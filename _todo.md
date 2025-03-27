@@ -53,6 +53,8 @@
 1. make subgrids spaning polygons with own kdtree to speed lookup of initial cell find
 2. speed inside polygon by when cell is known, for triangles fully inside a ploygon
 3. radius point release separated from point release to do inside domain check at start  
+4.  cellsearch status flags as numba compile time constants
+5. 
 # Other
 
 ## Docs
