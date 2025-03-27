@@ -63,33 +63,24 @@ default_classes_dict = dict(
 class _AttribDict():
     '''
     holds variables as class attributes to enable auto complete hints
-    and give iterators over these variables
-    but can act like a dictionary,  ie  allows both  instance.backtracking and instance['backtracking']
+    and give iterators over these variables, but can act like a dictionary,
+    ie  allows both  instance.backtracking and instance['backtracking']
 
     '''
     def __init__(self):
-        # add  class variables in ._class_.__dict__
-        # to instance __dict__ by adding attributes
+        # add  class variables in ._class_.__dict__, to instance __dict__ by adding attributes
         for key, item in self.__class__.__dict__.items():
             if not key.startswith('_'):
                 setattr(self, key, item)
-    def asdict(self):
-        d = dict()
-        for key, item in self.__dict__.items():
-            if not key.startswith('_'): d[key] = item
-        return d
-    def keys(self): return  self.possible_values()
-    def possible_values(self):
-        d = []
-        for key in self.__dict__.keys():
-            if not key.startswith('_'): d.append(key)
-        return d
-    def items(self): return self.asdict().items()
+    def asdict(self): return self.__dict__
 
-    def __getitem__(self, name:str):
-        return getattr(self,name)
-    def __setitem__(self, name:str, value):
-        setattr(self,name, value)
+    def keys(self): return  self.possible_values()
+    def possible_values(self):  return list(self.__dict__.keys())
+
+    def items(self): return  self.__dict__.items()
+
+    def __getitem__(self, name:str):  return getattr(self,name)
+    def __setitem__(self, name:str, value):  setattr(self,name, value)
 
 
 ''' Particle status flags mapped to integer values '''
