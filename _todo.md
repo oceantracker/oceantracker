@@ -5,7 +5,7 @@
 1. Stats unit test
 1. matlab read stats check
 2.  fix demo matalb plot axes 
-3. split particles reading files
+3. split particles writing track   files, are not readable
    
 1. add descriptions to particle properties to put in netcdf if written out
 
