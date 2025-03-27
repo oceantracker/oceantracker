@@ -73,18 +73,18 @@ class _AttribDict():
         for key, item in self.__class__.__dict__.items():
             if not key.startswith('_'):
                 setattr(self, key, item)
-    def as_dict(self):
+    def asdict(self):
         d = dict()
         for key, item in self.__dict__.items():
             if not key.startswith('_'): d[key] = item
         return d
-
+    def keys(self): return  self.possible_values()
     def possible_values(self):
         d = []
         for key in self.__dict__.keys():
             if not key.startswith('_'): d.append(key)
         return d
-    def items(self): return self.as_dict().items()
+    def items(self): return self.asdict().items()
 
     def __getitem__(self, name:str):
         return getattr(self,name)
@@ -92,18 +92,8 @@ class _AttribDict():
         setattr(self,name, value)
 
 
-# below are mapping names to index name, and are added to shared info
-@dataclass
-class _BaseConstantsClass:
-    c = 1
-    def asdict(self):  return self.__dict__
-    def possible_values(self):  return list(self.__dict__.keys())
-
-
 ''' Particle status flags mapped to integer values '''
-
-@dataclass
-class _ParticleStatusFlags(_BaseConstantsClass):
+class _ParticleStatusFlags(_AttribDict):
     unknown : int = -20
     notReleased : int = -10
     dead : int = -5
@@ -115,8 +105,8 @@ class _ParticleStatusFlags(_BaseConstantsClass):
     moving : int = 10
 
 # status of cell search
-@dataclass
-class _CellSearchStatusFlags(_BaseConstantsClass):
+
+class _CellSearchStatusFlags(_AttribDict):
     ok: int = 0
     hit_domain_boundary: int = -1
     hit_open_boundary: int = -2
@@ -127,22 +117,22 @@ class _CellSearchStatusFlags(_BaseConstantsClass):
 
 
 # types of node
-@dataclass
-class _NodeTypes(_BaseConstantsClass):
+
+class _NodeTypes(_AttribDict):
     interior: int = 0
     island_boundary: int = 1
     domain_boundary: int = 2
     open_boundary: int = 3
     land: int = 4
 
-@dataclass
-class _EdgeTypes(_BaseConstantsClass):
+
+class _EdgeTypes(_AttribDict):
     interior: int = 0
     domain: int = -1
     open_boundary: int = -2
 
-@dataclass
-class _DimensionNames(_BaseConstantsClass):
+
+class _DimensionNames(_AttribDict):
     # used to standardise output dimension names
     time: str = 'time_dim'
     particle: str  = 'particle_dim'

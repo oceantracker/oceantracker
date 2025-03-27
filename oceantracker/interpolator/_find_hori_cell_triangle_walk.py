@@ -12,20 +12,14 @@ from oceantracker.util.numba_util import  njitOT, njitOTparallel, prange
 
 # globals to compile into numba to save pass arguments
 # numba code needs integer versions of constants
-psf = si.particle_status_flags
 
-status_moving = int(psf.moving)
-status_on_bottom = int(psf.on_bottom)
-status_stranded_by_tide = int(psf.stranded_by_tide)
-status_outside_domain = int(psf.outside_domain)
-status_outside_open_boundary = int(psf.outside_open_boundary)
-status_dead = int(psf.dead)
 
 csf = si.cell_search_status_flags
+
 search_ok = int(csf.ok)
 search_bad_coord = int(csf.bad_coord)
 search_failed = int(csf.failed)
-search_hit_domain_boundary = int(csf.hit_domain_boundary)
+search_hit_domain_boundary = csf.hit_domain_boundary
 search_hit_dry_cell = int(csf.hit_dry_cell)
 search_hit_open_boundary = int(csf.hit_open_boundary)
 

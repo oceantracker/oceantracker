@@ -14,7 +14,7 @@ class TimeAtStatus(CustomParticleProperty):
         super().__init__() # must call parent class to get its parameters etc 
         psf = si.particle_status_flags
         self.add_default_params( required_status= PVC(psf.moving, str,
-                                        possible_values =[key  for key, item in si.particle_status_flags.asdict().items() if item >=0 ],
+                                        possible_values =[key  for key, item in si.particle_status_flags.items() if item >=0 ],
                                                     doc_str='The particle status to count the time spend'),
                                 description=PVC('total time particle spends in a given status', # optional description and units are added to part. prop. netcdf variables attributes
                                                    str, units='seconds'),
@@ -26,7 +26,7 @@ class TimeAtStatus(CustomParticleProperty):
         super().initial_setup() # for particle prop. must call parent to set up data array self.data
 
         # get numerical value of status flag for use in numba code below
-        self.info['status_value']  = si.particle_status_flags.asdict()[self.params['required_status']] # info use to hold useful data
+        self.info['status_value']  = si.particle_status_flags[self.params['required_status']] # info use to hold useful data
     def initial_value_at_birth(self, new_part_IDs):
         # set the value given to this particle property when new particles are released
         self.set_values(0., new_part_IDs)  # set total time to zero when born

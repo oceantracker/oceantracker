@@ -122,7 +122,7 @@ class RSTfileBuilder(object):
 
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
 
-                for k, v in item.asdict().items():
+                for k, v in item.items():
                     if k not in dont_include and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
                 self.add_lines()
@@ -233,7 +233,7 @@ def build_param_ref():
 
     # settings sub page
     sp = RSTfileBuilder('settings', 'Settings')
-    settings_dict = si.settings.as_dict()
+    settings_dict = si.settings.asdict()
     sp.add_heading('Top level settings/parameters', level=2)
     sp.add_params_from_dict(settings_dict,expert=False)
     sp.add_params_from_dict(settings_dict, expert=True)

@@ -350,11 +350,11 @@ class OceanTrackerParamsRunner(object):
     def _final_setup_all_classes(self):
         # finalise alll classes setup  after all initialised
 
-        for role, i in si.core_class_roles.as_dict().items():
+        for role, i in si.core_class_roles.items():
             if i is not None and role not in ['field_group_manager']:
                 i.final_setup()
 
-        for role, item in si.class_roles.as_dict().items():
+        for role, item in si.class_roles.items():
             for name, i in item.items():
                 if i is not None:
                     i.final_setup()  # some require instanceID from above add class to initialise
@@ -501,7 +501,7 @@ class OceanTrackerParamsRunner(object):
                          duration=str(datetime.now() - d0),
                          elapsed_time_sec=elapsed_time_sec,
                          number_particles_released= pgm.info['particles_released'] if pgm  is not None else None ))
-        info.update(si.run_info.as_dict())
+        info.update(si.run_info.asdict())
         # base class variable warnings is common with all descendants of parameter_base_class
         d = {'user_note': si.settings['user_note'],
              'file_written': datetime.now().isoformat(),
@@ -509,10 +509,10 @@ class OceanTrackerParamsRunner(object):
              'version_info':   si.run_info.version,
              'computer_info':  si.run_info.computer_info,
 
-             'working_params': dict(settings = si.settings.as_dict() ,core_class_roles={}, class_roles={}),
+             'working_params': dict(settings = si.settings.asdict() ,core_class_roles={}, class_roles={}),
              'timing':dict(block_timings=[], function_timers= {}),
              'update_timers': {},
-             'settings' : si.settings.as_dict(),
+             'settings' : si.settings.asdict(),
              'run_info' : info,
              'particle_status_flags': si.particle_status_flags.asdict(),
              'errors': si.msg_logger.errors_list,
@@ -525,7 +525,7 @@ class OceanTrackerParamsRunner(object):
 
         # sweep up any output files from al used classes
         class_info={}
-        for key, i in si.class_roles.as_dict().items():
+        for key, i in si.class_roles.items():
             if i is None : continue
             class_info[key] = {}
             d['scheduler_info'][key] = {}
@@ -555,7 +555,7 @@ class OceanTrackerParamsRunner(object):
         d['release_group_info'] = class_info['release_groups']
 
         # core roles
-        for key, i in si.core_class_roles.as_dict().items():
+        for key, i in si.core_class_roles.items():
             if i is None: continue
             class_info[key] = {}
             class_info[key] = i.info

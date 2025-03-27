@@ -190,9 +190,9 @@ class _SharedInfoClass():
         self.msg_logger.reset()
 
         # empty out roles and core roles in case of rerunning and shared info import only happens once
-        for role in self.core_class_roles.as_dict().keys():
+        for role in self.core_class_roles.possible_values():
             setattr(self.core_class_roles, role, None)
-        for role in self. class_roles.as_dict().keys():
+        for role in self. class_roles.possible_values():
             setattr(self.class_roles, role, {})
 
 
