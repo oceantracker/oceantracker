@@ -9,7 +9,7 @@ class _BaseUnstructuredReader(_BaseReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
-            dimension_map=dict(node=PVC(None, str, doc_str='Nodes in grid')),
+            dimension_map=dict(node=PVC(None, str, doc_str='Nodes in grid', is_required=True)),
         )  # list of normal required dimensions
 
     # Below are basic variable read methods for any new reader
@@ -19,8 +19,17 @@ class _BaseUnstructuredReader(_BaseReader):
     def read_water_depth(self, grid):
         ds = self.dataset
         gm = self.params['grid_variable_map']
-        water_depth = ds.read_variable(gm['water_depth']).data
+        water_depth = ds.read_data(gm['water_depth'])
         return water_depth
+
+    def read_horizontal_grid_coords(self, grid):
+        # reader nodal locations
+        ds = self.dataset
+        gm = self.params['grid_variable_map']
+
+        x = ds.read_data(gm['x'])
+        y = ds.read_data(gm['y'])
+        grid['x']  = np.stack((x, y), axis=1).astype(np.float64)
 
     def read_file_var_as_4D_nodal_values(self, var_name, var_info, nt=None):
         # todo add name to params!!

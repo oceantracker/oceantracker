@@ -112,14 +112,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         grid['triangles'] = tri
 
 
-    def read_horizontal_grid_coords(self, grid):
-        # reader nodal locations
-        ds = self.dataset
-        gm = self.params['grid_variable_map']
 
-        x = ds.read_variable(gm['x']).data
-        y = ds.read_variable(gm['y']).data
-        grid['x']  = np.stack((x, y), axis=1).astype(np.float64)
 
 
     def read_bottom_cell_index(self, grid):

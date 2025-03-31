@@ -140,7 +140,7 @@ rg3points= dict(name='three points',
              points=[[1594500, 5487000, -1],
                      [1594500, 5483000, -1],
                      [1598000, 5486100, -1]],
-             release_interval=3600,
+             release_interval=1800,
              pulse_size=10)
 
 pp1= dict(name='a_pollutant',  # must have a user given name
