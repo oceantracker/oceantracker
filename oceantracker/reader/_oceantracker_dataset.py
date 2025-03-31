@@ -55,7 +55,10 @@ class OceanTrackerDataSet(object):
         nt_available = nt[sel]
         return nt_available
 
+    def read_data(self, file_var_name: str, nt=None):
+        return self.read_variable(file_var_name, nt=nt).data
     def read_variable(self, file_var_name: str, nt=None):
+
         # read simple variable
         info = self.info
         vi = info['variables'][file_var_name]
