@@ -33,12 +33,18 @@ class FieldGroupManager(ParameterBaseClass):
 
         # get params from main or nested reader
         if gridID > 0:
-            reader_params = si.working_params['nested_readers'][gridID -1]
+            reader_params = si.working_params['nested_readers'][gridID - 1]
         else:
             reader_params = si.working_params['reader']
         # build  primary. ie  velocity field, reader
 
         self.reader, add_info = self._make_a_reader(reader_params)
+
+        if gridID == 0:
+            si.core_class_roles.reader = self.reader
+        else:
+            si.class_roles.nested_readers[f'nested_reader_{gridID:02d}'] = self.reader
+
         info.update(add_info)
 
 

@@ -23,7 +23,6 @@ def default_params():
         'release_groups':[ {'name':'P1', 'points': [], 'pulse_size': 10,
                              #     'coords_in_lat_lon_order': True, # only used if hydro-model is in
                                 'release_interval': 1800,'z_min':-2.},
-
                             ],
         'dispersion': {'A_H': .1, 'A_V': 0.001},
         'reader': {'file_mask':None,
@@ -380,6 +379,7 @@ def get_case(n):
                 # nested schisim
                 pulse_size = 5
                 root_input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\final_version\2012\09'
+
                 output_file_base = 'shared_reader'
                 file_mask = 'NZfinite*.nc'
                 max_days =5# 30
@@ -392,21 +392,16 @@ def get_case(n):
                     [-35.922300421719214, 174.665532083399],  # hen and chickes, in outer grid
                     [-35.922300421719214, 174.665532083399], # hen and chickes, in outer grid
                     ]
-                x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
-                x0=[   [ 1727195 ,    6035149],
-                        [1737357,     6029638],
-                        [1742484 ,    6021345],
-                        [1743472 ,    6019861]]
-                ax=  [  1715000 ,    1755000 ,    6010000 ,    6050000] # northland
+                x0 = np.flip(np.asarray(x0), axis=1)
+
                 title = 'nested test'
                 nested_readers= [dict(name='nest1',
-                        input_dir = r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\Existing_Sep2012_temp',
-                        hgrid_file_name=r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\hgrid.gr3',
-                        # input_dir = r'F:\Hindcasts\2023WhangareiHarbour2012\2012_outputs\Existing_Sep2012_temp',
-                        #  hgrid_file_name=r'F:\Hindcasts\2023WhangareiHarbour2012\hgrid.gr3',
-                        file_mask = 'schout*.nc',
+                        input_dir = r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\schism_standard_variables\Existing_Sep2012_temp',
+                        hgrid_file_name=r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\schism_standard_variables\hgrid.gr3',
 
-                )]
+                        file_mask = 'schout*.nc',
+                        EPSG_code=2193 )]
+                params['reader'].update(EPSG_code=2193)
 
 
         case 3000:
