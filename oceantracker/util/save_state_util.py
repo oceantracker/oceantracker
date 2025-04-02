@@ -28,7 +28,8 @@ def save_class_info(file_name, si, n_time_step, time_sec ):
         # recorded current state of all  class info
         d=dict(time_sec=time_sec,n_time_step=n_time_step,
                date=time_util.seconds_to_isostr(time_sec),
-               core_class_roles=dict(),class_roles=dict())
+               core_class_roles=dict(),class_roles=dict(),
+               run_info= si.run_info.asdict())
         for role, i in si.core_class_roles.items():
             if role is not None and hasattr(i, 'info'):
                 d['core_class_roles'][role] = i.info
@@ -39,5 +40,6 @@ def save_class_info(file_name, si, n_time_step, time_sec ):
                 d['class_roles'][role][name] = i.info
 
         # write info to json
+
         json_util.write_JSON(file_name, d)
 
