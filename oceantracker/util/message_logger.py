@@ -58,7 +58,7 @@ class MessageLogger(object ):
         self.log_file = open(self.log_file_name, 'w')
 
         # kill any old error file
-        error_file_name = output_file_base+ '.err'
+        error_file_name = 'error_warnings.err'
         self.error_file_name = path.join(run_output_dir, error_file_name)
         if path.isfile(self.error_file_name ):
             remove(self.error_file_name)

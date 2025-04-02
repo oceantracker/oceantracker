@@ -121,7 +121,6 @@ class ParticleGroupManager(ParameterBaseClass):
         # update new particles props
         # todo does this update_PartProp have to be here as setup_interp_time_step and update_PartProp are run immediately after this in pre step bookkeeping ?
         self.update_PartProp(n_time_step, time_sec, new_buffer_index)
-        #print('xx2',new_buffer_index.size,  new_buffer_index[[0,-1]])
 
         return new_buffer_index #indices of all new particles
 
@@ -242,12 +241,12 @@ class ParticleGroupManager(ParameterBaseClass):
         nDead = si.particles_in_buffer - num_alive
 
         # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
-        if nDead > 100_000 and nDead >= 0.20* si.particles_in_buffer:
+        if nDead > si.settings.min_dead_to_remove and nDead >= 0.20* si.particles_in_buffer:
                 # if too many dead then delete from memory
                 part_prop = si.class_roles.particle_properties
                 ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
                 dead_frac=100*nDead/si.particles_in_buffer
-                si.msg_logger.msg(f'removing dead {nDead:6,d} particles from buffer,  {dead_frac:2.0f}% are dead', tabs=3)
+                si.msg_logger.msg(f'removing dead {nDead:6,d} particles from buffer,  {dead_frac:2.0f}% are dead or more than {si.settings.min_dead_to_remove:6,d} are dead', tabs=3)
 
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():

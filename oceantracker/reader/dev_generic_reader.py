@@ -70,7 +70,7 @@ class _BaseGenericReader(_BaseReader):
             ds = self.dataset
             grid['sigma']       = 1. + ds.read_variable(params['grid_variable_map']['sigma']).data.astype(np.float32)  # layer boundary fractions reversed from negative valu
         else:
-            si.msg_logger.msg('Genteric reader under develoment, currently only works with sigma vertical grids')
+            si.msg_logger.msg('Generic reader under development, currently only works with sigma vertical grids')
 
 
         super().build_vertical_grid()
