@@ -160,7 +160,7 @@ class Solver(ParameterBaseClass):
             self.stop_update_timer()
             if abs(t2 - ri.start_time) > ri.duration: break
 
-        raise ('debug -error handing check')
+        #raise ('debug -error handing check')
 
         # write out props etc at last step
         if n_time_step > 0: # if more than on set completed

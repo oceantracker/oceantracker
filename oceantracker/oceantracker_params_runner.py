@@ -631,7 +631,7 @@ class OceanTrackerParamsRunner(object):
             save_state_util.save_part_prop(path.join(file_base,'particle_prop_on_error.nc'), si, n_time_step, time_sec)
 
         # save class info
-        save_state_util.save_class_info(path.join(file_base,'class_info_on_error.json'), si, n_time_step, time_sec)
+        save_state_util.save_class_info(path.join(file_base,'info_on_error.json'), si, n_time_step, time_sec)
 
 
 
