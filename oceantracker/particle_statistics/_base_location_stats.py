@@ -172,9 +172,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
 
 
-    # overload this method to subset indicies in out of particles to count
-    def select_particles_to_count(self, out):
-        return out
+    # user overload this method to subset indicies in out of particles to count
+    def select_particles_to_count(self, sel): # dummy method
+        return sel
 
 
     def update(self,n_time_step, time_sec):
@@ -187,9 +187,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         num_in_buffer = si.particles_in_buffer
 
         # first select those to count based on status and z location
-        sel = self.sel_status_waterdepth_and_z(part_prop['status'].data, part_prop['x'].data, part_prop['water_depth'].data.ravel(),
-                                               self.statuses_to_count_map, info['z_range'], info['water_depth_range'],
-                                               num_in_buffer, self.get_partID_buffer('B1'))
+        sel = self._sel_status_waterdepth_and_z(part_prop['status'].data, part_prop['x'].data, part_prop['water_depth'].data.ravel(),
+                                                self.statuses_to_count_map, info['z_range'], info['water_depth_range'],
+                                                num_in_buffer, self.get_partID_buffer('B1'))
 
         # any overloaded sub-selection of particles given in child classes
         sel = self.select_particles_to_count(sel)
@@ -210,7 +210,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     @staticmethod
     @njitOT
-    def sel_status_waterdepth_and_z(status, x, water_depth, statuses_to_count_map, z_range, water_depth_range, num_in_buffer, out):
+    def _sel_status_waterdepth_and_z(status, x, water_depth, statuses_to_count_map, z_range, water_depth_range, num_in_buffer, out):
         n_found = 0
         if x.shape[1] == 3:
             # 3D selection

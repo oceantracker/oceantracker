@@ -37,7 +37,7 @@ def main(args):
         case_info_file = ot.run()
     except Exception as e:
         print('has errors',str(e))
-        # acrry on
+        # carry on
 
 
 

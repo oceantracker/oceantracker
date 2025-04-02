@@ -2,7 +2,7 @@ from time import perf_counter
 import psutil
 from os import  path, mkdir
 import numpy as np
-from oceantracker.util import time_util, json_util, ncdf_util
+from oceantracker.util import time_util, json_util, ncdf_util, save_state_util
 from datetime import datetime
 from oceantracker.particle_properties.util import particle_operations_util, particle_comparisons_util
 from oceantracker.util.parameter_base_class import ParameterBaseClass
@@ -39,7 +39,7 @@ class Solver(ParameterBaseClass):
     #@profile
     def solve(self):
         # solve for data in buffer
-
+        info = self.info
         ri=si.run_info
         ml = si.msg_logger
         part_prop = si.class_roles.particle_properties
@@ -85,6 +85,10 @@ class Solver(ParameterBaseClass):
             t0_step = perf_counter()
             self.start_update_timer()
             time_sec = model_times[n_time_step]
+
+            # record info for any error dump
+            info['time_sec'] = time_sec
+            info['current_time_step'] = n_time_step
 
             # warn of  high physical memory use
             if psutil.virtual_memory().percent > 95:
@@ -155,6 +159,8 @@ class Solver(ParameterBaseClass):
 
             self.stop_update_timer()
             if abs(t2 - ri.start_time) > ri.duration: break
+
+        raise ('debug -error handing check')
 
         # write out props etc at last step
         if n_time_step > 0: # if more than on set completed
@@ -229,8 +235,6 @@ class Solver(ParameterBaseClass):
             # write time varying track data to file if scheduled
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
-
-
 
     def do_time_step(self, time_sec, is_moving):
 
@@ -401,41 +405,23 @@ class Solver(ParameterBaseClass):
             si.core_class_roles.tracks_writer._close_file()
 
         state_dir = path.join(si.run_info.run_output_dir, 'saved_state')
-        state = dict(time=time_sec, date = time_util.seconds_to_isostr(time_sec),
+        state = dict(time=time_sec,
+                     date = time_util.seconds_to_isostr(time_sec),
                      state_dir=state_dir,
                      run_output_dir= si.run_info.run_output_dir,
+                     class_info_file=path.join(state_dir, 'class_info.json'),
                      part_prop_file =path.join(state_dir, 'particle_properties.nc'),
-                     class_roles_info={},
-                     core_class_info={})
+                    )
         if not path.isdir(state_dir):
             mkdir(state_dir)
 
         # save particle properties
-        nc = ncdf_util.NetCDFhandler(state['part_prop_file'], mode='w')
-        nc.write_global_attribute('time', time_sec)
-        nc. add_dimension(si.dim_names.particle,si.particles_in_buffer)
-        for name, prop in si.class_roles.particle_properties.items():
-            dims=[si.dim_names.particle]
-            if prop.params['vector_dim'] == 2: dims +=[si.dim_names.vector2D]
-            if prop.params['vector_dim'] == 3: dims += [si.dim_names.vector3D]
+        save_state_util.save_part_prop(state['part_prop_file'], si, n_time_step, time_sec)
 
-            if len(dims) == prop.data.ndim:
-                # in dev mode only write those that have al dimsenions
-                nc.write_a_new_variable(name,prop.data[:si.particles_in_buffer,...], dims)
-        nc.close()
+        # save class info
+        save_state_util.save_class_info(state['class_info_file'], si, n_time_step, time_sec)
 
-        # recorded all class info
-        for role, i in si.core_class_roles.items():
-            if hasattr(i,'info'):
-                state['core_class_info'][role] = i.info
-
-        for role, d in si.class_roles.items():
-            if role not in state['class_roles_info']:  state['class_roles_info'][role] = dict()
-            for name, i in d.items():
-                state['class_roles_info'][role][name] = i.info
-
-
-        # write info to json for restarting
+        # write state json for restarting
         json_util.write_JSON(path.join(state_dir, 'state_info.json'),state)
 
     def _load_saved_state(self):

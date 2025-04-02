@@ -9,7 +9,7 @@ from time import  perf_counter
 from oceantracker.util.message_logger import OTerror, OTfatal_error, OTunexpected_error
 from oceantracker.util import profiling_util, get_versions_computer_info
 
-from oceantracker.util import time_util, output_util
+from oceantracker.util import time_util, output_util, save_state_util
 
 from oceantracker.util import json_util, setup_util
 from datetime import datetime
@@ -32,7 +32,12 @@ class OceanTrackerParamsRunner(object):
         case_info_file = None
         ml = si.msg_logger
         err_hint = 'check for first error above or in log file.txt or .err file '
+
+
+
         try:
+
+
             # unpack params into working version as si.working_params
             # and set up output directory and log file
             self._do_setup(user_given_params)
@@ -55,21 +60,21 @@ class OceanTrackerParamsRunner(object):
             ml.msg(f'Parameters/setup has errors', hint= 'see above')
 
         except OTfatal_error as e:
+            self._write_error_info(e)
 
-            ml.write_error_log_file(e)
             ml.msg(f'Single parameter/setup error requiring immediate exit', hint=err_hint)
 
         except FileNotFoundError as e:
-            ml.write_error_log_file(e)
+            self._write_error_info(e)
             ml.msg(f'Could not find hindcast file? or other required file',  hint=err_hint)
 
         except OSError as e:
             # path may already exist, but if not through other error, exit
-            ml.write_error_log_file(e)
+            self._write_error_info(e)
             si.msg_logger.msg(f'Failed to make run output dir or invalid file name', hint=err_hint )
 
         except Exception as e:
-            ml.write_error_log_file(e)
+            self._write_error_info(e)
             ml.msg(f' Unexpected error  ', error=True, hint=err_hint)
 
 
@@ -88,7 +93,7 @@ class OceanTrackerParamsRunner(object):
 
         if num_errors > 0:
             ml.hori_line('Found errors, so some cases may not have completed')
-            ml.hori_line('see above or  *_caseLog.txt and *_caseLog.err files')
+            ml.hori_line('see above or  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
             ml.hori_line()
 
         ml.progress_marker('Finished "' + '>> with errors, see above'  if  si.run_info.output_file_base is None else si.run_info.output_file_base
@@ -190,7 +195,7 @@ class OceanTrackerParamsRunner(object):
         self._build_field_group_manager(si.working_params)
 
         self._make_all_class_instances_from_params(si.working_params)
-
+        #raise ('debug -error handing check')
         self._add_release_groups_to_get_run_start_end(si.working_params)
 
         self._initial_setup_all_classes(si.working_params)
@@ -597,8 +602,45 @@ class OceanTrackerParamsRunner(object):
             from oceantracker.util import numba_util
             d['numba_code_info'] = numba_util.get_numba_func_info()
 
-
-
         case_info_file = path.join(si.output_files[ 'run_output_dir'],si.output_files['caseInfo_file'])
         json_util.write_JSON(case_info_file, d)
         return case_info_file
+
+    def _write_error_info(self,e):
+
+        if si.run_info.run_output_dir is None:
+            # if nowhere to write
+            print(e)
+            print(traceback.format_exc())
+            return
+
+        if hasattr(si.msg_logger,'error_file_name'):
+            si.msg_logger.write_error_log_file(e)
+
+        file_base = si.run_info.run_output_dir
+        solver_info = si.core_class_roles.solver.info
+        if si.core_class_roles.solver is not None and 'n_time_step' in solver_info:
+            n_time_step = solver_info['n_time_step']
+            time_sec = solver_info['time_sec']
+        else:
+            n_time_step = -999
+            time_sec =  0.
+
+        # save current particle properties
+        if len(si.class_roles.particle_properties) > 0:
+            save_state_util.save_part_prop(path.join(file_base,'particle_prop_on_error.nc'), si, n_time_step, time_sec)
+
+        # save class info
+        save_state_util.save_class_info(path.join(file_base,'class_info_on_error.json'), si, n_time_step, time_sec)
+
+
+
+
+
+
+
+
+
+
+
+

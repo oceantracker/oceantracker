@@ -6,12 +6,13 @@
 1. matlab read stats check
 2.  fix demo matalb plot axes 
 3. split particles writing track   files, are not readable
+3. map scale on latlong grid too big
    
 1. add descriptions to particle properties to put in netcdf if written out
 
 2. centalize polygon list creation and param checking 
 4. ensure error log is written on caught error
-1. better spell check suggestions when short or long module name not found
+
 
 ##  Internal Structure
 
@@ -30,7 +31,7 @@
 3.  reader grid transforms faster with pre-allocated buffers?
 4. unit test 01,  track diff. between LSC and sigma vertical regrid too large?
 5. vertical regrid using z fractions for each time step?
-6.  adding custion reader fields, reader fields, eg deg_t0_lat_long updating? and part prop updating ordering?
+6.  adding custom reader fields, reader fields, eg deg_t0_lat_long updating? and part prop updating ordering?
 1. max_duration and end time estimates
 8. LSC unit test slow?  release stratergies?
 9.  speed nested grids, only check if particle on outer grid is inside an inner grid if in a cell overlapping  an inner grid 
