@@ -446,8 +446,6 @@ class _BaseReader(ParameterBaseClass):
         bi = self.info['buffer_info']
 
 
-
-
         hindcast_fraction = (time_sec - info['start_time']) / info['duration']
 
         current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
