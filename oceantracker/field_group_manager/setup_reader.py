@@ -241,6 +241,7 @@ def _time_sort_files(reader, crumbs):
 
     ds_info['start_date'] = time_util.seconds_to_isostr(ds_info['start_time'])
     ds_info['end_date'] = time_util.seconds_to_isostr(ds_info['end_time'])
+    ds_info['dates'] = time_util.seconds_to_isostr( time)
 
     pass
 def _catalog_fields(reader, crumbs=None):

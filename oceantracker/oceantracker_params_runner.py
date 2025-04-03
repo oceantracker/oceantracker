@@ -195,7 +195,7 @@ class OceanTrackerParamsRunner(object):
         self._build_field_group_manager(si.working_params)
 
         self._make_all_class_instances_from_params(si.working_params)
-        #raise ('debug -error handing check')
+        ##raise Exception('debug -error handing check')
         self._add_release_groups_to_get_run_start_end(si.working_params)
 
         self._initial_setup_all_classes(si.working_params)
@@ -229,7 +229,7 @@ class OceanTrackerParamsRunner(object):
         for name, i in si.class_roles.release_groups.items():
             if i.info['number_released'] == 0:
                 ml.msg(f'No particles were released by release_group named= "{name}"', error=True,
-                       caller=i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells)')
+                       caller=i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells?, mismatch of release coords and hindcast, betweem meters and GPS? )')
 
         case_info_file = self._get_case_run_info(self.start_date, self.start_time)
 

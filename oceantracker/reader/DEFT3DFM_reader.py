@@ -34,6 +34,8 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             dimension_map=dict(
                         z = PVC('mesh2d_nInterfaces', str, doc_str='z dim for interfaces'),
                         time=PVC('time', str, doc_str='name of time dimension in files'),
+                        node=PVC('mesh2d_nNodes', str, doc_str='name of node  dimension in files'),
+
                         all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers'], str, doc_str='All z dims, used to identify  3D variables'),
                          ),
             field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
@@ -135,10 +137,13 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         ds = self.dataset
 
         if info['vert_grid_type'] == si.vertical_grid_types.Sigma:
+            # assumes first value -1 is at the bottom
             grid['sigma'] = ds.read_variable('mesh2d_interface_sigma').data.astype(np.float32) # layer interfaces
-            grid['sigma'][0] = -1  # not sure why this value is 9.96920997e+36??
-            grid['sigma'] = 1.+ grid['sigma'] #
-            grid['sigma_layer'] = ds.read_variable('mesh2d_layer_sigma').data.astype(np.float32) # layer center
+            grid['sigma'][0] = -1.  # not sure why this value is 9.96920997e+36??
+            grid['sigma_layer'] = ds.read_variable('mesh2d_layer_sigma').data.astype(np.float32)  # layer center
+            # shift to be zero at bottom
+            grid['sigma'] = 1.+ grid['sigma']
+            grid['sigma_layer'] = 1. + grid['sigma_layer']
         else:
             # fixed z levels
             grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)  # layer boundary fractions reversed from negative values

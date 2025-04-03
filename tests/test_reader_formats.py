@@ -34,7 +34,7 @@ def default_params():
         'resuspension': {'critical_friction_velocity': 0.00}
         }
 
-    params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_coords'])
+    params['tracks_writer']= dict(turn_on_write_particle_properties_list=['n_cell','nz_cell','bc_coords','water_velocity'])
 
     return  params
 
@@ -301,11 +301,14 @@ def get_case(n):
             show_grid = True
 
         case 411:
-            # DELFT FM exmouth
-            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_version1'
+            # DELFT FM hananui
+            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_test1\compressed_version1'
 
-            x0 = [[230372.0534805571, 7581341.601568772]]
-            file_mask = 'Ha*.nc'
+            x0 = [[-46.76850063886385, 168.1665833416483],
+                  [-46.6651360690957, 168.5548344059933],
+                  [-46.948229184324596, 168.34936820699286]]
+            x0 = np.flip(np.asarray(x0), axis=1)
+            file_mask = 'R3*.nc'
             output_file_base = 'DELF3D-FM_hananui'
             title = 'DELF3D-FM_hananui'
             is3D = True
@@ -475,7 +478,7 @@ if __name__ == '__main__':
 
     for n in tests:
         params, plot_opt= get_case(n)
-        #params['display_grid_at_start'] = True # ti use giput to get cords
+        params['display_grid_at_start'] = True # ti use giput to get cords
         params.update( root_output_dir = root_output_dir,
                     regrid_z_to_uniform_sigma_levels = args.uniform,
                     dev_debug_plots = args.debug_plots,
@@ -507,6 +510,7 @@ if __name__ == '__main__':
                                           show_grid=plot_opt['show_grid'])
             if track_data['x'].shape[1] > 2:
                 plot_tracks.plot_path_in_vertical_section(track_data, particleID=0,)
+
 
             plot_file = plot_base + '_decay_01.mp4' if args.save_plot else None
 
