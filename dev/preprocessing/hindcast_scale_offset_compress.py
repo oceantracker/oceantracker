@@ -143,6 +143,8 @@ class RewriteHindcast():
                 pass
         pass
 
+        print('output in  >> ', path.basename(fn_out))
+
     def add_variable(self, name, data, dims):
           self.variables_to_add[name] = xr.DataArray(data, dims=dims)
 
@@ -179,10 +181,8 @@ class RewriteHindcast():
 
     def DEFT3D_encoding(self, compress = 0):
         # add encoding to common variables
-        # hori velocity
-        self.file_info['time_variable'] = 'time'
         # do not scale encode depth
-
+        self.file_info['time_variable'] = 'time'
         self.file_info['time_dim'] = 'time'
 
         for name in ['mesh2d_u1', 'mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ucxa', 'mesh2d_ucya', 'mesh2d_ucmag', 'mesh2d_ucmaga']:
@@ -202,6 +202,32 @@ class RewriteHindcast():
         for name in ['mesh2d_windx', 'mesh2d_windy', 'mesh2d_windxu', 'mesh2d_windyu']:
             self.encode_var(name, min_max=[-self.max['wind_speed'], self.max['wind_speed']], compression=compress)
 
+        self.encode_var('mesh2d_Patm', min_max=[50000,150000])
+    def SCH_encoding(self, compress = 0):
+        # add encoding to common variables
+        # do not scale encode depth
+        self.file_info['time_variable'] = 'time'
+        self.file_info['time_dim'] = 'time'
+
+        for name in ['mesh2d_u1', 'mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ucxa', 'mesh2d_ucya', 'mesh2d_ucmag', 'mesh2d_ucmaga']:
+            self.encode_var(name, min_max=[-self.max['hori_vel'], self.max['hori_vel']], compression=compress)
+
+        self.encode_var('mesh2d_s1', min_max=[-self.max['tide'], self.max['tide']], compression=compress) # tide
+
+        # tides
+
+        self.encode_var('mesh2d_TidalPotential', min_max=[-self.max['tide'], self.max['tide']], compression=compress)
+
+        # vertical vel
+        self.encode_var('mesh2d_ucz', min_max=[-self.max['vert_vel'], self.max['vert_vel']], compression=compress)
+        self.encode_var('mesh2d_ww1', min_max=[-self.max['vert_vel'], self.max['vert_vel']], compression=compress)
+
+        # wind speeds
+        for name in ['mesh2d_windx', 'mesh2d_windy', 'mesh2d_windxu', 'mesh2d_windyu']:
+            self.encode_var(name, min_max=[-self.max['wind_speed'], self.max['wind_speed']], compression=compress)
+
+        self.encode_var('mesh2d_Patm', min_max=[50000,150000])
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
@@ -216,8 +242,9 @@ if __name__ == "__main__":
             output_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_test1\compressed_version1'
 
             h= RewriteHindcast(input_dir, file_mask, test=args.test_mode)
-            h.DEFT3D_encoding(compress=0)
+            h.DEFT3D_encoding(compress=3)
 
+            # use h.encode_var() to override any minmaxs sset in
             h.show_var_min_max()  # show mins and max, dims  for all variables in first file, must be after encoding cll
 
             s = -np.arange(0,1.1,.1)[::-1]
