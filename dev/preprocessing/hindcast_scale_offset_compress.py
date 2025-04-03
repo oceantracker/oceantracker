@@ -17,12 +17,18 @@ class RewriteHindcast():
         glob_mask = path.join(input_dir, '**',file_mask)
 
         self.file_list=  glob(glob_mask, recursive=True)
+        self.test = test
+
+        if len(self.file_list) ==0:
+            raise FileNotFoundError( f'no files found with, "{input_dir}", "{file_mask}"')
         if test:
             self.file_list = [self.file_list[0]]
 
 
     def show_vars(self):
         ds =  xr.open_dataset(self.file_list[0])
+        print('_________ variable info_______________________________________')
+
         for name, v in ds.variables.items():
             min, max = np.nanmin(v),np.nanmax(v)
             print(f'{name:15}  dtype= {v.dtype}, dims={v.dims},  shape={v.shape}', 'min=',min, 'max=', max )
@@ -45,7 +51,8 @@ class RewriteHindcast():
             time_steps = dataset[time_variable].size
             time_steps_per_file = time_steps if time_steps_per_file is None else time_steps_per_file
 
-            for sel_time_steps in np.array_split(np.arange(time_steps), int(time_steps/time_steps_per_file)):
+            for n, sel_time_steps in enumerate(np.array_split(np.arange(time_steps), int(time_steps/time_steps_per_file))):
+                if self.test and n >=3:continue # only write 3 files
                 self._write_a_file(fn, dataset, time_variable,time_dim,  dropvars, sel_time_steps,splitting_file=sel_time_steps.size < time_steps)
 
         self.compare_compressed_file()
@@ -54,13 +61,15 @@ class RewriteHindcast():
 
         output_dataset = xr.Dataset()
         output_dataset.attrs = dataset.attrs
+        # add user added variables
+        for name, var in self.variables_to_add.items():
+            output_dataset[name] = var
 
         ve = self.var_encoding
         endcoding = dict()
 
         for name, v in dataset.variables.items():
             if name in dropvars: continue
-
 
             if time_dim in v.dims:
                 # select times
@@ -72,10 +81,10 @@ class RewriteHindcast():
                 min_max = ve[name]['min_max']
                 if min_max is not None:
                     data, sf =  self._compute_scale_and_offset(data, min_max)  # as int16
+                    data.attrs.update(v.attrs)
                     data.attrs.update(sf)
                     endcoding[name] ={}
                     #endcoding[name].update(dict(dtype=np.int16, _FillValue=np.iinfo(np.int16).min))
-
 
                 if ve[name]['compression'] > 0:
                     endcoding[name].update(dict(zlib=True, complevel=ve[name]['compression']))
@@ -99,15 +108,17 @@ class RewriteHindcast():
 
         d_out = xr.open_dataset(self.file_list_out[0])
         d_in = d_in.sel(time=d_out['time'])
+        print('')
+        print('_____________check  max differences between raw and compressed__ first file only _________________________________')
 
         for name, v in d_out.variables.items():
             if 'scale_factor' in v.encoding:
-                print(name,'compare, max diff', np.nanmax( (d_out[name] - d_in[name]).compute()))
+                print(name,'\t  max diff',  np.nanmax( (d_out[name] - d_in[name]).compute()), '\t , range used =', self.var_encoding[name]['min_max'])
                 pass
         pass
 
     def add_variable(self, name, data, dims):
-          self.variables_to_add[name] = xr.DataArray(name, data, dims=dims)
+          self.variables_to_add[name] = xr.DataArray(data, dims=dims)
 
     def _compute_scale_and_offset(self,data,  min_max):
         # convert float to scaled and offset int32
@@ -140,7 +151,7 @@ class RewriteHindcast():
         return data,  e
 
 
-    def DEFT3D_var_encoding(self,max_depth, compress = 0):
+    def DEFT3D_encoding(self, max_depth, compress = 0):
         # add encoding to common variables
         # hori velocity
         for name in ['mesh2d_u1', 'mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ucxa', 'mesh2d_ucya', 'mesh2d_ucmag', 'mesh2d_ucmaga']:
@@ -165,16 +176,16 @@ if __name__ == "__main__":
     ncase = 0
     match ncase:
          case 0:
-            input_dir=r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_version1'
-            file_mask = r'han*.nc'
-            output_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_version1_compressed'
+            input_dir=r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_test1'
+            file_mask = r'R3_*.nc'
+            output_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_test1\compressed_version1'
 
             h= RewriteHindcast(input_dir, file_mask, test=True)
-            h.show_vars()
+            #h.show_vars() # show mins and max, dims  for all variables
 
-            h.DEFT3D_var_encoding(600, compress=0)
-            s = np.linspace(0,1,11)
-            h.add_variable('mesh2d_interface_sigma' , s,['s'] )
-
-            h.write(output_dir,'time',time_steps_per_file=12)
+            h.DEFT3D_encoding(600, compress=0)
+            s = -np.arange(0,1.1,.1)[::-1]
+            h.add_variable('mesh2d_interface_sigma' , s, ['mesh2d_nInterfaces'])
+            h.add_variable('mesh2d_layer_sigma', (.05+s[:-1]), ['mesh2d_nLayers'])
+            h.write(output_dir,'time',time_steps_per_file=24)
 

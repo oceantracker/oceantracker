@@ -45,6 +45,7 @@ class OceanTrackerDataSet(object):
                                        dtype = var.dtype)
 
                 info['variables'][name]['fileIDs'].append(fileID)
+            info['attributes'].update(ds.attrs)
 
         self.info['variables'] = vars
 
