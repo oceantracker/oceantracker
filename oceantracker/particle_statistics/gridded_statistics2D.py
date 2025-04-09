@@ -208,8 +208,8 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
         # set up info/attributes
         self.add_default_params({'role_output_file_tag': PVC('stats_gridded_age',str),
                                  'min_age_to_bin':  PVC(0.,float,min=0., doc_str='Min. particle age to count', units='sec'),
-                                 'max_age_to_bin':  PVC(si.info.large_float , float, min=1., doc_str='Max. particle age to count', units='sec'),
-                                 'age_bin_size':    PVC(7*24*3600.,float,doc_str='Size of bins to count ages into, default= 1 week', units='sec'),
+                                 'max_age_to_bin':  PVC(None , float, min=1., doc_str='Max. particle age to count', units='sec', is_required=True),
+                                 'age_bin_size':    PVC(7*24*3600.,float,min=1,doc_str='Size of bins to count ages into, default= 1 week', units='sec'),
                                 })
 
     def initial_setup(self):
@@ -222,21 +222,21 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
 
     def set_up_time_bins(self,nc):
         # this set up age bins, not time
+        params = self.params
         ml = si.msg_logger
         stats_grid = self.grid
 
-        # ages to bin particle ages into,  equal bins in given range
-        age_min = abs(self.params['min_age_to_bin'])
-        age_max = min(abs(self.params['max_age_to_bin']), si.run_info.duration)
+        # check age limits to bin particle ages into,  equal bins in given range
+        params['max_age_to_bin'] = min(params['max_age_to_bin'], si.run_info.duration)
+        params['max_age_to_bin'] = max(params['age_bin_size'], params['max_age_to_bin']) # at least one bin
 
-        if age_max <= age_min:
-            ml.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
-                                    + str([age_min,age_max ]) + ', duration=' + str(si.run_info['duration']),
-                   caller=self,   error=True)
+        if params['min_age_to_bin'] >=  params['max_age_to_bin']: params['min_age_to_bin'] = 0
+        age_range = params['max_age_to_bin']- params['min_age_to_bin']
+        if params['age_bin_size'] > age_range:  params['age_bin_size'] = age_range
 
         # set up age bin edges
-        dage= abs((self.params['age_bin_size']))
-        stats_grid['age_bin_edges'] = float(si.run_info.model_direction) * np.arange(age_min, age_max+dage, dage)
+        dage= params['age_bin_size']
+        stats_grid['age_bin_edges'] = float(si.run_info.model_direction) * np.arange(params['min_age_to_bin'], params['max_age_to_bin']+dage, dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
             ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',
