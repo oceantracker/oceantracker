@@ -26,6 +26,8 @@ class RewriteHindcast():
             self.file_list = [self.file_list[0]]
 
 
+
+
     def show_var_min_max(self):
         ds =  xr.open_dataset(self.file_list[0])
         print('_________ variable info______first 100 time steps from first file________________________________')
@@ -297,7 +299,7 @@ if __name__ == "__main__":
             h= RewriteHindcast(input_dir, file_mask, test=args.test_mode)
             h.DEFT3D_encoding(scale =True)
 
-            # use h.encode_var() to override any minmaxs sset in
+            # use h.encode_var() to override any min,maxs sset in above
             h.show_var_min_max()  # show mins and max, dims  for all variables in first file, must be after encoding cll
 
             s = -np.arange(0,1.1,.1)[::-1]
@@ -313,7 +315,7 @@ if __name__ == "__main__":
             h = RewriteHindcast(input_dir, file_mask, test=args.test_mode)
             h.SCHISM_encoding(scale =True)
 
-            # use h.encode_var() to override any minmaxs sset in
+            # use h.encode_var() to override any min,maxs sset in above
             h.show_var_min_max()  # show mins and max, dims  for all variables in first file, must be after encoding cll
 
             h.write(output_dir, compression=5)
@@ -325,7 +327,7 @@ if __name__ == "__main__":
             h = RewriteHindcast(input_dir, file_mask, test=args.test_mode)
             h.ROMS_encoding(scale=True)
 
-            # use h.encode_var() to override any minmaxs sset in
+            # use h.encode_var() to override any min,maxs sset in above
             h.show_var_min_max()  # show mins and max, dims  for all variables in first file, must be after encoding cll
 
             h.write(output_dir, compression=5)

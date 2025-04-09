@@ -1,5 +1,5 @@
 from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReader
-
+from os import path
 
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC, ParameterListChecker as PLC
@@ -210,6 +210,9 @@ def decompose_lines(lines, dtype=np.float64):
 
 def read_hgrid_file(file_name):
 
+    if not path.isfile(file_name):
+        si.msg_logger.msg(f'Cannot find given schsim hgrid file "{file_name}"',
+                         hint ='check path', fatal_error=True )
     d={}
     with open(file_name) as f:
         lines = f.readlines()

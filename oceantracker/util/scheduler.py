@@ -1,5 +1,4 @@
-import signal
-from inspect import signature
+from oceantracker.shared_info import shared_info as si
 import numpy as np
 from oceantracker.util import  time_util
 class Scheduler(object):
@@ -26,8 +25,6 @@ class Scheduler(object):
             times = run_info.start_time + np.round(n) * dt
             times = md* np.sort(md*times) # ensure they are in right order for backwards/forwards
             interval = None
-
-        start_time_outside_run_times = times[0]*md < run_info.start_time*md
 
         # trim to fit inside the run
         sel = np.logical_and(times * md >= run_info.start_time * md, times * md <= run_info.end_time * md)
@@ -59,7 +56,6 @@ class Scheduler(object):
                         end_date=time_util.seconds_to_isostr(end),
                         number_scheduled_times = self.scheduled_times.size,
                         cancel_when_done=cancel_when_done,
-                        start_time_outside_run_times =start_time_outside_run_times,
                         )
         i = self.info
         b = f'{12*" "} Scheduler{15*" "}Hindcast{14*" "}Run\n'
@@ -68,8 +64,8 @@ class Scheduler(object):
         b += f'{10*" "}interval = {i["interval"]}, backtracking={settings.backtracking}'
         i['bounds_table']= b
 
-        if i['start_time_outside_run_times']:
-            msg_logger.msg('Making scheduler: start time is outside model run times',
+        if len(self.scheduled_times) == 0:
+            msg_logger.msg('No times scheduled, as outside start and end times of run, see caller below',
                                 hint=i['bounds_table'], caller=caller, error=True, crumbs=crumbs)
 
         if self.scheduled_times.size == 0:
