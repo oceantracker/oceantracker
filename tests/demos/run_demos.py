@@ -1,4 +1,4 @@
-from os import path, mkdir, getcwd
+from os import path
 import argparse
 import glob
 import matplotlib.pyplot as plt
@@ -6,13 +6,13 @@ from oceantracker.util import json_util
 from oceantracker.util import time_util
 
 from oceantracker import main
-from plot_oceantracker import plot_utilities
+from oceantracker.plot_output import plot_utilities
 import make_demo_plots
 import build_and_test_demos
 import numpy as np
-from read_oceantracker.python import load_output_files
-from read_oceantracker.python.load_output_files import load_stats_data, load_concentration_data
-from plot_oceantracker.plot_statistics import plot_heat_map, animate_heat_map
+from oceantracker.read_output.python import load_output_files
+from oceantracker.read_output.python import load_stats_data, load_concentration_data
+from oceantracker.plot_output.plot_statistics import plot_heat_map, animate_heat_map
 
 two_points= [[1594500, 5483000], [1598000, 5486100]]
 
@@ -133,7 +133,7 @@ if __name__ == "__main__":
         elif n == 61:
             #todo make conc plotting work
 
-            from plot_oceantracker.plot_statistics import animate_concentrations
+            from oceantracker.plot_output.plot_statistics import animate_concentrations
 
             c = load_concentration_data(case_info_file_name)
 

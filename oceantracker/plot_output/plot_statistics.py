@@ -3,7 +3,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from oceantracker.util.triangle_utilities import convert_face_to_nodal_values
-import plot_oceantracker.plot_utilities as plot_utilities
+import oceantracker.plot_output.plot_utilities as plot_utilities
 
 from matplotlib import animation
 from oceantracker.util import time_util

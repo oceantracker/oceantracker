@@ -1,12 +1,7 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from os import  path
 import numpy as np
-from oceantracker.util import time_util, json_util
 from oceantracker.field_group_manager.util import field_group_manager_util
-from time import  perf_counter
-from copy import deepcopy
 from oceantracker.shared_info import shared_info as si
-from  oceantracker.definitions import  cell_search_status_flags
 from oceantracker.interpolator.util import  triangle_eval_interp
 from oceantracker.field_group_manager import setup_reader
 
@@ -78,7 +73,7 @@ class FieldGroupManager(ParameterBaseClass):
         pass
         if si.settings['display_grid_at_start']:
             from matplotlib import pyplot as plt
-            from plot_oceantracker.plot_utilities import display_grid
+            from oceantracker.plot_output.plot_utilities import display_grid
             display_grid(grid, 1)
             plt.show()
 

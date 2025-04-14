@@ -6,6 +6,7 @@ from os import path
 from oceantracker.util import json_util
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util.triangle_utilities import make_domain_mask
+
 def read_particle_tracks_file(file_name_or_list,file_dir=None, var_list=None, file_number=None, fraction_to_read=None):
     # release group is 1 based
 

@@ -5,10 +5,6 @@
 
 ## Import packages ##
 from oceantracker.main import OceanTracker
-from oceantracker.util import yaml_util, cord_transforms
-from os import path
-import numpy as np
-import argparse
 from datetime import datetime
 
 ## Model selection ##
@@ -70,10 +66,8 @@ if __name__ == '__main__':
 
 
 # plot animation of results
-from matplotlib import pyplot as plt
-from plot_oceantracker.plot_tracks import animate_particles
-from read_oceantracker.python import load_output_files
-from IPython.display import HTML # show animation in note book
+from oceantracker.plot_output.plot_tracks import animate_particles
+from oceantracker.read_output.python import load_output_files
 
 # read particle track data into a dictionary using case_info_file_name
 tracks = load_output_files.load_track_data(case_info_file_name)

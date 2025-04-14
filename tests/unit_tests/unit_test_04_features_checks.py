@@ -1,9 +1,6 @@
-from os import path, sep
+from os import path
 from oceantracker.main import OceanTracker
 from oceantracker import  definitions
-from plot_oceantracker import plot_tracks
-import  argparse
-import shutil
 import numpy as np
 from tests.unit_tests import test_definitions
 
@@ -53,7 +50,7 @@ def main(args):
 
     case_info_file = ot.run()
 
-    from read_oceantracker.python import load_output_files
+    from oceantracker.read_output.python import load_output_files
     tracks = load_output_files.load_track_data(case_info_file)
 
     if args.plot:

@@ -1,8 +1,8 @@
 import numpy as np
 
 from oceantracker.main import run
-from plot_oceantracker import plot_statistics, plot_tracks
-from read_oceantracker.python import load_output_files
+from oceantracker.plot_output import plot_statistics, plot_tracks
+from oceantracker.read_output.python import load_output_files
 from os import path
 import argparse
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
 
 
         track_data = load_output_files.load_track_data(caseInfoFile)
-        plot_tracks.animate_particles(track_data, title='Hauraki test ',movie_file='HG.MP4',show_grid=True,show_dry_cells=True)
+        plot_tracks.animate_particles(track_data, title='Hauraki test ', movie_file='HG.MP4', show_grid=True, show_dry_cells=True)
         #plot_tracks.plot_path_in_vertical_section(track_data, title='OceanNum, fall velocity and critical friction  resuspension ')
 
         stats_data = load_output_files.load_stats_data((caseInfoFile))

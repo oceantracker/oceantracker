@@ -16,15 +16,14 @@ from os import path
 import glob
 from copy import copy
 import time
-from read_oceantracker.python import load_output_files
-from plot_oceantracker import plot_tracks
-from plot_oceantracker import plot_utilities
+from oceantracker.read_output.python import load_output_files
+from oceantracker.plot_output import plot_tracks, plot_utilities
 
 
 def plot_sample(caseInfoFile, num_to_plot=10 ** 3):
     # plot devation from circle
 
-    data = load_output_files.load_track_data(caseInfoFile, ['x','age', 'water_depth', 'time', 'x0', 'ID'])
+    data = load_output_files.load_track_data(caseInfoFile, ['x', 'age', 'water_depth', 'time', 'x0', 'ID'])
     grid= data['grid']
 
 

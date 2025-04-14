@@ -1,10 +1,9 @@
 
 # a tempate which uses demo hindcasts for dev testing
-from os import path, sep
 from oceantracker.main import OceanTracker
 from oceantracker import definitions
-from plot_oceantracker import plot_tracks
-from read_oceantracker.python import  load_output_files
+from oceantracker.plot_output import plot_tracks
+from oceantracker.read_output.python import load_output_files
 import  argparse
 from os import path
 # some polgons for demo hindcast
@@ -81,9 +80,9 @@ if __name__ == "__main__":
 
     case_info_file = ot.run()
 
-    tracks=load_output_files.load_track_data(case_info_file)
+    tracks= load_output_files.load_track_data(case_info_file)
 
     if not args.noplot:
         ax = [1591000, 1601500, 5479500, 5491000]
-        anim = plot_tracks.animate_particles(tracks,axis_lims=ax,
-                                    show_grid=True, show_dry_cells=True)
+        anim = plot_tracks.animate_particles(tracks, axis_lims=ax,
+                                             show_grid=True, show_dry_cells=True)

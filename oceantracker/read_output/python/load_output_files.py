@@ -2,9 +2,9 @@
 import numpy as np
 
 from oceantracker.util import json_util
-from read_oceantracker.python import read_ncdf_output_files
+from oceantracker.read_output.python import read_ncdf_output_files
 from os import path
-from glob import glob
+
 
 def read_case_info_file(case_info_file_name):
     # load runInfo and given case case_infofiles into dict
@@ -34,9 +34,9 @@ def load_track_data(case_info_file_name, var_list=None, fraction_to_read= None, 
     case_info = read_case_info_file(case_info_file_name)
 
     tracks = read_ncdf_output_files.read_particle_tracks_file(case_info['output_files']['tracks_writer'],
-                                                       file_dir=case_info['output_files']['run_output_dir'],
-                                                       var_list=var_list,
-                                                       file_number=file_number,  fraction_to_read=fraction_to_read)
+                                                              file_dir=case_info['output_files']['run_output_dir'],
+                                                              var_list=var_list,
+                                                              file_number=file_number, fraction_to_read=fraction_to_read)
 
     tracks['grid'] = load_grid(case_info_file_name,gridID=gridID)
 
@@ -49,7 +49,7 @@ def load_track_data(case_info_file_name, var_list=None, fraction_to_read= None, 
 def _extract_useful_info(case_info, d):
     # get release group info
     if 'version_info' in case_info and 'major' in case_info['version_info'] and case_info['version_info']['major'] >= 0.5:
-        prg_info = read_ncdf_output_files.read_release_groups_info(path.join(case_info['output_files']['run_output_dir'] , case_info['output_files']['release_groups']))
+        prg_info = read_ncdf_output_files.read_release_groups_info(path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['release_groups']))
 
     else:
         #todo deprecated from version 0.5
@@ -98,7 +98,7 @@ def load_stats_data(case_info_file_name, name = None,nt=None):
     case_info = read_case_info_file(case_info_file_name)
     name = _get_role_dict_name(case_info, 'particle_statistics', name)
     stat_nc_file_name = _get_role_dict_file_name(case_info, 'particle_statistics', name)
-    d = read_ncdf_output_files.read_stats_file(stat_nc_file_name,nt=nt)
+    d = read_ncdf_output_files.read_stats_file(stat_nc_file_name, nt=nt)
 
     d = _extract_useful_info(case_info, d)
     d['grid'] = load_grid(case_info_file_name)

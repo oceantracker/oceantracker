@@ -9,8 +9,8 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo04_ageBasedHeatmaps
 
 # below only required for plotting
-from read_oceantracker.python.load_output_files import load_stats_data
-from plot_oceantracker.plot_statistics import plot_heat_map, animate_heat_map
+from oceantracker.read_output.python import load_stats_data
+from oceantracker.plot_output.plot_statistics import animate_heat_map
 
 output_file= "output\demo04_ageBasedHeatmaps"
 

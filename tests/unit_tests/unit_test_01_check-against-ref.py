@@ -1,12 +1,5 @@
-from os import path, sep
-
-
-
 from oceantracker.main import OceanTracker
 
-from plot_oceantracker import plot_tracks
-import  argparse
-import shutil
 import numpy as np
 from tests.unit_tests import test_definitions
 

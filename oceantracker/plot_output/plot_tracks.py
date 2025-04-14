@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import colors, animation
-from plot_oceantracker import plot_utilities
+from oceantracker.plot_output import plot_utilities
 
 #from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
