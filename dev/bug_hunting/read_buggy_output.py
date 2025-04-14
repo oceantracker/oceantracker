@@ -1,10 +1,9 @@
 import numpy as np
 
-from read_oceantracker.python import load_output_files
-from read_oceantracker.python import read_ncdf_output_files
+from oceantracker.read_output.python import read_ncdf_output_files
 from matplotlib import pyplot as plt
 from os import path
-from plot_oceantracker.plot_statistics import animate_heat_map
+from oceantracker.plot_output.plot_statistics import animate_heat_map
 
 output_dir = r'\\CCL-AKL-STORE01.cawthron.org.nz\Malcolm$\OTDebug20250224\oceantracker_penConfig1z\faecesNR'
 case_info_file = path.join(output_dir, 'faecesNR_caseInfo.json')

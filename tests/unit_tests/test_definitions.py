@@ -1,9 +1,5 @@
-import datetime
-from os import path, sep
-from oceantracker.main import OceanTracker
+from os import path
 
-
-import  argparse
 import shutil
 import numpy as np
 from oceantracker import definitions
@@ -180,14 +176,14 @@ ax = [1591000, 1601500, 5478500, 5491000]
 
 
 def read_tracks(case_info_file,fraction_to_read=None, ref_case=False):
-    from read_oceantracker.python import load_output_files
+    from oceantracker.read_output.python import load_output_files
 
     fn = case_info_file if not ref_case else case_info_file.replace('unit_tests', 'unit_test_reference_cases')
 
-    return load_output_files.load_track_data(fn,fraction_to_read=fraction_to_read)
+    return load_output_files.load_track_data(fn, fraction_to_read=fraction_to_read)
 
 def compare_reference_run(case_info_file, args):
-    from read_oceantracker.python import load_output_files
+    from oceantracker.read_output.python import load_output_files
 
     if case_info_file is None : return
 
@@ -209,7 +205,7 @@ def compare_reference_run(case_info_file, args):
 
     # check stats
     for name in ['my_heatmap','my_poly_stats']:
-        stats_ref= load_output_files.load_stats_data(reference_case_info_file,name=name)
+        stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
         dc = stats['count'] - stats_ref['count']
         print(' stats  name ',  name,'counts', stats_ref['count'].sum(), stats['count'].sum(),'max diff counts-ref run counts =',np.nanmax(np.abs(dc)))
@@ -219,7 +215,7 @@ def compare_reference_run(case_info_file, args):
     print('max time difference, sec', np.max(dt))
     pass
 def show_track_plot(case_info_file, args):
-    from plot_oceantracker import plot_tracks
+    from oceantracker.plot_output import plot_tracks
     if not args.plot : return
     if case_info_file is None :
         print('>>> Run failed no unit test plot')
@@ -230,15 +226,15 @@ def show_track_plot(case_info_file, args):
     movie_file1= path.join(image_dir, 'decay_movie_frame.mp4') if args.save_plots else None
 
     anim= plot_tracks.animate_particles(tracks,
-                           show_grid=True, show_dry_cells=True,axis_labels=True,
-                            #part_color_map='hot',
-                           #size_using_data=tracks['a_pollutant'],
-                           #colour_using_data=tracks['a_pollutant'],
-                           movie_file=movie_file1)
+                                        show_grid=True, show_dry_cells=True, axis_labels=True,
+                                        #part_color_map='hot',
+                                        #size_using_data=tracks['a_pollutant'],
+                                        #colour_using_data=tracks['a_pollutant'],
+                                        movie_file=movie_file1)
 
 def plot_vert_section(case_info_file, args,fraction_to_read):
     if not args.plot: return
 
-    from plot_oceantracker.plot_tracks import plot_path_in_vertical_section
+    from oceantracker.plot_output.plot_tracks import plot_path_in_vertical_section
     tracks = read_tracks(case_info_file,fraction_to_read=fraction_to_read)
     plot_path_in_vertical_section(tracks, particleID=np.arange(0,tracks['x'].shape[1],10))

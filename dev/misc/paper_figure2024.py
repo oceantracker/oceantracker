@@ -78,8 +78,8 @@ ot.add_class('particle_statistics',
 if run:
     stats_case_info= ot.run()
 # plotting after run
-from read_oceantracker.python import load_output_files
-from  plot_oceantracker import plot_tracks,plot_statistics
+from oceantracker.read_output.python import load_output_files
+from oceantracker.plot_output import plot_statistics, plot_tracks
 from os import path
 case_info_file =r'E:\H_Local_drive\ParticleTracking\oceantracker\tests\misc\output\OTpaper_exmaple_A\OTpaper_exmaple_A_caseInfo.json'
 track_data = load_output_files.load_track_data(case_info_file)
@@ -90,28 +90,28 @@ single_time_step = 23
 image_dir =r'E:\H_Local_drive\OceanTrackerPaper'
 
 # Figure 1b)  particle snapshot
-plot_tracks.animate_particles(track_data,axis_lims=ax,single_time_step =single_time_step,
+plot_tracks.animate_particles(track_data, axis_lims=ax, single_time_step =single_time_step,
                               show_grid=True, show_dry_cells=True,
                               movie_file= path.join(image_dir,'tracks_movie_frame.mp4'))
 
 # Figure 1b)  particles sized by user added decaying particle property 'a_pollutant'
-p1= plot_tracks.animate_particles(track_data,axis_lims=ax,single_time_step =single_time_step,
-                              show_grid=True, show_dry_cells=True,part_color_map='hot',
-                              size_using_data=track_data['a_pollutant'],colour_using_data=track_data['a_pollutant'],
-                              movie_file= path.join(image_dir,'decay_movie_frame.mp4'))
+p1= plot_tracks.animate_particles(track_data, axis_lims=ax, single_time_step =single_time_step,
+                                  show_grid=True, show_dry_cells=True, part_color_map='hot',
+                                  size_using_data=track_data['a_pollutant'], colour_using_data=track_data['a_pollutant'],
+                                  movie_file= path.join(image_dir,'decay_movie_frame.mp4'))
 case_info_file =r'E:\H_Local_drive\ParticleTracking\oceantracker\tests\misc\output\OTpaper_exmaple_A_heatmap\OTpaper_exmaple_A_heatmap_caseInfo.json'
 
 
 stats_data = load_output_files.load_stats_data(case_info_file) # load gridded heatmap data
 # Figure 1c)  Snapshot heat-map of particles counts, plotting  gridded a statistic  at last time step
-plot_statistics.plot_heat_map(stats_data, 'my_point_release_heatmap' ,
-                              logscale=True, axis_lims=ax,cmap='hot',
+plot_statistics.plot_heat_map(stats_data, 'my_point_release_heatmap',
+                              logscale=True, axis_lims=ax, cmap='hot',
                               show_grid=True, colour_bar=False,
                               plot_file_name=path.join(image_dir,'heatmap_counts.png'))
 # Figure 1d)  Snapshot heat-map of decaying particle property 'a_pollutant'
 plot_statistics.plot_heat_map(stats_data, 'my_point_release_heatmap',
-                              logscale=True, axis_lims=ax,#cmap='hot',
-                              show_grid=True,var='a_pollutant',colour_bar=False,
+                              logscale=True, axis_lims=ax,  #cmap='hot',
+                              show_grid=True, var='a_pollutant', colour_bar=False,
                               plot_file_name=path.join(image_dir,'heatmap_decay.png'))
 
 

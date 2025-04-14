@@ -34,8 +34,8 @@ case_info_file_name = ot.run()
 
 # below is optional code for plotting
 #-------------------------------------
-from plot_oceantracker.plot_tracks import animate_particles, plot_tracks
-from read_oceantracker.python.load_output_files import load_track_data
+from oceantracker.plot_output.plot_tracks import animate_particles, plot_tracks
+from oceantracker.read_output.python import load_track_data
 
 # read particle tracks for plotting
 track_data = load_track_data(case_info_file_name)

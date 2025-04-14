@@ -1,12 +1,7 @@
-from os import path, sep
-
-
+from os import path
 
 from oceantracker.main import OceanTracker
 from oceantracker import  definitions
-from plot_oceantracker import plot_tracks
-import  argparse
-import shutil
 import numpy as np
 from tests.unit_tests import test_definitions
 from matplotlib import  pyplot as plt
@@ -54,7 +49,7 @@ def main(args):
 
     # compare water depth at that in schism zcor
     if args.plot:
-        from read_oceantracker.python import load_output_files
+        from oceantracker.read_output.python import load_output_files
         cs = load_output_files.read_case_info_file(case_info_file1)
         from oceantracker.util.ncdf_util import NetCDFhandler
         #nc = NetCDFhandler('../../tutorials_how_to/demo_hindcast/schsim3D/demo_hindcast_schisim3D_00.nc', mode='r')
@@ -86,8 +81,8 @@ def main(args):
     if args.plot:
         test_definitions.plot_vert_section(case_info_file1,args, fraction_to_read=0.01)
 
-        from read_oceantracker.python import load_output_files
-        tracks1 = load_output_files.load_track_data(case_info_file1,fraction_to_read=0.01)
+        from oceantracker.read_output.python import load_output_files
+        tracks1 = load_output_files.load_track_data(case_info_file1, fraction_to_read=0.01)
         plt.plot(tracks1['x'][:,:,2] + tracks1['water_depth'])
         plt.show()
 

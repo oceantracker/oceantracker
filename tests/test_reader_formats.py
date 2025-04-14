@@ -1,6 +1,6 @@
 from oceantracker.main import run
-from plot_oceantracker import plot_tracks, plot_utilities
-from read_oceantracker.python import load_output_files
+from oceantracker.plot_output import plot_tracks
+from oceantracker.read_output.python import load_output_files
 from oceantracker.util import  cord_transforms
 from os import path
 import numpy as np
@@ -498,34 +498,34 @@ if __name__ == '__main__':
 
         # do plot
         if args.plot and caseInfoFile is not None:
-            track_data = load_output_files.load_track_data(caseInfoFile, gridID = 1 if len(params['nested_readers'])==1 else 0)
+            track_data = load_output_files.load_track_data(caseInfoFile, gridID = 1 if len(params['nested_readers']) == 1 else 0)
             if False:
                 plot_utilities.display_grid(track_data['grid'], ginput=3, axis_lims=None)
             plot_base = path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base'])
 
             plot_file = plot_base + '_tracks_01.mp4' if args.save_plot else None
 
-            plot_tracks.animate_particles(track_data, axis_lims=None,axis_labels=True,
+            plot_tracks.animate_particles(track_data, axis_lims=None, axis_labels=True,
                                           title=params['user_note'], movie_file=plot_file, aspect_ratio=None,
                                           show_grid=plot_opt['show_grid'])
             if track_data['x'].shape[1] > 2:
-                plot_tracks.plot_path_in_vertical_section(track_data, particleID=0,)
+                plot_tracks.plot_path_in_vertical_section(track_data, particleID=0, )
 
 
             plot_file = plot_base + '_decay_01.mp4' if args.save_plot else None
 
             if len(params['nested_readers']) > 0:
                 plot_tracks.animate_particles(track_data, axis_lims=plot_opt['ax'],
-                                  title='Ross Sea',
-                                  colour_using_data=track_data['hydro_model_gridID'],
+                                              title='Ross Sea',
+                                              colour_using_data=track_data['hydro_model_gridID'],
                                               vmin =0, vmax=len(params['nested_readers'])+3,
-                               #part_color_map='hot_r',
-                                part_color_map='hot',
-                                  #size_using_data=track_data['part_decay'],
-                                  movie_file=plot_file,
-                                  fps=24,
-                                  aspect_ratio=None,
-                                  interval=20, show_dry_cells=False)
+                                              #part_color_map='hot_r',
+                                              part_color_map='hot',
+                                              #size_using_data=track_data['part_decay'],
+                                              movie_file=plot_file,
+                                              fps=24,
+                                              aspect_ratio=None,
+                                              interval=20, show_dry_cells=False)
 
 
 

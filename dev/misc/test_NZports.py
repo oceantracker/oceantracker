@@ -1,10 +1,8 @@
 import numpy as np
 
 from oceantracker.main import OceanTracker
-from plot_oceantracker import plot_statistics, plot_tracks
-from read_oceantracker.python import load_output_files
-from os import path
-import argparse
+from oceantracker.plot_output import plot_statistics
+from oceantracker.read_output.python import load_output_files
 from datetime import datetime, timedelta
 from oceantracker.util.cord_transforms import WGS84_to_NZTM
 
@@ -91,8 +89,8 @@ if __name__ == '__main__':
     if True:
 
         stats_data = load_output_files.load_stats_data(case_info_file_name)
-        plot_statistics.animate_heat_map(stats_data,  title='OceanNum Schism, time based particle count heatmaps, built on the fly,  log scale', logscale=True)
+        plot_statistics.animate_heat_map(stats_data, title='OceanNum Schism, time based particle count heatmaps, built on the fly,  log scale', logscale=True)
 
-        plot_statistics.plot_heat_map(stats_data,release_group='',   title='Test hea map')
+        plot_statistics.plot_heat_map(stats_data, release_group='', title='Test hea map')
 
 

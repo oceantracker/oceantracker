@@ -9,8 +9,8 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo07_inside_polygon_events
 
 # below only required for plotting
-from read_oceantracker.python.load_output_files import load_track_data, read_case_info_file
-from plot_oceantracker.plot_tracks import animate_particles
+from oceantracker.read_output.python import load_track_data, read_case_info_file
+from oceantracker.plot_output.plot_tracks import animate_particles
 from matplotlib import colors
 
 output_file= "output\demo07_inside_polygon_events"

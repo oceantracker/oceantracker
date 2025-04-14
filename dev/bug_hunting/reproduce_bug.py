@@ -3,9 +3,7 @@
 
 # %%
 from oceantracker.main import run
-from read_oceantracker.python import load_output_files
-from plot_oceantracker import plot_tracks
-from plot_oceantracker import plot_statistics
+from oceantracker.read_output.python import load_output_files
 
 import os
 import numpy as np
@@ -344,7 +342,7 @@ plt.hlines(0.01, 0, 60, linestyles='dashed')
 case = load_output_files.get_case_info_file_from_run_file(path_to_output, ncase = 1)
 
 # deposition in the model duration
-stats_data = load_output_files.load_stats_data(case,nsequence=0)
+stats_data = load_output_files.load_stats_data(case, nsequence=0)
 
 # %%
 # shit unit masses present at time step at cell on bottom
