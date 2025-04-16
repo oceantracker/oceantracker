@@ -10,7 +10,7 @@ old - from read_oceantracker.python import load_output_files
 
 new - from oceantracker.read_output.python import load_output_files
 
-matlab scripts to read output are in ''oceantracker.read_output.matlab''
+matlab scripts to read output are in dir ''oceantracker.oceantracker.read_output.matlab''
 
 ## Plotting example
 
