@@ -142,6 +142,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
         environ['NUMBA_DEVELOPER_MODE'] = '1'
         environ['NUMBA_BOUNDSCHECK'] = '1'
         environ['NUMBA_FULL_TRACEBACKS'] = '1'
+        environ['NUMBA_DEVELOPER_MODE'] = '1'
 
     # maxium threads used
     from psutil import cpu_count

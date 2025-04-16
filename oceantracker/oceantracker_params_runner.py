@@ -630,6 +630,7 @@ class OceanTrackerParamsRunner(object):
         if len(si.class_roles.particle_properties) > 0:
             save_state_util.save_part_prop(path.join(file_base,'particle_prop_on_error.nc'), si, n_time_step, time_sec)
 
+        save_state_util.save_settings_class_params(path.join(file_base,'settings_params_on_error.json'), si)
         # save class info
         save_state_util.save_class_info(path.join(file_base,'info_on_error.json'), si, n_time_step, time_sec)
 

@@ -142,6 +142,7 @@ class _RunInfo(definitions._AttribDict):
     has_A_Z_profile = None
     has_bottom_stress = None
     particle_counts = {}
+    particles_in_buffer = 0
 
 class _UseFullInfo(definitions._AttribDict):
     # default reader classes used by auto-detection of file type
@@ -171,7 +172,7 @@ class _SharedInfoClass():
     msg_logger = MessageLogger()
     block_timers={}
     class_importer = class_importer_util.ClassImporter(msg_logger)
-    particles_in_buffer = 0
+
     info = _UseFullInfo
     dim_names = definitions._DimensionNames()
 

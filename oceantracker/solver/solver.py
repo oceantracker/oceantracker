@@ -433,7 +433,7 @@ class Solver(ParameterBaseClass):
 
         for name, i in si.class_roles.particle_properties.items():
             i.data = nc.read_a_variable(name)  # rely on particle buffer expansion
-        si.particles_in_buffer = num_part
+        si.run_info.particles_in_buffer = num_part
         pass
 
         if si.settings.write_tracks:
