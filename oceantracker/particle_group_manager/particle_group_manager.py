@@ -74,7 +74,7 @@ class ParticleGroupManager(ParameterBaseClass):
     def initial_setup(self):
         info=self.info
         # is data 3D
-        si.particles_in_buffer = 0
+        si.run_info.particles_in_buffer = 0
 
         info['num_alive'] = 0
         info['particles_released'] = 0
@@ -128,17 +128,15 @@ class ParticleGroupManager(ParameterBaseClass):
         # release one pulse of particles from given group
         info= self.info
         # check if buffer needs expanding
-        smax = si.particles_in_buffer + release_data['x'].shape[0]
+        smax = si.run_info.particles_in_buffer + release_data['x'].shape[0]
         if smax > si.settings['max_particles']: return # no more can be released
 
         if smax > self.info['current_particle_buffer_size']:
             self._expand_particle_buffers(smax)
 
         # get indices within particle buffer where new particles will go, as in compact mode particle ID is not the buffer index
-        new_buffer_indices= np.arange(si.particles_in_buffer, smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
+        new_buffer_indices= np.arange(si.run_info.particles_in_buffer, smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
         num_released = new_buffer_indices.size
-
-
 
         part_prop = si.class_roles.particle_properties
 
@@ -157,7 +155,7 @@ class ParticleGroupManager(ParameterBaseClass):
             part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_buffer_indices)
 
         info['particles_released'] += num_released  # total released
-        si.particles_in_buffer += num_released  # number in particle buffer
+        si.run_info.particles_in_buffer += num_released  # number in particle buffer
 
 
         return new_buffer_indices
@@ -168,7 +166,7 @@ class ParticleGroupManager(ParameterBaseClass):
         # get number of chunks required rounded up
         n_chunks = max(1,int(np.ceil(num_particles/si.settings.particle_buffer_initial_size)))
         info['current_particle_buffer_size'] = n_chunks*si.settings.particle_buffer_initial_size
-        num_in_buffer = si.particles_in_buffer
+        num_in_buffer = si.run_info.particles_in_buffer
 
         #print('xxy',num_particles,n_chunks,num_in_buffer,info['current_particle_buffer_size'])
         # copy property data
@@ -180,6 +178,7 @@ class ParticleGroupManager(ParameterBaseClass):
             new_data = np.zeros(s, dtype=old_data.dtype) # the new buffer
             np.copyto(new_data[:num_in_buffer, ...], old_data[:num_in_buffer, ...])
             i.data = new_data
+            i.info['data_shape'] = i.data.shape # record new shape for debugging
 
         si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 
@@ -200,7 +199,12 @@ class ParticleGroupManager(ParameterBaseClass):
         for name,i in cr.particle_properties.items():
             if isinstance(i, FieldParticleProperty):
                 i.start_update_timer()
-                i.update(n_time_step, time_sec, active)
+                try:
+                    i.update(n_time_step, time_sec, active)
+                except Exception as e:
+                    print('xx update bug check', name, si.run_info.particles_in_buffer, i.data.shape,'active', active.min(),active.max())
+                    pass
+                    raise e
                 i.stop_update_timer()
 
 
@@ -223,7 +227,7 @@ class ParticleGroupManager(ParameterBaseClass):
                                                                    part_prop['IDrelease_group'].data,
                                                                    info['max_age_for_each_release_group'],
                                                                    self.status_count_array_per_thread,
-                                                                   si.particles_in_buffer)
+                                                                   si.run_info.particles_in_buffer)
         pc = si.run_info.particle_counts
         pc['num_alive'] = num_alive
         pc['particles_released']  = info['particles_released']
@@ -238,14 +242,14 @@ class ParticleGroupManager(ParameterBaseClass):
         # in comapct mode, if too many   dead particles remove then from buffer
         info = self.info
 
-        nDead = si.particles_in_buffer - num_alive
+        nDead = si.run_info.particles_in_buffer - num_alive
 
         # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
-        if nDead > si.settings.min_dead_to_remove and nDead >= 0.20* si.particles_in_buffer:
+        if nDead > si.settings.min_dead_to_remove and nDead >= 0.20* si.run_info.particles_in_buffer:
                 # if too many dead then delete from memory
                 part_prop = si.class_roles.particle_properties
                 ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
-                dead_frac=100*nDead/si.particles_in_buffer
+                dead_frac=100*nDead/si.run_info.particles_in_buffer
                 si.msg_logger.msg(f'removing dead {nDead:6,d} particles from buffer,  {dead_frac:2.0f}% are dead or more than {si.settings.min_dead_to_remove:6,d} are dead', tabs=3)
 
                 # only  retain alive particles in buffer
@@ -256,7 +260,7 @@ class ParticleGroupManager(ParameterBaseClass):
                 notReleased = np.arange(ID_alive.size, info['current_particle_buffer_size'])
                 part_prop['status'].set_values(si.particle_status_flags.notReleased, notReleased)
 
-                si.particles_in_buffer = ID_alive.size # record new number in buffer
+                si.run_info.particles_in_buffer = ID_alive.size # record new number in buffer
 
     def screen_info(self):
         #  return  info about particle numbers
@@ -268,7 +272,7 @@ class ParticleGroupManager(ParameterBaseClass):
         s += f'Active:{pc["num_alive"]:<6,d} Move:{counts["moving"]:<6,d} '
         s += f'Bottom:{counts["on_bottom"]:<5,d} Strand:{counts["stranded_by_tide"]:<5,d}  '
         s += f'Dead:{counts["dead"]:<5,d} Out:{counts["outside_open_boundary"]:4d} '
-        p = int((100. * si.particles_in_buffer / si.core_class_roles.particle_group_manager.info['current_particle_buffer_size']))
+        p = int((100. * si.run_info.particles_in_buffer / si.core_class_roles.particle_group_manager.info['current_particle_buffer_size']))
         s += f'Buffer:{p:2d}% '
         return s
 

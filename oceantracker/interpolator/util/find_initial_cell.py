@@ -2,7 +2,7 @@ import numpy as np
 from oceantracker.interpolator.util.triangle_interpolator_util import  check_if_point_inside_triangle_connected_to_node
 
 
-def find_cellKDtree(xq, grid, KDtree, bc_walk_tol):
+def find_hori_cellKDtree(xq, grid, KDtree, bc_walk_tol):
     # find nearest cell to xq
     # find nearest node
     dist, nodes = KDtree.query(xq[:, :2])

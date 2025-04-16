@@ -41,11 +41,11 @@ class  InterpTriangularGrid(_BaseInterp):
 
         # define initial cell and find cell functions from interp class
         self._hori_cell_finder= FindHoriCellTriangleWalk(grid, params)
-        self.find_initial_cell= self._hori_cell_finder.find_initial_cell
+        self.find_initial_hori_cell_method= self._hori_cell_finder.find_initial_hori_cell
         self.info['horizontal_cell_finder_info'] = self._hori_cell_finder.info
         self._get_hori_cell = self._hori_cell_finder.find_cell
 
-        self._interp_evaluator= EvalInterpTriangles(params, reader)
+        self._interp_evaluator = EvalInterpTriangles(params, reader)
 
         if reader.info['is3D']:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
@@ -145,7 +145,7 @@ class  InterpTriangularGrid(_BaseInterp):
             IDs_failed_walk = IDs_need_fixing[sel_failed_walk]
             info['triangle_walks_retried'] += IDs_failed_walk.size
 
-            n_cell, bc, is_inside_domain = self.find_initial_cell(xq[IDs_failed_walk,...])
+            n_cell, bc, is_inside_domain = self.find_initial_hori_cell_method(xq[IDs_failed_walk,...])
             fixed = is_inside_domain
             part_prop['n_cell'].set_values(n_cell[fixed], IDs_failed_walk[fixed])
             part_prop['bc_coords'].set_values(bc[fixed,:], IDs_failed_walk[fixed])
@@ -178,7 +178,7 @@ class  InterpTriangularGrid(_BaseInterp):
 
     #@function_profiler(__name__)
     def are_points_inside_domain(self,xq):
-        n_cell, bc, is_inside_domain  = self.find_initial_cell(xq)
+        n_cell, bc, is_inside_domain  = self.find_initial_hori_cell_method(xq)
         part_data = dict(x = xq, n_cell=n_cell, bc_coords=bc)
         # todo add interpolated water depth, tide???
         return is_inside_domain, part_data # is inside if  magnitude of all BC < 1

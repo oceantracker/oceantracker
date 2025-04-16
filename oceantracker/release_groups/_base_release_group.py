@@ -173,7 +173,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
             if params['release_at_surface']:
                 release_part_prop['x'][:, 2] = release_part_prop['tide'] - params['release_offset_from_surface_or_bottom']
             elif params['release_at_bottom']:
-                release_part_prop['x'][:, 2] = release_part_prop['water_depth'] + params['release_offset_from_surface_or_bottom']
+                release_part_prop['x'][:, 2] = -release_part_prop['water_depth'] + params['release_offset_from_surface_or_bottom']
 
             elif params['z_min'] is not None or params['z_max'] is not None:
                 # release in random depth range if no given points have no z value, or zmin and/or zmax is set

@@ -262,9 +262,11 @@ class RewriteHindcast():
         if not scale: return
 
         # hori vel
-        for name in ['u', 'v','ubar','vbar']:
+        for name in ['u', 'v','ubar','vbar','u_eastward','v_northward']:
             self.encode_var(name, min_max=[-self.max['hori_vel'], self.max['hori_vel']])
+
         # vertical vel
+        self.encode_var('w', min_max=[-self.max['vert_vel'], self.max['vert_vel']])
 
         self.encode_var('temp', min_max=[-10, 50])
         self.encode_var('salt', min_max=[-1, 100])
@@ -275,6 +277,7 @@ class RewriteHindcast():
 
         # tides
         self.encode_var('elev', min_max=[-self.max['tide'], self.max['tide']] )
+        self.encode_var('zeta', min_max=[-self.max['tide'], self.max['tide']]) # moana tides
 
         # wind speeds
         for name in ['wind_speed']:

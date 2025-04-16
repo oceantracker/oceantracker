@@ -76,10 +76,10 @@ class FindHoriCellTriangleWalk(object):
                          triangle_walks_retried=wc[4:5],
                          particles_killed_after_triangle_walk_retry_failed=wc[5:6],
                     )
-    def find_initial_cell(self, xq):
+    def find_initial_hori_cell(self, xq):
         # find nearest cell to xq
         t0 = perf_counter()
-        n_cell, bc, is_inside_domain= find_initial_cell.find_cellKDtree(xq, self.grid, self.KDtree, self.params['bc_walk_tol'])
+        n_cell, bc, is_inside_domain= find_initial_cell.find_hori_cellKDtree(xq, self.grid, self.KDtree, self.params['bc_walk_tol'])
         si.block_timer('Initial cell guess', t0)
         return n_cell, bc, is_inside_domain
 
