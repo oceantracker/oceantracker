@@ -121,7 +121,7 @@ class _BaseWriter(ParameterBaseClass):
                 if float(b) >= 4.0e9 :
                     si.msg_logger.msg('Netcdf chunk size for variable "' + name + '" exceeds 4GB, chunks=' + str(c), error=True,
                                             hint='Reduce tracks_writer param NCDF_time_chunk (will be slower), if many dead particles then use compact mode and manually set case_param particle_buffer_size to hold number alive at the same time', )
-            #print('xx', name)
+
             nc.create_a_variable(name, item['dim_list'] , item['dtype'],  description=item['description'],  attributes=item['attributes'], chunksizes=item['chunks'],)
 
         pass

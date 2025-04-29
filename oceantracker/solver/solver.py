@@ -73,7 +73,7 @@ class Solver(ParameterBaseClass):
 
         si.msg_logger.set_screen_tag('S')
         if si.settings.restart_interval is not None:
-            # schedle restart saves at given interval after start of run
+            # dev- schedule restart saves at given interval after start of run
             self.add_scheduler('save_state',
                                start=si.settings.restart_interval + si.run_info.start_time,
                                interval=si.settings.restart_interval )
@@ -91,8 +91,8 @@ class Solver(ParameterBaseClass):
             info['current_time_step'] = n_time_step
 
             # warn of  high physical memory use
-            if psutil.virtual_memory().percent > 95:
-                ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
+            if psutil.virtual_memory().percent > 85:
+                ml.msg(' More than 85% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
                        hint=f'For parallel runs,reduce "processors" setting below max. available (={psutil.cpu_count(logical=False)} cores) \n to have fewer simultaneous cases and/or reduce memory use with smaller reader time_buffer_size ')
 
             # release particles
@@ -203,6 +203,8 @@ class Solver(ParameterBaseClass):
 
         # update particle properties
         pgm.update_PartProp(n_time_step, time_sec, alive)
+
+
 
         # resuspension is a core trajectory modifier
         if si.settings.use_resuspension and si.run_info.is3D_run:
@@ -350,7 +352,7 @@ class Solver(ParameterBaseClass):
         s += ' Day ' + ('-' if si.settings.backtracking else '+')
         s += time_util.day_hms(t)
         s += ' ' + time_util.seconds_to_pretty_str(time_sec) + ':'
-        s +=   si.core_class_roles.particle_group_manager.screen_info()
+        s +=   pgm.screen_info()
 
         elapsed_time= perf_counter() - t0_model
         if elapsed_time > 300.:

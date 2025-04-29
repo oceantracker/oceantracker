@@ -31,12 +31,10 @@ def function_profiler(modual_name):
         elif profile_type =='scalene':
             # just use function as is
             #return func
-            #print('xxx-scalene', )
             return profile(func) # use scalene profile wrapper
         elif profile_type == 'line_profiler':
             # just use function as is
             # return func
-            # print('xxx-scalene', )
             return profile(func)  # use scalene profile wrapper
         else:
             return func

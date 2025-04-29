@@ -441,7 +441,7 @@ class OceanTrackerParamsRunner(object):
         ri.duration_str = time_util.seconds_to_pretty_duration_string(ri.duration)
         ri.backtracking = si.settings.backtracking
 
-        si.msg_logger.progress_marker('Added release groups and found run start and end times', start_time=t0)
+        si.msg_logger.progress_marker(f'Added {len(si.class_roles.release_groups)} release group(s) and found run start and end times', start_time=t0)
 
 
     def _build_field_group_manager(self, working_params):

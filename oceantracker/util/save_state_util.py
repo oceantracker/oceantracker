@@ -53,7 +53,8 @@ def save_settings_class_params(file_name, si):
              class_roles=dict(),
              )
     for role, i in si.core_class_roles.items():
-        d['core_class_roles'][role] = i.params
+         if i is not None:
+            d['core_class_roles'][role] = i.params
 
     for role, item in si.class_roles.items():
         if role not in d['class_roles']:  d['class_roles'][role] = dict()

@@ -271,8 +271,6 @@ class FindVerticalCellSlayerLSCGrid(object):
             z_fraction_water_velocity[n] = z_fraction[n]  # flag as not in bottom layer, will become >= 0 if in layer
             if nz == deepest_bottom_cell:
                 # set status if on the bottom set status
-                #print('xx', zq - z_below) # below bottom check
-
                 if zq < z_below + z0:
                     status[n] = status_on_bottom
                     zq = z_below
@@ -370,8 +368,6 @@ class FindVerticalCellZfixed(object):
             n_in_map = min(n_in_map,nz_map.size-1) # clip inside map
             nz = nz_map[n_in_map]
 
-            #print('xx', nz, zq, z_top, z[-3:])
-
             if nz == z.size-2: # in top layer
                 # treat top layer as variable in thickness, bewteen tide and next interface
                 z_fraction[n] = (zq - z[nz]) / (z[nz + 1] - z[nz])
@@ -392,7 +388,6 @@ class FindVerticalCellZfixed(object):
 
             # record new depth cell
             nz_cell[n] = nz
-            #print('xx',zq,z_bot)
             xq[n, 2] = zq
         pass
 

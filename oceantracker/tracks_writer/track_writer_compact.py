@@ -125,7 +125,6 @@ class CompactTracksWriter(_BaseWriter):
             nc.file_handle.variables[name][info['time_steps_written_to_current_file'], ...] = time_varying_info[name].data[:]
 
         for name in info['variables_to_write']['time_varying_part_prop']:
-            #print('xx',name)
             nc.file_handle.variables[name][self.file_index[0]:self.file_index[1], ...] = part_prop[name].data[self.sel_alive, ...]
 
         if si.settings['write_dry_cell_flag']:

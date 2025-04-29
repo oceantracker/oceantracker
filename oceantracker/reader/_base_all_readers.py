@@ -520,7 +520,6 @@ class _BaseReader(ParameterBaseClass):
         self.update_tide_field(buffer_index, nt_available)
         self.update_water_velocity_field(buffer_index, nt_available)
 
-        # print('xx', time_util.seconds_to_isostr(time_sec), current_hydro_model_step, current_buffer_steps)
         # read time varying vector and scalar reader fields
         for name, field in self.fields.items():
             if not isinstance(field, ReaderField) or not field.is_time_varying() : continue
