@@ -201,7 +201,7 @@ class DevNestedFields(ParameterBaseClass):
         # update outer grid
         fgm_outer_grid = self.fgm_hydro_grids[0]
         on_outer_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', 0, out=self.get_partID_buffer('fgmID0'))
-        #print('xx1',on_outer_grid, part_prop['status'].data[:1], part_prop['x'].data[:1], part_prop['hydro_model_gridID'].data[:1])
+
         fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid)
 
         # work through inner grids
@@ -215,8 +215,6 @@ class DevNestedFields(ParameterBaseClass):
             if np.any(is_inside):
                 # move those now inside outer grid and copy in values
                 s = on_outer_grid[is_inside]
-
-                #print('xx moved to inner grid',s[:2], part_prop['status'].data[s[:2]], part_prop['x'].data[s[:2]],  part_prop['hydro_model_gridID'].data[s[:2]])
                 part_prop['hydro_model_gridID'].set_values(n, s)  # put on inner grid
                 part_prop['n_cell'].set_values(pp['n_cell'][is_inside], s)
                 part_prop['n_cell_last_good'].set_values(pp['n_cell'][is_inside], s)
@@ -243,7 +241,7 @@ class DevNestedFields(ParameterBaseClass):
                     part_prop['n_cell'].set_values(pp['n_cell'][inside_outer], s)
                     part_prop['n_cell_last_good'].set_values(pp['n_cell'][inside_outer], s)
                     part_prop['bc_coords'].set_values(pp['bc_coords'][inside_outer, ...], s)
-                    #print('xx moved to outer grid', s[:2], part_prop['status'].data[s[:2]], part_prop['x'].data[s[:2]],  part_prop['hydro_model_gridID'].data[:1])
+
                     # update those now on outer grid and apply its open boundary condition
                     fgm_outer_grid.setup_time_step(time_sec, xq, s)
                     pass
@@ -251,20 +249,21 @@ class DevNestedFields(ParameterBaseClass):
                     fgm._move_back(outside_inner[~inside_outer] ) # move back to last good position on inner grid
 
             pass
-            #print('xx10', part_prop['status'].data[:1], part_prop['x'].data[:1],    part_prop['hydro_model_gridID'].data[:1])
             #todo any still outside the inner or outer grid? move back?
             #todo utside outer grid and all inner grids
+
+
         pass
 
     def interp_field_at_particle_locations(self, field_name, active, output=None):
 
-        # loop over grids find interpolated values
 
         part_prop = si.class_roles.particle_properties
 
         for n, fgm in enumerate(self.fgm_hydro_grids):
             # find particles in this hydro-grid
             sel =  part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', n, out=self.get_partID_subset_buffer('gridID')) # those on this grid
+
             fgm.interp_field_at_particle_locations(field_name, sel, output=output)
         pass
 

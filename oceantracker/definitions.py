@@ -88,8 +88,8 @@ class _ParticleStatusFlags(_AttribDict):
     unknown : int = -20
     notReleased : int = -10
     dead : int = -5
-    outside_open_boundary : int = -2
-    outside_domain: int = -1
+    outside_domain: int = -2
+    outside_open_boundary : int = -1
     stationary : int = 0
     stranded_by_tide : int = 3
     on_bottom : int = 6

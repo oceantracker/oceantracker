@@ -125,7 +125,6 @@ class FieldGroupManager(ParameterBaseClass):
         reader = self.reader
         # find hori cell
         sel_fix = self.reader.interpolator.find_hori_cell(xq, active)
-        #print('xx',str(part_prop['cell_search_status'].data[sel_fix]))
 
         sel_outside_open = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.hit_open_boundary,
                                                                         out=self.get_partID_subset_buffer('B2'))
@@ -238,9 +237,6 @@ class FieldGroupManager(ParameterBaseClass):
         field_group_manager_util.update_dry_cell_index( grid['is_dry_cell_buffer'], grid['dry_cell_index'],
                                                    info['current_buffer_steps'], info['fractional_time_steps'])
 
-        # dev copy adjacency matrix and include dry cell lateral boundaries
-        #field_group_manager_util.update_dry_cell_adjacency(grid['adjacency'], grid['dry_cell_index'], grid['adjacency_with_dry_edges'])
-        #print('xx', np.count_nonzero(grid['adjacency_with_dry_edges']==-3))
         pass
 
     def screen_info(self):

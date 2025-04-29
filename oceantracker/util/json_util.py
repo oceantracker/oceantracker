@@ -40,7 +40,7 @@ def read_JSON(file_name):
 class MyEncoder(json.JSONEncoder):
 
     def default(self, obj):
-        #print('xx0',type(obj),str(obj))
+
         try :
             # first numpy types
             if isinstance(obj, np.ndarray):
@@ -64,7 +64,6 @@ class MyEncoder(json.JSONEncoder):
 
             elif isinstance(obj,float):
                   if np.isnan(obj):
-                      #print('xx float',str(obj))
                       return None
                   else:
                       return float(obj)
@@ -88,7 +87,6 @@ class MyEncoder(json.JSONEncoder):
                 # make single numpy float values
 
                 if np.isnan(obj):
-                    #print('xx2 np.floating', str(obj))
                     return None
                 elif not np.isfinite(obj):
                     return None

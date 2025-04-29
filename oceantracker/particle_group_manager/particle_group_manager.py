@@ -1,6 +1,8 @@
 import numpy as np
 from time import perf_counter
 from oceantracker.util.parameter_base_class import ParameterBaseClass
+from oceantracker.util.numba_util import njitOT
+
 from oceantracker.particle_properties.util import particle_operations_util
 from copy import deepcopy
 from  oceantracker.particle_group_manager.util import  pgm_util
@@ -118,8 +120,8 @@ class ParticleGroupManager(ParameterBaseClass):
             if isinstance(i,CustomParticleProperty):
                 i.initial_value_at_birth(new_buffer_index)
 
-        # update new particles props
-        # todo does this update_PartProp have to be here as setup_interp_time_step and update_PartProp are run immediately after this in pre step bookkeeping ?
+        # update new particles props, after finding hori and vert cell, first update hori and vert cell
+        si.core_class_roles.field_group_manager.setup_time_step(time_sec, part_prop['x'].data, new_buffer_index)
         self.update_PartProp(n_time_step, time_sec, new_buffer_index)
 
         return new_buffer_index #indices of all new particles
@@ -168,7 +170,6 @@ class ParticleGroupManager(ParameterBaseClass):
         info['current_particle_buffer_size'] = n_chunks*si.settings.particle_buffer_initial_size
         num_in_buffer = si.run_info.particles_in_buffer
 
-        #print('xxy',num_particles,n_chunks,num_in_buffer,info['current_particle_buffer_size'])
         # copy property data
         for key, i in part_prop.items():
             #debug_util.print_referers(i.data,tag=key)
@@ -199,12 +200,7 @@ class ParticleGroupManager(ParameterBaseClass):
         for name,i in cr.particle_properties.items():
             if isinstance(i, FieldParticleProperty):
                 i.start_update_timer()
-                try:
-                    i.update(n_time_step, time_sec, active)
-                except Exception as e:
-                    print('xx update bug check', name, si.run_info.particles_in_buffer, i.data.shape,'active', active.min(),active.max())
-                    pass
-                    raise e
+                i.update(n_time_step, time_sec, active)
                 i.stop_update_timer()
 
 
@@ -239,7 +235,7 @@ class ParticleGroupManager(ParameterBaseClass):
         return num_alive
 
     def remove_dead_particles_from_memory(self, num_alive):
-        # in comapct mode, if too many   dead particles remove then from buffer
+        # in compact  if too many   dead particles remove then from buffer
         info = self.info
 
         nDead = si.run_info.particles_in_buffer - num_alive
@@ -248,19 +244,24 @@ class ParticleGroupManager(ParameterBaseClass):
         if nDead > si.settings.min_dead_to_remove and nDead >= 0.20* si.run_info.particles_in_buffer:
                 # if too many dead then delete from memory
                 part_prop = si.class_roles.particle_properties
-                ID_alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
+                ID_alive = part_prop['status'].compare_all_to_a_value('gt', si.particle_status_flags.dead, out=self.get_partID_buffer('B1'))
                 dead_frac=100*nDead/si.run_info.particles_in_buffer
                 si.msg_logger.msg(f'removing dead {nDead:6,d} particles from buffer,  {dead_frac:2.0f}% are dead or more than {si.settings.min_dead_to_remove:6,d} are dead', tabs=3)
 
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():
-                        pp.data[:ID_alive.size,...] = pp.get_values(ID_alive)
+                    pp.data[:ID_alive.size,...] = pp.get_values(ID_alive)
 
                 # mark remaining not released to make inactive
                 notReleased = np.arange(ID_alive.size, info['current_particle_buffer_size'])
                 part_prop['status'].set_values(si.particle_status_flags.notReleased, notReleased)
 
                 si.run_info.particles_in_buffer = ID_alive.size # record new number in buffer
+    @staticmethod
+    @njitOT
+    def _pack_particle_buffer(data, cull):
+        pass
+
 
     def screen_info(self):
         #  return  info about particle numbers
