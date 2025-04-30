@@ -14,14 +14,13 @@ from oceantracker.shared_info import shared_info as si
 class _BaseWriter(ParameterBaseClass):
     # particle property  write modes,   used to set when to write  properties to output, as well as if to calculate at all
 
-
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
 
         self.add_default_params(
                         role_output_file_tag =  PVC('tracks', str),
-                        update_interval =  PVC(None, float, min=0.01, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
+                        update_interval =  PVC(3600., float, min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
                         output_step_count =  PVC(None,int,min=1,  obsolete=True,  doc_str='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
                         turn_on_write_particle_properties_list =  PLC(None, str,doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
                         turn_off_write_particle_properties_list =  PLC(['water_velocity', 'velocity_modifier'], str,
@@ -42,10 +41,7 @@ class _BaseWriter(ParameterBaseClass):
     def final_setup(self):
         params = self.params
         # set up write schedule
-        if params['update_interval'] is None :
-            params['update_interval'] = si.settings.time_step
-
-        self.add_scheduler('write_scheduler', interval=self.params['update_interval'], caller=self)
+        self.add_scheduler('write_scheduler', interval= params['update_interval'], caller=self)
         pass
 
     def open_file_if_needed(self):
