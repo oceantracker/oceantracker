@@ -8,13 +8,13 @@ import oceantracker.plot_output.plot_utilities as plot_utilities
 from matplotlib import animation
 from oceantracker.util import time_util
 
-def animate_heat_map(stats_data, release_group, var='count',  axis_lims=None, credit=None, interval=20,heading=None,
+def animate_heat_map(stats_data, release_groupID:int =0, var:str='count',  axis_lims=None, credit=None, interval=20,heading=None,
                      vmin=None, vmax=None,show_grid=False,title=None,logscale=False, caxis= None,cmap='viridis',
                      movie_file= None, fps=15, dpi=300,  back_ground_depth=True, back_ground_color_map= None):
 
     def draw_frame(nt):
 
-        x,y, z = _get_stats_data(nt, stats_data, var, release_group, logscale, zmin=caxis[0])
+        x,y, z = _get_stats_data(nt, stats_data, var, release_groupID, logscale, zmin=caxis[0])
         pc.set_array(z.ravel())
         pc.set_clim(caxis[0],caxis[1])
         if 'time' in stats_data:
@@ -30,7 +30,7 @@ def animate_heat_map(stats_data, release_group, var='count',  axis_lims=None, cr
     zmin = np.nanmin(stats_data[var])
     zmax = np.nanmax(stats_data[var])
 
-    x, y, z  = _get_stats_data(-1, stats_data, var, release_group, logscale, zmin=vmin)
+    x, y, z  = _get_stats_data(-1, stats_data, var, release_groupID, logscale, zmin=vmin)
     caxis = [zmin if vmin is None else vmin, zmax if vmax is None else vmax]
 
     if not back_ground_depth:
@@ -44,7 +44,7 @@ def animate_heat_map(stats_data, release_group, var='count',  axis_lims=None, cr
     plot_utilities.draw_base_map(stats_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
                                  back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
-    plot_utilities.plot_release_points_and_polygons(stats_data, ax= ax, release_group=release_group)
+    plot_utilities.plot_release_points_and_polygons(stats_data, ax= ax, release_groupID=release_groupID)
 
     plot_utilities.show_particleNumbers(stats_data['total_num_particles_released'])
     plot_utilities.add_heading(heading)
@@ -109,11 +109,11 @@ def animate_concentrations(concentration_data, plot_load=False,  axis_lims=None,
 
     return anim
 
-def plot_heat_map(stats_data,  release_group, nt=-1, axis_lims=None,show_grid=False, title=None,logscale=False, colour_bar= True,
+def plot_heat_map(stats_data,  release_groupID:int = 0, nt=-1, axis_lims=None,show_grid=False, title=None,logscale=False, colour_bar= True,
                   var='count',vmin=None, vmax=None, credit=None, cmap='viridis', heading = None,
                   plot_file_name=None, back_ground_depth=True,back_ground_color_map= None):
     #todo repace var with data_to_plot=, as in other ploting code
-    x,y, z = _get_stats_data(nt, stats_data, var, release_group, logscale)
+    x,y, z = _get_stats_data(nt, stats_data, var, release_groupID, logscale)
 
     fig = plt.gcf()
     ax  = plt.gca()
@@ -128,7 +128,7 @@ def plot_heat_map(stats_data,  release_group, nt=-1, axis_lims=None,show_grid=Fa
     if colour_bar:
         plt.colorbar(pc, ax=ax)
 
-    plot_utilities.plot_release_points_and_polygons(stats_data, release_group=release_group, ax=ax)
+    plot_utilities.plot_release_points_and_polygons(stats_data, release_groupID=release_groupID, ax=ax)
 
     plot_utilities.show_particleNumbers(stats_data['total_num_particles_released'])
     plot_utilities.add_heading(heading)
@@ -195,7 +195,7 @@ def plot_LCS(LCS_data, n_grid=0, n_lag=-1, n_time_step=None, axis_lims=None, cre
 
 
 
-def _get_stats_data(nt, d, var, release_group, logscale, zmin=None):
+def _get_stats_data(nt, d, var, release_groupID, logscale, zmin=None):
     # get count or variable patch Nan in zero counts
     # sum/average over all or 1 release group dim
     # nt is time step or age bin
@@ -203,7 +203,6 @@ def _get_stats_data(nt, d, var, release_group, logscale, zmin=None):
     count = d['count'][nt, :, :, :]
 
     # get ID of named release group
-    release_groupID = d['particle_release_groups'][release_group]['instanceID']
     z = z[release_groupID, :, :]
 
     count = count[release_groupID, :, :]

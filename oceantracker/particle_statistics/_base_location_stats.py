@@ -187,7 +187,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         num_in_buffer = si.run_info.particles_in_buffer
 
         # first select those to count based on status and z location
-        sel = self._sel_status_waterdepth_and_z(part_prop['status'].data, part_prop['x'].data, part_prop['water_depth'].data.ravel(),
+        sel = self._sel_status_waterdepth_and_z(part_prop['status'].data,
+                                                part_prop['x'].data, part_prop['water_depth'].data.ravel(),
                                                 self.statuses_to_count_map, info['z_range'], info['water_depth_range'],
                                                 num_in_buffer, self.get_partID_buffer('B1'))
 

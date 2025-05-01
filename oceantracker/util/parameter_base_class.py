@@ -146,6 +146,10 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.schedulers[name_scheduler]  = s
         return s
 
+    def screen_info(self,text:str = '',level:int = 5):
+        if level >= si.settings.screen_info_level:
+            si.msg_logger.msg('info: ' + text,tabs=1)
+
     def restart(self):
         # code require to reload save state for this class
         pass

@@ -167,8 +167,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                                         self.count_time_slice, self.count_all_particles_time_slice,
                                         self.prop_data_list, self.sum_prop_data_list, sel)
-
-
+        pass
 
     @staticmethod
     @njitOT
