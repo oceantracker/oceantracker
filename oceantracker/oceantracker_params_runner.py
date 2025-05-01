@@ -216,8 +216,10 @@ class OceanTrackerParamsRunner(object):
 
         # -----------run-------------------------------
         si.msg_logger.hori_line()
-        si.msg_logger.progress_marker('Starting" ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
+        si.msg_logger.progress_marker('Starting " ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
         si.msg_logger.msg(f'From {time_util.seconds_to_isostr(si.run_info.start_time)} to  {time_util.seconds_to_isostr(si.run_info.end_time)}', tabs=3)
+        si.msg_logger.msg(f'Time step {si.settings.time_step:5.1f} sec', tabs=3)
+
         si.core_class_roles.solver.solve() # do time stepping
 
         # -----------done -------------------------------

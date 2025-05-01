@@ -36,7 +36,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
     if check_for_unknown_keys:
         for key in list(params.keys()):
             msg = f'Parameter "{key}"'
-            if  key not in default_params and not key.startswith('#'):
+            if  key not in default_params:
                 # get possible values without obsolete params
                 msg_logger.spell_check(msg, key,possible_params,caller=caller,
                            crumbs= crumbs + crumb_seperator + f'"{key}"', error=True)

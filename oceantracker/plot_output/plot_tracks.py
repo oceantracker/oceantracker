@@ -39,7 +39,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
                       back_ground_depth=True, back_ground_color_map = None, credit=None, heading= None,
                       size_using_data= None,  part_color_map=None,
                       vmin=None, vmax=None, aspect_ratio=None,show_release_points=True,
-                      release_group=None, show_dry_cells = False, show=True):
+                      release_groupID=None, show_dry_cells = False, show=True):
     def draw_frame(nt):
         if show_dry_cells:
             dry_cell_plot.set_array(dry_cell_data[nt, :])
@@ -107,7 +107,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
     # plot release_points
     release_pts= []
     if show_release_points:
-        release_points_obj = plot_utilities.plot_release_points_and_polygons(track_data, ax=ax, release_group=release_group)
+        release_points_obj = plot_utilities.plot_release_points_and_polygons(track_data, ax=ax, release_groupID=release_groupID)
         for rp in release_points_obj:
             for rpi in rp:
                release_pts.append((rpi))

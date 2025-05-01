@@ -21,6 +21,9 @@ class _DefaultSettings(definitions._AttribDict):
                 doc_str= 'The start/base of all output files and name of sub-dir of "root_output_dir" where output will be written' )
     time_step = PVC(3600., float, min=0.001, units='sec',doc_str='Time step in seconds for all cases' )
     screen_output_time_interval = PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file' )
+    screen_info_level = PVC(0, int, doc_str='Sets 0-10 value at which user added self.screen_info(text,level) method calls are written to the screen, = 0 for none',
+                            min=0, max =10)
+
     backtracking =   PVC(False, bool, doc_str='Run model backwards in time')
     regrid_z_to_uniform_sigma_levels = PVC(True, bool,
                 doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read (eg. SCHISM), based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS' )

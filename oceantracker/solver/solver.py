@@ -122,8 +122,9 @@ class Solver(ParameterBaseClass):
                 self.save_state_for_restart(n_time_step, time_sec)
 
             # print progress to screen
+            t_step= perf_counter() - t0_step
             if n_time_step % nt_write_time_step_to_screen == 0:
-                self.screen_output(ri.time_steps_completed, time_sec, t0_model, t0_step)
+                self._screen_output(ri.time_steps_completed, time_sec, t0_model, t_step)
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
@@ -163,9 +164,10 @@ class Solver(ParameterBaseClass):
         #raise Exception('debug -error handing check')
 
         # write out props etc at last step
+
         if n_time_step > 0: # if more than on set completed
             self._pre_step_bookkeeping(ri.time_steps_completed, t2) # update and record stuff from last step
-            self.screen_output(ri.time_steps_completed, t2, t0_model,t0_step)
+            self._screen_output(ri.time_steps_completed, t2, t0_model,perf_counter() - t0_step)
 
         ri.end_time = t2
         ri.model_end_date = t2.astype('datetime64[s]')
@@ -204,19 +206,10 @@ class Solver(ParameterBaseClass):
         # update particle properties
         pgm.update_PartProp(n_time_step, time_sec, alive)
 
-
-
-        # resuspension is a core trajectory modifier
-        if si.settings.use_resuspension and si.run_info.is3D_run:
-            # friction_velocity property  is now updated, so do resupension
-            i =si.core_class_roles.resuspension
-            i.start_update_timer()
-            i.update(n_time_step, time_sec, alive)
-            i.stop_update_timer()
-
         fgm.update_tidal_stranding_status(time_sec, alive)
 
         # update writable class lists and stats at current time step now props are up to date
+
         self._update_stats(n_time_step, time_sec)
         self._update_concentrations(n_time_step, time_sec)
         self._update_events(n_time_step, time_sec)
@@ -237,6 +230,15 @@ class Solver(ParameterBaseClass):
             # write time varying track data to file if scheduled
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
+
+        # resuspension is a core trajectory modifier, upated after resupension
+        # so those on bottom can be recorded
+        if si.settings.use_resuspension and si.run_info.is3D_run:
+            # friction_velocity property  is now updated, so do resupension
+            i = si.core_class_roles.resuspension
+            i.start_update_timer()
+            i.update(n_time_step, time_sec, alive)
+            i.stop_update_timer()
 
     def do_time_step(self, time_sec, is_moving):
 
@@ -286,6 +288,8 @@ class Solver(ParameterBaseClass):
 
         self.euler_substep( x1, v_temp, velocity_modifier, dt2, is_moving, x2)
         particle_operations_util.scale_and_copy(water_velocity, v_temp, is_moving, scale=1.0 / 6.0)   # accumulate RK velocity to reduce space taken by temporary working variables
+
+        #self.screen_info(f'xx time step {si.settings.time_step}',5)
 
         # step 2, get improved half step velocity
         t2= time_sec + 0.5 * dt
@@ -338,7 +342,7 @@ class Solver(ParameterBaseClass):
             else:
                 solver_util.euler_substep2D(xold, water_velocity, velocity_modifier, dt, active, xnew)
 
-    def screen_output(self, nt, time_sec,t0_model, t0_step):
+    def _screen_output(self, nt, time_sec,t0_model, t_step):
         ri = si.run_info
         fgm = si.core_class_roles.field_group_manager
         pgm = si.core_class_roles.particle_group_manager
@@ -360,7 +364,7 @@ class Solver(ParameterBaseClass):
             remaining_time= (1 - fraction_done) * elapsed_time / max(.01, fraction_done)
             s += ' remaining: ' + time_util.seconds_to_hours_mins_string(abs(remaining_time)) +','
 
-        s += f' step time = { (perf_counter() - t0_step) * 1000:4.1f} ms'
+        s += f' step time = { t_step * 1000:4.1f} ms'
         si.msg_logger.msg(s)
 
     def _update_stats(self,n_time_step, time_sec):
