@@ -40,9 +40,7 @@ def main(args):
                         probability=1.,#interval=3600,
                         statuses=['stranded_by_tide','on_bottom']
                         )
-    ot.add_class('trajectory_modifiers', class_name='CullParticles',
-                 probability=.5,   interval=3600, statuses=['on_bottom']
-                 )
+
     #ot.add_class('trajectory_modifiers', class_name='SplitParticles', probability=1,   interval=2*3600,min_age=3600)
 
     ot.add_class('particle_properties', name='moving_time',  class_name='my_part_prop.TimeAtStatus',  required_status= 'moving')

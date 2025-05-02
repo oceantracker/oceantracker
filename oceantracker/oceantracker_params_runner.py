@@ -33,11 +33,8 @@ class OceanTrackerParamsRunner(object):
         ml = si.msg_logger
         err_hint = 'check for first error above or in log file.txt or .err file '
 
-
-
         try:
-
-
+            t0 = perf_counter()
             # unpack params into working version as si.working_params
             # and set up output directory and log file
             self._do_setup(user_given_params)
@@ -52,6 +49,7 @@ class OceanTrackerParamsRunner(object):
 
             ml.msg(f'Starting user param. runner: "{si.run_info.output_file_base}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
+            si.block_timer('Setup', t0)
 
             # _________ do run ____________________________
             case_info_file= self._run_case()
@@ -87,16 +85,31 @@ class OceanTrackerParamsRunner(object):
         ml.msg(f'Finished "{"??" if  si.run_info.output_file_base is None else si.run_info.output_file_base}"'
                            + ',  started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()))
         ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
-        ml.msg(f'Output in {si.run_info.run_output_dir}', tabs=1)
-        ml.msg(f'{num_errors:3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes', tabs=3)
+
+
+
+        # performance
+        ml.msg(f'Timings: total = {(perf_counter()-  self.start_time):5.1f} sec',tabs=2)
+
+        for name in ['Setup','Filling reader buffers','Initial cell guess', 'RK integration',
+                      'Interpolate fields', 'Update statistics',
+                     'Update custom particle properties']:
+            if name in si.block_timers:  ml.msg(f'{name}  {si.block_timers[name]["time"]:4.2f} s\t', tabs=4)
+
+        for name in ['resuspension','dispersion','tracks_writer', 'integrated_model']:
+            if si.core_class_roles[name] is not None:
+                ml.msg(f'{name}  {si.core_class_roles[name].info["time_spent_updating"]:4.2f} s\t\t', tabs=4)
+
+        ml.msg('')
+        ml.msg(f'{num_errors:3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes', tabs=1)
 
         if num_errors > 0:
-            ml.msg('')
+
             ml.msg(f'>>>>>>> Found {num_errors:2d} errors <<<<<<<<<<<<',
                 hint='Look for first error above  or in  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
             ml.msg('')
 
-        ml.hori_line(f'Finished Oceantracker')
+        ml.hori_line(f'Finished: output in {si.run_info.run_output_dir}')
 
 
         if case_info_file is None:
@@ -136,8 +149,6 @@ class OceanTrackerParamsRunner(object):
         si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
                hint='see for copies of screen output and user supplied parameters, plus all other output')
-
-
 
         # write raw params to a file
         if not si.settings.restart:
@@ -211,7 +222,7 @@ class OceanTrackerParamsRunner(object):
 
         # -----------run-------------------------------
         si.msg_logger.hori_line()
-        si.msg_logger.progress_marker('Starting " ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
+        si.msg_logger.progress_marker(f'Starting "{si.run_info.output_file_base}",  duration: {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}')
         si.msg_logger.msg(f'From {time_util.seconds_to_isostr(si.run_info.start_time)} to  {time_util.seconds_to_isostr(si.run_info.end_time)}', tabs=3)
         si.msg_logger.msg(f'Time step {si.settings.time_step:5.1f} sec', tabs=3)
         si.msg_logger.msg(f'using: A_Z_profile = {si.settings.use_A_Z_profile} bottom_stress = {si.settings.use_bottom_stress}', tabs=4)

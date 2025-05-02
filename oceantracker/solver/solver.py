@@ -55,12 +55,12 @@ class Solver(ParameterBaseClass):
         t0_model = perf_counter()
         ri.free_wheeling = False
         model_times = si.run_info.times
-
+        ml.hori_line()
         fgm.update_readers(model_times[0]) # initial buffer fill
 
         # run forwards through model time variable, which for backtracking are backwards in time
         t2 = model_times[0]
-        ml.hori_line()
+
         ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)} '
                            + f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)} ')
 
@@ -256,7 +256,7 @@ class Solver(ParameterBaseClass):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties
         # nb is buffer offset
-
+        t0 = perf_counter()
         RK_order =self.params['RK_order']
         fgm = si.core_class_roles.field_group_manager
         part_prop =  si.class_roles.particle_properties
@@ -318,7 +318,7 @@ class Solver(ParameterBaseClass):
         #  v = (v1 + 2.0 * (v2 + v3) + v4) /6
         #  x2 = x1 + v*dt
         self.euler_substep( x1, water_velocity, velocity_modifier, dt, is_moving, x2)  # set final location directly to particle x property
-
+        si.block_timer('RK integration', t0)
         pass
 
     def euler_substep(self, xold, water_velocity, velocity_modifier, dt, active, xnew):
