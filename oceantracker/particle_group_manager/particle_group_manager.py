@@ -196,21 +196,23 @@ class ParticleGroupManager(ParameterBaseClass):
         particle_operations_util.set_value_and_add(part_prop['age'].used_buffer(), time_sec,
                                                    part_prop['time_released'].used_buffer(), active, scale= -1.)
 
+        t0 = perf_counter()
         # first interpolate to give particle properties from reader derived  fields
         for name,i in cr.particle_properties.items():
             if isinstance(i, FieldParticleProperty):
                 i.start_update_timer()
                 i.update(n_time_step, time_sec, active)
                 i.stop_update_timer()
+        si.block_timer('Interpolate fields', t0)
 
-
+        t0 = perf_counter()
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for name, i in cr.particle_properties.items():
             if isinstance(i, CustomParticleProperty):
                 i.start_update_timer()
                 i.update(n_time_step, time_sec, active)
                 i.stop_update_timer()
-        si.block_timer('Update particle properties',t0)
+        si.block_timer('Update custom particle properties',t0)
 
 
     def status_counts_and_kill_old_particles(self, t):
@@ -247,8 +249,9 @@ class ParticleGroupManager(ParameterBaseClass):
                 # if too many dead then delete from memory
                 part_prop = si.class_roles.particle_properties
                 ID_alive = part_prop['status'].compare_all_to_a_value('gt', si.particle_status_flags.dead, out=self.get_partID_buffer('B1'))
+                nDead = si.run_info.particles_in_buffer-ID_alive.size # update nDead as particle counts are from start of time step, removal at the end
                 dead_frac=100*nDead/si.run_info.particles_in_buffer
-                si.msg_logger.msg(f'removing {dead_frac:2.0f}%  dead  = {(si.run_info.particles_in_buffer-ID_alive.size):6,d} of  {si.run_info.particles_in_buffer:6,d} particles in buffer', tabs=3)
+                si.msg_logger.msg(f'removing {dead_frac:2.0f}%  dead  = {nDead:6,d} of  {si.run_info.particles_in_buffer:6,d} particles in buffer', tabs=3)
                 pass
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():

@@ -168,13 +168,15 @@ class  InterpTriangularGrid(_BaseInterp):
                 # kill particles
                 part_prop['status'].set_values(si.particle_status_flags.dead, sel2)
 
-        si.block_timer('Find cell, horizontal walk', t0)
+        si.block_timer('Find horizontal cell', t0)
 
         return IDs_need_fixing
 
     def find_vertical_cell(self, fields, xq, current_buffer_steps,fractional_time_steps, active):
         # locate vertical cell in place
+        t0 = perf_counter()
         self._get_vert_cell(fields, xq, current_buffer_steps, fractional_time_steps, active)
+        si.block_timer('Find vertical cell', t0)
 
     #@function_profiler(__name__)
     def are_points_inside_domain(self,xq):

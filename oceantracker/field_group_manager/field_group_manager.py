@@ -1,5 +1,6 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 import numpy as np
+from time import perf_counter
 from oceantracker.field_group_manager.util import field_group_manager_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.interpolator.util import  triangle_eval_interp
@@ -198,6 +199,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     #@function_profiler(__name__)
     def interp_field_at_particle_locations(self, field_name, active, output=None):
+
         # in place evaluation of field interpolation
         # interp reader field_name inplace to particle locations to same time and memory
         # output can optionally be redirected to another particle property name different from  reader's field_name
@@ -208,6 +210,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         field= self.reader.fields[field_name]
         self.reader.interpolator.interp_field(field,info['current_buffer_steps'], info['fractional_time_steps'], output, active)
+
 
     def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_coords, time_sec= None,hydro_model_gridID=None):
         # interp reader field_name at specfied locations,  not particle locations
