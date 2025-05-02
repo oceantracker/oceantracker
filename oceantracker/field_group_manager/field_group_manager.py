@@ -110,9 +110,8 @@ class FieldGroupManager(ParameterBaseClass):
 
     def update_tidal_stranding_status(self, time_sec, alive):
         i = self.tidal_stranding
-        i.start_update_timer()
-        i.update(self.reader.grid, time_sec, alive)
-        i.stop_update_timer()
+        i.timed_update(self.reader.grid, time_sec, alive)
+
 
     def setup_time_step(self, time_sec, xq, active):
 

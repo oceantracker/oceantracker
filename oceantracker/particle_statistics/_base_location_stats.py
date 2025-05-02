@@ -171,7 +171,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
 
 
-
     # user overload this method to subset indicies in out of particles to count
     def select_particles_to_count(self, sel): # dummy method
         return sel

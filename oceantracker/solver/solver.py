@@ -120,17 +120,15 @@ class Solver(ParameterBaseClass):
             # update particle velocity modification prior to integration
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
             for name, i in si.class_roles.velocity_modifiers.items():
-                i.start_update_timer()
-                i.update(n_time_step, time_sec, is_moving)
-                i.stop_update_timer()
+                i.timed_update(n_time_step, time_sec, is_moving)
+
 
             # dispersion is done by random walk
             # by adding to velocity modifier prior to integration step
             if si.settings['use_dispersion']:
                 i = si.core_class_roles.dispersion
-                i.start_update_timer()
-                i.update(n_time_step, time_sec, is_moving)
-                i.stop_update_timer()
+                i.timed_update(n_time_step, time_sec, is_moving)
+
 
             #  Main integration step
             #--------------------------------------
@@ -184,12 +182,12 @@ class Solver(ParameterBaseClass):
 
         # trajectory modifiers,
         for name, i in si.class_roles.trajectory_modifiers.items():
-            i.start_update_timer()
-            i.update(n_time_step, time_sec, alive)
-            i.stop_update_timer()
+            i.timed_update(n_time_step, time_sec, alive)
 
-        # modify status, eg tidal stranding
+
+        t0 = perf_counter()
         fgm.update_dry_cell_values()
+        si.block_timer('Filling reader buffers', t0)
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
 
@@ -231,9 +229,8 @@ class Solver(ParameterBaseClass):
         if si.settings.use_resuspension and si.run_info.is3D_run:
             # friction_velocity property  is now updated, so do resupension
             i = si.core_class_roles.resuspension
-            i.start_update_timer()
-            i.update(n_time_step, time_sec, alive)
-            i.stop_update_timer()
+            i.timed_update(n_time_step, time_sec, alive)
+
 
     def do_time_step(self, time_sec, is_moving):
 
@@ -368,9 +365,8 @@ class Solver(ParameterBaseClass):
         for name, i in si.class_roles.particle_statistics.items():
             pass
             if i.schedulers['count_scheduler'].do_task(n_time_step):
-                i.start_update_timer()
-                i.update(n_time_step, time_sec)
-                i.stop_update_timer()
+                i.timed_update(n_time_step, time_sec)
+
         si.block_timer('Update statistics', t0)
 
     def _update_concentrations(self,n_time_step,  time_sec):
@@ -378,9 +374,8 @@ class Solver(ParameterBaseClass):
 
         t0 = perf_counter()
         for name, i in si.class_roles.particle_concentrations.items():
-            i.start_update_timer()
-            i.update(n_time_step, time_sec)
-            i.stop_update_timer()
+            i.timed_update(n_time_step, time_sec)
+
         si.block_timer('Update concentrations', t0)
 
     def _update_events(self, n_time_step,  time_sec):
@@ -388,9 +383,8 @@ class Solver(ParameterBaseClass):
 
         t0 = perf_counter()
         for name, i in si.class_roles.event_loggers.items():
-            i.start_update_timer()
-            i.update(n_time_step,time_sec)
-            i.stop_update_timer()
+            i.timed_update(n_time_step,time_sec)
+
         si.block_timer('Update event loggers', t0)
 
     def close(self):

@@ -200,18 +200,15 @@ class ParticleGroupManager(ParameterBaseClass):
         # first interpolate to give particle properties from reader derived  fields
         for name,i in cr.particle_properties.items():
             if isinstance(i, FieldParticleProperty):
-                i.start_update_timer()
-                i.update(n_time_step, time_sec, active)
-                i.stop_update_timer()
+                i.timed_update(n_time_step, time_sec, active)
+
         si.block_timer('Interpolate fields', t0)
 
         t0 = perf_counter()
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
         for name, i in cr.particle_properties.items():
             if isinstance(i, CustomParticleProperty):
-                i.start_update_timer()
-                i.update(n_time_step, time_sec, active)
-                i.stop_update_timer()
+                i.timed_update(n_time_step, time_sec, active)
         si.block_timer('Update custom particle properties',t0)
 
 

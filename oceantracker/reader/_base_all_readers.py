@@ -475,10 +475,10 @@ class _BaseReader(ParameterBaseClass):
         # check if all interpolators have the time steps they need
 
         if not self.are_time_steps_in_buffer(time_sec):
-            t0 = perf_counter()
+
             self.start_update_timer()
             self.fill_time_buffer(time_sec)  # get next steps into buffer if not in buffer
-            si.block_timer('Filling reader buffers',t0)
+
             self.stop_update_timer()
 
     #@function_profiler(__name__)
