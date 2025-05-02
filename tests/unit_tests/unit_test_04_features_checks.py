@@ -9,7 +9,7 @@ def main(args):
     ot.settings(**test_definitions.base_settings(__file__,args))
     ot.settings(time_step=1800,
                 particle_buffer_initial_size=20000,
-                min_dead_to_remove = 500,
+                min_dead_to_remove = 100,
                 screen_output_time_interval=1800,
                 add_path=[ path.join(definitions.ot_root_dir, 'tutorials_how_to')],
                 processors=1)

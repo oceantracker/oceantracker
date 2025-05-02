@@ -31,4 +31,3 @@ def _status_counts_and_kill_old_particles(age, status, IDrelease_group,max_age_f
         status_counts[get_thread_id(),status[n] - 128] += 1
 
     return alive
-

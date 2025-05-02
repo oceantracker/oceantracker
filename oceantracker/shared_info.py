@@ -138,7 +138,6 @@ class _RunInfo(definitions._AttribDict):
     run_output_dir = None
     output_file_base = None
     time_of_nominal_first_occurrence = None
-    total_alive_particles = 0
     time_steps_completed = 0
     hindcast_start_time = None
     hindcast_end_time = None

@@ -219,6 +219,7 @@ class OceanTrackerParamsRunner(object):
         si.msg_logger.progress_marker('Starting " ' + si.run_info.output_file_base + ',  duration: ' + time_util.seconds_to_pretty_duration_string(si.run_info.duration))
         si.msg_logger.msg(f'From {time_util.seconds_to_isostr(si.run_info.start_time)} to  {time_util.seconds_to_isostr(si.run_info.end_time)}', tabs=3)
         si.msg_logger.msg(f'Time step {si.settings.time_step:5.1f} sec', tabs=3)
+        si.msg_logger.msg(f'using: A_Z_profile = {si.settings.use_A_Z_profile} bottom_stress = {si.settings.use_bottom_stress}', tabs=4)
 
         si.core_class_roles.solver.solve() # do time stepping
 
@@ -491,7 +492,6 @@ class OceanTrackerParamsRunner(object):
         si.run_info.hindcast_end_time = fgm.info['end_time']
 
         si.msg_logger.progress_marker('Finished field group manager and readers setup', start_time=t0)
-        si.msg_logger.msg(f'using: A_Z_profile = { si.settings.use_A_Z_profile} bottom_stress = { si.settings.use_bottom_stress}', tabs=4 )
         si.msg_logger.hori_line()
 
     # ____________________________
