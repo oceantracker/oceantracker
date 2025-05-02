@@ -46,17 +46,11 @@ class Solver(ParameterBaseClass):
 
         computation_started = datetime.now()
         # set up particle velocity working space for solver
-        ri.total_alive_particles = 0
-
         pgm, fgm = si.core_class_roles.particle_group_manager, si.core_class_roles.field_group_manager
         ri.time_steps_completed = 0
 
-        # work out time steps between writing tracks to screen
-        write_tracks_time_step = si.settings['screen_output_time_interval']
-        if write_tracks_time_step is None:
-            nt_write_time_step_to_screen = 1
-        else:
-            nt_write_time_step_to_screen = max(1,int(write_tracks_time_step/si.settings.time_step))
+        # work out time steps between writing tracks to screen, default 1 hr
+        nt_write_time_step_to_screen = max(1, int(si.settings.screen_output_time_interval/si.settings.time_step))
 
         t0_model = perf_counter()
         ri.free_wheeling = False
@@ -80,11 +74,23 @@ class Solver(ParameterBaseClass):
         if si.settings.restart:
             self._load_saved_state()
 
+        num_alive = 1
+
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
 
             t0_step = perf_counter()
             self.start_update_timer()
             time_sec = model_times[n_time_step]
+
+            if num_alive == 0:
+                # freewheel until more are released or end of run/hindcast
+                if not ri.free_wheeling:
+                    # at start note
+                    ml.msg(f'No particles alive at {time_util.seconds_to_pretty_str(time_sec)}, skipping time steps until more are released', note=True)
+                ri.free_wheeling = True
+                continue
+
+            ri.free_wheeling = False  # has ended
 
             # record info for any error dump
             info['time_sec'] = time_sec
@@ -95,24 +101,11 @@ class Solver(ParameterBaseClass):
                 ml.msg(' More than 85% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
                        hint=f'For parallel runs,reduce "processors" setting below max. available (={psutil.cpu_count(logical=False)} cores) \n to have fewer simultaneous cases and/or reduce memory use with smaller reader time_buffer_size ')
 
+
             # release particles
             new_particleIDs  = pgm.release_particles(n_time_step, time_sec)
 
-            # count particles of each status and count number >= stationary status
-            num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
 
-            if num_alive == 0:
-                #freewheel until more are released or end of run/hindcast
-                if not ri.free_wheeling:
-                    # at start note
-                    ml.msg(f'No particles alive at {time_util.seconds_to_pretty_str(time_sec)}, skipping time steps until more are released', note=True)
-                ri.free_wheeling = True
-                continue
-
-            ri.free_wheeling = False # has ended
-
-           # alive particles so do steps
-            ri.total_alive_particles += num_alive
             fgm.update_readers(time_sec)
 
             # do stats etc updates and write tracks
@@ -120,11 +113,6 @@ class Solver(ParameterBaseClass):
 
             if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
                 self.save_state_for_restart(n_time_step, time_sec)
-
-            # print progress to screen
-            t_step= perf_counter() - t0_step
-            if n_time_step % nt_write_time_step_to_screen == 0:
-                self._screen_output(ri.time_steps_completed, time_sec, t0_model, t_step)
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
@@ -150,13 +138,21 @@ class Solver(ParameterBaseClass):
             self.do_time_step(time_sec, is_moving)
             #--------------------------------------
 
+            # count particles of each status and count number >= stationary status
+            num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
+
+            # print progress to screen
+            t_step = perf_counter() - t0_step
+            if n_time_step % nt_write_time_step_to_screen == 0:
+                self._screen_output(ri.time_steps_completed, time_sec, t0_model, t_step)
+
+            pgm.remove_dead_particles_from_memory()
+
             t2 = time_sec + si.settings.time_step * ri.model_direction
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             ri.time_steps_completed += 1
             si.block_timer('Time stepping',t0_step)
-
-            pgm.remove_dead_particles_from_memory(num_alive)
 
             self.stop_update_timer()
             if abs(t2 - ri.start_time) > ri.duration: break
@@ -167,7 +163,7 @@ class Solver(ParameterBaseClass):
 
         if n_time_step > 0: # if more than on set completed
             self._pre_step_bookkeeping(ri.time_steps_completed, t2) # update and record stuff from last step
-            self._screen_output(ri.time_steps_completed, t2, t0_model,perf_counter() - t0_step)
+            self._screen_output(ri.time_steps_completed, t2, t0_model, perf_counter() - t0_step)
 
         ri.end_time = t2
         ri.model_end_date = t2.astype('datetime64[s]')
@@ -222,6 +218,7 @@ class Solver(ParameterBaseClass):
         if si.settings.write_tracks:
             t0_write = perf_counter()
             tracks_writer = si.core_class_roles.tracks_writer
+            tracks_writer.start_update_timer()
             tracks_writer.open_file_if_needed()
 
             if new_particleIDs.size > 0:
@@ -230,6 +227,7 @@ class Solver(ParameterBaseClass):
             # write time varying track data to file if scheduled
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
+            tracks_writer.stop_update_timer()
 
         # resuspension is a core trajectory modifier, upated after resupension
         # so those on bottom can be recorded

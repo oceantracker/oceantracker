@@ -1,7 +1,7 @@
 import numpy as np
 from time import perf_counter
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, prange, njitOTparallel
 
 from oceantracker.particle_properties.util import particle_operations_util
 from copy import deepcopy
@@ -234,20 +234,22 @@ class ParticleGroupManager(ParameterBaseClass):
 
         return num_alive
 
-    def remove_dead_particles_from_memory(self, num_alive):
+
+
+    def remove_dead_particles_from_memory(self):
         # in compact  if too many   dead particles remove then from buffer
         info = self.info
 
-        nDead = si.run_info.particles_in_buffer - num_alive
+        nDead = si.run_info.particle_counts['current_status_counts']['dead']
 
         # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
-        if nDead > si.settings.min_dead_to_remove and nDead >= 0.20* si.run_info.particles_in_buffer:
+        if nDead > si.settings.min_dead_to_remove and nDead >= 0.20 * si.run_info.particles_in_buffer:
                 # if too many dead then delete from memory
                 part_prop = si.class_roles.particle_properties
                 ID_alive = part_prop['status'].compare_all_to_a_value('gt', si.particle_status_flags.dead, out=self.get_partID_buffer('B1'))
                 dead_frac=100*nDead/si.run_info.particles_in_buffer
-                si.msg_logger.msg(f'removing dead {nDead:6,d} particles from buffer,  {dead_frac:2.0f}% are dead or more than {si.settings.min_dead_to_remove:6,d} are dead', tabs=3)
-
+                si.msg_logger.msg(f'removing {dead_frac:2.0f}%  dead  = {(si.run_info.particles_in_buffer-ID_alive.size):6,d} of  {si.run_info.particles_in_buffer:6,d} particles in buffer', tabs=3)
+                pass
                 # only  retain alive particles in buffer
                 for pp in part_prop.values():
                     pp.data[:ID_alive.size,...] = pp.get_values(ID_alive)
