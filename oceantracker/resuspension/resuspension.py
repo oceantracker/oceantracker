@@ -52,16 +52,15 @@ class Resuspension(_BaseResuspension):
     # all particles checked to see if they need status changing
     def update(self,n_time_step, time_sec, alive):
         # do resupension
-        self.start_update_timer()
-        info = self.info
 
+        info = self.info
         # resuspend those on bottom and friction velocity exceeds critical value
         part_prop = si.class_roles.particle_properties
         resupend= self.select_particles_to_resupend(alive)
         self.resuspension_jump(part_prop['friction_velocity'].data, part_prop['status'].data,
                                info['resuspension_factor'],
                                part_prop['x'].data, part_prop['water_depth'].data, si.settings.z0, resupend)
-        self.stop_update_timer()
+
 
     @staticmethod
     @njitOT
