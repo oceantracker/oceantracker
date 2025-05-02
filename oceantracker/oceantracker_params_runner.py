@@ -81,28 +81,23 @@ class OceanTrackerParamsRunner(object):
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
         ml.hori_line()
-
-        ml.show_all_warnings_and_errors()  # reshow warnings
-
         # write a sumary of errors etc
         num_errors = len(ml.errors_list)
-        ml.hori_line()
-        ml.msg(f'Error counts - {num_errors:3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes, check above',
-            tabs=3)
-        ml.msg('')
 
-        if num_errors > 0:
-            ml.hori_line('Found errors, so some cases may not have completed')
-            ml.hori_line('see above or  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
-            ml.hori_line()
-
-        ml.progress_marker('Finished "' + '>> with errors, see above'  if  si.run_info.output_file_base is None else si.run_info.output_file_base
-                           + '" started: ' + str(self.start_time) + ', ended: ' + str(datetime.now()))
+        ml.msg(f'Finished "{"??" if  si.run_info.output_file_base is None else si.run_info.output_file_base}"'
+                           + ',  started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()))
         ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
         ml.msg(f'Output in {si.run_info.run_output_dir}', tabs=1)
-        ml.msg('')
-        ml.hori_line(f'Finished Oceantracker run')
-        ml.msg('')
+        ml.msg(f'{num_errors:3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes', tabs=3)
+
+        if num_errors > 0:
+            ml.msg('')
+            ml.msg(f'>>>>>>> Found {num_errors:2d} errors <<<<<<<<<<<<',
+                hint='Look for first error above  or in  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
+            ml.msg('')
+
+        ml.hori_line(f'Finished Oceantracker')
+
 
         if case_info_file is None:
             ml.msg('Fatal errors, run did not complete  ', hint='check for first error above, log file.txt or .err file ', error=True)
