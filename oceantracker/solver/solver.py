@@ -74,16 +74,23 @@ class Solver(ParameterBaseClass):
         if si.settings.restart:
             self._load_saved_state()
 
-        num_alive = 1
-
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
 
             t0_step = perf_counter()
             self.start_update_timer()
             time_sec = model_times[n_time_step]
+            # record info for any error dump
+            info['time_sec'] = time_sec
+            info['current_time_step'] = n_time_step
+
+            # release particles
+            new_particleIDs = pgm.release_particles(n_time_step, time_sec)
+
+            # count particles of each status and count number >= stationary status
+            num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
 
             if num_alive == 0:
-                # freewheel until more are released or end of run/hindcast
+                # freewheel until more are released or end of run/hindcast, alive count done at end of loop
                 if not ri.free_wheeling:
                     # at start note
                     ml.msg(f'No particles alive at {time_util.seconds_to_pretty_str(time_sec)}, skipping time steps until more are released', note=True)
@@ -92,18 +99,10 @@ class Solver(ParameterBaseClass):
 
             ri.free_wheeling = False  # has ended
 
-            # record info for any error dump
-            info['time_sec'] = time_sec
-            info['current_time_step'] = n_time_step
-
             # warn of  high physical memory use
             if psutil.virtual_memory().percent > 85:
                 ml.msg(' More than 85% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
                        hint=f'For parallel runs,reduce "processors" setting below max. available (={psutil.cpu_count(logical=False)} cores) \n to have fewer simultaneous cases and/or reduce memory use with smaller reader time_buffer_size ')
-
-
-            # release particles
-            new_particleIDs  = pgm.release_particles(n_time_step, time_sec)
 
 
             fgm.update_readers(time_sec)
@@ -138,8 +137,6 @@ class Solver(ParameterBaseClass):
             self.do_time_step(time_sec, is_moving)
             #--------------------------------------
 
-            # count particles of each status and count number >= stationary status
-            num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
 
             # print progress to screen
             t_step = perf_counter() - t0_step
