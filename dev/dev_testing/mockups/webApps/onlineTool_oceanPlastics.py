@@ -82,7 +82,7 @@ if __name__ == '__main__':
                 }
 
     else:
-        input_dir = '../../../../demos/demo_hindcast'
+        input_dir = '../../../../tutorials_how_to/demo_hindcast'
         reader_dict = {'class_name': 'oceantracker.reader.generic_ncdf_readerUnstructured.GenericReaderNCDF',
                        'file_mask': 'demoHindcast2D*.nc',
                        'isodate_of_hindcast_time_zero': '2017-01-01',

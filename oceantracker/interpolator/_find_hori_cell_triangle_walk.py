@@ -1,29 +1,27 @@
 from scipy.spatial import cKDTree
 import numpy as np
-
+import numba as nb
 from oceantracker.shared_info import shared_info as si
 from time import perf_counter
 from oceantracker.util import numpy_util
 from oceantracker.interpolator.util import triangle_interpolator_util,  find_initial_cell
 
-from oceantracker.util.numba_util import  njitOT, njitOTparallel
-import numba as nb
+from oceantracker.util.numba_util import  njitOT, njitOTparallel, prange
+
 # globals
 
 # globals to compile into numba to save pass arguments
 # numba code needs integer versions of constants
-psf = si.particle_status_flags
 
-status_moving = int(psf.moving)
-status_on_bottom = int(psf.on_bottom)
-status_stranded_by_tide = int(psf.stranded_by_tide)
-status_outside_domain = int(psf.outside_domain)
-status_outside_open_boundary = int(psf.outside_open_boundary)
-status_dead = int(psf.dead)
-status_bad_coord = int(psf.bad_coord)
-status_cell_search_failed = int(psf.cell_search_failed)
-status_hit_dry_cell = int(psf.hit_dry_cell)
 
+csf = si.cell_search_status_flags
+
+search_ok = int(csf.ok)
+search_bad_coord = int(csf.bad_coord)
+search_failed = int(csf.failed)
+search_hit_domain_boundary = csf.hit_domain_boundary
+search_hit_dry_cell = int(csf.hit_dry_cell)
+search_hit_open_boundary = int(csf.hit_open_boundary)
 
 domain_edge =  int(si.edge_types.domain)
 open_bounday_edge=  int(si.edge_types.open_boundary)
@@ -61,6 +59,9 @@ class FindHoriCellTriangleWalk(object):
         si.add_class('particle_properties', name='need_fixingIDs', class_name='ManuallyUpdatedParticleProperty',
                      write=False, dtype='int32',
                      initial_value=0, caller=self, crumbs=crumbs)
+        si.add_class('particle_properties', name='cell_search_status', class_name='ManuallyUpdatedParticleProperty', write=False,
+                     initial_value=si.cell_search_status_flags.ok, dtype='int8', caller=self, crumbs=crumbs)
+
         si.add_class('particle_properties', name='bc_coords', class_name='ManuallyUpdatedParticleProperty', write=False,
                      initial_value=0., vector_dim=3, dtype='float32', caller=self, crumbs=crumbs)
         si.add_class('particle_properties', name='bc_coords_last_good', class_name='ManuallyUpdatedParticleProperty', write=False,
@@ -75,10 +76,10 @@ class FindHoriCellTriangleWalk(object):
                          triangle_walks_retried=wc[4:5],
                          particles_killed_after_triangle_walk_retry_failed=wc[5:6],
                     )
-    def find_initial_cell(self, xq):
+    def find_initial_hori_cell(self, xq):
         # find nearest cell to xq
         t0 = perf_counter()
-        n_cell, bc, is_inside_domain= find_initial_cell.find_cellKDtree(xq, self.grid, self.KDtree, self.params['bc_walk_tol'])
+        n_cell, bc, is_inside_domain= find_initial_cell.find_hori_cellKDtree(xq, self.grid, self.KDtree, self.params['bc_walk_tol'])
         si.block_timer('Initial cell guess', t0)
         return n_cell, bc, is_inside_domain
 
@@ -88,17 +89,16 @@ class FindHoriCellTriangleWalk(object):
         grid= self.grid
         n_cell = part_prop['n_cell'].data
         bc_coords = part_prop['bc_coords'].data
-        status = part_prop['status'].data
-        need_fixingIDs = part_prop['need_fixingIDs'].data
+        cell_search_status = part_prop['cell_search_status'].data
+
         params = self.params
 
-        IDs_need_fixing= self.BCwalk(xq,
-                                self.tri_walk_AOS, grid['dry_cell_index'],
-                                n_cell, status, need_fixingIDs ,bc_coords,
+        self.BCwalk(xq, self.tri_walk_AOS, grid['dry_cell_index'],
+                                n_cell, cell_search_status, bc_coords,
                                 self.walk_counts,
                                 params['max_search_steps'], params['bc_walk_tol'],
                                 si.settings['block_dry_cells'], active)
-        return IDs_need_fixing
+
 
     def close(self):
         info= self.info
@@ -110,7 +110,7 @@ class FindHoriCellTriangleWalk(object):
     @staticmethod
     @njitOTparallel
     def BCwalk(xq, tri_walk_AOS, dry_cell_index,
-               n_cell, status, need_fixingIDs, bc_coords,
+               n_cell, cell_search_status, bc_coords,
                walk_counts,
                max_triangle_walk_steps, bc_walk_tol, block_dry_cells,
                active):
@@ -122,17 +122,16 @@ class FindHoriCellTriangleWalk(object):
         for nn in nb.prange(active.size):
             n = active[nn]
             bc = bc_coords[n, :]
-
+            cell_search_status[n] = search_ok
             if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
                 # if any is nan copy all and move on
-                status[n] = status_bad_coord
+                cell_search_status[n] = search_bad_coord
                 thread_buffer_index[nb.get_thread_id()].append(n)
                 continue
 
             n_tri = n_cell[n]  # starting triangle
             # do BC walk
             n_steps = 0
-            cell_search_OK = True
 
             while n_steps < max_triangle_walk_steps:
                 # update barcentric cords of xq
@@ -152,47 +151,34 @@ class FindHoriCellTriangleWalk(object):
                     # keep n_cell, bc  unchanged
                     if next_tri == open_bounday_edge:  # outside domain
                         # leave x, bc, cell, location  unchanged as outside
-                        status[n] = status_outside_open_boundary
-                        cell_search_OK = False
+                        cell_search_status[n] = search_hit_open_boundary
                         break
                     else:  # n_tri == -1 outside domain and any future
                         # solid boundary, so just move back
-                        status[n] = status_outside_domain
-                        cell_search_OK = False
+                        cell_search_status[n] = search_hit_domain_boundary
                         break
 
                 # check for dry cell
                 if block_dry_cells:  # is faster split into 2 ifs, not sure why
                     if dry_cell_index[next_tri] > 128:
                         # treats dry cell like a lateral boundary,  move back and keep triangle the same
-                        status[n] = status_hit_dry_cell
-                        cell_search_OK = False
+                        cell_search_status[n] = search_hit_dry_cell
                         break
 
                 n_tri = next_tri
 
             # not found in given number of search steps
             if n_steps >= max_triangle_walk_steps:  # dont update cell
-                status[n] = status_cell_search_failed
-                cell_search_OK = False
+                cell_search_status[n] = search_failed
 
-            if cell_search_OK:
+            if cell_search_status[n] == search_ok:
                 # update cell anc BC for new triangle, if not fixed in solver after full step
                 n_cell[n] = n_tri
-            else:
-                # record ID to fix outside
-                thread_buffer_index[nb.get_thread_id()].append(n)
+
 
             # walk_counts[1] += n_steps  # steps taken
             # walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
 
         walk_counts[0] += active.size  # particles walked
 
-        # merge index IDs for those needing fixing from each thread
-        n_found = 0
-        for IDs in thread_buffer_index:
-            for ID in IDs:
-                need_fixingIDs[n_found] = ID
-                n_found += 1
 
-        return need_fixingIDs[:n_found]  # return IDs of those needing fixing

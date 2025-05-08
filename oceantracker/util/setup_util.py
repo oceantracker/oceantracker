@@ -11,44 +11,42 @@ from oceantracker import definitions
 from oceantracker.shared_info import  shared_info as si
 import sys
 
-def setup_output_dir(params, crumbs='', caller=None):
-    # setus up params, opens log files/ error handling, required befor mesage loger can be used
+def setup_output_dir(settings, crumbs='', caller=None):
+    # setus up params, opens log files/ error handling, required before message loger can be used
     crumbs += '> setup_output_dir'
 
-    # check outpu_file_base is not dir, just a test
-    if len(path.dirname(params['output_file_base'])) > 0:
+    # check output_file_base is not dir, just a test
+    if len(path.dirname(settings['output_file_base'])) > 0:
         si.msg_logger.msg(
-            f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{params["output_file_base"]}"',
+            f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{settings["output_file_base"]}"',
             error=True,
             hint='Use setting "root_output_dir" to designate which dir. to place output files in',
             crumbs=crumbs, caller=caller,
             fatal_error=True)
 
     # get output files location
-    root_output_dir = path.abspath(path.normpath(params['root_output_dir']))
-    run_output_dir = path.join(root_output_dir, params['output_file_base'])
+    root_output_dir = path.abspath(path.normpath(settings['root_output_dir']))
+    run_output_dir = path.join(root_output_dir, settings['output_file_base'])
 
-    if params['add_date_to_run_output_dir']:
+    if settings['add_date_to_run_output_dir']:
         run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
 
-    # clear existing folder
-    if path.isdir(run_output_dir):
+    # clear existing folder and make a new dir, if not restarting
+    if path.isdir(run_output_dir) : #and not si.settings.restart:
         shutil.rmtree(run_output_dir)
-        si.msg_logger.msg('Deleted contents of existing output dir', warning=True)
 
-    # make a new dir
-    makedirs(run_output_dir)  # make  and clear out dir for output
+    makedirs(run_output_dir)  # make  new clean folder
 
     # write a copy of user given parameters, to help with debugging and code support
-    fb = 'users_params_' + params['output_file_base']
+    fb = 'users_params_' + settings['output_file_base']
     output_files = {'root_output_dir': root_output_dir,
                     'run_output_dir': run_output_dir,
-                    'output_file_base': params['output_file_base'],
-                    'raw_output_file_base': copy(params['output_file_base']),
+                    'output_file_base': settings['output_file_base'],
+                    'raw_output_file_base': copy(settings['output_file_base']),
                     # this is need for grid file so it does not get a case number in // runs
-                    'caseInfo_file': params['output_file_base'] + '_caseInfo.json',
-                    'runLog_file': params['output_file_base'] + '_runScreen.log',
-                    'run_error_file': params['output_file_base'] + '_run.err',
+                    'caseInfo_file': settings['output_file_base'] + '_caseInfo.json',
+                    'runLog_file': settings['output_file_base'] + '_runScreen.log',
+                    'run_error_file': settings['output_file_base'] + '_run.err',
                     'users_params_json': fb + '.json',
                     }
     return output_files
@@ -56,8 +54,8 @@ def setup_output_dir(params, crumbs='', caller=None):
 
 def write_raw_user_params(output_files, params,msg_logger):
     fn= output_files['output_file_base']+'_raw_user_params.json'
-    output_files['raw_user_params'] = 'user_given_params.json'
-    json_util.write_JSON(path.join(output_files['run_output_dir'],   output_files['raw_user_params']),params)
+    output_files['raw_user_params'] = fn
+    json_util.write_JSON(path.join(output_files['run_output_dir'],  output_files['raw_user_params']),params)
     msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
 
 def build_working_params(params, msg_logger, crumbs='', caller=None):
@@ -125,7 +123,7 @@ def check_python_version(msg_logger):
             ml.msg('Oceantracker requires Python 3 , version >= 3.10  and < 3.11',
                          hint=install_hint, warning=True, tabs=1)
         if (p_major == 3 and p_minor >= 11):
-            ml.msg('Oceantracker is compatible with Python 3.11, but > 3.11, however not all external imported packages have been updated to be compatible with 3.11', warning=True,
+            ml.msg('Oceantracker is compatible with Python 3.11,  however not all external imported packages have been updated to be compatible with 3.11', warning=True,
                    hint='Down grade to python 3.10 if unexplained issues in external packages')
 
 def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', caller = None):
@@ -135,14 +133,16 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     environ['NUMBA_function_cache_size'] = str(settings['NUMBA_function_cache_size'])
 
     if settings['NUMBA_cache_code']:
+        # use defaul cache location, as setting it fails for some reason
         environ['OCEANTRACKER_NUMBA_CACHING'] = '1'
-        environ['NUMBA_CACHE_DIR'] = path.join(settings['root_output_dir'], 'numba_cache')
     else:
         environ['OCEANTRACKER_NUMBA_CACHING'] = '0'
 
-    if  'debug' in settings and settings['debug']:
+    if settings['debug']:
+        environ['NUMBA_DEVELOPER_MODE'] = '1'
         environ['NUMBA_BOUNDSCHECK'] = '1'
         environ['NUMBA_FULL_TRACEBACKS'] = '1'
+        environ['NUMBA_DEVELOPER_MODE'] = '1'
 
     # maxium threads used
     from psutil import cpu_count

@@ -1,5 +1,5 @@
-numpy < 2
 numba
+numpy < 2
 netcdf4
 xarray
 scipy

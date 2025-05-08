@@ -27,7 +27,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
 
     def check_requirements(self):
         # Add z coordinate requirement
-        self.check_class_required_fields_prop_etc(required_props_list=['x', 'status', 'z'])
+        self.check_class_required_fields_prop_etc(required_props_list=['x', 'status'])
 
 
     def info_to_write_at_end(self):

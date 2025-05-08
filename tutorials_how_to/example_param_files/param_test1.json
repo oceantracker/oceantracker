@@ -3,7 +3,7 @@
     "root_output_dir": "output",
     "time_step": 120,
     "reader": {
-        "input_dir": "../demos/demo_hindcast/schsim3D",
+        "input_dir": "./demo_hindcast/schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
     },
     "release_groups": [

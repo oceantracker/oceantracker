@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(name='oceantracker',
       python_requires='>=3.10,<3.12',
-      version='0.4.1.1',
+      version='0.5.1.0',
       description='Fast offline Lagrangian particle tracking in the Ocean',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',

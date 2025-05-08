@@ -1,61 +1,41 @@
 # To do List
 
 # Required for version 0.5
-1. check available RAM or slow running, which happens when memory use exceeds physical ram, and uses disk cacheing,
-2. warn to reduce number of processors used below max available  (to have fewer simultaneous readers memory buffers  ) and/or reduce memory use with smaller reader time_buffer_size 
-1. DEFT3D FM
-   1. 3D sigma reader requires vertical regridder
-1. Stats
-    1. matab read polygon
-1. write of case info file even if errors, trap json encoding erorrs 
+
+1. Stats unit test
+1. matlab read stats check
+2.  fix demo matalb plot axes 
+3. split particles writing track   files, are not readable
+3. map scale on latlong grid too big
+   
+1. add descriptions to particle properties to put in netcdf if written out
+
 2. centalize polygon list creation and param checking 
 4. ensure error log is written on caught error
-1. slow start up
-   1. after  - Starting time stepping:
-   1. after -  read  24 time steps in  9.2 sec
-1. better spell check sugesttions when short or long module name not found
-1. Thread stats counts, events counts etc
+1. polygon_list param spell checking 
+
 
 ##  Internal Structure
 
-1. Ensure all classes call final setup (core_roles first) 
-2.give solve a scheduler
-1. Cleaner exiting when error
-    1. trace backs
-    1. always get secondary case.json info error?
-2.  have field manager with each field having its own reader, grid and interpolator
-1. Rebuild interp walk counts/stats
-1. set max treads before numbas import
-1. use fast math numba option?
-2. comparison tests in parallelized?
-3. restructure particle ID buffers?
-1. restructure  particle method find_those_in_range_of_values()?
-2. 1. sture feilds by triangles for faster interp? afterf asyc reader?
-3. are results of random slighly dif when threaded?
 
-## New additions
+## New additions?
 
-1. some parameters are not changeable by user, set internally?
 1. helper method to add to  polygon lists of a class
 1. check pointing of run to enable restart
-1. native global lon-lat  models
-1. used np.datetime64, milli sec internally
-2. Add positive=True to param checker to ensure vale is >0
-2. faster to do dry cellby updating adjacency matrix? aviods addtional decsion in cel serach
-1. throw error if all release points in a release group or all of polygon vertices  are outside domain
-1. Spell checking dictionary like class, against existing keys
-1. for nested grids, find cells of transferred particles faster with map of nearest cell in new grid too old grid cell
+1. used np.datetime64  internally 
+2. update timer for reader classes
 
-## Niggles that need sorting some time
-
+# Niggles that need sorting some time
 3. compact tracks writer to retain dead particle locations in retangular form, but flag as dead
 1. List check makes default values of None into [], should be None? Look at merging list params, better to remove, or keep for building polygon lists ?
-1. all final_setup()' s done??
-1. inside polygon class over writes given points with closed polygon 
 1. cope with time dependent water depth in write to grid
-1. unit test cope with dispersion on 
-2. nest field group manager, use default only if none given
 3.  reader grid transforms faster with pre-allocated buffers?
+4. unit test 01,  track diff. between LSC and sigma vertical regrid too large?
+5. vertical regrid using z fractions for each time step?
+6.  adding custom reader fields, reader fields, eg deg_t0_lat_long updating? and part prop updating ordering?
+1. max_duration and end time estimates
+8. LSC unit test slow?  release stratergies?
+9.  speed nested grids, only check if particle on outer grid is inside an inner grid if in a cell overlapping  an inner grid 
     
 ## Nice to haves
 1.   remove_tidally_stranded_particles option?
@@ -66,13 +46,17 @@
 1. only put files with output fies classes in case info output_files
 1. cleaner to make write plot function from returned plot?
 2. web links to help on error
-1. Readers,  get data from function,  to use for gyre test cases
+1. Readers,  get data from a function not file,  to use for gyre test cases
 1. tidal constituents reader
 1. read write polygons from geo-jsons, release groups poly stats
 1. add netcdf variable atributes. dimensions etc when reading output
-1.  add message logging to post processing
+1.  add message logging to postprocessing
 2.  remove dimension map in favour of using get_hindcast_info() method
-
+1. make subgrids spaning polygons with own kdtree to speed lookup of initial cell find
+2. speed inside polygon by when cell is known, for triangles fully inside a ploygon
+3. radius point release separated from point release to do inside domain check at start  
+4.  cellsearch status flags as numba compile time constants
+5. 
 # Other
 
 ## Docs

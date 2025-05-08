@@ -1,12 +1,12 @@
 from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReader
-
+from os import path
 
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC, ParameterListChecker as PLC
 import numpy as np
 from oceantracker.shared_info import shared_info as si
 from oceantracker.reader.util import reader_util
-
+from oceantracker.reader.util import hydromodel_grid_transforms
 class SCHISMreader(_BaseUnstructuredReader):
 
     def __init__(self):
@@ -40,7 +40,7 @@ class SCHISMreader(_BaseUnstructuredReader):
                                                 doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'one_based_indices': PVC(True, bool, doc_str='Schism has indices starting at 1 not zero'),
-            'variable_signature': PLC(['elev','depth'], str, doc_str='Variable names used to test if file is this format'),
+            'variable_signature': PLC(['elev','depth','wetdry_elem'], str, doc_str='Variable names used to test if file is this format'),
             'hgrid_file_name': PVC(None, str),
              })
 
@@ -57,9 +57,13 @@ class SCHISMreader(_BaseUnstructuredReader):
             d0 = np.datetime64(f'{int(s[0])}-{int(s[1]):02d}-{int(s[2]):02d}')
             d0 = d0.astype('datetime64[s]').astype(np.float64)
             d0 = d0 + float(s[3])*3600
-            t= time.data + d0
+            t = time.data + d0
             return t
-
+    def initial_setup(self):
+        super().initial_setup()
+        # use schism min water depth if in file
+        if 'minimum_depth' in self.info['variables']:
+            si.settings.minimum_total_water_depth = max( float(self.dataset.read_variable('minimum_depth')), .01)
     def add_hindcast_info(self):
         params = self.params
         info = self. info
@@ -81,7 +85,18 @@ class SCHISMreader(_BaseUnstructuredReader):
 
 
     def read_zlevel(self, nt):
-        return self.dataset.read_variable(self.params['grid_variable_map']['zlevel'], nt = nt)
+        data = self.dataset.read_variable(self.params['grid_variable_map']['zlevel'], nt = nt)
+        return data
+
+    @staticmethod
+    def _fix_uninitialized_zcorr_not_used(water_depth,min_water_depth, bottom_cell_index, zcor):
+        # fix zcor profiles in dry cells which are not initialise, so are zero
+
+        for nt in range(zcor.shape[0]):
+            for node in range(zcor.shape[1]):
+                n_bot = bottom_cell_index[node]
+                if zcor[nt,node,-1] == 0 and zcor[nt,n_bot] ==0:
+                    zcor[nt,node,n_bot:] = -water_depth[node] + np.linspace(0,min_water_depth,zcor.shape[2]-n_bot)
 
     def read_triangles(self, grid):
         # read nodes in triangles (N by 3) or mix of triangles and quad cells as  (N by 4)
@@ -93,19 +108,12 @@ class SCHISMreader(_BaseUnstructuredReader):
         tri[sel] = 0
         tri = tri.astype(np.int32)
         tri -= 1
+
         grid['triangles'] = tri
-        return grid
 
 
-    def read_horizontal_grid_coords(self, grid):
-        # reader nodal locations
-        ds = self.dataset
-        gm = self.params['grid_variable_map']
 
-        x = ds.read_variable(gm['x']).data
-        y = ds.read_variable(gm['y']).data
-        grid['x']  = np.stack((x, y), axis=1).astype(np.float64)
-        return grid
+
 
     def read_bottom_cell_index(self, grid):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid
@@ -117,6 +125,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         else:
             # S  grid bottom cell index = zero
             bottom_cell_index = np.zeros((self.info['num_nodes'],), dtype=np.int32)
+
         return bottom_cell_index
 
     def read_dry_cell_data(self,nt_index, buffer_index):
@@ -140,6 +149,51 @@ class SCHISMreader(_BaseUnstructuredReader):
 
         return is_open_boundary_node
 
+    def set_up_uniform_sigma(self, grid):
+        # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
+        # for use in Slayer ond LSC grids
+
+        ds = self.dataset
+        gm = self.params['grid_variable_map']
+
+        # read first zlevel time step
+        zlevel =ds.read_variable(gm['zlevel']).data[0,:,:]
+
+        # use node with thinest top/bot layers as template for all sigma levels
+        grid['zlevel_fractions'] = hydromodel_grid_transforms.convert_zlevels_to_fractions(zlevel, grid['bottom_cell_index'], si.settings.minimum_total_water_depth)
+
+        # get profile with the smallest bottom layer  tickness as basis for first sigma layer
+        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['zlevel_fractions'],grid['bottom_cell_index'])
+
+        # use layer fractions from this node to give layer fractions everywhere
+        # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
+        nz_bottom = grid['bottom_cell_index'][node_thinest_bot_layer]
+
+        # stretch sigma out to same number of depth cells,
+        # needed for LSC grid if node_min profile is not full number of cells
+        zf_model = grid['zlevel_fractions'][node_thinest_bot_layer, nz_bottom:]
+        nz = grid['zlevel_fractions'].shape[1]
+        nz_fractions = nz - nz_bottom
+        grid['sigma'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
+
+        if False:
+            # debug plots sigma
+            from matplotlib import pyplot as plt
+            sel = np.arange(0, zlevel.shape[0], 100)
+            water_depth,junk = self.read_field_var(nc, self.params['field_variable_map']['water_depth'])
+            sel=sel[water_depth[sel]> 10]
+            index_frac = (np.arange(zlevel.shape[1])[np.newaxis,:] - grid['bottom_cell_index'][sel,np.newaxis]) / (zlevel.shape[1] - grid['bottom_cell_index'][sel,np.newaxis])
+            zlevel[zlevel < -1.0e4] = np.nan
+
+            #plt.plot(index_frac.T,zlevel[sel,:].T,'.')
+            #plt.show(block=True)
+            plt.plot(index_frac.T, grid['zlevel_fractions'][sel, :].T, lw=0.1)
+            plt.plot(index_frac.T,grid['zlevel_fractions'][sel, :].T, '.')
+
+            plt.show(block=True)
+
+            pass
+
 def decompose_lines(lines, dtype=np.float64):
     cols= len(lines[0].split())
     out= np.full((len(lines),cols),0,dtype=dtype)
@@ -156,6 +210,9 @@ def decompose_lines(lines, dtype=np.float64):
 
 def read_hgrid_file(file_name):
 
+    if not path.isfile(file_name):
+        si.msg_logger.msg(f'Cannot find given schsim hgrid file "{file_name}"',
+                         hint ='check path', fatal_error=True )
     d={}
     with open(file_name) as f:
         lines = f.readlines()
@@ -206,3 +263,5 @@ def read_hgrid_file(file_name):
             l0 = l0 + nodes.size + 1
 
     return d
+
+

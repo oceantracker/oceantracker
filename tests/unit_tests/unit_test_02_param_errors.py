@@ -1,10 +1,5 @@
-from os import path, sep
 from oceantracker.main import OceanTracker
 from copy import deepcopy
-from plot_oceantracker import plot_tracks
-import  argparse
-import shutil
-import numpy as np
 from tests.unit_tests import test_definitions
 
 def main(args):
@@ -37,7 +32,7 @@ def main(args):
         case_info_file = ot.run()
     except Exception as e:
         print('has errors',str(e))
-        # acrry on
+        # carry on
 
 
 

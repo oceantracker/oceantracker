@@ -2,9 +2,9 @@ import numpy as np
 from numba import njit
 from oceantracker.interpolator.util.interp_kernals import kernal_linear_interp1D
 from copy import copy
-from oceantracker.util.numba_util import njitOT, njitOTparallel
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.util.triangle_utilities import split_quad_cells
-import numba as nb
+
 
 def convert_regular_grid_to_triangles(grid,mask):
     # get nodes for each corner of quad
@@ -32,19 +32,20 @@ def convert_regular_grid_to_triangles(grid,mask):
 
 
 @njitOTparallel
-def convert_zlevels_to_fractions(zlevels,bottom_cell_index,z0):
+def convert_zlevels_to_fractions(zlevels,bottom_cell_index,minimum_total_water_depth):
     # get zlevels (nodes, depths) as fraction of water depth
     z_fractions= np.full_like(zlevels,np.nan,dtype=np.float32)
-    for n in nb.prange(zlevels.shape[0]): # loop over nodes
+    for n in prange(zlevels.shape[0]): # loop over nodes
         z_surface = float(zlevels[n, -1])
         z_bottom= float(zlevels[n,bottom_cell_index[n]])
         total_water_depth = abs(z_surface-z_bottom)
-
-        for nz in range(bottom_cell_index[n], zlevels.shape[1]):
-            if total_water_depth > z0:
+        if total_water_depth >= minimum_total_water_depth:
+            for nz in range(bottom_cell_index[n], zlevels.shape[1]):
                 z_fractions[n,nz] = (zlevels[n,nz]-z_bottom)/total_water_depth
-            else:
-                z_fractions[n, nz] = 0.
+        else:
+            # make linear if total depth too small, (eg when zlevel not initialised in dry cells,  so is all zeros)
+            z_fractions[n, bottom_cell_index[n]:] = np.arange(0, zlevels.shape[1]-bottom_cell_index[n] )/(zlevels.shape[1] -1 - bottom_cell_index[n])
+        pass
     return z_fractions
 
 @njitOT
@@ -69,7 +70,7 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
                                            data,out, is_water_velocity):
     # assumes time invariant zlevel_fractions, linear interp
     # set up space
-    for nt in nb.prange(out.shape[0]):
+    for nt in prange(out.shape[0]):
         for node in range(out.shape[1]):
             nz_bottom =  int(bottom_cell_index[node])
             nz_data = nz_bottom
@@ -118,21 +119,21 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
 def convert_mid_layer_sigma_top_bot_layer_values(data, sigma_layer, sigma):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
     # used in FVCOM reader
-    data_levels = np.full((data.shape[0],) + (data.shape[1],) + (sigma.shape[0],), 0., dtype=np.float32)
+    data_interface = np.full((data.shape[0],) + (data.shape[1],) + (sigma.shape[0],), 0., dtype=np.float32)
 
     for nt in range(data.shape[0]):
         for n in range(data.shape[1]):
             for nz in range(1, data.shape[2]):
                 # linear interp levels not, first or last boundary
-                data_levels[nt, n, nz] = kernal_linear_interp1D(sigma_layer[nz - 1], data[nt, n, nz - 1], sigma_layer[nz], data[nt, n, nz], sigma[nz])
+                data_interface[nt, n, nz] = kernal_linear_interp1D(sigma_layer[nz - 1], data[nt, n, nz - 1], sigma_layer[nz], data[nt, n, nz], sigma[nz])
 
             # extrapolate to top zlevel
-            data_levels[nt, n, -1] = kernal_linear_interp1D(sigma_layer[-2], data[nt, n, -2], sigma_layer[-1], data[nt, n, -1], sigma[-1])
+            data_interface[nt, n, -1] = kernal_linear_interp1D(sigma_layer[-2], data[nt, n, -2], sigma_layer[-1], data[nt, n, -1], sigma[-1])
 
             # extrapolate to bottom zlevel
-            data_levels[nt, n, 0] = kernal_linear_interp1D(sigma_layer[0], data[nt, n, 0], sigma_layer[1], data[nt, n, 1], sigma[0])
+            data_interface[nt, n, 0] = kernal_linear_interp1D(sigma_layer[0], data[nt, n, 0], sigma_layer[1], data[nt, n, 1], sigma[0])
 
-    return data_levels
+    return data_interface
 
 @njitOT
 def convert_mid_layer_fixedZ_top_bot_layer_values(data_zlayer, z_layer, z, bottom_cell_index,water_depth):

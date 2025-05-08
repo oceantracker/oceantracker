@@ -32,7 +32,10 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                         is_dry_cell=PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                             ),
             dimension_map=dict(
+                        z = PVC('mesh2d_nInterfaces', str, doc_str='z dim for interfaces'),
                         time=PVC('time', str, doc_str='name of time dimension in files'),
+                        node=PVC('mesh2d_nNodes', str, doc_str='name of node  dimension in files'),
+
                         all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers'], str, doc_str='All z dims, used to identify  3D variables'),
                          ),
             field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
@@ -86,7 +89,6 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             si.msg_logger.msg('DEFT3D FM not yet tested with sigma vertical grid, only tested to work with fixed z level grid', warning=True)
 
 
-
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations
         ds = self.dataset
@@ -95,7 +97,6 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         x = ds.read_variable(gm['x']).data
         y = ds.read_variable(gm['y']).data
         grid['x'] = np.stack((x, y), axis=1).astype(np.float64)
-        return grid
 
     def read_triangles(self, grid):
         # read nodes in triangles (N by 3) or mix of triangles and quad cells as (N by 4)
@@ -112,7 +113,6 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         tri[sel] = 0
         grid['triangles'] = tri.astype(np.int32) - 1 # make zero based
 
-        return grid
 
     def read_dry_cell_data(self,nt_index, buffer_index):
         # get dry cells from water depth and tide
@@ -127,31 +127,35 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                                                 si.settings.minimum_total_water_depth, is_dry_cell_buffer, buffer_index)
         pass
 
-    def build_vertical_grid(self, grid):
+    def build_vertical_grid(self):
         # add time invariant vertical grid variables needed for transformations
         # first values in z axis is the top? so flip
         gm = self.params['grid_variable_map']
         fm = self.params['field_variable_map']
         info = self.info
+        grid = self.grid
         ds = self.dataset
 
         if info['vert_grid_type'] == si.vertical_grid_types.Sigma:
+            # assumes first value -1 is at the bottom
             grid['sigma'] = ds.read_variable('mesh2d_interface_sigma').data.astype(np.float32) # layer interfaces
-            grid['sigma'][0] = -1  # not sure why this value is 9.96920997e+36??
-            grid['sigma'] = 1.+ grid['sigma'] #
-            grid['sigma_layer'] = ds.read_variable('mesh2d_layer_sigma').data.astype(np.float32) # layer center
+            grid['sigma'][0] = -1.  # not sure why this value is 9.96920997e+36??
+            grid['sigma_layer'] = ds.read_variable('mesh2d_layer_sigma').data.astype(np.float32)  # layer center
+            # shift to be zero at bottom
+            grid['sigma'] = 1.+ grid['sigma']
+            grid['sigma_layer'] = 1. + grid['sigma_layer']
         else:
             # fixed z levels
             grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)  # layer boundary fractions reversed from negative values
             grid['z_layer'] = ds.read_variable(gm['z_layer']).data.astype(np.float32)   # layer center fractions
 
-        grid = super().build_vertical_grid(grid)
+        super().build_vertical_grid()
 
 
 
         # need to add a layer between first given z level and bottom
         grid['bottom_cell_index'] = np.maximum(grid['bottom_cell_index']-1, 0)
-        return  grid
+
 
     def read_bottom_cell_index(self, grid):
         gm = self.params['grid_variable_map']
@@ -174,7 +178,8 @@ class DELF3DFMreader(_BaseUnstructuredReader):
 
     def build_hori_grid(self, grid):
 
-        super().build_hori_grid( grid)
+        super().build_hori_grid(grid)
+
         ds = self.dataset
         gm = self.params['grid_variable_map']
 
@@ -222,10 +227,14 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             # data is at cell center/element/triangle  move to nodes
             data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(
                                         data, grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
-        #  interp layer values to interfaces, must be done after nodal values
         if var_info['is3D'] and info['layer_dim'] in var_info['dims']:
-            data = hydromodel_grid_transforms.convert_mid_layer_fixedZ_top_bot_layer_values(
-                data, grid['z_layer'], grid['z'], grid['bottom_cell_index'], grid['water_depth'])
+            if info['vert_grid_type'] == si.vertical_grid_types.Zfixed :
+                #  interp fixed z layer values to interfaces, must be done after nodal values
+                data = hydromodel_grid_transforms.convert_mid_layer_fixedZ_top_bot_layer_values(
+                    data, grid['z_layer'], grid['z'], grid['bottom_cell_index'], grid['water_depth'])
+            else:
+                # sigma grid
+                data = hydromodel_grid_transforms. convert_mid_layer_sigma_top_bot_layer_values(data, grid['sigma_layer'], grid['sigma'])
 
         # add dummy component axis
         data = data[..., np.newaxis]

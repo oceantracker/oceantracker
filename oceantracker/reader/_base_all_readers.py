@@ -19,8 +19,6 @@ from oceantracker.util import triangle_utilities, basic_util, cord_transforms
 
 from oceantracker.reader.util import reader_util
 
-from oceantracker.definitions import  cell_search_status_flags
-
 from oceantracker.shared_info import shared_info as si
 
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
@@ -94,8 +92,6 @@ class _BaseReader(ParameterBaseClass):
 
     def preprocess_field_variable(self, name,grid, data): return data
 
-
-
     def read_bottom_cell_index(self, grid):
         # dummy bottom cell
         bottom_cell_index = np.full((self.info['num_nodes'],), 0, dtype=np.int32)
@@ -126,11 +122,9 @@ class _BaseReader(ParameterBaseClass):
         # first build data set
 
         info = self.info
-        self.grid = self._build_hori_and_vert_grids()
+        self._build_hori_and_vert_grids()
 
         pass
-
-
 
 
     def build_fields(self):
@@ -151,13 +145,13 @@ class _BaseReader(ParameterBaseClass):
 
     def final_setup(self):      pass
 
-    def _build_hori_and_vert_grids(self):
-        grid={}
-        grid = self.build_hori_grid(grid)
-        grid = self._construct_hori_grid_variables(grid)
+    def _build_hori_and_vert_grids(self, ):
+        grid= self.grid
+        self.build_hori_grid(grid)
+        self._construct_hori_grid_variables()
 
         if self.info['is3D']:
-            grid = self.build_vertical_grid(grid)
+            self.build_vertical_grid()
         else:
             # 2D
             grid['zlevel'] = None
@@ -168,38 +162,17 @@ class _BaseReader(ParameterBaseClass):
                 v = grid[name]
                 if v is not None and v.dtype != np.float32:
                     si.msg_logger.msg(f'Reader type error {name} must be dtype {np.float64} ', warning=True)
-        return grid
-
-
-
-    def _time_sort_variable_fileIDs(self):
-        # sort variable fileIDs by time, now all files are read
-        info = self.info
-        fi = info['file_names']
-
-        for v_name, item in info['variables'].items():
-            if item['has_time']:
-                item['fileIDs'] = np.asarray(item['fileIDs'])
-                start_times = np.asarray([fi[x]['start_time'] for x in item['fileIDs']])
-                file_order = np.argsort(start_times)
-                item['fileIDs'] = item['fileIDs'][file_order]
-                # get first time step in the file
-                time_steps = np.asarray([fi[x]['time_steps'] for x in item['fileIDs']])
-                first_time_step_in_file = np.cumsum(time_steps) - time_steps[0]
-                # insert first time step into the file info in time order
-                # this will be unnecessarily  repeated, if more than one variable in a file
-                for n, fID in enumerate(item['fileIDs']):
-                    fi[fID]['first_time_step_in_file'] = first_time_step_in_file[n]
-            else:
-                item['fileIDs'] = item['fileIDs'][0]
 
         pass
+
+
 
     def build_hori_grid(self, grid):
         # read nodal values and triangles
         params = self.params
         info = self.info
-        grid = self.read_horizontal_grid_coords(grid) # read nodal x's
+
+        self.read_horizontal_grid_coords(grid) # read nodal x's
 
         if si.settings.use_geographic_coords or info['geographic_coords']:
             if not info['geographic_coords']:
@@ -235,9 +208,10 @@ class _BaseReader(ParameterBaseClass):
         si.msg_logger.msg(f'time step = {dt}, number of time steps= {info["total_time_steps"]} ',
             tabs=5)
         si.msg_logger.msg('grid bounding box = ' + b, tabs=5)
-
+        si.msg_logger.msg(f"has:  A_Z profile={info['has_A_Z_profile']}  bottom stress={info['has_bottom_stress']}", tabs=5)
+        si.msg_logger.hori_line()
         # reader triangles
-        grid = self.read_triangles(grid)
+        self.read_triangles(grid)
         grid['quad_cells_to_split'],grid['triangles'] = self.find_and_split_quad_cells(grid['triangles'])
 
         # find nodes that are used in triangulation (ie not land)
@@ -246,12 +220,12 @@ class _BaseReader(ParameterBaseClass):
         # ensure variables have right type
         grid['x'] = grid['x'].astype(np.float64)
 
-        return grid
-
-    def _construct_hori_grid_variables(self, grid):
+    def _construct_hori_grid_variables(self):
         # set up grid variables which don't vary in time and are shared by all case runners and main
         # add to reader build info
         info = self.info
+        grid = self.grid
+
         msg_logger = si.msg_logger
         msg_logger.progress_marker('Starting grid setup',tabs=2)
 
@@ -321,20 +295,19 @@ class _BaseReader(ParameterBaseClass):
         #for n  in range(3):
         #    pass
         msg_logger.progress_marker('Finished grid setup', tabs=2)
-        return grid
 
-    def build_vertical_grid(self, grid):
+    def build_vertical_grid(self):
         # setup transforms on the data, eg regrid vertical if 3D to same sigma levels
         params = self.params
         info = self.info
-
+        grid = self.grid
         vgt = si.vertical_grid_types
         grid['bottom_cell_index'] = self.read_bottom_cell_index(grid).astype(np.int32)
 
         # allow vertical regridding to same sigma at all nodes
 
         if info['regrid_z_to_uniform_sigma_levels']:
-            grid = self.set_up_uniform_sigma(grid)  # add an estimated sigma to the grid
+            self.set_up_uniform_sigma(grid)  # add an estimated sigma to the grid
 
 
         # set up zlevels if needed
@@ -345,8 +318,6 @@ class _BaseReader(ParameterBaseClass):
             s = [si.settings.time_buffer_size, grid['x'].shape[0], info['num_z_levels']]
             grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
             info['read_zlevels'] = True
-
-        return grid
 
     def find_and_split_quad_cells(self, tri):
         # return indices of quad cells to split from 4th column on triangulation
@@ -447,12 +418,21 @@ class _BaseReader(ParameterBaseClass):
     def update_water_velocity_field(self, buffer_index, nt):
         field = self.fields['water_velocity']
         data = self.read_field_data('water_velocity', field, nt)
+        info = self.info
 
         if field.is3D():
-            if self.info['regrid_z_to_uniform_sigma_levels']:
-                data = self._vertical_regrid_Slayer_field_to_uniform_sigma('water_velocity', data)
+            if info['regrid_z_to_uniform_sigma_levels']:
+                # applies to LSC and Slayer grids if requested (the default)
+                data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_cell_index']) # zero bottom before regrid
+                data = self._vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma('water_velocity', data)
+
             # ensure vel at bottom is zero
-            data = reader_util.patch_bottom_velocity_to_make_it_zero(data, self.grid['bottom_cell_index'])
+            if info['vert_grid_type'] in [si.vertical_grid_types.LSC, si.vertical_grid_types.Zfixed]:
+                # ragged bottom
+                data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_cell_index'])
+            else:
+                # First  cell is at the bottom , so set zero
+                data[:, :, 0, :] = 0.
 
         field.data[buffer_index, ...] = data
 
@@ -465,34 +445,40 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         bi = self.info['buffer_info']
 
-        fractional_time_steps = np.zeros((2,), dtype=np.float64)
-        current_buffer_steps = np.zeros((2,), dtype=np.int32)
 
         hindcast_fraction = (time_sec - info['start_time']) / info['duration']
+
         current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
 
+        time_hindcast = self.get_time(current_hydro_model_step)
+
         # ring buffer locations of surrounding steps
+        current_buffer_steps = np.zeros((2,), dtype=np.int32)
         current_buffer_steps[0] = current_hydro_model_step % si.settings.time_buffer_size
         current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.model_direction)) % si.settings.time_buffer_size
-
-        time_hindcast = grid['time'][current_buffer_steps[0]]
 
         # sets the fraction of time step that current time is between
         # surrounding hindcast time steps
         # abs makes it work when backtracking
         s = abs(time_sec - time_hindcast) / info['time_step']
-        fractional_time_steps[0] = 1.0 - s
+        fractional_time_steps =  np.asarray([1.0 - s, s])
         fractional_time_steps[1] = s
+
+        if np.any(np.abs(fractional_time_steps) > 1.1):
+            si.msg_logger.msg(f'unexpected error in times, fractional time steps is greater than 1 = {str(fractional_time_steps)}',
+                              hint='Error in  decoding hindcast time? hindcast files not properly sorted in time order? or code bug?',
+                              warning=True, caller = self)
+
         return current_hydro_model_step, current_buffer_steps, fractional_time_steps
 
     def update(self, time_sec):
         # check if all interpolators have the time steps they need
 
         if not self.are_time_steps_in_buffer(time_sec):
-            t0 = perf_counter()
+
             self.start_update_timer()
             self.fill_time_buffer(time_sec)  # get next steps into buffer if not in buffer
-            si.block_timer('Filled reader buffers',t0)
+
             self.stop_update_timer()
 
     #@function_profiler(__name__)
@@ -534,7 +520,6 @@ class _BaseReader(ParameterBaseClass):
         self.update_tide_field(buffer_index, nt_available)
         self.update_water_velocity_field(buffer_index, nt_available)
 
-        # print('xx', time_util.seconds_to_isostr(time_sec), current_hydro_model_step, current_buffer_steps)
         # read time varying vector and scalar reader fields
         for name, field in self.fields.items():
             if not isinstance(field, ReaderField) or not field.is_time_varying() : continue
@@ -543,7 +528,7 @@ class _BaseReader(ParameterBaseClass):
             data =  self.read_field_data(name, field, nt_available)
 
             if field.is3D() and si.settings['regrid_z_to_uniform_sigma_levels']:
-                data = self._vertical_regrid_Slayer_field_to_uniform_sigma(name, data)
+                data = self._vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma(name, data)
 
             # insert data
             field.data[buffer_index, ...] = data
@@ -589,7 +574,6 @@ class _BaseReader(ParameterBaseClass):
     def read_time_varying_grid_variables(self, nt, buffer_index):
         # read time and  grid variables, eg time,dry cell
         grid = self.grid
-        grid['time'][buffer_index] = self.read_time(nt)
 
         if si.run_info.is3D_run and self.info['read_zlevels']:
             # read zlevel if native vertical grid of types Slayer or LSC
@@ -622,32 +606,38 @@ class _BaseReader(ParameterBaseClass):
         else:
             si.msg_logger(f'Unrecognised time unit = {unit}', hint="must be one of [seconds,minutes,hours,days]")
 
-
         t = t + d0
         return t
 
-    def read_time(self, nt=None):
-        # assume time is cf convention
-        time_var = self.info['time_var']
-        time = self.dataset.read_variable(time_var, nt=nt)
-        time = self.decode_time(time)
-        return  time
+    def get_time(self, nt_hindcast):
+        # get preloaded times at given time steps
+        return  self.info['time_coord'][nt_hindcast]
 
-    def _vertical_regrid_Slayer_field_to_uniform_sigma(self,name, data):
+    def _vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma(self, name, data):
         grid = self.grid
         fields = self.fields
 
         s = list(np.asarray(data.shape, dtype=np.int32))
         s[2] = grid['sigma'].size
-        out = np.full(tuple(s), np.nan, dtype=np.float32)
-        data = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
-            grid['zlevel_fractions'], grid['bottom_cell_index'],
-            grid['sigma'],
-            fields['water_depth'].data, fields['tide'].data,
-            si.settings.z0, si.settings.minimum_total_water_depth,
-            data, out,
-            name == 'water_velocity')
-        return data
+        out = np.full(tuple(s), np.nan, dtype=np.float32) # move to interp_4D_field_to_fixed_sigma_values?
+
+        data_out = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
+                            grid['zlevel_fractions'], grid['bottom_cell_index'],
+                            grid['sigma'],
+                            fields['water_depth'].data, fields['tide'].data,
+                            si.settings.z0, si.settings.minimum_total_water_depth,
+                            data, out,
+                            name == 'water_velocity')
+        if False:
+            # check regridded profiles look reasonable
+            from matplotlib import  pyplot as plt
+            nt = 1
+            n = 75
+
+            plt.plot(grid['zlevel_fractions'][ n, :], data[nt, n, :, 0], c='g')
+            plt.plot(grid['sigma'],data_out[nt,n,:,0],c='r')
+            plt.show()
+        return data_out
 
     # convert, time etc to hindcast/ buffer index
     def time_to_hydro_model_index(self, time_sec):
@@ -699,7 +689,7 @@ class _BaseReader(ParameterBaseClass):
         nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
         nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
         nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
-        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(cell_search_status_flags.get_edge_vars()))
+        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(si.cell_search_status_flags))
         nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
         nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
         nc.write_a_new_variable('node_to_tri_map', grid['node_to_tri_map'], ('node_dim','max_nodes_per_tri'))

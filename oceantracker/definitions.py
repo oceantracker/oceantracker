@@ -7,8 +7,8 @@ from os import path
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 0.5, revision  = 30, date = '2025-01-28', parameter_ver=0.5)
-version['str'] = f"{version['major']:.2f}.{version['revision']:04.0f}-{version['date']}"
+version= dict(major= 0.5, revision  = 50, date = '2025-04-14', parameter_ver=0.5)
+version['str'] = f"{version['major']:.2f}.{version['revision']:04d}-{version['date']}"
 
 try:
     version['git_revision'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
@@ -34,7 +34,7 @@ known_readers = dict(
                 GLORYS =  'oceantracker.reader.GLORYS_reader.GLORYSreader',
                 DEFT3D_FM =  'oceantracker.reader.DEFT3DFM_reader.DELF3DFMreader',
                 FVCOMreader =  'oceantracker.reader.FVCOM_reader.FVCOMreader',
-                ROMSmoanaProject = 'oceantracker.reader.ROMS_reader_moana_project.ROMSreaderMonaProject'
+                ROMSmoanaProject = 'oceantracker.reader.ROMS_reader_moana_projectNZ.ROMSreaderMoanaProjectNZ'
                 #generic =  'oceantracker.reader.generic_unstructured_reader.GenericUnstructuredReader',
                 #dummy_data =  'oceantracker.reader.dummy_data_reader.DummyDataReader',
 
@@ -60,56 +60,78 @@ default_classes_dict = dict(
                 )
 # index values
 
-# below are mapping names to index name, and are added to shared info
-@dataclass
-class _BaseConstantsClass:
-    c = 1
-    def asdict(self):  return self.__dict__
+class _AttribDict():
+    '''
+    holds variables as class attributes to enable auto complete hints
+    and give iterators over these variables, but can act like a dictionary,
+    ie  allows both  instance.backtracking and instance['backtracking']
+
+    '''
+    def __init__(self):
+        # add  class variables in ._class_.__dict__, to instance __dict__ by adding attributes
+        for key, item in self.__class__.__dict__.items():
+            if not key.startswith('_'):
+                setattr(self, key, item)
+    def asdict(self): return self.__dict__
+
+    def keys(self): return  self.possible_values()
     def possible_values(self):  return list(self.__dict__.keys())
+
+    def items(self): return  self.__dict__.items()
+
+    def __getitem__(self, name:str):  return getattr(self,name)
+    def __setitem__(self, name:str, value):  setattr(self,name, value)
 
 
 ''' Particle status flags mapped to integer values '''
-@dataclass
-class _ParticleStatusFlags(_BaseConstantsClass):
+class _ParticleStatusFlags(_AttribDict):
     unknown : int = -20
-    bad_coord : int = -16
-    cell_search_failed: int = -15
     notReleased : int = -10
     dead : int = -5
-    hit_dry_cell: int = -4
-    outside_domain : int = -3
-    outside_open_boundary : int = -2
+    outside_domain: int = -2
+    outside_open_boundary : int = -1
     stationary : int = 0
     stranded_by_tide : int = 3
     on_bottom : int = 6
     moving : int = 10
 
+# status of cell search
+
+class _CellSearchStatusFlags(_AttribDict):
+    ok: int = 0
+    hit_domain_boundary: int = -1
+    hit_open_boundary: int = -2
+    hit_dry_cell : int = -3
+    bad_coord: int = -20
+    failed: int = -30
+
+
 
 # types of node
-@dataclass
-class _NodeTypes(_BaseConstantsClass):
+
+class _NodeTypes(_AttribDict):
     interior: int = 0
     island_boundary: int = 1
     domain_boundary: int = 2
     open_boundary: int = 3
     land: int = 4
 
-@dataclass
-class _EdgeTypes(_BaseConstantsClass):
+
+class _EdgeTypes(_AttribDict):
     interior: int = 0
     domain: int = -1
     open_boundary: int = -2
 
 
-# status of cell search
-@dataclass
-class _CellSearchStatusFlags(_BaseConstantsClass):
-    ok: int = 0
-    domain_edge: int = -1
-    open_boundary_edge: int = -2
-    dry_cell_edge : int = -3
-    bad_coord: int = -20
-    failed: int = -30
+class _DimensionNames(_AttribDict):
+    # used to standardise output dimension names
+    time: str = 'time_dim'
+    particle: str  = 'particle_dim'
+    vector2D: str  = 'vector2D'
+    vector3D: str = 'vector3D'
+    triangle: str = 'triangle_dim'
+
+
 
     def get_edge_vars(self):
         return {key:item for key,item in self.asdict().items() if key in ['domain_edge']}

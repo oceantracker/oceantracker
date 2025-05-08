@@ -5,7 +5,7 @@ from oceantracker.shared_info import shared_info as si
 import xarray as xr
 from time import perf_counter
 from copy import  copy, deepcopy
-
+from oceantracker.util import  time_util
 class OceanTrackerDataSet(object):
     '''
     Class to wrap whole set of files into single time series like xarray
@@ -30,29 +30,36 @@ class OceanTrackerDataSet(object):
 
         for fileID, fn in enumerate(file_list):
             ds = xr.open_dataset(fn, decode_times=False)
-            info['dims'].update(ds.sizes)
+
+            info['dims'].update(dict(ds.sizes)) # all dims found
+
             info['files'].append(dict(name=fn,start_time=None,
                             variables= list(ds.variables.keys()),
-                            dims = ds.sizes)) # to see if dims the same
+                            dims = dict(ds.sizes))) # to see if dims the same
             for name, var in ds.variables.items():
                 if name not in vars:
                     vars[name] = dict( dims={key:ds.sizes[key]  for key in var.dims},
                                        fileIDs=[], attrs = var.attrs,
                                        #encoding = var.encoding,
+                                       shape= copy(var.shape),
                                        dtype = var.dtype)
 
                 info['variables'][name]['fileIDs'].append(fileID)
+            info['attributes'].update(ds.attrs)
 
         self.info['variables'] = vars
 
     def time_steps_available(self, nt):
         # which of  time steps are in the data set
         # used to calculate buffer index
-        sel =  np.logical_and( nt >= 0, nt < self.info['ref_time'].size)
+        sel =  np.logical_and( nt >= 0, nt < self.info['time_coord'].size)
         nt_available = nt[sel]
         return nt_available
 
+    def read_data(self, file_var_name: str, nt=None):
+        return self.read_variable(file_var_name, nt=nt).data
     def read_variable(self, file_var_name: str, nt=None):
+
         # read simple variable
         info = self.info
         vi = info['variables'][file_var_name]
@@ -84,7 +91,8 @@ class OceanTrackerDataSet(object):
         nt_required = nt.copy()
 
         # clip to full range
-        nt_required = nt_required[ np.logical_and( nt_required >= 0, nt_required < info['ref_time'].size)]
+        nt_required = nt_required[ np.logical_and( nt_required >= 0, nt_required < info['time_coord'].size)]
+
         files_read = 0
         while nt_required.size > 0 :
             file_no = vi['time_step_to_fileID_map'][nt_required[0]]
@@ -94,24 +102,29 @@ class OceanTrackerDataSet(object):
             nt0 = fi['first_time_step_in_file']
             sel = np.logical_and( nt_required >= nt0, nt_required < nt0 + fi['time_steps'])
             nt_available = nt_required[sel]
+
+            # get mapped file offsets
+            file_offsets = vi['time_step_to_file_offset_map'][nt_available]
+
             # open file and read
             ds = self._open_file(fi['name'])
-            nt_file = nt_available-nt0 # file offset
             if files_read == 0:
+                # first files time step
                 try:
-                    out = ds[file_var_name][{time_dim: nt_file}].compute()
+                    out = ds[file_var_name][{time_dim: file_offsets}].compute()
                 except Exception as e:
                     raise(e)
             else:
-                # time invariant
-                t0= perf_counter()
-                out = xr.concat((out,ds[file_var_name][{time_dim: nt_file}].compute()), dim=time_dim)
+                # next files time steps
+                try:
+                    out = xr.concat((out,ds[file_var_name][{time_dim: file_offsets}].compute()), dim=time_dim)
+                except Exception as e:
+                    raise (e)
             ds.close()
             nt_required = nt_required[nt_available.size:]
             files_read += 1
 
-        # return numpy array and found time steps
-        return out
+        return out # return numpy array at  found time steps
 
     def _open_file(self, file_name):
         try:
@@ -120,58 +133,6 @@ class OceanTrackerDataSet(object):
             raise (e)
         return ds
 
-
-    def _make_time_step_to_fileID_map(self):
-
-        # make time step to fileID map, accounting for file order
-        info = self.info
-        for v_name, item in info['variables'].items():
-            if item['time_varying']:
-                time_step_file_map = np.zeros((0,),dtype=np.int32)
-                for fileID in  item['fileIDs']: #IDs have aleady been time sorted
-                    fi = info['files'][fileID]
-                    time_step_file_map =  np.append(time_step_file_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
-                    times = fi['time']
-                item['time_step_to_fileID_map'] = np.asarray(time_step_file_map, dtype=np.int32)
-        pass
-    def _check_time_consistency(self):
-        # check all variables have same time_step_to_fileID_map, and save one version of it
-        info= self.info
-        ml = self.msg_logger
-
-
-        starts = []
-        n_files=[]
-        ref_time = None
-        vars=[]
-
-        for v_name, item in info['variables'].items():
-
-            if item['has_time']:
-                starts.append(item['global_time_step_check'][0])
-                n_files.append(len(item['fileIDs']))
-                vars.append(v_name)
-                item.pop('global_time_step_check') # discard times
-                vars.append(v_name)
-        # checks on hindcasts with variables in different files
-        # check if difernt number of files for any variable
-        sel = np.flatnonzero( np.abs(np.diff(np.asarray(n_files)) ) > 0)
-        if sel.size>0:
-            ml.msg('File numbers differ for some variables for hindcast where variables are in separate n files',error=True,
-                             hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
-        # check if all variables start at the same times
-        starts = np.asarray(starts).astype(np.float64)
-        sel = np.flatnonzero( np.abs(np.diff(starts)))
-        if sel.size > 0:
-            ml.msg('Start times differ for some variables for hindcast where files are split between files',error=True,
-                            hint=f'look for missing file variables- {str([vars[x] for x in sel])}, {[vars[x+1] for x in sel]}')
-
-        # for all check missing time steps
-        t = info['ref_time'].astype('datetime64[s]').astype(np.float64)
-        sel = np.flatnonzero(np.abs(np.diff(t)) > 4*info['time_step'])
-        if sel.size > 0:
-            ml.msg('There are gaps in hindcast times larger than 4 time steps',warning=True,
-                            hint= f'there may be missing hindcast files, look at dates around {[ str(x) for x in cat["ref_time"][sel]]}')
 
     def get_time_step(self,time, backtracking):
         #round down/up to time step for forward/backwards

@@ -19,6 +19,7 @@ class _BaseParticleProperty(ParameterBaseClass):
 
         self.add_default_params({   'description': PVC(None,str),
                                     'units': PVC(None, str),
+                                    'extra_dimensions': PLC(None, str, doc_str='list of the names of dimensions for vectors, or those with prop_dim3 set. Partile is added automatically'),
                                     'time_varying':PVC(True, bool),
                                     'name' :PVC(None, str,doc_str='Name used to refer to this particle property in code and output',is_required=True),
                                     'vector_dim': PVC(1, int, min = 1 ),
@@ -37,8 +38,13 @@ class _BaseParticleProperty(ParameterBaseClass):
 
     def initial_setup(self):
         params = self.params
+        info = self.info
+        info['dimensions'] = ['particle_dim']
         s = (si.settings.particle_buffer_initial_size,) # initial size one chunk
-        if params['vector_dim'] > 1: s += (params['vector_dim'],)
+        if params['vector_dim'] > 1:
+            s += (params['vector_dim'],)
+            if params['extra_dimensions'] is not None:
+                pass
 
         # third matrix dim, so far only used recording vertical cell at each node  3D for 2 time steps
         if params['prop_dim3'] > 0 and params['prop_dim3'] > 1:
@@ -47,6 +53,7 @@ class _BaseParticleProperty(ParameterBaseClass):
         # set up data buffer
         params['dtype'] = self.get_dtype() # convert strings dtypes to instance
         self.data = np.full(s, params['initial_value'], dtype=params['dtype'], order='c')
+        info['data_shape'] = self.data.shape
 
     def final_setup(self):
         # stuff done after initial setup of all classes/properties
@@ -58,7 +65,7 @@ class _BaseParticleProperty(ParameterBaseClass):
             w = si.core_class_roles.tracks_writer
             if name in w.params['turn_off_write_particle_properties_list']: params['write'] = False
             if name in w.params['turn_on_write_particle_properties_list']:  params['write'] = True
-            if params['write']:
+            if False and params['write']:
                 w.create_variable_to_write(name, is_time_varying=params['time_varying'],
                                            is_part_prop=True,
                                            fill_value=basic_util.fillvalue(params['dtype']),
@@ -104,21 +111,21 @@ class _BaseParticleProperty(ParameterBaseClass):
         particle_operations_util.copy(self.data, part_prop[prop_name].data, active)
 
     def fill_buffer(self,value):
-        self.data[:si.particles_in_buffer,...] = value
+        self.data[:si.run_info.particles_in_buffer,...] = value
 
 
     def get_values(self, sel):
         # get property values using indices sel
         return np.take(self.data,sel, axis=0)  # for integer index sel, take is faster than numpy fancy indexing and numba
 
-    def used_buffer(self): return self.data[:si.particles_in_buffer, ...]
+    def used_buffer(self): return self.data[:si.run_info.particles_in_buffer, ...]
 
     def full_buffer(self):  return self.data
 
     # particle selection methods
     # if out given, uses index buffers to speed, by reducing memory creation, and making it more likely index values are in chip cache
     # WARNING!!! if out supplied then returned matrix is view of out, so careful with reuse of out!!!!!!!!!!!!!!!! otherwise strange results!!!
-    def compare_all_to_a_value(self, test, value, out = None):
+    def compare_all_to_a_value(self, test:str, value, out = None):
         # find indices where prop[prop_name] (test)  value is true
         # if out is None, given result returns a view of new variable
 
@@ -128,10 +135,11 @@ class _BaseParticleProperty(ParameterBaseClass):
         # to search only those in buffer use used_buffer()
         data = self.used_buffer()
         if out is None: out = np.full((data.shape[0],), -127, np.int32)
-        found = particle_comparisons_util.compared_prop_to_value(data, test, value, out)
+
+        found = particle_comparisons_util._compared_prop_to_value(data, test, value, out)
         return found
 
-    def find_subset_where(self, active, test, value, out=None):
+    def find_subset_where(self, active, test:str, value, out=None):
         # searches a subset of active particles to find indicies
         #  where prop[prop_name][active] (test)  value is true and returns a view of out,
         # if out is None, given result returns a view of new variable

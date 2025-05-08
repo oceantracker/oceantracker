@@ -70,9 +70,10 @@ class FVCOMreader(_BaseUnstructuredReader):
 
 
 
-    def build_vertical_grid(self, grid):
+    def build_vertical_grid(self):
 
         # time invarient z fractions at layer needed for super.build_vertical_grid
+        grid = self.grid
         ds = self.dataset
         z = ds.read_variable('siglev').data.astype(np.float32).T
         zlayer = ds.read_variable('siglay').data.astype(np.float32).T
@@ -85,12 +86,11 @@ class FVCOMreader(_BaseUnstructuredReader):
         grid['vertical_grid_type'] = 'S-sigma'
 
         # now do setup
-        grid = super().build_vertical_grid(grid)
+        super().build_vertical_grid()
 
-        return grid
 
     def set_up_uniform_sigma(self, grid):
-
+        # for use in Slayer vertical grids
         # get profile with the smallest bottom layer  tickness as basis for first sigma layer
         node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['zlevel_fractions'],
                                                                                               grid['bottom_cell_index'])
@@ -104,9 +104,9 @@ class FVCOMreader(_BaseUnstructuredReader):
         zf_model = grid['zlevel_fractions'][node_thinest_bot_layer, nz_bottom:]
         nz = grid['zlevel_fractions'].shape[1]
         nz_fractions = nz - nz_bottom
-        grid['sigma'] = np.interp(np.arange(nz) / nz, np.arange(nz_fractions) / nz_fractions, zf_model)
+        grid['sigma'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
 
-        return grid
+
 
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations
@@ -119,14 +119,13 @@ class FVCOMreader(_BaseUnstructuredReader):
 
         grid['x_center'] = np.stack((ds.read_variable('lonc').data,
                                      ds.read_variable('latc').data), axis=1).astype(np.float64)
-        return grid
 
 
     def read_triangles(self, grid):
         ds = self.dataset
         grid['triangles'] = ds.read_variable('nv').data.T.astype(np.int32) - 1 # convert to zero base index
         grid['quad_cells_to_split'] =  np.full((0,),0, np.int32)
-        return grid
+
 
     def read_zlevel(self, nc,grid,fields, file_index, zlevel_buffer, buffer_index):
         # calcuate zlevel from depth fractions, tide and water depth

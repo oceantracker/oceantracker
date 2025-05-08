@@ -55,7 +55,6 @@ class CullParticles(_BaseTrajectoryModifier):
         eligible_to_cull = self._cullIDs(part_prop['status'].used_buffer(), self.statuses_to_cull,
                                        self.get_partID_buffer('B1'))
         culled = particle_comparisons_util.random_selection(eligible_to_cull, self.params['probability'], self.get_partID_subset_buffer('B1'))
-        #print('xx', self.statuses_to_cull,culled.size)
         return culled
 
     def update(self,n_time_step, time_sec, active):

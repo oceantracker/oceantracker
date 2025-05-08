@@ -16,7 +16,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         # set up info/attributes
         self.add_default_params({
                  'grid_size':  PLC([100, 99],int, fixed_len=2, min=1, max=10 ** 5, doc_str='number of (rows, columns) in grid, where rows is y size, cols x size, values should be odd, so will be rounded up to next '),
-                 'release_group_centered_grids': PVC(False, bool),
+                 'release_group_centered_grids': PVC(False, bool, doc_str='Center grid on the release groups  mean horizontal location or center of release polygon. '),
                  'grid_center':         PCC(None, single_cord=True,is3D=False, doc_str='center of the statistics grid as (x,y), must be given if not using  release_group_centered_grids',
                                             units='meters'),
                  'grid_span':           PLC(None, float, doc_str='(width-x, height-y)  of the statistics grid', units='meters (dx,dy) or degrees (dlon, dlat) if geographic',
@@ -34,8 +34,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         super().initial_setup()
         self.open_output_file()
         nc = self.nc
-        if self.params['write']:
-              nc.add_dimension('release_group_dim', len(si.class_roles.release_groups))
 
         # get release group IDs to split bt
         self.set_up_spatial_bins(nc)
@@ -143,6 +141,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         nc.create_a_variable('count', dim_names, np.int64, description= 'counts of particles in grid at given times, for each release group')
         nc.create_a_variable('count_all_particles', dim_names[:2], np.int64, description='counts of particles whether in grid or not')
 
+
+
         # set up space for requested particle properties
         # working count space, row are (y,x)
         self.count_time_slice = np.full(dim_sizes[1:], 0, np.int64)
@@ -167,6 +167,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                                         self.count_time_slice, self.count_all_particles_time_slice,
                                         self.prop_data_list, self.sum_prop_data_list, sel)
+        pass
 
     @staticmethod
     @njitOT
@@ -206,8 +207,8 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
         # set up info/attributes
         self.add_default_params({'role_output_file_tag': PVC('stats_gridded_age',str),
                                  'min_age_to_bin':  PVC(0.,float,min=0., doc_str='Min. particle age to count', units='sec'),
-                                 'max_age_to_bin':  PVC(si.info.large_float , float, min=1., doc_str='Max. particle age to count', units='sec'),
-                                 'age_bin_size':    PVC(7*24*3600.,float,doc_str='Size of bins to count ages into, default= 1 week', units='sec'),
+                                 'max_age_to_bin':  PVC(None , float, min=1., doc_str='Max. particle age to count', units='sec', is_required=True),
+                                 'age_bin_size':    PVC(7*24*3600.,float,min=1,doc_str='Size of bins to count ages into, default= 1 week', units='sec'),
                                 })
 
     def initial_setup(self):
@@ -220,21 +221,21 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
 
     def set_up_time_bins(self,nc):
         # this set up age bins, not time
+        params = self.params
         ml = si.msg_logger
         stats_grid = self.grid
 
-        # ages to bin particle ages into,  equal bins in given range
-        age_min = abs(self.params['min_age_to_bin'])
-        age_max = min(abs(self.params['max_age_to_bin']), si.run_info.duration)
+        # check age limits to bin particle ages into,  equal bins in given range
+        params['max_age_to_bin'] = min(params['max_age_to_bin'], si.run_info.duration)
+        params['max_age_to_bin'] = max(params['age_bin_size'], params['max_age_to_bin']) # at least one bin
 
-        if age_max <= age_min:
-            ml.msg(' parameter min_age_to_bin must be <  max_age_to_bin  (min,max)= '
-                                    + str([age_min,age_max ]) + ', duration=' + str(si.run_info['duration']),
-                   caller=self,   error=True)
+        if params['min_age_to_bin'] >=  params['max_age_to_bin']: params['min_age_to_bin'] = 0
+        age_range = params['max_age_to_bin']- params['min_age_to_bin']
+        if params['age_bin_size'] > age_range:  params['age_bin_size'] = age_range
 
         # set up age bin edges
-        dage= abs((self.params['age_bin_size']))
-        stats_grid['age_bin_edges'] = float(si.run_info.model_direction) * np.arange(age_min, age_max+dage, dage)
+        dage= params['age_bin_size']
+        stats_grid['age_bin_edges'] = float(si.run_info.model_direction) * np.arange(params['min_age_to_bin'], params['max_age_to_bin']+dage, dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
             ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',

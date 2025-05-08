@@ -125,6 +125,25 @@ class ParameterBaseClass(_RootParameterBaseClass):
         # wrapper to help ensure a subset ID buffer is not the same as main buffer
         return self.get_partID_buffer(name +'_subset')
 
+    def update(self, n_time_step, time_sec, alive) :pass
+
+    def timed_update(self, n_time_step, time_sec, alive=None):
+        t0 = perf_counter()
+        if alive is None:
+            self.update(n_time_step, time_sec)
+        else:
+            self.update(n_time_step, time_sec, alive)
+
+        info = self.info
+        dt = perf_counter() - t0
+        info['time_spent_updating'] += dt
+        info['update_calls'] += 1
+
+        # note effect of any numba compilation on first call
+        if info['update_calls'] == 1: info['time_first_update_call'] = dt
+
+        pass
+
     def start_update_timer(self): self.update_timer_t0 = perf_counter()
 
     def stop_update_timer(self):
@@ -145,3 +164,11 @@ class ParameterBaseClass(_RootParameterBaseClass):
                                                     msg_logger=si.msg_logger, crumbs=crumbs + f'> adding scheduler {name_scheduler}')
         self.schedulers[name_scheduler]  = s
         return s
+
+    def screen_info(self,text:str = '',level:int = 5):
+        if level >= si.settings.screen_info_level:
+            si.msg_logger.msg('info: ' + text,tabs=1)
+
+    def restart(self):
+        # code require to reload save state for this class
+        pass

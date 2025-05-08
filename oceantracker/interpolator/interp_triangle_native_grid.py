@@ -9,6 +9,7 @@ from oceantracker.shared_info import shared_info as si
 from oceantracker.interpolator._find_hori_cell_triangle_walk import FindHoriCellTriangleWalk
 from oceantracker.interpolator._eval_interp_triangles import EvalInterpTriangles
 from oceantracker.interpolator import _find_vertical_cell_classes
+from oceantracker.particle_properties.util import particle_comparisons_util
 
 class  InterpTriangularGrid(_BaseInterp):
 
@@ -40,11 +41,11 @@ class  InterpTriangularGrid(_BaseInterp):
 
         # define initial cell and find cell functions from interp class
         self._hori_cell_finder= FindHoriCellTriangleWalk(grid, params)
-        self.find_initial_cell= self._hori_cell_finder.find_initial_cell
+        self.find_initial_hori_cell_method= self._hori_cell_finder.find_initial_hori_cell
         self.info['horizontal_cell_finder_info'] = self._hori_cell_finder.info
         self._get_hori_cell = self._hori_cell_finder.find_cell
 
-        self._interp_evaluator= EvalInterpTriangles(params, reader)
+        self._interp_evaluator = EvalInterpTriangles(params, reader)
 
         if reader.info['is3D']:
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
@@ -122,7 +123,7 @@ class  InterpTriangularGrid(_BaseInterp):
                 ie._time_dependent_3D_vector_field(fi, current_buffer_steps,
                                                    fractional_time_steps, output, active)
             case _:
-                si.msg_logger.msg (f' 3D time invariant fields interpolator not yet implemented for ', error=True,caller=self,
+                si.msg_logger.msg (f' 3D time invariant fields interpolator not yet implemented for ', error=True, caller=self,
                                    hint=f'remove field "{str(fi.params["name"])}" from reader load_fields param')
         pass
 
@@ -132,49 +133,54 @@ class  InterpTriangularGrid(_BaseInterp):
         info = self.info
         part_prop = si.class_roles.particle_properties
 
-        IDs_need_fixing = self._get_hori_cell(xq, active)
+        self._get_hori_cell(xq, active)
 
         # try to fix any failed walks
-        sel = part_prop['status'].find_subset_where(IDs_need_fixing, 'eq', si.particle_status_flags.cell_search_failed, out=self.get_partID_subset_buffer('B1'))
+        IDs_need_fixing =part_prop['cell_search_status'].compare_all_to_a_value('lt', si.cell_search_status_flags.ok,
+                                                                           out=self.get_partID_buffer('B1'))
+        # retry any failed walks, ie too long
+        sel_failed_walk = part_prop['cell_search_status'].data[IDs_need_fixing] == si.cell_search_status_flags.failed
 
-        if sel.size > 0:
-            # si.msg_logger.msg(f'Search retried for {sel.size} cells')
-            info['triangle_walks_retried'] += sel.size
+        if np.any(sel_failed_walk):
+            IDs_failed_walk = IDs_need_fixing[sel_failed_walk]
+            info['triangle_walks_retried'] += IDs_failed_walk.size
 
-            n_cell, bc, is_inside_domain = self.find_initial_cell(xq[sel,...])
-            part_prop['n_cell'].set_values(n_cell, sel)
-            part_prop['bc_coords'].set_values(bc, sel)
+            n_cell, bc, is_inside_domain = self.find_initial_hori_cell_method(xq[IDs_failed_walk,...])
+            fixed = is_inside_domain
+            part_prop['n_cell'].set_values(n_cell[fixed], IDs_failed_walk[fixed])
+            part_prop['bc_coords'].set_values(bc[fixed,:], IDs_failed_walk[fixed])
+
 
             # recheck for repeated failures of failed searched, which must be outside domain if not found by intial serarch
-            # , but not outside an open boundary which is flagged separately
-            sel = sel[~is_inside_domain]
-            IDs_need_fixing = IDs_need_fixing[sel]
-            if sel.size > 0:
-                wf = {'x0': part_prop['x_last_good'].get_values(sel),
-                      'xq': part_prop['x'].get_values(sel)}
+            if np.any(~fixed):
+                sel2= IDs_failed_walk[~fixed]
+                wf = {'x0': part_prop['x_last_good'].get_values(sel2),
+                      'xq': part_prop['x'].get_values(sel2)}
 
                 info['tri_walk_full_failures'].append(wf)
-                info['particles_killed_after_triangle_walk_retry_failed'] += sel.size  # total failed walks
-                si.msg_logger.msg('walks too long after kd retry- killed ' + str(sel.shape[0]) + ' particles', warning=True, tabs=0,
+                info['particles_killed_after_triangle_walk_retry_failed'] += sel2.size  # total failed walks
+                si.msg_logger.msg('walks too long after kd retry- killed ' + str(sel2.size) + ' particles', warning=True, tabs=0,
                                   hint='Try decreasing time step or increasing interpolator parameter "max_search_steps", current value =' + str(self.params['max_search_steps']))
                 # make notes for log file enabling follow up
                 si.msg_logger.msg('particle locations of failed walks, first 3 or less ', warning=True, tabs=2)
-                si.msg_logger.msg(' location xq =' + str(xq[sel[:3], :].tolist()), warning=True, tabs=2)
-                si.msg_logger.msg(' x_old =' + str(part_prop['x_last_good'].data[sel[:3], :].tolist()), warning=True, tabs=2)
+                si.msg_logger.msg(' location xq =' + str(xq[sel2[:3], :].tolist()), warning=True, tabs=2)
+                si.msg_logger.msg(' x_old =' + str(part_prop['x_last_good'].data[sel2[:3], :].tolist()), warning=True, tabs=2)
                 # kill particles
-                part_prop['status'].set_values(si.particle_status_flags.dead, sel)
+                part_prop['status'].set_values(si.particle_status_flags.dead, sel2)
 
-        si.block_timer('Find cell, horizontal walk', t0)
+        si.block_timer('Find horizontal cell', t0)
 
         return IDs_need_fixing
 
     def find_vertical_cell(self, fields, xq, current_buffer_steps,fractional_time_steps, active):
         # locate vertical cell in place
+        t0 = perf_counter()
         self._get_vert_cell(fields, xq, current_buffer_steps, fractional_time_steps, active)
+        si.block_timer('Find vertical cell', t0)
 
     #@function_profiler(__name__)
     def are_points_inside_domain(self,xq):
-        n_cell, bc, is_inside_domain  = self.find_initial_cell(xq)
+        n_cell, bc, is_inside_domain  = self.find_initial_hori_cell_method(xq)
         part_data = dict(x = xq, n_cell=n_cell, bc_coords=bc)
         # todo add interpolated water depth, tide???
         return is_inside_domain, part_data # is inside if  magnitude of all BC < 1
