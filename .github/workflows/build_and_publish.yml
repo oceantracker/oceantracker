@@ -16,14 +16,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Check if version number has changed
-      - name: Check version change
-        run: |
-          if ! git diff --name-only HEAD^ HEAD | grep -q 'setup.py'; then
-            echo "Version file not changed, skipping upload."
-            exit 1
-          fi
-
       # Set up Python
       - name: Set up Python
         uses: actions/setup-python@v4
