@@ -12,6 +12,7 @@
 
 2. centalize polygon list creation and param checking 
 4. ensure error log is written on caught error
+1. polygon_list param spell checking 
 
 
 ##  Internal Structure
