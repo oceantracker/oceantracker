@@ -19,8 +19,8 @@ class _BaseReleaseGroup(ParameterBaseClass):
             end =  PTC(None,doc_str='date/time of lase release, ignored if duration given'),
             duration =  PVC(None, float, min=0.,units='sec',
                             doc_str='How long particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "end"'),
-            coords_in_lat_lon_order=PVC(False, bool,
-                    doc_str='If hindcast is in geographic coords, allow user to give release point locations in (lat, lon) order rather than default (lon,lat) order.'),
+            #coords_in_lat_lon_order=PVC(False, bool,
+             #       doc_str='If hindcast is in geographic coords, allow user to give release point locations in (lat, lon) order rather than default (lon,lat) order.'),
 
             max_age =  PVC(None, float, min=1.,
                       doc_str='Particles older than this age in seconds are culled,ie. status=dead, and removed from computation, very useful in reducing run time'),
