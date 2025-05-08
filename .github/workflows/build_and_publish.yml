@@ -1,0 +1,53 @@
+name: Build Python distribution and publish to TestPyPI on push to main and to PyPI on tag on main branch
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'  # Matches version tags like v1.0.0
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Check if version number has changed
+      - name: Check version change
+        run: |
+          if ! git diff --name-only HEAD^ HEAD | grep -q 'setup.py'; then
+            echo "Version file not changed, skipping upload."
+            exit 1
+          fi
+
+      # Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      # Build the distribution
+      - name: Build distribution
+        run: python -m build
+
+      # Publish to TestPyPI or PyPI
+      - name: Publish to TestPyPI or PyPI
+        env:
+          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+        run: |
+          if [[ $GITHUB_REF == refs/heads/main ]]; then
+            twine upload --repository testpypi dist/*
+          elif [[ $GITHUB_REF == refs/tags/* ]]; then
+            twine upload dist/*
+          fi
