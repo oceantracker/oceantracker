@@ -8,6 +8,13 @@ _BaseTimeVaringInfo
 
 **full class_name :** oceantracker.time_varying_info._base_time_varying_info._BaseTimeVaringInfo
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseTimeVaringInfo
 
 

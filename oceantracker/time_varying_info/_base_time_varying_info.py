@@ -28,9 +28,9 @@ class _BaseTimeVaringInfo(ParameterBaseClass):
     def initial_setup(self, **kwargs):
         params = self.params
         s=(1,)
-        self.data = self.data = np.full(s, params['initial_value'], dtype=  self.get_dtype(),order='c')
+        self.data = np.full(s, params['initial_value'], dtype=  self.get_dtype(),order='c')
 
-        if si.settings.write_tracks and params['write']:
+        if False and si.settings.write_tracks and params['write']:
             w = si.core_class_roles.tracks_writer
             w.create_variable_to_write(params['name'], 'time', None, params['vector_dim'],
                                     units=params['units'], description=params['description'],

@@ -8,6 +8,13 @@ Solver
 
 **full class_name :** oceantracker.solver.solver.Solver
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> Solver
 
 

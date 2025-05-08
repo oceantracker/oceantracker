@@ -51,15 +51,15 @@ class ROMSreader(_BaseStructuredReader):
                                     },
                 grid_variable_map=dict(
                                     time=PVC('ocean_time', str, doc_str='Name of time variable in hindcast'),
-                                    x=PVC('lon_psi', str),
-                                    y=PVC('lat_psi', str)),
-                dimension_map=dict(  z=PVC('s_w', str, doc_str='name of dimensions for z layer boundaries '),
+                                    x=PVC('lon_psi', str, doc_str='psi grid variable used for  particle tracking'),
+                                    y=PVC('lat_psi', str, doc_str='psi grid variable used for  particle tracking')),
+                dimension_map=dict(  z=PVC('s_w', str, doc_str='name of dimension for z layer boundaries '),
                             all_z_dims=PLC(['s_w','s_rho'], str, doc_str='All z dims used to identify  3D variables'),
-                             row=PVC('eta_psi', str, doc_str='row dim of grid'),
-                            col=PVC('xi_psi', str, doc_str='column dim of grid'),
+                             row=PVC('eta_psi', str, doc_str='row dim of psi grid'),
+                            col=PVC('xi_psi', str, doc_str='column dim of psi grid'),
                                       ),
 
-                variable_signature= PLC(['mask_psi','lat_psi','lon_psi','h','zeta'], str,
+                variable_signature= PLC(['mask_psi','lat_psi','lon_psi','h','zeta','s_w','s_rho'], str,
                                          doc_str='Variable names used to test if file is this format'),
                   )
         pass
@@ -84,6 +84,7 @@ class ROMSreader(_BaseStructuredReader):
 
     def build_hori_grid(self, grid):
         # pre-read useful info
+
         ds = self.dataset
         grid['psi_land_mask'] = ds.read_variable('mask_psi').data != 1
         grid['u_land_mask'] = ds.read_variable('mask_u').data  != 1
@@ -91,7 +92,8 @@ class ROMSreader(_BaseStructuredReader):
         grid['rho_land_mask'] = ds.read_variable('mask_rho').data  != 1
 
         # build a full land mask based on the psi grid
-        grid['land_mask'] = grid['psi_land_mask'].copy() # the used grid's mask
+        grid['land_mask'] = grid['psi_land_mask'].copy() # the used psi grid's mask
+
         # mask psi node if either v node either side is mask
         m = np.logical_or(grid['v_land_mask'][:, 1:], grid['v_land_mask'][:, :-1])
         grid['land_mask'] = np.logical_or(grid['land_mask'] , m)
@@ -100,20 +102,27 @@ class ROMSreader(_BaseStructuredReader):
         m = np.logical_or(grid['u_land_mask'][ 1:,:], grid['u_land_mask'][:-1, :])
         grid['land_mask'] = np.logical_or(grid['land_mask'], m)
 
-        grid = super().build_hori_grid(grid)
+        grid['rho_land_mask'] = ds.read_variable('mask_rho').data != 1
 
-        return grid
 
-    def build_vertical_grid(self, grid):
+        super().build_hori_grid(grid)
+
+        if False:
+
+            self._dev_show_grid()
+
+
+    def build_vertical_grid(self):
         # add time invariant vertical grid variables needed for transformations
         # first values in z axis is the top? so flip
+        grid = self.grid
         ds = self.dataset
         grid['sigma']       = 1. + ds.read_variable('s_w').data.astype(np.float32)  # layer boundary fractions reversed from negative values
         grid['sigma_layer'] = 1. + ds.read_variable('s_rho').data.astype(np.float32)  # layer center fractions
 
 
-        grid = super().build_vertical_grid(grid)
-        return grid
+        super().build_vertical_grid()
+
 
     def read_horizontal_grid_coords(self, grid):
         ds = self.dataset
@@ -123,8 +132,6 @@ class ROMSreader(_BaseStructuredReader):
         grid['lat'] =  ds.read_variable(gm['y']).data
 
         grid['x'] =  np.stack((grid['lon'].ravel(),grid['lat'].ravel()),  axis=1)
-
-        return grid
 
 
 
@@ -195,17 +202,34 @@ class ROMSreader(_BaseStructuredReader):
 
     def _dev_show_grid(self):
         # plots to help with development
+        ds = self.dataset
         grid = self.grid
+        grid['lat_psi'] = ds.read_variable('lat_psi').data
+        grid['lon_psi'] = ds.read_variable('lon_psi').data
+        grid['lat_rho'] = ds.read_variable('lat_rho').data
+        grid['lon_rho'] = ds.read_variable('lon_rho').data
+        grid['lat_u'] = ds.read_variable('lat_u').data
+        grid['lon_u'] = ds.read_variable('lon_u').data
+        grid['lat_v'] = ds.read_variable('lat_v').data
+        grid['lon_v'] = ds.read_variable('lon_v').data
 
-        fig1, ax1 = plt.subplots()
-        ax1.scatter(grid['x'][:,0],grid['x'][:,1],c='k', marker='.', s=4)
-        ax1.triplot(grid['x'][:,0],grid['x'][:,1],grid['triangles'])
-
+        if False:
+            fig1, ax1 = plt.subplots()
+            #ax1.scatter(grid['x'][:,0],grid['x'][:,1],c='k', marker='.', s=4)
+            ax1.triplot(grid['x'][:,0],grid['x'][:,1],grid['triangles'],c=[.8,.8,.8])
 
         fig2, ax2 = plt.subplots()
+        #ax2.scatter(grid['x'][:, 0], grid['x'][:, 1], c='k', marker='.', s=4)
+        ax2.triplot(grid['x'][:, 0], grid['x'][:, 1], grid['triangles'],c=[.8,.8,.8])
+
         ax2.scatter(grid['lon_psi'] , grid['lat_psi'] , c='k', marker='.', s=4)
         sel= grid['land_mask']
         ax2.scatter(grid['lon_psi'][sel],grid['lat_psi'][sel] ,  c='g', marker='.', s=4)
+
+        sel = grid['u_land_mask']
+        ax2.scatter(grid['lon_u'][sel], grid['lat_u'][sel], c='r', marker='x', s=4)
+        sel = grid['v_land_mask']
+        ax2.scatter(grid['lon_v'][sel], grid['lat_v'][sel], c='b', marker='x', s=4)
         plt.show()
 
 @njitOT

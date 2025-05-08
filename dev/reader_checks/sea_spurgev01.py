@@ -1,4 +1,4 @@
-from os import path,chdir, mkdir
+from os import path
 
 from oceantracker.main import OceanTracker
 
@@ -7,7 +7,7 @@ if __name__ == "__main__":
     ot = OceanTracker()
     ot.settings(output_file_base = 'sea_spurge_test01',
                 root_output_dir= r'D:\OceanTrackerOutput',
-                time_step=1800,
+                time_step=3600,
                 max_run_duration = 30*24*3600., # 10 days
                 #display_grid_at_start=True
                 )
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     ot.add_class('release_groups',
                  points = x0,
                  pulse_size=10,
-                 release_interval=1800)
+                 release_interval=3600)
 
     if True:
         case_info_file= ot.run()
@@ -44,12 +44,13 @@ if __name__ == "__main__":
         case_info_file = r'D:\OceanTrackerOutput\sea_spurge01\f'
 
     if case_info_file is not None:
-        from plot_oceantracker import plot_tracks
-        from read_oceantracker.python import load_output_files
-        tracks =load_output_files.load_track_data(case_info_file,
-                                        gridID=0) # plot inner gridID=1, not outer gridID = 0
-        anim = plot_tracks.animate_particles(tracks,colour_using_data=tracks['hydro_model_gridID'],
-                                             back_ground_depth=False, vmin=0,vmax=1,
+        from oceantracker.plot_output import plot_tracks
+        from oceantracker.read_output.python import load_output_files
+
+        tracks = load_output_files.load_track_data(case_info_file,
+                                                   gridID=0) # plot inner gridID=1, not outer gridID = 0
+        anim = plot_tracks.animate_particles(tracks, colour_using_data=tracks['hydro_model_gridID'],
+                                             back_ground_depth=False, vmin=0, vmax=1,
                                              show_grid=True, show_dry_cells=True, axis_labels=True,
                                              )
 

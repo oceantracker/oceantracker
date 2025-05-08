@@ -1,6 +1,7 @@
 from oceantracker.util.numba_util import njitOT
 from oceantracker.definitions import cell_search_status_flags
-dry_cell_edge = int(cell_search_status_flags.dry_cell_edge)
+
+dry_cell_edge = int(cell_search_status_flags.hit_dry_cell)
 
 
 @njitOT

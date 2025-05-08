@@ -2,8 +2,8 @@ from oceantracker.particle_properties._base_particle_properties import CustomPar
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.shared_info import shared_info as si
-from oceantracker.util.numba_util import  njitOTparallel
-import numba as nb
+from oceantracker.util.numba_util import  njitOTparallel, prange
+
 
 class AgeDecay(CustomParticleProperty):
     '''
@@ -30,6 +30,6 @@ class AgeDecay(CustomParticleProperty):
     @staticmethod
     @njitOTparallel
     def _calc_decay(age,initial_value, decay_rate, data,active):
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             data[n] = initial_value * np.exp(-np.abs(age[n]) * decay_rate)

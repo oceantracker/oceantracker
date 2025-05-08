@@ -1,18 +1,16 @@
-
 <!DOCTYPE html>
 
-<html>
+<html lang="en" data-content_root="../../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Particle properties &#8212; OceanTracker Beta 0.5 documentation</title>
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=a66d8bb5" />
+    <script src="../../_static/documentation_options.js?v=7b06c30a"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Trajectory modifiers" href="trajectory_modifiers.html" />
@@ -20,17 +18,20 @@
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   <div class="document">
     
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="../../index.html">
-    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo" />
+    
+    <h1 class="logo logo-name">Beta 0.5</h1>
     
   </a>
 </p>
@@ -50,7 +51,7 @@
 
 
 <h3>Navigation</h3>
-<p><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -61,7 +62,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_ocean_tracker.html">Running</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../how_to.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
@@ -80,16 +81,16 @@
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
-<script>$('#searchbox').show(0);</script>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -99,11 +100,11 @@
           <div class="body" role="main">
             
   <section id="particle-properties">
-<h1>Particle properties<a class="headerlink" href="#particle-properties" title="Permalink to this headline">¶</a></h1>
+<h1>Particle properties<a class="headerlink" href="#particle-properties" title="Link to this heading">¶</a></h1>
 <p>Particle properties can easily  add to computation via parameters, eg decaying concentrations,  by listing in particle_properties parameters.
 Standard properties include, status, tide, water_depth and  particle age.</p>
 <section id="decaying-particle">
-<h2>Decaying particle<a class="headerlink" href="#decaying-particle" title="Permalink to this headline">¶</a></h2>
+<h2>Decaying particle<a class="headerlink" href="#decaying-particle" title="Link to this heading">¶</a></h2>
 <center>
   <video width="95%" controls muted autoplay loop src="../../_static/demos/demo60_SCHISM_3D_decaying_particle.mp4">
  </video>
@@ -113,106 +114,106 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <li><p>demo60_SCHISM_3D_decaying_particle.py</p></li>
 </ul>
 <details>
-<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="container-1">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo60_SCHISM_3D_decaying_particle.json</span><a class="headerlink" href="#container-1" title="Permalink to this code">¶</a></div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo60_SCHISM_3D_decaying_particle&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;debug&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;time_step&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;NUMBA_cache_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;use_A_Z_profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;regrid_z_to_uniform_sigma_levels&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_hindcast_schisim3D_00.nc&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;load_fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">            </span><span class="s2">&quot;water_temperature&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">]</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;dispersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;A_H&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;A_V&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.001</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;release_groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">1594500</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">5487000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">-1</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">1594500</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">5483000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">-1</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">1598000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">5486100</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">-1</span><span class="w"></span>
-<span class="w">                </span><span class="p">]</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">150.0</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;max_age&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">17280.000000000004</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;particle_properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;age_decay&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_properties.age_decay.AgeDecay&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;decay_time_scale&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">25714.28571428571</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;root_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="id1">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo60_SCHISM_3D_decaying_particle.json</span><a class="headerlink" href="#id1" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo60_SCHISM_3D_decaying_particle&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;debug&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;time_step&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;NUMBA_cache_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;use_A_Z_profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;regrid_z_to_uniform_sigma_levels&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_hindcast_schisim3D_00.nc&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;load_fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;water_temperature&quot;</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;dispersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;A_H&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;A_V&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.001</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;release_groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P1&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mi">1594500</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">5487000</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">-1</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mi">1594500</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">5483000</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">-1</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mi">1598000</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">5486100</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">-1</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">150.0</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;max_age&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">17280.000000000004</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;particle_properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;age_decay&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_properties.age_decay.AgeDecay&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;decay_time_scale&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">25714.28571428571</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;root_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
 </details><details>
-<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="container-2">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo60_SCHISM_3D_decaying_particle.yaml</span><a class="headerlink" href="#container-2" title="Permalink to this code">¶</a></div>
-<div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">NUMBA_cache_code</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span><span class="w"></span>
-<span class="w">  </span><span class="nt">A_V</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span><span class="w"></span>
-<span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo60_SCHISM_3D_decaying_particle</span><span class="w"></span>
-<span class="nt">particle_properties</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.age_decay.AgeDecay</span><span class="w"></span>
-<span class="w">  </span><span class="nt">decay_time_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25714.28571428571</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age_decay</span><span class="w"></span>
-<span class="nt">reader</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo_hindcast_schisim3D_00.nc</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast</span><span class="w"></span>
-<span class="w">  </span><span class="nt">load_fields</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_temperature</span><span class="w"></span>
-<span class="nt">regrid_z_to_uniform_sigma_levels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">release_groups</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">max_age</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">17280.000000000004</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">P1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5483000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5486100</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150.0</span><span class="w"></span>
-<span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span><span class="w"></span>
-<span class="nt">time_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span><span class="w"></span>
-<span class="nt">use_A_Z_profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
+<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id2">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo60_SCHISM_3D_decaying_particle.yaml</span><a class="headerlink" href="#id2" title="Link to this code">¶</a></div>
+<div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">NUMBA_cache_code</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">dispersion</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">  </span><span class="nt">A_V</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo60_SCHISM_3D_decaying_particle</span>
+<span class="nt">particle_properties</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.age_decay.AgeDecay</span>
+<span class="w">  </span><span class="nt">decay_time_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25714.28571428571</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age_decay</span>
+<span class="nt">reader</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo_hindcast_schisim3D_00.nc</span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast</span>
+<span class="w">  </span><span class="nt">load_fields</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_temperature</span>
+<span class="nt">regrid_z_to_uniform_sigma_levels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">release_groups</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">max_age</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">17280.000000000004</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">P1</span>
+<span class="w">  </span><span class="nt">points</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5483000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5486100</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+<span class="w">  </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+<span class="w">  </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">150.0</span>
+<span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span>
+<span class="nt">time_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span>
+<span class="nt">use_A_Z_profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 </pre></div>
 </div>
 </div>
 </details></section>
 <section id="polygon-aware-particles">
-<h2>Polygon aware particles<a class="headerlink" href="#polygon-aware-particles" title="Permalink to this headline">¶</a></h2>
+<h2>Polygon aware particles<a class="headerlink" href="#polygon-aware-particles" title="Link to this heading">¶</a></h2>
 <center>
   <video width="95%" controls autoplay loop src="../../_static/demos/demo07_inside_polygon_events.mp4">
  </video>
@@ -222,522 +223,522 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
 <li><p>class: <code class="docutils literal notranslate"><span class="pre">event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit</span></code></p></li>
 </ul>
 <details>
-<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="container-3">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo07_inside_polygon_events.json</span><a class="headerlink" href="#container-3" title="Permalink to this code">¶</a></div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo07_inside_polygon_events&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;add_date_to_run_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;NUMBA_cache_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;time_step&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;debug&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Random_order_*.nc&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;time_buffer_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;user_note&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test of notes&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;dispersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;A_H&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;tracks_writer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;write_dry_cell_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;release_groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">1594500</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">5490000</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">1598000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">5488500</span><span class="w"></span>
-<span class="w">                </span><span class="p">]</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10800</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;particle_properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;age_decay&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_properties.age_decay.AgeDecay&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;decay_time_scale&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">86400.0</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;block_dry_cells&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;event_loggers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;in_out_poly&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;particle_prop_to_write_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;ID&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;IDrelease_group&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;status&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;age&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;polygon_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="p">{</span><span class="w"></span>
-<span class="w">                    </span><span class="nt">&quot;user_polygon_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1592682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1593604.1667</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5490275.5488</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1593886.4247</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489464.0424</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1592917.3387</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489000.0</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1592300.0</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489000.0</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1592682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                        </span><span class="p">]</span><span class="w"></span>
-<span class="w">                    </span><span class="p">]</span><span class="w"></span>
-<span class="w">                </span><span class="p">},</span><span class="w"></span>
-<span class="w">                </span><span class="p">{</span><span class="w"></span>
-<span class="w">                    </span><span class="nt">&quot;user_polygon_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;B&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1597682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1598604.1667</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5490275.5488</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1598886.4247</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489464.0424</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1597917.3387</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mi">5487000</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mi">1597300</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mi">5487000</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1597682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                        </span><span class="p">]</span><span class="w"></span>
-<span class="w">                    </span><span class="p">]</span><span class="w"></span>
-<span class="w">                </span><span class="p">}</span><span class="w"></span>
-<span class="w">            </span><span class="p">]</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;root_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="id3">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo07_inside_polygon_events.json</span><a class="headerlink" href="#id3" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo07_inside_polygon_events&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;add_date_to_run_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;NUMBA_cache_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;time_buffer_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;time_step&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;debug&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Random_order_*.nc&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;user_note&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test of notes&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;dispersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;A_H&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.1</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;tracks_writer&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;write_dry_cell_flag&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;release_groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P1&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mi">1594500</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">5490000</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mi">1598000</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">5488500</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10800</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;particle_properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;age_decay&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_properties.age_decay.AgeDecay&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;decay_time_scale&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">86400.0</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;block_dry_cells&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;event_loggers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;in_out_poly&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;particle_prop_to_write_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">&quot;ID&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;IDrelease_group&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;status&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;age&quot;</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;polygon_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;user_polygon_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1592682.1237</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489972.7479</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1593604.1667</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5490275.5488</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1593886.4247</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489464.0424</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1592917.3387</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489000.0</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1592300.0</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489000.0</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1592682.1237</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489972.7479</span>
+<span class="w">                        </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">]</span>
+<span class="w">                </span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;user_polygon_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;B&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1597682.1237</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489972.7479</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1598604.1667</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5490275.5488</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1598886.4247</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489464.0424</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1597917.3387</span><span class="p">,</span>
+<span class="w">                            </span><span class="mi">5487000</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mi">1597300</span><span class="p">,</span>
+<span class="w">                            </span><span class="mi">5487000</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1597682.1237</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489972.7479</span>
+<span class="w">                        </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">]</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;root_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
 </details></details><details>
-<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="container-4">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo07_inside_polygon_events.yaml</span><a class="headerlink" href="#container-4" title="Permalink to this code">¶</a></div>
-<div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">NUMBA_cache_code</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="nt">add_date_to_run_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="nt">block_dry_cells</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
-<span class="nt">event_loggers</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">in_out_poly</span><span class="w"></span>
-<span class="w">  </span><span class="nt">particle_prop_to_write_list</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ID</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IDrelease_group</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">status</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age</span><span class="w"></span>
-<span class="w">  </span><span class="nt">polygon_list</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592682.1237</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1593604.1667</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490275.5488</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1593886.4247</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489464.0424</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592917.3387</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000.0</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592300.0</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000.0</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592682.1237</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">    </span><span class="nt">user_polygon_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598604.1667</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490275.5488</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598886.4247</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489464.0424</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597917.3387</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597300</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">    </span><span class="nt">user_polygon_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">B</span><span class="w"></span>
-<span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo07_inside_polygon_events</span><span class="w"></span>
-<span class="nt">particle_properties</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.age_decay.AgeDecay</span><span class="w"></span>
-<span class="w">  </span><span class="nt">decay_time_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">86400.0</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age_decay</span><span class="w"></span>
-<span class="nt">reader</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Random_order_*.nc</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast</span><span class="w"></span>
-<span class="w">  </span><span class="nt">time_buffer_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span><span class="w"></span>
-<span class="nt">release_groups</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">P1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490000</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5488500</span><span class="w"></span>
-<span class="w">  </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="w">  </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10800</span><span class="w"></span>
-<span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span><span class="w"></span>
-<span class="nt">time_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">600</span><span class="w"></span>
-<span class="nt">tracks_writer</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">write_dry_cell_flag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">user_note</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test of notes</span><span class="w"></span>
+<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id4">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo07_inside_polygon_events.yaml</span><a class="headerlink" href="#id4" title="Link to this code">¶</a></div>
+<div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">NUMBA_cache_code</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="nt">add_date_to_run_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="nt">block_dry_cells</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">dispersion</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<span class="nt">event_loggers</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">in_out_poly</span>
+<span class="w">  </span><span class="nt">particle_prop_to_write_list</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ID</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IDrelease_group</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">status</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age</span>
+<span class="w">  </span><span class="nt">polygon_list</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592682.1237</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1593604.1667</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490275.5488</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1593886.4247</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489464.0424</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592917.3387</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000.0</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592300.0</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000.0</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592682.1237</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span>
+<span class="w">    </span><span class="nt">user_polygon_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598604.1667</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490275.5488</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598886.4247</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489464.0424</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597917.3387</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597300</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span>
+<span class="w">    </span><span class="nt">user_polygon_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">B</span>
+<span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo07_inside_polygon_events</span>
+<span class="nt">particle_properties</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.age_decay.AgeDecay</span>
+<span class="w">  </span><span class="nt">decay_time_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">86400.0</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age_decay</span>
+<span class="nt">reader</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Random_order_*.nc</span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast</span>
+<span class="nt">release_groups</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">P1</span>
+<span class="w">  </span><span class="nt">points</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490000</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5488500</span>
+<span class="w">  </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10800</span>
+<span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span>
+<span class="nt">time_buffer_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">15</span>
+<span class="nt">time_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">600</span>
+<span class="nt">tracks_writer</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">write_dry_cell_flag</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">user_note</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test of notes</span>
 </pre></div>
 </div>
 </div>
 </details></section>
 <section id="particle-status">
-<h2>Particle Status<a class="headerlink" href="#particle-status" title="Permalink to this headline">¶</a></h2>
+<h2>Particle Status<a class="headerlink" href="#particle-status" title="Link to this heading">¶</a></h2>
 <center>
   <video width="95%" controls autoplay loop src="../../_static/demos/demo56_SCHISM_3D_resupend_crtitical_friction_vel_status.mp4">
  </video>
 </center><p>Particles coloured by their status property. Status can be one of following strings</p>
 <p><code class="docutils literal notranslate"><span class="pre">['unknown',</span> <span class="pre">'bad_cord',</span> <span class="pre">'cell_search_failed',</span> <span class="pre">'notReleased',</span> <span class="pre">'dead',</span> <span class="pre">'outside_open_boundary',</span> <span class="pre">'frozen',</span> <span class="pre">'stranded_by_tide',</span> <span class="pre">'on_bottom',</span> <span class="pre">'moving']</span></code></p>
 <details>
-<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="container-5">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json</span><a class="headerlink" href="#container-5" title="Permalink to this code">¶</a></div>
-<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo56_SCHISM_3D_resupend_crtitical_friction_vel&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;debug&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;time_step&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;NUMBA_cache_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;use_A_Z_profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;regrid_z_to_uniform_sigma_levels&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_hindcast_schisim3D_00.nc&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;load_fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">            </span><span class="s2">&quot;water_temperature&quot;</span><span class="w"></span>
-<span class="w">        </span><span class="p">]</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;dispersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;A_H&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;A_V&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.001</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;release_groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;poly1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.release_groups.polygon_release.PolygonRelease&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mf">1597682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mf">1598604.1667</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mf">5490275.5488</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mf">1598886.4247</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mf">5489464.0424</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mf">1597917.3387</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">5489000</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">1597300</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">5489000</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mf">1597682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                </span><span class="p">]</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;z_min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;z_max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3660</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2017-01-01T00:31:30&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"></span>
-<span class="w">        </span><span class="p">},</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">1594500</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">5487000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">-1</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">1594500</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">5483000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">-1</span><span class="w"></span>
-<span class="w">                </span><span class="p">],</span><span class="w"></span>
-<span class="w">                </span><span class="p">[</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">1598000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">5486100</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="mi">-1</span><span class="w"></span>
-<span class="w">                </span><span class="p">]</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;particle_properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;age_decay&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_properties.age_decay.AgeDecay&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;decay_time_scale&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">86400.0</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;event_loggers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inoutpoly&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;particle_prop_to_write_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;ID&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;x&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;IDrelease_group&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;status&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;age&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;polygon_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="p">{</span><span class="w"></span>
-<span class="w">                    </span><span class="nt">&quot;user_polygon_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1592682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1593604.1667</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5490275.5488</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1593886.4247</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489464.0424</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1592917.3387</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489000.0</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1592300.0</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489000.0</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1592682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                        </span><span class="p">]</span><span class="w"></span>
-<span class="w">                    </span><span class="p">]</span><span class="w"></span>
-<span class="w">                </span><span class="p">},</span><span class="w"></span>
-<span class="w">                </span><span class="p">{</span><span class="w"></span>
-<span class="w">                    </span><span class="nt">&quot;user_polygon_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;B&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">                    </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1597682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1598604.1667</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5490275.5488</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1598886.4247</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489464.0424</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1597917.3387</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mi">5487000</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mi">1597300</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mi">5487000</span><span class="w"></span>
-<span class="w">                        </span><span class="p">],</span><span class="w"></span>
-<span class="w">                        </span><span class="p">[</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">1597682.1237</span><span class="p">,</span><span class="w"></span>
-<span class="w">                            </span><span class="mf">5489972.7479</span><span class="w"></span>
-<span class="w">                        </span><span class="p">]</span><span class="w"></span>
-<span class="w">                    </span><span class="p">]</span><span class="w"></span>
-<span class="w">                </span><span class="p">}</span><span class="w"></span>
-<span class="w">            </span><span class="p">]</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;particle_statistics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;grid1&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;update_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;particle_property_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;water_depth&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;status_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="s2">&quot;moving&quot;</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;z_min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;grid_span&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="mi">10000</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="mi">10000</span><span class="w"></span>
-<span class="w">            </span><span class="p">],</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;grid_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">                </span><span class="mi">120</span><span class="p">,</span><span class="w"></span>
-<span class="w">                </span><span class="mi">121</span><span class="w"></span>
-<span class="w">            </span><span class="p">]</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;resuspension&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;critical_friction_velocity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.005</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;velocity_modifiers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
-<span class="w">        </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;terminal_velocity&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.001</span><span class="w"></span>
-<span class="w">        </span><span class="p">}</span><span class="w"></span>
-<span class="w">    </span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;root_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<summary> json parameters </summary><div class="literal-block-wrapper docutils container" id="id5">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo56_SCHISM_3D_resupend_crtitical_friction_vel.json</span><a class="headerlink" href="#id5" title="Link to this code">¶</a></div>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;output_file_base&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo56_SCHISM_3D_resupend_crtitical_friction_vel&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;debug&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;time_step&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">120</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;NUMBA_cache_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;use_A_Z_profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;regrid_z_to_uniform_sigma_levels&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;reader&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;input_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;file_mask&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demo_hindcast_schisim3D_00.nc&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;load_fields&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;water_temperature&quot;</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;dispersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;A_H&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;A_V&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.001</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;release_groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;poly1&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.release_groups.polygon_release.PolygonRelease&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mf">1597682.1237</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">5489972.7479</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mf">1598604.1667</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">5490275.5488</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mf">1598886.4247</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">5489464.0424</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mf">1597917.3387</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">5489000</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mi">1597300</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">5489000</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mf">1597682.1237</span><span class="p">,</span>
+<span class="w">                    </span><span class="mf">5489972.7479</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;z_min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;z_max&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3660</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;start&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2017-01-01T00:31:30&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;P1&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mi">1594500</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">5487000</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">-1</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mi">1594500</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">5483000</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">-1</span>
+<span class="w">                </span><span class="p">],</span>
+<span class="w">                </span><span class="p">[</span>
+<span class="w">                    </span><span class="mi">1598000</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">5486100</span><span class="p">,</span>
+<span class="w">                    </span><span class="mi">-1</span>
+<span class="w">                </span><span class="p">]</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;release_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;pulse_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;particle_properties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;age_decay&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_properties.age_decay.AgeDecay&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;decay_time_scale&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">86400.0</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;event_loggers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inoutpoly&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;particle_prop_to_write_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">&quot;ID&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;x&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;IDrelease_group&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;status&quot;</span><span class="p">,</span>
+<span class="w">                </span><span class="s2">&quot;age&quot;</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;polygon_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;user_polygon_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1592682.1237</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489972.7479</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1593604.1667</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5490275.5488</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1593886.4247</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489464.0424</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1592917.3387</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489000.0</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1592300.0</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489000.0</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1592682.1237</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489972.7479</span>
+<span class="w">                        </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">]</span>
+<span class="w">                </span><span class="p">},</span>
+<span class="w">                </span><span class="p">{</span>
+<span class="w">                    </span><span class="nt">&quot;user_polygon_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;B&quot;</span><span class="p">,</span>
+<span class="w">                    </span><span class="nt">&quot;points&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1597682.1237</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489972.7479</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1598604.1667</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5490275.5488</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1598886.4247</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489464.0424</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1597917.3387</span><span class="p">,</span>
+<span class="w">                            </span><span class="mi">5487000</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mi">1597300</span><span class="p">,</span>
+<span class="w">                            </span><span class="mi">5487000</span>
+<span class="w">                        </span><span class="p">],</span>
+<span class="w">                        </span><span class="p">[</span>
+<span class="w">                            </span><span class="mf">1597682.1237</span><span class="p">,</span>
+<span class="w">                            </span><span class="mf">5489972.7479</span>
+<span class="w">                        </span><span class="p">]</span>
+<span class="w">                    </span><span class="p">]</span>
+<span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;particle_statistics&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;grid1&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;update_interval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;particle_property_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">&quot;water_depth&quot;</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;status_list&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s2">&quot;moving&quot;</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;z_min&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;grid_span&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="mi">10000</span><span class="p">,</span>
+<span class="w">                </span><span class="mi">10000</span>
+<span class="w">            </span><span class="p">],</span>
+<span class="w">            </span><span class="nt">&quot;grid_size&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="mi">120</span><span class="p">,</span>
+<span class="w">                </span><span class="mi">121</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;resuspension&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;critical_friction_velocity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">0.005</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;velocity_modifiers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;terminal_velocity&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;class_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.001</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;root_output_dir&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;output&quot;</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
 </details><details>
-<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="container-6">
-<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo56_SCHISM_3D_resupend_crtitical_friction_vel.yaml</span><a class="headerlink" href="#container-6" title="Permalink to this code">¶</a></div>
-<div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">NUMBA_cache_code</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">dispersion</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span><span class="w"></span>
-<span class="w">  </span><span class="nt">A_V</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span><span class="w"></span>
-<span class="nt">event_loggers</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inoutpoly</span><span class="w"></span>
-<span class="w">  </span><span class="nt">particle_prop_to_write_list</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ID</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IDrelease_group</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">status</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age</span><span class="w"></span>
-<span class="w">  </span><span class="nt">polygon_list</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592682.1237</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1593604.1667</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490275.5488</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1593886.4247</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489464.0424</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592917.3387</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000.0</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592300.0</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000.0</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592682.1237</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">    </span><span class="nt">user_polygon_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598604.1667</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490275.5488</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598886.4247</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489464.0424</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597917.3387</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597300</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">    </span><span class="nt">user_polygon_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">B</span><span class="w"></span>
-<span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo56_SCHISM_3D_resupend_crtitical_friction_vel</span><span class="w"></span>
-<span class="nt">particle_properties</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.age_decay.AgeDecay</span><span class="w"></span>
-<span class="w">  </span><span class="nt">decay_time_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">86400.0</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age_decay</span><span class="w"></span>
-<span class="nt">particle_statistics</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased</span><span class="w"></span>
-<span class="w">  </span><span class="nt">grid_size</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">121</span><span class="w"></span>
-<span class="w">  </span><span class="nt">grid_span</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grid1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">particle_property_list</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_depth</span><span class="w"></span>
-<span class="w">  </span><span class="nt">status_list</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">moving</span><span class="w"></span>
-<span class="w">  </span><span class="nt">update_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span><span class="w"></span>
-<span class="w">  </span><span class="nt">z_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-2</span><span class="w"></span>
-<span class="nt">reader</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo_hindcast_schisim3D_00.nc</span><span class="w"></span>
-<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast</span><span class="w"></span>
-<span class="w">  </span><span class="nt">load_fields</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_temperature</span><span class="w"></span>
-<span class="nt">regrid_z_to_uniform_sigma_levels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">release_groups</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.release_groups.polygon_release.PolygonRelease</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">poly1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598604.1667</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490275.5488</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598886.4247</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489464.0424</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597917.3387</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597300</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span><span class="w"></span>
-<span class="w">  </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="w">  </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3660</span><span class="w"></span>
-<span class="w">  </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2017-01-01T00:31:30&#39;</span><span class="w"></span>
-<span class="w">  </span><span class="nt">z_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">z_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">P1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">points</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5483000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598000</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5486100</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span><span class="w"></span>
-<span class="w">  </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="w">  </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span><span class="w"></span>
-<span class="nt">resuspension</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">critical_friction_velocity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.005</span><span class="w"></span>
-<span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span><span class="w"></span>
-<span class="nt">time_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span><span class="w"></span>
-<span class="nt">use_A_Z_profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="nt">velocity_modifiers</span><span class="p">:</span><span class="w"></span>
-<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity</span><span class="w"></span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">terminal_velocity</span><span class="w"></span>
-<span class="w">  </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.001</span><span class="w"></span>
+<summary> yaml parameters </summary><div class="literal-block-wrapper docutils container" id="id6">
+<div class="code-block-caption"><span class="caption-text">../../../demos/demo_param_files/demo56_SCHISM_3D_resupend_crtitical_friction_vel.yaml</span><a class="headerlink" href="#id6" title="Link to this code">¶</a></div>
+<div class="highlight-Yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">NUMBA_cache_code</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="nt">debug</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">dispersion</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">A_H</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<span class="w">  </span><span class="nt">A_V</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span>
+<span class="nt">event_loggers</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">inoutpoly</span>
+<span class="w">  </span><span class="nt">particle_prop_to_write_list</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ID</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">x</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">IDrelease_group</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">status</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age</span>
+<span class="w">  </span><span class="nt">polygon_list</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592682.1237</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1593604.1667</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490275.5488</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1593886.4247</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489464.0424</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592917.3387</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000.0</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592300.0</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000.0</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1592682.1237</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span>
+<span class="w">    </span><span class="nt">user_polygon_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">A</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">points</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598604.1667</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490275.5488</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598886.4247</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489464.0424</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597917.3387</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597300</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span>
+<span class="w">    </span><span class="nt">user_polygon_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">B</span>
+<span class="nt">output_file_base</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo56_SCHISM_3D_resupend_crtitical_friction_vel</span>
+<span class="nt">particle_properties</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_properties.age_decay.AgeDecay</span>
+<span class="w">  </span><span class="nt">decay_time_scale</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">86400.0</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">age_decay</span>
+<span class="nt">particle_statistics</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased</span>
+<span class="w">  </span><span class="nt">grid_size</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">121</span>
+<span class="w">  </span><span class="nt">grid_span</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10000</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">grid1</span>
+<span class="w">  </span><span class="nt">particle_property_list</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_depth</span>
+<span class="w">  </span><span class="nt">status_list</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">moving</span>
+<span class="w">  </span><span class="nt">update_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span>
+<span class="w">  </span><span class="nt">z_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-2</span>
+<span class="nt">reader</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">file_mask</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demo_hindcast_schisim3D_00.nc</span>
+<span class="w">  </span><span class="nt">input_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast</span>
+<span class="w">  </span><span class="nt">load_fields</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_temperature</span>
+<span class="nt">regrid_z_to_uniform_sigma_levels</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="nt">release_groups</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.release_groups.polygon_release.PolygonRelease</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">poly1</span>
+<span class="w">  </span><span class="nt">points</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598604.1667</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5490275.5488</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598886.4247</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489464.0424</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597917.3387</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597300</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489000</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1597682.1237</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5489972.7479</span>
+<span class="w">  </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3660</span>
+<span class="w">  </span><span class="nt">start</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2017-01-01T00:31:30&#39;</span>
+<span class="w">  </span><span class="nt">z_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+<span class="w">  </span><span class="nt">z_min</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">P1</span>
+<span class="w">  </span><span class="nt">points</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5487000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1594500</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5483000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1598000</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5486100</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1</span>
+<span class="w">  </span><span class="nt">pulse_size</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">release_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3600</span>
+<span class="nt">resuspension</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">critical_friction_velocity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.005</span>
+<span class="nt">root_output_dir</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">output</span>
+<span class="nt">time_step</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">120</span>
+<span class="nt">use_A_Z_profile</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="nt">velocity_modifiers</span><span class="p">:</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">terminal_velocity</span>
+<span class="w">  </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-0.001</span>
 </pre></div>
 </div>
 </div>
@@ -767,11 +768,11 @@ Standard properties include, status, tide, water_depth and  particle age.</p>
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2024, R. Vennell.
+      &#169;2024, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../../_sources/info/gallery/particle_properties.rst.txt"

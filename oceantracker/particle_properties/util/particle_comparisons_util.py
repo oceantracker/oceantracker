@@ -44,7 +44,7 @@ def setup_shared_comparison_IndexBuffer(current_particle_buffer_size, n_threads)
     _number_found_in_each_thread = np.zeros((n_threads,), dtype=np.int32)
 
 
-def compared_prop_to_value(part_prop_data, test, value, out=None):
+def _compared_prop_to_value(part_prop_data, test, value, out=None):
     # return a view of indices where  part_prop (test) value, is true
 
     comp = _get_comparison(test)

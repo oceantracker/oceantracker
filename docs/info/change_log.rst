@@ -14,12 +14,10 @@ Faster and simplified internal structure
 
 New features
 --------------------
-#. Now uses thread parallelism, so "case" and "case_list" are no longer used
+#. Now uses threaded parallelism exploiting al physical processors by default, so "case" and "case_list" are no longer used, processors setting ca be use to use fewer cpus thanall physicl cores
 
 #. Now works in natively geographic coords if hindcast is in geographic coords. If using geographic coords all inputs
 must also be groegraphic in (lon, lat) order, eg. release points, polygons, stats etc.
-
-#. Also grid spans  are now always required and must  be in  (dx,dy) meters not geographic
 
 #. gridded_statistics module renamed gridded_statistics2D in prep for 3D versions
 

@@ -1,0 +1,82 @@
+{
+    "output_file_base": "unit_test_10_resupension_00",
+    "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
+    "time_step": 300,
+    "use_random_seed": true,
+    "NCDF_time_chunk": 1,
+    "debug": true,
+    "screen_output_time_interval": 300,
+    "use_A_Z_profile": false,
+    "regrid_z_to_uniform_sigma_levels": false,
+    "tracks_writer": {
+        "update_interval": 300,
+        "write_dry_cell_flag": true
+    },
+    "reader": {
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
+        "file_mask": "demo_hindcast_schisim3D*.nc"
+    },
+    "release_groups": [
+        {
+            "points": [
+                1597682.1237,
+                5489972.7479
+            ],
+            "release_at_surface": true,
+            "release_interval": 0,
+            "pulse_size": 5000,
+            "name": "point1"
+        }
+    ],
+    "velocity_modifiers": [
+        {
+            "value": -0.01,
+            "class_name": "TerminalVelocity",
+            "name": "fall_vel"
+        }
+    ],
+    "particle_statistics": [
+        {
+            "grid_size": [
+                120,
+                121
+            ],
+            "grid_span": [
+                10000,
+                10000
+            ],
+            "release_group_centered_grids": true,
+            "update_interval": 7200,
+            "particle_property_list": [
+                "a_pollutant",
+                "water_depth"
+            ],
+            "z_min": -10.0,
+            "start": "2017-01-01T02:30:00",
+            "class_name": "GriddedStats2D_timeBased",
+            "name": "my_heatmap"
+        }
+    ],
+    "particle_properties": [
+        {
+            "initial_value": 1000,
+            "decay_time_scale": 7200.0,
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "name": "a_pollutant"
+        },
+        {
+            "class_name": "WaterSpeed"
+        },
+        {
+            "class_name": "AgeDecay",
+            "name": "test_decay"
+        },
+        {
+            "class_name": "DistanceTravelled"
+        }
+    ],
+    "resuspension": {
+        "critical_friction_velocity": 0.01,
+        "class_name": "BasicResuspension"
+    }
+}

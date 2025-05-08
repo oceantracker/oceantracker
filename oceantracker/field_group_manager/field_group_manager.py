@@ -1,14 +1,10 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-
 import numpy as np
-from oceantracker.util import time_util, ncdf_util, json_util, cord_transforms
+from time import perf_counter
 from oceantracker.field_group_manager.util import field_group_manager_util
-from time import  perf_counter
-from copy import deepcopy
 from oceantracker.shared_info import shared_info as si
-from  oceantracker.definitions import  cell_search_status_flags
 from oceantracker.interpolator.util import  triangle_eval_interp
-from oceantracker.field_group_manager import set_up_reader
+from oceantracker.field_group_manager import setup_reader
 
 class FieldGroupManager(ParameterBaseClass):
     # class holding data in file and ability to spatially interpolate fields that it holds
@@ -33,14 +29,18 @@ class FieldGroupManager(ParameterBaseClass):
 
         # get params from main or nested reader
         if gridID > 0:
-            reader_params = si.working_params['nested_readers'][gridID -1]
+            reader_params = si.working_params['nested_readers'][gridID - 1]
         else:
             reader_params = si.working_params['reader']
-        # build  primary. ie  velocity field, reader
 
         self.reader, add_info = self._make_a_reader(reader_params)
-        info.update(add_info)
 
+        if gridID == 0:
+            si.core_class_roles.reader = self.reader
+        else:
+            si.class_roles.nested_readers[f'nested_reader_{gridID:02d}'] = self.reader
+
+        info.update(add_info)
 
 
 
@@ -71,11 +71,10 @@ class FieldGroupManager(ParameterBaseClass):
         # write_grid
         self.reader.write_grid(info['gridID'])
 
-
         pass
-        if si.settings['display_grid_at_start'] and self.reader.info['gridID']==1:
+        if si.settings['display_grid_at_start']:
             from matplotlib import pyplot as plt
-            from plot_oceantracker.plot_utilities import display_grid
+            from oceantracker.plot_output.plot_utilities import display_grid
             display_grid(grid, 1)
             plt.show()
 
@@ -100,9 +99,9 @@ class FieldGroupManager(ParameterBaseClass):
         for name, i in self.reader.fields.items():
             if i.params['create_particle_property_with_same_name']:
                 si.add_class('particle_properties', class_name='FieldParticleProperty', name=name,
-                                            write=i.params['write_interp_particle_prop_to_tracks_file'],
-                                            vector_dim = i.get_number_components(),
-                                            time_varying=True, dtype='float64', initial_value=0.)
+                             write=i.params['write_interp_particle_prop_to_tracks_file'],
+                             vector_dim = i.get_number_components(),
+                             time_varying=True, dtype='float64', initial_value=0.)
         pass
 
 
@@ -111,9 +110,8 @@ class FieldGroupManager(ParameterBaseClass):
 
     def update_tidal_stranding_status(self, time_sec, alive):
         i = self.tidal_stranding
-        i.start_update_timer()
-        i.update(self.reader.grid, time_sec, alive)
-        i.stop_update_timer()
+        i.timed_update(self.reader.grid, time_sec, alive)
+
 
     def setup_time_step(self, time_sec, xq, active):
 
@@ -122,35 +120,35 @@ class FieldGroupManager(ParameterBaseClass):
         # plus global time step locations and time ftactions od timre step and put results in interpolators step info numpy structure
         info = self.info
         grid =self.reader.grid
-        info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps']= self.reader._time_step_and_buffer_offsets(time_sec)
+        info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps'] = self.reader._time_step_and_buffer_offsets(time_sec)
         part_prop = si.class_roles.particle_properties
         reader = self.reader
         # find hori cell
         sel_fix = self.reader.interpolator.find_hori_cell(xq, active)
 
-        sel_outside_open = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.outside_open_boundary,
+        sel_outside_open = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.hit_open_boundary,
                                                                         out=self.get_partID_subset_buffer('B2'))
         if sel_outside_open.size > 0:
             self._fix_those_outside_open_boundary(sel_outside_open)
 
         # outside domain but not an open boundary,
-        sel_outside_domain = part_prop['status'].find_subset_where(sel_fix, 'eq',
-                                                                        si.particle_status_flags.outside_domain,
+        sel_outside_domain = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
+                                                                        si.cell_search_status_flags.hit_domain_boundary,
                                                                         out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel_outside_domain)
 
         if si.settings.block_dry_cells:
-            sel_hit_dry = part_prop['status'].find_subset_where(sel_fix, 'eq',
-                                                                    si.particle_status_flags.hit_dry_cell,
-                                                                    out=self.get_partID_subset_buffer('B2'))
+            sel_hit_dry = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq',
+                                                                si.cell_search_status_flags.hit_dry_cell,
+                                                                out=self.get_partID_subset_buffer('B2'))
             self._apply_dry_cell_boundary_condition(sel_hit_dry)
 
         # move back bad coords, nan etc
-        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.bad_coord, out=self.get_partID_subset_buffer('B2'))
+        sel = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.bad_coord, out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel) # those still bad, eg nan etc
 
         # move back cell search failed
-        sel = part_prop['status'].find_subset_where(sel_fix, 'eq', si.particle_status_flags.cell_search_failed,
+        sel = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.failed,
                                                     out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel)  # those still bad, eg nan etc
 
@@ -163,7 +161,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def _make_a_reader(self,reader_params):
         # build a readers
-        reader = set_up_reader.make_a_reader_from_params(reader_params, si.settings,  crumbs='')
+        reader = setup_reader.make_a_reader_from_params(reader_params, si.settings,  crumbs='')
         reader.initial_setup()
         reader.final_setup()
 
@@ -193,13 +191,14 @@ class FieldGroupManager(ParameterBaseClass):
             part_prop['x'].copy('x_last_good', sel)  # move back location
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
             part_prop['bc_coords'].copy('bc_coords_last_good', sel)  # move back the cell
-            part_prop['status'].set_values(si.particle_status_flags.moving, sel)  # set statud to moving
+            part_prop['status'].copy('status_last_good', sel)  # set status to moving
 
         # debug_util.plot_walk_step(xq, si.core__class_roles.reader.grid, part_prop)
 
 
     #@function_profiler(__name__)
     def interp_field_at_particle_locations(self, field_name, active, output=None):
+
         # in place evaluation of field interpolation
         # interp reader field_name inplace to particle locations to same time and memory
         # output can optionally be redirected to another particle property name different from  reader's field_name
@@ -210,6 +209,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         field= self.reader.fields[field_name]
         self.reader.interpolator.interp_field(field,info['current_buffer_steps'], info['fractional_time_steps'], output, active)
+
 
     def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_coords, time_sec= None,hydro_model_gridID=None):
         # interp reader field_name at specfied locations,  not particle locations
@@ -239,16 +239,15 @@ class FieldGroupManager(ParameterBaseClass):
         field_group_manager_util.update_dry_cell_index( grid['is_dry_cell_buffer'], grid['dry_cell_index'],
                                                    info['current_buffer_steps'], info['fractional_time_steps'])
 
-        # dev copy adjacency matrix and include dry cell lateral boundaries
-        #field_group_manager_util.update_dry_cell_adjacency(grid['adjacency'], grid['dry_cell_index'], grid['adjacency_with_dry_edges'])
-        #print('xx', np.count_nonzero(grid['adjacency_with_dry_edges']==-3))
         pass
 
     def screen_info(self):
         info = self.info
         s = f':H{info["current_hydro_model_step"]:04d}b{info["current_buffer_steps"][0]:02d}-{info["current_buffer_steps"][1]:02d}'
         return s
-
+    def get_reader_info(self):
+        d= dict(reader=self.reader.info)
+        return d
     def are_points_inside_domain(self,x, include_dry_cells):
         # only primary/outer grid
         is_inside, part_data = self.reader.interpolator.are_points_inside_domain(x)
@@ -265,7 +264,9 @@ class FieldGroupManager(ParameterBaseClass):
     def are_dry_cells(self, n_cell):
         sel = self.reader.grid['dry_cell_index'][n_cell] > 128  # those dry
         return sel
-    
+
+
+
     def close(self):
         pass
 

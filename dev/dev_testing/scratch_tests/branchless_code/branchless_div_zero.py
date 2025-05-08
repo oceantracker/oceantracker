@@ -34,7 +34,7 @@ def F2(x1,x2,out,sel, xmin):
 
 def show_llvm(f):
     for v, k in f.inspect_asm().items():
-        print('xx', f.__name__, v, k)
+        print('xx2', f.__name__, v, k)
 
 if __name__ == "__main__":
     N= 10**6

@@ -30,10 +30,13 @@ def time_independent_2D_vector_field(F_out, F_data, triangles, n_cell, bc_coords
     for nn in nb.prange(active.size):
         n = active[nn]
         # loop over each node in triangle
-        F_out[n] = 0.  # zero out for summing
+        for c in range(2): F_out[n,c] = 0.  # zero out for summing
+
         n_nodes = triangles[n_cell[n], :]
         for m in range(3):
-            F_out[n] += bc_coords[n, m] * F[n_nodes[m]]
+            node = n_nodes[m]
+            for c in range(2):
+                F_out[n, c] += bc_coords[n, m] * F[node, c]
 
 
 @njitOTparallel
@@ -147,6 +150,7 @@ def time_dependent_3D_vector_field_data_in_all_layers(n_buffer, fractional_time_
     # create views to remove redundant dim at current and next time step, improves speed?
     F1 = F_data[n_buffer[0], :, :, :]
     F2 = F_data[n_buffer[1], :, :, :]
+    frac0, frac1 = fractional_time_steps[0],fractional_time_steps[1]
 
     # loop over active particles and vector components
     for nn in nb.prange(active.size):
@@ -158,50 +162,15 @@ def time_dependent_3D_vector_field_data_in_all_layers(n_buffer, fractional_time_
         # loop over each vertex in triangle
         for c in range(3): F_out[n, c] = 0. # zero out for summing
 
-        n_nodes = triangles[n_cell[n], :]
         for m in range(3):
-            # loop over vector components
+            # loop vertex of tri
+            node = triangles[n_cell[n], m]
             for c in range(3):
                 # add contributions from layer above and below particle, for each spatial component at two time steps
                 # slightly faster with temp variable, as allows more LLVM optimisations?
-                temp  = (F1[n_nodes[m], nz, c] * zf1 + F1[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[0]
-                temp += (F2[n_nodes[m], nz, c] * zf1 + F2[n_nodes[m], nz + 1, c] * zf2)*fractional_time_steps[1]# second time step
+                temp  = (F1[node, nz, c] * zf1 + F1[node, nz + 1, c] * zf2)*frac0
+                temp += (F2[node, nz, c] * zf1 + F2[node, nz + 1, c] * zf2)*frac1 # second time step
                 F_out[n, c] += bc_coords[n, m] * temp
-
-#@njitOT
-@njitOTparallel
-def time_dependent_3D_vector_field_data_in_all_layers_bytri(n_buffer, fractional_time_steps, F_data,
-                                                      triangles,
-                                                      n_cell, bc_coords, nz_cell, z_fraction,
-                                                      F_out, active):
-    #  time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
-
-    # create views to remove redundant dim at current and next time step, improves speed?
-    F1 = F_data[n_buffer[0], :, :, :]
-    F2 = F_data[n_buffer[1], :, :, :]
-
-    # loop over active particles and vector components
-    for nn in nb.prange(active.size):
-        n = active[nn]
-        zf2 = z_fraction[n]
-        zf1 = 1. - zf2
-        nz = nz_cell[n]
-
-        # loop over each vertex in triangle
-        for c in range(3): F_out[n, c] = 0. # zero out for summing
-        nc = n_cell[n]
-        n_nodes = triangles[n_cell[n], :]
-
-        for c in range(3):# loop over vector components
-            # loop over vertcies
-            temp = 0.
-            for m in range(3):
-                # add contributions from layer above and below particle, for each spatial component at two time steps
-                # slightly faster with temp variable, as allows more LLVM optimisations?
-                temp += bc_coords[n, m] *(F1[nc, nz, c, m] * zf1 + F1[nc, nz + 1, c, m] * zf2)*fractional_time_steps[0]
-                temp += bc_coords[n, m] *(F2[nc, nz, c, m] * zf1 + F2[nc, nz + 1, c, m] * zf2)*fractional_time_steps[1]# second time step
-            F_out[n, c] = temp
-
 
 @njitOTparallel
 def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps, F_data,
@@ -219,7 +188,7 @@ def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps
     # loop over active particles and vector components
     for nn in nb.prange(active.size):
         n = active[nn]
-        for i in range(n_comp): F_out[n, i] = 0. # zero out for summing
+        F_out[n] = 0. # zero out for summing
         zf = z_fraction[n]
         zf1 = 1. - zf
         nz = nz_cell[n]
@@ -270,6 +239,8 @@ def time_dependent_3D_vector_field_ragged_bottom(n_buffer, fractional_time_steps
                 F_out[n, c] +=     bc_coords[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*fractional_time_steps[0]  \
                                 +  bc_coords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*fractional_time_steps[1]  # second time step
                 pass
+
+        pass
 
 
 # below are development ideas

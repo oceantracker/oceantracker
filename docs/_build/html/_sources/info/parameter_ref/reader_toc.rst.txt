@@ -10,6 +10,7 @@ reader
 	FVCOMreader.rst
 	GLORYSreader.rst
 	ROMSreader.rst
+	ROMSreaderMonaProject.rst
 	SCHISMreader.rst
 	SCHISMreaderV5.rst
 	_BaseReader.rst

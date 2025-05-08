@@ -8,7 +8,14 @@ Resuspension
 
 **full class_name :** oceantracker.resuspension.resuspension.Resuspension
 
-**Inheritance:** > ParameterBaseClass> BaseResuspension> Resuspension
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
+**Inheritance:** > ParameterBaseClass> _BaseResuspension> Resuspension
 
 
 Parameters:

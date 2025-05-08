@@ -1,11 +1,10 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.dispersion._base_dispersion import _BaseDispersion
-from oceantracker.util.numba_util import njitOT, njitOTparallel
-import numba as nb
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 
 from random import normalvariate
-from oceantracker.util.numba_util import njitOT
+
 from oceantracker.shared_info import shared_info as si
 
 class RandomWalk(_BaseDispersion):
@@ -75,7 +74,7 @@ class RandomWalk(_BaseDispersion):
     @staticmethod
     @njitOTparallel
     def _add_random_walk_velocity2D_modifier_constantAZ(random_walk_velocity, velocity_modifier, active):
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             for m in range(2):
                 velocity_modifier[n,m] += normalvariate(0., random_walk_velocity[m])
@@ -83,7 +82,7 @@ class RandomWalk(_BaseDispersion):
     @staticmethod
     @njitOTparallel
     def _add_random_walk_velocity3D_modifier_constantAZ(random_walk_velocity, active, velocity_modifier):
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             for m in range(3):
                 velocity_modifier[n, m] += normalvariate(0., random_walk_velocity[m])
@@ -95,7 +94,7 @@ class RandomWalk(_BaseDispersion):
         # this avoids particle accumulating in areas of high vertical gradient of A_Z, ie top and bottom
 
 
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
 
             # random walk velocity in horizontal

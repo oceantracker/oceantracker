@@ -8,6 +8,13 @@ _BaseDispersion
 
 **full class_name :** oceantracker.dispersion._base_dispersion._BaseDispersion
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseDispersion
 
 

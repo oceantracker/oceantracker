@@ -7,14 +7,23 @@
     "debug": true,
     "use_dispersion": false,
     "screen_output_time_interval": 1800,
-    "use_A_Z_profile": true,
+    "use_A_Z_profile": false,
     "regrid_z_to_uniform_sigma_levels": true,
+    "particle_buffer_initial_size": 500,
+    "NUMBA_cache_code": true,
+    "use_resuspension": false,
     "tracks_writer": {
         "update_interval": 3600,
-        "write_dry_cell_flag": false
+        "write_dry_cell_flag": false,
+        "turn_on_write_particle_properties_list": [
+            "nz_cell",
+            "z_fraction_water_velocity",
+            "z_fraction"
+        ],
+        "time_steps_per_per_file": 10
     },
     "reader": {
-        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast\\schsim3D",
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
     },
     "release_groups": [
@@ -83,7 +92,7 @@
             "name": "a_pollutant"
         },
         {
-            "class_name": "pWaterSpeed"
+            "class_name": "WaterSpeed"
         },
         {
             "class_name": "AgeDecay",
@@ -106,7 +115,8 @@
             "release_group_centered_grids": true,
             "update_interval": 7200,
             "particle_property_list": [
-                "a_pollutant"
+                "a_pollutant",
+                "water_depth"
             ],
             "z_min": -10.0,
             "start": "2017-01-01T02:30:00",
@@ -156,8 +166,5 @@
             "class_name": "PolygonStats2D_timeBased",
             "name": "my_poly_stats"
         }
-    ],
-    "resuspension": {
-        "critical_friction_velocity": 0.01
-    }
+    ]
 }

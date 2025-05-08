@@ -22,7 +22,6 @@ class _BaseStructuredReader(_BaseReader):
         # get nodes for each corner of quad
         grid['triangles'] = hydromodel_grid_transforms.convert_regular_grid_to_triangles(grid, grid['land_mask'])
 
-        return grid
 
     def read_open_boundary_data_as_boolean(self, grid):
         # and make this part of the read grid method

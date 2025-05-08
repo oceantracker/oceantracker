@@ -8,6 +8,13 @@ ParticleParameterFromNormalDistribution
 
 **full class_name :** oceantracker.particle_properties.particle_parameter_from_normal_distribution.ParticleParameterFromNormalDistribution
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleProperty> ManuallyUpdatedParticleProperty> ParticleParameterFromNormalDistribution
 
 

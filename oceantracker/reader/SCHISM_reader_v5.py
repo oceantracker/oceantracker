@@ -11,8 +11,12 @@ class SCHISMreaderV5(SCHISMreader):
         super().__init__()  # required in children to get parent defaults and merge with give params
         # redefine any variable names which differ from older schism format
         self.add_default_params(
-            grid_variable_map= { 'zlevel': PVC('zCoordinates', str),
-                                  'is_dry_cell': PVC('dryFlagElement', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')},
+            file_mask= PVC('*.nc', str,
+                         doc_str='Mask for file names, for Schism 5 default is "*.nc",, ie.  all netcdf files, finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
+            grid_variable_map= dict(zlevel = PVC('zCoordinates', str),
+                                is_dry_cell= PVC('dryFlagElement', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell'),
+                                 bottom_cell_index = PVC('bottom_index_node', str)),
+   
             field_variable_map= {'water_velocity': PLC(['horizontalVelX','horizontalVelY', 'verticalVelocity'], str),
                                    'tide': PVC('elevation', str, doc_str='maps standard internal field name to file variable name'),
                                    'water_depth': PVC('depth', str, doc_str='maps standard internal field name to file variable name'),
@@ -28,10 +32,3 @@ class SCHISMreaderV5(SCHISMreader):
                             },
             variable_signature= PLC(['depth','elevation', 'dryFlagElement'], str, doc_str='Variable names used to test if file is this format'),
                         )
-
-
-
-
-
-
-

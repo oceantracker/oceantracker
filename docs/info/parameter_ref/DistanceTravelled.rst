@@ -8,6 +8,13 @@ DistanceTravelled
 
 **full class_name :** oceantracker.particle_properties.distance_travelled.DistanceTravelled
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleProperty> CustomParticleProperty> DistanceTravelled
 
 

@@ -36,8 +36,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 water_depth_min =  PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
                 water_depth_max =  PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
                 particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
-                coords_in_lat_lon_order =  PVC(False, bool,
-                    doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
+                #coords_in_lat_lon_order =  PVC(False, bool,
+                #    doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
                 status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),
                                  obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
                                ),
@@ -115,6 +115,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
             self.info['output_file'] += f'_{self.info["instanceID"]}_{self.params["name"]}.nc'
             self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
+
+            # all stats are separated into  release groups
+            self.nc.add_dimension('release_group_dim', len(si.class_roles.release_groups))
         else:
             self.nc = None
         self.nWrites = 0
@@ -128,6 +131,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         # other output common to all types of stats
         nc.create_a_variable('num_released_total', ['time_dim'], np.int32, description='total number released')
+
+        nc.create_a_variable('num_released',  ['time_dim', 'release_group_dim'], np.int32, description='number released so far from each release group')
 
     def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
@@ -166,10 +171,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
 
 
-
-    # overload this method to subset indicies in out of particles to count
-    def select_particles_to_count(self, out):
-        return out
+    # user overload this method to subset indicies in out of particles to count
+    def select_particles_to_count(self, sel): # dummy method
+        return sel
 
 
     def update(self,n_time_step, time_sec):
@@ -179,17 +183,18 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.start_update_timer()
 
 
-        num_in_buffer = si.particles_in_buffer
+        num_in_buffer = si.run_info.particles_in_buffer
 
         # first select those to count based on status and z location
-        sel = self.sel_status_waterdepth_and_z(part_prop['status'].data, part_prop['x'].data, part_prop['water_depth'].data.ravel(),
-                                               self.statuses_to_count_map, info['z_range'], info['water_depth_range'],
-                                               num_in_buffer, self.get_partID_buffer('B1'))
+        sel = self._sel_status_waterdepth_and_z(part_prop['status'].data,
+                                                part_prop['x'].data, part_prop['water_depth'].data.ravel(),
+                                                self.statuses_to_count_map, info['z_range'], info['water_depth_range'],
+                                                num_in_buffer, self.get_partID_buffer('B1'))
 
         # any overloaded sub-selection of particles given in child classes
         sel = self.select_particles_to_count(sel)
 
-        #update prop list data, as buffer may have expnaded
+        #update prop list data, as buffer may have expanded
         #todo do this only when expansion occurs??
         part_prop = si.class_roles.particle_properties
         for n, name in enumerate(self.sum_binned_part_prop.keys()):
@@ -205,7 +210,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     @staticmethod
     @njitOT
-    def sel_status_waterdepth_and_z(status, x, water_depth, statuses_to_count_map, z_range, water_depth_range, num_in_buffer, out):
+    def _sel_status_waterdepth_and_z(status, x, water_depth, statuses_to_count_map, z_range, water_depth_range, num_in_buffer, out):
         n_found = 0
         if x.shape[1] == 3:
             # 3D selection
@@ -222,23 +227,27 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         return out[:n_found]
 
-    def write_time_varying_stats(self, n, time):
+    def write_time_varying_stats(self, n_write, time):
         # write nth step in file
         fh = self.nc.file_handle
-        fh['time'][n] = time
+        fh['time'][n_write] = time
+
         release_groups = si.class_roles.release_groups
 
-        # add up number released
-        num_released = 0
-        for rg in release_groups.values():
-            num_released += rg.info['number_released']
-        fh['num_released_total'][n] = num_released
+        # write number released
+        num_released = np.zeros((len(release_groups),), dtype=np.int32)
+        for nrg, rg in enumerate(release_groups.values()):
+            num_released[nrg] = rg.info['number_released']
 
-        fh['count'][n, ...] = self.count_time_slice[:, ...]
-        fh['count_all_particles'][n, ...] = self.count_all_particles_time_slice[:, ...]
+        fh['num_released'][n_write, :] = num_released # for each release group so far
+        fh['num_released_total'][n_write] = num_released.sum() # total all release groups so far
+
+        fh['count'][n_write, ...] = self.count_time_slice[:, ...]
+        fh['count_all_particles'][n_write, ...] = self.count_all_particles_time_slice[:, ...]
 
         for key, item in self.sum_binned_part_prop.items():
-            self.nc.file_handle['sum_' + key][n, ...] = item[:]  # write sums  working in original view
+            self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
+
 
     def info_to_write_at_end(self) : pass
 

@@ -8,6 +8,13 @@ _BaseWriter
 
 **full class_name :** oceantracker.tracks_writer._base_tracks_writer._BaseWriter
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseWriter
 
 

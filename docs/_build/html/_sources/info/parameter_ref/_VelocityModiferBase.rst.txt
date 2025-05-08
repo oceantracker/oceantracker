@@ -8,6 +8,13 @@ _VelocityModiferBase
 
 **full class_name :** oceantracker.velocity_modifiers._base_velocity_modifer._VelocityModiferBase
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _VelocityModiferBase
 
 

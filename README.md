@@ -4,10 +4,12 @@
 
 OceanTracker is a fast extendable code for offline particle tracking in structured and  unstructured grids [1].
 OceanTracker currently  supports structured grid ROMs and GLORYS (NEMO/COPERNICUS) 
-for fixed z level vertical grids and unstructured grids of SCHISM and DELFT3D-FM.  
+for fixed z level vertical grids and unstructured grids of SCHISM 
+(both original netcdf format and new format with variables split between files) and DELFT3D-FM.
+Other formats added on request. 
 
 Fast computational approaches to numerical interpolation makes OceanTracker extremely fast even on a single computer core [2]. 
-In addition, computations are split to run in parallel across available physical computer cores.
+In addition, intense computations are split to run in parallel across available physical computer cores.
 
 OceanTracker’s speed enables millions of particles to be simulated. This significantly increases 
 the range of particle behaviours that can be modeled and the quality of statistics derived from the particles. 

@@ -1,10 +1,5 @@
-from os import path, sep
 from oceantracker.main import OceanTracker
 
-from plot_oceantracker import plot_tracks
-import  argparse
-import shutil
-import numpy as np
 from tests.unit_tests import test_definitions
 
 def main(args):
@@ -13,6 +8,7 @@ def main(args):
     ot.settings(time_step=1800,
                 use_dispersion=False,
              use_A_Z_profile=False,
+                NUMBA_cache_code=True,
             regrid_z_to_uniform_sigma_levels=True)
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False)
@@ -39,6 +35,8 @@ def main(args):
                  polygon_list=[dict(points=hm['polygon'])])
 
     case_info_file = ot.run()
+
+    test_definitions.compare_reference_run(case_info_file, args)
 
 
 

@@ -143,13 +143,6 @@ Parameters:
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
-	* ``use_parallel_threads`` :   ``<class 'bool'>``   *<optional>*
-		Description: Use threads to distribute computation across mutiple threads
-
-		- default: ``True``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
-
 	* ``use_resuspension`` :   ``<class 'bool'>``   *<optional>*
 		Description: Allow particles to resuspend
 
@@ -251,6 +244,13 @@ Expert Parameters:
 		- default: ``None``
 		- data_type: ``<class 'int'>``
 		- min: ``1``
+
+	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
+		Description: Number of time steps held in hindcast memory buffers
+
+		- default: ``24``
+		- data_type: ``<class 'int'>``
+		- min: ``2``
 
 	* ``use_geographic_coords`` :   ``<class 'bool'>``   *<optional>*
 		Description: Used geographic coordniated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code

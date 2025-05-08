@@ -1,7 +1,7 @@
 .. _running-oceantracker:
 
 #####################
-Running OceanTracker
+Running
 #####################
 
 

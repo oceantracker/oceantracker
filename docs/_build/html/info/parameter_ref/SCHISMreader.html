@@ -1,36 +1,37 @@
-
 <!DOCTYPE html>
 
-<html>
+<html lang="en" data-content_root="../../">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>SCHISMreader &#8212; OceanTracker Beta 0.5 documentation</title>
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=a66d8bb5" />
+    <script src="../../_static/documentation_options.js?v=7b06c30a"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="SCHISMreaderV5" href="SCHISMreaderV5.html" />
-    <link rel="prev" title="ROMSreader" href="ROMSreader.html" />
+    <link rel="prev" title="ROMSreaderMonaProject" href="ROMSreaderMonaProject.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
+
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+  
 
   </head><body>
   <div class="document">
     
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="../../index.html">
-    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo" />
+    
+    <h1 class="logo logo-name">Beta 0.5</h1>
     
   </a>
 </p>
@@ -50,13 +51,13 @@
 
 
 <h3>Navigation</h3>
-<p><span class="caption-text">Contents:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installing.html">Installing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running_ocean_tracker.html">Running OceanTracker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_ocean_tracker.html">Running</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../how_to.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="parameter_ref_toc.html">Parameter details</a><ul class="current">
@@ -75,23 +76,23 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="parameter_ref_toc.html">Parameter details</a><ul>
   <li><a href="reader_toc.html">reader</a><ul>
-      <li>Previous: <a href="ROMSreader.html" title="previous chapter">ROMSreader</a></li>
+      <li>Previous: <a href="ROMSreaderMonaProject.html" title="previous chapter">ROMSreaderMonaProject</a></li>
       <li>Next: <a href="SCHISMreaderV5.html" title="next chapter">SCHISMreaderV5</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
 </ul>
 </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
-<script>$('#searchbox').show(0);</script>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -101,13 +102,17 @@
           <div class="body" role="main">
             
   <section id="schismreader">
-<h1>SCHISMreader<a class="headerlink" href="#schismreader" title="Permalink to this headline">¶</a></h1>
+<h1>SCHISMreader<a class="headerlink" href="#schismreader" title="Link to this heading">¶</a></h1>
 <p><strong>Doc:</strong></p>
 <p><strong>short class_name:</strong> SCHISMreader</p>
 <p><strong>full class_name :</strong> oceantracker.reader.SCHISM_reader.SCHISMreader</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Class is under development may not yet work in all cases, if errors contact developer</p>
+</div>
 <p><strong>Inheritance:</strong> &gt; ParameterBaseClass&gt; _BaseReader&gt; _BaseUnstructuredReader&gt; SCHISMreader</p>
 <section id="parameters">
-<h2>Parameters:<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<h2>Parameters:<a class="headerlink" href="#parameters" title="Link to this heading">¶</a></h2>
 <blockquote>
 <div><ul>
 <li><dl>
@@ -124,19 +129,6 @@
 <ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">drop_variables</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant</p>
-<ul class="simple">
-<li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
-<li><p>possible_types: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
-<li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
-<li><p>min_len: <code class="docutils literal notranslate"><span class="pre">0</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -209,15 +201,6 @@
 </dl>
 </li>
 <li><dl>
-<dt><code class="docutils literal notranslate"><span class="pre">time_buffer_size</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
-<li><p>default: <code class="docutils literal notranslate"><span class="pre">24</span></code></p></li>
-<li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'int'&gt;</span></code></p></li>
-<li><p>min: <code class="docutils literal notranslate"><span class="pre">2</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</li>
-<li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">user_note</span></code><span class="classifier"><code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code>   <em>&lt;optional&gt;</em></span></dt><dd><ul class="simple">
 <li><p>default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
@@ -229,7 +212,7 @@
 <dt><code class="docutils literal notranslate"><span class="pre">variable_signature</span></code>:  <em>&lt;optional&gt;</em></dt><dd><p>Description: - Variable names used to test if file is this format</p>
 <ul class="simple">
 <li><p>a list containing type:  <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
-<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['SCHISM_hgrid_node_x',</span> <span class="pre">'dahv']</span></code></p></li>
+<li><p>default list : <code class="docutils literal notranslate"><span class="pre">['elev',</span> <span class="pre">'depth']</span></code></p></li>
 <li><p>data_type: <code class="docutils literal notranslate"><span class="pre">&lt;class</span> <span class="pre">'str'&gt;</span></code></p></li>
 <li><p>possible_types: <code class="docutils literal notranslate"><span class="pre">[]</span></code></p></li>
 <li><p>make_list_unique: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
@@ -252,7 +235,7 @@
 </div></blockquote>
 </section>
 <section id="expert-parameters">
-<h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Permalink to this headline">¶</a></h2>
+<h2>Expert Parameters:<a class="headerlink" href="#expert-parameters" title="Link to this heading">¶</a></h2>
 <blockquote>
 <div><ul>
 <li><dl>
@@ -278,7 +261,7 @@
     <ul>
         <li>
           &larr;
-          <a href="ROMSreader.html" title="Previous document">ROMSreader</a>
+          <a href="ROMSreaderMonaProject.html" title="Previous document">ROMSreaderMonaProject</a>
         </li>
         <li>
           <a href="SCHISMreaderV5.html" title="Next document">SCHISMreaderV5</a>
@@ -293,11 +276,11 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &copy;2024, R. Vennell.
+      &#169;2024, R. Vennell.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.1</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
       
       |
       <a href="../../_sources/info/parameter_ref/SCHISMreader.rst.txt"

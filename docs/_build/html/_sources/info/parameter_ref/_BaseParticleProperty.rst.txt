@@ -8,6 +8,13 @@ _BaseParticleProperty
 
 **full class_name :** oceantracker.particle_properties._base_particle_properties._BaseParticleProperty
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseParticleProperty
 
 

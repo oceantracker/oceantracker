@@ -20,13 +20,14 @@ particle_statistics:
   name: my_heatmap
   particle_property_list:
   - a_pollutant
+  - water_depth
   release_group_centered_grids: true
   start: '2017-01-01T02:30:00'
   update_interval: 7200
   z_min: -10.0
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
-  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast\schsim3D
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
 release_groups:
 - class_name: PolygonRelease
   name: poly1

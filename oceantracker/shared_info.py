@@ -1,7 +1,7 @@
 import numpy as np
 from oceantracker import definitions
 
-from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
+from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC, ParameterListChecker as PLC
 
 from oceantracker.util import class_importer_util
 from oceantracker.util.message_logger import  MessageLogger
@@ -10,41 +10,10 @@ from time import  perf_counter
 
 # useful utility classes to enable auto complete
 class _Object(object):  pass
-class _SharedStruct():
-    '''
-    holds variables as class attributes to enable auto complete hints
-    and give iterators over these variables
-
-    allows both  instance.backtracking and i['instance.backtracking']
-
-    '''
-    def __init__(self):
-        # add  class variables in ._class_.__dict__
-        # to instance __dict__ by adding attributes
-        for key, item in self.__class__.__dict__.items():
-            if not key.startswith('_'):
-                setattr(self, key, item)
-    def as_dict(self):
-        d = dict()
-        for key, item in self.__dict__.items():
-            if not key.startswith('_'): d[key] = item
-        return d
-
-    def possible_values(self):
-        d = []
-        for key in self.__dict__.keys():
-            if not key.startswith('_'): d.append(key) 
-        return d
-    def items(self): return self.as_dict().items()
-
-    def __getitem__(self, name:str):
-        return getattr(self,name)
-    def __setitem__(self, name:str, value):
-        setattr(self,name, value)
 
 # default settings structure
 
-class _DefaultSettings(_SharedStruct):
+class _DefaultSettings(definitions._AttribDict):
 
     root_output_dir=  PVC('root_output_dir', str, doc_str='base dir for all output files')
     add_date_to_run_output_dir =  PVC(False,bool, doc_str='Append the date to the output dir. name to help in keeping output from different runs separate' )
@@ -52,15 +21,18 @@ class _DefaultSettings(_SharedStruct):
                 doc_str= 'The start/base of all output files and name of sub-dir of "root_output_dir" where output will be written' )
     time_step = PVC(3600., float, min=0.001, units='sec',doc_str='Time step in seconds for all cases' )
     screen_output_time_interval = PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file' )
+    screen_info_level = PVC(0, int, doc_str='Sets 0-10 value at which user added self.screen_info(text,level) method calls are written to the screen, = 0 for none',
+                            min=0, max =10)
+
     backtracking =   PVC(False, bool, doc_str='Run model backwards in time')
     regrid_z_to_uniform_sigma_levels = PVC(True, bool,
-                doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read, based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS' )
+                doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read (eg. SCHISM), based on sigma most curve z_level profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS' )
     display_grid_at_start = PVC(False, bool,
                 doc_str='Pause during strat up to plot the grid for checking using matplotlib, clicking om image will print a coord' )
     dev_debug_plots = PVC(False, bool,expert=True, doc_str='show any debug plot generated at give dbug_level, not for general use' )
     debug = PVC(False, bool, doc_str= 'more info on errors' )
     dev_debug_opt = PVC(0, int,expert=True,doc_str= 'does extra checks given by integer, not for general use' )
-    minimum_total_water_depth = PVC(0.25, float, min=0.0, units='m', doc_str='Min. water depth used to decide if stranded by tide and which are dry cells to block particles from entering' )
+    minimum_total_water_depth = PVC(0.25, float, min=0.0, units='m', doc_str='Min. water depth used to decide if cell is dry (only if no dry cell data in hindcast ) to decide if stranded  and to block particles from entering dry cells' )
                 #'write_output_files =     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web' )
     write_dry_cell_flag = PVC(True, bool,
                 doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots,may create large grid file, currently cannot be used with nested grids ' )
@@ -83,12 +55,12 @@ class _DefaultSettings(_SharedStruct):
     water_density = PVC(1025., float, units='kg/m^3', doc_str='Water density , default is seawater, an example of use is in calculating friction velocity from bottom stress, ', min=900. )
     use_open_boundary = PVC(False, bool, doc_str='Allow particles to leave open boundary, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred for structed grids like ROMS ' )
     block_dry_cells = PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary' )
-
+    add_path = PLC(None,str,doc_str='List of directories to add to python path containing user written classes. Enables import of user written classes outside of current working dir. ')
     time_buffer_size = PVC(24, int, min=2, doc_str='Number of time steps held in hindcast memory buffers', expert = True)
     use_geographic_coords = PVC(False, bool,
-                          doc_str='Used geographic coordniated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
+                          doc_str='Used geographic coordinated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
                                 expert=True)
-    use_A_Z_profile = PVC(True, bool,
+    use_A_Z_profile = PVC(False, bool,
                 doc_str='Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files')
     use_bottom_stress = PVC(True, bool,
                 doc_str='Use hydro models bottom_stress variable for friction velocity calculation, if mapped variable is in files. Friction velocity is used in resuspension')
@@ -97,11 +69,11 @@ class _DefaultSettings(_SharedStruct):
     use_resuspension = PVC(True, bool,
                 doc_str='Allow particles to resuspend')
     processors= PVC(None, int, min=1,
-                 doc_str='Maximum number of threads to use in parallelization, default is one less than the number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')
+                 doc_str='Maximum number of threads to use in parallelization, default = number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')
     NCDF_time_chunk = PVC(24, int, min=1,expert=True,
                  doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
 
-    particle_buffer_initial_size = PVC(None, int, min=1, expert=True,
+    particle_buffer_initial_size = PVC(10_000_000, int, min=1, expert=True,
                    doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive'
                                     )
     NCDF_particle_chunk =  PVC(None, int, min=1,  expert=True,
@@ -111,10 +83,13 @@ class _DefaultSettings(_SharedStruct):
         # profiler = PVC('oceantracker', str, possible_values=available_profile_types,
         #                 doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules ' )
         # 'debug_level =               PVC(0, int,min=0, max=10, doc_str='Gives  diferent levels of debug, in development' )
-
+    restart_interval = PVC(None, float,
+                           doc_str='Save the particle tracking state at the interval to allow restarting run', units='sec',  expert=True)
+    restart = PVC(False, bool, doc_str='Restart from a saved state, requires prior run setting restart_interval',  expert=True)
+    min_dead_to_remove = PVC(100_000, int, doc_str='The minimumn number of dead particles before they are removed from buffer', expert=True)
 
 # blocks that make up parts of shared info
-class _ClassRoles(_SharedStruct):
+class _ClassRoles(definitions._AttribDict):
     release_groups =[]
     fields = []  # user fields calculated from other fields  on reading
     particle_properties =  [] # user added particle properties, eg DistanceTraveled
@@ -126,28 +101,28 @@ class _ClassRoles(_SharedStruct):
     event_loggers =  [] # writes events files ,eg PolygonEntryExit
     time_varying_info = [] # particle info,eg. time,or  tide at at tide gauge, core example is particle time
 
-class _CoreClassRoles(_SharedStruct):
+class _CoreClassRoles(definitions._AttribDict):
     reader = None
     interpolator = None
     #todo below beter as None
-    solver = {}
-    field_group_manager = {}
-    particle_group_manager = {}
-    tracks_writer = {}
-    dispersion = {}
-    tidal_stranding = {}
-    resuspension = {}
+    solver = None
+    field_group_manager = None
+    particle_group_manager = None
+    tracks_writer = None
+    dispersion = None
+    tidal_stranding = None
+    resuspension = None
     integrated_model = None # this is here as there can be only one at a time
 
 
-class _VerticalGridTypes(_SharedStruct):
+class _VerticalGridTypes(definitions._AttribDict):
     '''Particle status flags mapped to integer values'''
     Slayer  = 'Slayer'
     LSC = 'LSC'
     Sigma = 'Sigma'
     Zfixed = 'Zfixed'
 
-class _RunInfo(_SharedStruct):
+class _RunInfo(definitions._AttribDict):
     is3D_run = None
     backtracking =None
     vector_components = None
@@ -163,15 +138,15 @@ class _RunInfo(_SharedStruct):
     run_output_dir = None
     output_file_base = None
     time_of_nominal_first_occurrence = None
-    total_alive_particles = 0
     time_steps_completed = 0
     hindcast_start_time = None
     hindcast_end_time = None
     has_A_Z_profile = None
     has_bottom_stress = None
     particle_counts = {}
+    particles_in_buffer = 0
 
-class _UseFullInfo(_SharedStruct):
+class _UseFullInfo(definitions._AttribDict):
     # default reader classes used by auto-detection of file type
     large_float = 1.0E50
 
@@ -189,6 +164,8 @@ class _SharedInfoClass():
     core_class_roles = _CoreClassRoles()
     default_settings = _DefaultSettings()
     particle_status_flags = definitions._ParticleStatusFlags()
+    cell_search_status_flags= definitions._CellSearchStatusFlags()
+
     node_types =  definitions._NodeTypes()
     edge_types = definitions._EdgeTypes()
     vertical_grid_types = _VerticalGridTypes()
@@ -197,8 +174,9 @@ class _SharedInfoClass():
     msg_logger = MessageLogger()
     block_timers={}
     class_importer = class_importer_util.ClassImporter(msg_logger)
-    particles_in_buffer = 0
+
     info = _UseFullInfo
+    dim_names = definitions._DimensionNames()
 
     def __init__(self):
 
@@ -216,15 +194,15 @@ class _SharedInfoClass():
         self.msg_logger.reset()
 
         # empty out roles and core roles in case of rerunning and shared info import only happens once
-        for role in self.core_class_roles.as_dict().keys():
+        for role in self.core_class_roles.possible_values():
             setattr(self.core_class_roles, role, None)
-        for role in self. class_roles.as_dict().keys():
+        for role in self. class_roles.possible_values():
             setattr(self.class_roles, role, {})
 
 
     def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=False,
                   check_for_unknown_keys=True, add_required_classes_and_settings=True,  **kwargs):
-        #todo get rid in initialize
+        #todo get rid in initialize????
         ml = self.msg_logger
         crumbs += f'Adding class {class_role}>'
 

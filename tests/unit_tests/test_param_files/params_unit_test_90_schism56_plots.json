@@ -8,7 +8,7 @@
     "use_A_Z_profile": true,
     "screen_output_time_interval": 240,
     "reader": {
-        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\demos\\demo_hindcast\\schsim3D",
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
     },
     "release_groups": [
@@ -91,7 +91,8 @@
             "release_group_centered_grids": true,
             "update_interval": 7200,
             "particle_property_list": [
-                "a_pollutant"
+                "a_pollutant",
+                "water_depth"
             ],
             "z_min": -10.0,
             "start": "2017-01-01T02:30:00",

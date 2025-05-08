@@ -77,7 +77,7 @@ There are two types of “class_role”.
 When
 
 a) Only a single class is required, these have singular “class_role”,
-   eg.”reader” and “solver”.
+   eg.“reader” and “solver”.
 
 b) One or more classes can be added. These have plural “class_role” (eg.
    can add multiple “release_groups”). Users must give a unique name to
@@ -92,13 +92,13 @@ Extend the minimal example
 
 The below extends the minimal_example, it adds:
 
-- release at random locations within a polygon, at random water depths
-  (the default)
+-  release at random locations within a polygon, at random water depths
+   (the default)
 
-- a particle fall velocity
+-  a particle fall velocity
 
-- particles on the bottom are re-suspended if friction velocity exceeds
-  a critical value.
+-  particles on the bottom are re-suspended if friction velocity exceeds
+   a critical value.
 
 .. code:: ipython3
 
@@ -439,7 +439,8 @@ Basic plots of tracks
     anim = animate_particles(tracks, axis_lims=ax,title='Fall vel.+  re-sus., grey part. are on bottom when flows too weak to resuspend', 
                              show_dry_cells=True, show_grid=True, show=False) # use ipython to show video, rather than matplotlib plt.show()
     
-    # this is slow to build! 
+    # this line only used in note books, in python scripts use show = True above
+    # this is slow to build!  
     HTML(anim.to_html5_video())
 
 

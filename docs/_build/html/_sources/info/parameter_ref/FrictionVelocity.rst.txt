@@ -8,6 +8,13 @@ FrictionVelocity
 
 **full class_name :** oceantracker.fields.friction_velocity.FrictionVelocity
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseField> CustomFieldBase> FrictionVelocity
 
 

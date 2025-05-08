@@ -122,7 +122,7 @@ class RSTfileBuilder(object):
 
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
 
-                for k, v in item.asdict().items():
+                for k, v in item.items():
                     if k not in dont_include and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
                 self.add_lines()
@@ -233,7 +233,7 @@ def build_param_ref():
 
     # settings sub page
     sp = RSTfileBuilder('settings', 'Settings')
-    settings_dict = si.settings.as_dict()
+    settings_dict = si.settings.asdict()
     sp.add_heading('Top level settings/parameters', level=2)
     sp.add_params_from_dict(settings_dict,expert=False)
     sp.add_params_from_dict(settings_dict, expert=True)
@@ -276,16 +276,19 @@ if __name__ == "__main__":
     import shutil
     from glob import  glob
 
-    chdir(r'../tutorials_how_to')
 
-    dest = r'../docs/info/how_to'
-    for f in glob('*.ipynb'):
+
+    dest = path.join( definitions.ot_root_dir, 'docs/info/how_to')
+    work_dir = path.join( definitions.ot_root_dir, 'tutorials_how_to')
+    chdir(work_dir)
+    for f in glob( '*.ipynb'):
         subprocess.run('jupyter nbconvert '+ f + '  --to rst')
-        subprocess.run('jupyter nbconvert ' + f + '  --to script')
+        #subprocess.run('jupyter nbconvert ' + f + '  --to script')
+        print('converted', f)
         f_base = f.split('.')[0]
         print(f_base)
         f_base + '_files'
-        old_fn = f_base+'.rst'
+        old_fn = f_base +'.rst'
         new_fn = path.join(dest,old_fn)
         if path.isfile(new_fn):
             remove(new_fn)

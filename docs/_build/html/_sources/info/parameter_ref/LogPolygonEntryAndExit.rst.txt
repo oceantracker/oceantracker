@@ -8,6 +8,13 @@ LogPolygonEntryAndExit
 
 **full class_name :** oceantracker.event_loggers.log_polygon_entry_and_exit.LogPolygonEntryAndExit
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseEventLogger> LogPolygonEntryAndExit
 
 

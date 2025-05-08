@@ -8,6 +8,13 @@ _BaseReleaseGroup
 
 **full class_name :** oceantracker.release_groups._base_release_group._BaseReleaseGroup
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseReleaseGroup
 
 

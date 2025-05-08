@@ -1,6 +1,6 @@
-from oceantracker.main import run, OceanTracker
-from plot_oceantracker import plot_statistics, plot_tracks
-from read_oceantracker.python import load_output_files
+from oceantracker.main import OceanTracker
+from oceantracker.plot_output import plot_statistics, plot_tracks
+from oceantracker.read_output.python import load_output_files
 from os import path
 import argparse
 

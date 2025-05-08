@@ -50,7 +50,6 @@ def numpy_array_of_structures_from_dict(d):
     for name in S.dtype.names:
         S[name] = np.copy(d[name])
         d[name]= S[name]
-        #print('xx', name,  d[name].data, S[name] .data,np.may_share_memory(d[name],S[name]))
         pass
 
     return S

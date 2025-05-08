@@ -8,6 +8,13 @@ TerminalVelocity
 
 **full class_name :** oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _VelocityModiferBase> TerminalVelocity
 
 

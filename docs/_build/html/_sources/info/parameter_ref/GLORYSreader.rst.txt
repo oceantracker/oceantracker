@@ -33,16 +33,6 @@ Parameters:
 		- default: ``None``
 		- data_type: ``<class 'str'>``
 
-	* ``drop_variables``:  *<optional>*
-		Description: - Variables for xarray to ingore, eg. problimatic time variables that wont decode, ie not CFtime standard compliant
-
-		- a list containing type:  ``[]``
-		- default list : ``None``
-		- data_type: ``<class 'str'>``
-		- possible_types: ``[]``
-		- make_list_unique: ``False``
-		- min_len: ``0``
-
 	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
 		Description: Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern
 
@@ -82,11 +72,6 @@ Parameters:
 		- default: ``False``
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
-
-	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
-		- default: ``24``
-		- data_type: ``<class 'int'>``
-		- min: ``2``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

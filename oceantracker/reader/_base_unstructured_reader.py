@@ -9,22 +9,27 @@ class _BaseUnstructuredReader(_BaseReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
-            dimension_map=dict(node=PVC(None, str, doc_str='Nodes in grid')),
+            dimension_map=dict(node=PVC(None, str, doc_str='Nodes in grid', is_required=True)),
         )  # list of normal required dimensions
 
     # Below are basic variable read methods for any new reader
     # ---------------------------------------------------------
 
 
-
-
     def read_water_depth(self, grid):
         ds = self.dataset
         gm = self.params['grid_variable_map']
-        water_depth = ds.read_variable(gm['water_depth']).data
+        water_depth = ds.read_data(gm['water_depth'])
         return water_depth
 
+    def read_horizontal_grid_coords(self, grid):
+        # reader nodal locations
+        ds = self.dataset
+        gm = self.params['grid_variable_map']
 
+        x = ds.read_data(gm['x'])
+        y = ds.read_data(gm['y'])
+        grid['x']  = np.stack((x, y), axis=1).astype(np.float64)
 
     def read_file_var_as_4D_nodal_values(self, var_name, var_info, nt=None):
         # todo add name to params!!
@@ -38,47 +43,3 @@ class _BaseUnstructuredReader(_BaseReader):
         s[0] = d.coords[time_dim].size if time_dim in d.dims else 1
         return d.data.reshape(s)
 
-    def set_up_uniform_sigma(self, grid):
-        # read z fractions into grid , for later use in vertical regridding, and set up the uniform sigma to be used
-        ds = self.dataset
-        gm = self.params['grid_variable_map']
-
-        # read first zlevel time step
-        zlevel =ds.read_variable(gm['zlevel']).data[0,:,:]
-
-        # use node with thinest top/bot layers as template for all sigma levels
-        grid['zlevel_fractions'] = hydromodel_grid_transforms.convert_zlevels_to_fractions(zlevel, grid['bottom_cell_index'], si.settings.z0)
-
-        # get profile with the smallest bottom layer  tickness as basis for first sigma layer
-        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['zlevel_fractions'],grid['bottom_cell_index'])
-
-        # use layer fractions from this node to give layer fractions everywhere
-        # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
-        nz_bottom = grid['bottom_cell_index'][node_thinest_bot_layer]
-
-        # stretch sigma out to same number of depth cells,
-        # needed for LSC grid if node_min profile is not full number of cells
-        zf_model = grid['zlevel_fractions'][node_thinest_bot_layer, nz_bottom:]
-        nz = grid['zlevel_fractions'].shape[1]
-        nz_fractions = nz - nz_bottom
-        grid['sigma'] = np.interp(np.arange(nz) / nz, np.arange(nz_fractions) / nz_fractions, zf_model)
-
-        if False:
-            # debug plots sigma
-            from matplotlib import pyplot as plt
-            sel = np.arange(0, zlevel.shape[0], 100)
-            water_depth,junk = self.read_field_var(nc, self.params['field_variable_map']['water_depth'])
-            sel=sel[water_depth[sel]> 10]
-            index_frac = (np.arange(zlevel.shape[1])[np.newaxis,:] - grid['bottom_cell_index'][sel,np.newaxis]) / (zlevel.shape[1] - grid['bottom_cell_index'][sel,np.newaxis])
-            zlevel[zlevel < -1.0e4] = np.nan
-
-            #plt.plot(index_frac.T,zlevel[sel,:].T,'.')
-            #plt.show(block=True)
-            plt.plot(index_frac.T, grid['zlevel_fractions'][sel, :].T, lw=0.1)
-            plt.plot(index_frac.T,grid['zlevel_fractions'][sel, :].T, '.')
-
-            plt.show(block=True)
-
-            pass
-
-        return grid

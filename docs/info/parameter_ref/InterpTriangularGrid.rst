@@ -8,6 +8,13 @@ InterpTriangularGrid
 
 **full class_name :** oceantracker.interpolator.interp_triangle_native_grid.InterpTriangularGrid
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseInterp> InterpTriangularGrid
 
 

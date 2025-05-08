@@ -1,10 +1,8 @@
-from os import path
 from oceantracker.main import OceanTracker
-from plot_oceantracker import plot_statistics
+from oceantracker.plot_output import plot_statistics
 
-import numpy as np
 from tests.unit_tests import test_definitions
-from plot_oceantracker.plot_tracks import animate_particles
+
 
 # double gyre https://shaddenlab.berkeley.edu/uploads/LCS-tutorial/examples.html
 
@@ -74,7 +72,7 @@ def _run(args):
                 **model_settings)
     case_info_file_name= ot.run()
 
-    from read_oceantracker.python import load_output_files
+    from oceantracker.read_output.python import load_output_files
 
     LCS_data = load_output_files.load_LSC(case_info_file_name)
 

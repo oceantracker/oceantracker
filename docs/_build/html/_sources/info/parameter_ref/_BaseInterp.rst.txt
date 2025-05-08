@@ -8,6 +8,13 @@ _BaseInterp
 
 **full class_name :** oceantracker.interpolator._base_interp._BaseInterp
 
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
 **Inheritance:** > ParameterBaseClass> _BaseInterp
 
 

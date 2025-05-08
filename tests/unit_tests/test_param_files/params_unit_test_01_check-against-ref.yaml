@@ -1,12 +1,14 @@
 NCDF_time_chunk: 1
+NUMBA_cache_code: true
 debug: true
 output_file_base: unit_test_01_check-against-ref_00
+particle_buffer_initial_size: 500
 particle_properties:
 - class_name: oceantracker.particle_properties.age_decay.AgeDecay
   decay_time_scale: 7200.0
   initial_value: 1000
   name: a_pollutant
-- class_name: pWaterSpeed
+- class_name: WaterSpeed
 - class_name: AgeDecay
   name: test_decay
 - class_name: DistanceTravelled
@@ -21,6 +23,7 @@ particle_statistics:
   name: my_heatmap
   particle_property_list:
   - a_pollutant
+  - water_depth
   release_group_centered_grids: true
   start: '2017-01-01T02:30:00'
   update_interval: 7200
@@ -50,7 +53,7 @@ particle_statistics:
   z_min: -2
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
-  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\demos\demo_hindcast\schsim3D
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
 regrid_z_to_uniform_sigma_levels: true
 release_groups:
 - class_name: PointRelease
@@ -89,14 +92,18 @@ release_groups:
     - -2
   pulse_size: 5
   release_interval: 3600
-resuspension:
-  critical_friction_velocity: 0.01
 root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
 screen_output_time_interval: 1800
 time_step: 1800
 tracks_writer:
+  time_steps_per_per_file: 10
+  turn_on_write_particle_properties_list:
+  - nz_cell
+  - z_fraction_water_velocity
+  - z_fraction
   update_interval: 3600
   write_dry_cell_flag: false
-use_A_Z_profile: true
+use_A_Z_profile: false
 use_dispersion: false
 use_random_seed: true
+use_resuspension: false

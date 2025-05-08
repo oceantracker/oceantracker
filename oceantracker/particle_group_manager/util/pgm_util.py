@@ -25,26 +25,9 @@ def _status_counts_and_kill_old_particles(age, status, IDrelease_group,max_age_f
         # kill particles older than their release groups max age
         if is_active and abs(age[n]) > max_age_for_each_release_group[IDrelease_group[n]] :
             status[n] =  status_dead
+            is_active = False
 
         alive += is_active
         status_counts[get_thread_id(),status[n] - 128] += 1
 
     return alive
-
-@njitOT
-def _find_status_alive(status,out):
-    nfound = 0
-    for n in range(status.size):
-        if status[n] >= status_stationary:
-            out[nfound] = n
-            nfound += 1
-    return out[:nfound]
-
-@njitOT
-def _find_status_moving(status, out):
-    nfound = 0
-    for n in range(status.size):
-        if status[n] == status_moving:
-            out[nfound] = n
-            nfound += 1
-    return out[:nfound]

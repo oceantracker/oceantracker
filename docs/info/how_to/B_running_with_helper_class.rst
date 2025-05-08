@@ -77,7 +77,7 @@ There are two types of “class_role”.
 When
 
 a) Only a single class is required, these have singular “class_role”,
-   eg.”reader” and “solver”.
+   eg.“reader” and “solver”.
 
 b) One or more classes can be added. These have plural “class_role” (eg.
    can add multiple “release_groups”). Users must give a unique name to
@@ -92,13 +92,13 @@ Extend the minimal example
 
 The below extends the minimal_example, it adds:
 
-- release at random locations within a polygon, at random water depths
-  (the default)
+-  release at random locations within a polygon, at random water depths
+   (the default)
 
-- a particle fall velocity
+-  a particle fall velocity
 
-- particles on the bottom are re-suspended if friction velocity exceeds
-  a critical value.
+-  particles on the bottom are re-suspended if friction velocity exceeds
+   a critical value.
 
 .. code:: ipython3
 
@@ -117,7 +117,7 @@ The below extends the minimal_example, it adds:
     # add a compulsory reader class
     # no class_name setting is required 
     # as will detect that it needs a a schism reader class
-    ot.add_class('reader',input_dir= '../demos/demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
+    ot.add_class('reader',input_dir= './demo_hindcast/schsim3D',  # folder to search for hindcast files, sub-dirs will, by default, also be searched
                           file_mask=  'demo_hindcast_schisim3D*.nc')  # hindcast file mask
     
     # add some release groups
@@ -178,165 +178,96 @@ The below extends the minimal_example, it adds:
 
 .. parsed-literal::
 
-    helper ----------------------------------------------------------------------
-    helper Starting OceanTracker helper class
-    helper   - Starting run using helper class
-    Main      Python version: 3.11.9 | packaged by conda-forge | (main, Apr 19 2024, 18:27:10) [MSC v.1938 64 bit (AMD64)]
-    Main >>> Warning: Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4
-    Main ----------------------------------------------------------------------
-    Main OceanTracker starting main:
-    Main     Starting package set up
-    Main         -  Built OceanTracker package tree,	  0.573 sec
-    Main         -  Built OceanTracker sort name map,	  0.000 sec
-    Main     -  Done package set up to setup ClassImporter,	  0.574 sec
-    Main >>> Warning: Deleted contents of existing output dir
-    Main Output is in dir "f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1"
-    Main       hint: see for copies of screen output and user supplied parameters, plus all other output
-    Main     >>> Note: to help with debugging, parameters as given by user  are in "user_given_params.json"
-    Main ----------------------------------------------------------------------
-    Main  OceanTracker version 0.50.0010-2024-03-30 - preliminary setup
-    Main   - Found input dir "../demos/demo_hindcast/schsim3D"
-    Main   - found hydro-model files of type  "SCHISM"
-    Main Cataloging hindcast with 1 files in dir ../demos/demo_hindcast/schsim3D
-    Main     -  Cataloged hydro-model files/variables in time order,	  0.009 sec
-    Main >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
-    Main     -  sorted hyrdo-model files in time order,	  0.031 sec
     prelim:     Starting package set up
-    prelim:         -  Built OceanTracker package tree,	  0.009 sec
-    prelim:         -  Built OceanTracker sort name map,	  0.000 sec
-    prelim:     -  Done package set up to setup ClassImporter,	  0.009 sec
-    C000 ----------------------------------------------------------------------
-    C000 Starting case number   0,  param_test1 at 2024-09-04T08:40:49.310527
-    C000 ----------------------------------------------------------------------
-    C000     -  Scanned OceanTracker to build short name map to the full class_names,	  0.000 sec
-    C000 >>> Note: Hydro-model is "3D"  type "SCHISMreaderNCDF"
-    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast/schsim3D"
-    C000     Start: 2017-01-01T00:30:00.000000000  end:  2017-01-01T23:30:00.000000000, time steps  24 
-    C000     grid bounding box = [1589789.0 5479437.0] to [1603398.0 5501640.0]
-    C000   - Starting grid setup
-    C000     -  built node to triangles map,	  0.894 sec
-    C000     -  built triangle adjacency matrix,	  0.156 sec
-    C000     -  found boundary triangles,	  0.000 sec
-    C000     -  built domain and island outlines,	  0.963 sec
-    C000     -  calculated triangle areas,	  0.000 sec
-    C000   - Finished grid setup
-    C000     -  built barycentric-transform matrix,	  0.221 sec
-    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
-    C000     -  Setup field group manager,	  0.223 sec
-    C000     -  Added release groups and found run start and end times,	  0.003 sec
-    C000 >>> Note: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
-    C000     -  Done initial setup of all classes,	  0.548 sec
-    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
-    C000 ----------------------------------------------------------------------
-    C000   - Starting param_test1,  duration: 0 days 23 hrs 0 min 0 sec
-    C000   -  Reading 24 time steps,  for hindcast time steps 00:23,  into ring buffer offsets 000:023 
-    C000       -  read  24 time steps in  0.9 sec
-    C000 ----------------------------------------------------------------------
-    C000   - Starting time stepping: 2017-01-01T00:30:00 to 2017-01-01T23:30:00 , duration  0 days 23 hrs 0 min 0 sec 
-    C000   - opening tracks output to : param_test1_tracks_compact.nc
-    C000 00% step 0000:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel.:      58: Active:00058 M:00058 S:00000  B:00000 D:000 O:00 N:000 Buffer:0058   0% step time = 3733.7 ms
-    C000 04% step 0030:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel.:      78: Active:00078 M:00077 S:00000  B:00001 D:000 O:00 N:000 Buffer:0078   0% step time =  1.7 ms
-    C000 09% step 0060:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel.:     139: Active:00139 M:00129 S:00000  B:00010 D:000 O:00 N:000 Buffer:0139   0% step time =  1.9 ms
-    C000 13% step 0090:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel.:     159: Active:00159 M:00146 S:00010  B:00003 D:000 O:00 N:000 Buffer:0159   0% step time =  1.7 ms
-    C000 17% step 0120:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel.:     204: Active:00204 M:00183 S:00012  B:00009 D:000 O:00 N:000 Buffer:0204   0% step time =  1.8 ms
-    C000 22% step 0150:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel.:     224: Active:00224 M:00196 S:00018  B:00010 D:000 O:00 N:000 Buffer:0224   0% step time =  1.7 ms
-    C000 26% step 0180:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel.:     280: Active:00280 M:00247 S:00018  B:00015 D:000 O:00 N:000 Buffer:0280   0% step time =  1.9 ms
-    C000 30% step 0210:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel.:     300: Active:00300 M:00267 S:00012  B:00021 D:000 O:00 N:000 Buffer:0300   0% step time =  2.7 ms
-    C000 35% step 0240:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel.:     356: Active:00356 M:00327 S:00010  B:00019 D:000 O:00 N:000 Buffer:0356   0% step time =  2.0 ms
-    C000 39% step 0270:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel.:     376: Active:00376 M:00350 S:00000  B:00026 D:000 O:00 N:000 Buffer:0376   0% step time =  1.8 ms
-    C000 43% step 0300:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel.:     429: Active:00429 M:00391 S:00000  B:00038 D:000 O:00 N:000 Buffer:0429   0% step time =  1.9 ms
-    C000 48% step 0330:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel.:     449: Active:00449 M:00393 S:00000  B:00056 D:000 O:00 N:000 Buffer:0449   0% step time =  1.6 ms
-    C000 52% step 0360:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel.:     490: Active:00490 M:00425 S:00000  B:00065 D:000 O:00 N:000 Buffer:0490   0% step time =  1.8 ms
-    C000 57% step 0390:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel.:     510: Active:00510 M:00454 S:00004  B:00052 D:000 O:00 N:000 Buffer:0510   0% step time =  1.8 ms
-    C000 61% step 0420:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel.:     552: Active:00552 M:00479 S:00005  B:00068 D:000 O:00 N:000 Buffer:0552   0% step time =  2.0 ms
-    C000 65% step 0450:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel.:     572: Active:00572 M:00437 S:00064  B:00071 D:000 O:00 N:000 Buffer:0572   0% step time =  1.8 ms
-    C000 70% step 0480:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel.:     631: Active:00631 M:00465 S:00066  B:00100 D:000 O:00 N:000 Buffer:0631   0% step time =  2.0 ms
-    C000 74% step 0510:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel.:     651: Active:00651 M:00369 S:00070  B:00212 D:000 O:00 N:000 Buffer:0651   0% step time =  1.7 ms
-    C000 78% step 0540:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel.:     692: Active:00692 M:00423 S:00070  B:00199 D:000 O:00 N:000 Buffer:0692   0% step time =  1.9 ms
-    C000 83% step 0570:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel.:     712: Active:00712 M:00514 S:00070  B:00128 D:000 O:00 N:000 Buffer:0712   0% step time =  1.8 ms
-    C000 87% step 0600:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel.:     764: Active:00764 M:00576 S:00068  B:00120 D:000 O:00 N:000 Buffer:0764   0% step time =  2.1 ms
-    C000 91% step 0630:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel.:     784: Active:00784 M:00662 S:00005  B:00117 D:000 O:00 N:000 Buffer:0784   0% step time =  1.7 ms
-    C000 96% step 0660:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel.:     825: Active:00825 M:00692 S:00004  B:00129 D:000 O:00 N:000 Buffer:0825   0% step time =  1.9 ms
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.0 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.0 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.0 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.0 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.0 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.0 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.1 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.0 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.0 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.0 sec
-    C000   -  Reading  1 time steps,  for hindcast time steps 23:23,  into ring buffer offsets 023:023 
-    C000       -  read   1 time steps in  0.0 sec
-    C000 100% step 0690:H0023b23-00 Day +00 23:00 2017-01-01 23:30:00: Rel.:     825: Active:00825 M:00660 S:00000  B:00165 D:000 O:00 N:000 Buffer:0825   0% step time = 51.5 ms
-    C000 >>> Note: Hydro-model is "3D"  type "SCHISMreaderNCDF"
-    C000       hint: Files found dir and sub-dirs of "../demos/demo_hindcast/schsim3D"
-    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
-    C000 >>> Note: When using a terminal velocity, ensure time step is small enough that vertical displacement is a small fraction of the water depth, ie vertical Courant number < 1
-    C000 >>> Note: Hydro-model grid in metres, all cords should be in meters, e.g. release group locations, gridded_stats grid
-    C000 ----------------------------------------------------------------------
-    C000   - Finished case number   0,  param_test1 started: 2024-09-04 08:40:49.296859, ended: 2024-09-04 08:41:01.827638
-    C000       Computational time =0:00:12.530779
-    C000 --- End case 0 -------------------------------------------------------
-    End --- Summary ----------------------------------------------------------
-    End     >>> Note: Run summary with case file names in "*_runInfo.json"
-    End     >>> Note: to help with debugging, parameters as given by user  are in "user_given_params.json"
-    End >>> Note: No bottom_stress variable in in hydro-files, using near seabed velocity to calculate friction_velocity for resuspension
-    End     >>> Note: Run summary with case file names in "*_runInfo.json"
-    End >>> Warning: Oceantracker is not yet compatible with Python 3.11, as not all imported packages have been updated, eg netcdf4
-    End >>> Warning: Deleted contents of existing output dir
-    End ----------------------------------------------------------------------
-    End ----------------------------------------------------------------------
-    End OceanTracker summary:  elapsed time =0:00:13.168148
-    End       Cases -   0 errors,   0 warnings,   4 notes, check above
-    End       Main  -   0 errors,   2 warnings,   3 notes, check above
-    End   Output in f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
-    End ----------------------------------------------------------------------
+    helper: ----------------------------------------------------------------------
+    helper: Starting OceanTrackerhelper class,  version 0.50.0041-2025-03-10 
+    helper:      Python version: 3.11.9 | packaged by conda-forge | (main, Apr 19 2024, 18:27:10) [MSC v.1938 64 bit (AMD64)]
+    helper: >>> Warning: Oceantracker is compatible with Python 3.11,  however not all external imported packages have been updated to be compatible with 3.11
+    helper:     hint: Down grade to python 3.10 if unexplained issues in external packages
+    helper: ----------------------------------------------------------------------
+    helper: OceanTracker version 0.50.0041-2025-03-10  starting setup helper "main.py":
+    helper: >>> Warning: Deleted contents of existing output dir
+    helper: Output is in dir "f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1"
+    helper:     hint: see for copies of screen output and user supplied parameters, plus all other output
+    helper:     >>> Note: to help with debugging, parameters as given by user  are in "param_test1_raw_user_params.json"
+    helper: ----------------------------------------------------------------------
+    helper: Numba setup: applied settings, max threads = 32, physical cores = 32
+    helper:     hint:  cache code = False, fastmath= False
+    helper: ----------------------------------------------------------------------
+    helper:       - Built OceanTracker package tree,	  0.823 sec
+    helper:       - Built OceanTracker sort name map,	  0.000 sec
+    helper:   - Done package set up to setup ClassImporter,	  0.823 sec
+    setup: ----------------------------------------------------------------------
+    setup:  OceanTracker version 0.50.0041-2025-03-10 
+    setup:     Starting user param. runner: "param_test1" at  2025-03-10T13:08:41.071268
+    setup: ----------------------------------------------------------------------
+    setup:   - Start  field group manager and readers setup
+    setup:   - Found input dir "./demo_hindcast/schsim3D"
+    setup:   - Detected reader class_name = "oceantracker.reader.SCHISM_reader.SCHISMreader"
+    setup:     Hydro-model is "3D", type "SCHISMreader"
+    setup:         hint: Files found in dir and sub-dirs of "./demo_hindcast/schsim3D"
+    setup:         Geographic coords = "False" 
+    setup:         Hindcast start: 2017-01-01T00:30:00  end:  2017-01-01T23:30:00
+    setup:           time step = 0 days 1 hrs 0 min 0 sec, number of time steps= 24 
+    setup:           grid bounding box = [1589789.000 5479437.000] to [1603398.000 5501640.000]
+    setup:       - Starting grid setup
+    setup:       - built node to triangles map,	  0.997 sec
+    setup:       - built triangle adjacency matrix,	  0.160 sec
+    setup:       - found boundary triangles,	  0.000 sec
+    setup:       - built domain and island outlines,	  0.970 sec
+    setup:       - calculated triangle areas,	  0.000 sec
+    setup:       - Finished grid setup
+    setup:       - built barycentric-transform matrix,	  0.332 sec
+    setup:   - Finished field group manager and readers setup,	  3.609 sec
+    setup:   - Added release groups and found run start and end times,	  0.446 sec
+    setup:   - Done initial setup of all classes,	  1.017 sec
+    setup: ----------------------------------------------------------------------
+    setup:   - Starting" param_test1,  duration: 0 days 23 hrs 0 min 0 sec
+    setup:       From 2017-01-01T00:30:00 to  2017-01-01T23:30:00
+    setup:   -  Reading 24 time steps,  for hindcast time steps 00:23 into ring buffer offsets 000:023 
+    setup:       -  read  24 time steps in  1.6 sec, from ./demo_hindcast/schsim3D
+    setup: ----------------------------------------------------------------------
+    setup:   - Starting time stepping: 2017-01-01T00:30:00 to 2017-01-01T23:30:00 , duration  0 days 23 hrs 0 min 0 sec 
+    S:   - Opened tracks output and done written first time step in: "param_test1_tracks_compact_000.nc",	  0.016 sec
+    S: 0000: 00%:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel:40   : Active:40     Move:40     Bottom:   0 Strand:0      Dead:   0 Out:   0 Buffer: 5%  step time = 12830.8 ms
+    S: 0030: 04%:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel:60   : Active:60     Move:55     Bottom:   5 Strand:0      Dead:   0 Out:   0 Buffer: 8%  step time =  7.4 ms
+    S: 0060: 09%:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel:100  : Active:100    Move:94     Bottom:   6 Strand:0      Dead:   0 Out:   0 Buffer:13%  step time =  7.5 ms
+    S: 0090: 13%:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel:120  : Active:120    Move:105    Bottom:   5 Strand:10     Dead:   0 Out:   0 Buffer:16%  step time =  7.4 ms
+    S: 0120: 17%:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel:160  : Active:160    Move:143    Bottom:   7 Strand:10     Dead:   0 Out:   0 Buffer:22%  step time =  9.2 ms
+    S: 0150: 22%:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel:180  : Active:180    Move:153    Bottom:  17 Strand:10     Dead:   0 Out:   0 Buffer:25%  step time =  7.1 ms
+    S: 0180: 26%:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel:220  : Active:220    Move:201    Bottom:   9 Strand:10     Dead:   0 Out:   0 Buffer:30%  step time = 12.0 ms
+    S: 0210: 30%:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel:240  : Active:240    Move:218    Bottom:  12 Strand:10     Dead:   0 Out:   0 Buffer:33%  step time = 10.8 ms
+    S: 0240: 35%:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel:280  : Active:280    Move:257    Bottom:  13 Strand:10     Dead:   0 Out:   0 Buffer:38%  step time =  9.2 ms
+    S: 0270: 39%:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel:300  : Active:300    Move:277    Bottom:  23 Strand:0      Dead:   0 Out:   0 Buffer:41%  step time =  7.1 ms
+    S: 0300: 43%:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel:340  : Active:340    Move:298    Bottom:  42 Strand:0      Dead:   0 Out:   0 Buffer:47%  step time =  8.7 ms
+    S: 0330: 48%:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel:360  : Active:360    Move:315    Bottom:  45 Strand:0      Dead:   0 Out:   0 Buffer:50%  step time = 18.5 ms
+    S: 0360: 52%:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel:400  : Active:400    Move:348    Bottom:  52 Strand:0      Dead:   0 Out:   0 Buffer:55%  step time = 11.4 ms
+    S: 0390: 57%:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel:420  : Active:420    Move:375    Bottom:  34 Strand:11     Dead:   0 Out:   0 Buffer:58%  step time =  8.2 ms
+    S: 0420: 61%:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel:460  : Active:460    Move:395    Bottom:  53 Strand:12     Dead:   0 Out:   0 Buffer:63%  step time = 20.3 ms
+    S: 0450: 65%:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel:480  : Active:480    Move:397    Bottom:  44 Strand:39     Dead:   0 Out:   0 Buffer:66%  step time =  7.5 ms
+    S: 0480: 70%:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel:520  : Active:520    Move:386    Bottom:  88 Strand:46     Dead:   0 Out:   0 Buffer:72%  step time =  8.0 ms
+    S: 0510: 74%:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel:540  : Active:540    Move:322    Bottom: 156 Strand:62     Dead:   0 Out:   0 Buffer:75%  step time =  7.9 ms
+    S: 0540: 78%:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel:580  : Active:580    Move:394    Bottom: 124 Strand:62     Dead:   0 Out:   0 Buffer:80%  step time = 11.7 ms
+    S: 0570: 83%:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel:600  : Active:600    Move:418    Bottom: 127 Strand:55     Dead:   0 Out:   0 Buffer:83%  step time =  8.0 ms
+    S: 0600: 87%:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel:640  : Active:640    Move:483    Bottom: 109 Strand:48     Dead:   0 Out:   0 Buffer:88%  step time =  9.3 ms
+    S: 0630: 91%:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel:660  : Active:660    Move:530    Bottom: 118 Strand:12     Dead:   0 Out:   0 Buffer:91%  step time =  7.4 ms
+    S: 0660: 96%:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel:700  : Active:700    Move:533    Bottom: 156 Strand:11     Dead:   0 Out:   0 Buffer:97%  step time =  8.3 ms
+    S: 0690: 100%:H0023b23-00 Day +00 23:00 2017-01-01 23:30:00: Rel:700  : Active:700    Move:531    Bottom: 169 Strand:0      Dead:   0 Out:   0 Buffer:97%  step time = 11.8 ms
+    end: ----------------------------------------------------------------------
+    end: >>> Warning: Oceantracker is compatible with Python 3.11,  however not all external imported packages have been updated to be compatible with 3.11
+    end:     hint: Down grade to python 3.10 if unexplained issues in external packages
+    end: 
+    end: >>> Warning: Deleted contents of existing output dir
+    end: 
+    end: ----------------------------------------------------------------------
+    end:       Error counts -   0 errors,   2 warnings,   1 notes, check above
+    end: 
+    end:   - Finished "param_test1" started: 21651.101759, ended: 2025-03-10 13:09:13.869712
+    end:       Computational time =0:00:33.852219
+    end:   Output in f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1
+    end: 
+    end: --- Finished Oceantracker run ----------------------------------------
+    end: 
     case file name= f:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\output\param_test1\param_test1_caseInfo.json
     
 
@@ -439,7 +370,8 @@ Basic plots of tracks
     anim = animate_particles(tracks, axis_lims=ax,title='Fall vel.+  re-sus., grey part. are on bottom when flows too weak to resuspend', 
                              show_dry_cells=True, show_grid=True, show=False) # use ipython to show video, rather than matplotlib plt.show()
     
-    # this is slow to build! 
+    # this line only used in note books, in python scripts use show = True above
+    # this is slow to build!  
     HTML(anim.to_html5_video())
 
 

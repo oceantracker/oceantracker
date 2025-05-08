@@ -88,8 +88,6 @@ class GLORYSreader(_BaseStructuredReader):
 
         grid['x'] =  np.stack((grid['lon'].ravel(),grid['lat'].ravel()),  axis=1)
 
-        return grid
-
 
     def build_hori_grid(self, grid):
 
@@ -102,19 +100,20 @@ class GLORYSreader(_BaseStructuredReader):
         else:
             pass
 
+        super().build_hori_grid(grid)
 
-        grid = super().build_hori_grid(grid)
-        return grid
 
-    def build_vertical_grid(self, grid):
+    def build_vertical_grid(self):
         # add time invariant vertical grid variables needed for transformations
 
         ds = self.dataset
+        grid = self.grid
         gm = self.params['grid_variable_map']
         grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)
         grid['z'] = -grid['z'][::-1]  # z is positive down so take -ve
-        grid = super().build_vertical_grid(grid)
-        return grid
+
+        super().build_vertical_grid()
+
 
     def read_bottom_cell_index(self, grid):
         # bottom cell is in data files
