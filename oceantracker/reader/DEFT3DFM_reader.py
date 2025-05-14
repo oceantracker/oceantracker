@@ -43,7 +43,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                         'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
                         'water_temperature': PVC('mesh2d_tem1', str, doc_str='maps standard internal field name to file variable name'),
                         'salinity': PVC('mesh2d_sa1', str, doc_str='maps standard internal field name to file variable name'),
-                        #'wind_stress': PLC([], str, doc_str='maps standard internal field name to file variable name'),
+                        'wind_stress': PLC(None, str, doc_str='maps standard internal field name to file variable name'),
                         'bottom_stress': PLC(['mesh2d_tausx', 'mesh2d_tausy'], str, doc_str='maps standard internal field name to file variable name'),
                         'A_Z_profile': PVC(None, str, doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
                         'water_velocity_depth_averaged': PLC(['mesh2d_ucxa','mesh2d_ucya'], str, fixed_len=2,
