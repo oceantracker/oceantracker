@@ -672,7 +672,7 @@ class _BaseReader(ParameterBaseClass):
 
     def write_grid(self, gridID):
         # write a netcdf of the grid from first hindcast file
-        #todo
+
         grid = self.grid
         info = self.info
         if 'grid' not in si.output_files: si.output_files['grid'] = []
@@ -684,6 +684,10 @@ class _BaseReader(ParameterBaseClass):
         nc.write_global_attribute('index_note', ' all indices are zero based')
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
         nc.write_global_attribute('geographic_coords_used', 1 if self.info['geographic_coords'] else 0)
+
+        # ad node types to grid file attributes
+        for nt, val in self.si.node_types.asdict().items():
+            nc.write_global_attribute(f'node_typeID_{nt}', val)
 
 
         nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
