@@ -37,21 +37,22 @@ if __name__ == "__main__":
                  pulse_size=10,
                  release_interval=3600)
 
-    if True:
+    if False:
         case_info_file= ot.run()
     else:
         # plot only
-        case_info_file = r'D:\OceanTrackerOutput\sea_spurge01\f'
+        case_info_file = r'D:\OceanTrackerOutput\sea_spurge_test01\sea_spurge_test01_caseInfo.json'
 
-    if case_info_file is not None:
+    if True:
         from oceantracker.plot_output import plot_tracks
         from oceantracker.read_output.python import load_output_files
 
-        tracks = load_output_files.load_track_data(case_info_file,
-                                                   gridID=0) # plot inner gridID=1, not outer gridID = 0
-        anim = plot_tracks.animate_particles(tracks, colour_using_data=tracks['hydro_model_gridID'],
+        tracks = load_output_files.load_track_data(case_info_file,  gridID=0, fraction_to_read=0.1) # plot inner gridID=1, not outer gridID = 0
+        anim = plot_tracks.animate_particles(tracks,
+                                             colour_using_data=tracks['hydro_model_gridID'],
                                              back_ground_depth=False, vmin=0, vmax=1,
-                                             show_grid=True, show_dry_cells=True, axis_labels=True,
+                                             #min_status=tracks['particle_status_flags']['outside_open_boundary'],
+                                             show_grid=True, show_dry_cells=False, axis_labels=True,
                                              )
 
 

@@ -129,19 +129,18 @@ class Solver(ParameterBaseClass):
                 i = si.core_class_roles.dispersion
                 i.timed_update(n_time_step, time_sec, is_moving)
 
-
-            #  Main integration step
-            #--------------------------------------
-            self.do_time_step(time_sec, is_moving)
-            #--------------------------------------
-
-
             # print progress to screen
             t_step = perf_counter() - t0_step
             if n_time_step % nt_write_time_step_to_screen == 0:
                 self._screen_output(ri.time_steps_completed, time_sec, t0_model, t_step)
 
             pgm.remove_dead_particles_from_memory()
+
+
+            #  Main integration step
+            #--------------------------------------
+            self.do_time_step(time_sec, is_moving)
+            #--------------------------------------
 
             t2 = time_sec + si.settings.time_step * ri.model_direction
 
