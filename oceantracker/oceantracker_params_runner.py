@@ -109,7 +109,7 @@ class OceanTrackerParamsRunner(object):
                 hint='Look for first error above  or in  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
             ml.msg('')
 
-        ml.hori_line(f'Finished: output in {si.run_info.run_output_dir}')
+        ml.hori_line(f'Finished: output in "{si.run_info.run_output_dir}"')
 
 
         if case_info_file is None:
