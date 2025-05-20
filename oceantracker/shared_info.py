@@ -51,7 +51,7 @@ class _DefaultSettings(definitions._AttribDict):
     multiprocessing_case_start_delay = PVC(0., int,  obsolete=True , doc_str='No longer needed in threaded version of code, remove this parameter from settings' )
     write_tracks = PVC(True, bool, doc_str='Flag if "True" will write particle tracks to disk. For large runs and statistics done on the fly, is normally set to False to reduce output volumes' )
     user_note = PVC('No user note', str, doc_str='Any run note to store in case info file' )
-    z0 = PVC(0.005, float, units='m', doc_str='Bottom roughness, used for tolerance and log layer calcs. ', min=0.0001 )  # default bottom roughness
+    z0 = PVC(0.0003, float, units='m', doc_str='Bottom roughness, used for tolerance and log layer calcs. default is flat sand/mud/gravel, https://eprints.hrwallingford.com/348/1/SR360.pdf', min=0.0001 )  # default bottom roughness
     water_density = PVC(1025., float, units='kg/m^3', doc_str='Water density , default is seawater, an example of use is in calculating friction velocity from bottom stress, ', min=900. )
     use_open_boundary = PVC(False, bool, doc_str='Allow particles to leave open boundary, only works if open boundary nodes  can be read or inferred from hydro-model, current schism using hgrid file, and inferred for structed grids like ROMS ' )
     block_dry_cells = PVC(True, bool, doc_str='Block particles moving from wet to dry cells, ie. treat dry cells as if they are part of the lateral boundary' )

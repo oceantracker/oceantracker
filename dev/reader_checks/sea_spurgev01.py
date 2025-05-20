@@ -51,7 +51,7 @@ if __name__ == "__main__":
         anim = plot_tracks.animate_particles(tracks,
                                              colour_using_data=tracks['hydro_model_gridID'],
                                              back_ground_depth=False, vmin=0, vmax=1,
-                                             #min_status=tracks['particle_status_flags']['outside_open_boundary'],
+                                             min_status=tracks['particle_status_flags']['outside_open_boundary'],
                                              show_grid=True, show_dry_cells=False, axis_labels=True,
                                              )
 
