@@ -33,6 +33,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                  possible_values=si.particle_status_flags.possible_values()),
                 z_min =  PVC(None, float, doc_str=' Count only those particles with vertical position >=  to this value', units='meters above mean water level, so is < 0 at depth'),
                 z_max =  PVC( None, float,  doc_str='Count only those particles with vertical position <= to this value', units='meters above mean water level, so is < 0 at depth'),
+                near_seabed=PVC(None, float, doc_str='Count only those particles within this distance of bottom', units='meters above seabed', min = 0.001),
+                near_seasurface=PVC(None, float, doc_str='Count only those particles within this distance of tidal sea surface', units='meters below sea surface', min=0.001),
+
                 water_depth_min =  PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
                 water_depth_max =  PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
                 particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
@@ -64,17 +67,34 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         #set particle depth and water depth limits for counting particles
 
-        f = 1.0E32
-        info['z_range'] = np.asarray([-f, f])
-        if params['z_min'] is not None:  info['z_range'][0] = params['z_min']
-        if params['z_max'] is not None:  info['z_range'][1] = params['z_max']
-        if info['z_range'][0] > info['z_range'][1]:
-            ml.msg(f'Require zmin > zmax, (zmin,zmax) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', error=True, caller=self,
-                              hint ='z=0 is mean water level, so z is mostly < 0')
 
+        f = 1.0E32
+        info['depth_sel_mode'] = 0
+        if params['z_min'] is not None or params['z_max'] is not None :
+            # count based on give z values
+            info['depth_sel_mode'] = 1
+            info['z_range'] = np.asarray([-f, f])
+            if params['z_min'] is not None:  info['z_range'][0] = params['z_min']
+            if params['z_max'] is not None:  info['z_range'][1] = params['z_max']
+            if info['z_range'][0] > info['z_range'][1]:
+                ml.msg(f'Require zmin > zmax, (z_min,z_max) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', error=True, caller=self,
+                                  hint ='z=0 is mean water level, so z is mostly < 0')
+
+            if params['near_seabed'] is not None or params['near_seasurface'] is not None:
+                ml.msg(f'Have set  one of params  "near_seabed" or  "near_seasurface" and also one of (z_min,z_max)', fatal_error=True, caller=self,
+                       hint='Cannot set both depth selections , add different particle_statistics  class for each type of depth selection')
+
+        elif params['near_seabed'] is not None:
+            info['depth_sel_mode'] = 2
+        elif params['near_seasurface'] is not None:
+            info['depth_sel_mode'] = 3
+            pass
+
+        # set water depth range
         info['water_depth_range'] = np.asarray([-f, f])
         if params['water_depth_min'] is not None:  info['water_depth_range'][0] = params['water_depth_min']
         if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']
+
         if info['water_depth_range'][0]> info['water_depth_range'][1]:
             ml.msg(f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
                      caller=self,error=True)
@@ -175,6 +195,24 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def select_particles_to_count(self, sel): # dummy method
         return sel
 
+    def sel_depth_range(self,sel):
+        # find subset of sel that meet depth range requirements
+        part_prop = si.class_roles.particle_properties
+        info = self.info
+        params = self.params
+
+        match info['depth_sel_mode']:
+            case 0:
+                sel_subset  = sel # no depth selection
+            case 1:
+                # first select those to count based on status and z location
+                sel_subset = self._sel_z(part_prop['x'].data, info['z_range'],  sel)
+            case 2: # near sea bed
+                sel_subset= self._sel_near_seabed(part_prop['x'].data, part_prop['water_depth'].data, params['near_seabed'], sel)
+            case 3:  # near sea surface
+                sel_subset = self._sel_near_seasurface(part_prop['x'].data, part_prop['tide'].data, params['near_seasurface'], sel)
+
+        return sel_subset
 
     def update(self,n_time_step, time_sec):
         '''do particle counts'''
@@ -186,12 +224,14 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         num_in_buffer = si.run_info.particles_in_buffer
 
         # first select those to count based on status and z location
-        sel = self._sel_status_waterdepth_and_z(part_prop['status'].data,
+        sel = self._sel_status_waterdepth(part_prop['status'].data,
                                                 part_prop['x'].data, part_prop['water_depth'].data.ravel(),
-                                                self.statuses_to_count_map, info['z_range'], info['water_depth_range'],
+                                                self.statuses_to_count_map, info['water_depth_range'],
                                                 num_in_buffer, self.get_partID_buffer('B1'))
 
-        # any overloaded sub-selection of particles given in child classes
+        if si.run_info.is3D_run:
+            sel = self.sel_depth_range(sel)
+
         sel = self.select_particles_to_count(sel)
 
         #update prop list data, as buffer may have expanded
@@ -208,24 +248,49 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.stop_update_timer()
 
 
+
     @staticmethod
     @njitOT
-    def _sel_status_waterdepth_and_z(status, x, water_depth, statuses_to_count_map, z_range, water_depth_range, num_in_buffer, out):
+    def _sel_status_waterdepth(status, x, water_depth, statuses_to_count_map,  water_depth_range, num_in_buffer, out):
         n_found = 0
-        if x.shape[1] == 3:
-            # 3D selection
-            for n in range(num_in_buffer):
-                if statuses_to_count_map[status[n]-status_unknown] and z_range[0] <= x[n, 2] <= z_range[1] and water_depth_range[0] <= water_depth[n] <= water_depth_range[1]:
-                    out[n_found] = n
-                    n_found += 1
-        else:
-            # 2D selection
-            for n in range(num_in_buffer):
-                if statuses_to_count_map[status[n]-status_unknown] and water_depth_range[0] <= water_depth[n] <= water_depth_range[1]:
-                    out[n_found] = n
-                    n_found += 1
+        for n in range(num_in_buffer):
+            if statuses_to_count_map[status[n]-status_unknown] and water_depth_range[0] <= water_depth[n] <= water_depth_range[1]:
+                out[n_found] = n
+                n_found += 1
 
         return out[:n_found]
+
+    @staticmethod
+    @njitOT
+    def _sel_z(x, z_range,  sel):
+        # put subset of those found back into start of sel array
+        n_found = 0
+        for n in sel:
+            if z_range[0] <= x[n, 2] <= z_range[1]:
+                sel[n_found] = n
+                n_found += 1
+        return sel[:n_found]
+    @staticmethod
+    @njitOT
+    def _sel_near_seabed(x,water_depth, dz, sel):
+        # put subset of those found back into start of sel array
+        n_found = 0
+        for n in sel:
+            if x[n, 2] <= -water_depth[n] + dz: # water depth is +ve
+                sel[n_found] = n
+                n_found += 1
+        return sel[:n_found]
+
+    @staticmethod
+    @njitOT
+    def _sel_near_seasurface(x, tide, dz, sel):
+        # put subset of those found back into start of sel array
+        n_found = 0
+        for n in sel:
+            if x[n, 2] >= tide[n] - dz:
+                sel[n_found] = n
+                n_found += 1
+        return sel[:n_found]
 
     def write_time_varying_stats(self, n_write, time):
         # write nth step in file
