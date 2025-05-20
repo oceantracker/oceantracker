@@ -13,7 +13,7 @@
 2. centalize polygon list creation and param checking 
 4. ensure error log is written on caught error
 1. polygon_list param spell checking 
-
+1. grid statrs areas in sq m for geographic coord, check ploygon areas in geographic ( add local grid function for these)
 
 ##  Internal Structure
 

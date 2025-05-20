@@ -51,9 +51,15 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         stats_grid = self.grid
         nc.write_a_new_variable('x', stats_grid['x'], ['release_groups_dim', 'x_dim'], description='Mid point of grid cell')
         nc.write_a_new_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'],  description='Mid point of grid cell')
+        if si.settings.use_geographic_coords:
+            #tod do area in meteres  in geogrpahic form
+            pass
+        else:
+            pass
 
         area = np.diff(stats_grid['y_bin_edges'][0,:]).reshape((-1,1))*np.diff(stats_grid['x_bin_edges'][0,:]).reshape((1,-1))
-        nc.write_a_new_variable('grid_cell_area', area, [ 'y_dim','x_dim'],  description='Horizontal area of each cell')
+
+        nc.write_a_new_variable('grid_cell_area', area, [ 'y_dim','x_dim'],  description='Horizontal area of each cell', units='m^2')
 
     def set_up_spatial_bins(self,nc):
 
