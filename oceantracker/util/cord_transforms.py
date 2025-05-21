@@ -90,21 +90,26 @@ def fix_any_spanning180east(lon_lat,single_cord=False, msg_logger=None, caller=N
     if single_cord: lon_lat = lon_lat[0]
     return lon_lat
 
-def get_degrees_per_meter(lon_lat, single_cord=False):
+def get_degrees_per_meter(lat, as_vector=False):
+    # lon lat in deg
     dx = 1. / 111000.  # deg per m of latitude, rows of lon_lat are multiple locations
-    if single_cord: lon_lat = lon_lat[np.newaxis, :]
-    out = np.full_like(lon_lat,0., dtype =lon_lat.dtype)
 
-    out[:, 0] = dx * np.cos(np.deg2rad(lon_lat[:, 1]))
-    out[:, 1] = dx
-    if single_cord: out = out[0]
-    return  out
+    dpm_lon = dx * np.cos(np.deg2rad(lat))
+    dpm_lat = dx *np.ones(lat.shape)
 
-def rectangle_area_meters_sq(xll,yll, xur, yur, is_geographic=False):
-    # calculate area of "small" retangle in meters squred, for bth m's and geographic coorindates
-    # given coords of lower left and upper right
-    if is_geographic:
-        dxy = get_degrees_per_meter(np.asarray([xll,.5*(yll+yur)]), single_cord=True)
-        return ((xur-xll)/dxy[0])*((yur-yll)/dxy[1])
+    if as_vector:
+        return np.stack((dpm_lon,dpm_lat),axis = lat.ndim)  # merge on last dim of lat
     else:
-        return (xur - xll)*(yur-yll)
+        return dpm_lon,dpm_lat
+
+def local_grid_deg_to_meters(lon,lat, lon_origin, lat_origin, as_vector=False):
+    # get coords in meters from small local grid with given origin(s)
+
+    d_per_m_lon,d_per_m_lat= get_degrees_per_meter(lat)
+
+    x = (lon-lon_origin)/d_per_m_lon
+    y = (lat - lat_origin) / d_per_m_lat
+    if as_vector:
+        return np.stack((x, y), axis=x.ndim)  # merge on last dim of lat
+    else:
+        return x, y

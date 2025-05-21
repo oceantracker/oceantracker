@@ -84,13 +84,11 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 ml.msg(f'Have set  one of params  "near_seabed" or  "near_seasurface" and also one of (z_min,z_max)', fatal_error=True, caller=self,
                        hint='Cannot set both depth selections , add different particle_statistics  class for each type of depth selection')
 
-        elif params['near_seabed'] is not None:
-            info['depth_sel_mode'] = 2
-        elif params['near_seasurface'] is not None:
-            info['depth_sel_mode'] = 3
-            pass
+        elif params['near_seabed'] is not None: info['depth_sel_mode'] = 2
 
-        # set water depth range
+        elif params['near_seasurface'] is not None:  info['depth_sel_mode'] = 3
+
+        # set water depth range (not using tide)
         info['water_depth_range'] = np.asarray([-f, f])
         if params['water_depth_min'] is not None:  info['water_depth_range'][0] = params['water_depth_min']
         if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']

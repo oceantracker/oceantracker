@@ -86,7 +86,7 @@ class _DefaultSettings(definitions._AttribDict):
     restart_interval = PVC(None, float,
                            doc_str='Save the particle tracking state at the interval to allow restarting run', units='sec',  expert=True)
     restart = PVC(False, bool, doc_str='Restart from a saved state, requires prior run setting restart_interval',  expert=True)
-    min_dead_to_remove = PVC(100_000, int, doc_str='The minimumn number of dead particles before they are removed from buffer', expert=True)
+    min_dead_to_remove = PVC(100_000, int, doc_str='The minimum number of dead particles before they are removed from buffer', expert=True)
 
 # blocks that make up parts of shared info
 class _ClassRoles(definitions._AttribDict):

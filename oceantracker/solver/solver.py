@@ -134,13 +134,13 @@ class Solver(ParameterBaseClass):
             if n_time_step % nt_write_time_step_to_screen == 0:
                 self._screen_output(ri.time_steps_completed, time_sec, t0_model, t_step)
 
-            pgm.remove_dead_particles_from_memory()
-
 
             #  Main integration step
             #--------------------------------------
             self.do_time_step(time_sec, is_moving)
             #--------------------------------------
+
+            pgm.remove_dead_particles_from_memory()  # must be done after last use of moving, which refers to an single ID buffer which are not culled
 
             t2 = time_sec + si.settings.time_step * ri.model_direction
 
