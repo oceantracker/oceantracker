@@ -191,7 +191,7 @@ class _BaseReader(ParameterBaseClass):
             # set up conversion of meters to degreees
             i = self._add_a_reader_field('degrees_per_meter', dict(time_varying=False, is3D=False, is_vector=True,
                               write_interp_particle_prop_to_tracks_file=False),  dummy=True)
-            i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'])
+            i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'][:,1],as_vector=True)
             si.msg_logger.msg('Converted hindcast to geographic coords',note=True)
             pass
 
