@@ -200,7 +200,9 @@ class DevNestedFields(ParameterBaseClass):
 
         # update outer grid
         fgm_outer_grid = self.fgm_hydro_grids[0]
+
         on_outer_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', 0, out=self.get_partID_buffer('fgmID0'))
+
 
         fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid)
 
@@ -209,6 +211,7 @@ class DevNestedFields(ParameterBaseClass):
 
             # find any on outer grid that are now inside this inner grid
             # todo faster- prebuild a index to show which cells overlap with an  inner and only check if these are inside the inner grid
+
 
             is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid, axis=0), include_dry_cells=True)
 

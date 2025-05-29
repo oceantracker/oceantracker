@@ -189,7 +189,7 @@ def make_domain_mask(xy):
 def calcuate_triangle_areas(xy, tri, geographic_coords=False):
     if geographic_coords:
         # get triangle coords relative to first vertex in meters
-        dxy = cord_transforms.get_degrees_per_meter(xy)
+        dxy = cord_transforms.get_degrees_per_meter(xy[:,1],as_vector=True)
         xy = xy/dxy
         x = xy[tri, 0]
         y = xy[tri, 1]

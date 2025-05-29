@@ -265,17 +265,20 @@ def _catalog_fields(reader, crumbs=None):
                     hint=f'Add a map for this variable readers "field_variable_map"  param or check spelling loaded variable name matches a file variable, current map is {str(mapped_fields)}',
                     fatal_error=True)
 
-        # decompose variable lis
+        # decompose variable list
+
         var_list = mapped_fields[name]
+        if var_list is None: continue # no default
         if type(var_list) != list: var_list = [var_list]  # ensure it is a list
+        if len(var_list) == 0: continue
 
         # use first variable to get basic info
         v1 = var_list[0]
+
         if v1 not in file_vars: continue
 
         field_params = dict(time_varying=file_vars[v1]['time_varying'],
-                            is3D=any(x in info['all_z_dims'] for x in file_vars[v1]['dims']),
-                            )
+                            is3D=any(x in info['all_z_dims'] for x in file_vars[v1]['dims']),  )
         field_params['zlevels'] = info['num_z_levels'] if field_params['is3D'] else 1
 
         # work out if variable is a vector field

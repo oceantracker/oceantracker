@@ -68,8 +68,11 @@ def _prop_compared_to_value(part_prop_data, comparison_func, value, out):
 def prop_subset_compared_to_value(active, part_prop, test, value, out):
     # return a view of  indices where  part_prop (test) value, is true for active particles
     if out is None: out = np.full((part_prop.shape[0],), -127, np.int32)
-
-    return _prop_subset_compared_to_value(active, part_prop, _get_comparison(test), value, out)
+    try:
+        return _prop_subset_compared_to_value(active, part_prop, _get_comparison(test), value, out)
+    except Exception as e:
+        print(e)
+        pass
     #return _prop_subset_compared_to_value_not_used(active, part_prop, _get_comparison(test),
     #                                      value,_shared_comparison_IndexBuffer, _number_found_in_each_thread,out)
 
@@ -83,6 +86,7 @@ def _prop_subset_compared_to_value(active, part_prop,comparison_func,value, out)
             out[nfound] = n
             nfound += 1
     return out[:nfound]
+
 
 @njitOT
 def random_selection(active, probability_of_selection, out):

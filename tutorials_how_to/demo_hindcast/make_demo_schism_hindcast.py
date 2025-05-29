@@ -89,7 +89,7 @@ if __name__ == '__main__':
     out_dir = path.dirname(__file__)
     nz0=22
     nt_step=2
-    n_files=4
+    n_files=0
 
     out_file_2D =[]
     # find sub domain
@@ -167,6 +167,7 @@ if __name__ == '__main__':
         plt.text(x[node-1],y[node-1],str(int(node)))
         pass
 
+    # make hgrid file
 
     plt.show()
 

@@ -181,8 +181,9 @@ class FieldGroupManager(ParameterBaseClass):
     def _fix_those_outside_open_boundary(self, sel_outside):
         # deal with open boundary if none
         if not self.info['use_open_boundary']:
-            # outside and no open boundary so move back
-            self._move_back(sel_outside)
+            self._move_back(sel_outside) # outside and no open boundary so move back
+        else:
+            si.class_roles['particle_properties']['status'].set_values( si.particle_status_flags.outside_open_boundary, sel_outside)
 
     def _move_back(self, sel):
         # do move backs for blocked and bad
@@ -191,7 +192,7 @@ class FieldGroupManager(ParameterBaseClass):
             part_prop['x'].copy('x_last_good', sel)  # move back location
             part_prop['n_cell'].copy('n_cell_last_good', sel)  # move back the cell
             part_prop['bc_coords'].copy('bc_coords_last_good', sel)  # move back the cell
-            part_prop['status'].copy('status_last_good', sel)  # set status to moving
+            part_prop['status'].copy('status_last_good', sel)  # set status to last good status
 
         # debug_util.plot_walk_step(xq, si.core__class_roles.reader.grid, part_prop)
 
