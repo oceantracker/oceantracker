@@ -12,9 +12,9 @@ def default_params():
         'debug' : True,
         'time_step': 1800,
         'dev_debug_plots' :False,
-        'use_A_Z_profile': False,
         'max_run_duration': 5. * 24 * 3600,
         'write_tracks': True,
+         'use_A_Z_profile': False,
         'output_file_base': None,
         'root_output_dir': None,
         'regrid_z_to_uniform_sigma_levels': True,
@@ -30,7 +30,7 @@ def default_params():
                    # 'field_map': {'ECO_no3': 'ECO_no3'}, # fields to track at particle locations
                    },
         'nested_readers': [],
-        'use_A_Z_profile': False,
+
         'resuspension': {'critical_friction_velocity': 0.00}
         }
 
@@ -44,8 +44,8 @@ def get_case(n):
 
     nested_readers=[]
     hgrid_file=None
-    time_step=3600.
-    terminal_vertical_vel= 0.
+    time_step=600.
+    terminal_vertical_vel= .0
     pulse_size = 10
     use_open_boundary = False
     reader= None
@@ -165,7 +165,7 @@ def get_case(n):
             output_file_base = 'test_Hauarki'
             file_mask = 'schout*.nc'
 
-            x0 = [[-36.81612195216445, 174.82731398519584],
+            x0 = [[-40.929089091498696, 173.88020093492983],
                   [-37.070731274878, 175.39302783837365],
                   [-36.4051733326401, 174.7771263023033],
                   [-36.85502113978176, 174.6807647189683]
@@ -173,6 +173,18 @@ def get_case(n):
             x0= cord_transforms.WGS84_to_UTM(np.flip(np.asarray(x0),axis=1)).tolist()
             ax = None # Auck
             title = 'test_ Hauarki'
+
+        case 153:
+            root_input_dir = r'Z:\Hindcasts\UpperSouthIsland\2024_pelorus_schism\downloaded\2017\01'
+            output_file_base = 'test_pelorus'
+            file_mask = 'Pel*.nc'
+
+            x0 = [[-40.929089091498696, 173.88020093492983],
+                  [-41.199976461262594, 173.9678480817815],
+                  ]
+            x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
+            ax = None  # Auck
+            title = 'test_pelorus'
 
         case 200:
             # FVCOM
@@ -482,7 +494,7 @@ if __name__ == '__main__':
         params.update( root_output_dir = root_output_dir,
                     regrid_z_to_uniform_sigma_levels = args.uniform,
                     dev_debug_plots = args.debug_plots,
-                    use_A_Z_profile = True,
+                    use_A_Z_profile = False,
                     debug=True,
                        display_grid_at_start=args.gridplot,
                     #NUMBA_cache_code=True

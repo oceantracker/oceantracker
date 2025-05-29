@@ -20,7 +20,7 @@ class ClassImporter():
         t0 = perf_counter()
         # build class tree of al package parameter classes, with short, long name maps
         self.class_tree = self.scan_package_for_classes(crumbs='Package set up', caller=self)
-        self.short_name_class_map, self.full_name_class_map =  self.build_short_and_full_name_maps(self.class_tree)
+        self.short_name_class_map, self.full_name_class_map,self.short_name_list =  self.build_short_and_full_name_maps(self.class_tree)
         ml = self.msg_logger
         ml.exit_if_prior_errors(f'"ClassImporter" setup errors', caller=caller)
         ml.progress_marker(f'Done package set up to setup ClassImporter', start_time=t0)
@@ -137,6 +137,11 @@ class ClassImporter():
         if short_name in self.short_name_class_map:
             return self.short_name_class_map[short_name]['class_name']
 
+        if '.' not in class_name:
+            ml.spell_check(f'Class name "{class_name}" is not a recognised short class_name',
+                        class_name, self.short_name_list,
+                        hint='A miss-spelt short class_name? if a user written class, class_name must be of as "module.class" import string, ie have at least one "."',
+                        )
         # use give class name
         return params['class_name']
 
@@ -161,7 +166,7 @@ class ClassImporter():
                 self.msg_logger.spell_check(f'Cannot find class "{c}" within module/file "{mod}"',
                                             f'{mod}.{c}', list(self.full_name_class_map.keys()),
                                             hint='A miss-spelt short class_name? or missing custom class?',
-                                            error=True)
+                                            )
                 raise(e)
     def _import_module_from_string(self, mod, c = None):
 
@@ -169,7 +174,7 @@ class ClassImporter():
         mod_spec= importlib.util.find_spec(mod)
         if mod_spec is None:
             self.msg_logger.spell_check(f'Cannot find module "{mod}"',
-                                    f'{mod}.{c}', self.module_list, error=True)
+                                    f'{mod}.{c}', self.module_list)
 
         try:
             m = importlib.import_module(mod)
@@ -184,11 +189,13 @@ class ClassImporter():
         # build short and full name maps to oceantracker's parameter classes
         ml = self.msg_logger
         t0= perf_counter()
+        short_name_list = []
         short_name_class_map = {}
         full_name_class_map = {}
         for class_role, classes in class_tree.items():
             for name, info in classes.items():
                 class_name = info['class_name']
+                short_name_list.append(name)
                 short_name = class_role + '.' + name
 
                 if short_name in short_name_class_map:
@@ -202,4 +209,4 @@ class ClassImporter():
                                    )
                 full_name_class_map[class_name] = info
         ml.progress_marker(f'Built {definitions.package_fancy_name} sort name map', start_time=t0, tabs=2)
-        return short_name_class_map, full_name_class_map
+        return short_name_class_map, full_name_class_map, short_name_list

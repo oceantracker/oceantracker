@@ -105,7 +105,7 @@ def build_working_params(params, msg_logger, crumbs='', caller=None):
             working_params['class_roles'][k] = item
         else:
             msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
-                           crumbs=crumbs, link='parameter_ref_toc', error=True)
+                           crumbs=crumbs, link='parameter_ref_toc')
 
     msg_logger.exit_if_prior_errors('Errors in decomposing parameters into settings, and classes')
 
@@ -205,7 +205,7 @@ def merge_settings(settings, default_settings, msg_logger, settings_to_merge=Non
                                              crumbs= crumbs + f'> setting = "{key}"', caller=caller)
         else:
             msg_logger.spell_check(f'Unrecognized setting "{key}"',key, all_settings,
-                            crumbs = crumbs + f'> {key}', caller=caller, error=True)
+                            crumbs = crumbs + f'> {key}', caller=caller)
         pass
     return settings
 

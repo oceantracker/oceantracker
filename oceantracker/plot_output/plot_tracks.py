@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from matplotlib import colors, animation
 from oceantracker.plot_output import plot_utilities
 
+from oceantracker.plot_output.plot_utilities import save_animation
+
 #from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 from oceantracker.util import time_util

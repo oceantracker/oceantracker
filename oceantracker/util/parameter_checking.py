@@ -39,7 +39,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
             if  key not in default_params:
                 # get possible values without obsolete params
                 msg_logger.spell_check(msg, key,possible_params,caller=caller,
-                           crumbs= crumbs + crumb_seperator + f'"{key}"', error=True)
+                           crumbs= crumbs + crumb_seperator + f'"{key}"')
             elif key in obsolute_params:
                msg_logger.msg(msg + ' is obsolete ',
                               hint=default_params[key].doc_str,

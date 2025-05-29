@@ -53,17 +53,12 @@ def _read_one_track_file(file_name, var_list):
     nc = NetCDFhandler(file_name, mode='r')
 
     if var_list is  None:
-        working_var_list = nc.all_var_names()
+        var_list = nc.all_var_names()
     else:
         # get list plus min data set
-        var_list = list(set(['x', 'time', 'status', 'IDrelease_group', 'IDpulse', 'x0', 'dry_cell_index', 'num_part_released_so_far'] + var_list))
-        # trim list to variables in the file
-        working_var_list= []
-        for var in var_list:
-            if var not in nc.all_var_names():
-                print('Warning: read_particle_tracks_file, particle property variable not in track file ' + var)
-            elif var not in working_var_list:
-                working_var_list.append(var)
+        var_list = list(set(['write_step_index','ID','particle_ID', 'x', 'time', 'status', 'IDrelease_group',
+                             'IDpulse', 'x0', 'dry_cell_index', 'num_part_released_so_far']
+                                + var_list))
 
     data = nc.read_variables(var_list)
     data['variable_info']  = nc.variable_info

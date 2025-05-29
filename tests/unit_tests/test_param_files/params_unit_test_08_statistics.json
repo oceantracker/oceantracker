@@ -41,7 +41,9 @@
             "name": "a_pollutant"
         },
         {
-            "class_name": "WaterSpeed"
+            "vector_part_prop": "water_velocity",
+            "class_name": "VectorMagnitude2D",
+            "name": "water_speed"
         },
         {
             "class_name": "AgeDecay",

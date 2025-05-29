@@ -8,7 +8,9 @@ particle_properties:
   decay_time_scale: 7200.0
   initial_value: 1000
   name: a_pollutant
-- class_name: WaterSpeed
+- class_name: VectorMagnitude2D
+  name: water_speed
+  vector_part_prop: water_velocity
 - class_name: AgeDecay
   name: test_decay
 - class_name: DistanceTravelled

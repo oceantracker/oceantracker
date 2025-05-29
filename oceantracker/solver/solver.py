@@ -61,8 +61,9 @@ class Solver(ParameterBaseClass):
         # run forwards through model time variable, which for backtracking are backwards in time
         t2 = model_times[0]
 
-        ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)} '
-                           + f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)} ')
+        ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)}')
+        ml.msg(f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}, time step=  {time_util.seconds_to_pretty_duration_string(si.settings.time_step)} ',
+                           tabs =2)
 
 
         si.msg_logger.set_screen_tag('S')
@@ -134,13 +135,14 @@ class Solver(ParameterBaseClass):
             if n_time_step % nt_write_time_step_to_screen == 0:
                 self._screen_output(ri.time_steps_completed, time_sec, t0_model, t_step)
 
-
             #  Main integration step
             #--------------------------------------
             self.do_time_step(time_sec, is_moving)
             #--------------------------------------
 
-            pgm.remove_dead_particles_from_memory()  # must be done after last use of moving, which refers to an single ID buffer which are not culled
+            # cull dead particles
+            # must be done after last use of "is_moving" in current time step (which refers to permanent  ID buffer which are not culled)
+            pgm.remove_dead_particles_from_memory()
 
             t2 = time_sec + si.settings.time_step * ri.model_direction
 

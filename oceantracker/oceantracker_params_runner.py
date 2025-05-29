@@ -626,8 +626,9 @@ class OceanTrackerParamsRunner(object):
             si.msg_logger.write_error_log_file(e)
 
         file_base = si.run_info.run_output_dir
-        solver_info = si.core_class_roles.solver.info
+
         if si.core_class_roles.solver is not None and 'n_time_step' in solver_info:
+            solver_info = si.core_class_roles.solver.info
             n_time_step = solver_info['n_time_step']
             time_sec = solver_info['time_sec']
         else:

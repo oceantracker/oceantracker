@@ -1,0 +1,51 @@
+NCDF_time_chunk: 1
+backtracking: true
+debug: true
+output_file_base: unit_test_03_release_group_errors_00
+particle_properties:
+- class_name: oceantracker.particle_properties.age_decay.AgeDecay
+  decay_time_scale: 7200.0
+  initial_value: 1000
+  name: a_pollutant
+reader:
+  file_mask: demo_hindcast_schisim3D*.nc
+  input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
+release_groups:
+- class_name: PolygonRelease
+  name: my_polygon_release
+  points:
+  - - 1597682.0
+    - 5486972
+  - - 1598604
+    - 5487275
+  - - 1598886
+    - 5486464
+  - - 1597917.0
+    - 5484000
+  - - 1597300
+    - 5484000
+  - - 1597682
+    - 5486972
+  pulse_size: 5
+  release_interval: 3600
+  z_max: 0.5
+  z_min: -2.0
+- class_name: PointRelease
+  name: my_radius_release
+  points:
+  - - 1592000.0
+    - 5486972
+  - - 159200
+    - 5480000
+  pulse_size: 5
+  release_interval: 3600
+  z_max: 0.5
+  z_min: -2.0
+root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
+time_step: 1800
+tracks_writer:
+  update_interval: 3600
+  write_dry_cell_flag: false
+use_A_Z_profile: false
+use_dispersion: false
+use_random_seed: true

@@ -121,8 +121,8 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
         ml.progress_marker(f'Using given reader parameter class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
         return reader
 
-    # lok for reader amongst known readers
-    reader = None
+    # look for reader amongst known readers
+    reader_class_name = None
 
     tests ={} # set of tests to pass
     ds_info = dataset.info
@@ -132,8 +132,8 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
         p = deepcopy(reader_params)
         p['class_name'] = class_name
         r = si.class_importer.make_class_instance_from_params('reader',p,
-                              check_for_unknown_keys=False,  # dont flag unknown keys
-                              crumbs=crumbs + f'> loading reader = class name "{class_name}"')
+                        check_for_unknown_keys=False,
+                        crumbs=crumbs + f'> loading reader = class name "{class_name}"')
         gmap = r.params['grid_variable_map']
         fmap= r.params['field_variable_map']
 
@@ -147,16 +147,23 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
         tests[name] = t
         # break if all testes passed as found reader
         if all(t.values()):
-            reader = r
+            reader_class_name = class_name
             break
 
-    if reader is None:
+
+    if reader_class_name is None:
         ml.msg(f' In detecting file format, not all tests against known file format variables were passed', error=True)
         for name, vals in tests.items():
             ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 2)
         ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
                hint=f'use reader to map to names in files? found variables {list(ds_info["variables"].keys())}',
                fatal_error=True, crumbs=crumbs)
+
+    # make and merge defaults for found reader
+    reader_params['class_name'] = reader_class_name
+    reader = si.class_importer.make_class_instance_from_params('reader', reader_params,
+                check_for_unknown_keys=True,
+                crumbs=crumbs + f'> loading detected reader = class name "{reader_class_name}"')
 
     reader.dataset = dataset
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
