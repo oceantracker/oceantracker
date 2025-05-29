@@ -3,8 +3,8 @@
 from setuptools import setup, find_packages
 
 setup(name='oceantracker',
-      python_requires='>=3.10,<3.12',
-      version='0.5.1.1',
+      python_requires='>=3.10',
+      version='0.5.1.2',
       description='Fast offline Lagrangian particle tracking in the Ocean',
       long_description=open('README.md').read(),
       long_description_content_type='text/markdown',
@@ -14,7 +14,7 @@ setup(name='oceantracker',
       license='MIT',
       packages=find_packages(),
       install_requires=[
-          'numpy < 2',
+          'numpy',
           'numba',
           'netcdf4',
           'xarray',
@@ -28,6 +28,7 @@ setup(name='oceantracker',
       classifiers=[
           'Programming Language :: Python :: 3.10',
           'Programming Language :: Python :: 3.11',
+          'Programming Language :: Python :: 3.12',
           'Development Status :: 4 - Beta',
           'Intended Audience :: Science/Research',
           'License :: OSI Approved :: MIT License',
