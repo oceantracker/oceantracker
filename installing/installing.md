@@ -22,16 +22,18 @@ To ensure python/ module compatibility, recommendation is to build a conda virtu
     ``cd ./oceantracker``
 
 3. Manually build a Conda environment
+ 
 
         ``conda create -n oceantracker python=3.10`` 
 
-    Note: Oceantracker will work in Python 3.11 and 3.12, Python version 3.10 is preferred, as currently  not all required external imported  packages for plotting work in 3.11
+    Note: - Oceantracker will work in Python 3.11 and 3.12, Python version 3.10 is preferred, as currently  not all required external imported  packages for plotting work in 3.11
+-     -  may need to run Conda as Admin widows or mode
 
     Activate new environment
 
         ``conda activate oceantracker``
    
-   Then install these packages
+   Then install these packages 
 
    ``conda install conda-forge::numba=0.56.4``  if using python 3.10
 
@@ -45,7 +47,7 @@ To ensure python/ module compatibility, recommendation is to build a conda virtu
         
    ``conda install anaconda::scipy``
 
-   ``pip install pyproj``
+   ``conda install conda-forge::pyprojy``
 
    ``conda install anaconda::pyyaml``
 
@@ -64,6 +66,7 @@ To ensure python/ module compatibility, recommendation is to build a conda virtu
 8. To add ability to make animation movies if needed
 
    ``conda install conda-forge::ffmpeg``
+
 
 9. To work with iPython/Jupyter notebooks
 

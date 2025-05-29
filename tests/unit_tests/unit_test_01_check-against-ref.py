@@ -35,7 +35,7 @@ def main(args):
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
-    ot.add_class('particle_properties', class_name='WaterSpeed')
+    ot.add_class('particle_properties',name='water_speed', class_name='VectorMagnitude2D',vector_part_prop='water_velocity')
     ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay')
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
@@ -119,8 +119,6 @@ def main(args):
 
         plt.show()
 
-
-    #'nz_cell', 'z_fraction_water_velocity'
 
     test_definitions.show_track_plot(case_info_file, args)
 

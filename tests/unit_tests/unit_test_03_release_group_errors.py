@@ -14,11 +14,19 @@ def main(args):
     #ot.settings(NUMBA_cache_code = True)
     ot.add_class('reader', **hm['reader'])
 
-    # add a point release outside domain
-    rg =  deepcopy(test_definitions.rg_start_in_datetime1)
-    rg['points'] = [0,0,1]
-    rg['z_min'] = -2
-    ot.add_class('release_groups', **rg)
+    ot.add_class( 'release_groups',name='my_polygon_release',  # name used internal to refer to this release
+                    class_name='PolygonRelease',  # class to use
+                    points=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
+                            [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
+                    # the below are optional settings/parameters
+                    release_interval=3600, pulse_size=5,
+                    z_min=-2., z_max=0.5)
+
+    ot.add_class('release_groups', name='my_radius_release',  # name used internal to refer to this release
+                 class_name='PointRelease',  # class to use
+                 points=[[1592000., 5486972], [159200, 5480000],],
+                 release_interval=3600, pulse_size=5,
+                 z_min=-2., z_max=0.5)
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False)
 
@@ -26,9 +34,12 @@ def main(args):
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.ps1)
-    ot.add_class('resuspension', critical_friction_velocity=0.01)
+
     case_info_file = ot.run()
+
+    test_definitions.show_track_plot(case_info_file, args)
+
+    return ot.params
 
 
 

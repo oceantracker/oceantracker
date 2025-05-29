@@ -239,3 +239,18 @@ def animation_output(anim, movie_file, fps = 15, dpi=600,show=True):
         plt.close() # prevents over plotting
         print(f'finished writing file, time={(perf_counter()-t0)/60} minutes')
 
+
+def save_animation(anim, file_name, fps = 15, dpi=600):
+
+    print('Building movie:  ' + file_name)
+    try:
+        FFMpegWriter = animation.writers['ffmpeg']
+    except Exception as e:
+        print('OceanTracker post_processing error: could not make movie as ffmpeg no installed or other error initialising ffmpeg')
+        print('           Install ffmpeg??, doing screen plot instead')
+        plt.close()
+        return
+
+    metadata = dict(title='OceanTracker  Demo', artist='Matplotlib')
+    writer = FFMpegWriter(fps=fps,bitrate=5000, codec='h264', metadata=metadata)
+    anim.save(file_name, writer=writer, dpi=dpi)

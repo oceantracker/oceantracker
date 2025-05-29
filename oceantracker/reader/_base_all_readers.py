@@ -332,7 +332,6 @@ class _BaseReader(ParameterBaseClass):
 
         return quad_cells_to_split, tri
 
-
     def _setup_fields(self):
         # setup field classes , ie make memory buffer
         info = self.info
@@ -351,7 +350,9 @@ class _BaseReader(ParameterBaseClass):
         load_fields= params['load_fields']
 
         # add reader fields
-        for name  in list(set(load_fields)):
+        all_fields= list(set(load_fields))
+        for name  in all_fields:
+            # core fields done separately by custom methods
             if name in ['water_depth', 'tide','water_velocity']: continue
 
             i = self._add_a_reader_field(name)
@@ -359,6 +360,8 @@ class _BaseReader(ParameterBaseClass):
             # read reader field now if not time varying
             if not i.is_time_varying():
                     i.data = self.read_field_data(name, i)
+
+        si.msg_logger.progress_marker(f'Loading reader fields {str(all_fields)}')
 
     def _add_a_reader_field(self, name, params={},dummy=False):
         info = self.info

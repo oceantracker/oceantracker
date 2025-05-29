@@ -35,7 +35,6 @@ class PointRelease(_BaseReleaseGroup):
         params = self.params
         info = self.info
 
-
         # ensure points are  meters
         if si.settings.use_geographic_coords:
             # check points for wrap around 180
