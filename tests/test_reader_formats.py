@@ -302,13 +302,13 @@ def get_case(n):
 
         case 411:
             # DELFT FM hananui
-            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_test1\compressed_version1'
+            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_test1\Version_2'
 
             x0 = [[-46.76850063886385, 168.1665833416483],
                   [-46.6651360690957, 168.5548344059933],
                   [-46.948229184324596, 168.34936820699286]]
             x0 = np.flip(np.asarray(x0), axis=1)
-            file_mask = 'R3*.nc'
+            file_mask = 'D3*.nc'
             output_file_base = 'DELF3D-FM_hananui'
             title = 'DELF3D-FM_hananui'
             is3D = True

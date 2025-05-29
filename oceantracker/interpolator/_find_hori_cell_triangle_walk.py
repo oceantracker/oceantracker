@@ -29,6 +29,7 @@ open_bounday_edge=  int(si.edge_types.open_boundary)
 
 class FindHoriCellTriangleWalk(object):
 
+
     def __init__(self, grid, params):
 
         self.grid, self.params= grid, params

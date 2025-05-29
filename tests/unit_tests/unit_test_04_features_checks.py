@@ -3,6 +3,7 @@ from oceantracker.main import OceanTracker
 from oceantracker import  definitions
 import numpy as np
 from tests.unit_tests import test_definitions
+from copy import deepcopy
 
 def main(args):
     ot = OceanTracker()
@@ -28,6 +29,15 @@ def main(args):
 
     # add a gridded particle statistic to plot heat map
     ot.add_class('particle_statistics',**test_definitions.ps1)
+
+    ps2 = deepcopy(test_definitions.ps1)
+    ps2.update(name='near_bottom', near_seabed=1.,z_min=None,z_max=None)
+    ot.add_class('particle_statistics', **ps2)
+
+
+    ps3 = deepcopy(test_definitions.ps1)
+    ps3.update(name='near_seasurface', near_seasurface=1.,z_min=None,z_max=None)
+    ot.add_class('particle_statistics', **ps3)
 
     ot.add_class('particle_statistics', **test_definitions.poly_stats,
                  polygon_list=[dict(points=hm['polygon'])])

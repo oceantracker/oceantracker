@@ -48,12 +48,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
     def info_to_write_at_end(self):
         nc = self.nc
-        stats_grid = self.grid
-        nc.write_a_new_variable('x', stats_grid['x'], ['release_groups_dim', 'x_dim'], description='Mid point of grid cell')
-        nc.write_a_new_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'],  description='Mid point of grid cell')
-
-        area = np.diff(stats_grid['y_bin_edges'][0,:]).reshape((-1,1))*np.diff(stats_grid['x_bin_edges'][0,:]).reshape((1,-1))
-        nc.write_a_new_variable('grid_cell_area', area, [ 'y_dim','x_dim'],  description='Horizontal area of each cell')
+        pass
 
     def set_up_spatial_bins(self,nc):
 
@@ -110,6 +105,9 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         n_grids= info['grid_centers'].shape[0]
         stats_grid['x'] = np.zeros((n_grids, base_x.size), dtype=np.float64)
         stats_grid['y'] = np.zeros( (n_grids, base_y.size), dtype=np.float64)
+        stats_grid['x_grid'] = np.zeros((n_grids, base_y.size,base_x.size), dtype=np.float64)
+        stats_grid['y_grid'] = np.zeros((n_grids,base_y.size,base_x.size), dtype=np.float64)
+        stats_grid['cell_area'] = np.zeros((n_grids, base_y.size,base_x.size), dtype=np.float64)
         stats_grid['x_bin_edges'] = np.zeros( (n_grids, base_x_bin_edges.size), dtype=np.float64)
         stats_grid['y_bin_edges'] = np.zeros( (n_grids, base_y_bin_edges.size), dtype=np.float64)
 
@@ -121,15 +119,27 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             stats_grid['x_bin_edges'][n_grid, :] = p[0] + base_x_bin_edges
             stats_grid['y_bin_edges'][n_grid, :] = p[1] + base_y_bin_edges
 
-        # get area im meters even if in geographic coords. from first release group
-        stats_grid['cell_area'] = cord_transforms.rectangle_area_meters_sq(
-            stats_grid['x_bin_edges'][0, 0], stats_grid['y_bin_edges'][0, 0],
-            stats_grid['x_bin_edges'][0, 1], stats_grid['y_bin_edges'][0, 1],
-            is_geographic=si.settings.use_geographic_coords)
+            # full mesh x, y
+            x, y = np.meshgrid(stats_grid['x'][n_grid, :], stats_grid['y'][n_grid, :])
+            stats_grid['x_grid'][n_grid, :, :], stats_grid['y_grid'][n_grid, :, :] = x, y
+
+            # get cell area im meters even if in geographic coords
+            x,y = np.meshgrid(stats_grid['x_bin_edges'][n_grid, :], stats_grid['y_bin_edges'][n_grid, :])
+
+            if si.settings.use_geographic_coords:
+                x,y = cord_transforms.local_grid_deg_to_meters(x,y, x[0,0], y[0,0])
+            stats_grid['cell_area'][n_grid, :, :] =(x[:-1, 1:]-x[:-1, :-1])*(y[1:,:-1]-y[:-1:,:-1])
 
         if self.params['write']:
             nc.add_dimension('x_dim', stats_grid['x'].shape[1])
             nc.add_dimension('y_dim', stats_grid['y'].shape[1])
+            nc.write_a_new_variable('x', stats_grid['x'], ['release_groups_dim', 'x_dim'], description='Mid point of grid cell', units='m or deg')
+            nc.write_a_new_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'], description='Mid point of grid cell')
+            nc.write_a_new_variable('x_grid', stats_grid['x_grid'], ['release_groups_dim', 'y_dim', 'x_dim'], description='x for mid point of grid cell, full grid')
+            nc.write_a_new_variable('y_grid', stats_grid['y_grid'], ['release_groups_dim', 'y_dim', 'x_dim'], description='y for mid point of grid cell, full grid')
+
+
+            nc.write_a_new_variable('cell_area', stats_grid['cell_area'], ['release_groups_dim','y_dim', 'x_dim'], description='Horizontal area of each cell', units='m^2')
 
     def set_up_binned_variables(self,nc):
         if not self.params['write']: return

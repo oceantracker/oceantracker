@@ -191,7 +191,7 @@ class _BaseReader(ParameterBaseClass):
             # set up conversion of meters to degreees
             i = self._add_a_reader_field('degrees_per_meter', dict(time_varying=False, is3D=False, is_vector=True,
                               write_interp_particle_prop_to_tracks_file=False),  dummy=True)
-            i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'])
+            i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'][:,1],as_vector=True)
             si.msg_logger.msg('Converted hindcast to geographic coords',note=True)
             pass
 
@@ -672,7 +672,7 @@ class _BaseReader(ParameterBaseClass):
 
     def write_grid(self, gridID):
         # write a netcdf of the grid from first hindcast file
-        #todo
+
         grid = self.grid
         info = self.info
         if 'grid' not in si.output_files: si.output_files['grid'] = []
@@ -684,6 +684,10 @@ class _BaseReader(ParameterBaseClass):
         nc.write_global_attribute('index_note', ' all indices are zero based')
         nc.write_global_attribute('created', str(datetime.now().isoformat()))
         nc.write_global_attribute('geographic_coords_used', 1 if self.info['geographic_coords'] else 0)
+
+        # ad node types to grid file attributes
+        for nt, val in self.si.node_types.asdict().items():
+            nc.write_global_attribute(f'node_typeID_{nt}', val)
 
 
         nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
