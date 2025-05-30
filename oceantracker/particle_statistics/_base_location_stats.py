@@ -316,7 +316,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         for key, item in self.sum_binned_part_prop.items():
             self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
 
-
     def info_to_write_at_end(self) : pass
 
     def close(self):
