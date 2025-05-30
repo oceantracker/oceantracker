@@ -212,14 +212,17 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         return sel_subset
 
-    def update(self,n_time_step, time_sec):
+    def update(self,n_time_step, time_sec, alive):
         '''do particle counts'''
         part_prop = si.class_roles.particle_properties
         info = self.info
         self.start_update_timer()
 
-
         num_in_buffer = si.run_info.particles_in_buffer
+
+        #  count alive particles in each release group (plus age for age based stats)
+        # children must implement their own count_alive_particles
+        self.do_alive_particle_counts(self.count_all_alive_particles, alive)
 
         # first select those to count based on status and z location
         sel = self._sel_status_waterdepth(part_prop['status'].data,
@@ -245,7 +248,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         self.stop_update_timer()
 
-
+    def do_alive_particle_counts(self, count_all_alive, alive):
+        basic_util.nopass('Stats class must implement method to do counts of all alive particles by release group')
 
     @staticmethod
     @njitOT
@@ -306,7 +310,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         fh['num_released_total'][n_write] = num_released.sum() # total all release groups so far
 
         fh['count'][n_write, ...] = self.count_time_slice[:, ...]
-        fh['count_all_particles'][n_write, ...] = self.count_all_particles_time_slice[:, ...]
+        fh['count_all_selected_particles'][n_write, ...] = self.count_all_particles_time_slice[:, ...]
+        fh['count_all_alive_particles'][n_write, ...] = self.count_all_alive_particles[:, ...]
 
         for key, item in self.sum_binned_part_prop.items():
             self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
@@ -327,6 +332,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['release_group_dim'], description='Total number released in each release group')
             nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
             nc.write_global_attribute('particle_status_values_counted', str(self.params['status_list']))
-
+            nc.write_global_attribute('backtracking', int(si.settings.backtracking))
             nc.close()
         self.nc = None  # parallel pool cant pickle nc

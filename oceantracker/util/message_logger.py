@@ -204,7 +204,7 @@ class MessageLogger(object ):
             f.write(str(e))
             f.write(tb)
 
-    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='',caller=None):
+    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='', caller=None):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
 
         known = list(possible_values)
@@ -220,7 +220,7 @@ class MessageLogger(object ):
             else:
                 self.msg(f'>> None found',tabs=tabs+7,
                          hint=f'Possible values = {str(known)}')
-            self.msg('Unkown  values', hint=hint, fatal_error=True, tabs=tabs,crumbs=crumbs,caller=caller)
+            self.msg('Unknown  values', hint=hint, fatal_error=True, tabs=tabs,crumbs=crumbs,caller=caller)
 
         pass
     def build_stack(self):

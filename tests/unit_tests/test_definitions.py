@@ -164,9 +164,11 @@ poly_stats =dict(name='my_poly_stats',
         update_interval= 3600,
         particle_property_list=['water_depth'],
         #status_list=[],
-
         z_min= -2,
         grid_size= [120, 121])
+
+poly_stats_age = deepcopy(poly_stats)
+poly_stats_age.update(class_name='PolygonStats2D_ageBased',name='my_poly_stats_age',max_age_to_bin=4*24*3600)
 
 LCS = dict(name='LSC test',
            class_name='dev_LagarangianStructuresFTLE2D',

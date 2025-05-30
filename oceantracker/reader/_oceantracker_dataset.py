@@ -30,7 +30,6 @@ class OceanTrackerDataSet(object):
 
         for fileID, fn in enumerate(file_list):
             ds = xr.open_dataset(fn, decode_times=False)
-
             info['dims'].update(dict(ds.sizes)) # all dims found
 
             info['files'].append(dict(name=fn,start_time=None,
