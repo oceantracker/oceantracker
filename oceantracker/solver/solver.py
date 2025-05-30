@@ -56,7 +56,10 @@ class Solver(ParameterBaseClass):
         ri.free_wheeling = False
         model_times = si.run_info.times
         ml.hori_line()
-        fgm.update_readers(model_times[0]) # initial buffer fill
+        # initial buffer fill
+        tr0=perf_counter()
+        fgm.update_readers(model_times[0])
+        si.block_timer('Read hindcast', tr0)
 
         # run forwards through model time variable, which for backtracking are backwards in time
         t2 = model_times[0]
@@ -105,8 +108,9 @@ class Solver(ParameterBaseClass):
                 ml.msg(' More than 85% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
                        hint=f'For parallel runs,reduce "processors" setting below max. available (={psutil.cpu_count(logical=False)} cores) \n to have fewer simultaneous cases and/or reduce memory use with smaller reader time_buffer_size ')
 
-
+            tr0 = perf_counter()
             fgm.update_readers(time_sec)
+            si.block_timer('Reading hindcast', tr0)
 
             # do stats etc updates and write tracks
             self._pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
@@ -185,10 +189,8 @@ class Solver(ParameterBaseClass):
         for name, i in si.class_roles.trajectory_modifiers.items():
             i.timed_update(n_time_step, time_sec, alive)
 
-
-        t0 = perf_counter()
         fgm.update_dry_cell_values()
-        si.block_timer('Filling reader buffers', t0)
+
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
 
@@ -202,7 +204,7 @@ class Solver(ParameterBaseClass):
 
         # update writable class lists and stats at current time step now props are up to date
 
-        self._update_stats(n_time_step, time_sec)
+        self._update_stats(n_time_step, time_sec, alive)
         self._update_concentrations(n_time_step, time_sec)
         self._update_events(n_time_step, time_sec)
 
@@ -214,7 +216,6 @@ class Solver(ParameterBaseClass):
         if si.settings.write_tracks:
             t0_write = perf_counter()
             tracks_writer = si.core_class_roles.tracks_writer
-            tracks_writer.start_update_timer()
             tracks_writer.open_file_if_needed()
 
             if new_particleIDs.size > 0:
@@ -223,7 +224,7 @@ class Solver(ParameterBaseClass):
             # write time varying track data to file if scheduled
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
-            tracks_writer.stop_update_timer()
+
 
         # resuspension is a core trajectory modifier, upated after resupension
         # so those on bottom can be recorded
@@ -360,13 +361,12 @@ class Solver(ParameterBaseClass):
         s += f' step time = { t_step * 1000:4.1f} ms'
         si.msg_logger.msg(s)
 
-    def _update_stats(self,n_time_step, time_sec):
+    def _update_stats(self,n_time_step, time_sec, alive):
         # update and write stats
         t0 = perf_counter()
         for name, i in si.class_roles.particle_statistics.items():
-            pass
             if i.schedulers['count_scheduler'].do_task(n_time_step):
-                i.timed_update(n_time_step, time_sec)
+                i.timed_update(n_time_step, time_sec, alive)
 
         si.block_timer('Update statistics', t0)
 

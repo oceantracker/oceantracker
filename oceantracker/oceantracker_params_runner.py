@@ -91,7 +91,7 @@ class OceanTrackerParamsRunner(object):
         # performance
         ml.msg(f'Timings: total = {(perf_counter()-  self.start_time):5.1f} sec',tabs=2)
 
-        for name in ['Setup','Filling reader buffers','Initial cell guess', 'RK integration',
+        for name in ['Setup','Reading hindcast','Initial cell guess', 'RK integration',
                       'Interpolate fields', 'Update statistics',
                      'Update custom particle properties']:
             if name in si.block_timers:  ml.msg(f'{name}  {si.block_timers[name]["time"]:4.2f} s\t', tabs=4)

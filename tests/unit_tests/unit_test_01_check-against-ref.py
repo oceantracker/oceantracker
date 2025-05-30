@@ -42,8 +42,7 @@ def main(args):
     # add a gridded particle statistic to plot heat map
     ot.add_class('particle_statistics',**test_definitions.ps1)
 
-    ot.add_class('particle_statistics', **test_definitions.poly_stats,
-                 polygon_list=[dict(points=hm['polygon'])])
+    ot.add_class('particle_statistics', **test_definitions.poly_stats,   polygon_list=[dict(points=hm['polygon'])])
 
 
     case_info_file = ot.run()

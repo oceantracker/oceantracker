@@ -90,7 +90,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         num_pulses= self.schedulers['count_scheduler'] .info['number_scheduled_times']
         nc.add_dimension('pulse_dim', dim_size=num_pulses)
         nc.create_a_variable('count', dim_names, np.int64, description='counts of particles in each pulse of release group inside release polygon at given times')
-        nc.create_a_variable('count_all_particles', ['time_dim', 'pulse_dim'], np.int64, description='counts of particles in each, whether inside polygon or not at given times')
+        nc.create_a_variable('count_all_selected_particles', ['time_dim', 'pulse_dim'], np.int64, description='counts of particles in each, whether inside polygon or not at given times')
         # set up space for requested particle properties
         # working count space
         self.count_time_slice = np.full((num_pulses,), 0, np.int64)

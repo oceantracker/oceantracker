@@ -196,10 +196,16 @@ def read_stats_file(file_name,nt=None):
                 d['limits'][name] = {'min' : np.nanmin(new_data[name]), 'max': np.nanmax(new_data[name])}
 
     with np.errstate(divide='ignore', invalid='ignore'):
-        if d['stats_type'] == 'grid':
-            d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis, np.newaxis]
+        # conectivity calc. is different depending on direction, use all particles if forwards, selected if backwards
+        if 'backtracking' not in d:
+            b = d['count_all_particles'] # version prior to june 2025
         else:
-            d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis]
+            b = d['count_all_selected_particles'] if d['backtracking'] == 1 else d['count_all_alive_particles']
+
+        if d['stats_type'] == 'grid':
+            d['connectivity_matrix'] = d['count'] / b[..., np.newaxis, np.newaxis]
+        else:
+            d['connectivity_matrix'] = d['count'] / b[..., np.newaxis]
 
     d.update(new_data)
     nc.close()

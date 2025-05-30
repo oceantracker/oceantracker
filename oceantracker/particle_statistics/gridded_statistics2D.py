@@ -1,11 +1,13 @@
 import numpy as np
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.util import cord_transforms
 
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 #from oceantracker.util.parameter_checking import ParameterListCheckerV2 as PLC2
 from oceantracker.shared_info import shared_info as si
+
+stationary_status = int(si.particle_status_flags.stationary)  # compile this constant into numba code
 
 class GriddedStats2D_timeBased(_BaseParticleLocationStats):
     # class to hold counts of particles inside grid squares
@@ -149,14 +151,15 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         dim_names= ['time_dim', 'release_group_dim', 'y_dim', 'x_dim']
         dim_sizes =[None, len(si.class_roles.release_groups), stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
         nc.create_a_variable('count', dim_names, np.int64, description= 'counts of particles in grid at given times, for each release group')
-        nc.create_a_variable('count_all_particles', dim_names[:2], np.int64, description='counts of particles whether in grid or not')
-
+        nc.create_a_variable('count_all_selected_particles', dim_names[:2], np.int64, description='counts of particles selected to be counted, eg by depth range etc wherethe inside grid or not')
+        nc.create_a_variable('count_all_alive_particles', dim_names[:2], np.int64, description='counts of all alive particles everywhere')
 
 
         # set up space for requested particle properties
         # working count space, row are (y,x)
         self.count_time_slice = np.full(dim_sizes[1:], 0, np.int64)
         self.count_all_particles_time_slice = np.full((dim_sizes[1],), 0, np.int64)
+        self.count_all_alive_particles = np.full((dim_sizes[1],), 0, np.int64)
 
         for p in self.params['particle_property_list']:
             if p in si.class_roles.particle_properties:
@@ -164,6 +167,25 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
                 nc.create_a_variable( 'sum_' + p, dim_names, np.float64, description= 'sum of particle property inside bin' )
             else:
                 si.msg_logger.msg('Part Prop "' + p + '" not a particle property, ignored and no stats calculated',warning=True)
+
+    def do_alive_particle_counts(self, count_all_alive, alive):
+        part_prop = si.class_roles.particle_properties
+
+        self._do_alive_particle_counting(part_prop['status'].data,part_prop['IDrelease_group'].data,
+                                         self.count_all_alive_particles, alive)
+
+
+
+    @staticmethod
+    @njitOTparallel
+    def _do_alive_particle_counting(status,  release_group, count_all_alive, alive):
+
+        count_all_alive[:]  = 0.
+
+        for nn in prange(alive.size):
+            n = alive[nn]
+            count_all_alive[release_group[n]] += status[n] >= stationary_status
+
 
     def do_counts(self,n_time_step, time_sec, sel):
         # do counts for each release  location and grid cell
@@ -264,7 +286,9 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
         # working count space, row are (y,x)
         self.count_age_bins = np.full(dim_sizes, 0, np.int64)
         # counts in each age bin, whether inside grid cell or not
-        self.count_all_particles =  np.full((stats_grid['age_bins'].shape[0], len(si.class_roles.release_groups)), 0, np.int64)
+        s = (stats_grid['age_bins'].shape[0], len(si.class_roles.release_groups))
+        self.count_all_particles =  np.full(s, 0, np.int64)
+        self.count_all_alive_particles = np.full(s, 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
             if p_name in si.class_roles.particle_properties:
@@ -302,13 +326,33 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
             c = int(np.floor((x[n, 0] - x_edges[ng, 0]) / dx))
             na = int(np.floor((age[n] - age_bin_edges[0]) / da))
 
-            if 0 <= na < (age_bin_edges.shape[0] - 1):
+            if 0 <= na < (age_bin_edges.size - 1):
                 count_all_particles[na, ng] += 1 # count all in each age band
                 if 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1 :
                     count[na, ng, r, c] += 1
                     # sum particle properties
                     for m in range(len(prop_list)):
                         sum_prop_list[m][na, ng, r, c] += prop_list[m][n]
+
+    def do_alive_particle_counts(self, count_all_alive, alive):
+        part_prop = si.class_roles.particle_properties
+        stats_grid = self.grid
+
+        self._do_alive_particle_counting(part_prop['status'].data,part_prop['IDrelease_group'].data,
+                                         part_prop['age'].data,  stats_grid['age_bin_edges'],
+                                         self.count_all_alive_particles, alive)
+
+    @staticmethod
+    @njitOTparallel
+    def _do_alive_particle_counting(status,  release_group, age, age_bin_edges, count_all_alive, alive):
+
+        da = age_bin_edges[1] - age_bin_edges[0]
+
+        for nn in prange(alive.size):
+            n = alive[nn]
+            na = int(np.floor((age[n] - age_bin_edges[0]) / da))
+            if 0 <= na < (age_bin_edges.size - 1):
+                count_all_alive[na, release_group[n]] += status[n] >= stationary_status
 
     def write_time_varying_stats(self, n, time_sec): pass # no writing in the fly in agged based states
 
@@ -321,8 +365,10 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
 
         nc.write_a_new_variable('count', self.count_age_bins, ['age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim'],
                                 description= 'counts of particles in grid at given ages, for each release group')
-        nc.write_a_new_variable('count_all_particles', self.count_all_particles, ['age_bin_dim', 'release_group_dim'],
-                                description='counts of all particles age bands for each release group')
+        nc.write_a_new_variable('count_all_selected_particles', self.count_all_particles, ['age_bin_dim', 'release_group_dim'],
+                                description='counts of all particles selected to be counted in age bands for each release group ( eg selected by z range)')
+        nc.write_a_new_variable('count_all_alive_particles', self.count_all_alive_particles, ['age_bin_dim', 'release_group_dim'],
+                                description='counts of all particles alive from each release group, into age bins')
         nc.write_a_new_variable('age_bins', stats_grid['age_bins'], ['age_bin_dim'], description= 'center of age bin, ie age axis of heat map in seconds')
         nc.write_a_new_variable('age_bin_edges', stats_grid['age_bin_edges'], ['age_bin_edges'],description='center of age bin, ie age axis of heat map in seconds')
         # particle property sums
