@@ -62,10 +62,9 @@ default_classes_dict = dict(
 
 class _AttribDict():
     '''
-    holds variables as class attributes to enable auto complete hints
+    holds variables as class attributes to enable auto-complete hints
     and give iterators over these variables, but can act like a dictionary,
     ie  allows both  instance.backtracking and instance['backtracking']
-
     '''
     def __init__(self):
         # add  class variables in ._class_.__dict__, to instance __dict__ by adding attributes
@@ -105,10 +104,7 @@ class _CellSearchStatusFlags(_AttribDict):
     bad_coord: int = -20
     failed: int = -30
 
-
-
 # types of node
-
 class _NodeTypes(_AttribDict):
     interior: int = 0
     island_boundary: int = 1
@@ -116,12 +112,10 @@ class _NodeTypes(_AttribDict):
     open_boundary: int = 3
     land: int = 4
 
-
 class _EdgeTypes(_AttribDict):
     interior: int = 0
     domain: int = -1
     open_boundary: int = -2
-
 
 class _DimensionNames(_AttribDict):
     # used to standardise output dimension names
@@ -130,11 +124,6 @@ class _DimensionNames(_AttribDict):
     vector2D: str  = 'vector2D'
     vector3D: str = 'vector3D'
     triangle: str = 'triangle_dim'
-
-
-
-    def get_edge_vars(self):
-        return {key:item for key,item in self.asdict().items() if key in ['domain_edge']}
 
 cell_search_status_flags = _CellSearchStatusFlags()
 
