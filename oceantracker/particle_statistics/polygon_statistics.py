@@ -65,11 +65,7 @@ class _CorePolygonMethods(ParameterBaseClass):
 
     def set_up_spatial_bins(self,nc ):
 
-        pgm = si.core_class_roles.particle_group_manager
-
-
         nc.add_dimension('polygon_dim', len(self.params['polygon_list']))
-
         add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
 
 class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.GriddedStats2D_timeBased):
@@ -79,7 +75,6 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
         super().__init__()
         # set up info/attributes
         self.add_default_params({'role_output_file_tag': PVC('stats_polygon_time',str)})
-
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x'])
@@ -168,7 +163,6 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
 
 
     def set_up_binned_variables(self,nc):
-         
 
         # set up space for requested particle properties
         dims= (self.grid['age_bins'].shape[0], len(si.class_roles.release_groups), len(self.params['polygon_list']))
@@ -188,8 +182,6 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
 
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
-
-
 
         # set up pointers to particle properties, only point to those in buffer as no need to look at those beyond buffer
         p_groupID   = part_prop['IDrelease_group'].used_buffer()
