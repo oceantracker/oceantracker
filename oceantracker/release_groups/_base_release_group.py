@@ -90,6 +90,24 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
         return is_inside, release_part_prop
 
+    def get_release_location_info(self, x, time_sec):
+        # get grid cell etc for given candidate locations
+        fgm = si.core_class_roles.field_group_manager
+        use_points, release_info = fgm.are_points_inside_domain(x, self.params['allow_release_in_dry_cells'])
+
+        self._add_tide_and_depth_release_part_prop(release_info, time_sec)
+
+        self._add_bookeeping_particle_prop_data(release_info)
+
+        # Block dry cell release
+        if not self.params['allow_release_in_dry_cells']:
+            is_dry_cell = fgm.are_dry_cells(release_info['n_cell'])
+            use_points = np.logical_and(use_points, ~is_dry_cell)
+
+        use_points = self._filter_water_depth_range(use_points, release_info)
+
+        return release_info, use_points
+
     def get_release_locations(self, time_sec):
         # set up full set of release locations inside  polygons
         ml = si.msg_logger
@@ -111,20 +129,22 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
             x0 = self.get_release_location_candidates()
 
-            # get candidate locations inside domain
-            use_points, rd  = self._check_potential_release_locations_in_bounds(x0)
-            #
-            rd = self.add_tide_and_depth_release_part_prop(rd,time_sec)
+            rd, use_points = self.get_release_location_info(x0, time_sec)
 
-            use_points = self.filter_water_depths(use_points, rd)
+            # get candidate locations inside domain
+            #use_points, rd  = self._check_potential_release_locations_in_bounds(x0)
+            #
+            #rd = self.add_tide_and_depth_release_part_prop(rd,time_sec)
+
+            #use_points = self.filter_water_depths(use_points, rd)
 
             # add booking IDs etrc before any culling of candidates
-            rd = self._add_bookeeping_particle_prop_data(rd)
+            #rd = self._add_bookeeping_particle_prop_data(rd)
 
-            #any filter added by child class added
+            #any filter added by child class included by user
             use_points, rd = self.filter_release_points(use_points,rd, time_sec=time_sec)
 
-            # only keep those inside domain and keeped by filter:
+            # only keep those inside domain and kept by filter:
             for key in rd.keys():
                 rd[key] = rd[key][use_points, ...]
 
@@ -187,7 +207,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
                                                                    release_part_prop['water_depth'],release_part_prop['tide'])
         return release_part_prop
 
-    def add_tide_and_depth_release_part_prop(self,release_part_prop, time_sec):# get water depth and tide at particle locations, which may be needed to filter particle releases
+    def _add_tide_and_depth_release_part_prop(self, release_part_prop, time_sec):# get water depth and tide at particle locations, which may be needed to filter particle releases
              
             # add tide and water depth at released particle locations
             #todo mbetter ways to do this?
@@ -203,7 +223,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
             return release_part_prop
 
 
-    def filter_water_depths(self, is_inside, release_part_prop):
+    def _filter_water_depth_range(self, is_inside, release_part_prop):
         info = self.info
         water_depth = release_part_prop['water_depth']
 

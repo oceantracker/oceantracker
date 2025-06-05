@@ -50,7 +50,6 @@ class GridRelease(_BaseReleaseGroup):
 
         # add particle prop fort row column only if nor already added by another grid release
 
-
         pass
 
     def get_number_required_per_release(self):
