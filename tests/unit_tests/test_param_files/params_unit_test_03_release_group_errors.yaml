@@ -11,6 +11,15 @@ reader:
   file_mask: demo_hindcast_schisim3D*.nc
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
 release_groups:
+- class_name: PointRelease
+  name: my_point_release
+  points:
+  - - 1594000.0
+    - 5487000
+  - - 1594000
+    - 5481000
+  pulse_size: 1
+  release_interval: 900
 - class_name: PolygonRelease
   name: my_polygon_release
   points:
@@ -26,25 +35,14 @@ release_groups:
     - 5484000
   - - 1597682
     - 5486972
-  pulse_size: 5
-  release_interval: 3600
-  z_max: 0.5
-  z_min: -2.0
-- class_name: PointRelease
-  name: my_radius_release
-  points:
-  - - 1592000.0
-    - 5486972
-  - - 159200
-    - 5480000
-  pulse_size: 5
-  release_interval: 3600
+  pulse_size: 1
+  release_interval: 900
   z_max: 0.5
   z_min: -2.0
 root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
-time_step: 1800
+time_step: 900
 tracks_writer:
-  update_interval: 3600
+  update_interval: 900
   write_dry_cell_flag: false
 use_A_Z_profile: false
 use_dispersion: false
