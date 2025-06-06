@@ -1,5 +1,5 @@
 import numpy as np
-
+from copy import deepcopy
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.release_groups._base_release_group import _BaseReleaseGroup
 from oceantracker.util.cord_transforms import fix_any_spanning180east
@@ -40,25 +40,37 @@ class PointRelease(_BaseReleaseGroup):
             # check points for wrap around 180
             params['points'] = fix_any_spanning180east( params['points'], msg_logger=si.msg_logger, caller=self,
                                                 crumbs=f'Point release#{self.info["instanceID"]}, name "{params["name"]}"')
+
         info['bounding_box_ll_ul'] = np.stack(( np.nanmin(params['points'][:2],axis=0),
                                                 np.nanmax(params['points'][:2],axis=0)))
+
+        # get release info for points inside domain and water depth limits
+        self.release_info = self._check_all_outside_domain_water_depth_range(params['points'])
+        self._check_some_outside_domain_water_depth_range(self.release_info['x'], params['points'])
 
     def get_number_required_per_release(self):
         return self.params['pulse_size']*self.params['points'].shape[0]
 
-    def get_release_location_candidates(self):
-         
-        x = np.repeat(self.params['points'], self.params['pulse_size'], axis=0)
+    def get_hori_release_locations(self, time_sec):
+        rg = self._apply_dry_cell_and_user_filters(self.release_info, time_sec)
+        return rg
 
-        if self.params['release_radius'] > 0.:
-            rr = abs(float(self.params['release_radius']))
-            n = x.shape[0]
-            rr = np.repeat(rr, n, axis=0)
-            r = np.random.random((n,)) * rr * np.exp(1.0j * np.random.random((n,)) * 2.0 * np.pi)
-            r = r.reshape((-1, 1))
-            x[:, :2] += np.hstack((np.real(r), np.imag(r)))
+    def _check_all_outside_domain_water_depth_range(self,points):
 
-        return x
+        # filters points based on inside domain/water depth range
+        release_info = self.release_location_info(points)
+        if release_info['x'].shape[0] == 0:  # check number # points inside
+            si.msg_logger.msg(f'No release points are inside domain for group "{self.params["name"] }" ',
+                              hint='points not in grids coord. system?, or if geographic, not in (lon,lat) order',
+                              error=True,caller = self)
+        return release_info
+
+    def _check_some_outside_domain_water_depth_range(self,points_used,points_given):
+        n_used,n_given =  points_used.shape[0],  points_given.shape[0]
+        if points_used.shape[0] <  points_given.shape[0]:
+            si.msg_logger.msg(f'Only {n_used} release of {n_given}  points used for group "{self.params["name"]}",  ',
+                              hint='Some points are outside domain or not in requested water depth range?',
+                              warning=True, caller=self)
 
 
 

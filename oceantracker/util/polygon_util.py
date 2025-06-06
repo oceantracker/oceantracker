@@ -132,7 +132,6 @@ class InsidePolygon(object):
             xy =  cord_transforms.WGS84_to_UTM(xy, in_lat_lon_order=False)
 
 
-
         x,y = xy[:,0], xy[:,1]
         n = len(x)
         area = 0.0

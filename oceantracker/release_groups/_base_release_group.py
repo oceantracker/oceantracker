@@ -65,10 +65,11 @@ class _BaseReleaseGroup(ParameterBaseClass):
     def get_number_required_per_release(self): nopass()
 
     # optional filter on release points
-    def filter_release_points(self,is_inside, release_part_prop, time_sec= None):
-        # user can filter release points by inheritance of this class and overriding this method
-        # return booleaon of keeped points
-        return is_inside, release_part_prop
+    def user_release_point_filter(self, release_part_prop, time_sec= None):
+        # user can create filter if points to keep from given points release points
+        # by inheritance of this class and overriding this method
+        # return boolean of kept points
+        return np.full((release_part_prop['x'].shape[0],),True,dtype=bool)
 
     def _add_bookeeping_particle_prop_data(self, release_part_prop):
         # add booking ID s before anny culling of candidates
@@ -81,34 +82,44 @@ class _BaseReleaseGroup(ParameterBaseClass):
         release_part_prop['user_release_groupID'] = np.full((n,), self.params['user_release_groupID'], dtype=np.int32)
         return release_part_prop
 
-    def _check_potential_release_locations_in_bounds(self, x):
-        # check cadiated in bound
-        # there must be a particle property set up for every release_part_prop must have a
-        # use KD tree to find points those inside model domain
-        fgm = si.core_class_roles.field_group_manager
-        is_inside, release_part_prop  = fgm.are_points_inside_domain(x, self.params['allow_release_in_dry_cells'])
-
-        return is_inside, release_part_prop
-
-    def get_release_location_info(self, x, time_sec):
+    def release_location_info(self, x):
         # get grid cell etc for given candidate locations
         fgm = si.core_class_roles.field_group_manager
-        use_points, release_info = fgm.are_points_inside_domain(x, self.params['allow_release_in_dry_cells'])
+        use_points, release_info = fgm.are_points_inside_domain(x)
 
-        self._add_tide_and_depth_release_part_prop(release_info, time_sec)
+        release_info['water_depth'] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(
+                                         'water_depth', release_info['x'],
+                                        release_info['n_cell'], release_info['bc_coords'], time_sec=None,
+                                        hydro_model_gridID=release_info['hydro_model_gridID'])
 
         self._add_bookeeping_particle_prop_data(release_info)
 
-        # Block dry cell release
-        if not self.params['allow_release_in_dry_cells']:
-            is_dry_cell = fgm.are_dry_cells(release_info['n_cell'])
-            use_points = np.logical_and(use_points, ~is_dry_cell)
+        in_depth_range = self._find_those_in_water_depth_range(release_info)
+        use_points = np.logical_and(use_points, in_depth_range)
 
-        use_points = self._filter_water_depth_range(use_points, release_info)
+        # keep those inside domain, depth range
+        release_info = self._retain_release_locations(release_info,use_points)
 
-        return release_info, use_points
+        return release_info
 
     def get_release_locations(self, time_sec):
+        info = self.info
+        release_info= self.get_hori_release_locations(time_sec)
+
+        if si.run_info.is3D_run:
+            self._add_vertical_release(release_info)
+
+        info['pulseID'] += 1
+        info['number_released'] += release_info['x'].shape[0]  # count number released in this group
+
+        return release_info
+
+    # needs to be overridden , put on no pass when all release types use it
+    def get_hori_release_locations(self, time_sec):
+        release_info = self.find_enough_hori_release_locations(time_sec)
+        return release_info
+
+    def find_enough_hori_release_locations(self, time_sec):
         # set up full set of release locations inside  polygons
         ml = si.msg_logger
         info= self.info
@@ -120,121 +131,102 @@ class _BaseReleaseGroup(ParameterBaseClass):
         if 'points' in params :
             self.points  = params['points'] # grid release does not have points param
 
-        release_part_prop =dict(
+        release_info =dict(
                         x= np.full((0, self.points.shape[1]), 0.,dtype=np.float64, order='C'),
                         )
         count = 0
-        while release_part_prop['x'].shape[0] < n_required:
+        while release_info['x'].shape[0] < n_required:
             # get 2D release candidates
-
             x0 = self.get_release_location_candidates()
 
-            rd, use_points = self.get_release_location_info(x0, time_sec)
+            # get candidate locations and if useable/inside domain
+            rd = self.release_location_info(x0)
+            rd = self._apply_dry_cell_and_user_filters(rd, time_sec)
 
-            # get candidate locations inside domain
-            #use_points, rd  = self._check_potential_release_locations_in_bounds(x0)
-            #
-            #rd = self.add_tide_and_depth_release_part_prop(rd,time_sec)
-
-            #use_points = self.filter_water_depths(use_points, rd)
-
-            # add booking IDs etrc before any culling of candidates
-            #rd = self._add_bookeeping_particle_prop_data(rd)
-
-            #any filter added by child class included by user
-            use_points, rd = self.filter_release_points(use_points,rd, time_sec=time_sec)
-
-            # only keep those inside domain and kept by filter:
-            for key in rd.keys():
-                rd[key] = rd[key][use_points, ...]
-
-            # if any data concatenate it
-            # add release particle prop
+            # if any data concatenate it, add release particle prop
             if rd['x'].shape[0] > 0:
-                  # if any to list so far
                 for key, item in rd.items():
                     # add keys  if not there as 0, by what is needed add to
-                    if key not in release_part_prop:
+                    if key not in release_info:
                         s = [0]
                         if item.ndim ==2:
                             s += [item.shape[1]]
                         elif item.ndim > 2:
                             s += list(item.shape[1:])
-                        release_part_prop[key]=np.zeros(s, dtype=item.dtype)
+                        release_info[key]=np.zeros(s, dtype=item.dtype)
                     # add on new release data to existing data
-                    release_part_prop[key] = np.concatenate((release_part_prop[key], rd[key][:, ...]), axis=0)
+                    release_info[key] = np.concatenate((release_info[key], rd[key][:, ...]), axis=0)
 
             # allow max_cycles_to_find_release_points cycles to find points
             count += 1
             if count > params["max_cycles_to_find_release_points"]: break
 
-        info['pulseID'] += 1
-        info['number_released'] += release_part_prop['x'].shape[0]  # count number released in this group
+        # trim initial location, cell  etc to required number or points
+        n_required = min(release_info['x'].shape[0], n_required)
+        for key in release_info.keys():
+            release_info[key] = release_info[key][:n_required, ...]
+
         info['total_number_required'] += n_required  # used to check what proportion  sucessfully release all that were required, used to find groups tha have no releaseses
 
+        return release_info
 
-        # trim or deliver points found
-        n_required = min(release_part_prop['x'].shape[0], n_required) #
+    def _apply_dry_cell_and_user_filters(self, release_info, time_sec):
+        # Block dry cell release
+        if not self.params['allow_release_in_dry_cells']:
+             #usew time dependent dry cell index from reader to discard dry cells
+            is_dry_cell = si.core_class_roles.field_group_manager.are_dry_cells(release_info['n_cell'])
+            release_info= self._retain_release_locations(release_info, ~is_dry_cell)
 
-        # trim initial location, cell  etc to required number
-        for key in release_part_prop.keys():
-            release_part_prop[key] = release_part_prop[key][:n_required, ...]
+        # add tide data
+        # add time dependent tide
+        fgm = si.core_class_roles.field_group_manager
+        release_info['tide'] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(
+            'tide', release_info['x'],
+            release_info['n_cell'], release_info['bc_coords'], time_sec=time_sec,
+            hydro_model_gridID=release_info['hydro_model_gridID'])
 
-        # if nothing to release then return
-        if release_part_prop['x'].shape[0] ==0:
-            return release_part_prop
+        # apply user filter
+        use_points = self.user_release_point_filter(release_info, time_sec=time_sec)
+        release_info = self._retain_release_locations(release_info, use_points)
 
-        if si.run_info.is3D_run:
+        return release_info
 
-            # add z if not given
-            if  release_part_prop['x'].shape[1] < 3:
-                release_part_prop['x']= np.concatenate(( release_part_prop['x'],np.full( (release_part_prop['x'].shape[0],1), 0, dtype=release_part_prop['x'].dtype)),axis=1)
+    def _add_vertical_release(self, release_info):
+        params = self.params
 
-            if params['release_at_surface']:
-                release_part_prop['x'][:, 2] = release_part_prop['tide'] - params['release_offset_from_surface_or_bottom']
-            elif params['release_at_bottom']:
-                release_part_prop['x'][:, 2] = -release_part_prop['water_depth'] + params['release_offset_from_surface_or_bottom']
+        # add z if not given
+        if  release_info['x'].shape[1] < 3:
+            release_info['x']= np.concatenate((release_info['x'], np.full((release_info['x'].shape[0], 1), 0, dtype=release_info['x'].dtype)), axis=1)
 
-            elif params['z_min'] is not None or params['z_max'] is not None:
-                # release in random depth range if no given points have no z value, or zmin and/or zmax is set
-                z_min = -si.info.large_float if params['z_min'] is None else params['z_min']
-                z_max =  si.info.large_float if params['z_max'] is None else params['z_max']
+        if params['release_at_surface']:
+            release_info['x'][:, 2] = release_info['tide'] - params['release_offset_from_surface_or_bottom']
+        elif params['release_at_bottom']:
+            release_info['x'][:, 2] = -release_info['water_depth'] + params['release_offset_from_surface_or_bottom']
 
-                if z_min > z_max:
-                    ml.msg(f'Must have zmin >= zmax, (zmin,zmax) =({z_min:.3e}, {z_max:.3e}) ',
-                                      hint='z=0 is mean tide level and z < 0 below the mean tide level',   fatal_error=True, caller=self)
-                release_part_prop['x']  = self.get_z_release_in_depth_range(release_part_prop['x'] ,z_min,z_max,
-                                                                   release_part_prop['water_depth'],release_part_prop['tide'])
-        return release_part_prop
+        elif params['z_min'] is not None or params['z_max'] is not None:
+            # release in random depth range if no given points have no z value, or zmin and/or zmax is set
+            z_min = -si.info.large_float if params['z_min'] is None else params['z_min']
+            z_max =  si.info.large_float if params['z_max'] is None else params['z_max']
 
-    def _add_tide_and_depth_release_part_prop(self, release_part_prop, time_sec):# get water depth and tide at particle locations, which may be needed to filter particle releases
-             
-            # add tide and water depth at released particle locations
-            #todo mbetter ways to do this?
-            fgm = si.core_class_roles.field_group_manager
-            release_part_prop['water_depth'] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(
-                                                'water_depth', release_part_prop['x'],
-                                                release_part_prop['n_cell'],release_part_prop['bc_coords'], time_sec=None,
-                                                hydro_model_gridID=release_part_prop['hydro_model_gridID'])
-            release_part_prop['tide'] = fgm.interp_named_2D_scalar_fields_at_given_locations_and_time(
-                                                'tide', release_part_prop['x'],
-                                                release_part_prop['n_cell'],release_part_prop['bc_coords'], time_sec=time_sec,
-                                                hydro_model_gridID=release_part_prop['hydro_model_gridID'])
-            return release_part_prop
+            if z_min > z_max:
+                si.msg_logger.msg(f'Must have zmin >= zmax, (zmin,zmax) =({z_min:.3e}, {z_max:.3e}) ',
+                                  hint='z=0 is mean tide level and z < 0 below the mean tide level',   fatal_error=True, caller=self)
+            release_info['x']  = self._get_z_release_in_depth_range(release_info['x'], z_min, z_max,
+                                                                    release_info['water_depth'], release_info['tide'])
+        return release_info
 
 
-    def _filter_water_depth_range(self, is_inside, release_part_prop):
+    def _find_those_in_water_depth_range(self, release_part_prop):
         info = self.info
         water_depth = release_part_prop['water_depth']
 
         sel = np.logical_and(water_depth >= info['depth_range'][0] ,
                              water_depth <= info['depth_range'][1] )
-        is_inside = np.logical_and(sel, is_inside)
-        return is_inside
+        return sel
 
     @staticmethod
     @njitOT
-    def get_z_release_in_depth_range(x,z_min, z_max, water_depth,tide):
+    def _get_z_release_in_depth_range(x, z_min, z_max, water_depth, tide):
         # get random release within z_min and z_max and with water depth and tide
 
         for n in range(x.shape[0]):
@@ -242,3 +234,10 @@ class _BaseReleaseGroup(ParameterBaseClass):
             z2  = min(tide[n], z_max)
             x[n, 2] = np.random.uniform(z1, z2, size=1)[0]
         return x
+
+    def _retain_release_locations(self,release_info,sel):
+        # only keep release_locations_those with sel ==True
+        result = dict()
+        for key in release_info.keys():
+            result[key] = release_info[key][sel, ...]
+        return result

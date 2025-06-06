@@ -1,10 +1,10 @@
 import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.util import   cord_transforms
-from oceantracker.release_groups.point_release import PointRelease
+from oceantracker.release_groups.point_release import PointRelease, _BaseReleaseGroup
 from oceantracker.shared_info import shared_info as si
 
-class PolygonRelease(PointRelease):
+class PolygonRelease(_BaseReleaseGroup):
     '''
     Release particles at random locations within given polygon.
     Points chosen are always inside the domain, also inside wet cells unless setting allow_release_in_dry_cells is True.

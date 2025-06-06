@@ -152,7 +152,7 @@ class DevNestedFields(ParameterBaseClass):
         for fgm in self.fgm_hydro_grids:
                 fgm.add_part_prop_from_fields_plus_book_keeping()
 
-    def are_points_inside_domain(self,x,include_dry_cells):
+    def are_points_inside_domain(self,x):
         # used to check initial release points only
         part_prop = si.class_roles.particle_properties
 
@@ -162,7 +162,7 @@ class DevNestedFields(ParameterBaseClass):
 
         for n, fgm in enumerate(self.fgm_hydro_grids):
 
-            sel_n, part_data_n = fgm.are_points_inside_domain(x,include_dry_cells)
+            sel_n, part_data_n = fgm.are_points_inside_domain(x)
 
             if n == 0:
                 # start with outer grids values
@@ -213,7 +213,7 @@ class DevNestedFields(ParameterBaseClass):
             # todo faster- prebuild a index to show which cells overlap with an  inner and only check if these are inside the inner grid
 
 
-            is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid, axis=0), include_dry_cells=True)
+            is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid, axis=0))
 
             if np.any(is_inside):
                 # move those now inside outer grid and copy in values
@@ -234,7 +234,7 @@ class DevNestedFields(ParameterBaseClass):
             outside_inner = part_prop['status'].find_subset_where(on_inner_grid, 'eq', si.particle_status_flags.outside_open_boundary,
                                                                   out=self.get_partID_subset_buffer('fgmID2'))
             if outside_inner.size > 0:
-                inside_outer, pp = fgm_outer_grid.are_points_inside_domain(np.take(xq,outside_inner,axis =0), include_dry_cells=True)
+                inside_outer, pp = fgm_outer_grid.are_points_inside_domain(np.take(xq,outside_inner,axis =0))
                 if np.any(inside_outer):
                     # move those now inside inner grid and copy in values
                     s = outside_inner[inside_outer]  # IDs of those outside inner and inside outer

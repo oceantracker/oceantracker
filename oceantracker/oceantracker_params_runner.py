@@ -627,7 +627,7 @@ class OceanTrackerParamsRunner(object):
 
         file_base = si.run_info.run_output_dir
 
-        if si.core_class_roles.solver is not None and 'n_time_step' in solver_info:
+        if si.core_class_roles.solver is not None and 'n_time_step' in si:
             solver_info = si.core_class_roles.solver.info
             n_time_step = solver_info['n_time_step']
             time_sec = solver_info['time_sec']

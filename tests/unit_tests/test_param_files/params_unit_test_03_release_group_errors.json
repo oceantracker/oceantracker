@@ -1,7 +1,7 @@
 {
     "output_file_base": "unit_test_03_release_group_errors_00",
     "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
-    "time_step": 1800,
+    "time_step": 900,
     "use_random_seed": true,
     "NCDF_time_chunk": 1,
     "debug": true,
@@ -13,6 +13,22 @@
         "file_mask": "demo_hindcast_schisim3D*.nc"
     },
     "release_groups": [
+        {
+            "points": [
+                [
+                    1594000.0,
+                    5487000
+                ],
+                [
+                    1594000,
+                    5481000
+                ]
+            ],
+            "release_interval": 900,
+            "pulse_size": 1,
+            "class_name": "PointRelease",
+            "name": "my_point_release"
+        },
         {
             "points": [
                 [
@@ -40,34 +56,16 @@
                     5486972
                 ]
             ],
-            "release_interval": 3600,
-            "pulse_size": 5,
+            "release_interval": 900,
+            "pulse_size": 1,
             "z_min": -2.0,
             "z_max": 0.5,
             "class_name": "PolygonRelease",
             "name": "my_polygon_release"
-        },
-        {
-            "points": [
-                [
-                    1592000.0,
-                    5486972
-                ],
-                [
-                    159200,
-                    5480000
-                ]
-            ],
-            "release_interval": 3600,
-            "pulse_size": 5,
-            "z_min": -2.0,
-            "z_max": 0.5,
-            "class_name": "PointRelease",
-            "name": "my_radius_release"
         }
     ],
     "tracks_writer": {
-        "update_interval": 3600,
+        "update_interval": 900,
         "write_dry_cell_flag": false
     },
     "particle_properties": [
