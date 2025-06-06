@@ -186,7 +186,7 @@ class _BaseReader(ParameterBaseClass):
                 grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
 
             # fix any spanning 179 to -179
-            grid['x'] = fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
+            fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
                                                 crumbs=f'setting up reader in dir=  {self.params["input_dir"]}')
             # set up conversion of meters to degreees
             i = self._add_a_reader_field('degrees_per_meter', dict(time_varying=False, is3D=False, is_vector=True,

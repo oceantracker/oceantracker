@@ -77,18 +77,21 @@ def convert_cords(xy, EPSG_in, EPSG_out):
     return out
 
 
-def fix_any_spanning180east(lon_lat,single_cord=False, msg_logger=None, caller=None, crumbs=None):
+def fix_any_spanning180east(lon_lat, msg_logger=None, caller=None, crumbs=None):
     # check longitudes spanning 180, ie jumps from 179 E to -179 East
-    if single_cord: lon_lat = lon_lat[np.newaxis,:]
+    # and adjust in place
+    if lon_lat.ndim < 2:
+        msg_logger.msg(f'fix_any_spanning180east: lon_lat must be 2D (N,2 or 3)',
+                       fatal_error=True, caller=caller, crumbs=crumbs)
+
     bounds= [lon_lat[:,0].min(), lon_lat[:,0].max()]
     if abs(bounds[1] - bounds[0]) > 180:
         # spanning 180 deg east
         sel = lon_lat[:, 0] < 0
-        lon_lat[sel,:] += 360.
+        lon_lat[sel,0] += 360.
         msg_logger.msg( f'Hydro-model coordinates are geographic and span 180 degrees east, converting to 0-360 degrees',
                         note=True, caller =caller,crumbs=crumbs )
-    if single_cord: lon_lat = lon_lat[0]
-    return lon_lat
+
 
 def get_degrees_per_meter(lat, as_vector=False):
     # lon lat in deg

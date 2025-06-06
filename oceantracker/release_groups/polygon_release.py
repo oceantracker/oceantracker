@@ -30,20 +30,19 @@ class PolygonRelease(_BaseReleaseGroup):
         if params['points'].shape[0] < 3:
             ml.msg('"points" parameter have at least 3 points, given ' + str(params['points']), error=True, caller=self)
 
-        # ensure points are  meters
-        if si.settings.use_geographic_coords:
-            params['points'] = cord_transforms.fix_any_spanning180east(params['points'], msg_logger=si.msg_logger, caller=self,
-                                                       crumbs=f'Point release#{params["name"]}')
         info['release_type'] = 'polygon'
-        info['bounding_box_ll_ul'] = np.stack((np.nanmin(params['points'][:,:2], axis=0),
-                                               np.nanmax(params['points'][:,:2], axis=0)))
 
         self.polygon = InsidePolygon(verticies = params['points'], geographic_coords=si.settings.use_geographic_coords)
+        params['points'] = self.polygon.points # polygon may have been closed
+
+        self._check_all_inside_domain(params['points'])
+        self._add_bounding_box(params['points'])
+
         info['polygon_area'] = self.polygon.get_area()
         ll, ur = info['bounding_box_ll_ul']
         info['bounding_box_area'] = abs((ur[0] - ll[0]) * (ur[1] - ll[1]))
 
-        if info['polygon_area']  < 10:
+        if info['polygon_area'] < 10:
             ml.msg('Polygon release, area of polygon is < 10 sq meters , area =' + str(info['polygon_area']),
                    hint='Is hydro model grid in meters and polygon coords given in (lon, lat)  degrees, convert polygons to hydro models meters coords? ',
                    warning=True)

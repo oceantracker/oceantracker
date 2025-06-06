@@ -39,6 +39,17 @@ release_groups:
   release_interval: 900
   z_max: 0.5
   z_min: -2.0
+- class_name: GridRelease
+  grid_center:
+  - 1598604
+  - 5487275
+  grid_size:
+  - 3
+  - 4
+  grid_span:
+  - 500
+  - 1000
+  name: my_grid_release
 root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
 time_step: 900
 tracks_writer:
