@@ -78,13 +78,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             # use given grid center for all
             info['grid_centers'] =  np.tile(params['grid_center'],(len(si.class_roles.release_groups),1))
 
-
-        if si.settings.use_geographic_coords:
-            # check points for wrap around 180
-            info['grid_centers'] = cord_transforms.fix_any_spanning180east(info['grid_centers'], msg_logger=si.msg_logger, caller=self,
-                                                       crumbs=f'gridded statistics release# {params["name"]}')
-
-
         gsize = np.asarray(params['grid_size'])
         gsize = gsize + (gsize+1) % 2  # grid size must be odd to ensure middle of center cell at mid point , a required by re
         gspan = params['grid_span']

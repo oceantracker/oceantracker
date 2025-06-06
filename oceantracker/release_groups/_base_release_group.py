@@ -5,7 +5,6 @@ from oceantracker.util.parameter_checking import  ParameterListChecker as PLC, P
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 from numba import njit
 from oceantracker.util.numba_util import njitOT
-
 from oceantracker.util.basic_util import nopass
 from oceantracker.shared_info import shared_info as si
 
@@ -93,9 +92,6 @@ class _BaseReleaseGroup(ParameterBaseClass):
                                         hydro_model_gridID=release_info['hydro_model_gridID'])
 
         self._add_bookeeping_particle_prop_data(release_info)
-
-        in_depth_range = self._find_those_in_water_depth_range(release_info)
-        use_points = np.logical_and(use_points, in_depth_range)
 
         # keep those inside domain, depth range
         release_info = self._retain_release_locations(release_info,use_points)
@@ -216,13 +212,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         return release_info
 
 
-    def _find_those_in_water_depth_range(self, release_part_prop):
-        info = self.info
-        water_depth = release_part_prop['water_depth']
 
-        sel = np.logical_and(water_depth >= info['depth_range'][0] ,
-                             water_depth <= info['depth_range'][1] )
-        return sel
 
     @staticmethod
     @njitOT
@@ -241,3 +231,42 @@ class _BaseReleaseGroup(ParameterBaseClass):
         for key in release_info.keys():
             result[key] = release_info[key][sel, ...]
         return result
+
+    def _check_all_inside_domain(self, points):
+
+        # filters points based on inside domain/water depth range
+        release_info = self.release_location_info(points)
+        if release_info['x'].shape[0] == 0:  # check number # points inside
+            si.msg_logger.msg(f'No release points are inside domain for group "{self.params["name"]}" ',
+                              hint='points not in grids coord. system?, or if geographic, not in (lon,lat) order',
+                              error=True, caller=self)
+        return release_info
+
+    def _check_some_outside_domain(self, points_used, points_given):
+        n_used, n_given = points_used.shape[0], points_given.shape[0]
+        if points_used.shape[0] < points_given.shape[0]:
+            si.msg_logger.msg(f'Only {n_used} release of {n_given}  points used for group "{self.params["name"]}",  ',
+                              hint='Some points are outside domain or not in requested water depth range?',
+                              warning=True, caller=self)
+
+    def _add_bounding_box(self,points):
+        self.info['bounding_box_ll_ul'] = np.stack(( np.nanmin(points[:,:2],axis=0), np.nanmax(points[:, :2],axis=0)))
+
+
+    def _check_all_inside_water_depth_range(self, release_info):
+
+        info = self.info
+        water_depth = release_info['water_depth']
+
+        in_range = np.logical_and(water_depth >= info['depth_range'][0] ,
+                             water_depth <= info['depth_range'][1] )
+
+        if ~np.any(in_range):  # check number # points in depth range
+            si.msg_logger.msg(f'No release points are inside user given depth range "{self.params["name"]}" ',
+                              hint='Fix depth range or move points',
+                              error=True, caller=self)
+
+        release_info = self._retain_release_locations(release_info,in_range)
+
+
+        return release_info

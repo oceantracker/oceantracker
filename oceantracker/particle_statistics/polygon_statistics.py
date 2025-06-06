@@ -5,7 +5,7 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
-from oceantracker.util.cord_transforms import fix_any_spanning180east
+
 from oceantracker.shared_info import shared_info as si
 
 class _CorePolygonMethods(ParameterBaseClass):
@@ -49,10 +49,6 @@ class _CorePolygonMethods(ParameterBaseClass):
             for n, p in enumerate(params['polygon_list']):
                 p = merge_params_with_defaults(p,  si.default_polygon_dict_params,
                                 si.msg_logger, crumbs='polygon_statistics_merging polygon list')
-                if si.settings.use_geographic_coords:
-                    p['points'] = fix_any_spanning180east(p['points'],
-                                                   msg_logger=si.msg_logger, caller=self,
-                                                   crumbs=f'Polygon_list#{n}')
 
         if len(params['polygon_list'])==0:
             ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,

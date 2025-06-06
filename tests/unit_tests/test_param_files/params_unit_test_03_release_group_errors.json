@@ -62,6 +62,22 @@
             "z_max": 0.5,
             "class_name": "PolygonRelease",
             "name": "my_polygon_release"
+        },
+        {
+            "grid_center": [
+                1598604,
+                5487275
+            ],
+            "grid_span": [
+                500,
+                1000
+            ],
+            "grid_size": [
+                3,
+                4
+            ],
+            "class_name": "GridRelease",
+            "name": "my_grid_release"
         }
     ],
     "tracks_writer": {

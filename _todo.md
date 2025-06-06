@@ -35,7 +35,7 @@
 1. max_duration and end time estimates
 8. LSC unit test slow?  release stratergies?
 9.  speed nested grids, only check if particle on outer grid is inside an inner grid if in a cell overlapping  an inner grid 
-
+1. when converting from meters to latlong grid, need to rotate vel to be north/south, east/west??
 ## Nice to haves
 1.   remove_tidally_stranded_particles option?
 1. attach name of method to message loggers crumb trail
