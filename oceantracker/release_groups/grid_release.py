@@ -41,26 +41,35 @@ class GridRelease(_BaseReleaseGroup):
         xi, yi, info['bounding_box_ll_ul'] = regular_grid_util.make_regular_grid(params['grid_center'], params['grid_size'], params['grid_span'])
         info['x_grid'] = np.stack((xi,yi),axis=2)
 
-        # add points param for other parts of code
-        self.points = np.stack((xi.ravel(),yi.ravel()),axis=1)
-
         # build global grid index
         ci, ri = np.meshgrid(range(xi.shape[1]),range(xi.shape[0]))
+        # add particle prop fort row column only if nor already added by another grid release
         info['map_grid_index_to_row_column'] = np.stack((ri.ravel(), ci.ravel()),axis=1)
 
+        # add points param for other parts of code
+        params['points'] = np.stack((xi.ravel(),yi.ravel()),axis=1)
+
+        self.release_info = self._check_points_inside_domain(params['points'],warn_some_outside=True)
+        self.release_info = self._check_all_inside_water_depth_range(self.release_info)
+
+        params['points'] = self.release_info['x']
+
+        self._add_bounding_box(self.release_info['x'])
+
         # add particle prop fort row column only if nor already added by another grid release
+        info['number_per_release'] = params['pulse_size'] * self.release_info['x'].shape[0]
 
         pass
 
-    def get_number_required_per_release(self):
-        return self.params['pulse_size'] * self.points.shape[0]
+    def get_hori_release_locations(self, time_sec):
+        # filter pre-calculated reslease info
+        rg = self._apply_dry_cell_and_user_filters(self.release_info, time_sec)
+        rg = self._clone_release_info(rg, self.params['pulse_size'])
+        return rg
 
-    def get_release_location_candidates(self):
-        x = np.repeat(self.points, self.params['pulse_size'], axis=0)
-        return x
-    
-    def _add_bookeeping_particle_prop_data(self, release_part_prop):
-        super()._add_bookeeping_particle_prop_data(release_part_prop) # get standard release bookeeping prop
+
+    def _add_bookeeping_release_info(self, release_part_prop):
+        super()._add_bookeeping_release_info(release_part_prop) # get standard release bookeeping prop
 
         # add row column origin part prop data, for each pulse
         release_part_prop['grid_release_row_col'] = np.repeat(self.info['map_grid_index_to_row_column'], self.params['pulse_size'], axis=0)

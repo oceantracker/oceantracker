@@ -33,17 +33,18 @@ class PointRelease(_BaseReleaseGroup):
         params = self.params
 
         # get release info for points inside domain and water depth limits
-        self.release_info = self._check_all_inside_domain(params['points'])
-        self._check_all_inside_water_depth_range(self.release_info)
-        self._check_some_outside_domain(self.release_info['x'], params['points'])
-        self._add_bounding_box( self.release_info['x'])
+        self.release_info = self._check_points_inside_domain(params['points'], warn_some_outside=True)
+        self.release_info = self._check_all_inside_water_depth_range(self.release_info)
 
-    def get_number_required_per_release(self):
-        return self.params['pulse_size']*self.params['points'].shape[0]
+        self._add_bounding_box( self.release_info['x'])
+        params['points'] = self.release_info['x']
+
+        self.info['number_per_release'] = params['pulse_size'] * self.release_info['x'].shape[0]
 
     def get_hori_release_locations(self, time_sec):
         # filter pre-calculated reslease info
         rg = self._apply_dry_cell_and_user_filters(self.release_info, time_sec)
+        rg  = self._clone_release_info(rg,self.params['pulse_size'])
         return rg
 
 

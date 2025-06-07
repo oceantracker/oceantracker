@@ -309,7 +309,7 @@ class OceanTrackerParamsRunner(object):
             # max_ages needed for culling operations
             i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
             max_ages.append(i.params['max_age'])
-            number_released += i.schedulers['release'].task_flag * i.get_number_required_per_release()  # find total released at each time step
+            number_released += i.schedulers['release'].task_flag *i.info['number_per_release']  # find total released at each time step
 
         # use forcast number alive to set up particle chunking, for memory buffers and output files
         ri = si.run_info

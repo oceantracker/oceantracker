@@ -60,17 +60,14 @@ class _BaseReleaseGroup(ParameterBaseClass):
         ]
         info['depth_range'] = np.asarray( info['depth_range'])
 
-    def get_release_location_candidates(self): nopass()
-    def get_number_required_per_release(self): nopass()
-
-    # optional filter on release points
+     # optional filter on release points
     def user_release_point_filter(self, release_part_prop, time_sec= None):
         # user can create filter if points to keep from given points release points
         # by inheritance of this class and overriding this method
         # return boolean of kept points
         return np.full((release_part_prop['x'].shape[0],),True,dtype=bool)
 
-    def _add_bookeeping_particle_prop_data(self, release_part_prop):
+    def _add_bookeeping_release_info(self, release_part_prop):
         # add booking ID s before anny culling of candidates
         info = self.info
         # add release IDs as full arrays
@@ -91,7 +88,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
                                         release_info['n_cell'], release_info['bc_coords'], time_sec=None,
                                         hydro_model_gridID=release_info['hydro_model_gridID'])
 
-        self._add_bookeeping_particle_prop_data(release_info)
+        self._add_bookeeping_release_info(release_info)
 
         # keep those inside domain, depth range
         release_info = self._retain_release_locations(release_info,use_points)
@@ -121,14 +118,8 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info= self.info
         params=self.params
 
-        n_required = self.get_number_required_per_release()
-
-        # there must be a particle property set up for every release_part_prop must have a
-        if 'points' in params :
-            self.points  = params['points'] # grid release does not have points param
-
-        release_info =dict(
-                        x= np.full((0, self.points.shape[1]), 0.,dtype=np.float64, order='C'),
+        n_required = info['number_per_release']
+        release_info =dict(x = np.full((0, params['points'].shape[1]), 0.,dtype=np.float64, order='C'),
                         )
         count = 0
         while release_info['x'].shape[0] < n_required:
@@ -232,41 +223,44 @@ class _BaseReleaseGroup(ParameterBaseClass):
             result[key] = release_info[key][sel, ...]
         return result
 
-    def _check_all_inside_domain(self, points):
+    def _check_points_inside_domain(self, points, warn_some_outside=False):
 
         # filters points based on inside domain/water depth range
         release_info = self.release_location_info(points)
-        if release_info['x'].shape[0] == 0:  # check number # points inside
-            si.msg_logger.msg(f'No release points are inside domain for group "{self.params["name"]}" ',
+
+        n_used, n_given = release_info['x'].shape[0], points.shape[0]
+        if n_used == 0:  # check number # points inside
+            si.msg_logger.msg(f'No points are inside domain for group "{self.params["name"]}" ',
                               hint='points not in grids coord. system?, or if geographic, not in (lon,lat) order',
                               error=True, caller=self)
+
+        if warn_some_outside and n_used < n_given:
+            si.msg_logger.msg(f'Discarded {n_given-n_used} points of {n_given}  outside domain for group "{self.params["name"]}",  ',
+                              hint='Wrong cord system? not in (lon, lat order) if geographic coords?',
+                              warning=True, caller=self)
+
         return release_info
 
-    def _check_some_outside_domain(self, points_used, points_given):
-        n_used, n_given = points_used.shape[0], points_given.shape[0]
-        if points_used.shape[0] < points_given.shape[0]:
-            si.msg_logger.msg(f'Only {n_used} release of {n_given}  points used for group "{self.params["name"]}",  ',
-                              hint='Some points are outside domain or not in requested water depth range?',
-                              warning=True, caller=self)
 
     def _add_bounding_box(self,points):
         self.info['bounding_box_ll_ul'] = np.stack(( np.nanmin(points[:,:2],axis=0), np.nanmax(points[:, :2],axis=0)))
-
 
     def _check_all_inside_water_depth_range(self, release_info):
 
         info = self.info
         water_depth = release_info['water_depth']
-
         in_range = np.logical_and(water_depth >= info['depth_range'][0] ,
                              water_depth <= info['depth_range'][1] )
 
         if ~np.any(in_range):  # check number # points in depth range
             si.msg_logger.msg(f'No release points are inside user given depth range "{self.params["name"]}" ',
                               hint='Fix depth range or move points',
-                              error=True, caller=self)
-
+                              fatal_error=True, caller=self)
         release_info = self._retain_release_locations(release_info,in_range)
-
-
         return release_info
+
+    def _clone_release_info(self, release_info,n):
+        result = dict()
+        for key, val in release_info.items():
+            result[key] = np.repeat(release_info[key],n,axis=0)
+        return  result

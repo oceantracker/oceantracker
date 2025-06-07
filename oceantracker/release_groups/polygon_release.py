@@ -35,7 +35,7 @@ class PolygonRelease(_BaseReleaseGroup):
         self.polygon = InsidePolygon(verticies = params['points'], geographic_coords=si.settings.use_geographic_coords)
         params['points'] = self.polygon.points # polygon may have been closed
 
-        self._check_all_inside_domain(params['points'])
+        self._check_points_inside_domain(params['points'])
         self._add_bounding_box(params['points'])
 
         info['polygon_area'] = self.polygon.get_area()
@@ -49,7 +49,7 @@ class PolygonRelease(_BaseReleaseGroup):
 
         info['number_released'] = 0
         info['pulseID'] = 0
-
+        info['number_per_release'] = params['pulse_size']
 
     def get_release_location_candidates(self):
         info = self.info
@@ -67,8 +67,6 @@ class PolygonRelease(_BaseReleaseGroup):
         x = xy_candidates[sel, :]
         return x
 
-    def get_number_required_per_release(self):
-        return self.params['pulse_size']
 
 
 

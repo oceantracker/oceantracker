@@ -7,7 +7,7 @@ def main(args):
     ot.settings(**test_definitions.base_settings(__file__, args))
     hm = test_definitions.hydro_model['demoSchism3D']
 
-    ot.settings(time_step=900,use_dispersion=False,backtracking=True,
+    ot.settings(time_step=900,use_dispersion=False,
              use_A_Z_profile=False, )
 
 
@@ -30,7 +30,9 @@ def main(args):
     ot.add_class( 'release_groups',name='my_grid_release',  # name used internal to refer to this release
                     class_name='GridRelease',
                   release_interval=1800, pulse_size=1,
-                  grid_center=[1601000, 5484000], grid_span=[1000, 3000], grid_size=[3, 4],)
+                  grid_center=[1601000, 5484000],
+                  grid_span=[1000, 3000], grid_size=[3, 4],)
+
     ot.add_class('tracks_writer',update_interval = 900, write_dry_cell_flag=False)
 
     # add a decaying particle property,# with exponential decay based on age
