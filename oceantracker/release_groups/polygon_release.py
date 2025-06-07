@@ -51,6 +51,10 @@ class PolygonRelease(_BaseReleaseGroup):
         info['pulseID'] = 0
         info['number_per_release'] = params['pulse_size']
 
+    def get_hori_release_locations(self, time_sec):
+        release_info = self.find_enough_hori_release_locations(time_sec)
+        return release_info
+
     def get_release_location_candidates(self):
         info = self.info
         ll, ur = info['bounding_box_ll_ul']
@@ -66,7 +70,3 @@ class PolygonRelease(_BaseReleaseGroup):
         sel = self.polygon.inside_indices(xy_candidates)
         x = xy_candidates[sel, :]
         return x
-
-
-
-

@@ -1,3 +1,5 @@
+import numpy as np
+
 from oceantracker.main import OceanTracker
 from copy import deepcopy
 from tests.unit_tests import test_definitions
@@ -18,11 +20,12 @@ def main(args):
              class_name='PointRelease',  # class to use
              points=[[1594000., 5487000], [1594000, 5481000],],
              release_interval=900, pulse_size=1)
-
+    poly =np.asarray([[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
+                     [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]])
+    #poly= poly - np.asarray([0,1000])
     ot.add_class( 'release_groups',name='my_polygon_release',  # name used internal to refer to this release
                     class_name='PolygonRelease',  # class to use
-                    points=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
-                            [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
+                    points=poly,
                     # the below are optional settings/parameters
                     release_interval=900, pulse_size=1,
                     z_min=-2., z_max=0.5)
