@@ -327,11 +327,8 @@ def read_release_groups_info(file_name):
 
         # extract info
         d[rg_name] = attr
-        if attr['release_type'] =='grid':
-            d[rg_name]['x_grid'] = data
-            d[rg_name]['points'] = np.reshape(data,(data.shape[0]*data.shape[1], data.shape[2])) # flatten points
-        else:
-            d[rg_name]['points'] = data
+        d[rg_name]['points'] = data
+
         pass
     nc.close()
     return d

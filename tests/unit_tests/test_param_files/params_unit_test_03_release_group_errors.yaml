@@ -1,5 +1,4 @@
 NCDF_time_chunk: 1
-backtracking: true
 debug: true
 output_file_base: unit_test_03_release_group_errors_00
 particle_properties:
@@ -41,15 +40,17 @@ release_groups:
   z_min: -2.0
 - class_name: GridRelease
   grid_center:
-  - 1598604
-  - 5487275
+  - 1601000
+  - 5484000
   grid_size:
   - 3
   - 4
   grid_span:
-  - 500
   - 1000
+  - 3000
   name: my_grid_release
+  pulse_size: 1
+  release_interval: 1800
 root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
 time_step: 900
 tracks_writer:

@@ -6,7 +6,6 @@
     "NCDF_time_chunk": 1,
     "debug": true,
     "use_dispersion": false,
-    "backtracking": true,
     "use_A_Z_profile": false,
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
@@ -64,13 +63,15 @@
             "name": "my_polygon_release"
         },
         {
+            "release_interval": 1800,
+            "pulse_size": 1,
             "grid_center": [
-                1598604,
-                5487275
+                1601000,
+                5484000
             ],
             "grid_span": [
-                500,
-                1000
+                1000,
+                3000
             ],
             "grid_size": [
                 3,
