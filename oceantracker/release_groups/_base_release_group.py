@@ -67,16 +67,15 @@ class _BaseReleaseGroup(ParameterBaseClass):
         # return boolean of kept points
         return np.full((release_part_prop['x'].shape[0],),True,dtype=bool)
 
-    def _add_bookeeping_release_info(self, release_part_prop):
+    def _add_bookeeping_release_info(self, release_info):
         # add booking ID s before anny culling of candidates
         info = self.info
         # add release IDs as full arrays
-        n = release_part_prop['x'].shape[0]
-        info['IDrelease_group'] = info['instanceID']
-        release_part_prop['IDrelease_group'] = np.full((n,), info['instanceID'], dtype=np.int32)
-        release_part_prop['IDpulse'] = np.full((n,), info['pulseID'], dtype=np.int32)
-        release_part_prop['user_release_groupID'] = np.full((n,), self.params['user_release_groupID'], dtype=np.int32)
-        return release_part_prop
+        n = release_info['x'].shape[0]
+        release_info['IDrelease_group'] = np.full((n,), info['instanceID'], dtype=np.int32)
+        release_info['IDpulse'] = np.full((n,), info['pulseID'], dtype=np.int32)
+        release_info['user_release_groupID'] = np.full((n,), self.params['user_release_groupID'], dtype=np.int32)
+        return release_info
 
     def release_location_info(self, x):
         # get grid cell etc for given candidate locations
@@ -90,7 +89,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
         self._add_bookeeping_release_info(release_info)
 
-        # keep those inside domain, depth range
+        # keep those inside domain
         release_info = self._retain_release_locations(release_info,use_points)
 
         return release_info
@@ -109,8 +108,8 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
     # needs to be overridden , put on no pass when all release types use it
     def get_hori_release_locations(self, time_sec):
-        release_info = self.find_enough_hori_release_locations(time_sec)
-        return release_info
+        nopass(f'get_hori_release_locations must be added to this release name = {self.params["name"]} class= {self.params["class_name"]}')
+
 
     def find_enough_hori_release_locations(self, time_sec):
         # set up full set of release locations inside  polygons
@@ -128,20 +127,15 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
             # get candidate locations and if useable/inside domain
             rd = self.release_location_info(x0)
-            rd = self._apply_dry_cell_and_user_filters(rd, time_sec)
 
             # if any data concatenate it, add release particle prop
-            if rd['x'].shape[0] > 0:
-                for key, item in rd.items():
-                    # add keys  if not there as 0, by what is needed add to
-                    if key not in release_info:
-                        s = [0]
-                        if item.ndim ==2:
-                            s += [item.shape[1]]
-                        elif item.ndim > 2:
-                            s += list(item.shape[1:])
-                        release_info[key]=np.zeros(s, dtype=item.dtype)
-                    # add on new release data to existing data
+            for key, item in rd.items():
+                # add keys  if not there as 0, by what is needed add to
+                if key not in release_info:
+                    s = (0,) + item.shape[1:] if item.ndim > 1 else (0,)
+                    release_info[key]=np.zeros(s, dtype=item.dtype)
+                # add on new release data to existing data
+                if rd['x'].shape[0] > 0:
                     release_info[key] = np.concatenate((release_info[key], rd[key][:, ...]), axis=0)
 
             # allow max_cycles_to_find_release_points cycles to find points
@@ -149,11 +143,13 @@ class _BaseReleaseGroup(ParameterBaseClass):
             if count > params["max_cycles_to_find_release_points"]: break
 
         # trim initial location, cell  etc to required number or points
+        sel =np.full((release_info['x'].shape[0],),False,dtype=bool)
         n_required = min(release_info['x'].shape[0], n_required)
-        for key in release_info.keys():
-            release_info[key] = release_info[key][:n_required, ...]
+        sel[:n_required] = True
+        release_info= self._retain_release_locations(release_info,sel)
 
-        info['total_number_required'] += n_required  # used to check what proportion  sucessfully release all that were required, used to find groups tha have no releaseses
+        # discard those in dry cells if requested
+        release_info = self._apply_dry_cell_and_user_filters(release_info, time_sec)
 
         return release_info
 
@@ -202,9 +198,6 @@ class _BaseReleaseGroup(ParameterBaseClass):
                                                                     release_info['water_depth'], release_info['tide'])
         return release_info
 
-
-
-
     @staticmethod
     @njitOT
     def _get_z_release_in_depth_range(x, z_min, z_max, water_depth, tide):
@@ -219,8 +212,15 @@ class _BaseReleaseGroup(ParameterBaseClass):
     def _retain_release_locations(self,release_info,sel):
         # only keep release_locations_those with sel ==True
         result = dict()
+        has_points = np.any(sel)
         for key in release_info.keys():
-            result[key] = release_info[key][sel, ...]
+            data = release_info[key]
+            if has_points:
+                result[key] = data[sel, ...]
+            else:
+                # make empty output
+                s = (0,) + data.shape[1:] if data.ndim > 1 else (0,)
+                result[key] = np.zeros(s, dtype=data.dtype)
         return result
 
     def _check_points_inside_domain(self, points, warn_some_outside=False):
