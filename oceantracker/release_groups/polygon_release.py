@@ -19,7 +19,6 @@ class PolygonRelease(_BaseReleaseGroup):
         # below are not needed for polygons
         self.remove_default_params(['release_radius'])
 
-
     def initial_setup(self):
         super().initial_setup()  # required to get base class set up
         # sort out list  polygon from points

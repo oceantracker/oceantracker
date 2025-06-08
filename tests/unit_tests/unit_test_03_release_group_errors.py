@@ -16,9 +16,14 @@ def main(args):
     #ot.settings(NUMBA_cache_code = True)
     ot.add_class('reader', **hm['reader'])
 
+    ot.add_class('release_groups', name='my_radius_release',  # name used internal to refer to this release
+             class_name='RadiusRelease',  # class to use
+             points=[[1593000., 5487000], [1593000, 5484000],],
+             radius = 1000, release_interval=1800, pulse_size=2)
+
     ot.add_class('release_groups', name='my_point_release',  # name used internal to refer to this release
              class_name='PointRelease',  # class to use
-             points=[[1594000., 5487000], [1594000, 5481000],],
+             points=[[1593000., 5491000], [1593000, 5481000],],
              release_interval=900, pulse_size=1)
     poly =np.asarray([[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
                      [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]])
