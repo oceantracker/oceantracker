@@ -41,12 +41,10 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
                 #coords_in_lat_lon_order =  PVC(False, bool,
                 #    doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
-                status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),
-                                 obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
-                               ),
-                status_max=PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),
-                                obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
-                               ),
+                status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),obsolete=True,
+                               doc_str='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'),
+                status_max=PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),obsolete=True,
+                             doc_str='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'),
                 )
         self.add_default_params(count_start_date= PTC(None,  obsolete=True,  doc_str='Use "start" parameter'),
                                 count_end_date= PTC(None,   obsolete=True,  doc_str='Use "end" parameter'))

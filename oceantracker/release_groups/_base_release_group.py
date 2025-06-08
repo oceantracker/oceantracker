@@ -142,11 +142,10 @@ class _BaseReleaseGroup(ParameterBaseClass):
             count += 1
             if count > params["max_cycles_to_find_release_points"]: break
 
-        # trim initial location, cell  etc to required number or points
-        sel =np.full((release_info['x'].shape[0],),False,dtype=bool)
+        # trim initial locations, cell  etc to required number or points
         n_required = min(release_info['x'].shape[0], n_required)
-        sel[:n_required] = True
-        release_info= self._retain_release_locations(release_info,sel)
+        for key in release_info.keys():
+            release_info[key] = release_info[key][:n_required,...]
 
         # discard those in dry cells if requested
         release_info = self._apply_dry_cell_and_user_filters(release_info, time_sec)

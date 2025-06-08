@@ -15,11 +15,28 @@
         {
             "points": [
                 [
-                    1594000.0,
+                    1593000.0,
                     5487000
                 ],
                 [
-                    1594000,
+                    1593000,
+                    5484000
+                ]
+            ],
+            "radius": 1000,
+            "release_interval": 1800,
+            "pulse_size": 2,
+            "class_name": "RadiusRelease",
+            "name": "my_radius_release"
+        },
+        {
+            "points": [
+                [
+                    1593000.0,
+                    5491000
+                ],
+                [
+                    1593000,
                     5481000
                 ]
             ],
