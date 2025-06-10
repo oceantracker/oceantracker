@@ -156,7 +156,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         # Block dry cell release
         if not self.params['allow_release_in_dry_cells']:
              #usew time dependent dry cell index from reader to discard dry cells
-            is_dry_cell = si.core_class_roles.field_group_manager.are_dry_cells(release_info['n_cell'])
+            is_dry_cell = si.core_class_roles.field_group_manager.release_are_dry_cells(release_info)
             release_info= self._retain_release_locations(release_info, ~is_dry_cell)
 
         # add tide data
