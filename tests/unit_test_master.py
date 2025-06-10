@@ -46,5 +46,5 @@ if __name__ == "__main__":
         params = p.main(args)
         if params is not None:
             json_util.write_JSON(path.join(param_dir,f'params_{name}.json'),params)
-            yaml_util.write_YAML(path.join(param_dir, f'params_{name}.yaml'), params)
+
 

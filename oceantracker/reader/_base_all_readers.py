@@ -62,6 +62,7 @@ class _BaseReader(ParameterBaseClass):
                             all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables', is_required=True),
                             ),
             'field_variables' : PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
+            'drop_variables': PLC(None, str, expert=True, doc_str='List of problematic file variable names to ignore, eg non-critcal variables not present in all files/all times', make_list_unique=True),
         })  # list of normal required dimensions
 
         self.info['buffer_info'] = dict( time_steps_in_buffer = [])

@@ -13,6 +13,7 @@ def write_release_group_netcdf():
     '''Write release groups data to own file for each case '''
     fn =  si.run_info.output_file_base + '_release_groups.nc'
     nc = NetCDFhandler(path.join(si.run_info.run_output_dir, fn), mode= 'w')
+    nc.write_global_attribute('geographic_coords', int(si.settings.use_geographic_coords))
 
     # loop over release groups
     for name, rg in si.class_roles.release_groups.items():
@@ -41,8 +42,13 @@ def write_release_group_netcdf():
                    user_release_groupID=rg.params['user_release_groupID'],
                    user_release_group_name= rg.params['user_release_group_name'],
                    number_released= rg.info['number_released'])
+
+        if rg.info['release_type'] == 'radius':
+            attr.update(radius=rg.params['radius'])
+
         nc.write_a_new_variable(v_name, points, dims, units='meters or decimal deg. as  (lon, lat)',
                                 description='release locations, not outside grid', attributes=attr)
+
 
     nc.close()
     return fn

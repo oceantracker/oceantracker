@@ -55,8 +55,7 @@ class RadiusRelease(_BaseReleaseGroup):
 
         # lon,lat  tweaks
         if si.settings.use_geographic_coords:
-            x[:, :2] =  local_meters_grid_to_deg(offsets_meters[:,0],offsets_meters[:,1],
-                                     x[:,0], x[:,1], as_vector=True)
+            x[:, :2] =  local_meters_grid_to_deg(offsets_meters[:,0],offsets_meters[:,1], x[:,0], x[:,1], as_vector=True)
         else:
             x[:, :2] += offsets_meters
 
