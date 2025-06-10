@@ -56,8 +56,6 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
 
     reader.add_hindcast_info() # any tweaks for specific reader
 
-    # checks on hindcast info
-    _check_time_consistency(reader)
 
     # todo check all required fields are set
     if info['vert_grid_type'] is not None and info['vert_grid_type'] not in si.vertical_grid_types.possible_values():
@@ -369,6 +367,29 @@ def _make_variable_time_step_to_fileID_map(reader):
         item['time_step_to_file_offset_map'] = time_step_file_offset_map
         pass
     pass
+
+
+def _hindcast_integrity_checks(reader):
+    # todo , not ey used, put call in fgm final setup after all classes set up?
+    params = reader.params
+    info = reader.info
+    file_vars = info['variables']
+    ml = si.msg_logger
+    vars =[]
+
+    # check needed fields  are present
+    for name, i in reader.fields.items():
+        if 'file_vars_info' not in i.info: continue  # only do reader fiields
+        for var_name in i.info['file_vars_info'].keys():
+            vars.append(var_name)
+            if var_name not in file_vars:
+                ml.msg(f'Reader feild {name}, file variable{var_name} is not in hindcast files', caller=reader, fatal_error=True)
+
+
+
+        pass
+    ml.progress_marker('passed hindcast integrity checks', caller = reader)
+    return
 
 
 def _check_time_consistency(reader):

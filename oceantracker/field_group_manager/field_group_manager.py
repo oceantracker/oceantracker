@@ -257,11 +257,13 @@ class FieldGroupManager(ParameterBaseClass):
 
         return is_inside, part_data
 
-    def are_dry_cells(self, n_cell):
-        sel = self.reader.grid['dry_cell_index'][n_cell] > 128  # those dry
+    def release_are_dry_cells(self, release_info):
+        sel = self.reader.grid['dry_cell_index'][ release_info['n_cell']] > 128  # those dry
         return sel
 
 
+    def hindcast_integrity(self):
+        setup_reader._hindcast_integrity_checks(self.reader)
 
     def close(self):
         pass

@@ -1,7 +1,7 @@
-from oceantracker.field_group_manager.field_group_manager import FieldGroupManager
+
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.field_group_manager.util import  field_group_manager_util
+from oceantracker.util.numba_util import  njitOT, njitOTparallel, prange
 import numpy as np
 from oceantracker.util import time_util
 from oceantracker.shared_info import shared_info as si
@@ -179,6 +179,15 @@ class DevNestedFields(ParameterBaseClass):
 
 
         return is_inside, part_data
+
+    def release_are_dry_cells(self, release_info):
+        # work out of dry for rreleased partivles
+        sel = np.full((release_info['hydro_model_gridID'].size),False, dtype=bool)
+        for ngrid, fgm in enumerate(self.fgm_hydro_grids):
+            active   = release_info['hydro_model_gridID'] == ngrid
+            sel[active] = fgm.reader.grid['dry_cell_index'][release_info['n_cell'][active]] > 128  # those dry
+
+        return sel
 
 
     def interp_named_2D_scalar_fields_at_given_locations_and_time(self,field_name,  x, n_cell, bc_coords, time_sec = None, hydro_model_gridID = None):

@@ -275,7 +275,10 @@ class OceanTrackerParamsRunner(object):
         pass
 
     def _do_run_integrity_checks(self):
-         # check all have required, fields, part props and grid data
+        #todo add hindcast checks
+        #si.core_class_roles.field_group_manager.hindcast_integrity()
+
+        # check all have required, fields, part props and grid data
         for i in si._all_class_instance_pointers_iterator():
             i.check_requirements()
 
