@@ -136,16 +136,20 @@ def plot_release_points_and_polygons(d, release_groupID:int = None, ax = plt.gca
     
     if release_groupID is None : 
         # plot all release groups
-        sel = d['particle_release_groups'].values()
+        sel = d['particle_release_groups']
     else:
         sel = [list(d['particle_release_groups'].values())[release_groupID]]
 
     objs=[]
-    for rg in sel:
+    for name, rg in sel.items():
 
         p = rg['points'][:,:2]
         if rg['release_type'] == 'polygon':
             o = ax.plot(p[:, 0], p[:, 1], '-', color=color,zorder=8, linewidth=1)
+        #elif rg['release_type'] == 'radius':
+        #    #todo does not work in geographic coords yet
+        #    xy =  rg['radius'] * np.exp(1.0j * np.arange(0,370, 10)*np.pi/180.)
+        #    o = ax.plot( p[:,0] + np.real(xy), p[:,1] + np.imag(xy), color=color, lw=1)
         else:
             # for grid and points releases
             o = ax.plot(p[:, 0], p[:, 1], 'x', color=color, markersize=6,zorder=9)

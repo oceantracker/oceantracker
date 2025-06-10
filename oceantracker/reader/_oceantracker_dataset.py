@@ -118,6 +118,7 @@ class OceanTrackerDataSet(object):
                 try:
                     out = xr.concat((out,ds[file_var_name][{time_dim: file_offsets}].compute()), dim=time_dim)
                 except Exception as e:
+                    print('xx',fi['name'],file_var_name,nt,  nt_required,nt_available)
                     raise (e)
             ds.close()
             nt_required = nt_required[nt_available.size:]

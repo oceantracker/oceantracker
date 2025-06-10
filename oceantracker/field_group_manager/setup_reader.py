@@ -18,6 +18,13 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
     # detect reader format and add clas_name to params
     reader = _detect_hydro_file_format(reader_params, dataset,  crumbs=crumbs)
 
+    # discard problematic variables
+    for file_var in reader.params['drop_variables']:
+        if file_var in reader.dataset.info['variables']:
+            del reader.dataset.info['variables'][file_var]
+        else:
+            si.msg_logger.msg(f'Cannot drop file variable {file_var}, not in file', warning=True, caller = reader)
+
     if reader.development:
         si.msg_logger.msg(f'Class "{reader.__class__.__name__}" under development, it may not work in all cases',
                            hint=f' contact developer with any unexpected issues', warning=True)
@@ -37,6 +44,8 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
     # sort files into time order and add info to reader builder on if 3D hindcast and mapped field
     # uses times in files containing the velocity variable
     _time_sort_files(reader, crumbs)
+
+
     _make_variable_time_step_to_fileID_map(reader)
 
     info = reader.info
@@ -210,7 +219,8 @@ def _time_sort_files(reader, crumbs):
             item['fileIDs'] = item['fileIDs'][0]  # todo keep as list??
 
 
-    # sort out which hindcast time steps are in each file
+
+    #  build a time for every variables
     #  note time may appear in many files if variables are split between file, eg schsim v5 than once in each file
     # so must do this for all variables to ensure all files are covered, with some unnecessary repeats when more than one variable in same file
     #   time is not done as done a below as a "coordinate"
@@ -224,10 +234,8 @@ def _time_sort_files(reader, crumbs):
             time = np.append(time, fi[fID]['time'])
             fi[fID]['first_time_step_in_file'] = time.size - fi[fID]['time_steps']
             fi[fID]['last_time_step_in_file'] = time.size - 1
+        #print('xx',var_name,  fi[fID]['first_time_step_in_file'],  fi[fID]['last_time_step_in_file'] )
         item['time'] =  time
-
-    # get ful time varaible from files with first water velocity variable
-
 
 
     # if variables in different files, eg schism v5, time may be in many files,
@@ -348,16 +356,18 @@ def _make_variable_time_step_to_fileID_map(reader):
     # make time step to fileID map and file offset map for every time step, accounting for each variable's file order
     info = reader.dataset.info
     for v_name, item in info['variables'].items():
-        if item['time_varying']:
-            time_step_fileID_map = np.zeros((0,),dtype=np.int32)
-            time_step_file_offset_map = np.zeros((0,), dtype=np.int32)
-            for fileID in  item['fileIDs']: #IDs have aleady been time sorted
-                fi = info['files'][fileID]
-                time_step_fileID_map =  np.append(time_step_fileID_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
-                time_step_file_offset_map = np.append(time_step_file_offset_map,  np.arange(fi['time_steps'], dtype=np.int32))
+        if not item['time_varying']: continue
+        time_step_fileID_map = np.zeros((0,),dtype=np.int32)
+        time_step_file_offset_map = np.zeros((0,), dtype=np.int32)
+        for fileID in  item['fileIDs']: #IDs have aleady been time sorted
+            fi = info['files'][fileID]
+            time_step_fileID_map =  np.append(time_step_fileID_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
+            time_step_file_offset_map = np.append(time_step_file_offset_map,  np.arange(fi['time_steps'], dtype=np.int32))
+            pass
 
-            item['time_step_to_fileID_map'] = time_step_fileID_map
-            item['time_step_to_file_offset_map'] = time_step_file_offset_map
+        item['time_step_to_fileID_map'] = time_step_fileID_map
+        item['time_step_to_file_offset_map'] = time_step_file_offset_map
+        pass
     pass
 
 

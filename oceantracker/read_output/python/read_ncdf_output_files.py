@@ -161,7 +161,7 @@ def read_stats_file(file_name,nt=None):
     # read stats files
 
     nc = NetCDFhandler(file_name, mode='r')
-    d = nc.global_attrs()  # read all  global attibutes
+    d = dict( global_attributes = nc.global_attrs())  # read all  global attibutes
     d['dimensions'] = nc.dims()
     d['limits']=  {}
 
@@ -197,10 +197,10 @@ def read_stats_file(file_name,nt=None):
 
     with np.errstate(divide='ignore', invalid='ignore'):
         # conectivity calc. is different depending on direction, use all particles if forwards, selected if backwards
-        if 'backtracking' not in d:
+        if 'backtracking' not in d['global_attributes']:
             b = d['count_all_particles'] # version prior to june 2025
         else:
-            b = d['count_all_selected_particles'] if d['backtracking'] == 1 else d['count_all_alive_particles']
+            b = d['count_all_selected_particles'] if d['global_attributes']['backtracking'] == 1 else d['count_all_alive_particles']
 
         if d['stats_type'] == 'grid':
             d['connectivity_matrix'] = d['count'] / b[..., np.newaxis, np.newaxis]
@@ -228,6 +228,7 @@ def read_LCS(file_name):
 
     nc = NetCDFhandler(file_name, mode='r')
     d = nc.read_variables(nc.all_var_names())
+    d.update(nc.global_attrs())
     d['dimensions'] = nc.dims()
     nc.close()
     return d
@@ -255,6 +256,7 @@ def read_residence_file(file_name, var_list=[]):
     d = {'total_num_particles_released': num_released,'limits' : {}}
 
     d['release_times']= nc.read_a_variable('release_times')
+    d.update(nc.global_attrs())
 
 
     # read count first for mean value calc
@@ -283,6 +285,7 @@ def read_grid_file(file_name):
     # load OT output file grid
     d={}
     nc = NetCDFhandler(file_name,'r')
+    d.update(nc.global_attrs())
 
     for a,val in nc.global_attrs().items():
         d[a] = val
@@ -320,6 +323,8 @@ def dev_read_event_file(file_name):
 def read_release_groups_info(file_name):
     nc = NetCDFhandler(file_name,mode='r')
     d= dict()
+
+
     for name in nc.all_var_names():
         data = nc.read_a_variable(name)
         attr = nc.all_var_attr(name)
@@ -327,7 +332,10 @@ def read_release_groups_info(file_name):
 
         # extract info
         d[rg_name] = attr
-        d[rg_name]['points'] = data
+        if 'geographic_coords' in nc.global_attrs():
+            d[rg_name]['geographic_coords'] = bool(nc.global_attr('geographic_coords'))
+        if 'points' in name:
+            d[rg_name]['points'] = data
 
         pass
     nc.close()
