@@ -159,7 +159,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
 
         # do LSC calculation on schedule
         for n, rg in enumerate(si.class_roles.release_groups.values()):
-             if rg.schedulers['LCScalculation_scheduler'].do_task(n_time_step):
+             if rg.schedulers['LCScalculation_scheduler'].do_task(n_time_step) and 'IDrelease_group' in rg.info: #todo betteeter fix for points dicarded outside domain ??
                 # find particles in this release group to do calculations at this lag
                 sel = part_prop['IDrelease_group'].compare_all_to_a_value('eq', rg.info['IDrelease_group'], out=self.get_partID_buffer('ID1'))
 
