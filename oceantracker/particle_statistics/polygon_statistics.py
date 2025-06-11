@@ -82,9 +82,12 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
         dim_names = ('time_dim', 'release_group_dim', 'polygon_dim')
         dim_sizes  = (None, len(si.class_roles.release_groups), nc.dim_size('polygon_dim'))
 
-        nc.create_a_variable('count', dim_names, np.int64, description='counts of particles in each polygon at given times, for each release group')
-        nc.create_a_variable('count_all_selected_particles', ['time_dim', 'release_group_dim'], np.int64, description='counts of all selected particles whether in a polygon or not')
-        nc.create_a_variable('count_all_alive_particles', ['time_dim', 'release_group_dim'], np.int64, description='counts of all particles whether selected or not')
+        nc.create_a_variable('count', dim_names, np.int64,compression_level=si.settings.NCDF_compression_level,
+                             description='counts of particles in each polygon at given times, for each release group')
+        nc.create_a_variable('count_all_selected_particles', ['time_dim', 'release_group_dim'],compression_level=si.settings.NCDF_compression_level,
+                             dtype=np.int64, description='counts of all selected particles whether in a polygon or not')
+        nc.create_a_variable('count_all_alive_particles', ['time_dim', 'release_group_dim'],compression_level=si.settings.NCDF_compression_level,
+                             dtype =np.int64, description='counts of all particles whether selected or not')
 
         # set up space for requested particle properties
         # working count space, row are (y,x)

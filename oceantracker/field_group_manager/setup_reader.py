@@ -355,8 +355,10 @@ def _make_variable_time_step_to_fileID_map(reader):
     info = reader.dataset.info
     for v_name, item in info['variables'].items():
         if not item['time_varying']: continue
+
         time_step_fileID_map = np.zeros((0,),dtype=np.int32)
         time_step_file_offset_map = np.zeros((0,), dtype=np.int32)
+
         for fileID in  item['fileIDs']: #IDs have aleady been time sorted
             fi = info['files'][fileID]
             time_step_fileID_map =  np.append(time_step_fileID_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
@@ -383,7 +385,7 @@ def _hindcast_integrity_checks(reader):
         for var_name in i.info['file_vars_info'].keys():
             vars.append(var_name)
             if var_name not in file_vars:
-                ml.msg(f'Reader feild {name}, file variable{var_name} is not in hindcast files', caller=reader, fatal_error=True)
+                ml.msg(f'Reader field {name}, file variable{var_name} is not in hindcast files', caller=reader, fatal_error=True)
 
 
 

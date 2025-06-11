@@ -229,13 +229,13 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
 
 
         nc.create_a_variable('FTLE', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols'],
-                             np.float32, description=' Largest Eigen value of 2D strain matrix', fill_value=np.nan,
+                             np.float32, description=' Largest Eigen value of 2D strain matrix', fill_value=np.nan,compression_level=si.settings.NCDF_compression_level,
                              attributes=dict(units='dimensionless'))
-        nc.create_a_variable('eigen_values', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols','vector2D'],
-                             np.float32, description='Eigen values of 2D strain matrix, largest first', fill_value=np.nan,
+        nc.create_a_variable('eigen_values', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols','vector2D'],compression_level=si.settings.NCDF_compression_level,
+                             dtype= np.float32, description='Eigen values of 2D strain matrix, largest first', fill_value=np.nan,
                              attributes=dict(units='dimensionless'))
-        nc.create_a_variable('eigen_vectors', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols', 'vector2D', 'vector2D'],
-                             np.float32, description='Columns are Eigen vectors of 2D strain matrix, vector for largest eigen value in the first column t', fill_value=np.nan,
+        nc.create_a_variable('eigen_vectors', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols', 'vector2D', 'vector2D'],compression_level=si.settings.NCDF_compression_level,
+                             dtype=np.float32, description='Columns are Eigen vectors of 2D strain matrix, vector for largest eigen value in the first column t', fill_value=np.nan,
                              attributes=dict(units='dimensionless'))
 
         # optional output
