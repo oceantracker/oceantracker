@@ -13,6 +13,7 @@ class NetCDFhandler(object):
         self.file_name = file_name
 
         self.mode = mode
+
         path.isfile(file_name)
         try:
             self.file_handle = Dataset(self.file_name, mode)
@@ -45,7 +46,7 @@ class NetCDFhandler(object):
             self.file_handle.createDimension(name, dim_size)
 
     def create_a_variable(self, name, dimList,dtype, description=None, fill_value=None,units=None,
-                          attributes=None,  chunksizes=None, compressionLevel=0):
+                          attributes=None,  chunksizes=None, compression_level=0):
         # add and write a variable of given nane and dim name list
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
         if dtype is None: dtype = np.float64  # double by default
@@ -60,8 +61,8 @@ class NetCDFhandler(object):
             else:
                 fill_value = None
 
-        v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compressionLevel > 0),
-                                                complevel=compressionLevel, fill_value=fill_value)
+        v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compression_level > 0),
+                                                complevel=compression_level, fill_value=fill_value)
 
         # set attributes the hard way, must be an easier way!
         if description is not None:
@@ -100,7 +101,7 @@ class NetCDFhandler(object):
 
     def write_a_new_variable(self, name, data, dimList, description=None,
                              attributes={},dtype=None, chunksizes=None,units=None,
-                             compressionLevel=0,
+                             compression_level=0,
                              missing_value= None):
         # write a whole variable and add dimensions if required
         if type(dimList) != list and type(dimList) != tuple :dimList =[dimList]
@@ -116,7 +117,7 @@ class NetCDFhandler(object):
 
         v = self.create_a_variable(name, dimList,description=description,
                     attributes= attributes,dtype=dtype, chunksizes= chunksizes,
-                    units= units,  compressionLevel=compressionLevel, fill_value=missing_value)
+                    units= units,  compression_level=compression_level, fill_value=missing_value)
 
         # check dims match as below write does not respect shape
         for n,dn in enumerate(dimList):
@@ -204,10 +205,10 @@ class NetCDFhandler(object):
         for name in self.global_attr_names():
             nc_new.write_global_attribute(name, self.global_attr(name))
 
-    def copy_variable(self,name, nc_new, compressionLevel=0,float32asInt16=False):
+    def copy_variable(self,name, nc_new, compression_level=0,float32asInt16=False):
         v = self.file_handle[name]
 
-        #write_a_new_variable(self, name, X, dimList, description=None, attributes=None, dtype=None, chunksizes=None, compressionLevel=0):
+        #write_a_new_variable(self, name, X, dimList, description=None, attributes=None, dtype=None, chunksizes=None, compression_level=0):
         attributes = self.all_var_attr(name)
         if '_FillValue' in attributes:
             missing_value=attributes['_FillValue' ]
@@ -217,12 +218,12 @@ class NetCDFhandler(object):
         nc_new.write_a_new_variable(name,v[:], v.dimensions,
                                     missing_value=missing_value,
                                     attributes=attributes,
-                                    compressionLevel=compressionLevel,
+                                    compression_level=compression_level,
                                     float32asInt16=float32asInt16)
         pass
 
     def write_packed_1Darrays(self, name, array_list, description=None, attributes=None, dtype=None, chunksizes=None,
-                              compressionLevel=0, fill_value=None, units=None):
+                              compression_level=0, fill_value=None, units=None):
         # write list of numpy 1D arrays  which differ in size,
         # as a single array with unpacking data, m
 

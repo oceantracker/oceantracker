@@ -143,9 +143,12 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         dim_names= ['time_dim', 'release_group_dim', 'y_dim', 'x_dim']
         dim_sizes =[None, len(si.class_roles.release_groups), stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
-        nc.create_a_variable('count', dim_names, np.int64, description= 'counts of particles in grid at given times, for each release group')
-        nc.create_a_variable('count_all_selected_particles', dim_names[:2], np.int64, description='counts of particles selected to be counted, eg by depth range etc wherethe inside grid or not')
-        nc.create_a_variable('count_all_alive_particles', dim_names[:2], np.int64, description='counts of all alive particles everywhere')
+        nc.create_a_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
+                             description= 'counts of particles in grid at given times, for each release group')
+        nc.create_a_variable('count_all_selected_particles', dim_names[:2], np.int64, compression_level=si.settings.NCDF_compression_level,
+                             description='counts of particles selected to be counted, eg by depth range etc wherethe inside grid or not')
+        nc.create_a_variable('count_all_alive_particles', dim_names[:2], np.int64, compression_level=si.settings.NCDF_compression_level,
+                             description='counts of all alive particles everywhere')
 
 
         # set up space for requested particle properties
