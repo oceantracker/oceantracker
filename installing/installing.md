@@ -6,7 +6,7 @@ ________________________________________
     
         https://www.anaconda.com/docs/getting-started/miniconda/install
 
-2. create veritual enviomnent ( python 3.10 recommended)
+2. create virtual environment ( python 3.10 recommended)
     at command prompt  :  ``conda create -n oceantracker python=3.10``
 3. Activate new environment   ``conda activate oceantracker``
 4. install ocean tracker    ``pip install oceantracker``
