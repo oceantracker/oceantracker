@@ -1,13 +1,25 @@
-
-Build oceantracker conda environment
+Install using pip 
 ________________________________________
 
-To ensure python/ module compatibility, recommendation is to build a conda virtual environment with the given environment.yml file
 
-1. Install 
+1.    Install/update anaconda or miniconda if not already available
     
-    Install/update anaconda or miniconda if not already available
+        https://www.anaconda.com/docs/getting-started/miniconda/install
 
+2. create veritual enviomnent ( python 3.10 recommended)
+    at command prompt  :  ``conda create -n oceantracker python=3.10``
+3. Activate new environment   ``conda activate oceantracker``
+4. install ocean tracker    ``pip install oceantracker``
+
+Note: 
+- Oceantracker will work in Python 3.11 and 3.12, Python version 3.10 is preferred, as currently  not all required external imported  packages for plotting work in 3.11
+-  may need to run Conda as Admin on  Windows
+- pip install will not include how_to notebooks and the demo hindcasts they use 
+
+Install using git repository
+________________________________________
+
+this includes how_to notebooks and the demo hindcasts they use
 
 1. Change dir to where oceantracker files will be stored , e.g. 
 
@@ -26,8 +38,7 @@ To ensure python/ module compatibility, recommendation is to build a conda virtu
 
         ``conda create -n oceantracker python=3.10`` 
 
-    Note: - Oceantracker will work in Python 3.11 and 3.12, Python version 3.10 is preferred, as currently  not all required external imported  packages for plotting work in 3.11
--     -  may need to run Conda as Admin widows or mode
+
 
     Activate new environment
 

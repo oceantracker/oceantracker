@@ -33,10 +33,10 @@ Parameters:
 		- default: ``None``
 		- data_type: ``<class 'str'>``
 
-	* ``file_mask`` :   ``<class 'str'>`` **<isrequired>**
-		Description: Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern
+	* ``file_mask`` :   ``<class 'str'>``   *<optional>*
+		Description: Mask for file names, for Schism 5 default is "*.nc",, ie.  all netcdf files, finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern
 
-		- default: ``None``
+		- default: ``*.nc``
 		- data_type: ``<class 'str'>``
 
 	* ``hgrid_file_name`` :   ``<class 'str'>``   *<optional>*
@@ -102,6 +102,16 @@ Parameters:
 
 Expert Parameters:
 *******************
+
+	* ``drop_variables``:  *<optional>*
+		Description: - List of problematic file variable names to ignore, eg non-critcal variables not present in all files/all times
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``True``
+		- min_len: ``0``
 
 	* ``geographic_coords`` :   ``<class 'bool'>``   *<optional>*
 		Description: Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails

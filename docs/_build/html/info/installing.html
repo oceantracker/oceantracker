@@ -1,16 +1,18 @@
+
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../">
+<html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Installing &#8212; OceanTracker Beta 0.5 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d1102ebc" />
-    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=a66d8bb5" />
-    <script src="../_static/documentation_options.js?v=7b06c30a"></script>
-    <script src="../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Running" href="running_ocean_tracker.html" />
@@ -18,20 +20,17 @@
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
-
   
-  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head><body>
   <div class="document">
     
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="../index.html">
-    <img class="logo" src="../_static/ocean_tracker.png" alt="Logo" />
-    
-    <h1 class="logo logo-name">Beta 0.5</h1>
+    <img class="logo" src="../_static/ocean_tracker.png" alt="Logo"/>
     
   </a>
 </p>
@@ -51,13 +50,14 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="features.html">Features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gallery.html">Gallery</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installing</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#build-oceantracker-conda-environment">Build oceantracker conda environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-using-pip">Install using pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-using-git-repository">Install using git repository</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="running_ocean_tracker.html">Running</a></li>
@@ -77,16 +77,16 @@
   </ul></li>
 </ul>
 </div>
-<search id="searchbox" style="display: none" role="search">
+<div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+</div>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -96,30 +96,43 @@
           <div class="body" role="main">
             
   <section id="installing">
-<h1>Installing<a class="headerlink" href="#installing" title="Link to this heading">¶</a></h1>
-<section id="build-oceantracker-conda-environment">
-<h2>Build oceantracker conda environment<a class="headerlink" href="#build-oceantracker-conda-environment" title="Link to this heading">¶</a></h2>
-<p>To ensure python/ module compatibility, recommendation is to build a conda virtual environment with the given environment.yml file</p>
-<p>Due to version dependencies of modules outside oceantracker, it curently only works with python 3.10 and numpy &lt; 1.24, and not yet python 3.11</p>
+<h1>Installing<a class="headerlink" href="#installing" title="Permalink to this headline">¶</a></h1>
+<section id="install-using-pip">
+<h2>Install using pip<a class="headerlink" href="#install-using-pip" title="Permalink to this headline">¶</a></h2>
 <ol class="arabic">
-<li><p>Install</p>
+<li><p>Install/update anaconda or miniconda if not already available</p>
 <blockquote>
-<div><p>Install/update anaconda or miniconda and git if not already available</p>
+<div><p><a class="reference external" href="https://www.anaconda.com/docs/getting-started/miniconda/install">https://www.anaconda.com/docs/getting-started/miniconda/install</a></p>
 </div></blockquote>
 </li>
+<li><dl class="simple">
+<dt>create veritual enviomnent ( python 3.10 recommended)</dt><dd><p>at command prompt  :  <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">oceantracker</span> <span class="pre">python=3.10</span></code></p>
+</dd>
+</dl>
+</li>
+<li><p>Activate new environment   <code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p></li>
+<li><p>install ocean tracker    <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">oceantracker</span></code></p></li>
 </ol>
+<p>Note:
+- Oceantracker will work in Python 3.11 and 3.12, Python version 3.10 is preferred, as currently  not all required external imported  packages for plotting work in 3.11
+-  may need to run Conda as Admin on  Windows
+- pip install will not include how_to notebooks and the demo hindcasts they use</p>
+</section>
+<section id="install-using-git-repository">
+<h2>Install using git repository<a class="headerlink" href="#install-using-git-repository" title="Permalink to this headline">¶</a></h2>
+<p>this includes how_to notebooks and the demo hindcasts they use</p>
 <ol class="arabic">
-<li><p>Change dir to where oceantracker files will be stored , eg. within</p>
+<li><p>Change dir to where oceantracker files will be stored , e.g.</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">cd</span>&#160; <span class="pre">mycodedir</span></code></p>
 </div></blockquote>
 </li>
-<li><p>Ensure git is installed, then</p>
+<li><p>Ensure git is installed, then clone repository</p>
 <blockquote>
 <div><p>git clone <a class="reference external" href="https://github.com/oceantracker/oceantracker.git">https://github.com/oceantracker/oceantracker.git</a></p>
 </div></blockquote>
 </li>
-<li><p>Change dir to oceantracker folder, eg.</p>
+<li><p>Change dir to oceantracker package folder, eg.</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">./oceantracker</span></code></p>
 </div></blockquote>
@@ -131,30 +144,28 @@
 <div><blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">create</span> <span class="pre">-n</span> <span class="pre">oceantracker</span> <span class="pre">python=3.10</span></code></p>
 </div></blockquote>
-<p>Note: Use python version 3.10 as not all required external imported  packages work in 3.11</p>
 <p>Activate new environment</p>
 <blockquote>
 <div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">activate</span> <span class="pre">oceantracker</span></code></p>
 </div></blockquote>
 </div></blockquote>
 <p>Then install these packages</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::numpy=1.26</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::numba</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::numba=0.56.4</span></code>  if using python 3.10</p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::numba</span></code>  if using python 3.11 or higher</p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::numpy</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::netcdf4</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::xarray</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::scipy</span></code></p>
-<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pyproj</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::pyprojy</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">anaconda::pyyaml</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::psutil</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::python-dateutil</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">conda-forge::matplotlib</span></code></p>
-</div></blockquote>
 </li>
 </ol>
 <ol class="arabic" start="7">
 <li><p>Make oceantracker package findable</p>
-<p>From root dir of oceantracker</p>
+<p>From root dir of oceantracker package</p>
 <p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--no-deps</span> <span class="pre">-e</span> <span class="pre">.</span></code></p>
 </li>
 <li><p>To add ability to make animation movies if needed</p>
@@ -190,11 +201,11 @@
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &#169;2024, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.1</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../_sources/info/installing.rst.txt"

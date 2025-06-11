@@ -67,10 +67,10 @@ Parameters:
 	* ``update_interval`` :   ``<class 'float'>``   *<optional>*
 		Description: the time in model seconds between writes (will be rounded to model time step)
 
-		- default: ``None``
+		- default: ``3600.0``
 		- data_type: ``<class 'float'>``
 		- units: ``sec``
-		- min: ``0.01``
+		- min: ``1``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
 		- default: ``None``

@@ -30,6 +30,10 @@ The main files are:
    -  basic information from each class used in the computational
       pipeline
 
+-  \**_hindcast_info.json*\* has a catalog of information about al
+   hindcast file variables (dims, sizes etc.) plus which files hold each
+   variable
+
 -  \**_caseLog_log.txt*\* has a copy of what appeared on the screen
    during the run
 
@@ -62,15 +66,13 @@ Below list the files after running the minimal example.
 
 .. parsed-literal::
 
-    output/minimal_example\hindcast_variable_catalog.json
     output/minimal_example\minimal_example_caseInfo.json
     output/minimal_example\minimal_example_caseLog.txt
-    output/minimal_example\minimal_example_grid.nc
+    output/minimal_example\minimal_example_grid000.nc
+    output/minimal_example\minimal_example_hindcast_info.json
+    output/minimal_example\minimal_example_raw_user_params.json
     output/minimal_example\minimal_example_release_groups.nc
-    output/minimal_example\minimal_example_run.txt
-    output/minimal_example\minimal_example_runInfo.json
-    output/minimal_example\minimal_example_tracks_compact.nc
-    output/minimal_example\user_given_params.json
+    output/minimal_example\minimal_example_tracks_compact_000.nc
     
 
 Reading particle tracks
@@ -122,7 +124,7 @@ The below also shows how read the hydrodynamic grid.
     # example of reading tracks file
     
     # read netcdf into dictionary
-    from read_oceantracker.python import read_ncdf_output_files
+    from  oceantracker.read_output.python import read_ncdf_output_files
     
     tracks =read_ncdf_output_files.read_particle_tracks_file('output/minimal_example\minimal_example_tracks_compact.nc')
     print('Track data', tracks.keys())
@@ -150,7 +152,7 @@ associated with the case run.
 .. code:: ipython3
 
     # load netcdf with grid and other useful info for plotting
-    from read_oceantracker.python import load_output_files
+    from oceantracker.read_output.python import load_output_files
     
     tracks_plot =load_output_files.load_track_data('output/minimal_example\minimal_example_caseInfo.json')
     

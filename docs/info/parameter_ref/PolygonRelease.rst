@@ -15,7 +15,7 @@ PolygonRelease
 
 
 
-**Inheritance:** > ParameterBaseClass> _BaseReleaseGroup> PointRelease> PolygonRelease
+**Inheritance:** > ParameterBaseClass> _BaseReleaseGroup> PolygonRelease
 
 
 Parameters:
@@ -33,13 +33,6 @@ Parameters:
 
 		- default: ``None``
 		- data_type: ``<class 'str'>``
-
-	* ``coords_in_lat_lon_order`` :   ``<class 'bool'>``   *<optional>*
-		Description: If hindcast is in geographic coords, allow user to give release point locations in (lat, lon) order rather than default (lon,lat) order.
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 	* ``duration`` :   ``<class 'float'>``   *<optional>*
 		Description: How long particles are released for after they start being released, ie releases stop this time after first release.,an alternative to using "end"

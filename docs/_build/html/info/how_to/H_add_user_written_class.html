@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Add your own class &#8212; OceanTracker Beta 0.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="../../index.html">
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=oceantracker&repo=oceantracker&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<p><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gallery.html">Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installing.html">Installing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running_ocean_tracker.html">Running</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../how_to.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trouble_shooting.html">Trouble shooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameter_ref/parameter_ref_toc.html">Parameter details</a></li>
+<li class="toctree-l1"><a class="reference internal" href="D_output_files.html">Output files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../change_log.html">Change log</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="add-your-own-class">
+<h1>Add your own class<a class="headerlink" href="#add-your-own-class" title="Permalink to this headline">¶</a></h1>
+<p>[This note-book is in oceantracker/tutorials_how_to/]</p>
+<p>First create your own class create as a python file in the same diretory
+as your run script. Your class must in import the base case for the role
+it performs or one of its children in that role.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># minimal_example.py using class helper method</span>
+<span class="c1">#------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">oceantracker.main</span> <span class="kn">import</span> <span class="n">OceanTracker</span>
+
+<span class="c1"># make instance of oceantracker to use to set parameters using code, then run</span>
+<span class="n">ot</span> <span class="o">=</span> <span class="n">OceanTracker</span><span class="p">()</span>
+
+<span class="c1"># ot.settings method use to set basic settings</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">settings</span><span class="p">(</span><span class="n">output_file_base</span><span class="o">=</span><span class="s1">&#39;minimal_example&#39;</span><span class="p">,</span> <span class="c1"># name used as base for output files</span>
+            <span class="n">root_output_dir</span><span class="o">=</span><span class="s1">&#39;output&#39;</span><span class="p">,</span>             <span class="c1">#  output is put in dir   &#39;root_output_dir&#39;\\&#39;output_file_base&#39;</span>
+            <span class="n">time_step</span><span class="o">=</span> <span class="mf">120.</span> <span class="c1">#  2 min time step as seconds</span>
+            <span class="p">)</span>
+<span class="c1"># ot.set_class, sets parameters for a named class</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;reader&#39;</span><span class="p">,</span><span class="n">input_dir</span><span class="o">=</span> <span class="s1">&#39;./demo_hindcast/schsim3D&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
+                      <span class="n">file_mask</span><span class="o">=</span>  <span class="s1">&#39;demo_hindcast_schisim3D*.nc&#39;</span><span class="p">)</span>  <span class="c1"># hindcast file mask</span>
+<span class="c1"># add  release locations from two points,</span>
+<span class="c1">#               (ie locations where particles are released at the same times and locations)</span>
+<span class="c1"># note : can add multiple release groups</span>
+<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;release_groups&#39;</span><span class="p">,</span>
+                    <span class="n">points</span><span class="o">=</span> <span class="p">[[</span><span class="mi">1595000</span><span class="p">,</span> <span class="mi">5482600</span><span class="p">],</span>        <span class="c1">#[x,y] pairs of release locations</span>
+                             <span class="p">[</span><span class="mi">1599000</span><span class="p">,</span> <span class="mi">5486200</span><span class="p">]],</span>      <span class="c1"># must be an N by 2 or 3 or list, convertible to a numpy array</span>
+                    <span class="n">release_interval</span><span class="o">=</span> <span class="mi">3600</span><span class="p">,</span>           <span class="c1"># seconds between releasing particles</span>
+                    <span class="n">pulse_size</span><span class="o">=</span> <span class="mi">10</span><span class="p">,</span>                   <span class="c1"># number of particles released each release_interval</span>
+            <span class="p">)</span>
+
+<span class="c1"># add user written particle property in same dir as notebook</span>
+
+<span class="n">ot</span><span class="o">.</span><span class="n">add_class</span><span class="p">(</span><span class="s1">&#39;particle_properties&#39;</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;on_bottom_time&#39;</span><span class="p">,</span>
+                                        <span class="n">class_name</span><span class="o">=</span><span class="s1">&#39;my_part_prop.TimeAtStatus&#39;</span><span class="p">)</span>
+
+<span class="c1"># run oceantracker</span>
+<span class="n">case_info_file_name</span> <span class="o">=</span> <span class="n">ot</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="c1"># output now in folder output/minimal_example</span>
+<span class="c1"># case_info_file_name the name a json file with useful info for post processing, eg output file names</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">)</span>
+</pre></div>
+</div>
+<pre class="literal-block">prelim:     Starting package set up
+helper: ----------------------------------------------------------------------
+helper: Starting OceanTrackerhelper class,  version 0.50.0043-2025-03-25
+helper:      Python version: 3.10.9 | packaged by conda-forge | (main, Jan 11 2023, 15:15:40) [MSC v.1916 64 bit (AMD64)]
+helper: ----------------------------------------------------------------------
+helper: OceanTracker version 0.50.0043-2025-03-25  starting setup helper &quot;main.py&quot;:
+helper: Output is in dir &quot;f:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputminimal_example&quot;
+helper:     hint: see for copies of screen output and user supplied parameters, plus all other output
+helper:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;minimal_example_raw_user_params.json&quot;
+helper: ----------------------------------------------------------------------
+helper: Numba setup: applied settings, max threads = 32, physical cores = 32
+helper:     hint:  cache code = False, fastmath= False
+helper: ----------------------------------------------------------------------
+helper:       - Built OceanTracker package tree,      0.809 sec
+helper:       - Built OceanTracker sort name map,     0.000 sec
+helper:   - Done package set up to setup ClassImporter,       0.809 sec
+setup: ----------------------------------------------------------------------
+setup:  OceanTracker version 0.50.0043-2025-03-25
+setup:     Starting user param. runner: &quot;minimal_example&quot; at  2025-03-26T14:51:51.251008
+setup: ----------------------------------------------------------------------
+setup:   - Start  field group manager and readers setup
+setup:   - Found input dir &quot;./demo_hindcast/schsim3D&quot;
+setup:   - Detected reader class_name = &quot;oceantracker.reader.SCHISM_reader.SCHISMreader&quot;
+setup:     Hydro-model is &quot;3D&quot;, type &quot;SCHISMreader&quot;
+setup:         hint: Files found in dir and sub-dirs of &quot;./demo_hindcast/schsim3D&quot;
+setup:         Geographic coords = &quot;False&quot;
+setup:         Hindcast start: 2017-01-01T00:30:00  end:  2017-01-01T23:30:00
+setup:           time step = 0 days 1 hrs 0 min 0 sec, number of time steps= 24
+setup:           grid bounding box = [1589789.000 5479437.000] to [1603398.000 5501640.000]
+setup:           has:  A_Z profile=True  bottom stress=False
+setup: ----------------------------------------------------------------------
+setup:       - Starting grid setup
+setup:       - built node to triangles map,   0.585 sec
+setup:       - built triangle adjacency matrix,       0.147 sec
+setup:       - found boundary triangles,      0.000 sec
+setup:       - built domain and island outlines,      0.920 sec
+setup:       - calculated triangle areas,     0.000 sec
+setup:       - Finished grid setup
+setup:       - built barycentric-transform matrix,    0.265 sec
+setup:   - Finished field group manager and readers setup,    3.260 sec
+setup:         using: A_Z_profile = False bottom_stress = False
+setup: ----------------------------------------------------------------------
+setup:   - Added release groups and found run start and end times,    0.004 sec
+setup:   - Done initial setup of all classes,         0.004 sec
+setup: ----------------------------------------------------------------------
+setup:   - Starting&quot; minimal_example,  duration: 0 days 23 hrs 0 min 0 sec
+setup:       From 2017-01-01T00:30:00 to  2017-01-01T23:30:00
+setup:   -  Reading 24 time steps,  for hindcast time steps 00:23 into ring buffer offsets 000:023
+setup:       -  read  24 time steps in  1.1 sec, from ./demo_hindcast/schsim3D
+setup: ----------------------------------------------------------------------
+setup:   - Starting time stepping: 2017-01-01T00:30:00 to 2017-01-01T23:30:00 , duration  0 days 23 hrs 0 min 0 sec
+S: 'TimeAtStatus' object has no attribute 'data'
+S: Traceback (most recent call last):
+S:     File &quot;f:h_local_driveparticletrackingoceantrackeroceantrackeroceantracker_params_runner.py&quot;, line 52, in run
+S:       case_info_file= self._run_case()
+S:     File &quot;f:h_local_driveparticletrackingoceantrackeroceantrackeroceantracker_params_runner.py&quot;, line 210, in _run_case
+S:       si.core_class_roles.solver.solve() # do time stepping
+S:     File &quot;f:h_local_driveparticletrackingoceantrackeroceantrackersolversolver.py&quot;, line 95, in solve
+S:       new_particleIDs  = pgm.release_particles(n_time_step, time_sec)
+S:     File &quot;f:h_local_driveparticletrackingoceantrackeroceantrackerparticle_group_managerparticle_group_manager.py&quot;, line 117, in release_particles
+S:       i.initial_value_at_birth(new_buffer_indices)
+S:     File &quot;f:H_Local_driveParticleTrackingoceantrackertutorials_how_tomy_part_prop.py&quot;, line 38, in initial_value_at_birth
+S:       self.set_values(0., new_part_IDs)  # set total time to zero when born
+S:     File &quot;f:h_local_driveparticletrackingoceantrackeroceantrackerparticle_properties_base_particle_properties.py&quot;, line 104, in set_values
+S:       particle_operations_util.set_value(self.data, values, active)
+S:   AttributeError: 'TimeAtStatus' object has no attribute 'data'
+S:
+S: &gt;&gt;&gt; Error:  Unexpected error
+S:     hint: check for first error above or in log file.txt or .err file
+end: ----------------------------------------------------------------------
+end: &gt;&gt;&gt; Error:  Unexpected error
+end:     hint: check for first error above or in log file.txt or .err file
+end:
+end: ----------------------------------------------------------------------
+end:       Error counts -   1 errors,   0 warnings,   1 notes, check above
+end:
+end: --- Found errors, so some cases may not have completed ---------------
+end: --- see above or  <a href="#system-message-1"><span class="problematic" id="problematic-1">*</span></a>_caseLog.txt and <a href="#system-message-2"><span class="problematic" id="problematic-2">*</span></a>_caseLog.err files --------------
+end: ----------------------------------------------------------------------
+end:   - minimal_example&quot; started: 25445.8385601, ended: 2025-03-26 14:51:59.879385
+end:       Computational time =0:00:09.629072
+end:   Output in f:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputminimal_example
+end:
+end: --- Finished Oceantracker run ----------------------------------------
+end:
+end: &gt;&gt;&gt; Error: Fatal errors, run did not complete
+end:     hint: check for first error above, log file.txt or .err file
+None</pre>
+<section id="read-and-plot-output">
+<h2>Read and plot output<a class="headerlink" href="#read-and-plot-output" title="Permalink to this headline">¶</a></h2>
+<p>A first basic plot of particle tracks</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">oceantracker.read_output.python</span> <span class="kn">import</span> <span class="n">load_output_files</span>
+
+<span class="c1"># read particle track data into a dictionary using case_info_file_name</span>
+<span class="n">tracks</span> <span class="o">=</span> <span class="n">load_output_files</span><span class="o">.</span><span class="n">load_track_data</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">tracks</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="c1"># show what is in tracks dictionary holds</span>
+
+<span class="kn">from</span> <span class="nn">oceantracker.plot_output</span> <span class="kn">import</span> <span class="n">plot_tracks</span>
+
+<span class="n">ax</span><span class="o">=</span> <span class="p">[</span><span class="mi">1591000</span><span class="p">,</span> <span class="mi">1601500</span><span class="p">,</span> <span class="mi">5479500</span><span class="p">,</span> <span class="mi">5491000</span><span class="p">]</span>  <span class="c1"># area to plot</span>
+<span class="n">plot_tracks</span><span class="o">.</span><span class="n">plot_tracks</span><span class="p">(</span><span class="n">tracks</span><span class="p">,</span> <span class="n">axis_lims</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">show_grid</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">loading</span> <span class="n">oceantracker</span> <span class="n">read</span> <span class="n">files</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---------------------------------------------------------------------------</span>
+
+<span class="ne">TypeError</span>                                 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+
+<span class="n">Cell</span> <span class="n">In</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">line</span> <span class="mi">4</span>
+      <span class="mi">1</span> <span class="kn">from</span> <span class="nn">read_oceantracker.python</span> <span class="kn">import</span> <span class="n">load_output_files</span>
+      <span class="mi">3</span> <span class="c1"># read particle track data into a dictionary using case_info_file_name</span>
+<span class="o">----&gt;</span> <span class="mi">4</span> <span class="n">tracks</span> <span class="o">=</span> <span class="n">load_output_files</span><span class="o">.</span><span class="n">load_track_data</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">)</span>
+      <span class="mi">5</span> <span class="nb">print</span><span class="p">(</span><span class="n">tracks</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="c1"># show what is in tracks dictionary holds</span>
+      <span class="mi">7</span> <span class="kn">from</span> <span class="nn">plot_oceantracker.plot_tracks</span> <span class="kn">import</span> <span class="n">plot_tracks</span>
+
+
+<span class="n">File</span> <span class="n">f</span><span class="p">:</span>\<span class="n">h_local_drive</span>\<span class="n">particletracking</span>\<span class="n">oceantracker</span>\<span class="n">read_oceantracker</span>\<span class="n">python</span>\<span class="n">load_output_files</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">34</span><span class="p">,</span> <span class="ow">in</span> <span class="n">load_track_data</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">,</span> <span class="n">var_list</span><span class="p">,</span> <span class="n">fraction_to_read</span><span class="p">,</span> <span class="n">file_number</span><span class="p">,</span> <span class="n">gridID</span><span class="p">)</span>
+     <span class="mi">30</span> <span class="k">def</span> <span class="nf">load_track_data</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">,</span> <span class="n">var_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fraction_to_read</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">file_number</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">gridID</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+     <span class="mi">31</span>     <span class="c1"># load one track file from squeuence of what may be split files</span>
+     <span class="mi">32</span>     <span class="c1"># todo load split track files into  dictionary</span>
+<span class="o">---&gt;</span> <span class="mi">34</span>     <span class="n">case_info</span> <span class="o">=</span> <span class="n">read_case_info_file</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">)</span>
+     <span class="mi">36</span>     <span class="n">tracks</span> <span class="o">=</span> <span class="n">read_ncdf_output_files</span><span class="o">.</span><span class="n">read_particle_tracks_file</span><span class="p">(</span><span class="n">case_info</span><span class="p">[</span><span class="s1">&#39;output_files&#39;</span><span class="p">][</span><span class="s1">&#39;tracks_writer&#39;</span><span class="p">],</span>
+     <span class="mi">37</span>                                                        <span class="n">file_dir</span><span class="o">=</span><span class="n">case_info</span><span class="p">[</span><span class="s1">&#39;output_files&#39;</span><span class="p">][</span><span class="s1">&#39;run_output_dir&#39;</span><span class="p">],</span>
+     <span class="mi">38</span>                                                        <span class="n">var_list</span><span class="o">=</span><span class="n">var_list</span><span class="p">,</span>
+     <span class="mi">39</span>                                                        <span class="n">file_number</span><span class="o">=</span><span class="n">file_number</span><span class="p">,</span>  <span class="n">fraction_to_read</span><span class="o">=</span><span class="n">fraction_to_read</span><span class="p">)</span>
+     <span class="mi">41</span>     <span class="n">tracks</span><span class="p">[</span><span class="s1">&#39;grid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_grid</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">,</span><span class="n">gridID</span><span class="o">=</span><span class="n">gridID</span><span class="p">)</span>
+
+
+<span class="n">File</span> <span class="n">f</span><span class="p">:</span>\<span class="n">h_local_drive</span>\<span class="n">particletracking</span>\<span class="n">oceantracker</span>\<span class="n">read_oceantracker</span>\<span class="n">python</span>\<span class="n">load_output_files</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">18</span><span class="p">,</span> <span class="ow">in</span> <span class="n">read_case_info_file</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">)</span>
+     <span class="mi">16</span>     <span class="n">case_info</span> <span class="o">=</span> <span class="n">json_util</span><span class="o">.</span><span class="n">read_JSON</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+     <span class="mi">17</span> <span class="k">else</span><span class="p">:</span>
+<span class="o">---&gt;</span> <span class="mi">18</span>     <span class="n">case_info</span> <span class="o">=</span> <span class="n">json_util</span><span class="o">.</span><span class="n">read_JSON</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">)</span>
+     <span class="mi">20</span> <span class="c1"># make case info output dir consistent with given file name</span>
+     <span class="mi">21</span> <span class="n">case_info</span><span class="p">[</span><span class="s1">&#39;output_files&#39;</span><span class="p">][</span><span class="s1">&#39;run_output_dir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">case_info_file_name</span><span class="p">)</span>
+
+
+<span class="n">File</span> <span class="n">f</span><span class="p">:</span>\<span class="n">h_local_drive</span>\<span class="n">particletracking</span>\<span class="n">oceantracker</span>\<span class="n">oceantracker</span>\<span class="n">util</span>\<span class="n">json_util</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">25</span><span class="p">,</span> <span class="ow">in</span> <span class="n">read_JSON</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+     <span class="mi">23</span> <span class="k">def</span> <span class="nf">read_JSON</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+     <span class="mi">24</span>     <span class="c1"># avoid changing given file name</span>
+<span class="o">---&gt;</span> <span class="mi">25</span>     <span class="n">file_name</span><span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+     <span class="mi">26</span>     <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+     <span class="mi">27</span>         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Cannot find json file &quot;&#39;</span> <span class="o">+</span> <span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39;&quot;  &#39;</span><span class="p">)</span>
+
+
+<span class="n">File</span> <span class="n">c</span><span class="p">:</span>\<span class="n">ProgramData</span>\<span class="n">miniconda3</span>\<span class="n">envs</span>\<span class="n">otdev310</span>\<span class="n">lib</span>\<span class="n">ntpath</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">491</span><span class="p">,</span> <span class="ow">in</span> <span class="n">normpath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="mi">489</span> <span class="k">def</span> <span class="nf">normpath</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="mi">490</span>     <span class="s2">&quot;&quot;&quot;Normalize path, eliminating double slashes, etc.&quot;&quot;&quot;</span>
+<span class="o">--&gt;</span> <span class="mi">491</span>     <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="mi">492</span>     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+    <span class="mi">493</span>         <span class="n">sep</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span>
+
+
+<span class="ne">TypeError</span><span class="p">:</span> <span class="n">expected</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span> <span class="nb">object</span><span class="p">,</span> <span class="ow">not</span> <span class="n">NoneType</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+              <div class="related bottom">
+                &nbsp;
+  <nav id="rellinks">
+    <ul>
+    </ul>
+  </nav>
+              </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2024, R. Vennell.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/info/how_to/H_add_user_written_class.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

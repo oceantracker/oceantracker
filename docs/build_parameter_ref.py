@@ -122,7 +122,7 @@ class RSTfileBuilder(object):
 
                 self.add_lines('- default: ``' + str(item.get_default()) + '``', indent=indent+2)
 
-                for k, v in item.items():
+                for k, v in item.__dict__.items():
                     if k not in dont_include and v is not None:
                         self.add_lines('- ' + k + ': ``' + str(v) + '``', indent=indent+2)
                 self.add_lines()

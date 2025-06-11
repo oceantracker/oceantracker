@@ -2,13 +2,20 @@
 BasicResuspension
 ##################
 
-**Doc:** 
+**Doc:**     A very basic resupension, resuspend a distance of random walk, with variance equal to the constant vertical eddy viscosity     
 
 **short class_name:** BasicResuspension
 
-**full class_name :** oceantracker.resuspension.resuspension.BasicResuspension
+**full class_name :** oceantracker.resuspension.basic_resuspension.BasicResuspension
 
-**Inheritance:** > ParameterBaseClass> BaseResuspension> BasicResuspension
+
+.. warning::
+
+	Class is under development may not yet work in all cases, if errors contact developer
+
+
+
+**Inheritance:** > ParameterBaseClass> _BaseResuspension> Resuspension> BasicResuspension
 
 
 Parameters:
@@ -21,16 +28,12 @@ Parameters:
 		- data_type: ``<class 'str'>``
 
 	* ``critical_friction_velocity`` :   ``<class 'float'>``   *<optional>*
-		Description: Critical friction velocity, u_* in m/s defined in terms of bottom stress (this param is not the same as near seabed velocity)
-
 		- default: ``0.0``
 		- data_type: ``<class 'float'>``
 		- min: ``0.0``
 
 	* ``name`` :   ``<class 'str'>``   *<optional>*
-		Description: Name used to refer to class in code and output, = None for core claseses
-
-		- default: ``None``
+		- default: ``BasicResuspension``
 		- data_type: ``<class 'str'>``
 
 	* ``user_note`` :   ``<class 'str'>``   *<optional>*
@@ -41,12 +44,5 @@ Parameters:
 
 Expert Parameters:
 *******************
-
-	* ``development`` :   ``<class 'bool'>``   *<optional>*
-		Description: Class is under development and testing
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
 
 

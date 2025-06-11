@@ -10,11 +10,14 @@ particle_properties
 	CustomParticleProperty.rst
 	DistanceTravelled.rst
 	FieldParticleProperty.rst
+	FractionalWaterDepth.rst
 	InsidePolygonsNonOverlapping2D.rst
 	ManuallyUpdatedParticleProperty.rst
 	ParticleLoad.rst
 	ParticleParameterFromNormalDistribution.rst
+	RouseNumber.rst
 	TotalWaterDepth.rst
+	VectorMagnitude2D.rst
 	WaterSpeed.rst
 	_BaseParticleProperty.rst
 
