@@ -67,7 +67,7 @@ class MessageLogger(object ):
 
     def msg(self, msg_text, warning=False, note=False,
             hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,
-            spell_check=None,possible_values=None,
+            possible_values=None,
             error=False, fatal_error=False, exception = None,
             traceback_str=None, dev=False):
         
@@ -204,22 +204,23 @@ class MessageLogger(object ):
             f.write(str(e))
             f.write(tb)
 
-    def spell_check(self, msg, key: str, possible_values: list,hint=None, **kwargs):
+    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='', caller=None):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
 
-        if 'error' not in kwargs: kwargs['warning']= True
-        if 'fatal_error' not in kwargs: kwargs['warning'] = True
-        if 'tabs' not in kwargs: kwargs['tabs'] = 0
-
-
-        if hint is None : hint= ''
         known = list(possible_values)
         if key not in known:
             # flag if unknown
-            self.msg(msg, **kwargs)
-            self.msg(f'Closest matches to "{key}" are :',tabs=kwargs['tabs']+5)
-            for n ,t in enumerate(difflib.get_close_matches(key, known, cutoff=0.4)):
-                self.msg(f'{n+1}: "{t}"',tabs=kwargs['tabs']+7)
+            self.msg(msg)
+
+            self.msg(f'Closest matches to "{key}" are :',tabs=tabs +5)
+            o = difflib.get_close_matches(key, known, cutoff=0.5, n=4)
+            if len(o) > 0:
+                for n ,t in enumerate(o):
+                    self.msg(f'{n+1}: "{t}"',tabs=tabs+7)
+            else:
+                self.msg(f'>> None found',tabs=tabs+7,
+                         hint=f'Possible values = {str(known)}')
+            self.msg('Unknown  values', hint=hint, fatal_error=True, tabs=tabs,crumbs=crumbs,caller=caller)
 
         pass
     def build_stack(self):

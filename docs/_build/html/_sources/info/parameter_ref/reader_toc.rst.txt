@@ -9,10 +9,12 @@ reader
 	DELF3DFMreader.rst
 	FVCOMreader.rst
 	GLORYSreader.rst
+	GenericUnstructuredReader.rst
 	ROMSreader.rst
-	ROMSreaderMonaProject.rst
+	ROMSreaderMoanaProjectNZ.rst
 	SCHISMreader.rst
 	SCHISMreaderV5.rst
+	_BaseGenericReader.rst
 	_BaseReader.rst
 	_BaseStructuredReader.rst
 	_BaseUnstructuredReader.rst

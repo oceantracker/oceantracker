@@ -1,10 +1,10 @@
 import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.util import   cord_transforms
-from oceantracker.release_groups.point_release import PointRelease
+from oceantracker.release_groups.point_release import PointRelease, _BaseReleaseGroup
 from oceantracker.shared_info import shared_info as si
 
-class PolygonRelease(PointRelease):
+class PolygonRelease(_BaseReleaseGroup):
     '''
     Release particles at random locations within given polygon.
     Points chosen are always inside the domain, also inside wet cells unless setting allow_release_in_dry_cells is True.
@@ -19,7 +19,6 @@ class PolygonRelease(PointRelease):
         # below are not needed for polygons
         self.remove_default_params(['release_radius'])
 
-
     def initial_setup(self):
         super().initial_setup()  # required to get base class set up
         # sort out list  polygon from points
@@ -30,27 +29,30 @@ class PolygonRelease(PointRelease):
         if params['points'].shape[0] < 3:
             ml.msg('"points" parameter have at least 3 points, given ' + str(params['points']), error=True, caller=self)
 
-        # ensure points are  meters
-        if si.settings.use_geographic_coords:
-            params['points'] = cord_transforms.fix_any_spanning180east(params['points'], msg_logger=si.msg_logger, caller=self,
-                                                       crumbs=f'Point release#{params["name"]}')
         info['release_type'] = 'polygon'
-        info['bounding_box_ll_ul'] = np.stack((np.nanmin(params['points'][:,:2], axis=0),
-                                               np.nanmax(params['points'][:,:2], axis=0)))
 
         self.polygon = InsidePolygon(verticies = params['points'], geographic_coords=si.settings.use_geographic_coords)
+        params['points'] = self.polygon.points # polygon may have been closed
+
+        self._check_points_inside_domain(params['points'])
+        self._add_bounding_box(params['points'])
+
         info['polygon_area'] = self.polygon.get_area()
         ll, ur = info['bounding_box_ll_ul']
         info['bounding_box_area'] = abs((ur[0] - ll[0]) * (ur[1] - ll[1]))
 
-        if info['polygon_area']  < 10:
+        if info['polygon_area'] < 10:
             ml.msg('Polygon release, area of polygon is < 10 sq meters , area =' + str(info['polygon_area']),
                    hint='Is hydro model grid in meters and polygon coords given in (lon, lat)  degrees, convert polygons to hydro models meters coords? ',
                    warning=True)
 
         info['number_released'] = 0
         info['pulseID'] = 0
+        info['number_per_release'] = params['pulse_size']
 
+    def get_hori_release_locations(self, time_sec):
+        release_info = self.find_enough_hori_release_locations(time_sec)
+        return release_info
 
     def get_release_location_candidates(self):
         info = self.info
@@ -67,9 +69,3 @@ class PolygonRelease(PointRelease):
         sel = self.polygon.inside_indices(xy_candidates)
         x = xy_candidates[sel, :]
         return x
-
-    def get_number_required_per_release(self):
-        return self.params['pulse_size']
-
-
-

@@ -13,6 +13,7 @@ def write_release_group_netcdf():
     '''Write release groups data to own file for each case '''
     fn =  si.run_info.output_file_base + '_release_groups.nc'
     nc = NetCDFhandler(path.join(si.run_info.run_output_dir, fn), mode= 'w')
+    nc.write_global_attribute('geographic_coords', int(si.settings.use_geographic_coords))
 
     # loop over release groups
     for name, rg in si.class_roles.release_groups.items():
@@ -21,21 +22,15 @@ def write_release_group_netcdf():
         v_name = f'ReleaseGroup_{ID:04d}'
         dim_name = f'rg_{ID:04d}'
 
-        if rg.info['release_type'] in  ['point', 'polygon']:
-            v_name += '_points'
-            points = rg.params['points']
-            is3D = points.shape[1] ==3
-            dims = [dim_name + '_points', 'vector3D' if is3D else 'vector2D']
 
-        elif rg.info['release_type'] in ['grid']:
-            v_name += '_grid'
-            points =  rg.info['x_grid']
-            dims = [dim_name +'_rows', dim_name +'_cols', 'vector2D']
-            is3D = False
-        else:
-            raise('write_release_group_netcdf> unknown release group type')
+        v_name += '_points'
+        points = rg.params['points']
+        is3D = points.shape[1] ==3
+        dims = [dim_name + '_points', 'vector3D' if is3D else 'vector2D']
+
 
         nc.add_dimension(dim_name,points.shape[0])
+
         sc = rg.schedulers['release'].info
         # add useful info to variable atributes
         attr= dict(release_type=rg.info['release_type'], is3D = is3D,
@@ -47,8 +42,14 @@ def write_release_group_netcdf():
                    user_release_groupID=rg.params['user_release_groupID'],
                    user_release_group_name= rg.params['user_release_group_name'],
                    number_released= rg.info['number_released'])
-        nc.write_a_new_variable(v_name, points, dims, units='meters or decimal deg. as  (lon, lat)',  attributes=attr)
-    
+
+        if rg.info['release_type'] == 'radius':
+            attr.update(radius=rg.params['radius'])
+
+        nc.write_a_new_variable(v_name, points, dims, units='meters or decimal deg. as  (lon, lat)',
+                                description='release locations, not outside grid', attributes=attr)
+
+
     nc.close()
     return fn
 

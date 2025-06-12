@@ -249,24 +249,21 @@ class FieldGroupManager(ParameterBaseClass):
     def get_reader_info(self):
         d= dict(reader=self.reader.info)
         return d
-    def are_points_inside_domain(self,x, include_dry_cells):
+    def are_points_inside_domain(self,x):
         # only primary/outer grid
         is_inside, part_data = self.reader.interpolator.are_points_inside_domain(x)
         n = x.shape[0]
         part_data['hydro_model_gridID'] = np.zeros((n,), dtype=np.int8)
 
-        # get tide and water depth at particle locations
-
-        if not include_dry_cells:
-            # only  keep those in wet cells at this time
-            is_inside = np.logical_and(is_inside , ~self.are_dry_cells(part_data['n_cell'] ))
         return is_inside, part_data
 
-    def are_dry_cells(self, n_cell):
-        sel = self.reader.grid['dry_cell_index'][n_cell] > 128  # those dry
+    def release_are_dry_cells(self, release_info):
+        sel = self.reader.grid['dry_cell_index'][ release_info['n_cell']] > 128  # those dry
         return sel
 
 
+    def hindcast_integrity(self):
+        setup_reader._hindcast_integrity_checks(self.reader)
 
     def close(self):
         pass

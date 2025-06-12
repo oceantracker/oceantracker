@@ -18,6 +18,13 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
     # detect reader format and add clas_name to params
     reader = _detect_hydro_file_format(reader_params, dataset,  crumbs=crumbs)
 
+    # discard problematic variables
+    for file_var in reader.params['drop_variables']:
+        if file_var in reader.dataset.info['variables']:
+            del reader.dataset.info['variables'][file_var]
+        else:
+            si.msg_logger.msg(f'Cannot drop file variable {file_var}, not in file', warning=True, caller = reader)
+
     if reader.development:
         si.msg_logger.msg(f'Class "{reader.__class__.__name__}" under development, it may not work in all cases',
                            hint=f' contact developer with any unexpected issues', warning=True)
@@ -37,6 +44,8 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
     # sort files into time order and add info to reader builder on if 3D hindcast and mapped field
     # uses times in files containing the velocity variable
     _time_sort_files(reader, crumbs)
+
+
     _make_variable_time_step_to_fileID_map(reader)
 
     info = reader.info
@@ -47,8 +56,6 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
 
     reader.add_hindcast_info() # any tweaks for specific reader
 
-    # checks on hindcast info
-    _check_time_consistency(reader)
 
     # todo check all required fields are set
     if info['vert_grid_type'] is not None and info['vert_grid_type'] not in si.vertical_grid_types.possible_values():
@@ -121,8 +128,8 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
         ml.progress_marker(f'Using given reader parameter class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
         return reader
 
-    # lok for reader amongst known readers
-    reader = None
+    # look for reader amongst known readers
+    reader_class_name = None
 
     tests ={} # set of tests to pass
     ds_info = dataset.info
@@ -132,8 +139,8 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
         p = deepcopy(reader_params)
         p['class_name'] = class_name
         r = si.class_importer.make_class_instance_from_params('reader',p,
-                              check_for_unknown_keys=False,  # dont flag unknown keys
-                              crumbs=crumbs + f'> loading reader = class name "{class_name}"')
+                        check_for_unknown_keys=False,
+                        crumbs=crumbs + f'> loading reader = class name "{class_name}"')
         gmap = r.params['grid_variable_map']
         fmap= r.params['field_variable_map']
 
@@ -147,16 +154,23 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
         tests[name] = t
         # break if all testes passed as found reader
         if all(t.values()):
-            reader = r
+            reader_class_name = class_name
             break
 
-    if reader is None:
+
+    if reader_class_name is None:
         ml.msg(f' In detecting file format, not all tests against known file format variables were passed', error=True)
         for name, vals in tests.items():
             ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 2)
         ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
                hint=f'use reader to map to names in files? found variables {list(ds_info["variables"].keys())}',
                fatal_error=True, crumbs=crumbs)
+
+    # make and merge defaults for found reader
+    reader_params['class_name'] = reader_class_name
+    reader = si.class_importer.make_class_instance_from_params('reader', reader_params,
+                check_for_unknown_keys=True,
+                crumbs=crumbs + f'> loading detected reader = class name "{reader_class_name}"')
 
     reader.dataset = dataset
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
@@ -203,7 +217,8 @@ def _time_sort_files(reader, crumbs):
             item['fileIDs'] = item['fileIDs'][0]  # todo keep as list??
 
 
-    # sort out which hindcast time steps are in each file
+
+    #  build a time for every variables
     #  note time may appear in many files if variables are split between file, eg schsim v5 than once in each file
     # so must do this for all variables to ensure all files are covered, with some unnecessary repeats when more than one variable in same file
     #   time is not done as done a below as a "coordinate"
@@ -217,10 +232,8 @@ def _time_sort_files(reader, crumbs):
             time = np.append(time, fi[fID]['time'])
             fi[fID]['first_time_step_in_file'] = time.size - fi[fID]['time_steps']
             fi[fID]['last_time_step_in_file'] = time.size - 1
+        #print('xx',var_name,  fi[fID]['first_time_step_in_file'],  fi[fID]['last_time_step_in_file'] )
         item['time'] =  time
-
-    # get ful time varaible from files with first water velocity variable
-
 
 
     # if variables in different files, eg schism v5, time may be in many files,
@@ -341,17 +354,44 @@ def _make_variable_time_step_to_fileID_map(reader):
     # make time step to fileID map and file offset map for every time step, accounting for each variable's file order
     info = reader.dataset.info
     for v_name, item in info['variables'].items():
-        if item['time_varying']:
-            time_step_fileID_map = np.zeros((0,),dtype=np.int32)
-            time_step_file_offset_map = np.zeros((0,), dtype=np.int32)
-            for fileID in  item['fileIDs']: #IDs have aleady been time sorted
-                fi = info['files'][fileID]
-                time_step_fileID_map =  np.append(time_step_fileID_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
-                time_step_file_offset_map = np.append(time_step_file_offset_map,  np.arange(fi['time_steps'], dtype=np.int32))
+        if not item['time_varying']: continue
 
-            item['time_step_to_fileID_map'] = time_step_fileID_map
-            item['time_step_to_file_offset_map'] = time_step_file_offset_map
+        time_step_fileID_map = np.zeros((0,),dtype=np.int32)
+        time_step_file_offset_map = np.zeros((0,), dtype=np.int32)
+
+        for fileID in  item['fileIDs']: #IDs have aleady been time sorted
+            fi = info['files'][fileID]
+            time_step_fileID_map =  np.append(time_step_fileID_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
+            time_step_file_offset_map = np.append(time_step_file_offset_map,  np.arange(fi['time_steps'], dtype=np.int32))
+            pass
+
+        item['time_step_to_fileID_map'] = time_step_fileID_map
+        item['time_step_to_file_offset_map'] = time_step_file_offset_map
+        pass
     pass
+
+
+def _hindcast_integrity_checks(reader):
+    # todo , not ey used, put call in fgm final setup after all classes set up?
+    params = reader.params
+    info = reader.info
+    file_vars = info['variables']
+    ml = si.msg_logger
+    vars =[]
+
+    # check needed fields  are present
+    for name, i in reader.fields.items():
+        if 'file_vars_info' not in i.info: continue  # only do reader fiields
+        for var_name in i.info['file_vars_info'].keys():
+            vars.append(var_name)
+            if var_name not in file_vars:
+                ml.msg(f'Reader field {name}, file variable{var_name} is not in hindcast files', caller=reader, fatal_error=True)
+
+
+
+        pass
+    ml.progress_marker('passed hindcast integrity checks', caller = reader)
+    return
 
 
 def _check_time_consistency(reader):

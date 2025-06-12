@@ -1,16 +1,18 @@
+
 <!DOCTYPE html>
 
-<html lang="en" data-content_root="../../">
+<html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Running using param. dict. &#8212; OceanTracker Beta 0.5 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d1102ebc" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=a66d8bb5" />
-    <script src="../../_static/documentation_options.js?v=7b06c30a"></script>
-    <script src="../../_static/doctools.js?v=9bcbadda"></script>
-    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Tutorials" href="../how_to.html" />
@@ -18,20 +20,17 @@
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
-
   
-  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
   </head><body>
   <div class="document">
     
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
 <p class="logo">
   <a href="../../index.html">
-    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo" />
-    
-    <h1 class="logo logo-name">Beta 0.5</h1>
+    <img class="logo" src="../../_static/ocean_tracker.png" alt="Logo"/>
     
   </a>
 </p>
@@ -51,7 +50,7 @@
 
 
 <h3>Navigation</h3>
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<p><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../about.html">About</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../features.html">Features</a></li>
@@ -80,16 +79,16 @@
   </ul></li>
 </ul>
 </div>
-<search id="searchbox" style="display: none" role="search">
+<div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
     </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script>
+</div>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="documentwrapper">
@@ -99,7 +98,7 @@
           <div class="body" role="main">
             
   <section id="running-using-param-dict">
-<h1>Running using param. dict.<a class="headerlink" href="#running-using-param-dict" title="Link to this heading">¶</a></h1>
+<h1>Running using param. dict.<a class="headerlink" href="#running-using-param-dict" title="Permalink to this headline">¶</a></h1>
 <p>[This note-book is in oceantracker/tutorials_how_to/]</p>
 <p>The earlier notebook showed how to set parameters and run using the
 helper class. Here we exploit the flexibility to run Oceantracker
@@ -107,7 +106,7 @@ directly using a parameter dictionary built in code or read from a file.
 The dictionary can be built using {‘pulse_size’:10} or dict(pulse=10)
 approaches.</p>
 <section id="build-param-dict-with-code">
-<h2>Build param. dict. with code<a class="headerlink" href="#build-param-dict-with-code" title="Link to this heading">¶</a></h2>
+<h2>Build param. dict. with code<a class="headerlink" href="#build-param-dict-with-code" title="Permalink to this headline">¶</a></h2>
 <p>The below extends the minimal_example, shows two ways to build a
 parameter dictionary and different ways to run OceanTracker, from code
 or command line.</p>
@@ -116,7 +115,7 @@ or command line.</p>
     <span class="s1">&#39;output_file_base&#39;</span> <span class="p">:</span><span class="s1">&#39;param_test1&#39;</span><span class="p">,</span>      <span class="c1"># name used as base for output files</span>
     <span class="s1">&#39;root_output_dir&#39;</span><span class="p">:</span><span class="s1">&#39;output&#39;</span><span class="p">,</span>             <span class="c1">#  output is put in dir   &#39;root_output_dir&#39;/&#39;output_file_base&#39;</span>
     <span class="s1">&#39;time_step&#39;</span> <span class="p">:</span> <span class="mi">120</span><span class="p">,</span>  <span class="c1">#  2 min time step as seconds</span>
-    <span class="s1">&#39;reader&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;../demos/demo_hindcast/schsim3D&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
+    <span class="s1">&#39;reader&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">input_dir</span><span class="o">=</span><span class="s1">&#39;./demo_hindcast/schsim3D&#39;</span><span class="p">,</span>  <span class="c1"># folder to search for hindcast files, sub-dirs will, by default, also be searched</span>
                   <span class="n">file_mask</span><span class="o">=</span> <span class="s1">&#39;demo_hindcast_schisim3D*.nc&#39;</span><span class="p">,</span>    <span class="c1"># the file mask of the hindcast files</span>
                     <span class="p">),</span>
     <span class="c1"># add a list of release groups, the release locations from two points,</span>
@@ -207,7 +206,7 @@ items</p>
 </div>
 </section>
 <section id="run-oceantracker-from-parameters">
-<h2>Run OceanTracker from parameters<a class="headerlink" href="#run-oceantracker-from-parameters" title="Link to this heading">¶</a></h2>
+<h2>Run OceanTracker from parameters<a class="headerlink" href="#run-oceantracker-from-parameters" title="Permalink to this headline">¶</a></h2>
 <p>There are several ways to run OceanTracker</p>
 <ol class="arabic simple">
 <li><p>By coding</p>
@@ -236,7 +235,7 @@ later “how to”.</p></li>
 </ul>
 </section>
 <section id="run-with-code-built-params">
-<h2>Run with code built params.<a class="headerlink" href="#run-with-code-built-params" title="Link to this heading">¶</a></h2>
+<h2>Run with code built params.<a class="headerlink" href="#run-with-code-built-params" title="Permalink to this headline">¶</a></h2>
 <p>Is line below!</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># run oceantracker using param dict built in cells above</span>
 <span class="kn">from</span> <span class="nn">oceantracker</span> <span class="kn">import</span> <span class="n">main</span>
@@ -247,93 +246,96 @@ later “how to”.</p></li>
 </div>
 <pre class="literal-block">prelim:     Starting package set up
 helper:      Python version: 3.11.9 | packaged by conda-forge | (main, Apr 19 2024, 18:27:10) [MSC v.1938 64 bit (AMD64)]
-helper: &gt;&gt;&gt; Warning: Oceantracker is compatible with Python 3.11, but &gt; 3.11, however not all external imported packages have been updated to be compatible with 3.11
+helper: &gt;&gt;&gt; Warning: Oceantracker is compatible with Python 3.11,  however not all external imported packages have been updated to be compatible with 3.11
 helper:     hint: Down grade to python 3.10 if unexplained issues in external packages
 helper: ----------------------------------------------------------------------
-helper: OceanTracker version 0.50.0030-2025-01-28  starting setup helper &quot;main.py&quot;:
+helper: OceanTracker version 0.50.0041-2025-03-10  starting setup helper &quot;main.py&quot;:
+helper: &gt;&gt;&gt; Warning: Deleted contents of existing output dir
 helper: Output is in dir &quot;f:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1&quot;
 helper:     hint: see for copies of screen output and user supplied parameters, plus all other output
-helper:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;user_given_params.json&quot;
+helper:     &gt;&gt;&gt; Note: to help with debugging, parameters as given by user  are in &quot;param_test1_raw_user_params.json&quot;
 helper: ----------------------------------------------------------------------
 helper: Numba setup: applied settings, max threads = 32, physical cores = 32
 helper:     hint:  cache code = False, fastmath= False
 helper: ----------------------------------------------------------------------
-helper:       - Built OceanTracker package tree,      0.988 sec
+helper:       - Built OceanTracker package tree,      0.867 sec
 helper:       - Built OceanTracker sort name map,     0.000 sec
-helper:   - Done package set up to setup ClassImporter,       0.988 sec
+helper:   - Done package set up to setup ClassImporter,       0.867 sec
 setup: ----------------------------------------------------------------------
-setup:  OceanTracker version 0.50.0030-2025-01-28
-setup:     Starting user param. runner: &quot;param_test1&quot; at  2025-02-20T12:15:05.920385
+setup:  OceanTracker version 0.50.0041-2025-03-10
+setup:     Starting user param. runner: &quot;param_test1&quot; at  2025-03-10T13:12:49.603258
 setup: ----------------------------------------------------------------------
 setup:   - Start  field group manager and readers setup
-setup:   - Found input dir &quot;../demos/demo_hindcast/schsim3D&quot;
+setup:   - Found input dir &quot;./demo_hindcast/schsim3D&quot;
 setup:   - Detected reader class_name = &quot;oceantracker.reader.SCHISM_reader.SCHISMreader&quot;
 setup:     Hydro-model is &quot;3D&quot;, type &quot;SCHISMreader&quot;
-setup:         hint: Files found in dir and sub-dirs of &quot;../demos/demo_hindcast/schsim3D&quot;
+setup:         hint: Files found in dir and sub-dirs of &quot;./demo_hindcast/schsim3D&quot;
 setup:         Geographic coords = &quot;False&quot;
 setup:         Hindcast start: 2017-01-01T00:30:00  end:  2017-01-01T23:30:00
 setup:           time step = 0 days 1 hrs 0 min 0 sec, number of time steps= 24
 setup:           grid bounding box = [1589789.000 5479437.000] to [1603398.000 5501640.000]
 setup:       - Starting grid setup
-setup:       - built node to triangles map,   1.334 sec
-setup:       - built triangle adjacency matrix,       0.159 sec
+setup:       - built node to triangles map,   0.997 sec
+setup:       - built triangle adjacency matrix,       0.158 sec
 setup:       - found boundary triangles,      0.000 sec
-setup:       - built domain and island outlines,      0.977 sec
+setup:       - built domain and island outlines,      0.969 sec
 setup:       - calculated triangle areas,     0.000 sec
 setup:       - Finished grid setup
 setup:       - built barycentric-transform matrix,    0.343 sec
-setup:   - Finished field group manager and readers setup,    4.133 sec
-setup:   - Added release groups and found run start and end times,    0.443 sec
-setup:   - Done initial setup of all classes,         1.007 sec
+setup:   - Finished field group manager and readers setup,    3.688 sec
+setup:   - Added release groups and found run start and end times,    0.446 sec
+setup:   - Done initial setup of all classes,         0.999 sec
 setup: ----------------------------------------------------------------------
-setup:   - Starting param_test1,  duration: 0 days 23 hrs 0 min 0 sec
+setup:   - Starting&quot; param_test1,  duration: 0 days 23 hrs 0 min 0 sec
 setup:       From 2017-01-01T00:30:00 to  2017-01-01T23:30:00
 setup:   -  Reading 24 time steps,  for hindcast time steps 00:23 into ring buffer offsets 000:023
-setup:       -  read  24 time steps in  1.7 sec, from ../demos/demo_hindcast/schsim3D
+setup:       -  read  24 time steps in  1.6 sec, from ./demo_hindcast/schsim3D
 setup: ----------------------------------------------------------------------
 setup:   - Starting time stepping: 2017-01-01T00:30:00 to 2017-01-01T23:30:00 , duration  0 days 23 hrs 0 min 0 sec
-S:   - Opened tracks output and done written first time step in: &quot;param_test1_tracks_compact.nc&quot;,     0.129 sec
-S: 0000: 00%:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel:40   : Active:40     Move:40     Bottom:   0 Strand:0      Dead:   0 Out:   0 Buffer: 5%  step time = 12667.2 ms
-S: 0030: 04%:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel:60   : Active:60     Move:58     Bottom:   2 Strand:0      Dead:   0 Out:   0 Buffer: 8%  step time =  6.7 ms
-S: 0060: 09%:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel:100  : Active:100    Move:95     Bottom:   5 Strand:0      Dead:   0 Out:   0 Buffer:13%  step time =  7.7 ms
-S: 0090: 13%:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel:120  : Active:120    Move:108    Bottom:   2 Strand:10     Dead:   0 Out:   0 Buffer:16%  step time =  6.2 ms
-S: 0120: 17%:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel:160  : Active:160    Move:143    Bottom:   7 Strand:10     Dead:   0 Out:   0 Buffer:22%  step time =  7.0 ms
-S: 0150: 22%:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel:180  : Active:180    Move:155    Bottom:  15 Strand:10     Dead:   0 Out:   0 Buffer:25%  step time =  6.0 ms
-S: 0180: 26%:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel:220  : Active:220    Move:198    Bottom:  12 Strand:10     Dead:   0 Out:   0 Buffer:30%  step time =  6.6 ms
-S: 0210: 30%:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel:240  : Active:240    Move:219    Bottom:  11 Strand:10     Dead:   0 Out:   0 Buffer:33%  step time =  6.1 ms
-S: 0240: 35%:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel:280  : Active:280    Move:260    Bottom:  10 Strand:10     Dead:   0 Out:   0 Buffer:38%  step time =  6.9 ms
-S: 0270: 39%:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel:300  : Active:300    Move:287    Bottom:  13 Strand:0      Dead:   0 Out:   0 Buffer:41%  step time =  6.9 ms
-S: 0300: 43%:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel:340  : Active:340    Move:318    Bottom:  22 Strand:0      Dead:   0 Out:   0 Buffer:47%  step time =  7.2 ms
-S: 0330: 48%:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel:360  : Active:360    Move:342    Bottom:  18 Strand:0      Dead:   0 Out:   0 Buffer:50%  step time =  6.3 ms
-S: 0360: 52%:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel:400  : Active:400    Move:386    Bottom:  14 Strand:0      Dead:   0 Out:   0 Buffer:55%  step time =  7.2 ms
-S: 0390: 57%:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel:420  : Active:420    Move:400    Bottom:   8 Strand:12     Dead:   0 Out:   0 Buffer:58%  step time =  6.6 ms
-S: 0420: 61%:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel:460  : Active:460    Move:442    Bottom:   6 Strand:12     Dead:   0 Out:   0 Buffer:63%  step time =  7.3 ms
-S: 0450: 65%:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel:480  : Active:480    Move:444    Bottom:   1 Strand:35     Dead:   0 Out:   0 Buffer:66%  step time =  6.5 ms
-S: 0480: 70%:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel:520  : Active:520    Move:477    Bottom:   3 Strand:40     Dead:   0 Out:   0 Buffer:72%  step time =  8.4 ms
-S: 0510: 74%:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel:540  : Active:540    Move:489    Bottom:   1 Strand:50     Dead:   0 Out:   0 Buffer:75%  step time =  6.6 ms
-S: 0540: 78%:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel:580  : Active:580    Move:530    Bottom:   0 Strand:50     Dead:   0 Out:   0 Buffer:80%  step time =  6.5 ms
-S: 0570: 83%:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel:600  : Active:600    Move:549    Bottom:   3 Strand:48     Dead:   0 Out:   0 Buffer:83%  step time =  6.2 ms
-S: 0600: 87%:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel:640  : Active:640    Move:593    Bottom:   4 Strand:43     Dead:   0 Out:   0 Buffer:88%  step time = 10.6 ms
-S: 0630: 91%:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel:660  : Active:660    Move:642    Bottom:   6 Strand:12     Dead:   0 Out:   0 Buffer:91%  step time =  9.2 ms
-S: 0660: 96%:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel:700  : Active:700    Move:681    Bottom:   7 Strand:12     Dead:   0 Out:   0 Buffer:97%  step time =  8.2 ms
-S: 0690: 100%:H0023b23-00 Day +00 23:00 2017-01-01 23:30:00: Rel:700  : Active:700    Move:694    Bottom:   6 Strand:0      Dead:   0 Out:   0 Buffer:97%  step time =  9.6 ms
+S:   - Opened tracks output and done written first time step in: &quot;param_test1_tracks_compact_000.nc&quot;,         0.015 sec
+S: 0000: 00%:H0000b00-01 Day +00 00:00 2017-01-01 00:30:00: Rel:40   : Active:40     Move:40     Bottom:   0 Strand:0      Dead:   0 Out:   0 Buffer: 5%  step time = 12404.6 ms
+S: 0030: 04%:H0001b01-02 Day +00 01:00 2017-01-01 01:30:00: Rel:60   : Active:60     Move:55     Bottom:   5 Strand:0      Dead:   0 Out:   0 Buffer: 8%  step time =  7.2 ms
+S: 0060: 09%:H0002b02-03 Day +00 02:00 2017-01-01 02:30:00: Rel:100  : Active:100    Move:98     Bottom:   2 Strand:0      Dead:   0 Out:   0 Buffer:13%  step time =  8.9 ms
+S: 0090: 13%:H0003b03-04 Day +00 03:00 2017-01-01 03:30:00: Rel:120  : Active:120    Move:108    Bottom:   2 Strand:10     Dead:   0 Out:   0 Buffer:16%  step time =  7.3 ms
+S: 0120: 17%:H0004b04-05 Day +00 04:00 2017-01-01 04:30:00: Rel:160  : Active:160    Move:144    Bottom:   6 Strand:10     Dead:   0 Out:   0 Buffer:22%  step time =  8.1 ms
+S: 0150: 22%:H0005b05-06 Day +00 05:00 2017-01-01 05:30:00: Rel:180  : Active:180    Move:155    Bottom:  15 Strand:10     Dead:   0 Out:   0 Buffer:25%  step time =  7.0 ms
+S: 0180: 26%:H0006b06-07 Day +00 06:00 2017-01-01 06:30:00: Rel:220  : Active:220    Move:200    Bottom:  10 Strand:10     Dead:   0 Out:   0 Buffer:30%  step time =  8.0 ms
+S: 0210: 30%:H0007b07-08 Day +00 07:00 2017-01-01 07:30:00: Rel:240  : Active:240    Move:217    Bottom:  13 Strand:10     Dead:   0 Out:   0 Buffer:33%  step time =  7.4 ms
+S: 0240: 35%:H0008b08-09 Day +00 08:00 2017-01-01 08:30:00: Rel:280  : Active:280    Move:256    Bottom:  14 Strand:10     Dead:   0 Out:   0 Buffer:38%  step time = 11.8 ms
+S: 0270: 39%:H0009b09-10 Day +00 09:00 2017-01-01 09:30:00: Rel:300  : Active:300    Move:285    Bottom:  15 Strand:0      Dead:   0 Out:   0 Buffer:41%  step time =  8.1 ms
+S: 0300: 43%:H0010b10-11 Day +00 10:00 2017-01-01 10:30:00: Rel:340  : Active:340    Move:324    Bottom:  16 Strand:0      Dead:   0 Out:   0 Buffer:47%  step time =  9.4 ms
+S: 0330: 48%:H0011b11-12 Day +00 11:00 2017-01-01 11:30:00: Rel:360  : Active:360    Move:345    Bottom:  15 Strand:0      Dead:   0 Out:   0 Buffer:50%  step time =  9.1 ms
+S: 0360: 52%:H0012b12-13 Day +00 12:00 2017-01-01 12:30:00: Rel:400  : Active:400    Move:388    Bottom:  12 Strand:0      Dead:   0 Out:   0 Buffer:55%  step time =  9.5 ms
+S: 0390: 57%:H0012b12-13 Day +00 13:00 2017-01-01 13:30:00: Rel:420  : Active:420    Move:403    Bottom:   8 Strand:9      Dead:   0 Out:   0 Buffer:58%  step time =  7.9 ms
+S: 0420: 61%:H0014b14-15 Day +00 14:00 2017-01-01 14:30:00: Rel:460  : Active:460    Move:441    Bottom:   9 Strand:10     Dead:   0 Out:   0 Buffer:63%  step time =  8.3 ms
+S: 0450: 65%:H0015b15-16 Day +00 15:00 2017-01-01 15:30:00: Rel:480  : Active:480    Move:442    Bottom:   1 Strand:37     Dead:   0 Out:   0 Buffer:66%  step time = 10.5 ms
+S: 0480: 70%:H0016b16-17 Day +00 16:00 2017-01-01 16:30:00: Rel:520  : Active:520    Move:473    Bottom:   4 Strand:43     Dead:   0 Out:   0 Buffer:72%  step time =  9.9 ms
+S: 0510: 74%:H0017b17-18 Day +00 17:00 2017-01-01 17:30:00: Rel:540  : Active:540    Move:487    Bottom:   0 Strand:53     Dead:   0 Out:   0 Buffer:75%  step time =  7.7 ms
+S: 0540: 78%:H0018b18-19 Day +00 18:00 2017-01-01 18:30:00: Rel:580  : Active:580    Move:527    Bottom:   0 Strand:53     Dead:   0 Out:   0 Buffer:80%  step time =  9.0 ms
+S: 0570: 83%:H0019b19-20 Day +00 19:00 2017-01-01 19:30:00: Rel:600  : Active:600    Move:548    Bottom:   0 Strand:52     Dead:   0 Out:   0 Buffer:83%  step time =  9.8 ms
+S: 0600: 87%:H0020b20-21 Day +00 20:00 2017-01-01 20:30:00: Rel:640  : Active:640    Move:590    Bottom:   4 Strand:46     Dead:   0 Out:   0 Buffer:88%  step time = 10.0 ms
+S: 0630: 91%:H0021b21-22 Day +00 21:00 2017-01-01 21:30:00: Rel:660  : Active:660    Move:645    Bottom:   5 Strand:10     Dead:   0 Out:   0 Buffer:91%  step time =  8.4 ms
+S: 0660: 96%:H0022b22-23 Day +00 22:00 2017-01-01 22:30:00: Rel:700  : Active:700    Move:681    Bottom:  10 Strand:9      Dead:   0 Out:   0 Buffer:97%  step time =  9.7 ms
+S: 0690: 100%:H0023b23-00 Day +00 23:00 2017-01-01 23:30:00: Rel:700  : Active:700    Move:694    Bottom:   6 Strand:0      Dead:   0 Out:   0 Buffer:97%  step time = 11.4 ms
 end: ----------------------------------------------------------------------
-end: &gt;&gt;&gt; Warning: Oceantracker is compatible with Python 3.11, but &gt; 3.11, however not all external imported packages have been updated to be compatible with 3.11
+end: &gt;&gt;&gt; Warning: Deleted contents of existing output dir
+end:
+end: &gt;&gt;&gt; Warning: Oceantracker is compatible with Python 3.11,  however not all external imported packages have been updated to be compatible with 3.11
 end:     hint: Down grade to python 3.10 if unexplained issues in external packages
 end:
 end: ----------------------------------------------------------------------
-end:       Error counts -   0 errors,   1 warnings,   1 notes, check above
+end:       Error counts -   0 errors,   2 warnings,   1 notes, check above
 end:
-end:   - Finished &quot;param_test1&quot; started: 19597.8622025, ended: 2025-02-20 12:15:37.556692
-end:       Computational time =0:00:32.787589
+end:   - Finished &quot;param_test1&quot; started: 21899.6230059, ended: 2025-03-10 13:13:21.086088
+end:       Computational time =0:00:32.534181
 end:   Output in f:H_Local_driveParticleTrackingoceantrackertutorials_how_tooutputparam_test1
 end:
 end: --- Finished Oceantracker run ----------------------------------------
 end:</pre>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># plot animation of results</span>
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
-<span class="kn">from</span> <span class="nn">plot_oceantracker.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span>
-<span class="kn">from</span> <span class="nn">read_oceantracker.python</span> <span class="kn">import</span>  <span class="n">load_output_files</span>
+<span class="kn">from</span> <span class="nn">oceantracker.plot_output.plot_tracks</span> <span class="kn">import</span> <span class="n">animate_particles</span>
+<span class="kn">from</span> <span class="nn">oceantracker.read_output.python</span> <span class="kn">import</span>  <span class="n">load_output_files</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span> <span class="c1"># show animation in note book</span>
 
 <span class="c1"># read particle track data into a dictionary using case_info_file_name</span>
@@ -29926,10 +29928,10 @@ YXBwbAAAAAAAAAAAAAAAACxpbHN0AAAAJKl0b28AAAAcZGF0YQAAAAEAAAAATGF2ZjYxLjEuMTAw
 </video><img alt="info/how_to/E_run_using_parameter_dictionaries_files%5CE_run_using_parameter_dictionaries_6_1.png" src="info/how_to/E_run_using_parameter_dictionaries_files%5CE_run_using_parameter_dictionaries_6_1.png" />
 </section>
 <section id="run-by-reading-param-file">
-<h2>Run by reading param. file<a class="headerlink" href="#run-by-reading-param-file" title="Link to this heading">¶</a></h2>
+<h2>Run by reading param. file<a class="headerlink" href="#run-by-reading-param-file" title="Permalink to this headline">¶</a></h2>
 </section>
 <section id="run-from-command-line">
-<h2>Run from command line<a class="headerlink" href="#run-from-command-line" title="Link to this heading">¶</a></h2>
+<h2>Run from command line<a class="headerlink" href="#run-from-command-line" title="Permalink to this headline">¶</a></h2>
 <p>Run without coding from command lin bu using a parameter file pre-built
 in a text editor.</p>
 <p>From within an activated oceantracker conda environment, run command
@@ -29939,7 +29941,7 @@ activated environment.</p>
 <p>eg. run “run_oceantracker.py” script in the oceantracker/oceantracker
 directory with command</p>
 <p><code class="docutils literal notranslate"><span class="pre">python</span>&#160; <span class="pre">../oceantracker/run_oceantracker.py</span> <span class="pre">./example_param_files/param_test1.json</span></code></p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>python<span class="w">  </span>../oceantracker/run_ot_cmd_line.py<span class="w"> </span>./example_param_files/param_test1.json
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>python  ../oceantracker/run_ot_cmd_line.py ./example_param_files/param_test1.json
 </pre></div>
 </div>
 <pre class="literal-block">prelim:     Starting package set up
@@ -30031,7 +30033,7 @@ end:
 end: --- Finished Oceantracker run ----------------------------------------
 end:</pre>
 <section id="options-when-running-at-command-line">
-<h3>Options when running at command line<a class="headerlink" href="#options-when-running-at-command-line" title="Link to this heading">¶</a></h3>
+<h3>Options when running at command line<a class="headerlink" href="#options-when-running-at-command-line" title="Permalink to this headline">¶</a></h3>
 <p>These allow</p>
 <ul class="simple">
 <li><p>redefining the input and output dirs given within parameter file,
@@ -30040,7 +30042,7 @@ which may have been built for a different location</p></li>
 testing</p></li>
 </ul>
 <p>the full arguments are below</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>python<span class="w"> </span>../oceantracker/run_ot_cmd_line.py<span class="w"> </span>-h
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>python ../oceantracker/run_ot_cmd_line.py -h
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">prelim</span><span class="p">:</span>     <span class="n">Starting</span> <span class="n">package</span> <span class="nb">set</span> <span class="n">up</span>
@@ -30096,11 +30098,11 @@ testing</p></li>
     <div class="clearer"></div>
   </div>
     <div class="footer">
-      &#169;2024, R. Vennell.
+      &copy;2024, R. Vennell.
       
       |
-      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.1</a>
-      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="../../_sources/info/how_to/E_run_using_parameter_dictionaries.rst.txt"

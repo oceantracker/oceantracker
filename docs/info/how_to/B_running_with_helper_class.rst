@@ -358,8 +358,8 @@ Basic plots of tracks
 
     # plot animation of results
     from matplotlib import pyplot as plt
-    from plot_oceantracker.plot_tracks import animate_particles
-    from read_oceantracker.python import  load_output_files
+    from oceantracker.plot_output import  plot_tracks
+    from oceantracker.read_output.python import  load_output_files
     from IPython.display import HTML # show animation in note book
     
     # read particle track data into a dictionary using case_info_file_name
@@ -367,7 +367,7 @@ Basic plots of tracks
     
     ax= [1591000, 1601500, 5479500, 5491000]  # area to plot
     # animate particles
-    anim = animate_particles(tracks, axis_lims=ax,title='Fall vel.+  re-sus., grey part. are on bottom when flows too weak to resuspend', 
+    anim = plot_tracks.animate_particles(tracks, axis_lims=ax,title='Fall vel.+  re-sus., grey part. are on bottom when flows too weak to resuspend', 
                              show_dry_cells=True, show_grid=True, show=False) # use ipython to show video, rather than matplotlib plt.show()
     
     # this line only used in note books, in python scripts use show = True above

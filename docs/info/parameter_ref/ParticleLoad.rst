@@ -36,6 +36,16 @@ Parameters:
 		- data_type: ``<class 'str'>``
 		- possible_values: ``['float64', 'float32', 'bool', 'int32', 'int16', 'int8', 'int64']``
 
+	* ``extra_dimensions``:  *<optional>*
+		Description: - list of the names of dimensions for vectors, or those with prop_dim3 set. Partile is added automatically
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
+
 	* ``initial_value`` :   ``<class 'float'>``   *<optional>*
 		Description: Value of the particle property when it is released
 
@@ -49,7 +59,7 @@ Parameters:
 		- data_type: ``<class 'str'>``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
-		Description: size of a 3d dimesion of particle property
+		Description: size of a 3d dimension of particle property
 
 		- default: ``1``
 		- data_type: ``<class 'int'>``

@@ -164,9 +164,11 @@ poly_stats =dict(name='my_poly_stats',
         update_interval= 3600,
         particle_property_list=['water_depth'],
         #status_list=[],
-
         z_min= -2,
         grid_size= [120, 121])
+
+poly_stats_age = deepcopy(poly_stats)
+poly_stats_age.update(class_name='PolygonStats2D_ageBased',name='my_poly_stats_age',max_age_to_bin=4*24*3600)
 
 LCS = dict(name='LSC test',
            class_name='dev_LagarangianStructuresFTLE2D',
@@ -214,7 +216,7 @@ def compare_reference_run(case_info_file, args):
     dt = np.abs(tracks['time'] - tracks_ref['time'])
     print('max time difference, sec', np.max(dt))
     pass
-def show_track_plot(case_info_file, args):
+def show_track_plot(case_info_file, args,colour_with=None):
     from oceantracker.plot_output import plot_tracks
     if not args.plot : return
     if case_info_file is None :
@@ -228,8 +230,7 @@ def show_track_plot(case_info_file, args):
     anim= plot_tracks.animate_particles(tracks,
                                         show_grid=True, show_dry_cells=True, axis_labels=True,
                                         #part_color_map='hot',
-                                        #size_using_data=tracks['a_pollutant'],
-                                        #colour_using_data=tracks['a_pollutant'],
+                                        colour_using_data=None if colour_with is None else tracks[colour_with],
                                         movie_file=movie_file1)
 
 def plot_vert_section(case_info_file, args,fraction_to_read):

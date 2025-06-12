@@ -27,13 +27,6 @@ Parameters:
 		- default: ``None``
 		- data_type: ``<class 'str'>``
 
-	* ``coords_in_lat_lon_order`` :   ``<class 'bool'>``   *<optional>*
-		Description: Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees
-
-		- default: ``False``
-		- data_type: ``<class 'bool'>``
-		- possible_values: ``[True, False]``
-
 	* ``duration`` :   ``<class 'float'>``   *<optional>*
 		Description: How long to do counting after start time, can be used instead of "end" parameter
 
@@ -68,6 +61,22 @@ Parameters:
 		- default: ``None``
 		- data_type: ``<class 'str'>``
 
+	* ``near_seabed`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles within this distance of bottom
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``meters above seabed``
+		- min: ``0.001``
+
+	* ``near_seasurface`` :   ``<class 'float'>``   *<optional>*
+		Description: Count only those particles within this distance of tidal sea surface
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``meters below sea surface``
+		- min: ``0.001``
+
 	* ``particle_property_list``:  *<optional>*
 		Description: - Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions
 
@@ -95,7 +104,7 @@ Parameters:
 		- a list containing type:  ``[]``
 		- default list : ``['stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 		- data_type: ``<class 'str'>``
-		- possible_values: ``['unknown', 'notReleased', 'dead', 'outside_open_boundary', 'outside_domain', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
+		- possible_values: ``['unknown', 'notReleased', 'dead', 'outside_domain', 'outside_open_boundary', 'stationary', 'stranded_by_tide', 'on_bottom', 'moving']``
 		- possible_types: ``[]``
 		- make_list_unique: ``False``
 		- min_len: ``0``

@@ -15,7 +15,7 @@ Resuspension
 
 
 
-**Inheritance:** > ParameterBaseClass> BaseResuspension> Resuspension
+**Inheritance:** > ParameterBaseClass> _BaseResuspension> Resuspension
 
 
 Parameters:

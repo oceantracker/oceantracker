@@ -23,7 +23,7 @@ class _BaseParticleProperty(ParameterBaseClass):
                                     'time_varying':PVC(True, bool),
                                     'name' :PVC(None, str,doc_str='Name used to refer to this particle property in code and output',is_required=True),
                                     'vector_dim': PVC(1, int, min = 1 ),
-                                    'prop_dim3': PVC(1, int, min=1,doc_str='size of a 3d dimesion of particle property'),
+                                    'prop_dim3': PVC(1, int, min=1,doc_str='size of a 3d dimension of particle property'),
                                     'dtype':PVC('float64', str,possible_values=possible_dtypes, ),
                                     'initial_value':PVC(0.,float, doc_str='Value given to particle property on release'),
                                     'update':PVC(True,bool),
@@ -37,6 +37,7 @@ class _BaseParticleProperty(ParameterBaseClass):
         self.role_doc('Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
 
     def initial_setup(self):
+
         params = self.params
         info = self.info
         info['dimensions'] = ['particle_dim']
@@ -67,7 +68,7 @@ class _BaseParticleProperty(ParameterBaseClass):
             if name in w.params['turn_on_write_particle_properties_list']:  params['write'] = True
             if False and params['write']:
                 w.create_variable_to_write(name, is_time_varying=params['time_varying'],
-                                           is_part_prop=True,
+                                           is_part_prop=True,compression_level=si.settings.NCDF_compression_level,
                                            fill_value=basic_util.fillvalue(params['dtype']),
                                            vector_dim=params['vector_dim'],
                                            attributes=dict(description= params['description'],

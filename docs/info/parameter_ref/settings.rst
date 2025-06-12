@@ -17,6 +17,16 @@ Parameters:
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
+	* ``add_path``:  *<optional>*
+		Description: - List of directories to add to python path containing user written classes. Enables import of user written classes outside of current working dir.
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
+
 	* ``backtracking`` :   ``<class 'bool'>``   *<optional>*
 		Description: Run model backwards in time
 
@@ -101,6 +111,14 @@ Parameters:
 		- default: ``root_output_dir``
 		- data_type: ``<class 'str'>``
 
+	* ``screen_info_level`` :   ``<class 'int'>``   *<optional>*
+		Description: Sets 0-10 value at which user added self.screen_info(text,level) method calls are written to the screen, = 0 for none
+
+		- default: ``0``
+		- data_type: ``<class 'int'>``
+		- min: ``0``
+		- max: ``10``
+
 	* ``screen_output_time_interval`` :   ``<class 'float'>``   *<optional>*
 		Description: Time in seconds between writing progress to the screen/log file
 
@@ -118,7 +136,7 @@ Parameters:
 	* ``use_A_Z_profile`` :   ``<class 'bool'>``   *<optional>*
 		Description: Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files
 
-		- default: ``True``
+		- default: ``False``
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
@@ -179,9 +197,9 @@ Parameters:
 		- possible_values: ``[True, False]``
 
 	* ``z0`` :   ``<class 'float'>``   *<optional>*
-		Description: Bottom roughness, used for tolerance and log layer calcs.
+		Description: Bottom roughness, used for tolerance and log layer calcs. default is flat sand/mud/gravel, https://eprints.hrwallingford.com/348/1/SR360.pdf
 
-		- default: ``0.005``
+		- default: ``0.0003``
 		- data_type: ``<class 'float'>``
 		- units: ``m``
 		- min: ``0.0001``
@@ -189,6 +207,14 @@ Parameters:
 
 Expert Parameters:
 *******************
+
+	* ``NCDF_compression_level`` :   ``<class 'int'>``   *<optional>*
+		Description: Netcdf compression of output variables, reduces output file sixe, but slows code
+
+		- default: ``0``
+		- data_type: ``<class 'int'>``
+		- min: ``0``
+		- max: ``9``
 
 	* ``NCDF_particle_chunk`` :   ``<class 'int'>``   *<optional>*
 		Description: Chunk size for particle variable Net CDF output files, default is estimated max. particles alive
@@ -238,12 +264,32 @@ Expert Parameters:
 		- data_type: ``<class 'bool'>``
 		- possible_values: ``[True, False]``
 
+	* ``min_dead_to_remove`` :   ``<class 'int'>``   *<optional>*
+		Description: The minimum number of dead particles before they are removed from buffer
+
+		- default: ``100000``
+		- data_type: ``<class 'int'>``
+
 	* ``particle_buffer_initial_size`` :   ``<class 'int'>``   *<optional>*
 		Description: Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive
 
-		- default: ``None``
+		- default: ``10000000``
 		- data_type: ``<class 'int'>``
 		- min: ``1``
+
+	* ``restart`` :   ``<class 'bool'>``   *<optional>*
+		Description: Restart from a saved state, requires prior run setting restart_interval
+
+		- default: ``False``
+		- data_type: ``<class 'bool'>``
+		- possible_values: ``[True, False]``
+
+	* ``restart_interval`` :   ``<class 'float'>``   *<optional>*
+		Description: Save the particle tracking state at the interval to allow restarting run
+
+		- default: ``None``
+		- data_type: ``<class 'float'>``
+		- units: ``sec``
 
 	* ``time_buffer_size`` :   ``<class 'int'>``   *<optional>*
 		Description: Number of time steps held in hindcast memory buffers
@@ -253,7 +299,7 @@ Expert Parameters:
 		- min: ``2``
 
 	* ``use_geographic_coords`` :   ``<class 'bool'>``   *<optional>*
-		Description: Used geographic coordniated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code
+		Description: Used geographic coordinated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code
 
 		- default: ``False``
 		- data_type: ``<class 'bool'>``

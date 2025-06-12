@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from matplotlib import colors, animation
 from oceantracker.plot_output import plot_utilities
 
+from oceantracker.plot_output.plot_utilities import save_animation
+
 #from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 
 from oceantracker.util import time_util
@@ -85,6 +87,11 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
         clims = [np.nanmin(colour_using_data), np.nanmax(colour_using_data)]
         cmap = part_color_map
         print('animate_particles: color map limits', vmin, vmax)
+
+        if colour_using_data.shape[0] == track_data['x'].shape[1]:
+            # time independent coloring data, so make fake time steps
+            colour_using_data = np.repeat(colour_using_data.reshape(1,-1),track_data['x'].shape[0], axis=0)
+
         sc = ax.scatter(track_data['x'][nt, :, 0], track_data['x'][nt, :, 1], s=s0, c=colour_using_data[nt, :], edgecolors=None,
                         vmin=clims[0] if vmin is None else vmin,
                         vmax=clims[1] if vmax is None else vmax, cmap=cmap, zorder=5)

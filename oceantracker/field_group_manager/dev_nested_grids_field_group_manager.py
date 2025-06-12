@@ -1,7 +1,7 @@
-from oceantracker.field_group_manager.field_group_manager import FieldGroupManager
+
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.field_group_manager.util import  field_group_manager_util
+from oceantracker.util.numba_util import  njitOT, njitOTparallel, prange
 import numpy as np
 from oceantracker.util import time_util
 from oceantracker.shared_info import shared_info as si
@@ -152,7 +152,7 @@ class DevNestedFields(ParameterBaseClass):
         for fgm in self.fgm_hydro_grids:
                 fgm.add_part_prop_from_fields_plus_book_keeping()
 
-    def are_points_inside_domain(self,x,include_dry_cells):
+    def are_points_inside_domain(self,x):
         # used to check initial release points only
         part_prop = si.class_roles.particle_properties
 
@@ -162,7 +162,7 @@ class DevNestedFields(ParameterBaseClass):
 
         for n, fgm in enumerate(self.fgm_hydro_grids):
 
-            sel_n, part_data_n = fgm.are_points_inside_domain(x,include_dry_cells)
+            sel_n, part_data_n = fgm.are_points_inside_domain(x)
 
             if n == 0:
                 # start with outer grids values
@@ -179,6 +179,15 @@ class DevNestedFields(ParameterBaseClass):
 
 
         return is_inside, part_data
+
+    def release_are_dry_cells(self, release_info):
+        # work out of dry for rreleased partivles
+        sel = np.full((release_info['hydro_model_gridID'].size),False, dtype=bool)
+        for ngrid, fgm in enumerate(self.fgm_hydro_grids):
+            active   = release_info['hydro_model_gridID'] == ngrid
+            sel[active] = fgm.reader.grid['dry_cell_index'][release_info['n_cell'][active]] > 128  # those dry
+
+        return sel
 
 
     def interp_named_2D_scalar_fields_at_given_locations_and_time(self,field_name,  x, n_cell, bc_coords, time_sec = None, hydro_model_gridID = None):
@@ -213,7 +222,7 @@ class DevNestedFields(ParameterBaseClass):
             # todo faster- prebuild a index to show which cells overlap with an  inner and only check if these are inside the inner grid
 
 
-            is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid, axis=0), include_dry_cells=True)
+            is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid, axis=0))
 
             if np.any(is_inside):
                 # move those now inside outer grid and copy in values
@@ -234,7 +243,7 @@ class DevNestedFields(ParameterBaseClass):
             outside_inner = part_prop['status'].find_subset_where(on_inner_grid, 'eq', si.particle_status_flags.outside_open_boundary,
                                                                   out=self.get_partID_subset_buffer('fgmID2'))
             if outside_inner.size > 0:
-                inside_outer, pp = fgm_outer_grid.are_points_inside_domain(np.take(xq,outside_inner,axis =0), include_dry_cells=True)
+                inside_outer, pp = fgm_outer_grid.are_points_inside_domain(np.take(xq,outside_inner,axis =0))
                 if np.any(inside_outer):
                     # move those now inside inner grid and copy in values
                     s = outside_inner[inside_outer]  # IDs of those outside inner and inside outer

@@ -35,6 +35,16 @@ Parameters:
 		- default: ``int32``
 		- data_type: ``<class 'str'>``
 
+	* ``extra_dimensions``:  *<optional>*
+		Description: - list of the names of dimensions for vectors, or those with prop_dim3 set. Partile is added automatically
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``False``
+		- min_len: ``0``
+
 	* ``initial_value`` :   ``<class 'int'>``   *<optional>*
 		- default: ``-1``
 		- data_type: ``<class 'int'>``
@@ -46,7 +56,7 @@ Parameters:
 		- data_type: ``<class 'str'>``
 
 	* ``prop_dim3`` :   ``<class 'int'>``   *<optional>*
-		Description: size of a 3d dimesion of particle property
+		Description: size of a 3d dimension of particle property
 
 		- default: ``1``
 		- data_type: ``<class 'int'>``

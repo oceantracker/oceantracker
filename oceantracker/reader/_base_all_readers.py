@@ -62,6 +62,7 @@ class _BaseReader(ParameterBaseClass):
                             all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables', is_required=True),
                             ),
             'field_variables' : PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
+            'drop_variables': PLC(None, str, expert=True, doc_str='List of problematic file variable names to ignore, eg non-critcal variables not present in all files/all times', make_list_unique=True),
         })  # list of normal required dimensions
 
         self.info['buffer_info'] = dict( time_steps_in_buffer = [])
@@ -186,7 +187,7 @@ class _BaseReader(ParameterBaseClass):
                 grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
 
             # fix any spanning 179 to -179
-            grid['x'] = fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
+            fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
                                                 crumbs=f'setting up reader in dir=  {self.params["input_dir"]}')
             # set up conversion of meters to degreees
             i = self._add_a_reader_field('degrees_per_meter', dict(time_varying=False, is3D=False, is_vector=True,
@@ -332,7 +333,6 @@ class _BaseReader(ParameterBaseClass):
 
         return quad_cells_to_split, tri
 
-
     def _setup_fields(self):
         # setup field classes , ie make memory buffer
         info = self.info
@@ -351,7 +351,9 @@ class _BaseReader(ParameterBaseClass):
         load_fields= params['load_fields']
 
         # add reader fields
-        for name  in list(set(load_fields)):
+        all_fields= list(set(load_fields))
+        for name  in all_fields:
+            # core fields done separately by custom methods
             if name in ['water_depth', 'tide','water_velocity']: continue
 
             i = self._add_a_reader_field(name)
@@ -359,6 +361,8 @@ class _BaseReader(ParameterBaseClass):
             # read reader field now if not time varying
             if not i.is_time_varying():
                     i.data = self.read_field_data(name, i)
+
+        si.msg_logger.progress_marker(f'Loading reader fields {str(all_fields)}')
 
     def _add_a_reader_field(self, name, params={},dummy=False):
         info = self.info

@@ -41,12 +41,10 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
                 #coords_in_lat_lon_order =  PVC(False, bool,
                 #    doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
-                status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),
-                                 obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
-                               ),
-                status_max=PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),
-                                obsolete='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'
-                               ),
+                status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),obsolete=True,
+                               doc_str='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'),
+                status_max=PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),obsolete=True,
+                             doc_str='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'),
                 )
         self.add_default_params(count_start_date= PTC(None,  obsolete=True,  doc_str='Use "start" parameter'),
                                 count_end_date= PTC(None,   obsolete=True,  doc_str='Use "end" parameter'))
@@ -111,10 +109,10 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                       name, si.class_roles.particle_properties.keys(),
                                       hint='check parameter "particle_property_list"',
                                       crumbs=f'Particle Statistic "{self.params["name"]}" >',
-                                      caller = self, fatal_error=True)
+                                      caller = self)
 
             if part_prop[name].is_vector():
-                si.msg_logger.msg('On the fly statistical Binning of vector particle property  "' + name + '" not yet implemented', warning=True)
+                si.msg_logger.msg('On the fly statistical Binning of vector particle properties,eg  "' + name + '" not yet implemented', warning=True)
 
             elif part_prop[name].get_dtype() != np.float64:
                 si.msg_logger.msg(f'On the fly statistics can currently only track np.float64 particle properties, ignoring property  "{name}", of type "{str(part_prop[name].get_dtype())}"',
@@ -161,7 +159,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         names=[]
         for key, prop in self.sum_binned_part_prop.items():
             if part_prop[key].is_vector():
-                si.msg_logger.msg('On the fly statistical Binning of vector particle property  "' + key + '" not yet implemented', warning=True)
+                si.msg_logger.msg('On the fly statistical Binning of vector particle properties, eg.  "' + key + '" not yet implemented', warning=True)
 
             elif part_prop[key].get_dtype() != np.float64:
                 si.msg_logger.msg(f'On the fly statistics  can currently only track float64 particle properties, ignoring property  "{key}", of type "{str(part_prop[key].get_dtype())}"',
@@ -212,14 +210,17 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         return sel_subset
 
-    def update(self,n_time_step, time_sec):
+    def update(self,n_time_step, time_sec, alive):
         '''do particle counts'''
         part_prop = si.class_roles.particle_properties
         info = self.info
         self.start_update_timer()
 
-
         num_in_buffer = si.run_info.particles_in_buffer
+
+        #  count alive particles in each release group (plus age for age based stats)
+        # children must implement their own count_alive_particles
+        self.do_alive_particle_counts(self.count_all_alive_particles, alive)
 
         # first select those to count based on status and z location
         sel = self._sel_status_waterdepth(part_prop['status'].data,
@@ -245,7 +246,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         self.stop_update_timer()
 
-
+    def do_alive_particle_counts(self, count_all_alive, alive):
+        basic_util.nopass('Stats class must implement method to do counts of all alive particles by release group')
 
     @staticmethod
     @njitOT
@@ -306,11 +308,11 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         fh['num_released_total'][n_write] = num_released.sum() # total all release groups so far
 
         fh['count'][n_write, ...] = self.count_time_slice[:, ...]
-        fh['count_all_particles'][n_write, ...] = self.count_all_particles_time_slice[:, ...]
+        fh['count_all_selected_particles'][n_write, ...] = self.count_all_particles_time_slice[:, ...]
+        fh['count_all_alive_particles'][n_write, ...] = self.count_all_alive_particles[:, ...]
 
         for key, item in self.sum_binned_part_prop.items():
             self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
-
 
     def info_to_write_at_end(self) : pass
 
@@ -327,6 +329,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['release_group_dim'], description='Total number released in each release group')
             nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
             nc.write_global_attribute('particle_status_values_counted', str(self.params['status_list']))
-
+            nc.write_global_attribute('backtracking', int(si.settings.backtracking))
             nc.close()
         self.nc = None  # parallel pool cant pickle nc

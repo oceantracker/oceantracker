@@ -1,13 +1,25 @@
-
-Build oceantracker conda environment
+Install using pip 
 ________________________________________
 
-To ensure python/ module compatibility, recommendation is to build a conda virtual environment with the given environment.yml file
 
-1. Install 
+1.    Install/update anaconda or miniconda if not already available
     
-    Install/update anaconda or miniconda if not already available
+        https://www.anaconda.com/docs/getting-started/miniconda/install
 
+2. create virtual environment ( python 3.10 recommended)
+    at command prompt  :  ``conda create -n oceantracker python=3.10``
+3. Activate new environment   ``conda activate oceantracker``
+4. install ocean tracker    ``pip install oceantracker``
+
+Note: 
+- Oceantracker will work in Python 3.11 and 3.12, Python version 3.10 is preferred, as currently  not all required external imported  packages for plotting work in 3.11
+-  may need to run Conda as Admin on  Windows
+- pip install will not include how_to notebooks and the demo hindcasts they use 
+
+Install using git repository
+________________________________________
+
+this includes how_to notebooks and the demo hindcasts they use
 
 1. Change dir to where oceantracker files will be stored , e.g. 
 
@@ -22,16 +34,17 @@ To ensure python/ module compatibility, recommendation is to build a conda virtu
     ``cd ./oceantracker``
 
 3. Manually build a Conda environment
+ 
 
         ``conda create -n oceantracker python=3.10`` 
 
-    Note: Oceantracker will work in Python 3.11 and 3.12, Python version 3.10 is preferred, as currently  not all required external imported  packages for plotting work in 3.11
+
 
     Activate new environment
 
         ``conda activate oceantracker``
    
-   Then install these packages
+   Then install these packages 
 
    ``conda install conda-forge::numba=0.56.4``  if using python 3.10
 
@@ -45,7 +58,7 @@ To ensure python/ module compatibility, recommendation is to build a conda virtu
         
    ``conda install anaconda::scipy``
 
-   ``pip install pyproj``
+   ``conda install conda-forge::pyprojy``
 
    ``conda install anaconda::pyyaml``
 
@@ -64,6 +77,7 @@ To ensure python/ module compatibility, recommendation is to build a conda virtu
 8. To add ability to make animation movies if needed
 
    ``conda install conda-forge::ffmpeg``
+
 
 9. To work with iPython/Jupyter notebooks
 

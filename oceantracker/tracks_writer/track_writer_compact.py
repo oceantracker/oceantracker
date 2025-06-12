@@ -37,9 +37,9 @@ class CompactTracksWriter(_BaseWriter):
 
         nc.create_a_variable('particles_written_per_time_step',si.dim_names.time,dtype=np.int32,
                              description='Number of particles written each time step')
-        nc.create_a_variable('particle_ID', 'time_particle_dim', dtype=np.int32,
+        nc.create_a_variable('particle_ID', 'time_particle_dim', dtype=np.int32,compression_level=si.settings.NCDF_compression_level,
                              description='ID number of of particle recorded ')
-        nc.create_a_variable('write_step_index', 'time_particle_dim', dtype=np.int32,
+        nc.create_a_variable('write_step_index', 'time_particle_dim', dtype=np.int32,compression_level=si.settings.NCDF_compression_level,
                              description='Time/write step of particle recorded ')
         # variable to give index ranges of time steps within output
         nc.create_a_variable('time_step_range', ['time_dim','range_pair_dim'],dtype=np.int32,
@@ -58,22 +58,24 @@ class CompactTracksWriter(_BaseWriter):
             if i.params['time_varying']:
                 dim.append('time_particle_dim')
                 vi['time_varying_part_prop'].append(name)
+                comp = si.settings.NCDF_compression_level
             else:
                 dim.append('particle_dim')
                 vi['non_time_varying_part_prop'].append(name)
+                comp = 0
 
             if i.params['vector_dim'] == 2: dim.append(si.dim_names.vector2D)
             if i.params['vector_dim'] == 3: dim.append(si.dim_names.vector3D)
             if i.params['prop_dim3'] > 1: dim.append(nc.add_dimension(f'part_prop_{name}_dim3', i.params['prop_dim3']))
 
             nc.create_a_variable(name, dim, units=i.params['units'],dtype=i.params['dtype'],
-                                  description=i.params['description'])
+                                  description=i.params['description'],compression_level=comp)
 
         if si.settings['write_dry_cell_flag']:
             grid = si.core_class_roles.field_group_manager.reader.grid
             nc.add_dimension(si.dim_names.triangle, grid['triangles'].shape[0])
             nc.create_a_variable('dry_cell_index', [si.dim_names.time,si.dim_names.triangle],dtype=np.uint8,
-                                  description= 'Time series of grid dry index 0-255, > 128 is dry')
+                                  description= 'Time series of grid dry index 0-255, > 128 is dry',compression_level=si.settings.NCDF_compression_level,)
             pass
     def pre_time_step_write_book_keeping(self):
         # write indexing variables

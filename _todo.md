@@ -13,10 +13,9 @@
 2. centalize polygon list creation and param checking 
 4. ensure error log is written on caught error
 1. polygon_list param spell checking 
-1. grid statrs areas in sq m for geographic coord, check ploygon areas in geographic ( add local grid function for these)
-
+1. grid stats areas in sq m for geographic coord, check ploygon areas in geographic ( add local grid function for these)
+1. grid release slow! test release point is dry not all of pulse, pre test grid points outside domain and disable 
 ##  Internal Structure
-
 
 ## New additions?
 
@@ -36,7 +35,7 @@
 1. max_duration and end time estimates
 8. LSC unit test slow?  release stratergies?
 9.  speed nested grids, only check if particle on outer grid is inside an inner grid if in a cell overlapping  an inner grid 
-    
+1. when converting from meters to latlong grid, need to rotate vel to be north/south, east/west??
 ## Nice to haves
 1.   remove_tidally_stranded_particles option?
 1. attach name of method to message loggers crumb trail
@@ -56,6 +55,8 @@
 2. speed inside polygon by when cell is known, for triangles fully inside a ploygon
 3. radius point release separated from point release to do inside domain check at start  
 4.  cellsearch status flags as numba compile time constants
+1. Grid and point release, only check in inise domain at start and disable releases from these points?
+6. move point release with raduuis to sepeate class based on polygon release
 5. 
 # Other
 

@@ -5,7 +5,7 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
-from oceantracker.util.cord_transforms import fix_any_spanning180east
+
 from oceantracker.shared_info import shared_info as si
 
 class _CorePolygonMethods(ParameterBaseClass):
@@ -49,10 +49,6 @@ class _CorePolygonMethods(ParameterBaseClass):
             for n, p in enumerate(params['polygon_list']):
                 p = merge_params_with_defaults(p,  si.default_polygon_dict_params,
                                 si.msg_logger, crumbs='polygon_statistics_merging polygon list')
-                if si.settings.use_geographic_coords:
-                    p['points'] = fix_any_spanning180east(p['points'],
-                                                   msg_logger=si.msg_logger, caller=self,
-                                                   crumbs=f'Polygon_list#{n}')
 
         if len(params['polygon_list'])==0:
             ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,
@@ -65,11 +61,7 @@ class _CorePolygonMethods(ParameterBaseClass):
 
     def set_up_spatial_bins(self,nc ):
 
-        pgm = si.core_class_roles.particle_group_manager
-
-
         nc.add_dimension('polygon_dim', len(self.params['polygon_list']))
-
         add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
 
 class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.GriddedStats2D_timeBased):
@@ -79,7 +71,6 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
         super().__init__()
         # set up info/attributes
         self.add_default_params({'role_output_file_tag': PVC('stats_polygon_time',str)})
-
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x'])
@@ -91,14 +82,20 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
         dim_names = ('time_dim', 'release_group_dim', 'polygon_dim')
         dim_sizes  = (None, len(si.class_roles.release_groups), nc.dim_size('polygon_dim'))
 
-        nc.create_a_variable('count', dim_names, np.int64, description='counts of particles in each polygon at given times, for each release group')
-        nc.create_a_variable('count_all_particles', ['time_dim', 'release_group_dim'], np.int64, description='counts of particles whether in a polygon or not')
+        nc.create_a_variable('count', dim_names, np.int64,compression_level=si.settings.NCDF_compression_level,
+                             description='counts of particles in each polygon at given times, for each release group')
+        nc.create_a_variable('count_all_selected_particles', ['time_dim', 'release_group_dim'],compression_level=si.settings.NCDF_compression_level,
+                             dtype=np.int64, description='counts of all selected particles whether in a polygon or not')
+        nc.create_a_variable('count_all_alive_particles', ['time_dim', 'release_group_dim'],compression_level=si.settings.NCDF_compression_level,
+                             dtype =np.int64, description='counts of all particles whether selected or not')
+
         # set up space for requested particle properties
         # working count space, row are (y,x)
         self.count_time_slice = np.full(dim_sizes[1:], 0, np.int64)
 
         # counts in each age bin, whether inside polygon or not
         self.count_all_particles_time_slice =  np.full((len(si.class_roles.release_groups),), 0, np.int64)
+        self.count_all_alive_particles = np.full((len(si.class_roles.release_groups),), 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
             if p_name in si.class_roles.particle_properties:
@@ -165,8 +162,6 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
 
 
     def set_up_binned_variables(self,nc):
-         
-
 
         # set up space for requested particle properties
         dims= (self.grid['age_bins'].shape[0], len(si.class_roles.release_groups), len(self.params['polygon_list']))
@@ -174,6 +169,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
         self.count_age_bins = np.full(dims, 0, np.int64)
         # counts in each age bin, whether inside polygon or not
         self.count_all_particles = np.full(dims[:-1] , 0, np.int64)
+        self.count_all_alive_particles = np.full(dims[:-1], 0, np.int64)
 
         for p_name in self.params['particle_property_list']:
             if p_name in si.class_roles.particle_properties:
@@ -185,8 +181,6 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
 
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
-
-
 
         # set up pointers to particle properties, only point to those in buffer as no need to look at those beyond buffer
         p_groupID   = part_prop['IDrelease_group'].used_buffer()
@@ -209,8 +203,11 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
         nc.write_a_new_variable('count', self.count_age_bins, ['age_bin_dim', 'release_group_dim', 'polygon_dim'],
                                description='counts of particles in grid at given ages, for each release group')
 
-        nc.write_a_new_variable('count_all_particles', self.count_all_particles, ['age_bin_dim', 'release_group_dim'],
+        nc.write_a_new_variable('count_all_selected_particles', self.count_all_particles, ['age_bin_dim', 'release_group_dim'],
                                 description='counts of  particles in all age bands for each release group, whether inside a polygon or not')
+
+        nc.write_a_new_variable('count_all_alive_particles', self.count_all_alive_particles, ['age_bin_dim', 'release_group_dim'],
+                                description='counts of  all alive particles, not just those selected to be counted')
 
         nc.write_a_new_variable('age_bins'     , stats_grid['age_bins']     , ['age_bin_dim'], description= 'center of age bin, ie age axis in seconds')
         nc.write_a_new_variable('age_bin_edges', stats_grid['age_bin_edges'], ['num_age_bin_edges'], description='edges of age bins in seconds')

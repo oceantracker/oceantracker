@@ -99,6 +99,16 @@ Parameters:
 Expert Parameters:
 *******************
 
+	* ``drop_variables``:  *<optional>*
+		Description: - List of problematic file variable names to ignore, eg non-critcal variables not present in all files/all times
+
+		- a list containing type:  ``[]``
+		- default list : ``None``
+		- data_type: ``<class 'str'>``
+		- possible_types: ``[]``
+		- make_list_unique: ``True``
+		- min_len: ``0``
+
 	* ``geographic_coords`` :   ``<class 'bool'>``   *<optional>*
 		Description: Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails
 

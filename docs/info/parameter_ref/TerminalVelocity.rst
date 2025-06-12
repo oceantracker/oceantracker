@@ -43,7 +43,7 @@ Parameters:
 		- data_type: ``<class 'str'>``
 
 	* ``value`` :   ``<class 'float'>``   *<optional>*
-		Description: Terminal velocity positive upwards, ie fall velocities ate negative
+		Description: Terminal velocity positive upwards, ie fall velocities are < 0
 
 		- default: ``0.0``
 		- data_type: ``<class 'float'>``

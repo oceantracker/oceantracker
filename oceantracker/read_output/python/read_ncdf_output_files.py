@@ -53,17 +53,12 @@ def _read_one_track_file(file_name, var_list):
     nc = NetCDFhandler(file_name, mode='r')
 
     if var_list is  None:
-        working_var_list = nc.all_var_names()
+        var_list = nc.all_var_names()
     else:
         # get list plus min data set
-        var_list = list(set(['x', 'time', 'status', 'IDrelease_group', 'IDpulse', 'x0', 'dry_cell_index', 'num_part_released_so_far'] + var_list))
-        # trim list to variables in the file
-        working_var_list= []
-        for var in var_list:
-            if var not in nc.all_var_names():
-                print('Warning: read_particle_tracks_file, particle property variable not in track file ' + var)
-            elif var not in working_var_list:
-                working_var_list.append(var)
+        var_list = list(set(['write_step_index','ID','particle_ID', 'x', 'time', 'status', 'IDrelease_group',
+                             'IDpulse', 'x0', 'dry_cell_index', 'num_part_released_so_far']
+                                + var_list))
 
     data = nc.read_variables(var_list)
     data['variable_info']  = nc.variable_info
@@ -166,7 +161,7 @@ def read_stats_file(file_name,nt=None):
     # read stats files
 
     nc = NetCDFhandler(file_name, mode='r')
-    d = nc.global_attrs()  # read all  global attibutes
+    d = dict( global_attributes = nc.global_attrs())  # read all  global attibutes
     d['dimensions'] = nc.dims()
     d['limits']=  {}
 
@@ -201,10 +196,16 @@ def read_stats_file(file_name,nt=None):
                 d['limits'][name] = {'min' : np.nanmin(new_data[name]), 'max': np.nanmax(new_data[name])}
 
     with np.errstate(divide='ignore', invalid='ignore'):
-        if d['stats_type'] == 'grid':
-            d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis, np.newaxis]
+        # conectivity calc. is different depending on direction, use all particles if forwards, selected if backwards
+        if 'backtracking' not in d['global_attributes']:
+            b = d['count_all_particles'] # version prior to june 2025
         else:
-            d['connectivity_matrix'] = d['count'] / d['count_all_particles'][..., np.newaxis]
+            b = d['count_all_selected_particles'] if d['global_attributes']['backtracking'] == 1 else d['count_all_alive_particles']
+
+        if d['stats_type'] == 'grid':
+            d['connectivity_matrix'] = d['count'] / b[..., np.newaxis, np.newaxis]
+        else:
+            d['connectivity_matrix'] = d['count'] / b[..., np.newaxis]
 
     d.update(new_data)
     nc.close()
@@ -227,6 +228,7 @@ def read_LCS(file_name):
 
     nc = NetCDFhandler(file_name, mode='r')
     d = nc.read_variables(nc.all_var_names())
+    d.update(nc.global_attrs())
     d['dimensions'] = nc.dims()
     nc.close()
     return d
@@ -254,6 +256,7 @@ def read_residence_file(file_name, var_list=[]):
     d = {'total_num_particles_released': num_released,'limits' : {}}
 
     d['release_times']= nc.read_a_variable('release_times')
+    d.update(nc.global_attrs())
 
 
     # read count first for mean value calc
@@ -282,6 +285,7 @@ def read_grid_file(file_name):
     # load OT output file grid
     d={}
     nc = NetCDFhandler(file_name,'r')
+    d.update(nc.global_attrs())
 
     for a,val in nc.global_attrs().items():
         d[a] = val
@@ -319,6 +323,8 @@ def dev_read_event_file(file_name):
 def read_release_groups_info(file_name):
     nc = NetCDFhandler(file_name,mode='r')
     d= dict()
+
+
     for name in nc.all_var_names():
         data = nc.read_a_variable(name)
         attr = nc.all_var_attr(name)
@@ -326,11 +332,11 @@ def read_release_groups_info(file_name):
 
         # extract info
         d[rg_name] = attr
-        if attr['release_type'] =='grid':
-            d[rg_name]['x_grid'] = data
-            d[rg_name]['points'] = np.reshape(data,(data.shape[0]*data.shape[1], data.shape[2])) # flatten points
-        else:
+        if 'geographic_coords' in nc.global_attrs():
+            d[rg_name]['geographic_coords'] = bool(nc.global_attr('geographic_coords'))
+        if 'points' in name:
             d[rg_name]['points'] = data
+
         pass
     nc.close()
     return d

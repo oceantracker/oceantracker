@@ -10,7 +10,7 @@ a= np.random.randn(N)
 nc= NetCDFhandler(r'F:\H_Local_drive\ParticleTracking\oceantracker_output\scratch\packed_square.nc',mode='w')
 nc. add_dimension('time',None)
 nc. add_dimension('particle',None)
-nc.create_a_variable('x',['time', 'particle'], np.float64, chunksizes=[24, 100_000], compressionLevel=comp)
+nc.create_a_variable('x',['time', 'particle'], np.float64, chunksizes=[24, 100_000], compression_level=comp)
 
 time_steps = 24
 
@@ -27,8 +27,8 @@ print('square time=', perf_counter()-t0)
 nc= NetCDFhandler(r'F:\H_Local_drive\ParticleTracking\oceantracker_output\scratch\packed_compact.nc',mode='w')
 nc. add_dimension('time_particle',None)
 
-nc.create_a_variable('x',['time_particle'], np.float64, chunksizes=[24*100_000], compressionLevel=comp)
-nc.create_a_variable('n_write',['time_particle'], np.int32, chunksizes=[24*100_000], compressionLevel=comp)
+nc.create_a_variable('x',['time_particle'], np.float64, chunksizes=[24*100_000], compression_level=comp)
+nc.create_a_variable('n_write',['time_particle'], np.int32, chunksizes=[24*100_000], compression_level=comp)
 
 time_steps = 24
 

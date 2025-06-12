@@ -257,8 +257,8 @@ Is line below!
 
     # plot animation of results
     from matplotlib import pyplot as plt
-    from plot_oceantracker.plot_tracks import animate_particles
-    from read_oceantracker.python import  load_output_files
+    from oceantracker.plot_output.plot_tracks import animate_particles
+    from oceantracker.read_output.python import  load_output_files
     from IPython.display import HTML # show animation in note book
     
     # read particle track data into a dictionary using case_info_file_name
