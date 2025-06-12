@@ -7,35 +7,22 @@ particle_properties:
   decay_time_scale: 7200.0
   initial_value: 1000
   name: a_pollutant
-- class_name: WaterSpeed
+- class_name: VectorMagnitude2D
+  name: water_speed
+  vector_part_prop: water_velocity
 - class_name: AgeDecay
   name: test_decay
 - class_name: DistanceTravelled
 particle_statistics:
-- class_name: GriddedStats2D_timeBased
-  grid_size:
-  - 120
-  - 121
-  grid_span:
-  - 10000
-  - 10000
-  name: my_heatmap
-  particle_property_list:
-  - a_pollutant
-  - water_depth
-  release_group_centered_grids: true
-  start: '2017-01-01T02:30:00'
-  update_interval: 7200
-  z_min: -10.0
 - class_name: PolygonStats2D_timeBased
   grid_size:
   - 120
   - 121
-  name: my_poly_stats
+  name: polystats_time
   particle_property_list:
   - water_depth
   polygon_list:
-  - points:
+  - points: &id001
     - - 1597682.0
       - 5486972
     - - 1598604
@@ -50,6 +37,18 @@ particle_statistics:
       - 5486972
   update_interval: 3600
   z_min: -2
+- class_name: PolygonStats2D_ageBased
+  grid_size:
+  - 120
+  - 121
+  max_age_to_bin: 345600
+  name: poly_stats_age
+  particle_property_list:
+  - water_depth
+  polygon_list:
+  - points: *id001
+  update_interval: 3600
+  z_min: -2
 reader:
   file_mask: demo_hindcast_schisim3D*.nc
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast\schsim3D
@@ -59,6 +58,14 @@ release_groups:
   name: point 1
   points:
   - - 1594000
+    - 5484200
+    - -2
+  pulse_size: 500
+  release_interval: 900
+- class_name: PointRelease
+  name: point 2
+  points:
+  - - 1593000
     - 5484200
     - -2
   pulse_size: 500

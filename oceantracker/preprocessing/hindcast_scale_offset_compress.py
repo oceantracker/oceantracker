@@ -3,7 +3,7 @@
 from glob import glob
 import xarray as xr
 import numpy as np
-from os import path, mkdir
+from os import path, makedirs
 from time import perf_counter
 class RewriteHindcast():
     def __init__(self,input_dir, file_mask, test=False):
@@ -34,7 +34,7 @@ class RewriteHindcast():
         for n, fn in enumerate(self.file_list):
             ds = xr.open_dataset(fn, decode_times=False, decode_coords=False,decode_timedelta=False)
             self.variables.update(ds.variables)
-            self.variable_dims.update(ds.dims)
+            self.variable_dims.update(ds.sizes)
             ds.close()
 
         print(f'Dim in all variables ={self.variable_dims}')
@@ -53,7 +53,7 @@ class RewriteHindcast():
         self.file_list_out=[]
 
         if not path.isdir(output_dir):
-            mkdir(output_dir)
+            makedirs(output_dir)
 
         for n,  fn in enumerate(self.file_list):
             dataset = xr.open_dataset(fn)
@@ -103,7 +103,7 @@ class RewriteHindcast():
             if name in ve and scale:
                 t0 = perf_counter()
                 if ve[name] is None:
-                    data_min, data_max = np.nanmin(data), np.nanmax(data)
+                    data_min, data_max = float(np.nanmin(data)), float(np.nanmax(data))
                     ve[name] = [data_min , data_max ]
 
                 min_max = ve[name]

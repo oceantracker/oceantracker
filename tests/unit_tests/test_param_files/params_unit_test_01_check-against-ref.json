@@ -41,21 +41,6 @@
             "name": "release_interval0"
         },
         {
-            "start": "2017-01-01T03:30:00",
-            "points": [
-                [
-                    1594000,
-                    5484200,
-                    -2
-                ]
-            ],
-            "water_depth_min": 500,
-            "release_interval": 3600,
-            "pulse_size": 5,
-            "class_name": "PointRelease",
-            "name": "min_depth"
-        },
-        {
             "points": [
                 [
                     1594000,
@@ -68,20 +53,6 @@
             "pulse_size": 5,
             "class_name": "PointRelease",
             "name": "start_in_datetime1"
-        },
-        {
-            "points": [
-                [
-                    1594000,
-                    0,
-                    -2
-                ]
-            ],
-            "max_cycles_to_find_release_points": 10,
-            "release_interval": 3600,
-            "pulse_size": 5,
-            "class_name": "PointRelease",
-            "name": "outside_open_boundary"
         }
     ],
     "particle_properties": [
@@ -92,7 +63,9 @@
             "name": "a_pollutant"
         },
         {
-            "class_name": "WaterSpeed"
+            "vector_part_prop": "water_velocity",
+            "class_name": "VectorMagnitude2D",
+            "name": "water_speed"
         },
         {
             "class_name": "AgeDecay",

@@ -1,6 +1,6 @@
 
 import numpy as np
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
@@ -94,7 +94,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
 
         nc.create_a_variable('count', dim_names, np.int64, 
                           description='counts of particles in 3D grid at given times, for each release group')
-        nc.create_a_variable('count_all_particles', dim_names[:2], np.int64,
+        nc.create_a_variable('count_all_selected_particles', dim_names[:2], np.int64,
                           description='counts of particles whether in grid or not')
 
         # Set up working count space

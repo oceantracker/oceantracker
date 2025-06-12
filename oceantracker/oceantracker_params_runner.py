@@ -91,7 +91,7 @@ class OceanTrackerParamsRunner(object):
         # performance
         ml.msg(f'Timings: total = {(perf_counter()-  self.start_time):5.1f} sec',tabs=2)
 
-        for name in ['Setup','Filling reader buffers','Initial cell guess', 'RK integration',
+        for name in ['Setup','Reading hindcast','Initial cell guess', 'RK integration',
                       'Interpolate fields', 'Update statistics',
                      'Update custom particle properties']:
             if name in si.block_timers:  ml.msg(f'{name}  {si.block_timers[name]["time"]:4.2f} s\t', tabs=4)
@@ -275,7 +275,10 @@ class OceanTrackerParamsRunner(object):
         pass
 
     def _do_run_integrity_checks(self):
-         # check all have required, fields, part props and grid data
+        #todo add hindcast checks
+        #si.core_class_roles.field_group_manager.hindcast_integrity()
+
+        # check all have required, fields, part props and grid data
         for i in si._all_class_instance_pointers_iterator():
             i.check_requirements()
 
@@ -309,7 +312,7 @@ class OceanTrackerParamsRunner(object):
             # max_ages needed for culling operations
             i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
             max_ages.append(i.params['max_age'])
-            number_released += i.schedulers['release'].task_flag * i.get_number_required_per_release()  # find total released at each time step
+            number_released += i.schedulers['release'].task_flag *i.info['number_per_release']  # find total released at each time step
 
         # use forcast number alive to set up particle chunking, for memory buffers and output files
         ri = si.run_info
@@ -626,8 +629,9 @@ class OceanTrackerParamsRunner(object):
             si.msg_logger.write_error_log_file(e)
 
         file_base = si.run_info.run_output_dir
-        solver_info = si.core_class_roles.solver.info
-        if si.core_class_roles.solver is not None and 'n_time_step' in solver_info:
+
+        if si.core_class_roles.solver is not None and 'n_time_step' in si:
+            solver_info = si.core_class_roles.solver.info
             n_time_step = solver_info['n_time_step']
             time_sec = solver_info['time_sec']
         else:

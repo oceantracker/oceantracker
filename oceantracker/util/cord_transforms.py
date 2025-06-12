@@ -77,21 +77,26 @@ def convert_cords(xy, EPSG_in, EPSG_out):
     return out
 
 
-def fix_any_spanning180east(lon_lat,single_cord=False, msg_logger=None, caller=None, crumbs=None):
+def fix_any_spanning180east(lon_lat, msg_logger=None, caller=None, crumbs=None):
     # check longitudes spanning 180, ie jumps from 179 E to -179 East
-    if single_cord: lon_lat = lon_lat[np.newaxis,:]
+    # and adjust in place
+    if lon_lat.ndim < 2:
+        msg_logger.msg(f'fix_any_spanning180east: lon_lat must be 2D (N,2 or 3)',
+                       fatal_error=True, caller=caller, crumbs=crumbs)
+
     bounds= [lon_lat[:,0].min(), lon_lat[:,0].max()]
     if abs(bounds[1] - bounds[0]) > 180:
         # spanning 180 deg east
         sel = lon_lat[:, 0] < 0
-        lon_lat[sel,:] += 360.
+        lon_lat[sel,0] += 360.
         msg_logger.msg( f'Hydro-model coordinates are geographic and span 180 degrees east, converting to 0-360 degrees',
                         note=True, caller =caller,crumbs=crumbs )
-    if single_cord: lon_lat = lon_lat[0]
-    return lon_lat
+
 
 def get_degrees_per_meter(lat, as_vector=False):
-    # lon lat in deg
+    # rough lon lat in deg,
+    # todo full jacobian from pytrans and finite differences and both lat, long
+
     dx = 1. / 111000.  # deg per m of latitude, rows of lon_lat are multiple locations
 
     dpm_lon = dx * np.cos(np.deg2rad(lat))
@@ -113,3 +118,15 @@ def local_grid_deg_to_meters(lon,lat, lon_origin, lat_origin, as_vector=False):
         return np.stack((x, y), axis=x.ndim)  # merge on last dim of lat
     else:
         return x, y
+def local_meters_grid_to_deg(x,y, lon_origin, lat_origin, as_vector=False):
+    # get coords in (lon,lat) from small local grid with (x,y) meters offsets from given origin(s)
+
+    d_per_m_lon,d_per_m_lat= get_degrees_per_meter(lat_origin)
+
+    lon = lon_origin + d_per_m_lon * x
+    lat = lat_origin + d_per_m_lat * y
+
+    if as_vector:
+        return np.stack((lon, lat), axis=x.ndim)  # merge on last dim of lat
+    else:
+        return lon, lat

@@ -8,7 +8,9 @@ particle_properties:
   decay_time_scale: 7200.0
   initial_value: 1000
   name: a_pollutant
-- class_name: WaterSpeed
+- class_name: VectorMagnitude2D
+  name: water_speed
+  vector_part_prop: water_velocity
 - class_name: AgeDecay
   name: test_decay
 - class_name: DistanceTravelled
@@ -65,16 +67,6 @@ release_groups:
   pulse_size: 5
   release_interval: 0
 - class_name: PointRelease
-  name: min_depth
-  points:
-  - - 1594000
-    - 5484200
-    - -2
-  pulse_size: 5
-  release_interval: 3600
-  start: '2017-01-01T03:30:00'
-  water_depth_min: 500
-- class_name: PointRelease
   name: start_in_datetime1
   points:
   - - 1594000
@@ -83,15 +75,6 @@ release_groups:
   pulse_size: 5
   release_interval: 3600
   start: '2017-01-01T03:30:00'
-- class_name: PointRelease
-  max_cycles_to_find_release_points: 10
-  name: outside_open_boundary
-  points:
-  - - 1594000
-    - 0
-    - -2
-  pulse_size: 5
-  release_interval: 3600
 root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\unit_tests
 screen_output_time_interval: 1800
 time_step: 1800

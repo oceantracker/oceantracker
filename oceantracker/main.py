@@ -67,7 +67,7 @@ class OceanTracker():
 
         if class_role not in known_class_roles:
             ml.spell_check(f'oceantracker.add_class, class_role parameter is not recognised, value ="{class_role}"',
-                           class_role,known_class_roles, error=True, hint=f'Possible_values {str(known_class_roles)}')
+                           class_role,known_class_roles, hint=f'Possible_values {str(known_class_roles)}')
             return
 
         params = self.params

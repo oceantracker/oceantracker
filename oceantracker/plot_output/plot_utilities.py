@@ -136,16 +136,20 @@ def plot_release_points_and_polygons(d, release_groupID:int = None, ax = plt.gca
     
     if release_groupID is None : 
         # plot all release groups
-        sel = d['particle_release_groups'].values()
+        sel = d['particle_release_groups']
     else:
         sel = [list(d['particle_release_groups'].values())[release_groupID]]
 
     objs=[]
-    for rg in sel:
+    for name, rg in sel.items():
 
         p = rg['points'][:,:2]
         if rg['release_type'] == 'polygon':
             o = ax.plot(p[:, 0], p[:, 1], '-', color=color,zorder=8, linewidth=1)
+        #elif rg['release_type'] == 'radius':
+        #    #todo does not work in geographic coords yet
+        #    xy =  rg['radius'] * np.exp(1.0j * np.arange(0,370, 10)*np.pi/180.)
+        #    o = ax.plot( p[:,0] + np.real(xy), p[:,1] + np.imag(xy), color=color, lw=1)
         else:
             # for grid and points releases
             o = ax.plot(p[:, 0], p[:, 1], 'x', color=color, markersize=6,zorder=9)
@@ -239,3 +243,18 @@ def animation_output(anim, movie_file, fps = 15, dpi=600,show=True):
         plt.close() # prevents over plotting
         print(f'finished writing file, time={(perf_counter()-t0)/60} minutes')
 
+
+def save_animation(anim, file_name, fps = 15, dpi=600):
+
+    print('Building movie:  ' + file_name)
+    try:
+        FFMpegWriter = animation.writers['ffmpeg']
+    except Exception as e:
+        print('OceanTracker post_processing error: could not make movie as ffmpeg no installed or other error initialising ffmpeg')
+        print('           Install ffmpeg??, doing screen plot instead')
+        plt.close()
+        return
+
+    metadata = dict(title='OceanTracker  Demo', artist='Matplotlib')
+    writer = FFMpegWriter(fps=fps,bitrate=5000, codec='h264', metadata=metadata)
+    anim.save(file_name, writer=writer, dpi=dpi)
