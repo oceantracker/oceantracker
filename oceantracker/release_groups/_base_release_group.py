@@ -21,7 +21,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
             #coords_in_lat_lon_order=PVC(False, bool,
              #       doc_str='If hindcast is in geographic coords, allow user to give release point locations in (lat, lon) order rather than default (lon,lat) order.'),
 
-            max_age =  PVC(None, float, min=1.,
+            max_age =  PVC(None, float, min=1., units='sec',
                       doc_str='Particles older than this age in seconds are culled,ie. status=dead, and removed from computation, very useful in reducing run time'),
             user_release_groupID =  PVC(0, int, doc_str='User given ID number for this group, held by each particle. This may differ from internally uses release_group_ID.'),
             user_release_group_name =  PVC('no_given', str, doc_str='User given name/label to attached to this release groups to make it easier to distinguish.'),
