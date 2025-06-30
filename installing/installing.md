@@ -58,7 +58,7 @@ this includes how_to notebooks and the demo hindcasts they use
         
    ``conda install anaconda::scipy``
 
-   ``conda install conda-forge::pyprojy``
+   ``conda install conda-forge::pyproj``
 
    ``conda install anaconda::pyyaml``
 

@@ -43,15 +43,14 @@ def main(args):
 
     ot.add_class('particle_statistics', **test_definitions.poly_stats,   polygon_list=[dict(points=hm['polygon'])])
 
-
     case_info_file = ot.run()
 
     tests=dict()
     tracks = test_definitions.read_tracks(case_info_file)
-    tracks_ref = test_definitions.read_tracks(case_info_file, ref_case=True)
 
     test_definitions.compare_reference_run(case_info_file, args)
 
+    tracks_ref = test_definitions.read_tracks(case_info_file, ref_case=True)
     # check z fractions are in range 0-1
     z_fraction= tracks['z_fraction']
     sel = np.logical_or(z_fraction < -.01, z_fraction > 1.01)
