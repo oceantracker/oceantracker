@@ -34,7 +34,7 @@ def main(args):
     ot.add_class('velocity_modifiers', class_name='TerminalVelocity', name='fall_vel',value=-0.01)
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.ps1)
+    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role

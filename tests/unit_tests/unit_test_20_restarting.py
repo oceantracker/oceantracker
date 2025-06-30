@@ -12,7 +12,7 @@ def main(args):
             particle_buffer_initial_size= 200,
              NUMBA_cache_code=True,
                 use_resuspension = False,
-                restart_interval = 3*3600,
+                restart_interval = None if args.reference_case else 3*3600,
                 restart = not args.reference_case
     )
 
@@ -36,9 +36,9 @@ def main(args):
         ot.add_class('particle_properties', class_name='DistanceTravelled')
 
         # add a gridded particle statistic to plot heat map
-        ot.add_class('particle_statistics',**test_definitions.ps1)
+        ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
 
-        ot.add_class('particle_statistics', **test_definitions.poly_stats,
+        ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time,
                  polygon_list=[dict(points=hm['polygon'])])
 
 

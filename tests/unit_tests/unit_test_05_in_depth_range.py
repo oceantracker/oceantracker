@@ -34,7 +34,7 @@ def main(args):
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.ps1)
+    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
 
 
 

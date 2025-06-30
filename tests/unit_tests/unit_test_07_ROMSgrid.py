@@ -52,7 +52,7 @@ def main(args):
                                              status_list=['moving'],  # only count the particles which are moving
                                              z_min=-10.,  # only count particles at locations above z=-2m
                                         )
-    ot.add_class('particle_statistics',name='my_poly_stats',
+    ot.add_class('particle_statistics',name='my_poly_stats_time',
                                              class_name='PolygonStats2D_timeBased',
                                              # the below are optional settings/parameters
                                              polygon_list=[dict(points=poly_points+.05)],  # number of east and north cells in the heat map

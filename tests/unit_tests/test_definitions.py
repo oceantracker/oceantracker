@@ -145,7 +145,7 @@ pp1= dict(name='a_pollutant',  # must have a user given name
          initial_value=1000,  # value of property when released
          decay_time_scale=7200.)
 
-ps1 = dict(name='my_heatmap',
+my_heat_map_time = dict(name='my_heatmap_time',
          class_name='GriddedStats2D_timeBased',
          # the below are optional settings/parameters
          grid_size=[120, 121],  # number of east and north cells in the heat map
@@ -159,7 +159,7 @@ ps1 = dict(name='my_heatmap',
          start='2017-01-01T02:30:00',
          )
 
-poly_stats =dict(name='my_poly_stats',
+my_poly_stats_time =dict(name='my_poly_stats_time',
         class_name='PolygonStats2D_timeBased',
         update_interval= 3600,
         particle_property_list=['water_depth'],
@@ -167,8 +167,8 @@ poly_stats =dict(name='my_poly_stats',
         z_min= -2,
         grid_size= [120, 121])
 
-poly_stats_age = deepcopy(poly_stats)
-poly_stats_age.update(class_name='PolygonStats2D_ageBased',name='my_poly_stats_age',max_age_to_bin=4*24*3600)
+my_poly_stats_time_age = deepcopy(my_poly_stats_time)
+my_poly_stats_time_age.update(class_name='PolygonStats2D_ageBased',name='my_poly_stats_time_age',max_age_to_bin=4*24*3600)
 
 LCS = dict(name='LSC test',
            class_name='dev_LagarangianStructuresFTLE2D',
@@ -206,7 +206,7 @@ def compare_reference_run(case_info_file, args):
     print(' max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
 
     # check stats
-    for name in ['my_heatmap','my_poly_stats']:
+    for name in ['my_heatmap_time','my_poly_stats_time']:
         stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
         dc = stats['count'] - stats_ref['count']

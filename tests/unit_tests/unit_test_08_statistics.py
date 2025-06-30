@@ -43,11 +43,11 @@ def main(args):
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
     # add a gridded particle statistic to plot heat map
-    ps = dict(test_definitions.ps1)
-    ot.add_class('particle_statistics', **dict(test_definitions.poly_stats,name='polystats_time',  polygon_list=[dict(points=hm['polygon'])]))
+    ps = dict(test_definitions.my_heat_map_time)
+    ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time,name='polystats_time',  polygon_list=[dict(points=hm['polygon'])]))
 
 
-    ot.add_class('particle_statistics', **dict(test_definitions.poly_stats_age,name='poly_stats_age',   polygon_list=[dict(points=hm['polygon'])]))
+    ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time_age,name='my_poly_stats_time_age',   polygon_list=[dict(points=hm['polygon'])]))
 
 
     case_info_file = ot.run()
@@ -56,7 +56,7 @@ def main(args):
     test_definitions.show_track_plot(case_info_file, args)
     from oceantracker.read_output.python import load_output_files
     # check stats
-    for name in ['polystats_time', 'poly_stats_age']:
+    for name in ['polystats_time', 'my_poly_stats_time_age']:
         #stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
         #dc = stats['count'] - stats_ref['count']

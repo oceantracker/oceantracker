@@ -204,7 +204,7 @@ class MessageLogger(object ):
             f.write(str(e))
             f.write(tb)
 
-    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='', caller=None):
+    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='', caller=None, link=None):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
 
         known = list(possible_values)

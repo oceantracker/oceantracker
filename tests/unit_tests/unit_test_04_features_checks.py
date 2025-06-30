@@ -28,18 +28,18 @@ def main(args):
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.ps1)
+    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
 
-    ps2 = deepcopy(test_definitions.ps1)
+    ps2 = deepcopy(test_definitions.my_heat_map_time)
     ps2.update(name='near_bottom', near_seabed=1.,z_min=None,z_max=None)
     ot.add_class('particle_statistics', **ps2)
 
 
-    ps3 = deepcopy(test_definitions.ps1)
+    ps3 = deepcopy(test_definitions.my_heat_map_time)
     ps3.update(name='near_seasurface', near_seasurface=1.,z_min=None,z_max=None)
     ot.add_class('particle_statistics', **ps3)
 
-    ot.add_class('particle_statistics', **test_definitions.poly_stats,
+    ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time,
                  polygon_list=[dict(points=hm['polygon'])])
 
     ot.add_class('resuspension', critical_friction_velocity=0.01)

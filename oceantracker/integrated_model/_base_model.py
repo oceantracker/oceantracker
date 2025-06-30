@@ -13,7 +13,7 @@ class _BaseIntegratedModel(ParameterBaseClass):
 
     def initial_setup(self): nopass('initial_setup method is required for integrated models ')
 
-    def update(self, n_time_step, time_sec):   nopass('update method is required for integrated models ')
+    def update(self, n_time_step, time_sec,active=None):   nopass('update method is required for integrated models ')
 
 
 
