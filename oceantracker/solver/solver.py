@@ -68,15 +68,16 @@ class Solver(ParameterBaseClass):
         ml.msg(f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}, time step=  {time_util.seconds_to_pretty_duration_string(si.settings.time_step)} ',
                            tabs =2)
 
-
         si.msg_logger.set_screen_tag('S')
         if si.settings.restart_interval is not None:
             # dev- schedule restart saves at given interval after start of run
             self.add_scheduler('save_state',
-                               start=si.settings.restart_interval + si.run_info.start_time,
+                               start=si.run_info.start_time,
                                interval=si.settings.restart_interval )
         if si.settings.restart:
             self._load_saved_state()
+            pass
+
 
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
 
@@ -104,9 +105,9 @@ class Solver(ParameterBaseClass):
             ri.free_wheeling = False  # has ended
 
             # warn of  high physical memory use
-            if psutil.virtual_memory().percent > 85:
-                ml.msg(' More than 85% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
-                       hint=f'For parallel runs,reduce "processors" setting below max. available (={psutil.cpu_count(logical=False)} cores) \n to have fewer simultaneous cases and/or reduce memory use with smaller reader time_buffer_size ')
+            if psutil.virtual_memory().percent > 95:
+                ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
+                       hint=f'Reduce memory used by hindcast with smaller reader param. "time_buffer_size"')
 
             tr0 = perf_counter()
             fgm.update_readers(time_sec)
@@ -117,6 +118,11 @@ class Solver(ParameterBaseClass):
 
             if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
                 self.save_state_for_restart(n_time_step, time_sec)
+
+            save_state_util.record_run_stage(ri.run_output_dir,run_started=True)
+
+            if si.settings.throw_debug_error == 1 and n_time_step >= int(np.random.rand()*0.9*model_times.size):
+                raise(Exception(f'Debug error solver step,setting throw_debug_error =1 at {time_util.seconds_to_isostr(time_sec)}'))
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
@@ -394,7 +400,9 @@ class Solver(ParameterBaseClass):
 
     def save_state_for_restart(self, n_time_step, time_sec):
 
-        si.msg_logger.msg('save_state_for_restart: Restarting is under development and does not yet work!!!', warning=True)
+        si.msg_logger.msg(f'save_state_for_restart at: {time_util.seconds_to_isostr(time_sec)}'
+                          +f', released  {si.core_class_roles.particle_group_manager.info["particles_released"]} so far',
+                          hint='Restarting is under development and does not yet work!!!')
 
         # close time varying output files, eg tracks and stats files first!
         if si.settings.write_tracks:
@@ -405,32 +413,44 @@ class Solver(ParameterBaseClass):
                      date = time_util.seconds_to_isostr(time_sec),
                      state_dir=state_dir,
                      run_output_dir= si.run_info.run_output_dir,
-                     class_info_file=path.join(state_dir, 'class_info.json'),
+                     settings= si.settings.asdict(),
                      part_prop_file =path.join(state_dir, 'particle_properties.nc'),
                     )
+
+        # save class info
+        state['class_info'] = save_state_util.get_class_info(si)
+
         if not path.isdir(state_dir):
             mkdir(state_dir)
 
         # save particle properties
         save_state_util.save_part_prop(state['part_prop_file'], si, n_time_step, time_sec)
 
-        # save class info
-        save_state_util.save_class_info(state['class_info_file'], si, n_time_step, time_sec)
 
         # write state json for restarting
         json_util.write_JSON(path.join(state_dir, 'state_info.json'),state)
 
     def _load_saved_state(self):
-        ri = si.restart_info
+
+        rsi = si.restart_info
+        class_info = rsi['class_info']
 
         # load particle properties
-        nc = ncdf_util.NetCDFhandler(ri['part_prop_file'])
+        nc = ncdf_util.NetCDFhandler(rsi['part_prop_file'])
         num_part=nc.var_shape('water_velocity')[0]
 
         for name, i in si.class_roles.particle_properties.items():
             i.data = nc.read_a_variable(name)  # rely on particle buffer expansion
         si.run_info.particles_in_buffer = num_part
-        pass
+        si.core_class_roles.particle_group_manager.info['current_particle_buffer_size'] = num_part
+        nc.close()
 
+        # restore settings
+        for name,val  in rsi['settings'].items(): si.settings[name] = val
+        si.settings.throw_debug_error = 0 # dont do again
+
+        # reinstate tracks writer state
         if si.settings.write_tracks:
-            si.core_class_roles.tracks_writer.info = ri['core_class_info']['tracks_writer']
+            si.core_class_roles.tracks_writer.info = class_info['core_class_roles']['tracks_writer']
+
+        pass

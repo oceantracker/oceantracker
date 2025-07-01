@@ -2,7 +2,7 @@
     "output_file_base": "unit_test_20_restarting_00",
     "root_output_dir": "C:\\Auck_work\\oceantracker_output\\unit_tests",
     "time_step": 1800,
-    "use_random_seed": true,
+    "use_random_seed": false,
     "NCDF_time_chunk": 1,
     "debug": true,
     "use_dispersion": false,
@@ -13,7 +13,7 @@
     "NUMBA_cache_code": true,
     "use_resuspension": false,
     "restart_interval": 10800,
-    "restart": true,
+    "throw_debug_error": 0,
     "reader": {
         "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
@@ -32,5 +32,6 @@
             "class_name": "PointRelease",
             "name": "rg_basic"
         }
-    ]
+    ],
+    "restart": true
 }

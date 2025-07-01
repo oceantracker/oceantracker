@@ -11,10 +11,11 @@ def main(args):
             regrid_z_to_uniform_sigma_levels=False,
             particle_buffer_initial_size= 200,
              NUMBA_cache_code=True,
+                use_random_seed=False,
                 use_resuspension = False,
                 restart_interval = None if args.reference_case else 3*3600,
-                restart = not args.reference_case
-    )
+                throw_debug_error=1,
+            )
 
 
     hm = test_definitions.hydro_model['demoSchism3D']
@@ -25,7 +26,7 @@ def main(args):
 
 
     if False:
-        ot.add_class('tracks_writer', update_interval=1 * 3600, write_dry_cell_flag=False,
+        ot.add_class('tracks_writer', update_interval=1800, write_dry_cell_flag=False,
                      time_steps_per_per_file=None if args.reference_case else 10  # dont split files ref case to test reading split files
                      )  # keep file small
 
@@ -43,6 +44,12 @@ def main(args):
 
 
     case_info_file = ot.run()
+
+    # do restart
+    if not args.reference_case and case_info_file is None:
+        ot.settings( restart = True,throw_debug_error=0)
+        case_info_file = ot.run()
+
 
     if False:
         test_definitions.compare_reference_run(case_info_file, args)

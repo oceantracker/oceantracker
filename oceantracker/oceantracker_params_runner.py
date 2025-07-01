@@ -117,6 +117,8 @@ class OceanTrackerParamsRunner(object):
 
         ml.close()
 
+        save_state_util.record_run_stage(si.run_info.run_output_dir,
+                            run_complete=case_info_file is not None)
         return case_info_file
 
     def _do_setup(self, user_given_params):
@@ -141,10 +143,21 @@ class OceanTrackerParamsRunner(object):
         # setup output dir and msg files
         si.output_files = setup_util.setup_output_dir(si.settings, crumbs='Setting up output dir')
 
+        # copy basic  shortcuts to run info
+        ri = si.run_info
+
+        # move stuff to run info as central repository
+        ri.run_output_dir = si.output_files['run_output_dir']
+        ri.output_file_base = si.output_files['output_file_base']
+        ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
+        ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
+
+        # record stage
+        save_state_util.record_run_stage(ri.run_output_dir)
+
         si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(
-            si.output_files['run_output_dir'],
-            si.output_files[
-                'output_file_base'] + '_caseLog')  # message logger output file setup
+                                ri.run_output_dir,
+                                ri.output_file_base + '_caseLog')  # message logger output file setup
 
         si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
@@ -169,14 +182,6 @@ class OceanTrackerParamsRunner(object):
         ml.hori_line()
         ml.msg(f' {definitions.package_fancy_name} version {definitions.version["str"]} ')
 
-        # cpty basic  shortcuts to run info
-        ri = si.run_info
-
-        # move stuff to run info as central repository
-        ri.run_output_dir = si.output_files['run_output_dir']
-        ri.output_file_base = si.output_files['output_file_base']
-        ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
-        ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
 
         ml.exit_if_prior_errors('settings/parameters have errors')
 
@@ -619,32 +624,15 @@ class OceanTrackerParamsRunner(object):
 
     def _write_error_info(self,e):
 
-        if si.run_info.run_output_dir is None:
-            # if nowhere to write
-            print(e)
-            print(traceback.format_exc())
-            return
 
+        si.msg_logger.msg('Caught error>>>>>>>>>>')
+        si.msg_logger.msg(str(e))
+        si.msg_logger.msg(traceback.format_exc())
         if hasattr(si.msg_logger,'error_file_name'):
             si.msg_logger.write_error_log_file(e)
 
-        file_base = si.run_info.run_output_dir
 
-        if si.core_class_roles.solver is not None and 'n_time_step' in si:
-            solver_info = si.core_class_roles.solver.info
-            n_time_step = solver_info['n_time_step']
-            time_sec = solver_info['time_sec']
-        else:
-            n_time_step = -999
-            time_sec =  0.
 
-        # save current particle properties
-        if len(si.class_roles.particle_properties) > 0:
-            save_state_util.save_part_prop(path.join(file_base,'particle_prop_on_error.nc'), si, n_time_step, time_sec)
-
-        save_state_util.save_settings_class_params(path.join(file_base,'settings_params_on_error.json'), si)
-        # save class info
-        save_state_util.save_class_info(path.join(file_base,'info_on_error.json'), si, n_time_step, time_sec)
 
 
 

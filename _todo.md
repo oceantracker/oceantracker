@@ -4,25 +4,23 @@
 
 1. Stats unit test
 1. matlab read stats check
-2.  fix demo matalb plot axes 
-3. split particles writing track   files, are not readable
+2.  fix demo matlab plot axes 
 3. map scale on latlong grid too big
-   
 1. add descriptions to particle properties to put in netcdf if written out
-
 2. centalize polygon list creation and param checking 
 4. ensure error log is written on caught error
 1. polygon_list param spell checking 
-1. grid stats areas in sq m for geographic coord, check ploygon areas in geographic ( add local grid function for these)
-1. grid release slow! test release point is dry not all of pulse, pre test grid points outside domain and disable 
-##  Internal Structure
+1. split time series stats files into blocks, to allow restats
+2. convert tracks to rectangular format at run end
 
+##  Internal Structure
+1. restructure stats to remove multiple in inheritance 
+2. 
 ## New additions?
 
 1. helper method to add to  polygon lists of a class
 1. check pointing of run to enable restart
-1. used np.datetime64  internally 
-2. update timer for reader classes
+1. used np.datetime64  internally ???
 
 # Niggles that need sorting some time
 3. compact tracks writer to retain dead particle locations in retangular form, but flag as dead

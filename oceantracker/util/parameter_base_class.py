@@ -43,7 +43,6 @@ class ParameterBaseClass(_RootParameterBaseClass):
                                   )
 
         self.partID_buffers={} # dict of int32 ID number buffers
-        self.shared_info = None
         self.schedulers ={}
 
 
