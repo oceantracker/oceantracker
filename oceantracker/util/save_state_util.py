@@ -61,7 +61,3 @@ def save_settings_class_params(file_name, si):
 
     json_util.write_JSON(file_name, d)
 
-def record_run_stage(run_output_dir, run_started=False, run_complete=False):
-    json_util.write_JSON(path.join(run_output_dir,'run_complete.json'),
-                         dict(run_started=run_started or run_complete,
-                              run_complete=run_complete))

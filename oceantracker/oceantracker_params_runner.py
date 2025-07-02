@@ -46,6 +46,7 @@ class OceanTrackerParamsRunner(object):
                     ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
                            fatal_error=True, hint=f'missing file  {fn}')
                 si.restart_info = json_util.read_JSON(fn)
+                ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(si.restart_info["time"])}')
 
             ml.msg(f'Starting user param. runner: "{si.run_info.output_file_base}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
@@ -117,8 +118,9 @@ class OceanTrackerParamsRunner(object):
 
         ml.close()
 
-        save_state_util.record_run_stage(si.run_info.run_output_dir,
-                            run_complete=case_info_file is not None)
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, 'completion_state.json'),
+                                 dict(code_error_free=case_info_file is not None ))
+
         return case_info_file
 
     def _do_setup(self, user_given_params):
@@ -151,9 +153,6 @@ class OceanTrackerParamsRunner(object):
         ri.output_file_base = si.output_files['output_file_base']
         ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
         ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
-
-        # record stage
-        save_state_util.record_run_stage(ri.run_output_dir)
 
         si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(
                                 ri.run_output_dir,
@@ -426,7 +425,9 @@ class OceanTrackerParamsRunner(object):
         # set model run start/end time allowing for back tracking
         start_time = np.min(md * np.asarray(first_time)) * md
 
-        if si.settings.restart: start_time = si.restart_info['time']
+        if si.settings.restart:
+            # on restart, start onde time step on as first step has already been recorded
+            start_time = si.restart_info['time'] + md*si.settings.time_step
 
         end_time   = np.max(md * np.asarray(last_time)) * md
 

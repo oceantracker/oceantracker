@@ -184,7 +184,7 @@ def read_tracks(case_info_file,fraction_to_read=None, ref_case=False):
 
     return load_output_files.load_track_data(fn, fraction_to_read=fraction_to_read)
 
-def compare_reference_run(case_info_file, args):
+def compare_reference_run(case_info_file, args,compare_stats=True):
     from oceantracker.read_output.python import load_output_files
 
     if case_info_file is None : return
@@ -205,6 +205,7 @@ def compare_reference_run(case_info_file, args):
     print(' mean ', np.nanmean(np.nanmean(dx, axis=0), axis=0))
     print(' max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
 
+    if not compare_stats : return
     # check stats
     for name in ['my_heatmap_time','my_poly_stats_time']:
         stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)

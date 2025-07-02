@@ -89,7 +89,12 @@ class Solver(ParameterBaseClass):
             info['current_time_step'] = n_time_step
 
             # release particles
-            new_particleIDs = pgm.release_particles(n_time_step, time_sec)
+            if not si.settings.restart or n_time_step > 0:
+                # if restarting particles loaded from restart files in first step
+                new_particleIDs = pgm.release_particles(n_time_step, time_sec)
+            else:
+                # if first of restart no new particles
+                new_particleIDs = np.zeros((0,),dtype=np.int32)
 
             # count particles of each status and count number >= stationary status
             num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
@@ -119,9 +124,8 @@ class Solver(ParameterBaseClass):
             if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
                 self.save_state_for_restart(n_time_step, time_sec)
 
-            save_state_util.record_run_stage(ri.run_output_dir,run_started=True)
 
-            if si.settings.throw_debug_error == 1 and n_time_step >= int(np.random.rand()*0.9*model_times.size):
+            if si.settings.throw_debug_error == 1 and n_time_step >= int(0.6*model_times.size):
                 raise(Exception(f'Debug error solver step,setting throw_debug_error =1 at {time_util.seconds_to_isostr(time_sec)}'))
 
             # now modfy location after writing of moving particles
@@ -132,7 +136,6 @@ class Solver(ParameterBaseClass):
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
             for name, i in si.class_roles.velocity_modifiers.items():
                 i.timed_update(n_time_step, time_sec, is_moving)
-
 
             # dispersion is done by random walk
             # by adding to velocity modifier prior to integration step
@@ -446,7 +449,7 @@ class Solver(ParameterBaseClass):
         nc.close()
 
         # restore settings
-        for name,val  in rsi['settings'].items(): si.settings[name] = val
+        #for name,val  in rsi['settings'].items(): si.settings[name] = val
         si.settings.throw_debug_error = 0 # dont do again
 
         # reinstate tracks writer state

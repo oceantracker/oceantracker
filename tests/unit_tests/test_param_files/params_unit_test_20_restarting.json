@@ -2,7 +2,7 @@
     "output_file_base": "unit_test_20_restarting_00",
     "root_output_dir": "C:\\Auck_work\\oceantracker_output\\unit_tests",
     "time_step": 1800,
-    "use_random_seed": false,
+    "use_random_seed": true,
     "NCDF_time_chunk": 1,
     "debug": true,
     "use_dispersion": false,
@@ -13,7 +13,7 @@
     "NUMBA_cache_code": true,
     "use_resuspension": false,
     "restart_interval": 10800,
-    "throw_debug_error": 0,
+    "throw_debug_error": 1,
     "reader": {
         "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
@@ -27,11 +27,86 @@
                     -2
                 ]
             ],
-            "release_interval": 1800,
+            "release_interval": 0,
             "pulse_size": 5,
             "class_name": "PointRelease",
-            "name": "rg_basic"
+            "name": "release_interval0"
         }
     ],
-    "restart": true
+    "particle_properties": [
+        {
+            "initial_value": 1000,
+            "decay_time_scale": 7200.0,
+            "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
+            "name": "a_pollutant"
+        }
+    ],
+    "particle_statistics": [
+        {
+            "grid_size": [
+                120,
+                121
+            ],
+            "grid_span": [
+                10000,
+                10000
+            ],
+            "release_group_centered_grids": true,
+            "update_interval": 7200,
+            "particle_property_list": [
+                "a_pollutant",
+                "water_depth"
+            ],
+            "z_min": -10.0,
+            "start": "2017-01-01T02:30:00",
+            "class_name": "GriddedStats2D_timeBased",
+            "name": "my_heatmap_time"
+        },
+        {
+            "update_interval": 3600,
+            "particle_property_list": [
+                "water_depth"
+            ],
+            "z_min": -2,
+            "grid_size": [
+                120,
+                121
+            ],
+            "polygon_list": [
+                {
+                    "points": [
+                        [
+                            1597682.0,
+                            5486972
+                        ],
+                        [
+                            1598604,
+                            5487275
+                        ],
+                        [
+                            1598886,
+                            5486464
+                        ],
+                        [
+                            1597917.0,
+                            5484000
+                        ],
+                        [
+                            1597300,
+                            5484000
+                        ],
+                        [
+                            1597682,
+                            5486972
+                        ]
+                    ]
+                }
+            ],
+            "class_name": "PolygonStats2D_timeBased",
+            "name": "my_poly_stats_time"
+        }
+    ],
+    "tracks_writer": {
+        "update_interval": 1800
+    }
 }
