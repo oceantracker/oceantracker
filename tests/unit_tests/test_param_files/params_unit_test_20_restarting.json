@@ -107,6 +107,7 @@
         }
     ],
     "tracks_writer": {
-        "update_interval": 1800
+        "update_interval": 1800,
+        "time_steps_per_per_file": 10
     }
 }

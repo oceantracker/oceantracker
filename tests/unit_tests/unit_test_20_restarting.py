@@ -44,27 +44,19 @@ def main(args):
     ot.add_class('particle_statistics', **test_definitions.my_heat_map_time)
     ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time, polygon_list=[dict(points=hm['polygon'])])
 
-    ot.add_class('tracks_writer', update_interval=1800)
-    if False:
-        ot.add_class('tracks_writer', update_interval=1800, write_dry_cell_flag=False,
-                     time_steps_per_per_file=None if args.reference_case else 10  # dont split files ref case to test reading split files
-                     )  # keep file small
+    ot.add_class('tracks_writer', update_interval=1800,
+                 time_steps_per_per_file=None if args.reference_case else 10)
 
     params = deepcopy(ot.params)
     case_info_file =  run(params)
-    #case_info_file = ot.run()
-
-    state_file = path.join(ot.params['root_output_dir'],
-                           ot.params['output_file_base'],'completion_state.json')
 
     # do restart
     if not args.reference_case:
         params.update( restart = True,throw_debug_error=0)
         case_info_file = run(params)
 
-    if True:
-        test_definitions.compare_reference_run(case_info_file, args,compare_stats=False)
-        test_definitions.show_track_plot(case_info_file, args)
+    test_definitions.compare_reference_run(case_info_file, args,compare_stats=False)
+    test_definitions.show_track_plot(case_info_file, args)
 
     return  ot.params
 

@@ -80,10 +80,8 @@ class Solver(ParameterBaseClass):
         t1 =model_times[0]
         if si.settings.restart:
             self._load_saved_state()
-            new_particleIDs = np.zeros((0,), dtype=np.int32)
         else:
             new_particleIDs = pgm.release_particles(nt1,t1 )
-
             self._pre_step_bookkeeping(nt1, t1, new_particleIDs)
 
         ri.time_steps_completed = nt1
@@ -179,7 +177,8 @@ class Solver(ParameterBaseClass):
         ri.computation_duration = datetime.now() -computation_started
 
 
-    def _pre_step_bookkeeping(self, n_time_step,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
+    def _pre_step_bookkeeping(self, n_time_step,time_sec,
+                              new_particleIDs=np.full((0,),0,dtype=np.int32)):
         part_prop = si.class_roles.particle_properties
         pgm = si.core_class_roles.particle_group_manager
         fgm = si.core_class_roles.field_group_manager
@@ -210,7 +209,6 @@ class Solver(ParameterBaseClass):
         fgm.update_tidal_stranding_status(time_sec, alive)
 
         # update writable class lists and stats at current time step now props are up to date
-
         self._update_stats(n_time_step, time_sec, alive)
         self._update_concentrations(n_time_step, time_sec)
         self._update_events(n_time_step, time_sec)
