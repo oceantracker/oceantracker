@@ -74,36 +74,36 @@ class Solver(ParameterBaseClass):
             self.add_scheduler('save_state',
                                start=si.run_info.start_time,
                                interval=si.settings.restart_interval )
+        # initial conditions
+        t0_step = perf_counter()
+        nt1 = 0
+        t1 =model_times[0]
         if si.settings.restart:
             self._load_saved_state()
-            pass
+            new_particleIDs = np.zeros((0,), dtype=np.int32)
+        else:
+            new_particleIDs = pgm.release_particles(nt1,t1 )
 
+            self._pre_step_bookkeeping(nt1, t1, new_particleIDs)
+
+        ri.time_steps_completed = nt1
+        num_alive = pgm.status_counts_and_kill_old_particles(t2)
+        self._screen_output(nt1, t1, t0_model, perf_counter() - t0_step)
 
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
 
             t0_step = perf_counter()
             self.start_update_timer()
-            time_sec = model_times[n_time_step]
+            t1 = model_times[n_time_step]
             # record info for any error dump
-            info['time_sec'] = time_sec
+            info['time_sec'] = t1
             info['current_time_step'] = n_time_step
-
-            # release particles
-            if not si.settings.restart or n_time_step > 0:
-                # if restarting particles loaded from restart files in first step
-                new_particleIDs = pgm.release_particles(n_time_step, time_sec)
-            else:
-                # if first of restart no new particles
-                new_particleIDs = np.zeros((0,),dtype=np.int32)
-
-            # count particles of each status and count number >= stationary status
-            num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
 
             if num_alive == 0:
                 # freewheel until more are released or end of run/hindcast, alive count done at end of loop
                 if not ri.free_wheeling:
                     # at start note
-                    ml.msg(f'No particles alive at {time_util.seconds_to_pretty_str(time_sec)}, skipping time steps until more are released', note=True)
+                    ml.msg(f'No particles alive at {time_util.seconds_to_pretty_str(t1)}, skipping time steps until more are released', note=True)
                 ri.free_wheeling = True
                 continue
 
@@ -115,18 +115,8 @@ class Solver(ParameterBaseClass):
                        hint=f'Reduce memory used by hindcast with smaller reader param. "time_buffer_size"')
 
             tr0 = perf_counter()
-            fgm.update_readers(time_sec)
+            fgm.update_readers(t1)
             si.block_timer('Reading hindcast', tr0)
-
-            # do stats etc updates and write tracks
-            self._pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
-
-            if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
-                self.save_state_for_restart(n_time_step, time_sec)
-
-
-            if si.settings.throw_debug_error == 1 and n_time_step >= int(0.6*model_times.size):
-                raise(Exception(f'Debug error solver step,setting throw_debug_error =1 at {time_util.seconds_to_isostr(time_sec)}'))
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
@@ -135,29 +125,42 @@ class Solver(ParameterBaseClass):
             # update particle velocity modification prior to integration
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
             for name, i in si.class_roles.velocity_modifiers.items():
-                i.timed_update(n_time_step, time_sec, is_moving)
+                i.timed_update(n_time_step, t1, is_moving)
 
             # dispersion is done by random walk
             # by adding to velocity modifier prior to integration step
             if si.settings['use_dispersion']:
                 i = si.core_class_roles.dispersion
-                i.timed_update(n_time_step, time_sec, is_moving)
-
-            # print progress to screen
-            t_step = perf_counter() - t0_step
-            if n_time_step % nt_write_time_step_to_screen == 0:
-                self._screen_output(ri.time_steps_completed, time_sec, t0_model, t_step)
+                i.timed_update(n_time_step, t1, is_moving)
 
             #  Main integration step
             #--------------------------------------
-            self.do_time_step(time_sec, is_moving)
+            self.do_time_step(t1, is_moving)
             #--------------------------------------
+
+            # release particles etc at next time step
+            t2 = model_times[n_time_step+1]
+            nt2 =n_time_step + 1
+
+            new_particleIDs = pgm.release_particles(nt2, t2)
+
+            # do stats etc updates and write tracks at new time step
+            self._pre_step_bookkeeping(nt2, t2, new_particleIDs)
+
+            if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
+                self.save_state_for_restart(nt2, t2)
 
             # cull dead particles
             # must be done after last use of "is_moving" in current time step (which refers to permanent  ID buffer which are not culled)
             pgm.remove_dead_particles_from_memory()
 
-            t2 = time_sec + si.settings.time_step * ri.model_direction
+            # count particles of each status and count number >= stationary status
+            num_alive = pgm.status_counts_and_kill_old_particles(t2)
+
+            # print progress to screen
+            if n_time_step % nt_write_time_step_to_screen == 0:
+                self._screen_output(nt2, t2, t0_model,
+                                    perf_counter() - t0_step)
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             ri.time_steps_completed += 1
@@ -165,14 +168,8 @@ class Solver(ParameterBaseClass):
 
             self.stop_update_timer()
             if abs(t2 - ri.start_time) > ri.duration: break
-
-        #raise Exception('debug -error handing check')
-
-        # write out props etc at last step
-
-        if n_time_step > 0: # if more than on set completed
-            self._pre_step_bookkeeping(ri.time_steps_completed, t2) # update and record stuff from last step
-            self._screen_output(ri.time_steps_completed, t2, t0_model, perf_counter() - t0_step)
+            if si.settings.throw_debug_error == 1 and nt2 >= int(0.9*model_times.size):
+                raise(Exception(f'Debug error solver step,setting throw_debug_error =1 at {time_util.seconds_to_isostr(t1)}'))
 
         ri.end_time = t2
         ri.model_end_date = t2.astype('datetime64[s]')
@@ -180,6 +177,7 @@ class Solver(ParameterBaseClass):
         ri.computation_started = computation_started
         ri.computation_ended = datetime.now()
         ri.computation_duration = datetime.now() -computation_started
+
 
     def _pre_step_bookkeeping(self, n_time_step,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
         part_prop = si.class_roles.particle_properties

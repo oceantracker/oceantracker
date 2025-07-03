@@ -425,9 +425,7 @@ class OceanTrackerParamsRunner(object):
         # set model run start/end time allowing for back tracking
         start_time = np.min(md * np.asarray(first_time)) * md
 
-        if si.settings.restart:
-            # on restart, start onde time step on as first step has already been recorded
-            start_time = si.restart_info['time'] + md*si.settings.time_step
+        if si.settings.restart: start_time = si.restart_info['time']
 
         end_time   = np.max(md * np.asarray(last_time)) * md
 

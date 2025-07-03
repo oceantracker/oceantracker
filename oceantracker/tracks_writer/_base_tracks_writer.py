@@ -85,6 +85,7 @@ class _BaseWriter(ParameterBaseClass):
 
     def _close_file(self):
         nc = self.nc
+        if nc is None: return
         # write properties only written at end
         nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
         nc.write_global_attribute('time_steps_written', self.info['time_steps_written_to_current_file'])

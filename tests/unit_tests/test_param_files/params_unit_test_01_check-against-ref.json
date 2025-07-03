@@ -20,7 +20,7 @@
             "z_fraction_water_velocity",
             "z_fraction"
         ],
-        "time_steps_per_per_file": null
+        "time_steps_per_per_file": 10
     },
     "reader": {
         "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
@@ -94,7 +94,7 @@
             "z_min": -10.0,
             "start": "2017-01-01T02:30:00",
             "class_name": "GriddedStats2D_timeBased",
-            "name": "my_heatmap"
+            "name": "my_heatmap_time"
         },
         {
             "update_interval": 3600,
@@ -137,7 +137,7 @@
                 }
             ],
             "class_name": "PolygonStats2D_timeBased",
-            "name": "my_poly_stats"
+            "name": "my_poly_stats_time"
         }
     ]
 }
