@@ -69,11 +69,7 @@ class Solver(ParameterBaseClass):
                            tabs =2)
 
         si.msg_logger.set_screen_tag('S')
-        if si.settings.restart_interval is not None:
-            # dev- schedule restart saves at given interval after start of run
-            self.add_scheduler('save_state',
-                               start=si.run_info.start_time,
-                               interval=si.settings.restart_interval )
+
         # initial conditions
         t0_step = perf_counter()
         nt1 = 0
@@ -87,6 +83,12 @@ class Solver(ParameterBaseClass):
         ri.time_steps_completed = nt1
         num_alive = pgm.status_counts_and_kill_old_particles(t2)
         self._screen_output(nt1, t1, t0_model, perf_counter() - t0_step)
+
+        if si.settings.restart_interval is not None:
+            # dev- schedule restart saves at given interval after start of run
+            self.add_scheduler('save_state',
+                               start=si.run_info.start_time,
+                               interval=si.settings.restart_interval )
 
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
 
@@ -156,7 +158,7 @@ class Solver(ParameterBaseClass):
                        hint=f'Reduce memory used by hindcast with smaller reader param. "time_buffer_size"')
 
             if abs(t2 - ri.start_time) > ri.duration: break
-            if si.settings.throw_debug_error == 1 and nt2 >= int(0.4*model_times.size):
+            if si.settings.throw_debug_error == 1 and nt2 >= int(0.2*model_times.size):
                 raise(Exception(f'Debug error solver step,setting throw_debug_error =1 at {time_util.seconds_to_isostr(t1)}'))
 
         ri.end_time = t2
@@ -186,7 +188,6 @@ class Solver(ParameterBaseClass):
             i.timed_update(n_time_step, time_sec, alive)
 
         fgm.update_dry_cell_values()
-
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
 

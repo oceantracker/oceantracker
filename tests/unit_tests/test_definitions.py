@@ -205,6 +205,9 @@ def compare_reference_run(case_info_file, args,compare_stats=True):
     print(' mean ', np.nanmean(np.nanmean(dx, axis=0), axis=0))
     print(' max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
 
+    dt = tracks['time'] - tracks_ref['time']
+    print('times,  min/max diff ', np.nanmin(dt), np.nanmax(dt))
+
     if not compare_stats : return
     # check stats
     for name in ['my_heatmap_time','my_poly_stats_time']:
