@@ -39,14 +39,6 @@ class OceanTrackerParamsRunner(object):
             # and set up output directory and log file
             self._do_setup(user_given_params)
 
-            if si.settings.restart:
-                # load restart info
-                fn = path.join(si.run_info.run_output_dir, 'saved_state', 'state_info.json')
-                if not path.isfile(fn):
-                    ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
-                           fatal_error=True, hint=f'missing file  {fn}')
-                si.restart_info = json_util.read_JSON(fn)
-                ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(si.restart_info["time"])}')
 
             ml.msg(f'Starting user param. runner: "{si.run_info.output_file_base}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
@@ -154,9 +146,16 @@ class OceanTrackerParamsRunner(object):
         ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
         ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
 
-        si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(
-                                ri.run_output_dir,
-                                ri.output_file_base + '_caseLog')  # message logger output file setup
+        if si.settings.restart:
+            # load restart info
+            fn = path.join(si.run_info.run_output_dir, 'saved_state', 'state_info.json')
+            if not path.isfile(fn):
+                ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
+                       fatal_error=True, hint=f'missing file  {fn}')
+            si.restart_info = json_util.read_JSON(fn)
+            ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(si.restart_info["time"])}')
+
+        si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(si)  # message logger output file setup
 
         si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',

@@ -131,7 +131,6 @@ class _RunInfo(definitions._AttribDict):
     backtracking =None
     vector_components = None
     model_direction = None
-    free_wheeling = None
     start_time = None
     end_time = None
     current_model_time = None
@@ -178,7 +177,7 @@ class _SharedInfoClass():
     msg_logger = MessageLogger()
     block_timers={}
     class_importer = class_importer_util.ClassImporter(msg_logger)
-
+    restart_info = None
     info = _UseFullInfo
     dim_names = definitions._DimensionNames()
 

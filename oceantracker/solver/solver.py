@@ -1,6 +1,7 @@
 from time import perf_counter
 import psutil
 from os import  path, mkdir
+
 import numpy as np
 from oceantracker.util import time_util, json_util, ncdf_util, save_state_util
 from datetime import datetime
@@ -53,7 +54,6 @@ class Solver(ParameterBaseClass):
         nt_write_time_step_to_screen = max(1, int(si.settings.screen_output_time_interval/si.settings.time_step))
 
         t0_model = perf_counter()
-        ri.free_wheeling = False
         model_times = si.run_info.times
         ml.hori_line()
         # initial buffer fill
@@ -96,21 +96,6 @@ class Solver(ParameterBaseClass):
             # record info for any error dump
             info['time_sec'] = t1
             info['current_time_step'] = n_time_step
-
-            if num_alive == 0:
-                # freewheel until more are released or end of run/hindcast, alive count done at end of loop
-                if not ri.free_wheeling:
-                    # at start note
-                    ml.msg(f'No particles alive at {time_util.seconds_to_pretty_str(t1)}, skipping time steps until more are released', note=True)
-                ri.free_wheeling = True
-                continue
-
-            ri.free_wheeling = False  # has ended
-
-            # warn of  high physical memory use
-            if psutil.virtual_memory().percent > 95:
-                ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
-                       hint=f'Reduce memory used by hindcast with smaller reader param. "time_buffer_size"')
 
             tr0 = perf_counter()
             fgm.update_readers(t1)
@@ -157,16 +142,21 @@ class Solver(ParameterBaseClass):
 
             # print progress to screen
             if n_time_step % nt_write_time_step_to_screen == 0:
-                self._screen_output(nt2, t2, t0_model,
-                                    perf_counter() - t0_step)
+                self._screen_output(nt2, t2, t0_model, perf_counter() - t0_step)
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             ri.time_steps_completed += 1
             si.block_timer('Time stepping',t0_step)
 
             self.stop_update_timer()
+
+            # warn of  high physical memory use
+            if psutil.virtual_memory().percent > 95:
+                ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
+                       hint=f'Reduce memory used by hindcast with smaller reader param. "time_buffer_size"')
+
             if abs(t2 - ri.start_time) > ri.duration: break
-            if si.settings.throw_debug_error == 1 and nt2 >= int(0.9*model_times.size):
+            if si.settings.throw_debug_error == 1 and nt2 >= int(0.4*model_times.size):
                 raise(Exception(f'Debug error solver step,setting throw_debug_error =1 at {time_util.seconds_to_isostr(t1)}'))
 
         ri.end_time = t2
@@ -425,6 +415,7 @@ class Solver(ParameterBaseClass):
         # save particle properties
         save_state_util.save_part_prop(state['part_prop_file'], si, n_time_step, time_sec)
 
+        state['log_file'] = si.msg_logger.save_state(si,state_dir)
 
         # write state json for restarting
         json_util.write_JSON(path.join(state_dir, 'state_info.json'),state)

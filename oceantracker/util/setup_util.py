@@ -44,8 +44,6 @@ def setup_output_dir(settings, crumbs='', caller=None):
                     'raw_output_file_base': copy(settings['output_file_base']),
                     # this is need for grid file so it does not get a case number in // runs
                     'caseInfo_file': settings['output_file_base'] + '_caseInfo.json',
-                    'runLog_file': settings['output_file_base'] + '_runScreen.log',
-                    'run_error_file': settings['output_file_base'] + '_run.err',
                     'users_params_json': fb + '.json',
                     }
     return output_files
