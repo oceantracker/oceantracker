@@ -443,9 +443,7 @@ class OceanTrackerParamsRunner(object):
 
         # record info in run
         ri.start_time = start_time
-        ri.end_time = end_time
-        ri.duration = duration
-        ri.times    = ri.start_time  + md * np.arange(0., ri.duration + si.settings.time_step, si.settings.time_step)
+        ri.times    = ri.start_time  + md * np.arange(0., duration + si.settings.time_step, si.settings.time_step)
         ri.end_time = ri.times[-1] # adjust end to last time step
 
         # useful information

@@ -42,12 +42,11 @@ def setup_output_dir(settings, crumbs='', caller=None):
                     'run_output_dir': run_output_dir,
                     'output_file_base': settings['output_file_base'],
                     'raw_output_file_base': copy(settings['output_file_base']),
-                    # this is need for grid file so it does not get a case number in // runs
+                    # this is needed for grid file so it does not get a case number in // runs
                     'caseInfo_file': settings['output_file_base'] + '_caseInfo.json',
                     'users_params_json': fb + '.json',
                     }
     return output_files
-
 
 def write_raw_user_params(output_files, params,msg_logger):
     fn= output_files['output_file_base']+'_raw_user_params.json'

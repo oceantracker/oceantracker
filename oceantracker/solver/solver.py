@@ -62,8 +62,6 @@ class Solver(ParameterBaseClass):
         si.block_timer('Read hindcast', tr0)
 
         # run forwards through model time variable, which for backtracking are backwards in time
-        t2 = model_times[0]
-
         ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)}')
         ml.msg(f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}, time step=  {time_util.seconds_to_pretty_duration_string(si.settings.time_step)} ',
                            tabs =2)
@@ -81,7 +79,7 @@ class Solver(ParameterBaseClass):
             self._pre_step_bookkeeping(nt1, t1, new_particleIDs)
 
         ri.time_steps_completed = nt1
-        num_alive = pgm.status_counts_and_kill_old_particles(t2)
+        num_alive = pgm.status_counts_and_kill_old_particles(t1)
         self._screen_output(nt1, t1, t0_model, perf_counter() - t0_step)
 
         if si.settings.restart_interval is not None:
@@ -124,8 +122,8 @@ class Solver(ParameterBaseClass):
             #--------------------------------------
 
             # release particles etc at next time step
-            t2 = model_times[n_time_step+1]
-            nt2 =n_time_step + 1
+            nt2 = n_time_step + 1
+            t2 = model_times[nt2]
 
             new_particleIDs = pgm.release_particles(nt2, t2)
 
@@ -133,7 +131,7 @@ class Solver(ParameterBaseClass):
             self._pre_step_bookkeeping(nt2, t2, new_particleIDs)
 
             if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
-                self.save_state_for_restart(nt2, t2)
+                self._save_state_for_restart(nt2, t2)
 
             # cull dead particles
             # must be done after last use of "is_moving" in current time step (which refers to permanent  ID buffer which are not culled)
@@ -142,12 +140,12 @@ class Solver(ParameterBaseClass):
             # count particles of each status and count number >= stationary status
             num_alive = pgm.status_counts_and_kill_old_particles(t2)
 
+            ri.time_steps_completed += 1
             # print progress to screen
             if n_time_step % nt_write_time_step_to_screen == 0:
                 self._screen_output(nt2, t2, t0_model, perf_counter() - t0_step)
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
-            ri.time_steps_completed += 1
             si.block_timer('Time stepping',t0_step)
 
             self.stop_update_timer()
@@ -167,7 +165,6 @@ class Solver(ParameterBaseClass):
         ri.computation_started = computation_started
         ri.computation_ended = datetime.now()
         ri.computation_duration = datetime.now() -computation_started
-
 
     def _pre_step_bookkeeping(self, n_time_step,time_sec,
                               new_particleIDs=np.full((0,),0,dtype=np.int32)):
@@ -388,7 +385,7 @@ class Solver(ParameterBaseClass):
         pass
 
 
-    def save_state_for_restart(self, n_time_step, time_sec):
+    def _save_state_for_restart(self, n_time_step, time_sec):
 
         si.msg_logger.msg(f'save_state_for_restart at: {time_util.seconds_to_isostr(time_sec)}'
                           +f', released  {si.core_class_roles.particle_group_manager.info["particles_released"]} so far',

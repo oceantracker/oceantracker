@@ -52,7 +52,6 @@ class MessageLogger(object ):
 
     def set_up_files(self, si):
         # log file set up
-        si.settings.restart
         log_file_name = si.run_info['output_file_base'] + '.txt'
         self.log_file_name = path.join(si.run_info.run_output_dir, log_file_name)
 

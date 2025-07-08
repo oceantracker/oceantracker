@@ -207,6 +207,11 @@ def compare_reference_run(case_info_file, args,compare_stats=True):
 
     dt = tracks['time'] - tracks_ref['time']
     print('times,  min/max diff ', np.nanmin(dt), np.nanmax(dt))
+    if False:
+        from matplotlib import  pyplot as plt
+        v='status'
+        plt.plot(np.arange(dx.shape[0]),tracks[v]-tracks_ref[v] )
+        plt.show(block=True)
 
     if not compare_stats : return
     # check stats

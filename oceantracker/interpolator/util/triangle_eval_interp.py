@@ -236,8 +236,8 @@ def time_dependent_3D_vector_field_ragged_bottom(n_buffer, fractional_time_steps
             # loop over vector components
             for c in range(3):
                 # add contributions from layer above and below particle, for each spatial component at two time steps
-                F_out[n, c] +=     bc_coords[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*fractional_time_steps[0]  \
-                                +  bc_coords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*fractional_time_steps[1]  # second time step
+                F_out[n, c] +=    bc_coords[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*fractional_time_steps[0]  \
+                                + bc_coords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*fractional_time_steps[1]  # second time step
                 pass
 
         pass

@@ -189,7 +189,7 @@ class FindVerticalCellSlayerLSCGrid(object):
             z = 0.
             for m in range(3):
                 nz = max(min(nz_cell, nz_top_cell + 1), nz_bottom_nodes[m])  # move up to bottom, so not out of range
-                z += BCcord[m] * (zlevel1[nodes[m], nz] * tf[1] + zlevel2[nodes[m], nz] * tf[0])
+                z += BCcord[m] * (zlevel1[nodes[m], nz] * tf[0] + zlevel2[nodes[m], nz] * tf[1])
             return z
 
         nz_top_cell = zlevel.shape[2] - 2
