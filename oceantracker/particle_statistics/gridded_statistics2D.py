@@ -132,8 +132,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             nc.write_a_new_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'], description='Mid point of grid cell')
             nc.write_a_new_variable('x_grid', stats_grid['x_grid'], ['release_groups_dim', 'y_dim', 'x_dim'], description='x for mid point of grid cell, full grid')
             nc.write_a_new_variable('y_grid', stats_grid['y_grid'], ['release_groups_dim', 'y_dim', 'x_dim'], description='y for mid point of grid cell, full grid')
-
-
             nc.write_a_new_variable('cell_area', stats_grid['cell_area'], ['release_groups_dim','y_dim', 'x_dim'], description='Horizontal area of each cell', units='m^2')
 
     def set_up_binned_variables(self,nc):

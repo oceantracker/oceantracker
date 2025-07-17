@@ -64,12 +64,6 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         # do standard stats initialize
         super().initial_setup()  # set up using regular grid for  stats
 
-
-
-
-
-        # tag file with release group number
-        #params['role_output_file_tag'] += '_RG%3.0f ' % params['count_release_group']
         self.open_output_file()
 
         self.set_up_time_bins(self.nc)
@@ -87,7 +81,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         if not self.params['write']: return
 
         dim_names = ('time_dim', 'pulse_dim')
-        num_pulses= self.schedulers['count_scheduler'] .info['number_scheduled_times']
+        num_pulses= self.schedulers['count_scheduler'].info['number_scheduled_times']
         nc.add_dimension('pulse_dim', dim_size=num_pulses)
         nc.create_a_variable('count', dim_names, np.int64, description='counts of particles in each pulse of release group inside release polygon at given times')
         nc.create_a_variable('count_all_selected_particles', ['time_dim', 'pulse_dim'], np.int64, description='counts of particles in each, whether inside polygon or not at given times')

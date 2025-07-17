@@ -411,7 +411,10 @@ class Solver(ParameterBaseClass):
             mkdir(state_dir)
 
         # save particle properties
-        save_state_util.save_part_prop(state['part_prop_file'], si, n_time_step, time_sec)
+        save_state_util.save_part_prop_state(state['part_prop_file'], si, n_time_step, time_sec)
+
+        state['stats'] = save_state_util.save_stats_state(si, n_time_step, time_sec)
+
 
         state['log_file'] = si.msg_logger.save_state(si,state_dir)
 

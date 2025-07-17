@@ -12,6 +12,7 @@ def base_settings(fn,args,label=None):
     if label is not None: s += f'_{label}'
     d =  dict(output_file_base=s,
             root_output_dir=path.join(definitions.default_output_dir, 'unit_tests'),
+            #root_output_dir=path.join('C:\oceantracker_output', 'unit_tests'),
             time_step=600.,  # 10 min time step
             use_random_seed = True,
             NCDF_time_chunk=1,
@@ -158,6 +159,19 @@ my_heat_map_time = dict(name='my_heatmap_time',
          z_min=-10.,  # only count particles at locations above z=-2m
          start='2017-01-01T02:30:00',
          )
+my_heat_map_age = dict(name='my_heatmap_age',
+         class_name='GriddedStats2D_ageBased',
+         # the below are optional settings/parameters
+         grid_size=[120, 121],  # number of east and north cells in the heat map
+        grid_span = [10000,10000],
+         release_group_centered_grids=True,  # center a grid around each release group
+         update_interval=7200,  # time interval in sec, between doing particle statists counts
+         particle_property_list=['a_pollutant','water_depth'],  # request a heat map for the decaying part. prop. added above
+         #status_list=[],  # only count the particles which are moving
+        age_bin_size= 24*3600,
+        max_age_to_bin=3*24*3600,
+        z_min=-10.,  # only count particles at locations above z=-2m
+         )
 
 my_poly_stats_time =dict(name='my_poly_stats_time',
         class_name='PolygonStats2D_timeBased',
@@ -188,6 +202,7 @@ def compare_reference_run(case_info_file, args,compare_stats=True):
     from oceantracker.read_output.python import load_output_files
 
     if case_info_file is None : return
+    case_info = load_output_files.read_case_info_file(case_info_file)
 
     reference_case_info_file = case_info_file.replace('unit_tests', 'unit_test_reference_cases')
     if args.reference_case:
@@ -215,7 +230,8 @@ def compare_reference_run(case_info_file, args,compare_stats=True):
 
     if not compare_stats : return
     # check stats
-    for name in ['my_heatmap_time','my_poly_stats_time']:
+    for name in ['my_heatmap_time','my_poly_stats_time','my_heatmap_age']:
+        if name not in case_info['output_files']['particle_statistics']: continue
         stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
         dc = stats['count'] - stats_ref['count']

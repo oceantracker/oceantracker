@@ -41,8 +41,12 @@ def main(args):
     ot.add_class('release_groups',**test_definitions.rg_release_interval0)
 
     ot.add_class('particle_properties', **test_definitions.pp1)  # add a new property to particle_properties role
-    ot.add_class('particle_statistics', **test_definitions.my_heat_map_time)
-    ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time, polygon_list=[dict(points=hm['polygon'])])
+
+    #ot.add_class('particle_statistics', **test_definitions.my_heat_map_time)
+    #ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time, polygon_list=[dict(points=hm['polygon'])])
+
+    ot.add_class('particle_statistics', **test_definitions.my_heat_map_age)
+    #ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time, polygon_list=[dict(points=hm['polygon'])])
 
     ot.add_class('tracks_writer', update_interval=1800,
                  time_steps_per_per_file=None if args.reference_case else 10)
@@ -55,7 +59,7 @@ def main(args):
         params.update( restart = True,throw_debug_error=0)
         case_info_file = run(params)
 
-    test_definitions.compare_reference_run(case_info_file, args,compare_stats=False)
+    test_definitions.compare_reference_run(case_info_file, args,compare_stats=True)
     test_definitions.show_track_plot(case_info_file, args)
 
     return  ot.params

@@ -54,7 +54,7 @@
             "z_min": -10.0,
             "start": "2017-01-01T02:30:00",
             "class_name": "GriddedStats2D_timeBased",
-            "name": "my_heatmap"
+            "name": "my_heatmap_time"
         }
     ],
     "particle_properties": [

@@ -14,10 +14,11 @@ from oceantracker.util import time_util
 status_unknown= int(si.particle_status_flags.unknown)
 class _BaseParticleLocationStats(ParameterBaseClass):
 
+
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        #todo add depth range for count
+
         self.add_default_params(
                 update_interval =   PVC(60*60.,float,units='sec',
                                doc_str='Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step'),
@@ -25,7 +26,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 end =  PTC(None,  doc_str='Stop particle counting from this iso date-time, default is end of model run'),
                 duration =  PVC(None, float, min=0.,units='sec',
                         doc_str='How long to do counting after start time, can be used instead of "end" parameter'),
-
                 role_output_file_tag =            PVC('stats_base',str,doc_str='tag on output file for this class'),
                 write =                       PVC(True,bool,doc_str='Write statistcs to disk'),
                 status_list= PLC(['stationary','stranded_by_tide','on_bottom','moving'], str,
@@ -46,11 +46,17 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 status_max=PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),obsolete=True,
                              doc_str='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'),
                 )
+
         self.add_default_params(count_start_date= PTC(None,  obsolete=True,  doc_str='Use "start" parameter'),
                                 count_end_date= PTC(None,   obsolete=True,  doc_str='Use "end" parameter'))
 
+        info = self.info
+        info.update(mode_2D=False,mode_3D=False,
+                    mode_grid=False, mode_polygon=False,
+                    mode_time=False,mode_age = False)
+
         self.sum_binned_part_prop = {}
-        self.info['output_file'] = None
+        info['output_file'] = None
         self.role_doc('Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are \n * separated by release group \n * can be a time series of statistics or put be in particle age bins.')
 
     def initial_setup(self):
@@ -64,7 +70,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.statuses_to_count_map = status_util.build_select_status_map(params['status_list'])
 
         #set particle depth and water depth limits for counting particles
-
 
         f = 1.0E32
         info['depth_sel_mode'] = 0
@@ -123,7 +128,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # set params to reduced list
         self.params['particle_property_list'] = names
 
-    def set_up_spatial_bins(self): basic_util.nopass()
+    def set_up_spatial_bins(self):
+
+        basic_util.nopass()
 
     def open_output_file(self):
 
@@ -315,6 +322,13 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
 
     def info_to_write_at_end(self) : pass
+
+    def save_state(self, si, state_dir):
+        basic_util.nopass(f'Restarting from saved state using "save_state" and "restart" methods not yet implemented for class {self.__class__.__name__}S')
+
+    def restart(self, state_info):
+        # code require to reload save state for this class
+        basic_util.nopass(f'Restarting from saved state using "save_state" and "restart" methods not yet implemented for class {self.__class__.__name__}S')
 
     def close(self):
 

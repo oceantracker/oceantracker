@@ -1,7 +1,7 @@
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util import time_util, json_util
 from os import path
-def save_part_prop(file_name, si, n_time_step, time_sec ):
+def save_part_prop_state(file_name, si, n_time_step, time_sec ):
     # save particle properties
     nc = NetCDFhandler(file_name, mode='w')
 
@@ -24,6 +24,9 @@ def save_part_prop(file_name, si, n_time_step, time_sec ):
         nc.write_a_new_variable(name, prop.data[:si.run_info.particles_in_buffer, ...], dims)
 
     nc.close()
+
+def save_stats_state(si, n_time_step, time_sec):
+    pass
 
 def get_class_info(si ):
         # record current state of all  class info

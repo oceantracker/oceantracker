@@ -57,53 +57,11 @@
                 "a_pollutant",
                 "water_depth"
             ],
+            "age_bin_size": 86400,
+            "max_age_to_bin": 259200,
             "z_min": -10.0,
-            "start": "2017-01-01T02:30:00",
-            "class_name": "GriddedStats2D_timeBased",
-            "name": "my_heatmap_time"
-        },
-        {
-            "update_interval": 3600,
-            "particle_property_list": [
-                "water_depth"
-            ],
-            "z_min": -2,
-            "grid_size": [
-                120,
-                121
-            ],
-            "polygon_list": [
-                {
-                    "points": [
-                        [
-                            1597682.0,
-                            5486972
-                        ],
-                        [
-                            1598604,
-                            5487275
-                        ],
-                        [
-                            1598886,
-                            5486464
-                        ],
-                        [
-                            1597917.0,
-                            5484000
-                        ],
-                        [
-                            1597300,
-                            5484000
-                        ],
-                        [
-                            1597682,
-                            5486972
-                        ]
-                    ]
-                }
-            ],
-            "class_name": "PolygonStats2D_timeBased",
-            "name": "my_poly_stats_time"
+            "class_name": "GriddedStats2D_ageBased",
+            "name": "my_heatmap_age"
         }
     ],
     "tracks_writer": {

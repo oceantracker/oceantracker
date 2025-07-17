@@ -168,6 +168,3 @@ class ParameterBaseClass(_RootParameterBaseClass):
         if level >= si.settings.screen_info_level:
             si.msg_logger.msg('info: ' + text,tabs=1)
 
-    def restart(self):
-        # code require to reload save state for this class
-        pass

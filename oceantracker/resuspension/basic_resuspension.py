@@ -24,7 +24,6 @@ class BasicResuspension(Resuspension):
 
     def initial_setup(self,**kwargs): pass
 
-
     def update(self, nb, time, active):
         # do resupension
         # redsuspend those on bottom and friction velocity exceeds critical value

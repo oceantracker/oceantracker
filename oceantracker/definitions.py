@@ -3,7 +3,7 @@
 
 package_fancy_name= 'OceanTracker'
 
-from os import path
+from os import path, sep
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
@@ -24,7 +24,7 @@ max_timedelta_in_seconds = 1000*365*24*3600
 docs_base_url= 'https://oceantracker.github.io/oceantracker/_build/html/'
 package_dir = path.dirname(__file__)
 ot_root_dir = path.dirname(package_dir)
-default_output_dir = path.join(path.dirname(path.dirname(package_dir)),'oceantracker_output')
+default_output_dir = path.join(path.dirname(ot_root_dir),'oceantracker_output')
 
 #todo automate build of known readers list
 known_readers = dict(
