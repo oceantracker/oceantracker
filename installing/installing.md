@@ -54,7 +54,9 @@ this includes how_to notebooks and the demo hindcasts they use
  
    ``conda install conda-forge::netcdf4``
 
-   ``conda install anaconda::xarray``     
+    ``conda install anaconda::xarray`` 
+
+    ``conda install conda-forge::dask``
         
    ``conda install anaconda::scipy``
 
