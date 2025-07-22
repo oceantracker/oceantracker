@@ -148,6 +148,9 @@ class _RunInfo(definitions._AttribDict):
     has_bottom_stress = None
     particle_counts = {}
     particles_in_buffer = 0
+    forcasted_number_alive = 0
+    forcasted_max_number_alive = 0
+    cumulative_number_released = 0
 
 class _UseFullInfo(definitions._AttribDict):
     # default reader classes used by auto-detection of file type

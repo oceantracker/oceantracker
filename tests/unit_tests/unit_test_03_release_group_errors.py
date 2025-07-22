@@ -19,7 +19,10 @@ def main(args):
     ot.add_class('release_groups', name='my_radius_release',  # name used internal to refer to this release
              class_name='RadiusRelease',  # class to use
              points=[[1593000., 5487000], [1593000, 5484000],],
-             radius = 1000, release_interval=1800, pulse_size=2)
+             radius = 1000, release_interval=1800, pulse_size=2,
+             start = '2017-01-01T02:00:00',
+             end='2017-01-01T12:00:00',
+             max_age=3*3600)
 
     ot.add_class('release_groups', name='my_point_release',  # name used internal to refer to this release
              class_name='PointRelease',  # class to use

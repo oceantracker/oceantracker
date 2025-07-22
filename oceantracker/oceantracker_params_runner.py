@@ -93,7 +93,6 @@ class OceanTrackerParamsRunner(object):
             if si.core_class_roles[name] is not None:
                 ml.msg(f'{name}  {si.core_class_roles[name].info["time_spent_updating"]:4.2f} s\t\t', tabs=4)
 
-        ml.msg('')
         ml.msg(f'{num_errors:3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes', tabs=1)
 
         if num_errors > 0:
@@ -292,19 +291,18 @@ class OceanTrackerParamsRunner(object):
         crumbs='initial_setup_all_classes>'
         t0 = perf_counter()
         settings = si.settings
-        
-        
+        ri = si.run_info
         fgm = si.core_class_roles.field_group_manager
-        #fgm.final_setup()
+
         fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
 
         # write reader info to json
         d = fgm.get_reader_info()
         json_util.write_JSON(path.join(si.run_info.run_output_dir, f'{si.run_info.output_file_base}_hindcast_info.json'), d)
 
-
-        # schedule all release groups
-        number_released = np.zeros((si.run_info.times.size, ), dtype= np.int64)
+        # schedule all release groups, now run start and end known
+        ri.cumulative_number_released = np.zeros((si.run_info.times.size, ), dtype= np.int64)
+        ri.forcasted_number_alive = ri.cumulative_number_released.copy()
         max_ages = []
 
         for name, i in si.class_roles.release_groups.items():
@@ -315,13 +313,20 @@ class OceanTrackerParamsRunner(object):
             # max_ages needed for culling operations
             i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
             max_ages.append(i.params['max_age'])
-            number_released += i.schedulers['release'].task_flag *i.info['number_per_release']  # find total released at each time step
 
+            # find total released to date at each time step
+            i.info['cumulative_number_released'] = np.cumsum(i.schedulers['release'].task_flag *i.info['number_per_release'])
+            ri.cumulative_number_released += i.info['cumulative_number_released']
+
+            # number alive is cum. numb released, zeroed after max age is reached
+            nt_last = min(np.ceil(np.argwhere( i.schedulers['release'].task_flag)[-1]
+                              + i.params['max_age']/si.settings.time_step) + 1, si.run_info.times.size)
+            i.info['forcasted_number_alive'] = np.zeros(i.info['cumulative_number_released'].shape, dtype=np.int64)
+            i.info['forcasted_number_alive'][:nt_last] = i.info['cumulative_number_released'][:nt_last]
+            ri.forcasted_number_alive += i.info['forcasted_number_alive']
+            pass
         # use forcast number alive to set up particle chunking, for memory buffers and output files
-        ri = si.run_info
-        ri.forcasted_total_released = number_released.sum()
-        ri.forcasted_number_alive = np.cumsum(number_released)
-        ri.forcasted_max_number_alive = ri.forcasted_number_alive.max()
+        ri.forcasted_max_number_alive = int(ri.forcasted_number_alive.max())
 
         # particle chunking, chose smaler of forcasted or given buffer sise
         settings.particle_buffer_initial_size = min(ri.forcasted_max_number_alive, settings.particle_buffer_initial_size)
@@ -413,8 +418,7 @@ class OceanTrackerParamsRunner(object):
             duration = si.info.large_float if rg_params['duration'] is None else rg_params['duration']
 
             # end time takes presence over given duration
-            if rg_params['end'] is not None:
-                duration = abs(end-start)
+            if rg_params['end'] is not None: duration = abs(end-start)
 
             life_span = duration if rg_params['max_age'] is None else duration + rg_params['max_age']
 
