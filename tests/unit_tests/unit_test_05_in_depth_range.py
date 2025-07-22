@@ -11,7 +11,6 @@ def main(args):
             # use_A_Z_profile=False,
             regrid_z_to_uniform_sigma_levels=False,
              #NUMBA_cache_code=True,
-                #NCDF_particle_chunk= 50000
                 )
 
     ot.add_class('tracks_writer',update_interval = 600, write_dry_cell_flag=False,

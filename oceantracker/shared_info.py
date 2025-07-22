@@ -70,15 +70,13 @@ class _DefaultSettings(definitions._AttribDict):
                 doc_str='Allow particles to resuspend')
     processors= PVC(None, int, min=1,
                  doc_str='Maximum number of threads to use in parallelization, default = number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')
-    NCDF_time_chunk = PVC(24, int, min=1,expert=True, doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
+
     NCDF_compression_level = PVC(0, int, min=0,max =9, expert=True,
-                          doc_str='Netcdf compression of output variables, reduces output file sixe, but slows code ')
+                          doc_str='Netcdf compression of output variables, reduces output file size, but slows code ')
     particle_buffer_initial_size = PVC(10_000_000, int, min=1, expert=True,
                    doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive'
                                     )
-    NCDF_particle_chunk =  PVC(None, int, min=1,  expert=True,
-                   doc_str='Chunk size for particle variable Net CDF output files, default is estimated max. particles alive',
-                                    )
+
         #  #'loops_over_hindcast =  PVC(0, int, min=0 )  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
         # profiler = PVC('oceantracker', str, possible_values=available_profile_types,
         #                 doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules ' )

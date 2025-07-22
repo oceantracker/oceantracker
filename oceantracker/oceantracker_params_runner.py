@@ -330,9 +330,6 @@ class OceanTrackerParamsRunner(object):
         # particle buffer, choose smaller of forecasted or given buffer sise
         settings.particle_buffer_initial_size = min(ri.forecasted_max_number_alive, settings.particle_buffer_initial_size)
 
-        if settings.NCDF_particle_chunk is None:
-            settings.NCDF_particle_chunk = ri.forecasted_max_number_alive
-
         # particle group manager for particle handing infra-structure
         pgm = si.core_class_roles.particle_group_manager
         pgm.initial_setup()

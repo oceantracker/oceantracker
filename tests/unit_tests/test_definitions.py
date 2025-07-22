@@ -15,7 +15,6 @@ def base_settings(fn,args,label=None):
             #root_output_dir=path.join('C:\oceantracker_output', 'unit_tests'),
             time_step=600.,  # 10 min time step
             use_random_seed = True,
-            NCDF_time_chunk=1,
             debug=True,
 
             )

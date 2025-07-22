@@ -11,22 +11,24 @@ class CompactTracksWriter(_BaseWriter):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaultsults
 
-        self.add_default_params({
-                    'NCDF_time_chunk': PVC(None,int, obsolete=True, doc_str=' Use main setting with same name'),
-                    'NCDF_particle_chunk': PVC(None, int, obsolete=True, doc_str=' Use main setting with same name'),
-                    #'convert': PVC(False, bool, doc_str='convert compact tracks file to rectangular for at end of the run'),
-                    #'retain_compact_files': PVC(False, bool,  doc_str='keep  compact tracks files after conversion to rectangular format'),
-                    'role_output_file_tag': PVC('tracks_compact', str, expert=True),
-                                 })
+        self.add_default_params(
+                time_particle_chunk =  PVC(None, int, min=1,  expert=True,
+                               doc_str='Chunk size for time dependent particle props, compacted into time_particle dim, default is as estimated max. particles alive'),
+                role_output_file_tag=PVC('tracks_compact', str, expert=True),
+                )
         self.nc = None
 
     def initial_setup(self):
         super().initial_setup()
         self.info['time_particle_steps_written'] = 0
+        params = self.params
+
+        if params['time_particle_chunk'] is None:
+            params['time_particle_chunk'] = si.run_info.forecasted_max_number_alive
 
     def setup_file_vars(self, nc):
         info= self.info
-
+        params = self.params
         nc.add_dimension(si.dim_names.time, None)
         nc.add_dimension(si.dim_names.vector2D, 2)
         nc.add_dimension(si.dim_names.vector3D, 3)
@@ -60,11 +62,10 @@ class CompactTracksWriter(_BaseWriter):
                 dim.append('time_particle_dim')
                 vi['time_varying_part_prop'].append(name)
                 comp = si.settings.NCDF_compression_level
-                # faster to chunk time varing part prop.
-                chunking = [si.run_info.forecasted_max_number_alive]
-                if i.params['vector_dim'] >1: chunking.append(i.params['vector_dim'])
-                if i.params['prop_dim3'] > 1: chunking.append(i.params['prop_dim3'])
-
+                # faster to chunk time varying part prop.
+                chunking = [params['time_particle_chunk']]
+                if i.params['vector_dim'] > 1: chunking.append(i.params['vector_dim'])
+                if i.params['prop_dim3']  > 1: chunking.append(i.params['prop_dim3'])
             else:
                 dim.append('particle_dim')
                 vi['non_time_varying_part_prop'].append(name)
