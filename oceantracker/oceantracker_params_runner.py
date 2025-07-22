@@ -319,8 +319,8 @@ class OceanTrackerParamsRunner(object):
             ri.cumulative_number_released += i.info['cumulative_number_released']
 
             # number alive is cum. numb released, zeroed after max age is reached
-            nt_last = min(np.ceil(np.argwhere( i.schedulers['release'].task_flag)[-1]
-                              + i.params['max_age']/si.settings.time_step) + 1, si.run_info.times.size)
+            nt_last = min(int(np.argwhere( i.schedulers['release'].task_flag)[-1]
+                        + np.ceil(i.params['max_age']/si.settings.time_step)) + 1, si.run_info.times.size)
             i.info['forcasted_number_alive'] = np.zeros(i.info['cumulative_number_released'].shape, dtype=np.int64)
             i.info['forcasted_number_alive'][:nt_last] = i.info['cumulative_number_released'][:nt_last]
             ri.forcasted_number_alive += i.info['forcasted_number_alive']
@@ -328,7 +328,7 @@ class OceanTrackerParamsRunner(object):
         # use forcast number alive to set up particle chunking, for memory buffers and output files
         ri.forcasted_max_number_alive = int(ri.forcasted_number_alive.max())
 
-        # particle chunking, chose smaler of forcasted or given buffer sise
+        # particle buffer, choose smaller of forcasted or given buffer sise
         settings.particle_buffer_initial_size = min(ri.forcasted_max_number_alive, settings.particle_buffer_initial_size)
 
         if settings.NCDF_particle_chunk is None:
