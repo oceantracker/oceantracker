@@ -300,11 +300,10 @@ class OceanTrackerParamsRunner(object):
         d = fgm.get_reader_info()
         json_util.write_JSON(path.join(si.run_info.run_output_dir, f'{si.run_info.output_file_base}_hindcast_info.json'), d)
 
-        # schedule all release groups, now run start and end known
+        # schedule all release groups, now run start and end are known
         ri.cumulative_number_released = np.zeros((si.run_info.times.size, ), dtype= np.int64)
-        ri.forcasted_number_alive = ri.cumulative_number_released.copy()
+        ri.forecasted_number_alive = ri.cumulative_number_released.copy()
         max_ages = []
-
         for name, i in si.class_roles.release_groups.items():
             p = i.params
             i.initial_setup() # delayed set up
@@ -319,20 +318,20 @@ class OceanTrackerParamsRunner(object):
             ri.cumulative_number_released += i.info['cumulative_number_released']
 
             # number alive is cum. numb released, zeroed after max age is reached
-            nt_last = min(int(np.argwhere( i.schedulers['release'].task_flag)[-1]
-                        + np.ceil(i.params['max_age']/si.settings.time_step)) + 1, si.run_info.times.size)
-            i.info['forcasted_number_alive'] = np.zeros(i.info['cumulative_number_released'].shape, dtype=np.int64)
-            i.info['forcasted_number_alive'][:nt_last] = i.info['cumulative_number_released'][:nt_last]
-            ri.forcasted_number_alive += i.info['forcasted_number_alive']
-            pass
-        # use forcast number alive to set up particle chunking, for memory buffers and output files
-        ri.forcasted_max_number_alive = int(ri.forcasted_number_alive.max())
+            nt_last = min(int(np.argwhere(i.schedulers['release'].task_flag)[-1] # last flagged release tiem step
+                        + i.params['max_age']/si.settings.time_step + 1),  si.run_info.times.size)
+            i.info['forecasted_number_alive'] = np.zeros(i.info['cumulative_number_released'].shape, dtype=np.int64)
+            i.info['forecasted_number_alive'][:nt_last] = i.info['cumulative_number_released'][:nt_last]
+            ri.forecasted_number_alive += i.info['forecasted_number_alive']
 
-        # particle buffer, choose smaller of forcasted or given buffer sise
-        settings.particle_buffer_initial_size = min(ri.forcasted_max_number_alive, settings.particle_buffer_initial_size)
+        # use forecast number alive to set up particle chunking, for memory buffers and output files
+        ri.forecasted_max_number_alive = int(ri.forecasted_number_alive.max())
+
+        # particle buffer, choose smaller of forecasted or given buffer sise
+        settings.particle_buffer_initial_size = min(ri.forecasted_max_number_alive, settings.particle_buffer_initial_size)
 
         if settings.NCDF_particle_chunk is None:
-            settings.NCDF_particle_chunk = ri.forcasted_max_number_alive
+            settings.NCDF_particle_chunk = ri.forecasted_max_number_alive
 
         # particle group manager for particle handing infra-structure
         pgm = si.core_class_roles.particle_group_manager
@@ -340,11 +339,6 @@ class OceanTrackerParamsRunner(object):
 
         # record max age for each group, used to kill old particles
         pgm.info['max_age_for_each_release_group'] = np.asarray(max_ages)
-
-        # with particle mager and sizes  now do release group initialization
-
-        for name, rg in si.class_roles.release_groups.items():
-            rg.initial_setup()
 
         # make other core classes
         ccr = si.core_class_roles

@@ -55,10 +55,16 @@ class CompactTracksWriter(_BaseWriter):
         for name, i in si.class_roles.particle_properties.items():
             if not i.params['write']: continue
             dim =[]
+            chunking = None
             if i.params['time_varying']:
                 dim.append('time_particle_dim')
                 vi['time_varying_part_prop'].append(name)
                 comp = si.settings.NCDF_compression_level
+                # faster to chunk time varing part prop.
+                chunking = [si.run_info.forecasted_max_number_alive]
+                if i.params['vector_dim'] >1: chunking.append(i.params['vector_dim'])
+                if i.params['prop_dim3'] > 1: chunking.append(i.params['prop_dim3'])
+
             else:
                 dim.append('particle_dim')
                 vi['non_time_varying_part_prop'].append(name)
@@ -69,6 +75,7 @@ class CompactTracksWriter(_BaseWriter):
             if i.params['prop_dim3'] > 1: dim.append(nc.add_dimension(f'part_prop_{name}_dim3', i.params['prop_dim3']))
 
             nc.create_a_variable(name, dim, units=i.params['units'],dtype=i.params['dtype'],
+                                 chunksizes=chunking,
                                   description=i.params['description'],compression_level=comp)
 
         if si.settings['write_dry_cell_flag']:

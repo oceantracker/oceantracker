@@ -46,7 +46,8 @@ nc= NetCDFhandler(fn2,mode='w')
 nc. add_dimension('time_particle',None)
 nc. add_dimension('threeD',M)
 nc.create_a_variable('x',['time_particle','threeD'], dtype=dtype,
-                     chunksizes=[int(N/10), M], compression_level=comp)
+                     chunksizes=[int(N), M],
+                     compression_level=comp)
 
 t0 = perf_counter()
 n_writes= 0
