@@ -33,10 +33,10 @@ def load_track_data(case_info_file_name, var_list=None, fraction_to_read= None, 
 
     case_info = read_case_info_file(case_info_file_name)
 
-    tracks = read_ncdf_output_files.read_particle_tracks_file(case_info['output_files']['tracks_writer'],
-                                                              file_dir=case_info['output_files']['run_output_dir'],
+    tracks = read_ncdf_output_files.merge_track_files(case_info['output_files']['tracks_writer'],
+                                                              dir=case_info['output_files']['run_output_dir'],
                                                               var_list=var_list,
-                                                              file_number=file_number, fraction_to_read=fraction_to_read)
+                                                              fraction_to_read=fraction_to_read)
 
     tracks['grid'] = load_grid(case_info_file_name,gridID=gridID)
 

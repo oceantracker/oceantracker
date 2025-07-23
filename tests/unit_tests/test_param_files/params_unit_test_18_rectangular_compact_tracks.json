@@ -1,18 +1,14 @@
 {
-    "output_file_base": "unit_test_20_restarting_00",
+    "output_file_base": "unit_test_18_rectangular_compact_tracks_00",
     "root_output_dir": "C:\\Auck_work\\oceantracker_output\\unit_tests",
     "time_step": 1800,
     "use_random_seed": true,
     "debug": true,
     "use_dispersion": false,
     "screen_output_time_interval": 1800,
-    "use_A_Z_profile": true,
-    "regrid_z_to_uniform_sigma_levels": false,
-    "particle_buffer_initial_size": 200,
-    "NUMBA_cache_code": true,
+    "particle_buffer_initial_size": 10000,
     "use_resuspension": false,
-    "restart_interval": 10800,
-    "throw_debug_error": 1,
+    "min_dead_to_remove": 500,
     "reader": {
         "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
@@ -26,41 +22,24 @@
                     -2
                 ]
             ],
-            "release_interval": 0,
-            "pulse_size": 5,
+            "release_interval": 1800,
+            "pulse_size": 1000,
+            "max_age": 21600,
             "class_name": "PointRelease",
-            "name": "release_interval0"
+            "name": "rg_basic"
         }
     ],
     "particle_properties": [
+        {
+            "vector_part_prop": "water_velocity",
+            "class_name": "VectorMagnitude2D",
+            "name": "water_speed"
+        },
         {
             "initial_value": 1000,
             "decay_time_scale": 7200.0,
             "class_name": "oceantracker.particle_properties.age_decay.AgeDecay",
             "name": "a_pollutant"
-        }
-    ],
-    "particle_statistics": [
-        {
-            "grid_size": [
-                120,
-                121
-            ],
-            "grid_span": [
-                10000,
-                10000
-            ],
-            "release_group_centered_grids": true,
-            "update_interval": 7200,
-            "particle_property_list": [
-                "a_pollutant",
-                "water_depth"
-            ],
-            "age_bin_size": 86400,
-            "max_age_to_bin": 259200,
-            "z_min": -10.0,
-            "class_name": "GriddedStats2D_ageBased",
-            "name": "my_heatmap_age"
         }
     ],
     "tracks_writer": {

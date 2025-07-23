@@ -47,8 +47,8 @@ def main(args):
     case_info_file = ot.run()
 
     tests=dict()
-    tracks = test_definitions.read_tracks(case_info_file)
-    tracks_ref = test_definitions.read_tracks(case_info_file, ref_case=True)
+    tracks = test_definitions.load_tracks(case_info_file)
+    tracks_ref = test_definitions.load_tracks(case_info_file, ref_case=True)
 
     test_definitions.compare_reference_run(case_info_file, args)
 

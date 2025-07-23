@@ -49,20 +49,18 @@ class NetCDFhandler(object):
                           attributes=None,  chunksizes=None, compression_level=0):
         # add and write a variable of given nane and dim name list
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
-        if dtype is None: dtype = np.float64  # double by default
+
         dtype = np.dtype(dtype) # convert string dtypes
         if fill_value is None:
             if np.issubdtype(dtype,np.floating):
                 fill_value = np.nan
-            elif np.issubdtype(dtype, np.unsignedinteger):
-                fill_value = None
-            elif np.issubdtype(dtype, np.signedinteger):
+            elif np.issubdtype(dtype, np.integer):
                 fill_value = np.iinfo(dtype).min
             else:
                 fill_value = None
 
         v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compression_level > 0),
-                                                complevel=compression_level, fill_value=fill_value)
+                            complevel=compression_level, fill_value=fill_value)
 
         # set attributes the hard way, must be an easier way!
         if description is not None:

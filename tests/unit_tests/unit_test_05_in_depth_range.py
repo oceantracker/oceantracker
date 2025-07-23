@@ -44,7 +44,7 @@ def main(args):
     case_info_file = ot.run()
 
 
-    tracks= test_definitions.read_tracks(case_info_file)
+    tracks= test_definitions.load_tracks(case_info_file)
 
     dz = tracks['x'][:,:,2] + tracks['water_depth']
 

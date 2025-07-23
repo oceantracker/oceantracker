@@ -3,7 +3,6 @@
     "root_output_dir": "C:\\Auck_work\\oceantracker_output\\unit_tests",
     "time_step": 240,
     "use_random_seed": true,
-    "NCDF_time_chunk": 1,
     "debug": true,
     "use_A_Z_profile": true,
     "screen_output_time_interval": 240,

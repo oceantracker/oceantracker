@@ -317,11 +317,13 @@ class OceanTrackerParamsRunner(object):
             i.info['cumulative_number_released'] = np.cumsum(i.schedulers['release'].task_flag *i.info['number_per_release'])
             ri.cumulative_number_released += i.info['cumulative_number_released']
 
-            # number alive is cum. numb released, zeroed after max age is reached
-            nt_last = min(int(np.argwhere(i.schedulers['release'].task_flag)[-1] # last flagged release tiem step
-                        + i.params['max_age']/si.settings.time_step + 1),  si.run_info.times.size)
-            i.info['forecasted_number_alive'] = np.zeros(i.info['cumulative_number_released'].shape, dtype=np.int64)
-            i.info['forecasted_number_alive'][:nt_last] = i.info['cumulative_number_released'][:nt_last]
+            # after max age at nt1,  number alive is constant
+            nt1 = min(int(i.params['max_age']/si.settings.time_step),  si.run_info.times.size-1)
+            i.info['forecasted_number_alive'] = i.info['cumulative_number_released'].copy()
+            i.info['forecasted_number_alive'][nt1:] = i.info['cumulative_number_released'][nt1]
+            #none alive after time step nt2
+            nt2 = min(nt1 + int(i.params['max_age'] / si.settings.time_step) +1, si.run_info.times.size)
+            i.info['forecasted_number_alive'][nt2:] = 0
             ri.forecasted_number_alive += i.info['forecasted_number_alive']
 
         # use forecast number alive to set up particle chunking, for memory buffers and output files

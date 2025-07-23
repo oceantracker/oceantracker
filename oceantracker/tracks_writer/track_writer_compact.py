@@ -21,8 +21,8 @@ class CompactTracksWriter(_BaseWriter):
     def initial_setup(self):
         super().initial_setup()
         self.info['time_particle_steps_written'] = 0
-        params = self.params
 
+        params = self.params
         if params['time_particle_chunk'] is None:
             params['time_particle_chunk'] = si.run_info.forecasted_max_number_alive
 

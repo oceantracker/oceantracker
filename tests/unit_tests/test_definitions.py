@@ -190,13 +190,29 @@ ax = [1591000, 1601500, 5478500, 5491000]
 
 
 
-def read_tracks(case_info_file, ref_case=False,compact=True,fraction_to_read=None):
+def load_tracks(case_info_file, ref_case=False,fraction_to_read=None):
     from oceantracker.read_output.python import load_output_files
 
     fn = case_info_file if not ref_case else case_info_file.replace('unit_tests', 'unit_test_reference_cases')
 
     return load_output_files.load_track_data(fn, fraction_to_read=fraction_to_read)
 
+def read_tracks(case_info_file, ref_case=False,fraction_to_read=None):
+    from oceantracker.read_output.python import load_output_files
+    from oceantracker.read_output.python.read_ncdf_output_files import read_tracks_file, merge_track_files
+
+    case_info_file = case_info_file if not ref_case else case_info_file.replace('unit_tests', 'unit_test_reference_cases')
+    case_info = load_output_files.read_case_info_file(case_info_file)
+    o = case_info['output_files']
+
+    fn = path.join(o['run_output_dir'],o['tracks_writer'][0])
+    #d = read_tracks_file(fn,fraction_to_read=fraction_to_read)
+    d = merge_track_files(o['tracks_writer'],dir=o['run_output_dir'], fraction_to_read=fraction_to_read)
+    return d
+
+
+
+    return
 def compare_reference_run(case_info_file, args,compare_stats=True):
     from oceantracker.read_output.python import load_output_files
 
@@ -208,8 +224,8 @@ def compare_reference_run(case_info_file, args,compare_stats=True):
         # rewrite reference case output
         shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)
 
-    tracks = read_tracks(case_info_file)
-    tracks_ref = read_tracks(case_info_file, ref_case=True)
+    tracks = load_tracks(case_info_file)
+    tracks_ref = load_tracks(case_info_file, ref_case=True)
     dx = np.abs(tracks['x'] - tracks_ref['x'])
 
     # print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
@@ -247,7 +263,7 @@ def show_track_plot(case_info_file, args,colour_with=None):
         print('>>> Run failed no unit test plot')
         return
 
-    tracks= read_tracks(case_info_file)
+    tracks= load_tracks(case_info_file)
 
     movie_file1= path.join(image_dir, 'decay_movie_frame.mp4') if args.save_plots else None
 
@@ -261,5 +277,5 @@ def plot_vert_section(case_info_file, args,fraction_to_read):
     if not args.plot: return
 
     from oceantracker.plot_output.plot_tracks import plot_path_in_vertical_section
-    tracks = read_tracks(case_info_file,fraction_to_read=fraction_to_read)
+    tracks = load_tracks(case_info_file,fraction_to_read=fraction_to_read)
     plot_path_in_vertical_section(tracks, particleID=np.arange(0,tracks['x'].shape[1],10))
