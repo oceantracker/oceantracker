@@ -11,7 +11,7 @@ def read_tracks_file(file_name, var_list=None, fraction_to_read=None):
     # read a single tracks file
     ds = _open_dataset(file_name)
 
-    if 'time_particle_dim' not in ds.dims:
+    if 'time_particle_dim' in ds.dims:
         return _read_old_compact_format(file_name, file_dir=None, var_list=var_list,
                                         fraction_to_read=fraction_to_read)
     ds.close()
@@ -273,3 +273,12 @@ def _read_old_compact_format(file_name_or_list,file_dir=None, var_list=None, fra
                                                var_list=var_list,
                                                fraction_to_read=fraction_to_read)
     return result
+
+
+def read_particle_tracks_file(file_name_or_list,file_dir=None, var_list=None, file_number=None, fraction_to_read=None):
+    print('Error >>>> reading tracks file, obsolete code ')
+    print('\t "read_particle_tracks_file()" function has been removed')
+    print('\t\t to read single file use >> read_tracks_file(file_name, var_list=None, fraction_to_read=None)')
+    print('\t\t to read multiple files use >> merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None)')
+    print('\t import these from module "oceantracker.read_output.python.read_ncdf_output_files"')
+    raise(Exception('obsolete oceantracker code, see above'))
