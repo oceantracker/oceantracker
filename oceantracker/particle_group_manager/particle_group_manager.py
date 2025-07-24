@@ -137,30 +137,30 @@ class ParticleGroupManager(ParameterBaseClass):
             self._expand_particle_buffers(smax)
 
         # get indices within particle buffer where new particles will go, as in compact mode particle ID is not the buffer index
-        new_buffer_indices= np.arange(si.run_info.particles_in_buffer, smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
-        num_released = new_buffer_indices.size
+        new_part_buffer_indices = np.arange(si.run_info.particles_in_buffer, smax).astype(np.int32)  # indices of particles IN BUFFER to add ( zero base)
+        num_released = new_part_buffer_indices.size
 
         part_prop = si.class_roles.particle_properties
 
         # copy over release data to new part props
         for name in release_data.keys():
-            part_prop[name].set_values(release_data[name], new_buffer_indices)
+            part_prop[name].set_values(release_data[name], new_part_buffer_indices)
 
         # record needed copies
-        if new_buffer_indices.size >0:
-            part_prop['x0'].set_values(release_data['x'], new_buffer_indices)
-            part_prop['x_last_good'].set_values(release_data['x'], new_buffer_indices)
-            part_prop['n_cell_last_good'].set_values(release_data['n_cell'], new_buffer_indices)
-            part_prop['status'].set_values(si.particle_status_flags.moving, new_buffer_indices)  # set  status of released particles
-            part_prop['status_last_good'].set_values(si.particle_status_flags.moving, new_buffer_indices)  # set  status of released particles
-            part_prop['time_released'].set_values(time_sec, new_buffer_indices)  # time released for each particle, needed to calculate age
-            part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_buffer_indices)
+        if new_part_buffer_indices.size >0:
+            part_prop['x0'].set_values(release_data['x'], new_part_buffer_indices)
+            part_prop['x_last_good'].set_values(release_data['x'], new_part_buffer_indices)
+            part_prop['n_cell_last_good'].set_values(release_data['n_cell'], new_part_buffer_indices)
+            part_prop['status'].set_values(si.particle_status_flags.moving, new_part_buffer_indices)  # set  status of released particles
+            part_prop['status_last_good'].set_values(si.particle_status_flags.moving, new_part_buffer_indices)  # set  status of released particles
+            part_prop['time_released'].set_values(time_sec, new_part_buffer_indices)  # time released for each particle, needed to calculate age
+            part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_part_buffer_indices)
 
         info['particles_released'] += num_released  # total released
         si.run_info.particles_in_buffer += num_released  # number in particle buffer
 
 
-        return new_buffer_indices
+        return new_part_buffer_indices
 
     def _expand_particle_buffers(self,num_particles):
         info = self.info

@@ -9,23 +9,31 @@ from oceantracker.util.triangle_utilities import make_domain_mask
 from copy import deepcopy
 def read_tracks_file(file_name, var_list=None, fraction_to_read=None):
     # read a single tracks file
-    ds = _open_dataset(file_name)
 
-    if 'time_particle_dim' in ds.dims:
+    nc = NetCDFhandler(file_name,mode='r')
+    if nc.is_dim('time_particle_dim'):
         return _read_old_compact_format(file_name, file_dir=None, var_list=var_list,
                                         fraction_to_read=fraction_to_read)
-    ds.close()
+    # read rectangluar  format
     if var_list is None:
-        var_list = list(ds.variables.keys())
+        var_list = list(nc.variable_info.keys())
     else:
         # get list plus min data set
-        var_list = list(set(['ID', 'x', 'time', 'status', 'IDrelease_group',
-                             'IDpulse', 'x0', 'dry_cell_index'] + var_list))
+        var_list = list(set(['x', 'time', 'status', 'x0', 'dry_cell_index'] + var_list))
 
-    result['date'] = result['time'].astype('datetime64[s]') # make sure time is seconds
 
-    if compute: result = result.compute()
-    return result
+    data = nc.read_variables(var_list)
+    data['global_attributes']=nc.global_attrs()
+    data['dimensions'] = nc.dims()
+    data['variables']=dict()
+    for v in var_list:
+        data['variables'][v] = dict( nc.variable_info[v])
+        data['variables'][v]['data'] = data[v]
+    nc.close()
+    data['date'] = data['time'].astype('datetime64[s]') # make sure time is seconds
+
+    #if compute: result = result.compute()
+    return data
 
 
 def merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None):
@@ -34,54 +42,51 @@ def merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None):
     if dir is not None: file_list = [path.join(dir, fn) for fn in file_list]
 
     # read old compact format
-    ds = _open_dataset(file_list[0])
-    if 'time_particle_dim' in ds.dims:
+    nc = NetCDFhandler(file_list[0],mode='r')
+    if  nc.is_dim('time_particle_dim'):
         return _read_old_compact_format(file_list, var_list=var_list,
                                         fraction_to_read=fraction_to_read)
-    ds.close()
+    nc.close()
+
     IDrange = []
     n_times=[]
-    for fn in file_list:
-        ds = _open_dataset(fn)
-        ID1, ID2 = int(ds['ID'][0]), int(ds['ID'][-1])
-        IDrange.append([ID1, ID2 + 1])
-        n_times.append(ds.time.size)
-        ds.close()
+    N=[]
 
-    n_part = max([v[1] for v in IDrange])
-    result = xr.Dataset(attrs=ds.attrs)
+    for fn in file_list:
+        nc = NetCDFhandler(fn,mode='r')
+        ID = nc.read_a_variable('ID')
+        IDrange.append([int(ID.min()), int(ID.max())+1])
+        n_times.append(nc.variable_info['time']['shape'][0])
+        N.append(nc.dim_size('particle_dim'))
+        nc.close()
+
+    total_time_steps= sum(n_times)
+    first_time_step= np.cumsum(np.asarray([0]+n_times))
+    IDrange = np.asarray(IDrange)
+    result =dict()
 
     for n_file, fn in enumerate(file_list):
         d1 = read_tracks_file(fn, var_list=var_list)
+        ID = d1['ID']
+        for name in d1['variables'].keys():
 
-        for name in d1.variables.keys():
-
-            v = d1[name]
-            if name not in result.variables:
+            v = d1['variables'][name]
+            if name not in result:
                 # make space for all files in results, add empty variables
-                sizes = deepcopy(dict(v.sizes))
-                if 'time_dim' in sizes:  sizes['time_dim'] = sum(n_times)
-                if 'particle_dim' in sizes:  sizes['particle_dim'] = n_part
-                s =list(sizes.values())
-                result[name] = xr.DataArray(data=np.full(s, v.attrs['_FillValue'], dtype=v.dtype),
-                                       dims=list(sizes.keys()))
-            nt1 = sum(n_times[: n_file+1])
-            r = [nt1,nt1+n_times[n_file]]
-            p = [IDrange[n_file][0],IDrange[n_file][1]]
-            if 'particle_dim' in v.dims and 'time_dim' in v.dims:
-                print(n_file,name,v.sizes)
-                result[name][r[0]:r[1], p[0]:p[1],...] = v
+                dims = deepcopy(v['sizes'])
+                if 'time_dim' in dims: dims['time_dim'] = total_time_steps
+                if 'particle_dim' in dims :  dims['particle_dim' ] = IDrange[-1,1]
+                s =[ m for m in dims.values()]
+                result[name] = data=np.full(s, v['attrs']['_FillValue'], dtype=v['dtype'])
+            # insert file data into matrix
+
+            r = [int(first_time_step[n_file]),int(first_time_step[n_file+1])]
+            p = [IDrange[n_file,0],IDrange[n_file,1]]
+            if 'particle_dim' in v['dims'] and 'time_dim' in v['dims']:
+                print(n_file,name,r,p, v['shape'],ID.max(),result[name].shape)
+                result[name][r[0]:r[1], ID,...] = v['data']
 
     return result
-
-def _open_dataset(file_name):
-    ds = xr.open_dataset(file_name, mode='r',
-                         decode_times=False,
-                         decode_coords=False,
-                         decode_cf=False,  # stops conversion of int to double
-                         decode_timedelta=False)
-    return ds
-
 
 def read_stats_file(file_name,nt=None):
     # read stats files

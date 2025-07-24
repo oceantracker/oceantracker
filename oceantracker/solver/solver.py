@@ -63,7 +63,7 @@ class Solver(ParameterBaseClass):
 
         # run forwards through model time variable, which for backtracking are backwards in time
         ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)}')
-        ml.msg(f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}, time step=  {time_util.seconds_to_pretty_duration_string(si.settings.time_step)} ',
+        ml.msg(f'duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}, time step=  {time_util.seconds_to_pretty_duration_string(si.settings.time_step)} ',
                            tabs =2)
 
         si.msg_logger.set_screen_tag('S')
@@ -75,8 +75,8 @@ class Solver(ParameterBaseClass):
         if si.settings.restart:
             self._load_saved_state()
         else:
-            new_particleIDs = pgm.release_particles(nt1,t1 )
-            self._pre_step_bookkeeping(nt1, t1, new_particleIDs)
+            new_particle_indices = pgm.release_particles(nt1,t1 )
+            self._pre_step_bookkeeping(nt1, t1, new_particle_indices)
 
         ri.time_steps_completed = nt1
         num_alive = pgm.status_counts_and_kill_old_particles(t1)
@@ -125,10 +125,10 @@ class Solver(ParameterBaseClass):
             nt2 = n_time_step + 1
             t2 = model_times[nt2]
 
-            new_particleIDs = pgm.release_particles(nt2, t2)
+            new_particle_indices = pgm.release_particles(nt2, t2)
 
             # do stats etc updates and write tracks at new time step
-            self._pre_step_bookkeeping(nt2, t2, new_particleIDs)
+            self._pre_step_bookkeeping(nt2, t2, new_particle_indices)
 
             if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
                 self._save_state_for_restart(nt2, t2)
@@ -167,7 +167,7 @@ class Solver(ParameterBaseClass):
         ri.computation_duration = datetime.now() -computation_started
 
     def _pre_step_bookkeeping(self, n_time_step,time_sec,
-                              new_particleIDs=np.full((0,),0,dtype=np.int32)):
+                              new_particle_indices=np.full((0,),0,dtype=np.int32)):
         part_prop = si.class_roles.particle_properties
         pgm = si.core_class_roles.particle_group_manager
         fgm = si.core_class_roles.field_group_manager
@@ -211,8 +211,8 @@ class Solver(ParameterBaseClass):
             tracks_writer = si.core_class_roles.tracks_writer
             tracks_writer.open_file_if_needed()
 
-            if new_particleIDs.size > 0:
-                tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
+            if new_particle_indices.size > 0:
+                tracks_writer.write_all_non_time_varing_part_properties(new_particle_indices)  # these must be written on release, to work in compact mode
 
             # write time varying track data to file if scheduled
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):

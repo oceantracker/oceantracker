@@ -91,7 +91,8 @@ class CompactTracksWriter(_BaseWriter):
         info = self.info
         nc = self.nc
         nWrite = info['time_steps_written_to_current_file']
-        self.sel_alive = si.class_roles.particle_properties['status'].compare_all_to_a_value('gt', si.particle_status_flags.dead, out= self.get_partID_buffer('B1'))
+        self.sel_alive = si.class_roles.particle_properties['status'].compare_all_to_a_value('gt',
+                                                    si.particle_status_flags.dead, out= self.get_partID_buffer('B1'))
 
         n_file = self.nc.var_shape('particle_ID')[0]
 
@@ -106,19 +107,19 @@ class CompactTracksWriter(_BaseWriter):
         nc.file_handle.variables['write_step_index'][fi[0]:fi[1], ...] = info['total_time_steps_written'] * np.ones((self.sel_alive.shape[0],), dtype=np.int32)
 
         self.info['time_particle_steps_written'] += self.sel_alive.shape[0]
-    def write_all_non_time_varing_part_properties(self, new_particleIDs):
+    def write_all_non_time_varing_part_properties(self, new_particle_indices):
         # to work in compact mode must write particle non-time varying  particle properties when released
         #  eg ID etc, releaseGroupID  etc
 
         info = self.info
         nc = self.nc
         n_in_file = self.nc.var_shape('ID')[0]
-        n_write = range(n_in_file, n_in_file + new_particleIDs.size)
+        n_write = range(n_in_file, n_in_file + new_particle_indices.size)
 
         part_prop = si.class_roles.particle_properties
-        if new_particleIDs.size > 0:
+        if new_particle_indices.size > 0:
             for name in info['variables_to_write']['non_time_varying_part_prop']:
-                nc.file_handle.variables[name][n_write, ...] = part_prop[name].data[new_particleIDs, ...]
+                nc.file_handle.variables[name][n_write, ...] = part_prop[name].data[new_particle_indices, ...]
 
     def write_all_time_varying_prop_and_data(self):
         # write particle data at current time step, if none then a forced write

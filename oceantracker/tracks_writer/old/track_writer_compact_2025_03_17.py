@@ -1,6 +1,6 @@
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.tracks_writer.depricated._base_tracks_writer_2025_03_17 import  _BaseWriter
+from oceantracker.tracks_writer.old._base_tracks_writer_2025_03_17 import  _BaseWriter
 from oceantracker.util import  output_util
 
 

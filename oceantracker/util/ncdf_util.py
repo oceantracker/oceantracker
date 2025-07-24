@@ -1,5 +1,5 @@
 from netCDF4 import Dataset
-
+from oceantracker.util import numpy_util
 
 import numpy as np
 from os import path
@@ -31,9 +31,11 @@ class NetCDFhandler(object):
             # get variable info
             v = self.file_handle.variables
             for name in v.keys():
-                    self.variable_info[name] ={'dimensions':v[name].dimensions,
-                                               'shape': v[name].shape,'dtype': v[name].datatype,
-                                               'attributes': self.all_var_attr(name)}
+                self.variable_info[name] ={'dims':v[name].dimensions,
+                       'shape': v[name].shape,'dtype': v[name].datatype,
+                       'attrs': self.all_var_attr(name),
+                       'sizes': {name: s for name,s in zip(v[name].dimensions, v[name].shape) }
+                        }
 
         self.dimensions = self.file_handle.dimensions
         self.attrs = self.file_handle.__dict__
@@ -51,13 +53,7 @@ class NetCDFhandler(object):
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
 
         dtype = np.dtype(dtype) # convert string dtypes
-        if fill_value is None:
-            if np.issubdtype(dtype,np.floating):
-                fill_value = np.nan
-            elif np.issubdtype(dtype, np.integer):
-                fill_value = np.iinfo(dtype).min
-            else:
-                fill_value = None
+        if fill_value is None:  fill_value = numpy_util.smallest_value(dtype)
 
         v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compression_level > 0),
                             complevel=compression_level, fill_value=fill_value)
@@ -138,14 +134,6 @@ class NetCDFhandler(object):
     def is_var(self, name):
         return name in self.file_handle.variables
 
-    def are_vars(self, name_list):
-        a = []
-        for n in name_list:
-            a.append(self.is_var(n))
-        return a
-
-    def are_all_vars(self, name_list):  return all(self.are_vars(name_list))
-
     # dimensions
     def dim_list(self): return list(self.file_handle.dimensions.keys())
 
@@ -159,7 +147,6 @@ class NetCDFhandler(object):
 
     def is_dim(self,dim_name):return dim_name in self.file_handle.dimensions
 
-    def global_attr_names(self): return  self.file_handle.ncattrs()
     def global_attr(self, attr_name): return getattr(self.file_handle, attr_name)
     def global_attrs(self):  return self.file_handle.__dict__
 
@@ -200,7 +187,7 @@ class NetCDFhandler(object):
         return value
 
     def copy_global_attributes(self,nc_new):
-        for name in self.global_attr_names():
+        for name in self.global_attr().keys():
             nc_new.write_global_attribute(name, self.global_attr(name))
 
     def copy_variable(self,name, nc_new, compression_level=0,float32asInt16=False):

@@ -40,7 +40,8 @@ class _BaseWriter(ParameterBaseClass):
 
         self.nc = None
 
-    def initial_setup(self):pass
+    def initial_setup(self):
+        self.info['first_buffer_index_in_current_file'] = -10 ** 31
 
     def final_setup(self):
         params = self.params
@@ -72,6 +73,11 @@ class _BaseWriter(ParameterBaseClass):
         nc = self.nc
         nc.write_global_attribute('file_created', datetime.now().isoformat())
         self.setup_file_vars(nc)
+        # write non-time varing prop of those currently alive
+        sel = self._select_part_to_write()
+        info['first_buffer_index_in_current_file'] = max(sel[0],
+                                info['first_buffer_index_in_current_file'])
+        self.write_all_non_time_varing_part_properties(sel)
         pass
 
     def setup_file_vars(self, nc): basic_util.nopass('write muse have setup_file_vars method')
@@ -82,7 +88,11 @@ class _BaseWriter(ParameterBaseClass):
         #self.estimate_open_file_size()
         pass
 
-
+    def _select_part_to_write(self):
+        part_prop = si.class_roles.particle_properties
+        alive = part_prop['status'].compare_all_to_a_value('gt', si.particle_status_flags.dead,
+                                                           out=self.get_partID_buffer('B1'))
+        return alive
     def _close_file(self):
         nc = self.nc
         if nc is None: return

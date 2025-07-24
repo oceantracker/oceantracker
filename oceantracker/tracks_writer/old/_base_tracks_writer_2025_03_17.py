@@ -83,7 +83,7 @@ class _BaseWriter(ParameterBaseClass):
 
         self.info['file_builder']['variables'][name] = var
 
-    def open_file_if_needed(self, new_particleIDs):
+    def open_file_if_needed(self, new_particle_indices):
         params = self.params
         info = self.info
         opened_file = False
@@ -97,8 +97,8 @@ class _BaseWriter(ParameterBaseClass):
             # note file opening and time to open file set up chucks and write first block
             si.msg_logger.progress_marker(f'Opened tracks output and done written first time step in: "{self.info["output_file"][-1]}"', start_time=t0)
 
-        if new_particleIDs.size > 0:
-                self.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
+        if new_particle_indices.size > 0:
+                self.write_all_non_time_varing_part_properties(new_particle_indices)  # these must be written on release, to work in compact mode
 
     def _open_file(self, file_name):
         info = self.info
@@ -136,20 +136,20 @@ class _BaseWriter(ParameterBaseClass):
     def create_variable_to_write(self,name,first_dim_name,dim_len,**kwargs): pass
 
 
-    def write_all_non_time_varing_part_properties(self, new_particleIDs):
+    def write_all_non_time_varing_part_properties(self, new_particle_indices):
         # to work in compact mode must write particle non-time varying  particle properties when released
         #  eg ID etc, releaseGroupID  etc
 
         writer = si.core_class_roles.tracks_writer
 
         n_in_file = self.nc.var_shape('ID')[0]
-        n_write = range(n_in_file, n_in_file + new_particleIDs.size)
+        n_write = range(n_in_file, n_in_file + new_particle_indices.size)
 
-        if si.settings.write_tracks and new_particleIDs.size > 0:
+        if si.settings.write_tracks and new_particle_indices.size > 0:
             for name, prop in si.class_roles.particle_properties.items():
                 # parameters are not time varying, so done at ends in retangular writes, or on culling particles
                 if not prop.params['time_varying'] and prop.params['write']:
-                    writer.write_non_time_varying_particle_prop(name, prop.data, new_particleIDs, n_write)
+                    writer.write_non_time_varying_particle_prop(name, prop.data, new_particle_indices, n_write)
 
     #@function_profiler(__name__)
     def write_all_time_varying_prop_and_data(self):

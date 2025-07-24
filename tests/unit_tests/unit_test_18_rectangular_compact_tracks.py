@@ -8,7 +8,7 @@ def main(args):
     ot.settings(**test_definitions.base_settings(__file__, args))
     ot.settings(time_step=1800,use_dispersion=False,
                 screen_output_time_interval=1800,
-            particle_buffer_initial_size= 10_000,
+            particle_buffer_initial_size= 100_000,
              #NUMBA_cache_code=True,
                 use_resuspension = False,
                 min_dead_to_remove=500,
@@ -26,15 +26,17 @@ def main(args):
                  vector_part_prop='water_velocity')
 
     ot.add_class('tracks_writer',update_interval=1800,
+                 class_name= 'CompactTracksWriter' if args.reference_case else 'RectangularTracksWriter',
                  time_steps_per_per_file=None if args.reference_case else  10)
 
     ot.add_class('particle_properties', **test_definitions.pp1)  # add a new property to particle_properties role
 
-    #case_info_file = ot.run()
-    case_info_file=  r"C:\Auck_work\oceantracker_output\unit_tests\unit_test_18_rectangular_compact_tracks_00\unit_test_18_rectangular_compact_tracks_00_caseInfo.json"
+    if not args.norun:
+        case_info_file = ot.run()
+    else:
+        case_info_file=  r"C:\Auck_work\oceantracker_output\unit_tests\unit_test_18_rectangular_compact_tracks_00\unit_test_18_rectangular_compact_tracks_00_caseInfo.json"
 
     tracks_compact = test_definitions.read_tracks(case_info_file)
-
 
     return  ot.params
 
