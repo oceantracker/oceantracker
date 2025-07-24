@@ -26,7 +26,7 @@ def read_compact_particle_tracks_file(file_name_or_list,file_dir=None, var_list=
             for name, val in data.items():
                 if name in data['variable_info']:
                     vi = data['variable_info'][name]
-                    if any( [ s in vi['dimensions'] for s in ['time_particle_dim', 'particle_dim' , 'time_dim']]):
+                    if any( [ s in vi['dims'] for s in ['time_particle_dim', 'particle_dim' , 'time_dim']]):
                         data[name] = np.concatenate((data[name],data1[name]), axis=0)
 
 
@@ -100,23 +100,23 @@ def _unpack_compact_tracks(data):
 
     for name in set(var_list): # only do unique vars
         vi = variable_info[name]
-        if 'time_particle_dim' in vi['dimensions']:
+        if 'time_particle_dim' in vi['dims']:
             # compact time varying variablesF
             s = vi['shape']
             d[name] = np.full((time_steps_written, num_released) + tuple(s[1:]),
-                               vi['attributes']['_FillValue'], dtype=vi['dtype'])
+                               vi['attrs']['_FillValue'], dtype=vi['dtype'])
 
             _insertMatrixValues(d[name], n_time_step, particle_IDs, data[name])
-            _filIinDeadParticles(d[name], last_recordedID, vi['attributes']['_FillValue'])
+            _filIinDeadParticles(d[name], last_recordedID, vi['attrs']['_FillValue'])
 
-        elif  'particle_dim' in vi['dimensions']:
+        elif  'particle_dim' in vi['dims']:
             d[name] =data[name][:num_released,...]
 
         else:
             # non time_particle varying parameters, eg time
             d[name] = data[name]
 
-        d['dimensions'][name] = vi['dimensions']
+        d['dimensions'][name] = vi['dims']
         if d['dimensions'][name][0] == 'time_particle':
             # output wil be retangular so correct dim
             d['dimensions'][name] = ['time', 'particle'] + d['dimensions'][name][1:]
