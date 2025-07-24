@@ -77,8 +77,7 @@ def _unpack_compact_tracks(data):
 
     d = dict(dimensions=dict())
 
-    num_released = data['ID'].size
-
+    num_released = data['ID'].max() + 1
     particle_IDs = data['particle_ID'] # this is time_particle particleID to allow unpacking
 
     time_steps_written= data['time'].size

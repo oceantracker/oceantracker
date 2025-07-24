@@ -209,10 +209,8 @@ def read_tracks(case_info_file, ref_case=False,fraction_to_read=None):
     #d = read_tracks_file(fn,fraction_to_read=fraction_to_read)
     d = merge_track_files(o['tracks_writer'],dir=o['run_output_dir'], fraction_to_read=fraction_to_read)
     return d
-
-
-
-    return
+def get_case_inf_name(params):
+    return path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base']+'_caseInfo.json')
 def compare_reference_run(case_info_file, args,compare_stats=True):
     from oceantracker.read_output.python import load_output_files
 

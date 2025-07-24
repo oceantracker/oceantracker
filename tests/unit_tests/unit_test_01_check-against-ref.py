@@ -43,8 +43,10 @@ def main(args):
 
     ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time,   polygon_list=[dict(points=hm['polygon'])])
 
-
-    case_info_file = ot.run()
+    if not args.norun:
+        case_info_file = ot.run()
+    else:
+        case_info_file = test_definitions.get_case_inf_name(ot.params)
 
     tests=dict()
     tracks = test_definitions.load_tracks(case_info_file)
