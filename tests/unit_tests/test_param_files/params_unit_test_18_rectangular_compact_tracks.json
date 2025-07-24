@@ -6,7 +6,7 @@
     "debug": true,
     "use_dispersion": false,
     "screen_output_time_interval": 1800,
-    "particle_buffer_initial_size": 10000,
+    "particle_buffer_initial_size": 100000,
     "use_resuspension": false,
     "min_dead_to_remove": 500,
     "reader": {
@@ -24,7 +24,7 @@
             ],
             "release_interval": 1800,
             "pulse_size": 1000,
-            "max_age": 7200,
+            "max_age": 21600,
             "class_name": "PointRelease",
             "name": "rg_basic"
         }

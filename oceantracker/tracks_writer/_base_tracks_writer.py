@@ -41,7 +41,7 @@ class _BaseWriter(ParameterBaseClass):
         self.nc = None
 
     def initial_setup(self):
-        self.info['first_buffer_index_in_current_file'] = -10 ** 31
+        pass
 
     def final_setup(self):
         params = self.params
@@ -75,9 +75,11 @@ class _BaseWriter(ParameterBaseClass):
         self.setup_file_vars(nc)
         # write non-time varing prop of those currently alive
         sel = self._select_part_to_write()
-        info['first_buffer_index_in_current_file'] = max(sel[0],
-                                info['first_buffer_index_in_current_file'])
+        part_prop = si.class_roles.particle_properties
+        info['first_ID_in_file'] = part_prop['ID'].get_values(0)
+        nc.write_global_attribute('first_ID_in_file',info['first_ID_in_file'])
         self.write_all_non_time_varing_part_properties(sel)
+        
         pass
 
     def setup_file_vars(self, nc): basic_util.nopass('write muse have setup_file_vars method')

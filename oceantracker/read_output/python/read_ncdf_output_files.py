@@ -48,26 +48,21 @@ def merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None):
                                         fraction_to_read=fraction_to_read)
     nc.close()
 
-    IDrange = []
     n_times=[]
-    N=[]
-
     for fn in file_list:
         nc = NetCDFhandler(fn,mode='r')
-        ID = nc.read_a_variable('ID')
-        IDrange.append([int(ID.min()), int(ID.max())+1])
+        lastID= nc.read_a_variable('ID',-1)
         n_times.append(nc.variable_info['time']['shape'][0])
-        N.append(nc.dim_size('particle_dim'))
         nc.close()
 
     total_time_steps= sum(n_times)
     first_time_step= np.cumsum(np.asarray([0]+n_times))
-    IDrange = np.asarray(IDrange)
     result =dict()
 
     for n_file, fn in enumerate(file_list):
         d1 = read_tracks_file(fn, var_list=var_list)
         ID = d1['ID']
+        sel = np.flatnonzero(ID>=0)
         for name in d1['variables'].keys():
 
             v = d1['variables'][name]
@@ -75,16 +70,18 @@ def merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None):
                 # make space for all files in results, add empty variables
                 dims = deepcopy(v['sizes'])
                 if 'time_dim' in dims: dims['time_dim'] = total_time_steps
-                if 'particle_dim' in dims :  dims['particle_dim' ] = IDrange[-1,1]
+                if 'particle_dim' in dims :  dims['particle_dim' ] = lastID + 1
                 s =[ m for m in dims.values()]
                 result[name] = data=np.full(s, v['attrs']['_FillValue'], dtype=v['dtype'])
-            # insert file data into matrix
 
             r = [int(first_time_step[n_file]),int(first_time_step[n_file+1])]
-            p = [IDrange[n_file,0],IDrange[n_file,1]]
+            # insert file data into matrix
             if 'particle_dim' in v['dims'] and 'time_dim' in v['dims']:
-                print(n_file,name,r,p, v['shape'],ID.max(),result[name].shape)
-                result[name][r[0]:r[1], ID,...] = v['data']
+                print(n_file,name,r, v['shape'],ID.max(),result[name].shape)
+                try:
+                    result[name][r[0]:r[1], ID[sel],...] = v['data'][:,sel,...]
+                except Exception as e:
+                    raise('read error')
 
     return result
 

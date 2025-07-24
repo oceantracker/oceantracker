@@ -104,12 +104,15 @@ class RectangularTracksWriter(_BaseWriter):
         # write info about partciles when relaase, eg IDs in file
         info = self.info
         nc = self.nc
-
         part_prop = si.class_roles.particle_properties
+        IDs = part_prop['ID'].get_values(new_particle_indices)
+        ID0 = info['first_ID_in_file']
         if new_particle_indices.size > 0:
             for name in info['variables_to_write']['non_time_varying_part_prop']:
-                nc.file_handle.variables[name][new_particle_indices-info['first_buffer_index_in_current_file'] , ...] = part_prop[name].data[new_particle_indices, ...]
-
+                try:
+                    nc.file_handle.variables[name][IDs - ID0, ...] = part_prop[name].data[new_particle_indices, ...]
+                except Exception as e:
+                    raise('bad index')
     def write_all_time_varying_prop_and_data(self):
         # write particle data at current time step, if none then a forced write
         # write time vary info , eg "time"
@@ -124,8 +127,9 @@ class RectangularTracksWriter(_BaseWriter):
         # write time varying data, eg time  data
         for name in info['variables_to_write']['time_varying_info']:
             nc.file_handle.variables[name][nt, ...] = time_varying_info[name].data[:]
+        IDs= part_prop['ID'].get_values(self.sel_alive)
+        file_part_index = IDs - info['first_ID_in_file']
 
-        file_part_index = self.sel_alive - info['first_buffer_index_in_current_file']
         for name in info['variables_to_write']['time_varying_part_prop']:
            nc.file_handle.variables[name][nt, file_part_index, ...] = part_prop[name].data[self.sel_alive, ...]
 
