@@ -17,7 +17,7 @@ def main(args):
     ot.add_class('reader', **hm['reader'])
 
     # add a point release
-    pulse_size = 5000
+    pulse_size = 2000
     ot.add_class('release_groups',**dict(test_definitions.rg_basic,
                                          max_age=6*3600,
                                          pulse_size=pulse_size, release_interval=1800 ))
