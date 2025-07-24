@@ -109,14 +109,11 @@ class RectangularTracksWriter(_BaseWriter):
         ID0 = info['first_ID_in_file']
         if new_particle_indices.size > 0:
             for name in info['variables_to_write']['non_time_varying_part_prop']:
-                try:
-                    nc.file_handle.variables[name][IDs - ID0, ...] = part_prop[name].data[new_particle_indices, ...]
-                except Exception as e:
-                    raise('bad index')
+                nc.file_handle.variables[name][IDs - ID0, ...] = part_prop[name].data[new_particle_indices, ...]
+
     def write_all_time_varying_prop_and_data(self):
         # write particle data at current time step, if none then a forced write
         # write time vary info , eg "time"
-        self.start_update_timer()
         info = self.info
         part_prop = si.class_roles.particle_properties
         time_varying_info = si.class_roles.time_varying_info
@@ -128,10 +125,10 @@ class RectangularTracksWriter(_BaseWriter):
         for name in info['variables_to_write']['time_varying_info']:
             nc.file_handle.variables[name][nt, ...] = time_varying_info[name].data[:]
         IDs= part_prop['ID'].get_values(self.sel_alive)
-        file_part_index = IDs - info['first_ID_in_file']
+        offsets = IDs - info['first_ID_in_file']
 
         for name in info['variables_to_write']['time_varying_part_prop']:
-           nc.file_handle.variables[name][nt, file_part_index, ...] = part_prop[name].data[self.sel_alive, ...]
+           nc.file_handle.variables[name][nt, offsets, ...] = part_prop[name].data[self.sel_alive, ...]
 
         if si.settings['write_dry_cell_flag']:
             # wont run if nested grids
@@ -142,7 +139,6 @@ class RectangularTracksWriter(_BaseWriter):
 
         info['time_steps_written_to_current_file'] += 1  # time steps in current file
         self.info['total_time_steps_written'] += 1  # time steps written since the start
-        self.stop_update_timer()
 
     def _open_file(self, file_name):
         super()._open_file(file_name)

@@ -207,8 +207,8 @@ class Solver(ParameterBaseClass):
 
         # write tracks
         if si.settings.write_tracks:
-            t0_write = perf_counter()
             tracks_writer = si.core_class_roles.tracks_writer
+            tracks_writer.start_update_timer()
             tracks_writer.open_file_if_needed()
 
             if new_particle_indices.size > 0:
@@ -217,7 +217,7 @@ class Solver(ParameterBaseClass):
             # write time varying track data to file if scheduled
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
-
+            tracks_writer.stop_update_timer()
 
         # resuspension is a core trajectory modifier, upated after resupension
         # so those on bottom can be recorded

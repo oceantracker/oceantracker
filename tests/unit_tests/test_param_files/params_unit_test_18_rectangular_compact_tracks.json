@@ -23,7 +23,7 @@
                 ]
             ],
             "release_interval": 1800,
-            "pulse_size": 1000,
+            "pulse_size": 5000,
             "max_age": 21600,
             "class_name": "PointRelease",
             "name": "rg_basic"

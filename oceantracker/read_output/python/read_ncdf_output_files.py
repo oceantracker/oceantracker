@@ -77,11 +77,16 @@ def merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None):
             r = [int(first_time_step[n_file]),int(first_time_step[n_file+1])]
             # insert file data into matrix
             if 'particle_dim' in v['dims'] and 'time_dim' in v['dims']:
-                print(n_file,name,r, v['shape'],ID.max(),result[name].shape)
-                try:
-                    result[name][r[0]:r[1], ID[sel],...] = v['data'][:,sel,...]
-                except Exception as e:
-                    raise('read error')
+                result[name][r[0]:r[1], ID[sel],...] = v['data'][:,sel,...]
+
+            elif 'particle_dim' in v['dims']:
+                result[name][ID[sel], ...] = v['data'][ sel, ...]
+
+            elif 'time_dim' in v['dims']:
+                result[name][r[0]:r[1], ...] = v['data']
+
+
+
 
     return result
 
