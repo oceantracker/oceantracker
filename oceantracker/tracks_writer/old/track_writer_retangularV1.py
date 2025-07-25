@@ -2,13 +2,13 @@ import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.tracks_writer._base_tracks_writer import  _BaseWriter
 from oceantracker.util import  output_util
-from oceantracker.util import numpy_util
+
+
 from oceantracker.shared_info import shared_info as si
 
-class RectangularTracksWriter(_BaseWriter):
+class RectangularTracksWriterV1(_BaseWriter):
     '''
     Writes particle tracks with particle properties written with dims (time, particle,..)
-    Is very slow writing, better to use post run conversion!!
     '''
     def __init__(self):
         # set up info/attributes
@@ -94,10 +94,11 @@ class RectangularTracksWriter(_BaseWriter):
         nc = self.nc
         nWrite = info['time_steps_written_to_current_file']
 
-        self.part_to_write = self._select_part_to_write()
+        self.sel_alive = self._select_part_to_write()
 
-        nc.file_handle.variables['alive_particles'][nWrite] = self.part_to_write.shape[0]
-        info['time_particle_steps_written'] += self.part_to_write.shape[0]
+        # record range if time step in time_particle dim
+        nc.file_handle.variables['alive_particles'][nWrite] = self.sel_alive.shape[0]
+        info['time_particle_steps_written'] += self.sel_alive.shape[0]
 
     def write_all_non_time_varing_part_properties(self, new_particle_indices):
         # write info about partciles when relaase, eg IDs in file
@@ -123,13 +124,11 @@ class RectangularTracksWriter(_BaseWriter):
         # write time varying data, eg time  data
         for name in info['variables_to_write']['time_varying_info']:
             nc.file_handle.variables[name][nt, ...] = time_varying_info[name].data[:]
-        IDs= part_prop['ID'].get_values(self.part_to_write)
+        IDs= part_prop['ID'].get_values(self.sel_alive)
         offsets = IDs - info['first_ID_in_file']
 
         for name in info['variables_to_write']['time_varying_part_prop']:
-            offset_range, b = self._get_part_prop_buffer( part_prop[name].data,self.part_to_write, IDs, info['first_ID_in_file'])
-            nc.file_handle.variables[name][nt, offset_range[0]:offset_range[1], ...] = b
-           #nc.file_handle.variables[name][nt, offsets, ...] = part_prop[name].data[self.part_to_write, ...]
+           nc.file_handle.variables[name][nt, offsets, ...] = part_prop[name].data[self.sel_alive, ...]
 
         if si.settings['write_dry_cell_flag']:
             # wont run if nested grids
@@ -141,18 +140,8 @@ class RectangularTracksWriter(_BaseWriter):
         info['time_steps_written_to_current_file'] += 1  # time steps in current file
         self.info['total_time_steps_written'] += 1  # time steps written since the start
 
-    def _get_part_prop_buffer(self, data, part_to_write,IDs, ID_file0):
-        # write one time step
-        # fill a buffer with full set of values, including those dead/not written
-        IDrange= np.asarray([IDs[0],IDs[-1]+1])
-        s= list(data.shape)
-        s[0] = IDrange[1] - IDrange[0]
-        b =np.full(s, numpy_util.smallest_value(data.dtype),dtype=data.dtype)
-
-        b[IDs-IDs[0],...] = data[part_to_write,...]
-        offset_range= IDrange - ID_file0
-        return offset_range, b
-
+    def _open_file(self, file_name):
+        super()._open_file(file_name)
 
 
 

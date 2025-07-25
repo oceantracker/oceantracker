@@ -2,37 +2,28 @@
 from  oceantracker.util.ncdf_util import NetCDFhandler
 import numpy as np
 from os import path
-import xarray as xr
 from oceantracker.util import json_util
-from oceantracker.util.numba_util import njitOT
 from oceantracker.util.triangle_utilities import make_domain_mask
-from copy import deepcopy
+from oceantracker.read_output.python.util import read_rectangular_tracks_file, read_compact_tracks_file
+
+
 def read_tracks_file(file_name, var_list=None, fraction_to_read=None):
     # read a single tracks file
 
     nc = NetCDFhandler(file_name,mode='r')
-    if nc.is_dim('time_particle_dim'):
-        return _read_old_compact_format(file_name, file_dir=None, var_list=var_list,
-                                        fraction_to_read=fraction_to_read)
-    # read rectangluar  format
-    if var_list is None:
-        var_list = list(nc.variable_info.keys())
-    else:
-        # get list plus min data set
-        var_list = list(set(['x', 'time', 'status', 'x0', 'dry_cell_index'] + var_list))
-
-
-    data = nc.read_variables(var_list)
-    data['global_attributes']=nc.global_attrs()
-    data['dimensions'] = nc.dims()
-    data['variables']=dict()
-    for v in var_list:
-        data['variables'][v] = dict( nc.variable_info[v])
-        data['variables'][v]['data'] = data[v]
+    is_compact  = nc.is_dim('time_particle_dim')
     nc.close()
-    data['date'] = data['time'].astype('datetime64[s]') # make sure time is seconds
+    if is_compact:
+        data= read_compact_tracks_file.read_comp_tracks_file(
+                            file_name, var_list=var_list,
+                            fraction_to_read=fraction_to_read)
 
-    #if compute: result = result.compute()
+    else:
+        data = read_rectangular_tracks_file.read_rect_tracks_file(
+                            file_name, var_list=var_list,
+                            fraction_to_read=fraction_to_read)
+
+    data['date'] = data['time'].astype('datetime64[s]') # make sure time is seconds
     return data
 
 
@@ -42,52 +33,17 @@ def merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None):
     if dir is not None: file_list = [path.join(dir, fn) for fn in file_list]
 
     # read old compact format
-    nc = NetCDFhandler(file_list[0],mode='r')
-    if  nc.is_dim('time_particle_dim'):
-        return _read_old_compact_format(file_list, var_list=var_list,
-                                        fraction_to_read=fraction_to_read)
+    nc = NetCDFhandler(file_list[0], mode='r')
+    is_compact = nc.is_dim('time_particle_dim')
     nc.close()
-
-    n_times=[]
-    for fn in file_list:
-        nc = NetCDFhandler(fn,mode='r')
-        lastID= nc.read_a_variable('ID',-1)
-        n_times.append(nc.variable_info['time']['shape'][0])
-        nc.close()
-
-    total_time_steps= sum(n_times)
-    first_time_step= np.cumsum(np.asarray([0]+n_times))
-    result =dict()
-
-    for n_file, fn in enumerate(file_list):
-        d1 = read_tracks_file(fn, var_list=var_list)
-        ID = d1['ID']
-        sel = np.flatnonzero(ID>=0)
-        for name in d1['variables'].keys():
-
-            v = d1['variables'][name]
-            if name not in result:
-                # make space for all files in results, add empty variables
-                dims = deepcopy(v['sizes'])
-                if 'time_dim' in dims: dims['time_dim'] = total_time_steps
-                if 'particle_dim' in dims :  dims['particle_dim' ] = lastID + 1
-                s =[ m for m in dims.values()]
-                result[name] = data=np.full(s, v['attrs']['_FillValue'], dtype=v['dtype'])
-
-            r = [int(first_time_step[n_file]),int(first_time_step[n_file+1])]
-            # insert file data into matrix
-            if 'particle_dim' in v['dims'] and 'time_dim' in v['dims']:
-                result[name][r[0]:r[1], ID[sel],...] = v['data'][:,sel,...]
-
-            elif 'particle_dim' in v['dims']:
-                result[name][ID[sel], ...] = v['data'][ sel, ...]
-
-            elif 'time_dim' in v['dims']:
-                result[name][r[0]:r[1], ...] = v['data']
-
-
-
-
+    if is_compact:
+        result= read_compact_tracks_file.read_comp_tracks_file(
+                        file_list, var_list=var_list,
+                        fraction_to_read=fraction_to_read)
+    else:
+        result = read_rectangular_tracks_file.merge_rect_track_files(
+                        file_list,  var_list=var_list,
+                        fraction_to_read=fraction_to_read)
     return result
 
 def read_stats_file(file_name,nt=None):
@@ -144,18 +100,6 @@ def read_stats_file(file_name,nt=None):
     nc.close()
     return d
 
-def unpack_polygon_list(tag,d):
-    # make polygon list from variables starting with d
-    out = []
-    for key in d.keys():
-        if key.startswith(tag):
-            a = d['variable_attributes'][key]
-            out.append(dict(points=d[key],name=a['polygon_name'],
-                            user_polygonID=a['user_polygonID'],
-                            instanceID = a['instanceID'] ))
-    d['polygon_list'] = out
-    d={key: item for key, item in d.items() if not key.startswith(tag) }
-    return d
 def read_LCS(file_name):
     # read stats files
 
@@ -252,7 +196,6 @@ def dev_read_event_file(file_name):
     nc = NetCDFhandler(file_name, 'r')
     nc.close()
 
-
 def read_release_groups_info(file_name):
     nc = NetCDFhandler(file_name,mode='r')
     d= dict()
@@ -274,13 +217,18 @@ def read_release_groups_info(file_name):
     nc.close()
     return d
 
-def _read_old_compact_format(file_name_or_list,file_dir=None, var_list=None, fraction_to_read=None):
-    from  oceantracker.read_output.python.deprecated.deprecated_read_ncdf_output_files_compact import read_compact_particle_tracks_file
-    result = read_compact_particle_tracks_file(file_name_or_list,file_dir=file_dir,
-                                               var_list=var_list,
-                                               fraction_to_read=fraction_to_read)
-    return result
-
+def unpack_polygon_list(tag,d):
+    # make polygon list from variables starting with d
+    out = []
+    for key in d.keys():
+        if key.startswith(tag):
+            a = d['variable_attributes'][key]
+            out.append(dict(points=d[key],name=a['polygon_name'],
+                            user_polygonID=a['user_polygonID'],
+                            instanceID = a['instanceID'] ))
+    d['polygon_list'] = out
+    d={key: item for key, item in d.items() if not key.startswith(tag) }
+    return d
 
 def read_particle_tracks_file(file_name_or_list,file_dir=None, var_list=None, file_number=None, fraction_to_read=None):
     print('Error >>>> reading tracks file, obsolete code ')

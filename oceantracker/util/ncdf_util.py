@@ -3,7 +3,7 @@ from oceantracker.util import numpy_util
 
 import numpy as np
 from os import path
-
+from copy import  deepcopy
 class NetCDFhandler(object):
     # wrapper for single necdf cdf file, to do common operations
     # allows for only one unlimited dimension so far
@@ -51,8 +51,12 @@ class NetCDFhandler(object):
                           attributes=None,  chunksizes=None, compression_level=0):
         # add and write a variable of given nane and dim name list
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
-
+        attributes = deepcopy(attributes)
         dtype = np.dtype(dtype) # convert string dtypes
+        if attributes is not None and '_FillValue' in attributes:
+            if fill_value is None: fill_value =attributes['_FillValue']
+            del attributes['_FillValue']
+
         if fill_value is None:  fill_value = numpy_util.smallest_value(dtype)
 
         v = self.file_handle.createVariable(name, dtype, tuple(dimList), chunksizes=chunksizes, zlib=(compression_level > 0),
@@ -94,9 +98,9 @@ class NetCDFhandler(object):
         return output
 
     def write_a_new_variable(self, name, data, dimList, description=None,
-                             attributes={},dtype=None, chunksizes=None,units=None,
+                             attributes={}, dtype=None, chunksizes=None, units=None,
                              compression_level=0,
-                             missing_value= None):
+                             fill_value= None):
         # write a whole variable and add dimensions if required
         if type(dimList) != list and type(dimList) != tuple :dimList =[dimList]
 
@@ -109,9 +113,9 @@ class NetCDFhandler(object):
 
         if dtype is None: dtype = data.dtype  # preserve type unless explicitly changed
 
-        v = self.create_a_variable(name, dimList,description=description,
-                    attributes= attributes,dtype=dtype, chunksizes= chunksizes,
-                    units= units,  compression_level=compression_level, fill_value=missing_value)
+        v = self.create_a_variable(name, dimList, description=description,
+                                   attributes= attributes, dtype=dtype, chunksizes= chunksizes,
+                                   units= units, compression_level=compression_level, fill_value=fill_value)
 
         # check dims match as below write does not respect shape
         for n,dn in enumerate(dimList):
@@ -187,24 +191,24 @@ class NetCDFhandler(object):
         return value
 
     def copy_global_attributes(self,nc_new):
-        for name in self.global_attr().keys():
+        for name in self.attrs.keys():
             nc_new.write_global_attribute(name, self.global_attr(name))
 
-    def copy_variable(self,name, nc_new, compression_level=0,float32asInt16=False):
+    def copy_variable(self,name, nc_new, compression_level=0):
         v = self.file_handle[name]
 
         #write_a_new_variable(self, name, X, dimList, description=None, attributes=None, dtype=None, chunksizes=None, compression_level=0):
         attributes = self.all_var_attr(name)
         if '_FillValue' in attributes:
-            missing_value=attributes['_FillValue' ]
+            fill_value=attributes['_FillValue' ]
             del attributes['_FillValue']
         else:
-            missing_value = None
+            fill_value = None
         nc_new.write_a_new_variable(name,v[:], v.dimensions,
-                                    missing_value=missing_value,
+                                    fill_value=fill_value,
                                     attributes=attributes,
                                     compression_level=compression_level,
-                                    float32asInt16=float32asInt16)
+                                    )
         pass
 
     def write_packed_1Darrays(self, name, array_list, description=None, attributes=None, dtype=None, chunksizes=None,

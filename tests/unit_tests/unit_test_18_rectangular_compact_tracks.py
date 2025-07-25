@@ -17,7 +17,7 @@ def main(args):
     ot.add_class('reader', **hm['reader'])
 
     # add a point release
-    pulse_size = 2000
+    pulse_size = 1000
     ot.add_class('release_groups',**dict(test_definitions.rg_basic,
                                          max_age=6*3600,
                                          pulse_size=pulse_size, release_interval=1800 ))
@@ -27,7 +27,7 @@ def main(args):
 
     ot.add_class('tracks_writer',update_interval=1800,
                  class_name= 'CompactTracksWriter' if args.reference_case else 'RectangularTracksWriter',
-                 time_steps_per_per_file=None if args.reference_case else  10)
+                 time_steps_per_per_file= 10)
 
     ot.add_class('particle_properties', **test_definitions.pp1)  # add a new property to particle_properties role
 
