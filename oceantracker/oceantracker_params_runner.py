@@ -233,6 +233,7 @@ class OceanTrackerParamsRunner(object):
 
         # -----------done -------------------------------
         si.output_files['release_groups'] = output_util.write_release_group_netcdf()  # write release groups
+        ml.hori_line('Closing all classes')
         for i in si._all_class_instance_pointers_iterator(): i.close()  # close all instances, eg their files if not close etc
 
         # check for non-releases

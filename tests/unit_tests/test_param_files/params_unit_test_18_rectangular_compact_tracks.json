@@ -11,8 +11,7 @@
     "min_dead_to_remove": 500,
     "reader": {
         "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
-        "file_mask": "demo_hindcast_schisim3D*.nc",
-        "convert": true
+        "file_mask": "demo_hindcast_schisim3D*.nc"
     },
     "release_groups": [
         {

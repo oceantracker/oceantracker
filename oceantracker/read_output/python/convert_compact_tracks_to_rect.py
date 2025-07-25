@@ -54,6 +54,7 @@ def _write_time_depend_part_prop(name, nc1, nc2, particleID, ID, time_step_range
         pID = particleID[sel]  # ID's at this time step
         c = nc1.read_a_variable(name, sel)
         offsets = pID - ID[0]
+        buffer[:] = vi['attrs']['_FillValue']
         buffer[offsets, ...] = c[:]
 
         # reduce file size  by taking advantage of chunking to only write good values

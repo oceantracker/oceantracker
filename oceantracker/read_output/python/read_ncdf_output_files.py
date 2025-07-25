@@ -14,10 +14,10 @@ def read_tracks_file(file_name, var_list=None, fraction_to_read=None):
     is_compact  = nc.is_dim('time_particle_dim')
     nc.close()
     if is_compact:
+        print(f'Reading compact track file {path.basename(file_name)}')
         data= read_compact_tracks_file.read_comp_tracks_file(
                             file_name, var_list=var_list,
                             fraction_to_read=fraction_to_read)
-
     else:
         data = read_rectangular_tracks_file.read_rect_tracks_file(
                             file_name, var_list=var_list,
@@ -37,10 +37,12 @@ def merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None):
     is_compact = nc.is_dim('time_particle_dim')
     nc.close()
     if is_compact:
+        print('Merging compact track files')
         result= read_compact_tracks_file.read_comp_tracks_file(
                         file_list, var_list=var_list,
                         fraction_to_read=fraction_to_read)
     else:
+        print('Merging rectangular track files')
         result = read_rectangular_tracks_file.merge_rect_track_files(
                         file_list,  var_list=var_list,
                         fraction_to_read=fraction_to_read)

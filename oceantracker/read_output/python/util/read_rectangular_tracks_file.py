@@ -1,8 +1,10 @@
 from oceantracker.util.ncdf_util import NetCDFhandler
 import numpy as np
 from copy import  deepcopy
+from os import path
 def read_rect_tracks_file(file_name, var_list=None, fraction_to_read=None):
     # read rectangluar  format
+    print(f'\t Reading rectangular track file "{path.basename(file_name)}"')
     nc = NetCDFhandler(file_name, mode='r')
     if var_list is None:
         var_list = list(nc.variable_info.keys())
@@ -45,7 +47,7 @@ def merge_rect_track_files(file_list,  var_list=None,fraction_to_read=None):
                 if 'time_dim' in dims: dims['time_dim'] = total_time_steps
                 if 'particle_dim' in dims:  dims['particle_dim'] = lastID + 1
                 s = [m for m in dims.values()]
-                result[name] = data = np.full(s, v['attrs']['_FillValue'], dtype=v['dtype'])
+                result[name] = np.full(s, v['attrs']['_FillValue'], dtype=v['dtype'])
 
             r = [int(first_time_step[n_file]), int(first_time_step[n_file + 1])]
             # insert file data into matrix

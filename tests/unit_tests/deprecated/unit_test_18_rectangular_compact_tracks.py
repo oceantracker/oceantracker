@@ -13,7 +13,7 @@ def main(args):
                 min_dead_to_remove=500,
         )
     hm = test_definitions.hydro_model['demoSchism3D']
-    ot.add_class('reader', **hm['reader'], convert =  not args.reference_case)
+    ot.add_class('reader', **hm['reader'])
 
     # add a point release
     pulse_size = 1000
