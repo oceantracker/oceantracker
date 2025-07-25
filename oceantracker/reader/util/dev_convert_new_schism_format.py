@@ -32,7 +32,7 @@ def convert(input_dir, output_dir, mask= 'out*.nc'):
         # copy grid and 2D variables and attributes
         nc_out = NetCDFhandler(f)
 
-        print('outvars',nc_out.all_var_names())
+        print('outvars', nc_out.var_names())
 
         for l in ['time',
                  'minimum_depth',
@@ -58,7 +58,7 @@ def convert(input_dir, output_dir, mask= 'out*.nc'):
                 v1 = nc_out.file_handle[vars[0]]
                 v2 = nc_out.file_handle[vars[1]]
                 data = np.stack((v1,v2),axis=2)
-                single_file.write_a_new_variable(new_var, data, nc_out.all_var_dims(vars[0]) + ['two'], attributes=nc_out.all_var_attr(vars[0]))
+                single_file.write_variable(new_var, data, nc_out.var_dims(vars[0]) + ['two'], attributes=nc_out.var_attrs(vars[0]))
 
         # 3d 2D vector water velocity
         fn1= path.join(file_dir,'horizontalVelX_'+ file_ending)
@@ -69,11 +69,11 @@ def convert(input_dir, output_dir, mask= 'out*.nc'):
                 nc = NetCDFhandler(fn, mode='r')
                 v_name= 'horizontalVel' +l
                 v.append(nc.file_handle[v_name][:])
-                a = nc.all_var_attr(v_name)
-                d = nc.all_var_dims(v_name)
+                a = nc.var_attrs(v_name)
+                d = nc.var_dims(v_name)
                 nc.close()
             hvel = np.stack(v,axis=3)
-            single_file.write_a_new_variable('hvel', hvel, d + ['two'], attributes=a)
+            single_file.write_variable('hvel', hvel, d + ['two'], attributes=a)
 
         # 3D scalar variables
         for new_var, var in dict(salt='salinity',
@@ -89,8 +89,8 @@ def convert(input_dir, output_dir, mask= 'out*.nc'):
             fn= path.join(file_dir,var + '_' + file_ending)
             if path.isfile(fn):
                 nc = NetCDFhandler( fn, mode='r')
-                attr= nc.all_var_attr(var)
-                single_file.write_a_new_variable(new_var, nc.file_handle[var], nc.all_var_dims(var), attributes=attr)
+                attr= nc.var_attrs(var)
+                single_file.write_variable(new_var, nc.file_handle[var], nc.var_dims(var), attributes=attr)
                 nc.close()
             pass
 
@@ -99,7 +99,7 @@ def convert(input_dir, output_dir, mask= 'out*.nc'):
 def copy_variable(nc_old,nc_new, old_var,new_var):
 
         # make sure dims are in new file
-        attrib = nc_old.all_var_attr(old_var)
+        attrib = nc_old.var_attrs(old_var)
 
         if '_FillValue' in attrib :
             fv= attrib['_FillValue']
@@ -108,7 +108,7 @@ def copy_variable(nc_old,nc_new, old_var,new_var):
             fv = None
 
         #print(old_var,new_var,attrib)
-        nc_new.write_a_new_variable(new_var,nc_old.file_handle[old_var], nc_old.all_var_dims(old_var), attributes=attrib, fill_value = fv )
+        nc_new.write_variable(new_var, nc_old.file_handle[old_var], nc_old.var_dims(old_var), attributes=attrib, fill_value = fv)
 
 
 if __name__ == "__main__":

@@ -140,22 +140,22 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
 
             # all stats are separated into  release groups
-            self.nc.add_dimension('release_group_dim', len(si.class_roles.release_groups))
+            self.nc.create_dimension('release_group_dim', len(si.class_roles.release_groups))
         else:
             self.nc = None
         self.nWrites = 0
 
     def set_up_time_bins(self,nc):
         # stats time variables commute to all 	for progressive writing
-        nc.add_dimension('time_dim', None)  # unlimited time
-        nc.create_a_variable('time', ['time_dim'],  np.float64,
-                             units='seconds since 1970-01-01 00:00:00',
-                             description= 'time in seconds since 1970/01/01 00:00')
+        nc.create_dimension('time_dim', None)  # unlimited time
+        nc.create_variable('time', ['time_dim'], np.float64,
+                           units='seconds since 1970-01-01 00:00:00',
+                           description= 'time in seconds since 1970/01/01 00:00')
 
         # other output common to all types of stats
-        nc.create_a_variable('num_released_total', ['time_dim'], np.int32, description='total number released')
+        nc.create_variable('num_released_total', ['time_dim'], np.int32, description='total number released')
 
-        nc.create_a_variable('num_released',  ['time_dim', 'release_group_dim'], np.int32, description='number released so far from each release group')
+        nc.create_variable('num_released', ['time_dim', 'release_group_dim'], np.int32, description='number released so far from each release group')
 
     def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
@@ -340,9 +340,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         if self.params['write']:
             self.info_to_write_at_end()
-            nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['release_group_dim'], description='Total number released in each release group')
-            nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
-            nc.write_global_attribute('particle_status_values_counted', str(self.params['status_list']))
-            nc.write_global_attribute('backtracking', int(si.settings.backtracking))
+            nc.write_variable('number_released_each_release_group', np.asarray(num_released, dtype=np.int64), ['release_group_dim'], description='Total number released in each release group')
+            nc.create_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
+            nc.create_attribute('particle_status_values_counted', str(self.params['status_list']))
+            nc.create_attribute('backtracking', int(si.settings.backtracking))
             nc.close()
         self.nc = None  # parallel pool cant pickle nc

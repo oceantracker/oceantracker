@@ -38,7 +38,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         super().info_to_write_at_end()
         
         # Write z grid info
-        nc.write_a_new_variable('z', stats_grid['z'], ['release_group_dim', 'z_dim'], description='Mid point of vertical grid cell')
+        nc.write_variable('z', stats_grid['z'], ['release_group_dim', 'z_dim'], description='Mid point of vertical grid cell')
 
         # Calculate grid cell volume
         dx = np.diff(stats_grid['x_bin_edges'][0,:]).reshape(( 1, 1,-1))
@@ -47,8 +47,8 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         volume = dx * dy * dz
 
         # Write grid cell volume
-        nc.write_a_new_variable('grid_cell_volume', volume, ['z_dim', 'y_dim','x_dim'], 
-                                description='Volume of each 3D grid cell')
+        nc.write_variable('grid_cell_volume', volume, ['z_dim', 'y_dim', 'x_dim'],
+                          description='Volume of each 3D grid cell')
         
 
     def set_up_spatial_bins(self, nc):
@@ -79,7 +79,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         stats_grid['cell_volume'] = stats_grid['cell_area'] * dz
 
         if self.params['write']:
-            nc.add_dimension('z_dim', vsize)
+            nc.create_dimension('z_dim', vsize)
 
     def set_up_binned_variables(self, nc):
         if not self.params['write']: 
@@ -92,10 +92,10 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         dim_sizes = [None, len(si.class_roles.release_groups), 
                     stats_grid['z'].shape[1], stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
 
-        nc.create_a_variable('count', dim_names, np.int64, 
-                          description='counts of particles in 3D grid at given times, for each release group')
-        nc.create_a_variable('count_all_selected_particles', dim_names[:2], np.int64,
-                          description='counts of particles whether in grid or not')
+        nc.create_variable('count', dim_names, np.int64,
+                           description='counts of particles in 3D grid at given times, for each release group')
+        nc.create_variable('count_all_selected_particles', dim_names[:2], np.int64,
+                           description='counts of particles whether in grid or not')
 
         # Set up working count space
         self.count_time_slice = np.full(dim_sizes[1:], 0, np.int64)
@@ -104,7 +104,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         for p in self.params['particle_property_list']:
             if p in si.class_roles.particle_properties:
                 self.sum_binned_part_prop[p] = np.full(dim_sizes[1:], 0.)
-                nc.create_a_variable('sum_' + p, dim_names, np.float64,
+                nc.create_variable('sum_' + p, dim_names, np.float64,
                                    description='sum of particle property inside bin')
             else:
                 si.msg_logger.msg('Part Prop "' + p + '" not a particle property, ignored and no stats calculated',

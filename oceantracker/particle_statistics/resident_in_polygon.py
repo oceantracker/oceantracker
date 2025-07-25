@@ -82,9 +82,9 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
         dim_names = ('time_dim', 'pulse_dim')
         num_pulses= self.schedulers['count_scheduler'].info['number_scheduled_times']
-        nc.add_dimension('pulse_dim', dim_size=num_pulses)
-        nc.create_a_variable('count', dim_names, np.int64, description='counts of particles in each pulse of release group inside release polygon at given times')
-        nc.create_a_variable('count_all_selected_particles', ['time_dim', 'pulse_dim'], np.int64, description='counts of particles in each, whether inside polygon or not at given times')
+        nc.create_dimension('pulse_dim', dim_size=num_pulses)
+        nc.create_variable('count', dim_names, np.int64, description='counts of particles in each pulse of release group inside release polygon at given times')
+        nc.create_variable('count_all_selected_particles', ['time_dim', 'pulse_dim'], np.int64, description='counts of particles in each, whether inside polygon or not at given times')
         # set up space for requested particle properties
         # working count space
         self.count_time_slice = np.full((num_pulses,), 0, np.int64)
@@ -93,7 +93,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         for p_name in self.params['particle_property_list']:
             if p_name in si.class_roles.particle_properties:
                 self.sum_binned_part_prop[p_name] = np.full(num_pulses, 0.)  # zero for  summing
-                nc.create_a_variable('sum_' + p_name, dim_names, np.float64, description= 'sum of particle property inside polygon  ' + p_name)
+                nc.create_variable('sum_' + p_name, dim_names, np.float64, description='sum of particle property inside polygon  ' + p_name)
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning= True)
 
@@ -121,7 +121,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
     def info_to_write_at_end(self):
         nc = self.nc
-        nc.write_a_new_variable('release_times',self.schedulers['count_scheduler'].scheduled_times,['pulse_dim'], dtype=np.float64,attributes={'times_pulses_released': ' times in seconds since 1970'})
+        nc.write_variable('release_times', self.schedulers['count_scheduler'].scheduled_times, ['pulse_dim'], dtype=np.float64, attributes={'times_pulses_released': ' times in seconds since 1970'})
 
     @staticmethod
     @njitOT

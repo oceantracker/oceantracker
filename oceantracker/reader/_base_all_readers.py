@@ -685,38 +685,38 @@ class _BaseReader(ParameterBaseClass):
         si.output_files['grid'].append(f_name)
 
         nc = ncdf_util.NetCDFhandler(path.join(si.output_files['run_output_dir'], f_name), 'w')
-        nc.write_global_attribute('index_note', ' all indices are zero based')
-        nc.write_global_attribute('created', str(datetime.now().isoformat()))
-        nc.write_global_attribute('geographic_coords_used', 1 if self.info['geographic_coords'] else 0)
+        nc.create_attribute('index_note', ' all indices are zero based')
+        nc.create_attribute('created', str(datetime.now().isoformat()))
+        nc.create_attribute('geographic_coords_used', 1 if self.info['geographic_coords'] else 0)
 
         # ad node types to grid file attributes
         for nt, val in self.si.node_types.asdict().items():
-            nc.write_global_attribute(f'node_typeID_{nt}', val)
+            nc.create_attribute(f'node_typeID_{nt}', val)
 
 
-        nc.write_a_new_variable('x', grid['x'], ('node_dim', 'vector2D'))
-        nc.write_a_new_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
-        nc.write_a_new_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
-        nc.write_a_new_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'),description= 'number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(si.cell_search_status_flags))
-        nc.write_a_new_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
-        nc.write_a_new_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
-        nc.write_a_new_variable('node_to_tri_map', grid['node_to_tri_map'], ('node_dim','max_nodes_per_tri'))
-        nc.write_a_new_variable('tri_per_node', grid['tri_per_node'], ('node_dim',))
-        nc.write_a_new_variable('bc_transform', grid['bc_transform'], ('triangle_dim','bc_transform_rows','bc_transform_cols'))
+        nc.write_variable('x', grid['x'], ('node_dim', 'vector2D'))
+        nc.write_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
+        nc.write_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
+        nc.write_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'), description='number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(si.cell_search_status_flags))
+        nc.write_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
+        nc.write_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
+        nc.write_variable('node_to_tri_map', grid['node_to_tri_map'], ('node_dim', 'max_nodes_per_tri'))
+        nc.write_variable('tri_per_node', grid['tri_per_node'], ('node_dim',))
+        nc.write_variable('bc_transform', grid['bc_transform'], ('triangle_dim', 'bc_transform_rows', 'bc_transform_cols'))
 
         if 'water_depth' in self.fields:
-            nc.write_a_new_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))
+            nc.write_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))
 
         domain_nodes= grid['grid_outline']['domain']['nodes']
-        nc.write_a_new_variable('domain_outline_nodes', domain_nodes, ('domain_outline_nodes_dim',),
-                                description='node numbers in order around outer model domain')
+        nc.write_variable('domain_outline_nodes', domain_nodes, ('domain_outline_nodes_dim',),
+                          description='node numbers in order around outer model domain')
         domain_xy=  grid['x'][domain_nodes,:]
-        nc.write_a_new_variable('domain_outline_x', domain_xy, ('domain_outline_nodes_dim','vector2D'),
-                                description='coords of domain  a columns (x,y)', units='m')
+        nc.write_variable('domain_outline_x', domain_xy, ('domain_outline_nodes_dim', 'vector2D'),
+                          description='coords of domain  a columns (x,y)', units='m')
 
-        nc.write_a_new_variable('domain_masking_polygon', grid['grid_outline']['domain_masking_polygon'],
-                                ('domain_mask_dim', 'vector2D'),
-                                description='coords of fillable mask of area outside the domain as columns (x,y)', units='m')
+        nc.write_variable('domain_masking_polygon', grid['grid_outline']['domain_masking_polygon'],
+                          ('domain_mask_dim', 'vector2D'),
+                          description='coords of fillable mask of area outside the domain as columns (x,y)', units='m')
 
         if len( grid['grid_outline']['islands']) > 0:
             # write any islands

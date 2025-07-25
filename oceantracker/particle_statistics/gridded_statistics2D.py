@@ -126,13 +126,13 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             stats_grid['cell_area'][n_grid, :, :] =(x[:-1, 1:]-x[:-1, :-1])*(y[1:,:-1]-y[:-1:,:-1])
 
         if self.params['write']:
-            nc.add_dimension('x_dim', stats_grid['x'].shape[1])
-            nc.add_dimension('y_dim', stats_grid['y'].shape[1])
-            nc.write_a_new_variable('x', stats_grid['x'], ['release_groups_dim', 'x_dim'], description='Mid point of grid cell', units='m or deg')
-            nc.write_a_new_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'], description='Mid point of grid cell')
-            nc.write_a_new_variable('x_grid', stats_grid['x_grid'], ['release_groups_dim', 'y_dim', 'x_dim'], description='x for mid point of grid cell, full grid')
-            nc.write_a_new_variable('y_grid', stats_grid['y_grid'], ['release_groups_dim', 'y_dim', 'x_dim'], description='y for mid point of grid cell, full grid')
-            nc.write_a_new_variable('cell_area', stats_grid['cell_area'], ['release_groups_dim','y_dim', 'x_dim'], description='Horizontal area of each cell', units='m^2')
+            nc.create_dimension('x_dim', stats_grid['x'].shape[1])
+            nc.create_dimension('y_dim', stats_grid['y'].shape[1])
+            nc.write_variable('x', stats_grid['x'], ['release_groups_dim', 'x_dim'], description='Mid point of grid cell', units='m or deg')
+            nc.write_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'], description='Mid point of grid cell')
+            nc.write_variable('x_grid', stats_grid['x_grid'], ['release_groups_dim', 'y_dim', 'x_dim'], description='x for mid point of grid cell, full grid')
+            nc.write_variable('y_grid', stats_grid['y_grid'], ['release_groups_dim', 'y_dim', 'x_dim'], description='y for mid point of grid cell, full grid')
+            nc.write_variable('cell_area', stats_grid['cell_area'], ['release_groups_dim', 'y_dim', 'x_dim'], description='Horizontal area of each cell', units='m^2')
 
     def set_up_binned_variables(self,nc):
         if not self.params['write']: return
@@ -141,12 +141,12 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         dim_names= ['time_dim', 'release_group_dim', 'y_dim', 'x_dim']
         dim_sizes =[None, len(si.class_roles.release_groups), stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
-        nc.create_a_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
-                             description= 'counts of particles in grid at given times, for each release group')
-        nc.create_a_variable('count_all_selected_particles', dim_names[:2], np.int64, compression_level=si.settings.NCDF_compression_level,
-                             description='counts of particles selected to be counted, eg by depth range etc wherethe inside grid or not')
-        nc.create_a_variable('count_all_alive_particles', dim_names[:2], np.int64, compression_level=si.settings.NCDF_compression_level,
-                             description='counts of all alive particles everywhere')
+        nc.create_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
+                           description= 'counts of particles in grid at given times, for each release group')
+        nc.create_variable('count_all_selected_particles', dim_names[:2], np.int64, compression_level=si.settings.NCDF_compression_level,
+                           description='counts of particles selected to be counted, eg by depth range etc wherethe inside grid or not')
+        nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64, compression_level=si.settings.NCDF_compression_level,
+                           description='counts of all alive particles everywhere')
 
 
         # set up space for requested particle properties
@@ -158,7 +158,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         for p in self.params['particle_property_list']:
             if p in si.class_roles.particle_properties:
                 self.sum_binned_part_prop[p] = np.full(dim_sizes[1:], 0.)  # zero for  summing
-                nc.create_a_variable( 'sum_' + p, dim_names, np.float64, description= 'sum of particle property inside bin' )
+                nc.create_variable('sum_' + p, dim_names, np.float64, description='sum of particle property inside bin')
             else:
                 si.msg_logger.msg('Part Prop "' + p + '" not a particle property, ignored and no stats calculated',warning=True)
 
@@ -357,17 +357,17 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
         nc = self.nc
         stats_grid = self.grid
 
-        nc.write_a_new_variable('count', self.count_age_bins, ['age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim'],
-                                description= 'counts of particles in grid at given ages, for each release group')
-        nc.write_a_new_variable('count_all_selected_particles', self.count_all_particles, ['age_bin_dim', 'release_group_dim'],
-                                description='counts of all particles selected to be counted in age bands for each release group ( eg selected by z range)')
-        nc.write_a_new_variable('count_all_alive_particles', self.count_all_alive_particles, ['age_bin_dim', 'release_group_dim'],
-                                description='counts of all particles alive from each release group, into age bins')
-        nc.write_a_new_variable('age_bins', stats_grid['age_bins'], ['age_bin_dim'], description= 'center of age bin, ie age axis of heat map in seconds')
-        nc.write_a_new_variable('age_bin_edges', stats_grid['age_bin_edges'], ['age_bin_edges'],description='center of age bin, ie age axis of heat map in seconds')
+        nc.write_variable('count', self.count_age_bins, ['age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim'],
+                          description= 'counts of particles in grid at given ages, for each release group')
+        nc.write_variable('count_all_selected_particles', self.count_all_particles, ['age_bin_dim', 'release_group_dim'],
+                          description='counts of all particles selected to be counted in age bands for each release group ( eg selected by z range)')
+        nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, ['age_bin_dim', 'release_group_dim'],
+                          description='counts of all particles alive from each release group, into age bins')
+        nc.write_variable('age_bins', stats_grid['age_bins'], ['age_bin_dim'], description='center of age bin, ie age axis of heat map in seconds')
+        nc.write_variable('age_bin_edges', stats_grid['age_bin_edges'], ['age_bin_edges'], description='center of age bin, ie age axis of heat map in seconds')
         # particle property sums
         dims = ('age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim')
         for key, item in self.sum_binned_part_prop.items():
             # need to write final sums of propetries  after all age counts done across all times
-            nc.write_a_new_variable('sum_' + key, item[:], dims, description= 'sum of particle property inside bin  ' + key)
+            nc.write_variable('sum_' + key, item[:], dims, description='sum of particle property inside bin  ' + key)
 

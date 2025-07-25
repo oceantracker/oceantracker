@@ -205,48 +205,48 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
         self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
         nc = self. nc
         r, c = params['grid_size']
-        nc.add_dimension('time_dim', None) # open time dim
-        nc.add_dimension('lag_dim', params['lags'].size)
-        nc.add_dimension('release_grid_rows', r+2)
-        nc.add_dimension('release_grid_cols', c+2)
-        nc.add_dimension('grid_dim',  params['grid_center'].shape[0])
-        nc.add_dimension('vector2D', 2)
-        nc.add_dimension('rows', r)
-        nc.add_dimension('cols', c)
+        nc.create_dimension('time_dim', None) # open time dim
+        nc.create_dimension('lag_dim', params['lags'].size)
+        nc.create_dimension('release_grid_rows', r + 2)
+        nc.create_dimension('release_grid_cols', c + 2)
+        nc.create_dimension('grid_dim', params['grid_center'].shape[0])
+        nc.create_dimension('vector2D', 2)
+        nc.create_dimension('rows', r)
+        nc.create_dimension('cols', c)
 
         # write release group
-        nc.write_a_new_variable('time', self.time,'time_dim', dtype=np.float64,
-                                description='Time, or start time for calculation of Finite-Time Lyapunov exponents (FTLEs) type LCS',
-                                attributes=dict(units='seconds since 1/1/1970'))
-        nc.write_a_new_variable('lags', params['lags'], 'lag_dim', dtype=np.float64,
-                                description='Lags between release and calculation of FTLEs  type LCS',
-                                attributes=dict(units='seconds'))
+        nc.write_variable('time', self.time, 'time_dim', dtype=np.float64,
+                          description='Time, or start time for calculation of Finite-Time Lyapunov exponents (FTLEs) type LCS',
+                          attributes=dict(units='seconds since 1/1/1970'))
+        nc.write_variable('lags', params['lags'], 'lag_dim', dtype=np.float64,
+                          description='Lags between release and calculation of FTLEs  type LCS',
+                          attributes=dict(units='seconds'))
 
-        nc.write_a_new_variable('x_LSC_grid', self.x_LSC_grid,
-                                ['grid_dim', 'rows', 'cols','vector2D'],
-                             description='x,y locations of calculationed LCS',
-                             attributes=dict(units='meters or longitude deg.'))
+        nc.write_variable('x_LSC_grid', self.x_LSC_grid,
+                          ['grid_dim', 'rows', 'cols','vector2D'],
+                          description='x,y locations of calculationed LCS',
+                          attributes=dict(units='meters or longitude deg.'))
 
 
-        nc.create_a_variable('FTLE', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols'],
-                             np.float32, description=' Largest Eigen value of 2D strain matrix', fill_value=np.nan,compression_level=si.settings.NCDF_compression_level,
-                             attributes=dict(units='dimensionless'))
-        nc.create_a_variable('eigen_values', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols','vector2D'],compression_level=si.settings.NCDF_compression_level,
-                             dtype= np.float32, description='Eigen values of 2D strain matrix, largest first', fill_value=np.nan,
-                             attributes=dict(units='dimensionless'))
-        nc.create_a_variable('eigen_vectors', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols', 'vector2D', 'vector2D'],compression_level=si.settings.NCDF_compression_level,
-                             dtype=np.float32, description='Columns are Eigen vectors of 2D strain matrix, vector for largest eigen value in the first column t', fill_value=np.nan,
-                             attributes=dict(units='dimensionless'))
+        nc.create_variable('FTLE', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols'],
+                           np.float32, description=' Largest Eigen value of 2D strain matrix', fill_value=np.nan, compression_level=si.settings.NCDF_compression_level,
+                           attributes=dict(units='dimensionless'))
+        nc.create_variable('eigen_values', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols', 'vector2D'], compression_level=si.settings.NCDF_compression_level,
+                           dtype= np.float32, description='Eigen values of 2D strain matrix, largest first', fill_value=np.nan,
+                           attributes=dict(units='dimensionless'))
+        nc.create_variable('eigen_vectors', ['time_dim', 'grid_dim', 'lag_dim', 'rows', 'cols', 'vector2D', 'vector2D'], compression_level=si.settings.NCDF_compression_level,
+                           dtype=np.float32, description='Columns are Eigen vectors of 2D strain matrix, vector for largest eigen value in the first column t', fill_value=np.nan,
+                           attributes=dict(units='dimensionless'))
 
         # optional output
         if params['write_intermediate_results']:
-            nc.write_a_new_variable('x_release_grid', self.x_release_grids,
-                                    ['grid_dim', 'release_grid_rows', 'release_grid_cols', 'vector2D'],
-                                    description='x,y locations of grid release',
-                                    attributes=dict(units='meters or longitude deg.'))
-            nc.create_a_variable('x_at_lag',['time_dim','grid_dim', 'lag_dim','release_grid_rows','release_grid_cols','vector2D'],
-                             np.float32, description='x,y locations of particles at given lags', fill_value=np.nan,
-                             attributes=dict(units='meters or (lon, lat)  deg.') )
+            nc.write_variable('x_release_grid', self.x_release_grids,
+                              ['grid_dim', 'release_grid_rows', 'release_grid_cols', 'vector2D'],
+                              description='x,y locations of grid release',
+                              attributes=dict(units='meters or longitude deg.'))
+            nc.create_variable('x_at_lag', ['time_dim', 'grid_dim', 'lag_dim', 'release_grid_rows', 'release_grid_cols', 'vector2D'],
+                               np.float32, description='x,y locations of particles at given lags', fill_value=np.nan,
+                               attributes=dict(units='meters or (lon, lat)  deg.'))
 
     @staticmethod
     @njitOT

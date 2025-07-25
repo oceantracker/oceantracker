@@ -256,10 +256,10 @@ if __name__ == "__main__":
     from time import perf_counter
     fn = 'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2008\\schism_marl20080101_00z_3D.nc'
     nc = ncdf_util.NetCDFhandler(fn)
-    x= nc.read_a_variable('SCHISM_hgrid_node_x')
-    y = nc.read_a_variable('SCHISM_hgrid_node_y')
+    x= nc.read_variable('SCHISM_hgrid_node_x')
+    y = nc.read_variable('SCHISM_hgrid_node_y')
     xy = np.stack((x, y), axis=1)
-    tri = nc.read_a_variable('SCHISM_hgrid_face_nodes') -1
+    tri = nc.read_variable('SCHISM_hgrid_face_nodes') - 1
 
     msg = messgage_logger.MessageLogger('tri util timing')
 

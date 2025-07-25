@@ -37,21 +37,21 @@ class RectangularTracksWriter(_BaseWriter):
     def setup_file_vars(self, nc):
         info= self.info
         params = self.params
-        nc.add_dimension(si.dim_names.time, None)
-        nc.add_dimension(si.dim_names.vector2D, 2)
-        nc.add_dimension(si.dim_names.vector3D, 3)
-        nc.add_dimension(si.dim_names.particle, None)
+        nc.create_dimension(si.dim_names.time, None)
+        nc.create_dimension(si.dim_names.vector2D, 2)
+        nc.create_dimension(si.dim_names.vector3D, 3)
+        nc.create_dimension(si.dim_names.particle, None)
 
-        nc.create_a_variable('alive_particles',si.dim_names.time,dtype=np.int32,
-                             chunksizes=[params['particle_chunk']],
-                             description='Number of particles written each time step')
+        nc.create_variable('alive_particles', si.dim_names.time, dtype=np.int32,
+                           chunksizes=[params['particle_chunk']],
+                           description='Number of particles written each time step')
 
         vi = info['variables_to_write']
         for name, i in si.class_roles.time_varying_info.items():
             if not i.params['write']: continue
-            nc.create_a_variable(name,si.dim_names.time,units=i.params['units'],dtype=i.params['dtype'],
-                                  chunksizes= [params['time_chunk']],
-                                  description=i.params['description'])
+            nc.create_variable(name, si.dim_names.time, units=i.params['units'], dtype=i.params['dtype'],
+                               chunksizes= [params['time_chunk']],
+                               description=i.params['description'])
             vi['time_varying_info'].append(name)
 
         for name, i in si.class_roles.particle_properties.items():
@@ -73,20 +73,20 @@ class RectangularTracksWriter(_BaseWriter):
                 dim.append(si.dim_names.vector3D)
                 chunking.append(3)
             if i.params['prop_dim3'] > 1:
-                dim.append(nc.add_dimension(f'part_prop_{name}_dim3', i.params['prop_dim3']))
+                dim.append(nc.create_dimension(f'part_prop_{name}_dim3', i.params['prop_dim3']))
                 chunking.append(i.params['prop_dim3'])
 
-            nc.create_a_variable(name, dim, units=i.params['units'],dtype=i.params['dtype'],
-                    chunksizes=chunking,
-                    description=i.params['description'],
-                    compression_level=si.settings.NCDF_compression_level)
+            nc.create_variable(name, dim, units=i.params['units'], dtype=i.params['dtype'],
+                               chunksizes=chunking,
+                               description=i.params['description'],
+                               compression_level=si.settings.NCDF_compression_level)
 
         if si.settings['write_dry_cell_flag']:
             grid = si.core_class_roles.field_group_manager.reader.grid
-            nc.add_dimension(si.dim_names.triangle, grid['triangles'].shape[0])
-            nc.create_a_variable('dry_cell_index', [si.dim_names.time,si.dim_names.triangle],dtype=np.uint8,
-                    chunksizes=[params['time_chunk'],grid['triangles'].shape[0]],
-                    description= 'Time series of grid dry index 0-255, > 128 is dry',compression_level=si.settings.NCDF_compression_level,)
+            nc.create_dimension(si.dim_names.triangle, grid['triangles'].shape[0])
+            nc.create_variable('dry_cell_index', [si.dim_names.time, si.dim_names.triangle], dtype=np.uint8,
+                               chunksizes=[params['time_chunk'],grid['triangles'].shape[0]],
+                               description= 'Time series of grid dry index 0-255, > 128 is dry', compression_level=si.settings.NCDF_compression_level, )
             pass
 
     def pre_time_step_write_book_keeping(self):

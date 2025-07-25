@@ -61,14 +61,14 @@ t0= perf_counter()
 
 for fn in files:
     nc = NetCDFhandler(fn)
-    t = nc.read_a_variable(time_var).copy()
+    t = nc.read_variable(time_var).copy()
     nc.close()
 
 t1= perf_counter()
 nc= xr.open_dataset(files[0])
 for v in nc.variables:
     nc = NetCDFhandler(files[0])
-    data = nc.read_a_variable(v)
+    data = nc.read_variable(v)
     nc.close()
 
 print('NetCDFhandler',  t1-t0, perf_counter()-t1)

@@ -52,8 +52,8 @@ def merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None):
 def read_stats_file(file_name, nt=None):
     # read stats files
     nc = NetCDFhandler(file_name, mode='r')
-    d = dict( global_attributes = nc.global_attrs())  # read all  global attibutes
-    d['dimensions'] = nc.dims()
+    d = dict(global_attributes = nc.attrs())  # read all  global attibutes
+    d['dimensions'] = nc.dim_sizes()
     d['limits'] = {}
 
     data = nc.read_variables(sel=nt)
@@ -106,9 +106,9 @@ def read_LCS(file_name):
     # read stats files
 
     nc = NetCDFhandler(file_name, mode='r')
-    d = nc.read_variables(nc.all_var_names())
-    d.update(nc.global_attrs())
-    d['dimensions'] = nc.dims()
+    d = nc.read_variables(nc.var_names())
+    d.update(nc.attrs())
+    d['dimensions'] = nc.dim_sizes()
     nc.close()
     return d
 
@@ -117,11 +117,11 @@ def read_concentration_file(file_name):
     d={}
     nc = NetCDFhandler(file_name, 'r')
 
-    for var in  nc.all_var_names():
+    for var in  nc.var_names():
         if nc.is_var(var):
-            d[var]= nc.read_a_variable(var)
+            d[var]= nc.read_variable(var)
         else:
-            print('Warning: cannot find requested variable "' + var + '" in concentrations.nc output file, variables are ' + str(nc.all_var_names()) )
+            print('Warning: cannot find requested variable "' + var + '" in concentrations.nc output file, variables are ' + str(nc.var_names()))
 
     nc.close()
 
@@ -131,25 +131,25 @@ def read_residence_file(file_name, var_list=[]):
     # read stats files
     var_list =  var_list  # make sure count is first, do to means
     nc = NetCDFhandler(file_name, mode='r')
-    num_released = nc.global_attr('total_num_particles_released')
+    num_released = nc.attr('total_num_particles_released')
     d = {'total_num_particles_released': num_released,'limits' : {}}
 
-    d['release_times']= nc.read_a_variable('release_times')
-    d.update(nc.global_attrs())
+    d['release_times']= nc.read_variable('release_times')
+    d.update(nc.attrs())
 
 
     # read count first for mean value calc
     for v in ['count','count_all_particles','time']:
-        d[v]  = nc.read_a_variable(v)
+        d[v]  = nc.read_variable(v)
         d['limits'][v] = {'min': np.nanmin(d[v]), 'max': np.nanmax(d[v])}
         if v in var_list: var_list.remove(v)
 
     for var in set(var_list):
         if nc.is_var(var):
-            d[var]=  nc.read_a_variable(var)
+            d[var]=  nc.read_variable(var)
         elif nc.is_var('sum_'+ var) :
             # check if summed version is in file and calc mean
-            d['sum_'+ var] = nc.read_a_variable('sum_'+ var)
+            d['sum_'+ var] = nc.read_variable('sum_' + var)
             with np.errstate(divide='ignore', invalid='ignore'):
                 d[var] = d['sum_' + var]/d['count'] # calc mean
 
@@ -164,12 +164,12 @@ def read_grid_file(file_name):
     # load OT output file grid
     d={}
     nc = NetCDFhandler(file_name,'r')
-    d.update(nc.global_attrs())
+    d.update(nc.attrs())
 
-    for a,val in nc.global_attrs().items():
+    for a,val in nc.attrs().items():
         d[a] = val
     for var in nc.file_handle.variables.keys():
-        d[var]= nc.read_a_variable(var)
+        d[var]= nc.read_variable(var)
 
     if nc.is_var('domain_outline_nodes'):
         domain=dict(nodes=d['domain_outline_nodes'],
@@ -203,15 +203,15 @@ def read_release_groups_info(file_name):
     d= dict()
 
 
-    for name in nc.all_var_names():
-        data = nc.read_a_variable(name)
-        attr = nc.all_var_attr(name)
+    for name in nc.var_names():
+        data = nc.read_variable(name)
+        attr = nc.var_attrs(name)
         rg_name= attr['release_group_name']
 
         # extract info
         d[rg_name] = attr
-        if 'geographic_coords' in nc.global_attrs():
-            d[rg_name]['geographic_coords'] = bool(nc.global_attr('geographic_coords'))
+        if 'geographic_coords' in nc.attrs():
+            d[rg_name]['geographic_coords'] = bool(nc.attr('geographic_coords'))
         if 'points' in name:
             d[rg_name]['points'] = data
 

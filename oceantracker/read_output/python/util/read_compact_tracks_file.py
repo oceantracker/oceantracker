@@ -49,7 +49,7 @@ def _read_one_track_file(file_name, var_list):
     nc = NetCDFhandler(file_name, mode='r')
 
     if var_list is  None:
-        var_list = nc.all_var_names()
+        var_list = nc.var_names()
     else:
         # get list plus min data set
         var_list = list(set(['write_step_index','ID','particle_ID', 'x', 'time', 'status', 'IDrelease_group',
@@ -58,8 +58,8 @@ def _read_one_track_file(file_name, var_list):
 
     data = nc.read_variables(var_list)
     data['variable_info']  = nc.variable_info
-    data['global_attributes']=nc.global_attrs()
-    data['dimensions'] = nc.dims()
+    data['global_attributes']=nc.attrs()
+    data['dimensions'] = nc.dim_sizes()
 
     nc.close()
 

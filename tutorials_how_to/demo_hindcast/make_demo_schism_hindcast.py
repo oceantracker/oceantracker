@@ -143,7 +143,7 @@ if __name__ == '__main__':
     # read and plot
     print('reading',out_file3D)
     r = NetCDFhandler(out_file3D)
-    var = r.read_variables(r.all_var_names())
+    var = r.read_variables(r.var_names())
     x, y =var['SCHISM_hgrid_node_x'],var['SCHISM_hgrid_node_y']
 
     plt.scatter(x, y, c='k',zorder=0,s=6)

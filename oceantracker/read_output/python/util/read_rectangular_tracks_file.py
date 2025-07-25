@@ -13,8 +13,8 @@ def read_rect_tracks_file(file_name, var_list=None, fraction_to_read=None):
         var_list = list(set(['x', 'time', 'status', 'x0', 'dry_cell_index'] + var_list))
 
     data = nc.read_variables(var_list)
-    data['global_attributes'] = nc.global_attrs()
-    data['dimensions'] = nc.dims()
+    data['global_attributes'] = nc.attrs()
+    data['dimensions'] = nc.dim_sizes()
     data['variables'] = dict()
     for v in var_list:
         data['variables'][v] = dict(nc.variable_info[v])
@@ -26,7 +26,7 @@ def merge_rect_track_files(file_list,  var_list=None,fraction_to_read=None):
     n_times = []
     for fn in file_list:
         nc = NetCDFhandler(fn, mode='r')
-        lastID = nc.read_a_variable('ID', -1)
+        lastID = nc.read_variable('ID', -1)
         n_times.append(nc.variable_info['time']['shape'][0])
         nc.close()
 

@@ -32,29 +32,29 @@ class CompactTracksWriter(_BaseWriter):
     def setup_file_vars(self, nc):
         info= self.info
         params = self.params
-        nc.add_dimension(si.dim_names.time, None)
-        nc.add_dimension(si.dim_names.vector2D, 2)
-        nc.add_dimension(si.dim_names.vector3D, 3)
-        nc.add_dimension(si.dim_names.particle, None)
-        nc.add_dimension('time_particle_dim', None)
-        nc.add_dimension('range_pair_dim', 2)
+        nc.create_dimension(si.dim_names.time, None)
+        nc.create_dimension(si.dim_names.vector2D, 2)
+        nc.create_dimension(si.dim_names.vector3D, 3)
+        nc.create_dimension(si.dim_names.particle, None)
+        nc.create_dimension('time_particle_dim', None)
+        nc.create_dimension('range_pair_dim', 2)
 
 
-        nc.create_a_variable('particles_written_per_time_step',si.dim_names.time,dtype=np.int32,
-                             description='Number of particles written each time step')
-        nc.create_a_variable('particle_ID', 'time_particle_dim', dtype=np.int32,compression_level=si.settings.NCDF_compression_level,
-                             description='ID number of of particle recorded ')
-        nc.create_a_variable('write_step_index', 'time_particle_dim', dtype=np.int32,compression_level=si.settings.NCDF_compression_level,
-                             description='Time/write step of particle recorded ')
+        nc.create_variable('particles_written_per_time_step', si.dim_names.time, dtype=np.int32,
+                           description='Number of particles written each time step')
+        nc.create_variable('particle_ID', 'time_particle_dim', dtype=np.int32, compression_level=si.settings.NCDF_compression_level,
+                           description='ID number of of particle recorded ')
+        nc.create_variable('write_step_index', 'time_particle_dim', dtype=np.int32, compression_level=si.settings.NCDF_compression_level,
+                           description='Time/write step of particle recorded ')
         # variable to give index ranges of time steps within output
-        nc.create_a_variable('time_step_range', ['time_dim','range_pair_dim'],dtype=np.int32,
-                              description='range in time_particle_dim for each time step, could be used to unpack')
+        nc.create_variable('time_step_range', ['time_dim', 'range_pair_dim'], dtype=np.int32,
+                           description='range in time_particle_dim for each time step, could be used to unpack')
 
         vi = info['variables_to_write']
         for name, i in si.class_roles.time_varying_info.items():
             if not i.params['write']: continue
-            nc.create_a_variable(name,si.dim_names.time,units=i.params['units'],dtype=i.params['dtype'],
-                                  description=i.params['description'])
+            nc.create_variable(name, si.dim_names.time, units=i.params['units'], dtype=i.params['dtype'],
+                               description=i.params['description'])
             vi['time_varying_info'].append(name)
 
         for name, i in si.class_roles.particle_properties.items():
@@ -76,17 +76,17 @@ class CompactTracksWriter(_BaseWriter):
 
             if i.params['vector_dim'] == 2: dim.append(si.dim_names.vector2D)
             if i.params['vector_dim'] == 3: dim.append(si.dim_names.vector3D)
-            if i.params['prop_dim3'] > 1: dim.append(nc.add_dimension(f'part_prop_{name}_dim3', i.params['prop_dim3']))
+            if i.params['prop_dim3'] > 1: dim.append(nc.create_dimension(f'part_prop_{name}_dim3', i.params['prop_dim3']))
 
-            nc.create_a_variable(name, dim, units=i.params['units'],dtype=i.params['dtype'],
-                                 chunksizes=chunking,
-                                  description=i.params['description'],compression_level=comp)
+            nc.create_variable(name, dim, units=i.params['units'], dtype=i.params['dtype'],
+                               chunksizes=chunking,
+                               description=i.params['description'], compression_level=comp)
 
         if si.settings['write_dry_cell_flag']:
             grid = si.core_class_roles.field_group_manager.reader.grid
-            nc.add_dimension(si.dim_names.triangle, grid['triangles'].shape[0])
-            nc.create_a_variable('dry_cell_index', [si.dim_names.time,si.dim_names.triangle],dtype=np.uint8,
-                                  description= 'Time series of grid dry index 0-255, > 128 is dry',compression_level=si.settings.NCDF_compression_level,)
+            nc.create_dimension(si.dim_names.triangle, grid['triangles'].shape[0])
+            nc.create_variable('dry_cell_index', [si.dim_names.time, si.dim_names.triangle], dtype=np.uint8,
+                               description= 'Time series of grid dry index 0-255, > 128 is dry', compression_level=si.settings.NCDF_compression_level, )
             pass
     def pre_time_step_write_book_keeping(self):
         # write indexing variables
@@ -155,8 +155,8 @@ class CompactTracksWriter(_BaseWriter):
     def _close_file(self):
 
         nc = self.nc
-        nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
-        nc.write_global_attribute('time_steps_written', self.info['time_steps_written_to_current_file'])
+        nc.create_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
+        nc.create_attribute('time_steps_written', self.info['time_steps_written_to_current_file'])
 
         # write status values to  file attribues
         output_util.add_particle_status_values_to_netcdf(nc)

@@ -33,22 +33,18 @@ class NetCDFhandler(object):
             for name in v.keys():
                 self.variable_info[name] ={'dims':v[name].dimensions,
                        'shape': v[name].shape,'dtype': v[name].datatype,
-                       'attrs': self.all_var_attr(name),
+                       'attrs': self.var_attrs(name),
                        'sizes': {name: s for name,s in zip(v[name].dimensions, v[name].shape) }
                         }
 
-        self.dimensions = self.file_handle.dimensions
-        self.attrs = self.file_handle.__dict__
-        pass
-
-    def add_dimension(self, name, dim_size=None):
+    def create_dimension(self, name, dim_size=None):
         # add a dimension for use in netcdf
         # print('AD',name,dim_size)
         if name not in self.file_handle.dimensions:
             self.file_handle.createDimension(name, dim_size)
 
-    def create_a_variable(self, name, dimList,dtype, description=None, fill_value=None,units=None,
-                          attributes=None,  chunksizes=None, compression_level=0):
+    def create_variable(self, name, dimList, dtype, description=None, fill_value=None, units=None,
+                        attributes=None, chunksizes=None, compression_level=0):
         # add and write a variable of given nane and dim name list
         if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
         attributes = deepcopy(attributes)
@@ -73,7 +69,7 @@ class NetCDFhandler(object):
                 setattr(self.file_handle.variables[name], key, self._sanitize_attribute(value))
         return v
 
-    def read_a_variable(self,name, sel=None):
+    def read_variable(self, name, sel=None):
         # read a variable or sel of first dimension
         if sel is None:
             data= self.file_handle.variables[name][:]   # read whole variable
@@ -88,19 +84,19 @@ class NetCDFhandler(object):
         # read a list of variables into a dictionary, if output is a dictionary its add to that one
         # sel is which values to read from first dimension
         if output is None:  output=dict(variable_attributes=dict())
-        if var_list is None:  var_list = self.all_var_names()
+        if var_list is None:  var_list = self.var_names()
 
         name_list = list(set(var_list+required_var))
         for name in name_list:
-            output[name] = self.read_a_variable(name, sel=sel)
-            output['variable_attributes'][name] = self.all_var_attr(name)
-        output['global_attributes'] = self.global_attrs()
+            output[name] = self.read_variable(name, sel=sel)
+            output['variable_attributes'][name] = self.var_attrs(name)
+        output['global_attributes'] = self.attrs()
         return output
 
-    def write_a_new_variable(self, name, data, dimList, description=None,
-                             attributes={}, dtype=None, chunksizes=None, units=None,
-                             compression_level=0,
-                             fill_value= None):
+    def write_variable(self, name, data, dimList, description=None,
+                       attributes={}, dtype=None, chunksizes=None, units=None,
+                       compression_level=0,
+                       fill_value= None):
         # write a whole variable and add dimensions if required
         if type(dimList) != list and type(dimList) != tuple :dimList =[dimList]
 
@@ -109,13 +105,13 @@ class NetCDFhandler(object):
 
         # cycle through dims list to add dimension, if needed
         for n in range(len(dimList)):
-            self.add_dimension(dimList[n], data.shape[n])  # an unlimted dimension
+            self.create_dimension(dimList[n], data.shape[n])  # an unlimted dimension
 
         if dtype is None: dtype = data.dtype  # preserve type unless explicitly changed
 
-        v = self.create_a_variable(name, dimList, description=description,
-                                   attributes= attributes, dtype=dtype, chunksizes= chunksizes,
-                                   units= units, compression_level=compression_level, fill_value=fill_value)
+        v = self.create_variable(name, dimList, description=description,
+                                 attributes= attributes, dtype=dtype, chunksizes= chunksizes,
+                                 units= units, compression_level=compression_level, fill_value=fill_value)
 
         # check dims match as below write does not respect shape
         for n,dn in enumerate(dimList):
@@ -125,65 +121,44 @@ class NetCDFhandler(object):
         v[:] = data[:]  # write X
         pass
 
-    def write_part_of_first_dim_of_variable(self,name,data, sel):
-        # write data as part of first dim of named variable with give indicies, only if numpy array list in sel indices is not empty
-        if sel.shape[0] > 0:
-            self.file_handle.variables[name][sel, ...] = data[:]
 
-    def write_global_attribute(self, name,value) :
-        setattr(self.file_handle, name, self._sanitize_attribute(value))
-        pass
-    # get data
-    # check if variables or list of variables in file
-    def is_var(self, name):
-        return name in self.file_handle.variables
+    def create_attribute(self, name, value) : setattr(self.file_handle, name, self._sanitize_attribute(value))
 
     # dimensions
     def dim_list(self): return list(self.file_handle.dimensions.keys())
 
-    def dims(self):
-        out= {}
-        for dim_name, val in  self.file_handle.dimensions.items():
-            out[dim_name] =  self.file_handle.dimensions[dim_name].size
-        return out
+    def dim_sizes(self):
+        return {name: val.size for name, val in self.file_handle.dimensions.items()}
 
-    def dim_size(self,dim_name):  return self.file_handle.dimensions[dim_name].size
+    def dim_size(self,dim_name): return self.file_handle.dimensions[dim_name].size
 
     def is_dim(self,dim_name):return dim_name in self.file_handle.dimensions
 
-    def global_attr(self, attr_name): return getattr(self.file_handle, attr_name)
-    def global_attrs(self):  return self.file_handle.__dict__
+    def attr(self, name): return getattr(self.file_handle, name)
 
+    def attrs(self):  return self.file_handle.__dict__
+
+    def is_attr(self, name):  return name in self.file_handle.__dict__
+    def is_var(self, name):  return name in self.file_handle.variables
+    def is_var_dim(self, var_name, dim_name): return dim_name in self.var_dims(var_name)
+
+    def var_attr(self, name, attr_name):  return getattr(self.file_handle.variables[name], attr_name)
     # variables
-    def all_var_attr(self,var_name): return  self.file_handle[var_name].__dict__# Get all  attributes of the NetCDF file
+    def var_attrs(self, var_name): return  self.file_handle[var_name].__dict__# Get all  attributes of the NetCDF file
     def is_var_attr(self, name, attr_name):  return hasattr(self.file_handle.variables[name], attr_name)
 
-    def var_data(self, name):   return self.file_handle.variables[name][:]
-
-    def all_var_names(self):
-        return list(self.file_handle.variables.keys())
-    def all_var_dims(self,var):
-        return list(self.file_handle.variables[var].dimensions)
+    def var_names(self):  return list(self.file_handle.variables.keys())
+    def var_dims(self, var):  return list(self.file_handle.variables[var].dimensions)
 
     def var_shape(self, var):  return self.file_handle.variables[var].shape
-    def var_fill_value(self,var_name): return
-
-    def var_attr(self, name, attr_name):
-        return getattr(self.file_handle.variables[name], attr_name)
 
     def var_dtype(self,name):
-        # to allow for netcd scaland fit of integers
-        # get dtype by reading one  vaule
+        # to allow for netcd scal and fit of integers
+        # get dtype by reading one  value
         dtype = self.file_handle.variables[name][0].dtype
         return dtype
 
-    def var_fill_value(self, name):
-        return self.file_handle.variables[name]._FillValue
-
-    def is_var_dim(self, var_name, dim_name):
-        return dim_name in self.all_var_dims(var_name)
-
-    def get_file_handle(self): return self.file_handle
+    def var_fill_value(self, name): return self.file_handle.variables[name]._FillValue
 
     def _sanitize_attribute(self,value):
         if type(value) is  bool: value =int(value) #  convert booleans
@@ -191,24 +166,24 @@ class NetCDFhandler(object):
         return value
 
     def copy_global_attributes(self,nc_new):
-        for name in self.attrs.keys():
-            nc_new.write_global_attribute(name, self.global_attr(name))
+        for name, val in self.attrs().items():
+            nc_new.create_attribute(name, val)
 
     def copy_variable(self,name, nc_new, compression_level=0):
         v = self.file_handle[name]
 
         #write_a_new_variable(self, name, X, dimList, description=None, attributes=None, dtype=None, chunksizes=None, compression_level=0):
-        attributes = self.all_var_attr(name)
+        attributes = self.var_attrs(name)
         if '_FillValue' in attributes:
             fill_value=attributes['_FillValue' ]
             del attributes['_FillValue']
         else:
             fill_value = None
-        nc_new.write_a_new_variable(name,v[:], v.dimensions,
-                                    fill_value=fill_value,
-                                    attributes=attributes,
-                                    compression_level=compression_level,
-                                    )
+        nc_new.write_variable(name, v[:], v.dimensions,
+                              fill_value=fill_value,
+                              attributes=attributes,
+                              compression_level=compression_level,
+                              )
         pass
 
     def write_packed_1Darrays(self, name, array_list, description=None, attributes=None, dtype=None, chunksizes=None,
@@ -227,21 +202,21 @@ class NetCDFhandler(object):
 
         pass
         ranges_var= f'{name}_packed_ranges'
-        self.write_a_new_variable(name, out,f'{name}_packed_dim',
-                                  description= description+' packed array' ,
-                                  attributes=dict(ranges_var =ranges_var)
-                                  )
-        self.write_a_new_variable(ranges_var, ranges, [f'{name}_ranges_dim','range_pair_dim'],
-                                  description=description + ' packed array',
-                                  attributes=dict(ranges_var=ranges_var)
-                                  )
+        self.write_variable(name, out, f'{name}_packed_dim',
+                            description= description+' packed array',
+                            attributes=dict(ranges_var =ranges_var)
+                            )
+        self.write_variable(ranges_var, ranges, [f'{name}_ranges_dim', 'range_pair_dim'],
+                            description=description + ' packed array',
+                            attributes=dict(ranges_var=ranges_var)
+                            )
         pass
 
     def un_packed_1Darrays(self, name:str):
         '''  unpack variable of given name, from range variable '''
         out =[]
-        data =  self.read_a_variable(name)
-        ranges = self.read_a_variable(self.var_attr(name,'ranges_var'))
+        data =  self.read_variable(name)
+        ranges = self.read_variable(self.var_attr(name, 'ranges_var'))
         for r in ranges:
             out.append(data[r[0]:r[1]])
         return out

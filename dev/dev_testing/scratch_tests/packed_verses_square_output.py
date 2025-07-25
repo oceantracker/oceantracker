@@ -19,12 +19,12 @@ out_dir =r'C:\Auck_work\oceantracker_output\scratch'
 #out_dir =r'F:\H_Local_drive\ParticleTracking\oceantracker_output\scratch\'
 fn1 =  path.join(out_dir,'square.nc')
 nc= NetCDFhandler(fn1,mode='w')
-nc. add_dimension('time',None)
-nc. add_dimension('particle',None)
-nc. add_dimension('threeD',M)
-nc.create_a_variable('x',['time', 'particle','threeD'], dtype=dtype,
-                     chunksizes=[1, int(part_chunks) ,M],
-                     compression_level=comp, )
+nc. create_dimension('time', None)
+nc. create_dimension('particle', None)
+nc. create_dimension('threeD', M)
+nc.create_variable('x', ['time', 'particle', 'threeD'], dtype=dtype,
+                   chunksizes=[1, int(part_chunks) ,M],
+                   compression_level=comp, )
 t0 = perf_counter()
 t_steps= np.zeros((time_steps,))
 for nt  in range(time_steps):
@@ -43,11 +43,11 @@ print('\t max min all time steps',t_steps.min(), t_steps.max())
 
 fn2 = path.join(out_dir,'compact.nc')
 nc= NetCDFhandler(fn2,mode='w')
-nc. add_dimension('time_particle',None)
-nc. add_dimension('threeD',M)
-nc.create_a_variable('x',['time_particle','threeD'], dtype=dtype,
-                     chunksizes=[int(N), M],
-                     compression_level=comp)
+nc. create_dimension('time_particle', None)
+nc. create_dimension('threeD', M)
+nc.create_variable('x', ['time_particle', 'threeD'], dtype=dtype,
+                   chunksizes=[int(N), M],
+                   compression_level=comp)
 
 t0 = perf_counter()
 n_writes= 0
@@ -66,10 +66,10 @@ print('compact time=', f'{1000*(perf_counter()-t0)/time_steps:3.2f} msec/step ',
 print('\t max min all time steps',t_steps.min(), t_steps.max())
 
 f1 =NetCDFhandler(fn1,'r')
-x1 = f1.read_a_variable('x')
+x1 = f1.read_variable('x')
 f1.close()
 f2 =NetCDFhandler(fn2,'r')
-x2= f2.read_a_variable('x')
+x2= f2.read_variable('x')
 f2.close()
 
 n2 = int(N /time_steps) # compare first time step

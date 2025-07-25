@@ -72,7 +72,7 @@ class CSreader(GenericUnstructuredReader):
 
         else:
             # get dry cells for each triangle allowing for splitting quad cells
-            data_added_to_buffer = nc.read_a_variable(self.params['grid_variables']['is_dry_cell'], file_index)
+            data_added_to_buffer = nc.read_variable(self.params['grid_variables']['is_dry_cell'], file_index)
             is_dry_cell_buffer[buffer_index, :] = append_split_cell_data(grid, data_added_to_buffer, axis=1)
 
     def assemble_field_components(self, nc, field, buffer_index=None, file_index=None):
@@ -138,13 +138,13 @@ class CSreader(GenericUnstructuredReader):
 
     def read_nodal_x_as_float64(self, nc):
         x, y = self.convert_lon_lat_to_meters_grid(self.params['EPSG_transform_code'],
-                                                   nc.read_a_variable('lon'),
-                                                   nc.read_a_variable('lat'))
+                                                   nc.read_variable('lon'),
+                                                   nc.read_variable('lat'))
         x = np.stack((x, y), axis=1).astype(np.float64)
         return x
 
     def read_triangles_as_int32(self, nc):
-        data = nc.read_a_variable('elements')
+        data = nc.read_variable('elements')
 
         # flag quad cells for spliting
         if data.shape[1] == 4 and np.any(data > 0):

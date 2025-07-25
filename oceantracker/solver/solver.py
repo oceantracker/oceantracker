@@ -431,7 +431,7 @@ class Solver(ParameterBaseClass):
         num_part=nc.var_shape('water_velocity')[0]
 
         for name, i in si.class_roles.particle_properties.items():
-            i.data = nc.read_a_variable(name)  # rely on particle buffer expansion
+            i.data = nc.read_variable(name)  # rely on particle buffer expansion
         si.run_info.particles_in_buffer = num_part
         si.core_class_roles.particle_group_manager.info['current_particle_buffer_size'] = num_part
         nc.close()

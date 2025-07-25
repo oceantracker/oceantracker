@@ -5,11 +5,11 @@ def save_part_prop_state(file_name, si, n_time_step, time_sec ):
     # save particle properties
     nc = NetCDFhandler(file_name, mode='w')
 
-    nc.write_global_attribute('time', time_sec)
-    nc.write_global_attribute('date', time_util.seconds_to_isostr(time_sec))
-    nc.write_global_attribute('n_time_step',n_time_step)
+    nc.create_attribute('time', time_sec)
+    nc.create_attribute('date', time_util.seconds_to_isostr(time_sec))
+    nc.create_attribute('n_time_step', n_time_step)
 
-    nc.add_dimension(si.dim_names.particle, si.run_info.particles_in_buffer)
+    nc.create_dimension(si.dim_names.particle, si.run_info.particles_in_buffer)
     for name, prop in si.class_roles.particle_properties.items():
         if not hasattr(prop,'data'): continue
         dims = [si.dim_names.particle]
@@ -21,7 +21,7 @@ def save_part_prop_state(file_name, si, n_time_step, time_sec ):
         #if len(dims) == prop.data.ndim:
             # in dev mode only write those that have al dimensions
             # add  dim 3 with a name
-        nc.write_a_new_variable(name, prop.data[:si.run_info.particles_in_buffer, ...], dims)
+        nc.write_variable(name, prop.data[:si.run_info.particles_in_buffer, ...], dims)
 
     nc.close()
 

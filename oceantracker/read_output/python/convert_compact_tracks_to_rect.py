@@ -9,16 +9,16 @@ from oceantracker.shared_info import shared_info as si
 def convert_compact_file(file_name1):
     # particles with greater than stats val are not return
     nc1 = NetCDFhandler(file_name1, mode='r')
-    particleID = nc1.read_a_variable('particle_ID')
-    ID = nc1.read_a_variable('ID')
+    particleID = nc1.read_variable('particle_ID')
+    ID = nc1.read_variable('ID')
 
     file_name2= path.join(path.dirname(file_name1),
                           path.basename(file_name1).replace('_compact_','_rectangular_'))
     nc2 = NetCDFhandler(file_name2, mode='w')
     nc1.copy_global_attributes(nc2)
-    nc2.add_dimension('time_dim', nc1.dim_size('time_dim'))
-    nc2.add_dimension('particle_dim', ID[-1] - ID[0] + 1)
-    time_step_range = nc1.read_a_variable('time_step_range')
+    nc2.create_dimension('time_dim', nc1.dim_size('time_dim'))
+    nc2.create_dimension('particle_dim', ID[-1] - ID[0] + 1)
+    time_step_range = nc1.read_variable('time_step_range')
 
     for name, var in nc1.file_handle.variables.items():
         if name in ['particle_ID', 'write_step_index',b'time_step_range']: continue
@@ -39,20 +39,20 @@ def _write_time_depend_part_prop(name, nc1, nc2, particleID, ID, time_step_range
     dims=[]
     s=[]
     for dim in vi['dims'][1:]:
-        nc2.add_dimension(dim, vi['sizes'][dim])
+        nc2.create_dimension(dim, vi['sizes'][dim])
         dims.append(dim)
         s.append(vi['sizes'][dim])
     chunks = [1, int(nc2.dim_size('particle_dim')/10)]  + s
-    nc2.create_a_variable(name,['time_dim', 'particle_dim'] + dims,
-                            vi['dtype'], attributes= vi['attrs'],
-                            fill_value= vi['attrs']['_FillValue'],
-                            chunksizes=chunks)
+    nc2.create_variable(name, ['time_dim', 'particle_dim'] + dims,
+                        vi['dtype'], attributes= vi['attrs'],
+                        fill_value= vi['attrs']['_FillValue'],
+                        chunksizes=chunks)
     buffer = np.full([nc2.dim_size('particle_dim'),] + [vi['sizes'][dim] for dim in dims],
                      vi['attrs']['_FillValue'],dtype=vi['dtype'])
     for nt, ntr in  enumerate(time_step_range):
         sel = np.arange(ntr[0], ntr[1])
         pID = particleID[sel]  # ID's at this time step
-        c = nc1.read_a_variable(name, sel)
+        c = nc1.read_variable(name, sel)
         offsets = pID - ID[0]
         buffer[:] = vi['attrs']['_FillValue']
         buffer[offsets, ...] = c[:]
@@ -66,31 +66,34 @@ def _write_non_time_depend_part_prop(name,nc1,nc2,ID):
     vi = nc1.variable_info[name]
     dims=[]
     for dim in vi['dims'][1:]:
-        nc2.add_dimension(dim,vi['sizes'][dim])
+        nc2.create_dimension(dim, vi['sizes'][dim])
         dims.append(dim)
 
-    nc2.create_a_variable(name,['particle_dim']+dims,
-            vi['dtype'],attributes= vi['attrs'], fill_value= vi['attrs']['_FillValue']
-                          )
+    nc2.create_variable(name, ['particle_dim'] + dims,
+                        vi['dtype'], attributes= vi['attrs'], fill_value= vi['attrs']['_FillValue']
+                        )
     buffer = np.full([nc2.dim_size('particle_dim'),] + [vi['sizes'][dim] for dim in dims],
                      vi['attrs']['_FillValue'],dtype=vi['dtype'])
     offsets = ID - ID[0]
-    c = nc1.read_a_variable(name)
+    c = nc1.read_variable(name)
     buffer[offsets, ...] = c[:]
     nc2.file_handle[name][:] = buffer
 
 
 
 if __name__ == "__main__":
-    #fnbase=r'C:\Auck_work\oceantracker_output\unit_test_reference_cases\unit_test_18_rectangular_compact_tracks_00\unit_test_18_rectangular_compact_tracks_00_tracks_compact_00**.nc'
-    fnbase = r'C:\Auck_work\oceantracker_output\unit_tests\unit_test_80_LagrangianStructuresFTLE_00_demoSchism3D\unit_test_80_LagrangianStructuresFTLE_00_demoSchism3D_tracks_compact_00**.nc'
-
+    if True:
+        fnbase=r'C:\Auck_work\oceantracker_output\unit_test_reference_cases\unit_test_18_rectangular_compact_tracks_00\unit_test_18_rectangular_compact_tracks_00_tracks_compact_00**.nc'
+        r= range(0,4)
+    else:
+        fnbase = r'C:\Auck_work\oceantracker_output\unit_tests\unit_test_80_LagrangianStructuresFTLE_00_demoSchism3D\unit_test_80_LagrangianStructuresFTLE_00_demoSchism3D_tracks_compact_00**.nc'
+        r = range(0,1)
 
     t0 = perf_counter()
-    for n in range(0,1):
+    for n in r:
         fn1 = fnbase.replace('**',str(n))
         print(path.basename(fn1))
-        fn2 = convert_compact_file(fn1,si.particle_status_flags.dead)
+        fn2 = convert_compact_file(fn1)
         print(fn2)
 
     print('Conversion time', perf_counter()-t0)

@@ -18,10 +18,10 @@ nc = NetCDFhandler(file_name)
 for key, item in nc.variable_info.items():
     print(key,':', item)
 
-x = nc.read_a_variable(x_var)
-y = nc.read_a_variable(y_var)
-tri = nc.read_a_variable(tri_var) - one_based
-depth = nc.read_a_variable(depth_var)
+x = nc.read_variable(x_var)
+y = nc.read_variable(y_var)
+tri = nc.read_variable(tri_var) - one_based
+depth = nc.read_variable(depth_var)
 
 plt.tripcolor(x, y, tri[:, :3], depth, vmax=vmax)
 plt.triplot(x, y, tri[:, :3], lw=.5, c=[.8,.8,.8])
