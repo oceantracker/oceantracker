@@ -2,8 +2,9 @@ import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.tracks_writer._base_tracks_writer import  _BaseWriter
 from oceantracker.util import  output_util
-
-
+from oceantracker.read_output.python.convert_compact_tracks_to_rect import convert_compact_file
+from os import path
+from time import  perf_counter
 from oceantracker.shared_info import shared_info as si
 
 class CompactTracksWriter(_BaseWriter):
@@ -15,6 +16,8 @@ class CompactTracksWriter(_BaseWriter):
                 time_particle_chunk =  PVC(None, int, min=1,  expert=True,
                                doc_str='Chunk size for time dependent particle props, compacted into time_particle dim, default is as estimated max. particles alive'),
                 role_output_file_tag=PVC('tracks_compact', str, expert=True),
+                convert=PVC(True, bool, expert=True,
+                            doc_str='Convert compact tracks to rectangular form at end of run, for easier reading '),
                 )
         self.nc = None
 
@@ -150,6 +153,7 @@ class CompactTracksWriter(_BaseWriter):
         self.stop_update_timer()
 
     def _close_file(self):
+
         nc = self.nc
         nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
         nc.write_global_attribute('time_steps_written', self.info['time_steps_written_to_current_file'])
@@ -158,6 +162,17 @@ class CompactTracksWriter(_BaseWriter):
         output_util.add_particle_status_values_to_netcdf(nc)
 
         super()._close_file()
+    def close(self):
+        info = self.info
+        super().close()
+        # when all done convert compact to rectangular
+        if si.settings.write_tracks and self.params['convert']:
+            t0 = perf_counter()
+            for n, fn in enumerate(info['output_file']):
+                rect_file = convert_compact_file(path.join(si.run_info.run_output_dir, fn))
+                info['output_file'][n] = path.basename(rect_file)
+            si.msg_logger.progress_marker('Converted compact track files to rectangular format',
+                                          start_time=t0)
 
 
 

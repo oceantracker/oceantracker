@@ -27,9 +27,7 @@ def read_comp_tracks_file(file_name_or_list, file_dir=None, var_list=None, file_
                     if any( [ s in vi['dims'] for s in ['time_particle_dim', 'particle_dim' , 'time_dim']]):
                         data[name] = np.concatenate((data[name],data1[name]), axis=0)
 
-
     d = _unpack_compact_tracks(data)
-
 
     if d['x'].shape[2] == 3: d['z'] = d['x'][:,:,2] # make a z variable if 3D
 
@@ -88,7 +86,6 @@ def _unpack_compact_tracks(data):
     d['status'] =  np.full((time_steps_written, num_released), attributes['status_notReleased'], dtype=variable_info['status']['dtype'])
     _insertMatrixValues(d['status'], n_time_step, part_offset, data['status'])
     last_recordedID = _get_last_alive(d['status'], attributes['status_notReleased'], attributes['status_dead'])
-    rg =  data['IDrelease_group']
 
     # don't reprocess status, and don't process others, not needed in rectangular format
     var_list = list(data.keys())

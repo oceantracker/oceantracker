@@ -46,13 +46,13 @@ def merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None):
                         fraction_to_read=fraction_to_read)
     return result
 
-def read_stats_file(file_name,nt=None):
-    # read stats files
 
+def read_stats_file(file_name, nt=None):
+    # read stats files
     nc = NetCDFhandler(file_name, mode='r')
     d = dict( global_attributes = nc.global_attrs())  # read all  global attibutes
     d['dimensions'] = nc.dims()
-    d['limits']=  {}
+    d['limits'] = {}
 
     data = nc.read_variables(sel=nt)
     d.update(data)

@@ -1,8 +1,7 @@
 from oceantracker.main import OceanTracker
-from oceantracker.read_output.python import load_output_files
-from oceantracker.read_output.python import  read_ncdf_output_files
 from tests.unit_tests import test_definitions
-from os import path
+
+
 def main(args):
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__, args))
@@ -14,7 +13,7 @@ def main(args):
                 min_dead_to_remove=500,
         )
     hm = test_definitions.hydro_model['demoSchism3D']
-    ot.add_class('reader', **hm['reader'])
+    ot.add_class('reader', **hm['reader'], convert =  not args.reference_case)
 
     # add a point release
     pulse_size = 1000
@@ -25,8 +24,9 @@ def main(args):
     ot.add_class('particle_properties', name='water_speed', class_name='VectorMagnitude2D',
                  vector_part_prop='water_velocity')
 
+    rect_class ='oceantracker.tracks_writer.deprecated.track_writer_retangular.RectangularTracksWriter'
     ot.add_class('tracks_writer',update_interval=1800,
-                 class_name= 'CompactTracksWriter' if args.reference_case else 'RectangularTracksWriter',
+                 class_name= 'CompactTracksWriter' if args.reference_case else rect_class,
                  time_steps_per_per_file= 10)
 
     ot.add_class('particle_properties', **test_definitions.pp1)  # add a new property to particle_properties role

@@ -11,7 +11,8 @@
     "min_dead_to_remove": 500,
     "reader": {
         "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
-        "file_mask": "demo_hindcast_schisim3D*.nc"
+        "file_mask": "demo_hindcast_schisim3D*.nc",
+        "convert": true
     },
     "release_groups": [
         {
@@ -45,6 +46,6 @@
     "tracks_writer": {
         "update_interval": 1800,
         "time_steps_per_per_file": 10,
-        "class_name": "RectangularTracksWriter"
+        "class_name": "oceantracker.tracks_writer.deprecated.track_writer_retangular.RectangularTracksWriter"
     }
 }
