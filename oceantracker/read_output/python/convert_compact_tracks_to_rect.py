@@ -16,7 +16,7 @@ def convert_compact_file(file_name1):
                           path.basename(file_name1).replace('_compact_','_rectangular_'))
     nc2 = NetCDFhandler(file_name2, mode='w')
     nc1.copy_global_attributes(nc2)
-    nc2.create_dimension('time_dim', nc1.dim_size('time_dim'))
+    nc2.create_dimension('time_dim', nc1.dim('time_dim'))
     nc2.create_dimension('particle_dim', ID[-1] - ID[0] + 1)
     time_step_range = nc1.read_variable('time_step_range')
 
@@ -42,13 +42,13 @@ def _write_time_depend_part_prop(name, nc1, nc2, particleID, ID, time_step_range
         nc2.create_dimension(dim, vi['sizes'][dim])
         dims.append(dim)
         s.append(vi['sizes'][dim])
-    chunks = [1, int(nc2.dim_size('particle_dim')/10)]  + s
+    chunks = [1, int(nc2.dim('particle_dim') / 10)] + s
     nc2.create_variable(name, ['time_dim', 'particle_dim'] + dims,
                         vi['dtype'], attributes= vi['attrs'],
                         fill_value= vi['attrs']['_FillValue'],
                         chunksizes=chunks)
-    buffer = np.full([nc2.dim_size('particle_dim'),] + [vi['sizes'][dim] for dim in dims],
-                     vi['attrs']['_FillValue'],dtype=vi['dtype'])
+    buffer = np.full([nc2.dim('particle_dim'), ] + [vi['sizes'][dim] for dim in dims],
+                     vi['attrs']['_FillValue'], dtype=vi['dtype'])
     for nt, ntr in  enumerate(time_step_range):
         sel = np.arange(ntr[0], ntr[1])
         pID = particleID[sel]  # ID's at this time step
@@ -72,8 +72,8 @@ def _write_non_time_depend_part_prop(name,nc1,nc2,ID):
     nc2.create_variable(name, ['particle_dim'] + dims,
                         vi['dtype'], attributes= vi['attrs'], fill_value= vi['attrs']['_FillValue']
                         )
-    buffer = np.full([nc2.dim_size('particle_dim'),] + [vi['sizes'][dim] for dim in dims],
-                     vi['attrs']['_FillValue'],dtype=vi['dtype'])
+    buffer = np.full([nc2.dim('particle_dim'), ] + [vi['sizes'][dim] for dim in dims],
+                     vi['attrs']['_FillValue'], dtype=vi['dtype'])
     offsets = ID - ID[0]
     c = nc1.read_variable(name)
     buffer[offsets, ...] = c[:]

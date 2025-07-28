@@ -14,7 +14,7 @@ def read_rect_tracks_file(file_name, var_list=None, fraction_to_read=None):
 
     data = nc.read_variables(var_list)
     data['global_attributes'] = nc.attrs()
-    data['dimensions'] = nc.dim_sizes()
+    data['dimensions'] = nc.dims()
     data['variables'] = dict()
     for v in var_list:
         data['variables'][v] = dict(nc.variable_info[v])

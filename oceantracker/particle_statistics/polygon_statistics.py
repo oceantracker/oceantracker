@@ -80,7 +80,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
         if not self.params['write']: return
         
         dim_names = ('time_dim', 'release_group_dim', 'polygon_dim')
-        dim_sizes  = (None, len(si.class_roles.release_groups), nc.dim_size('polygon_dim'))
+        dim_sizes  = (None, len(si.class_roles.release_groups), nc.dim('polygon_dim'))
 
         nc.create_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in each polygon at given times, for each release group')

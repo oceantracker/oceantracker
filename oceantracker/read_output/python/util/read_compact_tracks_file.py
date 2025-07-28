@@ -59,7 +59,7 @@ def _read_one_track_file(file_name, var_list):
     data = nc.read_variables(var_list)
     data['variable_info']  = nc.variable_info
     data['global_attributes']=nc.attrs()
-    data['dimensions'] = nc.dim_sizes()
+    data['dimensions'] = nc.dims()
 
     nc.close()
 

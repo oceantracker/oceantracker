@@ -53,7 +53,7 @@ def read_stats_file(file_name, nt=None):
     # read stats files
     nc = NetCDFhandler(file_name, mode='r')
     d = dict(global_attributes = nc.attrs())  # read all  global attibutes
-    d['dimensions'] = nc.dim_sizes()
+    d['dimensions'] = nc.dims()
     d['limits'] = {}
 
     data = nc.read_variables(sel=nt)
@@ -108,7 +108,7 @@ def read_LCS(file_name):
     nc = NetCDFhandler(file_name, mode='r')
     d = nc.read_variables(nc.var_names())
     d.update(nc.attrs())
-    d['dimensions'] = nc.dim_sizes()
+    d['dimensions'] = nc.dims()
     nc.close()
     return d
 

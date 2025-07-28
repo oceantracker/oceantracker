@@ -7,7 +7,7 @@ from os import path, sep
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 0.5,minor=2, revision  = 50, date = '2025-04-14', parameter_ver=0.5)
+version= dict(major= 0.5,minor=2, revision  = 90, date = '2025-07-20', parameter_ver=0.5)
 version['str'] = f"{version['major']:.2f}.{version['minor']:02d}.{version['revision']:04d}-{version['date']}"
 
 try:

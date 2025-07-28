@@ -86,7 +86,7 @@ class NetCDFhandler(object):
         if output is None:  output=dict(variable_attributes=dict())
         if var_list is None:  var_list = self.var_names()
 
-        name_list = list(set(var_list+required_var))
+        name_list = list(set(var_list + required_var))
         for name in name_list:
             output[name] = self.read_variable(name, sel=sel)
             output['variable_attributes'][name] = self.var_attrs(name)
@@ -115,30 +115,26 @@ class NetCDFhandler(object):
 
         # check dims match as below write does not respect shape
         for n,dn in enumerate(dimList):
-            if self.dim_size(dn) != v.shape[n]:
-                raise ValueError('Size of dimension ' + dn + '(=' +   str(v.shape[n]) + ')  for   variable ' +  name +
-                                 ' does not  size of defined dimension ' + dn + '(=' +   str(self.dim_size(dn)) + ')' )
+            if self.dim(dn) != v.shape[n]:
+                raise ValueError('Size of dimension ' + dn + '(=' + str(v.shape[n]) + ')  for   variable ' + name +
+                                 ' does not  size of defined dimension ' + dn + '(=' + str(self.dim(dn)) + ')')
         v[:] = data[:]  # write X
         pass
-
 
     def create_attribute(self, name, value) : setattr(self.file_handle, name, self._sanitize_attribute(value))
 
     # dimensions
-    def dim_list(self): return list(self.file_handle.dimensions.keys())
+    def dims(self): return {name: val.size for name, val in self.file_handle.dimensions.items()}
 
-    def dim_sizes(self):
-        return {name: val.size for name, val in self.file_handle.dimensions.items()}
-
-    def dim_size(self,dim_name): return self.file_handle.dimensions[dim_name].size
+    def dim(self, name): return self.file_handle.dimensions[name].size
 
     def is_dim(self,dim_name):return dim_name in self.file_handle.dimensions
 
     def attr(self, name): return getattr(self.file_handle, name)
+    def is_attr(self, name):  return name in self.file_handle.__dict__
 
     def attrs(self):  return self.file_handle.__dict__
 
-    def is_attr(self, name):  return name in self.file_handle.__dict__
     def is_var(self, name):  return name in self.file_handle.variables
     def is_var_dim(self, var_name, dim_name): return dim_name in self.var_dims(var_name)
 
