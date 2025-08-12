@@ -82,16 +82,24 @@ class OceanTrackerParamsRunner(object):
 
 
         # performance
-        ml.msg(f'Timings: total = {(perf_counter()-  self.start_time):5.1f} sec',tabs=2)
+        total_time = perf_counter()-  self.start_time
+        ml.msg(f'Timings: total = {total_time:5.1f} sec',tabs=2)
 
-        for name in ['Setup','Reading hindcast','Initial cell guess', 'RK integration',
+        timers=['Setup','Reading hindcast','Initial cell guess', 'RK integration',
+                        'Find horizontal cell','Find vertical cell',
                       'Interpolate fields', 'Update statistics',
-                     'Update custom particle properties']:
-            if name in si.block_timers:  ml.msg(f'{name}  {si.block_timers[name]["time"]:4.2f} s\t', tabs=4)
+                     'Update custom particle properties']
+        l = max([len(s) for s in timers])
+        for name in timers:
+            if name in si.block_timers:
+                t = si.block_timers[name]["time"]
+                ml.msg(f'{name + " "*(l-len(name))} {t:4.2f} s,\t {100*t/total_time:4.1f}%', tabs=4)
 
+        # core physics timing
         for name in ['resuspension','dispersion','tracks_writer', 'integrated_model']:
             if si.core_class_roles[name] is not None:
-                ml.msg(f'{name}  {si.core_class_roles[name].info["time_spent_updating"]:4.2f} s\t\t', tabs=4)
+                t= si.core_class_roles[name].info["time_spent_updating"]
+                ml.msg(f'{name + " "*(l-len(name))} {t:4.2f} s,\t {100*t/total_time:4.1f}%', tabs=4)
 
         ml.msg(f'{num_errors:3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes', tabs=1)
 

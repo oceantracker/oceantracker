@@ -156,12 +156,12 @@
     ],
     "velocity_modifiers": [
         {
-            "value": -0.0,
+            "value": -0.0001,
             "class_name": "TerminalVelocity",
             "name": "terminal_velocity_test"
         }
     ],
     "resuspension": {
-        "critical_friction_velocity": 0.0
+        "critical_friction_velocity": 0.005
     }
 }
