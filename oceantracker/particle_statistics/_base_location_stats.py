@@ -203,19 +203,17 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         part_prop = si.class_roles.particle_properties
         info = self.info
         params = self.params
-
+        buffer = self.get_partID_buffer('depth_sel')
         match info['depth_sel_mode']:
             case 0:
-                sel_subset  = sel # no depth selection
-            case 1:
-                # first select those to count based on status and z location
-                sel_subset = self._sel_z(part_prop['x'].data, info['z_range'],  sel)
+                return sel # no depth selection
+            case 1: # first select in z range
+                return self._sel_z_range(part_prop['x'].data, info['z_range'], sel, buffer)
             case 2: # near sea bed
-                sel_subset= self._sel_near_seabed(part_prop['x'].data, part_prop['water_depth'].data, params['near_seabed'], sel)
+                return self._sel_z_near_seabed(part_prop['x'].data, part_prop['water_depth'].data, params['near_seabed'], sel, buffer)
             case 3:  # near sea surface
-                sel_subset = self._sel_near_seasurface(part_prop['x'].data, part_prop['tide'].data, params['near_seasurface'], sel)
+                return self._sel_z_near_seasurface(part_prop['x'].data, part_prop['tide'].data, params['near_seasurface'], sel, buffer)
 
-        return sel_subset
 
     def update(self,n_time_step, time_sec, alive):
         '''do particle counts'''
@@ -269,35 +267,35 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
     @staticmethod
     @njitOT
-    def _sel_z(x, z_range,  sel):
+    def _sel_z_range(x, z_range, sel, out):
         # put subset of those found back into start of sel array
         n_found = 0
         for n in sel:
             if z_range[0] <= x[n, 2] <= z_range[1]:
-                sel[n_found] = n
+                out[n_found] = n
                 n_found += 1
-        return sel[:n_found]
+        return out[:n_found]
     @staticmethod
     @njitOT
-    def _sel_near_seabed(x,water_depth, dz, sel):
+    def _sel_z_near_seabed(x, water_depth, dz, sel, out):
         # put subset of those found back into start of sel array
         n_found = 0
         for n in sel:
             if x[n, 2] <= -water_depth[n] + dz: # water depth is +ve
-                sel[n_found] = n
+                out[n_found] = n
                 n_found += 1
-        return sel[:n_found]
+        return out[:n_found]
 
     @staticmethod
     @njitOT
-    def _sel_near_seasurface(x, tide, dz, sel):
+    def _sel_z_near_seasurface(x, tide, dz, sel, out):
         # put subset of those found back into start of sel array
         n_found = 0
         for n in sel:
             if x[n, 2] >= tide[n] - dz:
-                sel[n_found] = n
+                out[n_found] = n
                 n_found += 1
-        return sel[:n_found]
+        return out[:n_found]
 
     def write_time_varying_stats(self, n_write, time):
         # write nth step in file

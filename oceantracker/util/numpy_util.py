@@ -13,6 +13,18 @@ def smallest_value(dtype:np.dtype):
         fill_value = None
     return fill_value
 
+class ArrayBytesBuffer():
+    '''
+     manages a buffer of bytes to take different dtypes
+     so that same memory can be used as buffer by multiple
+     arrays
+     - dev not working
+    '''
+    def __init__(self):
+
+        self._byte_buffer  = np.zeros([1_000,],dtype=np.byte)
+
+    #def get_buffer
 
 def numpy_array_of_structures_from_dict(d):
     # return a array of numpy sturcture with fields give by dict keys and copy of  from dictionary

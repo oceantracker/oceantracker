@@ -205,14 +205,14 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
         self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
         nc = self. nc
         r, c = params['grid_size']
-        nc.create_dimension('time_dim', None) # open time dim
+        nc.create_dimension(si.dim_names.time, None) # open time dim
         nc.create_dimension('lag_dim', params['lags'].size)
         nc.create_dimension('release_grid_rows', r + 2)
         nc.create_dimension('release_grid_cols', c + 2)
         nc.create_dimension('grid_dim', params['grid_center'].shape[0])
-        nc.create_dimension('vector2D', 2)
-        nc.create_dimension('rows', r)
-        nc.create_dimension('cols', c)
+        nc.create_dimension(si.dim_names.vector2D, 2)
+        nc.create_dimension(si.dim_names.grid_rows, r)
+        nc.create_dimension(si.dim_names.grid_cols, c)
 
         # write release group
         nc.write_variable('time', self.time, 'time_dim', dtype=np.float64,

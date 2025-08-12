@@ -514,6 +514,7 @@ class _BaseReader(ParameterBaseClass):
         s = f' Reading {buffer_index.size:2d} time steps, '
         s += f' for hindcast time steps {nt_available[0]:02d}:{nt_available[-1]:02d}'
         s += f' into ring buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03d} '
+        s+=  f',  for run "{si.run_info.output_file_base}"'
         si.msg_logger.progress_marker(s)
 
         # read grid time, zlevel
@@ -550,7 +551,7 @@ class _BaseReader(ParameterBaseClass):
         bi['time_steps_in_buffer'] = nt_available.tolist()
         num_read = nt_available.size
         bi['buffer_available'] -= num_read
-        si.msg_logger.progress_marker(f' read {num_read:3d} time steps in  {perf_counter() - t0:3.1f} sec, from {info["input_dir"]}', tabs=2)
+        si.msg_logger.progress_marker(f' read {num_read:3d} time steps in  {perf_counter() - t0:3.1f} sec, from {info["input_dir"]} ', tabs=2)
 
 
     def read_field_data(self, name, field, nt_index=None):

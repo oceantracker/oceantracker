@@ -560,8 +560,8 @@ class OceanTrackerParamsRunner(object):
 
                 # full parameters
                 p = deepcopy(i2.params)
-                if key == 'release_groups':  # don't put release point locations which may make json too big
-                    p['points'] = 'points may be too large for json, read release_groups netCDF file, '
+                if key == 'release_groups' and p['points'].shape[0] > 100:  # don't put release point locations which may make json too big
+                    p['points'] = 'more than 100 points for this release group, so  too large for json, read release_groups netCDF file, '
                 d['working_params']['class_roles'][key][key2] = p
 
         # rewrite release groups in net cdf

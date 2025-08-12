@@ -2,8 +2,8 @@
 # all require working_indices_buffer ,n_active , which hold isActive indices in a fixed sized buffer
 # all used numpy arrays as input, or value values., plus interger array of isActive indices/particle numbers to work on
 import numpy as np
-from oceantracker.util.numba_util import njitOT, njitOTparallel
-import numba as nb
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
+
 
 # set value, add_value and get_values are wrapped by methods of particle properties, so not normallu called directly
 def get_values(x1, active):
@@ -15,11 +15,11 @@ def get_values(x1, active):
 def set_value(x1, value, active):
     # set values ,  x1 = value for active
     if x1.ndim == 1:     # 1D
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             x1[n] = value
     else:
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
                 x1[n, m] = value
@@ -32,11 +32,11 @@ def set_values(x1, values, active):
     if firstDim_notMatching(values, active):  raise Exception('set_values: values and active must have same first dim')
 
     if x1.ndim ==1:  # 1D
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             x1[n] = values[nn]
     else: #case Dim
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
                 x1[n, m] = values[nn, m]
@@ -45,11 +45,11 @@ def set_values(x1, values, active):
 def add_value_to(x1, value, active):
     # x1 += value
     if x1.ndim == 1:  # 1D
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             x1[n] += value
     else:
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
                 x1[n, m] += value
@@ -64,31 +64,31 @@ def add_values_to(x1, values, active, scale=1.0):
     if firstDim_notMatching(values, active): raise Exception('add_values_to: active and first dim of values must be the same size')
 
     if x1.ndim == 1: # 1D
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             x1[n] += values[nn] * scale
     else:
         for nn in range(active.size):
             n = active[nn]
-            for m in nb.prange(x1.shape[1]):
+            for m in prange(x1.shape[1]):
                 x1[n, m ] += values[nn, m] * scale
 
 # below are currently only called directly using pointers
 # but are not used often, mainly in time step of solver
 
-@njitOTparallel
+#@njitOTparallel
 def copy(x1, x2, active):
     # x1 = x2 for active particles
 
     if dim_notMatching(x1, x2): raise Exception('copy: x1 and x2 must be the same size')
 
     if x1.ndim == 1: # 1D
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             x1[n] = x2[n]
     # faster if range of 2nd dimension explicit
     else:
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
                 x1[n, m] = x2[n, m]
@@ -100,12 +100,12 @@ def scale_and_copy(x1, x2, active, scale=1.0):
     if dim_notMatching(x1, x2): raise Exception('copy: x1 and x2 must be the same size')
 
     if x1.ndim == 1: # 1D
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             x1[n] = x2[n]*scale
     # faster if range of 2nd dimension explicit
     else:
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
                 x1[n, m] = x2[n, m]*scale
@@ -120,11 +120,11 @@ def add_to(x1, x2, active, scale=1.0):
     if dim_notMatching(x1, x2):  raise Exception('add_to: x1 and x2 must be the same size')
 
     if x1.ndim == 1: # 1D
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             x1[n] += x2[n] * scale
     else:
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
                  x1[n, m]  += x2[n,m]*scale
@@ -137,11 +137,11 @@ def set_value_and_add(x1, value, x2, active, scale=1.0):
     if dim_notMatching(x1, x2):  raise Exception('set_value_and_add: x1 and x2 must be the same size')
 
     if x1.ndim == 1: # 1D
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             x1[n] = value + x2[n]*scale
     else:
-        for nn in nb.prange(active.size):
+        for nn in prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
                 x1[n, m] = value + x2[n,m]*scale
