@@ -153,5 +153,15 @@
             "class_name": "PolygonStats2D_ageBased",
             "name": "my_poly_stats_time_age"
         }
-    ]
+    ],
+    "velocity_modifiers": [
+        {
+            "value": -0.0,
+            "class_name": "TerminalVelocity",
+            "name": "terminal_velocity_test"
+        }
+    ],
+    "resuspension": {
+        "critical_friction_velocity": 0.0
+    }
 }

@@ -1,12 +1,11 @@
 from psutil import cpu_count
-import  os
 physical_cores = cpu_count(logical=False)
 import  numpy as np
 from numba import njit, get_num_threads, set_num_threads, prange, get_thread_id
 set_num_threads(physical_cores)
 from time import perf_counter
 
-@njit(parallel=False)
+@njit(parallel=True)
 def copy(x,out,sel):
     for nn in prange(sel.size):
         n = sel[nn]

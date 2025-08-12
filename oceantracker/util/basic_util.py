@@ -33,8 +33,8 @@ def deep_dict_update(d, d_updates):
 
 
 
-def nopass(msg=''):
-    raise Exception("Missing method, base method must be overwritten -- " +msg)
+def nopass(msg='',c=None):
+    raise Exception(F"Missing method, base method must be overwritten -- {msg}, Class={str(c)}")
 
 
 def dummy_fuction(): pass

@@ -49,6 +49,10 @@ def main(args):
 
     ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time_age,name='my_poly_stats_time_age',   polygon_list=[dict(points=hm['polygon'])]))
 
+    ot.add_class('velocity_modifiers', name='terminal_velocity_test',
+                 class_name='TerminalVelocity', value=-0.000)
+    ot.add_class('resuspension', critical_friction_velocity=0.000)
+
 
     case_info_file = ot.run()
 

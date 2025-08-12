@@ -1,13 +1,13 @@
 # modfiy aspects pof all isActive particles, ie moving and stranded
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 import numpy as np
-from oceantracker.resuspension.resuspension import Resuspension
+from oceantracker.resuspension._base_resuspension import _BaseResuspension
 from oceantracker.util.numba_util import njitOT, njitOTparallel
 from oceantracker.shared_info import  shared_info as si
 
 from numba import  njit
 
-class BasicResuspension(Resuspension):
+class BasicResuspension(_BaseResuspension):
     '''
     A very basic resupension, resuspend a distance of random walk, with variance equal to the constant vertical eddy viscosity
      '''
