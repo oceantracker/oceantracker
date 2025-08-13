@@ -52,7 +52,7 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
         IDs_event_began, IDs_event_ended = self.find_events(current_polygon_for_event_logging.used_buffer() >= 0)
 
         # for new arrivals in polygon, note the polygon ID
-        particle_operations_util.copy1D(event_polygon.data, current_polygon_for_event_logging.data, IDs_event_began)
+        particle_operations_util.copy(event_polygon.data, current_polygon_for_event_logging.data, IDs_event_began)
 
 
         # note those exiting reatin their polygon ID for write
