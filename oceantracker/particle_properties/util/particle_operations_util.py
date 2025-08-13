@@ -77,31 +77,33 @@ def add_values_to(x1, values, active, scale=1.0):
 # but are not used often, mainly in time step of solver
 
 @njitOTparallel
-def copy(x1, x2, active):
+def copy1D(x1, x2, active):
     # x1 = x2 for active particles
+    for nn in prange(active.size):
+        n = active[nn]
+        x1[n] = x2[n]
 
-    if dim_notMatching(x1, x2): raise Exception('copy: x1 and x2 must be the same size')
-
-    if x1.ndim == 1: # 1D
-        for nn in prange(active.size):
-            n = active[nn]
-            x1[n] = x2[n]
+@njitOTparallel
+def copy2D(x1, x2, active):
     # faster if range of 2nd dimension explicit
-    elif x1.shape[1] == 2:
-        for nn in prange(active.size):
-            n = active[nn]
-            for m in range(2):
-                x1[n, m] = x2[n, m]
-    elif x1.shape[1] == 3:
-        for nn in prange(active.size):
-            n = active[nn]
-            for m in range(3):
-                x1[n, m] = x2[n, m]
-    else:
-        for nn in prange(active.size):
-            n = active[nn]
-            for m in range(x1.shape[1]):
-                x1[n, m] = x2[n, m]
+    for nn in prange(active.size):
+        n = active[nn]
+        for m in range(2):
+            x1[n, m] = x2[n, m]
+
+@njitOTparallel
+def copy3D(x1, x2, active):
+    for nn in prange(active.size):
+        n = active[nn]
+        for m in range(3):
+            x1[n, m] = x2[n, m]
+
+@njitOTparallel
+def copyND(x1, x2, active):
+    for nn in prange(active.size):
+        n = active[nn]
+        for m in range(x1.shape[1]):
+            x1[n, m] = x2[n, m]
 
 @njitOTparallel
 def scale_and_copy(x1, x2, active, scale=1.0):

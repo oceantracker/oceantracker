@@ -108,9 +108,16 @@ class _BaseParticleProperty(ParameterBaseClass):
     def copy(self, prop_name, active):
         # copy from named particle
         part_prop= si.class_roles.particle_properties
-
-        particle_operations_util.copy(self.data, part_prop[prop_name].data, active)
-
+        d = self.data
+        if d.ndim == 1:  # 1D
+            particle_operations_util.copy1D(d, part_prop[prop_name].data, active)
+        # faster if range of 2nd dimension explicit
+        elif d.shape[1] == 2:
+            particle_operations_util.copy2D(d, part_prop[prop_name].data, active)
+        elif d.shape[1] == 3:
+            particle_operations_util.copy3D(d, part_prop[prop_name].data, active)
+        else:
+            particle_operations_util.copyND(self.data, part_prop[prop_name].data, active)
     def fill_buffer(self,value):
         self.data[:si.run_info.particles_in_buffer,...] = value
 

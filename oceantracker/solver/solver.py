@@ -233,11 +233,11 @@ class Solver(ParameterBaseClass):
         fgm = si.core_class_roles.field_group_manager
         part_prop = si.class_roles.particle_properties
 
-        # used  copy particle operation directly to save overhead cost
-        particle_operations_util.copy(part_prop['x_last_good'].data, part_prop['x'].data, is_moving)
-        particle_operations_util.copy(part_prop['n_cell_last_good'].data, part_prop['n_cell'].data, is_moving)
-        particle_operations_util.copy(part_prop['status_last_good'].data, part_prop['status'].data, is_moving)
-        particle_operations_util.copy(part_prop['bc_coords_last_good'].data, part_prop['bc_coords'].data, is_moving)
+        # record las t good values og key prop
+        part_prop['x_last_good'].copy('x', is_moving)
+        part_prop['n_cell_last_good'].copy('n_cell', is_moving)
+        part_prop['status_last_good'].copy('status', is_moving)
+        part_prop['bc_coords_last_good'].copy('bc_coords', is_moving)
 
         # do time step
         dt = si.settings.time_step*si.run_info.model_direction
