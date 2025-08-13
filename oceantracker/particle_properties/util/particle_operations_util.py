@@ -73,9 +73,6 @@ def add_values_to(x1, values, active, scale=1.0):
             for m in prange(x1.shape[1]):
                 x1[n, m ] += values[nn, m] * scale
 
-# below are currently only called directly using pointers
-# but are not used often, mainly in time step of solver
-
 @njitOTparallel
 def copy1D(x1, x2, active):
     # x1 = x2 for active particles
@@ -104,7 +101,8 @@ def copyND(x1, x2, active):
         n = active[nn]
         for m in range(x1.shape[1]):
             x1[n, m] = x2[n, m]
-
+# below are currently only called directly using pointers
+# but are not used often, mainly in time step of solver
 @njitOTparallel
 def scale_and_copy(x1, x2, active, scale=1.0):
     # x1 = x2*scale for active particles
