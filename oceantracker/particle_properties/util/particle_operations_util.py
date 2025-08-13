@@ -87,6 +87,16 @@ def copy(x1, x2, active):
             n = active[nn]
             x1[n] = x2[n]
     # faster if range of 2nd dimension explicit
+    elif x1.shape[1] == 2:
+        for nn in prange(active.size):
+            n = active[nn]
+            for m in range(2):
+                x1[n, m] = x2[n, m]
+    elif x1.shape[1] == 3:
+        for nn in prange(active.size):
+            n = active[nn]
+            for m in range(3):
+                x1[n, m] = x2[n, m]
     else:
         for nn in prange(active.size):
             n = active[nn]
