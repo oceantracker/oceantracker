@@ -106,6 +106,7 @@ class FieldGroupManager(ParameterBaseClass):
 
 
     def update_readers(self, time_sec):
+
         self.reader.update(time_sec)
 
     def update_tidal_stranding_status(self, time_sec, alive):

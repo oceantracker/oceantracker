@@ -209,7 +209,7 @@ class ParticleGroupManager(ParameterBaseClass):
         for name, i in cr.particle_properties.items():
             if isinstance(i, CustomParticleProperty):
                 i.timed_update(n_time_step, time_sec, active)
-        si.block_timer('Update custom particle properties',t0)
+        si.block_timer('Update custom particle prop.',t0)
 
 
     def status_counts_and_kill_old_particles(self, t):

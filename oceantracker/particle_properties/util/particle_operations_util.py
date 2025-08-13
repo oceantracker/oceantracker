@@ -76,7 +76,7 @@ def add_values_to(x1, values, active, scale=1.0):
 # below are currently only called directly using pointers
 # but are not used often, mainly in time step of solver
 
-#@njitOTparallel
+@njitOTparallel
 def copy(x1, x2, active):
     # x1 = x2 for active particles
 

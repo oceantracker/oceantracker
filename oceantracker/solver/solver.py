@@ -57,9 +57,10 @@ class Solver(ParameterBaseClass):
         model_times = si.run_info.times
         ml.hori_line()
         # initial buffer fill
-        tr0=perf_counter()
+        tr0 = perf_counter()
         fgm.update_readers(model_times[0])
-        si.block_timer('Read hindcast', tr0)
+        si.block_timer('Reading hindcast', tr0)
+
 
         # run forwards through model time variable, which for backtracking are backwards in time
         ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)}')
