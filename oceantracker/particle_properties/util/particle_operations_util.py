@@ -117,21 +117,11 @@ def add_to(x1, x2, active, scale=1.0):
         for nn in prange(active.size):
             n = active[nn]
             x1[n] += x2[n] * scale
-    elif x1.shape[1] == 2:
-        for nn in prange(active.size):
-            n = active[nn]
-            for m in range(2):
-                 x1[n, m]  += x2[n,m]*scale
-    elif x1.shape[1] == 3:
-        for nn in prange(active.size):
-            n = active[nn]
-            for m in range(3):
-                 x1[n, m]  += x2[n,m]*scale
     else:
         for nn in prange(active.size):
             n = active[nn]
             for m in range(x1.shape[1]):
-                 x1[n, m]  += x2[n,m]*scale
+                 x1[n, m]  += x2[n, m]*scale
 
 @njitOTparallel
 def set_value_and_add(x1, value, x2, active, scale=1.0):

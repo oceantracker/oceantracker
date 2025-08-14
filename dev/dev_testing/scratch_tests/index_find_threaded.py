@@ -5,7 +5,7 @@ import  numpy as np
 from numba import njit, get_num_threads, set_num_threads, prange, get_thread_id
 set_num_threads(physical_cores)
 from time import perf_counter
-
+from find_smid import asm
 @njit()
 def sel_part(x):
     return x > 0.1
@@ -35,10 +35,12 @@ def IDfind_thread(x,IDthread,found_per_thread,starts,IDsplit,out):
 
     for nthread in prange(found_per_thread.size):
         ns = starts[nthread]
+        #out[ ns:ns + found_per_thread[nthread]] = IDthread[nthread, :found_per_thread[nthread]]
         for n in range(found_per_thread[nthread]):
             out[ ns + n] = IDthread[nthread, n]
 
     return out[:found]
+
 
 
 reps = 10
@@ -55,8 +57,8 @@ for n ,N in enumerate(Ns):
     IDs = np.arange(N,dtype=np.int32)
     IDsplit = np.array_split(IDs, get_num_threads())
     x= np.random.rand(N)
-    out1= ID.copy()
-    out2 = ID.copy()
+    out1= x.copy()
+    out2 = x.copy()
 
 
     # compile code
@@ -74,7 +76,9 @@ for n ,N in enumerate(Ns):
         sel2 = IDfind_thread(x,IDthread,IDperThread,starts,IDsplit, out2)
     t2[n] = perf_counter()-t0
 
-
+asm(IDfind)
+asm(IDfind_thread)
+print(t1[-1],t2[-1])
 from matplotlib import  pyplot as plt
 plt.plot(Ns,t1,label='loop')
 plt.plot(Ns,t2,label='threaded find loop')

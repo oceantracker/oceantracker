@@ -5,7 +5,7 @@ import  numpy as np
 from numba import njit, get_num_threads, set_num_threads, prange, get_thread_id
 set_num_threads(physical_cores)
 from time import perf_counter
-
+from find_smid import asm
 @njit(parallel=True)
 def copy1(x,out,sel):
     if x.ndim==1:
@@ -32,8 +32,10 @@ def copy2(x,out,sel):
     elif x.ndim == 3:
         for nn in prange(sel.size):
             n = sel[nn]
+            o= out[n,:]
+            xx = x[n, :]
             for m in range(3):
-                out[n, m] = x[n, m]
+                o[m] = xx[ m]
 
 
 
@@ -77,6 +79,8 @@ for n ,N in enumerate(Ns):
         copy2(x,out2,sel)
     t2[n] = perf_counter()-t0
 
+asm(copy1)
+asm(copy2)
 print('relative speed',t2[-1], t2[-1]/t1[-1])
 from matplotlib import  pyplot as plt
 plt.plot(Ns,t1,label='copy 1')
