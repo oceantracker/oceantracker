@@ -180,8 +180,10 @@ my_poly_stats_time =dict(name='my_poly_stats_time',
         z_min= -2,
         grid_size= [120, 121])
 
-my_poly_stats_time_age = deepcopy(my_poly_stats_time)
-my_poly_stats_time_age.update(class_name='PolygonStats2D_ageBased',name='my_poly_stats_time_age',max_age_to_bin=4*24*3600)
+my_poly_stats_age = deepcopy(my_poly_stats_time)
+my_poly_stats_age.update(class_name='PolygonStats2D_ageBased',
+                         name='my_poly_stats_age',
+                         max_age_to_bin=4*24*3600)
 
 LCS = dict(name='LSC test',
            class_name='dev_LagarangianStructuresFTLE2D',
