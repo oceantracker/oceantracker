@@ -10,7 +10,10 @@ def main(args):
                 screen_output_time_interval=1800,
              use_A_Z_profile=False,
             regrid_z_to_uniform_sigma_levels=False,
-             NUMBA_cache_code=True,)
+             NUMBA_cache_code=True,
+                use_dispersion=False,
+                use_resuspension=False,
+                )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
                time_steps_per_per_file= None if args.reference_case else 10  # dont split files ref case to test reading split files

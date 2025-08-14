@@ -175,9 +175,8 @@ my_heat_map_age = dict(name='my_heatmap_age',
 my_poly_stats_time =dict(name='my_poly_stats_time',
         class_name='PolygonStats2D_timeBased',
         update_interval= 3600,
-        particle_property_list=['water_depth'],
+        particle_property_list=['a_pollutant','water_depth'],
         #status_list=[],
-        z_min= -2,
         grid_size= [120, 121])
 
 my_poly_stats_age = deepcopy(my_poly_stats_time)
@@ -231,9 +230,9 @@ def compare_reference_run_tracks(case_info_file, args):
     # print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
 
     print(f'(x,y,z) differences from reference run: "{path.basename(case_info_file).split(".")[0]}"' )
-    print(' min  ', np.nanmin(np.nanmin(dx, axis=0), axis=0))
-    print(' mean ', np.nanmean(np.nanmean(dx, axis=0), axis=0))
-    print(' max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
+    print('\t min  ', np.nanmin(np.nanmin(dx, axis=0), axis=0))
+    print('\t mean ', np.nanmean(np.nanmean(dx, axis=0), axis=0))
+    print('\t max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
 
     dt = tracks['time'] - tracks_ref['time']
     print('times,  min/max diff ', np.nanmin(dt), np.nanmax(dt))
@@ -259,12 +258,13 @@ def compare_reference_run_stats(case_info_file, args):
         if name not in case_info['output_files']['particle_statistics']: continue
         stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
+
         dc = stats['count'] - stats_ref['count']
         print(f'Stats  compare ref: "{name}"')
         print('\t counts', stats_ref['count'].sum(), stats['count'].sum(),'max diff counts-ref run counts =',np.nanmax(np.abs(dc)))
         for prop_name in params['particle_property_list']:
-            dc = stats[prop_name] - stats_ref[prop_name]
-            print(f'\t Property  "{prop_name}"', 'max diff =', np.nanmax(np.abs(dc)))
+            dc = np.abs(stats[prop_name] - stats_ref[prop_name])
+            print(f'\t Property  "{prop_name}"', 'max diff =', np.max(dc[np.isfinite(dc)]))
 
     pass
 def show_track_plot(case_info_file, args,colour_with=None):
