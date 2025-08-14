@@ -59,7 +59,7 @@ def main(args):
         params.update( restart = True,throw_debug_error=0)
         case_info_file = run(params)
 
-    test_definitions.compare_reference_run(case_info_file, args,compare_stats=True)
+    test_definitions.compare_reference_run_tracks(case_info_file, args, compare_stats=True)
     test_definitions.show_track_plot(case_info_file, args)
 
     return  ot.params

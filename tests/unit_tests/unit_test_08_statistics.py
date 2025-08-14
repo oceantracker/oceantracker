@@ -45,9 +45,8 @@ def main(args):
     # add a gridded particle statistic to plot heat map
     ps = dict(test_definitions.my_heat_map_time)
     ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time,name='polystats_time',  polygon_list=[dict(points=hm['polygon'])]))
-
-
     ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time_age,name='my_poly_stats_time_age',   polygon_list=[dict(points=hm['polygon'])]))
+
 
     ot.add_class('velocity_modifiers', name='terminal_velocity_test',
                  class_name='TerminalVelocity', value=-0.0001)
@@ -56,16 +55,10 @@ def main(args):
 
     case_info_file = ot.run()
 
+    test_definitions.compare_reference_run_tracks(case_info_file, args)
+    test_definitions.compare_reference_run_stats(case_info_file, args)
 
     test_definitions.show_track_plot(case_info_file, args)
-    from oceantracker.read_output.python import load_output_files
-    # check stats
-    for name in ['polystats_time', 'my_poly_stats_time_age']:
-        #stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
-        stats= load_output_files.load_stats_data(case_info_file, name=name)
-        #dc = stats['count'] - stats_ref['count']
-        #print(' stats  name ',  name,'counts', stats_ref['count'].sum(), stats['count'].sum(),'max diff counts-ref run counts =',np.nanmax(np.abs(dc)))
-
     return  ot.params
 
 

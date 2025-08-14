@@ -1,9 +1,9 @@
 import numpy as np
 import oceantracker.particle_statistics.gridded_statistics2D as gridded_statistics2D
-from numba import njit
+
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC,merge_params_with_defaults
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, prange, njitOTparallel
 from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
 
 from oceantracker.shared_info import shared_info as si
@@ -75,10 +75,10 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x'])
 
-    def set_up_binned_variables(self,nc):
+    def _create_file_variables(self,nc):
 
         if not self.params['write']: return
-        
+
         dim_names = ('time_dim', 'release_group_dim', 'polygon_dim')
         dim_sizes  = (None, len(si.class_roles.release_groups), nc.dim('polygon_dim'))
 
@@ -114,7 +114,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
         # update time stats  recorded
 
         # set up pointers to particle properties
-        p_groupID = part_prop['IDrelease_group'].used_buffer()
+        release_groupID = part_prop['IDrelease_group'].used_buffer()
         p_x       = part_prop['x'].used_buffer()
 
         # manual update which polygon particles are inside
@@ -122,15 +122,15 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
         inside_poly_prop.update(n_time_step,time_sec,sel)
 
         # do counts
-        self.do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
-                                         p_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_data_list, self.sum_prop_data_list, sel)
+        self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
+                                         release_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_data_list, self.sum_prop_data_list, sel)
 
 
     def info_to_write_at_end(self):pass  # nothing extra to write
 
     @staticmethod
     @njitOT
-    def do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list, active):
+    def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list, sel):
 
         # zero out counts in the count time slices
         count[:] = 0
@@ -138,7 +138,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
 
-        for n in active:
+        for n in sel:
             n_group= group_ID[n]
             count_all_particles[n_group] += 1  # all particles counter whether in a polygon or not
             n_poly = inside_polygons[n]
@@ -161,7 +161,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
         self.check_class_required_fields_prop_etc(required_props_list=['age'])
 
 
-    def set_up_binned_variables(self,nc):
+    def _create_file_variables(self,nc):
 
         # set up space for requested particle properties
         dims= (self.grid['age_bins'].shape[0], len(si.class_roles.release_groups), len(self.params['polygon_list']))
@@ -183,7 +183,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
         stats_grid = self.grid
 
         # set up pointers to particle properties, only point to those in buffer as no need to look at those beyond buffer
-        p_groupID   = part_prop['IDrelease_group'].used_buffer()
+        release_groupID   = part_prop['IDrelease_group'].used_buffer()
         p_x         = part_prop['x'].used_buffer()
         p_age       = part_prop['age'].used_buffer()
 
@@ -192,7 +192,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
         inside_poly_prop.update(n_time_step, time_sec, sel)
 
         # loop over statistics polygons
-        self.do_counts_and_summing_numba(inside_poly_prop.used_buffer(), p_groupID, p_x, self.count_age_bins,
+        self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(), release_groupID, p_x, self.count_age_bins,
                                          self.count_all_particles, self.prop_data_list, self.sum_prop_data_list, sel, stats_grid['age_bin_edges'], p_age)
 
     def info_to_write_at_end(self):
@@ -219,13 +219,13 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
 
     @staticmethod
     @njitOT
-    def do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list,
-                                     active, age_bin_edges, age):
+    def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list,
+                                     sel, age_bin_edges, age):
 
         # (no zeroing as accumulated over  whole run)
         da = age_bin_edges[1] - age_bin_edges[0]
 
-        for n in active:
+        for n in sel:
 
             na = int(np.floor((age[n] - age_bin_edges[0]) / da))
             if 0 <= na < (age_bin_edges.shape[0] - 1):

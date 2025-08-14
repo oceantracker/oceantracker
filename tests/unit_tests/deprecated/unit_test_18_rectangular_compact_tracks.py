@@ -36,7 +36,7 @@ def main(args):
     else:
         case_info_file=  r"C:\Auck_work\oceantracker_output\unit_tests\unit_test_18_rectangular_compact_tracks_00\unit_test_18_rectangular_compact_tracks_00_caseInfo.json"
 
-    test_definitions.compare_reference_run(case_info_file,args)
+    test_definitions.compare_reference_run_tracks(case_info_file, args)
 
 
     return  ot.params

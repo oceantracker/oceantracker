@@ -36,7 +36,7 @@ def main(args):
 
     case_info_file = ot.run()
 
-    test_definitions.compare_reference_run(case_info_file, args)
+    test_definitions.compare_reference_run_tracks(case_info_file, args)
 
 
 

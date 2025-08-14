@@ -48,12 +48,12 @@ def main(args):
     else:
         case_info_file = test_definitions.get_case_inf_name(ot.params)
 
-    test_definitions.compare_reference_run(case_info_file, args)
+    test_definitions.compare_reference_run_tracks(case_info_file, args)
+    test_definitions.compare_reference_run_stats(case_info_file, args)
+
     tests=dict()
     tracks = test_definitions.load_tracks(case_info_file)
     tracks_ref = test_definitions.load_tracks(case_info_file, ref_case=True)
-
-
 
     # check z fractions are in range 0-1
     z_fraction= tracks['z_fraction']

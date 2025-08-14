@@ -42,7 +42,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.set_up_time_bins(nc)
 
         # set up space for sums of requested particle properties
-        self.set_up_binned_variables(nc)
+        self._create_file_variables(nc)
         self.info['type'] = 'gridded'
         self.set_up_part_prop_lists()
 
@@ -122,22 +122,24 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             x,y = np.meshgrid(stats_grid['x_bin_edges'][n_grid, :], stats_grid['y_bin_edges'][n_grid, :])
 
             if si.settings.use_geographic_coords:
-                x,y = cord_transforms.local_grid_deg_to_meters(x,y, x[0,0], y[0,0])
+                x, y = cord_transforms.local_grid_deg_to_meters(x,y, x[0,0], y[0,0])
             stats_grid['cell_area'][n_grid, :, :] =(x[:-1, 1:]-x[:-1, :-1])*(y[1:,:-1]-y[:-1:,:-1])
 
-        if self.params['write']:
-            nc.create_dimension('x_dim', stats_grid['x'].shape[1])
-            nc.create_dimension('y_dim', stats_grid['y'].shape[1])
-            nc.write_variable('x', stats_grid['x'], ['release_groups_dim', 'x_dim'], description='Mid point of grid cell', units='m or deg')
-            nc.write_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'], description='Mid point of grid cell')
-            nc.write_variable('x_grid', stats_grid['x_grid'], ['release_groups_dim', 'y_dim', 'x_dim'], description='x for mid point of grid cell, full grid')
-            nc.write_variable('y_grid', stats_grid['y_grid'], ['release_groups_dim', 'y_dim', 'x_dim'], description='y for mid point of grid cell, full grid')
-            nc.write_variable('cell_area', stats_grid['cell_area'], ['release_groups_dim', 'y_dim', 'x_dim'], description='Horizontal area of each cell', units='m^2')
-
-    def set_up_binned_variables(self,nc):
+    def _create_file_variables(self,nc):
         if not self.params['write']: return
 
         stats_grid = self.grid
+        nc.create_dimension('x_dim', stats_grid['x'].shape[1])
+        nc.create_dimension('y_dim', stats_grid['y'].shape[1])
+        nc.write_variable('x', stats_grid['x'], ['release_groups_dim', 'x_dim'], description='Mid point of grid cell',
+                          units='m or deg')
+        nc.write_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'], description='Mid point of grid cell')
+        nc.write_variable('x_grid', stats_grid['x_grid'], ['release_groups_dim', 'y_dim', 'x_dim'],
+                          description='x for mid point of grid cell, full grid')
+        nc.write_variable('y_grid', stats_grid['y_grid'], ['release_groups_dim', 'y_dim', 'x_dim'],
+                          description='y for mid point of grid cell, full grid')
+        nc.write_variable('cell_area', stats_grid['cell_area'], ['release_groups_dim', 'y_dim', 'x_dim'],
+                          description='Horizontal area of each cell', units='m^2')
 
         dim_names= ['time_dim', 'release_group_dim', 'y_dim', 'x_dim']
         dim_sizes =[None, len(si.class_roles.release_groups), stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
@@ -187,17 +189,17 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         stats_grid = self.grid
 
         # set up pointers to particle properties
-        p_groupID = part_prop['IDrelease_group'].used_buffer()
+        release_groupID = part_prop['IDrelease_group'].used_buffer()
         p_x= part_prop['x'].used_buffer()
 
-        self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
+        self._do_counts_and_summing_numba(release_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                                         self.count_time_slice, self.count_all_particles_time_slice,
                                         self.prop_data_list, self.sum_prop_data_list, sel)
         pass
 
     @staticmethod
     @njitOT
-    def do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, count, count_all_particles, prop_list, sum_prop_list, sel):
+    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, count, count_all_particles, prop_list, sum_prop_list, sel):
         # for time based heatmaps zero counts for one time slice
         count[:]=0
         count_all_particles[:] = 0
@@ -269,7 +271,7 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 
-    def set_up_binned_variables(self, nc):
+    def _create_file_variables(self, nc):
         # set up space for requested particle properties based on asge
 
         ml = si.msg_logger
@@ -295,23 +297,23 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
         # set up pointers to particle properties
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
-        p_groupID = part_prop['IDrelease_group'].used_buffer()
+        release_groupID = part_prop['IDrelease_group'].used_buffer()
         p_x = part_prop['x'].used_buffer()
         p_age = part_prop['age'].used_buffer()
 
-        self.do_counts_and_summing_numba(p_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'], self.count_age_bins,
+        self._do_counts_and_summing_numba(release_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'], self.count_age_bins,
                                          self.count_all_particles, self.prop_data_list, self.sum_prop_data_list, stats_grid['age_bin_edges'], p_age, sel)
 
 
     @staticmethod
     @njitOT
-    def do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, count, count_all_particles, prop_list, sum_prop_list,
-                                    age_bin_edges, age, active):
+    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, count, count_all_particles, prop_list, sum_prop_list,
+                                     age_bin_edges, age, sel):
 
         # (no zeroing as accumulated over  whole run)
         da = age_bin_edges[1] - age_bin_edges[0]
 
-        for n in active:
+        for n in sel:
             ng = group_ID[n]
             dx = x_edges[ng, 1] - x_edges[ng, 0]
             dy = y_edges[ng, 1] - y_edges[ng, 0]

@@ -2,7 +2,7 @@ from oceantracker.particle_statistics._base_location_stats import _BaseParticleL
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC, merge_params_with_defaults
 from copy import  deepcopy
 from oceantracker.release_groups.polygon_release import PolygonRelease
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 
 from oceantracker.shared_info import shared_info as si
 
@@ -67,7 +67,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         self.open_output_file()
 
         self.set_up_time_bins(self.nc)
-        self.set_up_binned_variables(self.nc)
+        self._create_file_variables(self.nc)
 
         self.set_up_part_prop_lists()
 
@@ -76,7 +76,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         params = self.params
         self.check_class_required_fields_prop_etc()
 
-    def set_up_binned_variables(self, nc):
+    def _create_file_variables(self, nc):
 
         if not self.params['write']: return
 
@@ -85,6 +85,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         nc.create_dimension('pulse_dim', dim_size=num_pulses)
         nc.create_variable('count', dim_names, np.int64, description='counts of particles in each pulse of release group inside release polygon at given times')
         nc.create_variable('count_all_selected_particles', ['time_dim', 'pulse_dim'], np.int64, description='counts of particles in each, whether inside polygon or not at given times')
+
         # set up space for requested particle properties
         # working count space
         self.count_time_slice = np.full((num_pulses,), 0, np.int64)
@@ -109,7 +110,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         inside_poly_prop.update(n_time_step, time_sec, sel)
 
         # do counts
-        self.do_counts_and_summing_numba(inside_poly_prop.data,
+        self._do_counts_and_summing_numba(inside_poly_prop.data,
                                          part_prop['IDrelease_group'].data,
                                          part_prop['IDpulse'].data,
                                          self.info['release_group_ID_to_count'],
@@ -125,9 +126,9 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
     @staticmethod
     @njitOT
-    def do_counts_and_summing_numba(in_polgon,
-                                    release_group_ID, pulse_ID, required_release_group,zrange, x, count,
-                                    count_all_particles, prop_list, sum_prop_list, active):
+    def _do_counts_and_summing_numba(in_polgon,
+                                     release_group_ID, pulse_ID, required_release_group, zrange, x, count,
+                                     count_all_particles, prop_list, sum_prop_list, sel):
         # count those of each pulse inside release polygon
 
         # zero out counts in the count time slices
@@ -136,7 +137,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
 
-        for n in active:
+        for n in sel:
             if  release_group_ID[n] == required_release_group:
                 pulse= pulse_ID[n]
 

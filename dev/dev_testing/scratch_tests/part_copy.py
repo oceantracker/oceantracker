@@ -32,10 +32,11 @@ def copy2(x,out,sel):
     elif x.ndim == 3:
         for nn in prange(sel.size):
             n = sel[nn]
-            o= out[n,:]
-            xx = x[n, :]
-            for m in range(3):
-                o[m] = xx[ m]
+            out [n, :] = x[n, :].copy()
+            #o= out[n,:]
+            #xx = x[n, :]
+            #for m in range(3):
+            #    o[m] = xx[ m]
 
 
 

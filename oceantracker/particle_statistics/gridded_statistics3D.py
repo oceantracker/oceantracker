@@ -78,19 +78,18 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         stats_grid['z_bin_edges'] = np.tile(base_z_bin_edges[np.newaxis,:], s)
         stats_grid['cell_volume'] = stats_grid['cell_area'] * dz
 
-        if self.params['write']:
-            nc.create_dimension('z_dim', vsize)
 
-    def set_up_binned_variables(self, nc):
-        if not self.params['write']: 
-            return
+
+    def _create_file_variables(self, nc):
+        if not self.params['write']:  return
 
         stats_grid = self.grid
-        
+        nc.create_dimension('z_dim', self.params['vertical_grid_size'])
         # Add z dimension to dimension lists
         dim_names = ['time_dim', 'release_group_dim', 'z_dim', 'y_dim', 'x_dim']
         dim_sizes = [None, len(si.class_roles.release_groups), 
                     stats_grid['z'].shape[1], stats_grid['y'].shape[1], stats_grid['x'].shape[1]]
+
 
         nc.create_variable('count', dim_names, np.int64,
                            description='counts of particles in 3D grid at given times, for each release group')
@@ -112,7 +111,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
 
     @staticmethod
     @njitOT
-    def do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, z_edges, count, 
+    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, z_edges, count,
                                    count_all_particles, prop_list, sum_prop_list, sel):
         # Zero counts for this time slice
         count[:] = 0
@@ -121,6 +120,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
             sum_prop_list[m][:] = 0.
 
         for n in sel:
+
             ng = group_ID[n]
             count_all_particles[ng] += 1
 
@@ -149,10 +149,10 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         stats_grid = self.grid
 
         # Get particle properties
-        p_groupID = part_prop['IDrelease_group'].used_buffer()
+        release_groupID = part_prop['IDrelease_group'].used_buffer()
         p_x = part_prop['x'].used_buffer()
 
-        self.do_counts_and_summing_numba(p_groupID, p_x, 
+        self._do_counts_and_summing_numba(release_groupID, p_x, 
                                       stats_grid['x_bin_edges'],
                                       stats_grid['y_bin_edges'],
                                       stats_grid['z_bin_edges'],

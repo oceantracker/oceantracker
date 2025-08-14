@@ -211,11 +211,11 @@ def read_tracks(case_info_file, ref_case=False,fraction_to_read=None):
     return d
 def get_case_inf_name(params):
     return path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base']+'_caseInfo.json')
-def compare_reference_run(case_info_file, args,compare_stats=True):
-    from oceantracker.read_output.python import load_output_files
+def compare_reference_run_tracks(case_info_file, args):
+
 
     if case_info_file is None : return
-    case_info = load_output_files.read_case_info_file(case_info_file)
+
 
     reference_case_info_file = case_info_file.replace('unit_tests', 'unit_test_reference_cases')
     if args.reference_case:
@@ -241,18 +241,29 @@ def compare_reference_run(case_info_file, args,compare_stats=True):
         plt.plot(np.arange(dx.shape[0]),tracks[v]-tracks_ref[v] )
         plt.show(block=True)
 
-    if not compare_stats : return
+def compare_reference_run_stats(case_info_file, args):
+    from oceantracker.read_output.python import load_output_files
+    case_info = load_output_files.read_case_info_file(case_info_file)
+
+    reference_case_info_file = case_info_file.replace('unit_tests', 'unit_test_reference_cases')
+    if args.reference_case:
+        # rewrite reference case output
+        shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)
+
+
     # check stats
-    for name in ['my_heatmap_time','my_poly_stats_time','my_heatmap_age']:
+    stats_params=case_info['working_params']['class_roles']['particle_statistics']
+    for name, params in stats_params.items():
         if name not in case_info['output_files']['particle_statistics']: continue
         stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
         dc = stats['count'] - stats_ref['count']
-        print(' stats  name ',  name,'counts', stats_ref['count'].sum(), stats['count'].sum(),'max diff counts-ref run counts =',np.nanmax(np.abs(dc)))
+        print(f'Stats  compare ref: "{name}"')
+        print('\t counts', stats_ref['count'].sum(), stats['count'].sum(),'max diff counts-ref run counts =',np.nanmax(np.abs(dc)))
+        for prop_name in params['particle_property_list']:
+            dc = stats[prop_name] - stats_ref[prop_name]
+            print(f'\t Property  "{prop_name}"', 'max diff =', np.nanmax(np.abs(dc)))
 
-    # check times
-    dt = np.abs(tracks['time'] - tracks_ref['time'])
-    print('max time difference, sec', np.max(dt))
     pass
 def show_track_plot(case_info_file, args,colour_with=None):
     from oceantracker.plot_output import plot_tracks
