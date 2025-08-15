@@ -9,61 +9,6 @@ from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_statistics.util import stats_util
 
-class _CorePolygonMethods(ParameterBaseClass):
-
-    def __init__(self):
-        super().__init__()
-        # set up info/attributes
-        self.add_default_params({'polygon_list': [],
-                                 'use_release_group_polygons': PVC(False, bool,doc_str = 'Omit polygon_list param and use all polygon release polygons as statistics/counting polygons, useful for building release group polygon to polygon connectivity matrix.'),
-                                 })
-
-        self.remove_default_params(['grid_center','release_group_centered_grids', 'grid_span' ])
-        self.file_tag = 'polygon_stats'
-        self.info['type'] = 'polygon'
-
-    def add_required_classes_and_settings(self):
-        info = self.info
-        # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
-        info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
-        si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D',
-                     name=info['inside_polygon_particle_prop'],
-                     polygon_list=self.params['polygon_list'], write=False)
-
-    def initial_setup(self, **kwargs):
-
-        ml = si.msg_logger
-        params = self.params
-
-        # pre fill  polygon list from release groups if requested
-        if params['use_release_group_polygons']:
-            params['polygon_list']=[]
-            for name, i in si.class_roles.release_groups.items():
-                if i.info['release_type'] == 'polygon':
-                    params['polygon_list'].append({'name': name, 'points':i.params['points']})
-
-            if len(params['polygon_list']) == 0:
-                ml.msg('There are no polygon releases to use as statistic polygons',
-                                  hint='must have at least one polygon release defined to use the use_release_group_polygons parameter, or use statistics polygon_list parameter',
-                                   fatal_error=True, caller=self)
-        else:
-            # use given polygon list
-            for n, p in enumerate(params['polygon_list']):
-                p = merge_params_with_defaults(p,  si.default_polygon_dict_params,
-                                si.msg_logger, crumbs='polygon_statistics_merging polygon list')
-
-        if len(params['polygon_list'])==0:
-            ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,
-                        fatal_error=True,hint= 'eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
-
-        # do standard stats initialize
-        super().initial_setup()  # set up using regular grid for  stats
-
-
-
-    def set_up_spatial_bins(self,nc ):
-        add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
-
 class PolygonStats2D_timeBased(_BaseParticleLocationStats):
     # class to hold counts of particles inside 2D polygons squares
 
@@ -72,7 +17,6 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         # set up info/attributes
         self.add_default_params({'role_output_file_tag': PVC('stats_polygon_time',str)})
         self.add_polygon_params()
-
 
     def initial_setup(self):
         # set up regular grid for  stats
@@ -91,7 +35,6 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         self.set_up_part_prop_lists()
 
         nc = self.open_output_file()
-
 
     def open_output_file(self):
         nc = super().open_output_file()
