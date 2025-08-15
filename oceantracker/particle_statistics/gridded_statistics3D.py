@@ -51,9 +51,9 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                           description='Volume of each 3D grid cell')
         
 
-    def set_up_spatial_bins(self, nc):
+    def create_grid_variables(self, nc):
         # First set up x,y bins using parent method
-        super().set_up_spatial_bins(nc)
+        super().create_grid_variables(nc)
         
         # Then add z bins
         stats_grid = self.grid

@@ -46,7 +46,8 @@ class NetCDFhandler(object):
     def create_variable(self, name, dimList, dtype, description=None, fill_value=None, units=None,
                         attributes=None, chunksizes=None, compression_level=0):
         # add and write a variable of given nane and dim name list
-        if type(dimList) != list and type(dimList) != tuple: dimList = [dimList]
+        if type(dimList) ==str: dimList=[dimList]
+        dimList = list(dimList)
         attributes = deepcopy(attributes)
         dtype = np.dtype(dtype) # convert string dtypes
         if attributes is not None and '_FillValue' in attributes:

@@ -126,10 +126,14 @@ class _DimensionNames(_AttribDict):
     vector3D: str = 'vector3D'
     triangle: str = 'triangle_dim'
     age: str = 'age_dim'
-    grid_rows: str = 'grid_rows_dim'
-    grid_cols: str = 'grid_cols_dim'
+    x: str = 'x_dim'
+    y: str = 'y_dim'
     node  = 'node_dim'
     cell = 'cell_dim'
+    release_group= 'release_group_dim'
+    polygons= 'polygon_dim'
+
+
 
 cell_search_status_flags = _CellSearchStatusFlags()
 

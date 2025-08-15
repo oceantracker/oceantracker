@@ -178,6 +178,13 @@ my_poly_stats_time =dict(name='my_poly_stats_time',
         particle_property_list=['a_pollutant','water_depth'],
         #status_list=[],
         )
+my_poly_stats_age = dict(class_name='PolygonStats2D_ageBased',
+                         name='my_poly_stats_age',
+                         max_age_to_bin=4*24*3600,
+                         update_interval=3600,
+                         particle_property_list=['a_pollutant', 'water_depth'],
+                         )
+
 my_resident_in_polygon =dict(name='my_resident_in_polygon',
         class_name='ResidentInPolygon',
         name_of_polygon_release_group= 'my_polygon_release',
@@ -185,10 +192,7 @@ my_resident_in_polygon =dict(name='my_resident_in_polygon',
         particle_property_list=['a_pollutant','water_depth'],
         #status_list=[],
         )
-my_poly_stats_age = deepcopy(my_poly_stats_time)
-my_poly_stats_age.update(class_name='PolygonStats2D_ageBased',
-                         name='my_poly_stats_age',
-                         max_age_to_bin=4*24*3600)
+
 
 LCS = dict(name='LSC test',
            class_name='dev_LagarangianStructuresFTLE2D',
@@ -265,12 +269,22 @@ def compare_reference_run_stats(case_info_file, args):
         stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
 
-        dc = stats['count'] - stats_ref['count']
+
         print(f'Stats  compare ref: "{name}"')
-        print('\t counts', stats_ref['count'].sum(), stats['count'].sum(),'max diff counts-ref run counts =',np.nanmax(np.abs(dc)))
+        print('\t counts', stats_ref['count'].sum(), stats['count'].sum(),
+              'max diff counts-ref run counts =',np.max(np.abs(stats['count'] - stats_ref['count'])))
+        print('\t count all selected', stats_ref['count_all_selected_particles'].sum(),
+              stats['count_all_selected_particles'].sum(),
+              'max diff counts-ref run counts =',
+              np.max(np.abs(stats['count_all_selected_particles'] - stats_ref['count_all_selected_particles'])))
+
+        print('\t count all alive', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
+                      'max diff counts-ref run counts =',np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])))
+
         for prop_name in params['particle_property_list']:
             dc = np.abs(stats[prop_name] - stats_ref[prop_name])
-            print(f'\t Property  "{prop_name}"', 'max diff =', np.max(dc[np.isfinite(dc)]))
+            print(f'\t Property  "{prop_name}"', 'max mag.',
+                  np.nanmax(np.abs(stats[prop_name])), np.nanmax(np.abs(stats_ref[prop_name])), ', max diff =', np.max(dc[np.isfinite(dc)]))
 
     pass
 def show_track_plot(case_info_file, args,colour_with=None):

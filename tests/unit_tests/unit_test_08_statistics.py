@@ -42,10 +42,11 @@ def main(args):
     # add a  particle statistics
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_time))
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_age))
-    ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time,name='my_poly_stats_time',
+    ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time,
                                                polygon_list=[dict(points=hm['polygon'])]))
-    ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_age, name='my_poly_stats_age',
-                                           polygon_list=[dict(points=hm['polygon'])]))
+    ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_age,
+                                               polygon_list=[dict(points=hm['polygon'])]))
+
 
     #ot.add_class('particle_statistics',**test_definitions.my_resident_in_polygon)
 

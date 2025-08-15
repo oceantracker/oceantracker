@@ -66,7 +66,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
         self.open_output_file()
 
-        self._set_up_time_bins(self.nc)
+        self.create_time_variables(self.nc)
         self._create_file_variables(self.nc)
 
         self.set_up_part_prop_lists()
@@ -98,7 +98,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning= True)
 
-    def set_up_spatial_bins(self,nc ): pass
+    def create_grid_variables(self, nc): pass
 
     def do_counts(self,n_time_step, time_sec, sel):
 

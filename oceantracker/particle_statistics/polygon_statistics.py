@@ -1,12 +1,13 @@
 import numpy as np
 import oceantracker.particle_statistics.gridded_statistics2D as gridded_statistics2D
-
+from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC,merge_params_with_defaults
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.util.numba_util import njitOT, prange, njitOTparallel
 from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
 
 from oceantracker.shared_info import shared_info as si
+from oceantracker.particle_statistics.util import stats_util
 
 class _CorePolygonMethods(ParameterBaseClass):
 
@@ -19,6 +20,7 @@ class _CorePolygonMethods(ParameterBaseClass):
 
         self.remove_default_params(['grid_center','release_group_centered_grids', 'grid_span' ])
         self.file_tag = 'polygon_stats'
+        self.info['type'] = 'polygon'
 
     def add_required_classes_and_settings(self):
         info = self.info
@@ -56,57 +58,64 @@ class _CorePolygonMethods(ParameterBaseClass):
 
         # do standard stats initialize
         super().initial_setup()  # set up using regular grid for  stats
-        self.info['type'] = 'polygon'
+
 
 
     def set_up_spatial_bins(self,nc ):
-
-        nc.create_dimension('polygon_dim', len(self.params['polygon_list']))
         add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
 
-class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.GriddedStats2D_timeBased):
+class PolygonStats2D_timeBased(_BaseParticleLocationStats):
     # class to hold counts of particles inside 2D polygons squares
 
     def __init__(self):
         super().__init__()
         # set up info/attributes
         self.add_default_params({'role_output_file_tag': PVC('stats_polygon_time',str)})
+        self.add_polygon_params()
 
-    def check_requirements(self):
-        self.check_class_required_fields_prop_etc(required_props_list=['x'])
 
-    def _create_file_binned_variables(self, nc):
+    def initial_setup(self):
+        # set up regular grid for  stats
+        super().initial_setup()
+        info = self.info
+        self.create_polygon_variables_part_prop()
+        self.create_time_variables()
 
-        if not self.params['write']: return
+        dm = si.dim_names
+        info['count_dims']= {dm.time: None,
+                       dm.release_group:len(si.class_roles.release_groups),
+                       dm.polygons:  len(self.params['polygon_list']),
+                       }
 
-        dim_names = ('time_dim', 'release_group_dim', 'polygon_dim')
-        dim_sizes  = (None, len(si.class_roles.release_groups), nc.dim('polygon_dim'))
+        self.create_count_variables(info['count_dims'],'time')
+        self.set_up_part_prop_lists()
 
+        nc = self.open_output_file()
+
+
+    def open_output_file(self):
+        nc = super().open_output_file()
+        self.nWrites = 0
+        self.add_time_variables_to_file(nc)
+        add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
+
+        # time polygon count variables
+        dims = self.info['count_dims']
+        dim_names = [key for key in dims]
         nc.create_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in each polygon at given times, for each release group')
-        nc.create_variable('count_all_selected_particles', ['time_dim', 'release_group_dim'], compression_level=si.settings.NCDF_compression_level,
+        nc.create_variable('count_all_selected_particles', dim_names[:2],
+                           compression_level=si.settings.NCDF_compression_level,
                            dtype=np.int64, description='counts of all selected particles whether in a polygon or not')
-        nc.create_variable('count_all_alive_particles', ['time_dim', 'release_group_dim'], compression_level=si.settings.NCDF_compression_level,
-                           dtype =np.int64, description='counts of all particles whether selected or not')
+        nc.create_variable('count_all_alive_particles', dim_names[:2],
+                           compression_level=si.settings.NCDF_compression_level,
+                           dtype=np.int64, description='counts of all particles whether selected or not')
 
-        # set up space for requested particle properties
-        # working count space, row are (y,x)
-        self.count_time_slice = np.full(dim_sizes[1:], 0, np.int64)
+        for p in self.params['particle_property_list']:
+            nc.create_variable('sum_' + p,list(dims.keys()), np.float64, description='sum of particle property inside bin')
+        return nc
 
-        # counts in each age bin, whether inside polygon or not
-        self.count_all_particles_time_slice =  np.full((len(si.class_roles.release_groups),), 0, np.int64)
-        self.count_all_alive_particles = np.full((len(si.class_roles.release_groups),), 0, np.int64)
-
-        for p_name in self.params['particle_property_list']:
-            if p_name in si.class_roles.particle_properties:
-                self.sum_binned_part_prop[p_name] = np.full(dim_sizes[1:], 0.)  # zero for  summing
-                nc.create_variable('sum_' + p_name, dim_names, np.float64, description='sum of particle property inside polygon  ' + p_name)
-            else:
-                si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated')
-
-
-
-    def do_counts(self,n_time_step, time_sec, sel):
+    def do_counts(self,n_time_step, time_sec, sel, alive):
 
         part_prop = si.class_roles.particle_properties
         g = self.grid
@@ -117,17 +126,18 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
         release_groupID = part_prop['IDrelease_group'].used_buffer()
         p_x       = part_prop['x'].used_buffer()
 
+        stats_grid = self.grid
+        stats_util._count_all_alive_time(part_prop['status'].data, part_prop['IDrelease_group'].data,
+                                         self.count_all_alive_particles, alive)
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
         inside_poly_prop.update(n_time_step,time_sec,sel)
 
         # do counts
         self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
-                                         release_groupID, p_x, self.count_time_slice, self.count_all_particles_time_slice, self.prop_data_list, self.sum_prop_data_list, sel)
-
-
-    def info_to_write_at_end(self):pass  # nothing extra to write
-
+                                         release_groupID, p_x, self.count_time_slice,
+                                          self.count_all_selected_particles_time_slice,
+                                          self.prop_data_list, self.sum_prop_data_list, sel)
     @staticmethod
     @njitOT
     def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list, sel):
@@ -150,16 +160,30 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
             for m in range(len(prop_list)):
                 sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
 
-class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedStats2D_ageBased):
+class PolygonStats2D_ageBased(_BaseParticleLocationStats):
 
     def __init__(self):
         super().__init__()
-        self.add_default_params({'role_output_file_tag': PVC('stats_polygon_age',str)})\
+        self.add_default_params({'role_output_file_tag': PVC('stats_polygon_age',str)})
+        self.add_age_params()
+        self.add_polygon_params()
 
+    def initial_setup(self):
+        # set up regular grid for  stats
+        super().initial_setup()
+        info = self.info
+        self.create_polygon_variables_part_prop()
+        self.create_age_variables()
+        dm = si.dim_names
+        info['count_dims']= {dm.age: self.grid['age_bins'].size,
+                       dm.release_group:len(si.class_roles.release_groups),
+                       dm.polygons:  len(self.params['polygon_list'])}
 
-    def check_requirements(self):
-        self.check_class_required_fields_prop_etc(required_props_list=['age'])
+        self.create_count_variables(info['count_dims'],'age')
 
+        self.set_up_part_prop_lists()
+
+        nc = self.open_output_file()
 
     def _create_file_binned_variables(self, nc):
 
@@ -177,7 +201,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
             else:
                 si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
 
-    def do_counts(self,n_time_step, time_sec, sel):
+    def do_counts(self,n_time_step, time_sec, sel, alive):
 
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
@@ -187,26 +211,33 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
         p_x         = part_prop['x'].used_buffer()
         p_age       = part_prop['age'].used_buffer()
 
+        stats_util._count_all_alive_age_bins(part_prop['status'].data,
+                                             part_prop['IDrelease_group'].data,
+                                             part_prop['age'].data, stats_grid['age_bin_edges'],
+                                             self.count_all_alive_particles, alive)
+
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
         inside_poly_prop.update(n_time_step, time_sec, sel)
 
         # loop over statistics polygons
-        self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(), release_groupID, p_x, self.count_age_bins,
-                                         self.count_all_particles, self.prop_data_list, self.sum_prop_data_list, sel, stats_grid['age_bin_edges'], p_age)
-
+        self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
+                                          release_groupID, p_x, self.count_age_bins,
+                                         self.count_all_selected_particles, self.prop_data_list, self.sum_prop_data_list, sel, stats_grid['age_bin_edges'], p_age)
+    def write_time_varying_stats(self, time_sec):
+        pass # no writing on the fly in aged based states
     def info_to_write_at_end(self):
         # write variables whole
         nc = self.nc
         stats_grid = self.grid
-
-        nc.write_variable('count', self.count_age_bins, ['age_bin_dim', 'release_group_dim', 'polygon_dim'],
+        dim_names = [key for key in self.info['count_dims']]
+        nc.write_variable('count', self.count_age_bins, dim_names,
                           description='counts of particles in grid at given ages, for each release group')
 
-        nc.write_variable('count_all_selected_particles', self.count_all_particles, ['age_bin_dim', 'release_group_dim'],
+        nc.write_variable('count_all_selected_particles', self.count_all_selected_particles, dim_names[:2],
                           description='counts of  particles in all age bands for each release group, whether inside a polygon or not')
 
-        nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, ['age_bin_dim', 'release_group_dim'],
+        nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],
                           description='counts of  all alive particles, not just those selected to be counted')
 
         nc.write_variable('age_bins', stats_grid['age_bins'], ['age_bin_dim'], description='center of age bin, ie age axis in seconds')
@@ -215,7 +246,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
         # particle property sums
         for key, item in self.sum_binned_part_prop.items():
             # need to write final sums of properties  after all age counts done across all times
-            nc.write_variable('sum_' + key, item[:], ('age_bin_dim', 'release_group_dim', 'polygon_dim'), description='sum of particle property inside bin  ' + key)
+            nc.write_variable('sum_' + key, item[:], dim_names, description='sum of particle property inside bin  ' + key)
 
     @staticmethod
     @njitOT
