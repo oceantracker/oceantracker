@@ -282,6 +282,7 @@ def compare_reference_run_stats(case_info_file, args):
                       'max diff counts-ref run counts =',np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])))
 
         for prop_name in params['particle_property_list']:
+            if prop_name not in stats_ref: continue
             dc = np.abs(stats[prop_name] - stats_ref[prop_name])
             print(f'\t Property  "{prop_name}"', 'max mag.',
                   np.nanmax(np.abs(stats[prop_name])), np.nanmax(np.abs(stats_ref[prop_name])), ', max diff =', np.max(dc[np.isfinite(dc)]))

@@ -49,8 +49,6 @@
             ],
             "release_interval": 3600,
             "pulse_size": 50,
-            "z_min": -2.0,
-            "z_max": 0.5,
             "class_name": "PolygonRelease",
             "name": "my_polygon_release"
         }

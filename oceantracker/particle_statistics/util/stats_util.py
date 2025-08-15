@@ -64,3 +64,4 @@ def _sel_z_near_seasurface(x, tide, dz, sel, out):
         if x[n, 2] >= tide[n] - dz:
             out[n_found] = n
             n_found += 1
+    return out[:n_found]

@@ -98,12 +98,8 @@
         {
             "update_interval": 3600,
             "particle_property_list": [
+                "a_pollutant",
                 "water_depth"
-            ],
-            "z_min": -2,
-            "grid_size": [
-                120,
-                121
             ],
             "polygon_list": [
                 {
