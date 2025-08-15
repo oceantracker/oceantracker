@@ -23,7 +23,7 @@ def main(args):
     ot.add_class('reader', **hm['reader'])
 
     # add a point release
-    ot.add_class('release_groups',**test_definitions.rg_ploy1)
+    ot.add_class('release_groups', **test_definitions.my_polygon_release)
 
 
     # add a decaying particle property,# with exponential decay based on age

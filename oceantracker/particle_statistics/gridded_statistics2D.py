@@ -39,13 +39,12 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         # get release group IDs to split bt
         self.set_up_spatial_bins(nc)
-        self.set_up_time_bins(nc)
+        self._set_up_time_bins(nc)
 
         # set up space for sums of requested particle properties
-        self._create_file_variables(nc)
+        self._create_file_binned_variables(nc)
         self.info['type'] = 'gridded'
         self.set_up_part_prop_lists()
-
 
 
     def info_to_write_at_end(self):
@@ -107,7 +106,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         stats_grid['y_bin_edges'] = np.zeros( (n_grids, base_y_bin_edges.size), dtype=np.float64)
 
 
-
         for n_grid, p in enumerate(info['grid_centers']):
             stats_grid['x'][n_grid, :] = p[0] + base_x
             stats_grid['y'][n_grid, :] = p[1] + base_y
@@ -125,7 +123,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
                 x, y = cord_transforms.local_grid_deg_to_meters(x,y, x[0,0], y[0,0])
             stats_grid['cell_area'][n_grid, :, :] =(x[:-1, 1:]-x[:-1, :-1])*(y[1:,:-1]-y[:-1:,:-1])
 
-    def _create_file_variables(self,nc):
+    def _create_file_binned_variables(self, nc):
         if not self.params['write']: return
 
         stats_grid = self.grid
@@ -247,7 +245,7 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
         self.check_class_required_fields_prop_etc(required_props_list=['age'])
 
 
-    def set_up_time_bins(self,nc):
+    def _set_up_time_bins(self, nc):
         # this set up age bins, not time
         params = self.params
         ml = si.msg_logger
@@ -271,7 +269,7 @@ class GriddedStats2D_ageBased(GriddedStats2D_timeBased):
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 
-    def _create_file_variables(self, nc):
+    def _create_file_binned_variables(self, nc):
         # set up space for requested particle properties based on asge
 
         ml = si.msg_logger

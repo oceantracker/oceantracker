@@ -31,13 +31,7 @@ def main(args):
                              # the below are optional settings/parameters
                              release_interval=timestep,  # seconds between releasing particles
                              pulse_size=500)  # how many are released each interval
-    ot.add_class('release_groups',
-                            name='point 2',  # name used internal to refer to this release
-                             class_name='PointRelease',  # class to use
-                             points=[[1593000, 5484200, -2]],
-                             # the below are optional settings/parameters
-                             release_interval=timestep,  # seconds between releasing particles
-                             pulse_size=500)  # how many are released each interval
+    ot.add_class('release_groups',**test_definitions.my_polygon_release)
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
@@ -52,6 +46,8 @@ def main(args):
                                                polygon_list=[dict(points=hm['polygon'])]))
     ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_age, name='my_poly_stats_age',
                                            polygon_list=[dict(points=hm['polygon'])]))
+
+    #ot.add_class('particle_statistics',**test_definitions.my_resident_in_polygon)
 
     ot.add_class('velocity_modifiers', name='terminal_velocity_test',
                  class_name='TerminalVelocity', value=-0.0001)

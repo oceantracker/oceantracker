@@ -145,7 +145,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.nc = None
         self.nWrites = 0
 
-    def set_up_time_bins(self,nc):
+    def _set_up_time_bins(self, nc):
         # stats time variables commute to all 	for progressive writing
         nc.create_dimension('time_dim', None)  # unlimited time
         nc.create_variable('time', ['time_dim'], np.float64,

@@ -109,14 +109,14 @@ rg_start_in_datetime1 = dict(name='start_in_datetime1',  # name used internal to
                              release_interval=3600,  # seconds between releasing particles
                              pulse_size=5)  # how many are released each interval
 
-rg_ploy1 = dict(name='my_polygon_release',  # name used internal to refer to this release
-         class_name='PolygonRelease',  # class to use
-         # (x,y) points making up a 2D polygon
-         points=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
-                 [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
-         # the below are optional settings/parameters
-         release_interval=3600, pulse_size=50,
-         z_min=-2., z_max=0.5)
+my_polygon_release = dict(name='my_polygon_release',  # name used internal to refer to this release
+                          class_name='PolygonRelease',  # class to use
+                          # (x,y) points making up a 2D polygon
+                          points=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
+                        [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
+                          # the below are optional settings/parameters
+                          release_interval=3600, pulse_size=50,
+                          )
 
 rg3= dict(name='my_grid_release',  # name used internal to refer to this release
         class_name='GridRelease',  # class to use
@@ -177,8 +177,14 @@ my_poly_stats_time =dict(name='my_poly_stats_time',
         update_interval= 3600,
         particle_property_list=['a_pollutant','water_depth'],
         #status_list=[],
-        grid_size= [120, 121])
-
+        )
+my_resident_in_polygon =dict(name='my_resident_in_polygon',
+        class_name='ResidentInPolygon',
+        name_of_polygon_release_group= 'my_polygon_release',
+        update_interval= 3600,
+        particle_property_list=['a_pollutant','water_depth'],
+        #status_list=[],
+        )
 my_poly_stats_age = deepcopy(my_poly_stats_time)
 my_poly_stats_age.update(class_name='PolygonStats2D_ageBased',
                          name='my_poly_stats_age',

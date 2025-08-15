@@ -8,7 +8,7 @@ from oceantracker.shared_info import shared_info as si
 
 import numpy as np
 from numba import njit
-#todo much clearner to  have user define polygon list for residewnce time per polygon like stats polygon!
+#todo much clearner to  have user define polygon list for residence time per polygon like stats polygon!
 
 class ResidentInPolygon(_BaseParticleLocationStats):
     def __init__(self):
@@ -66,7 +66,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
 
         self.open_output_file()
 
-        self.set_up_time_bins(self.nc)
+        self._set_up_time_bins(self.nc)
         self._create_file_variables(self.nc)
 
         self.set_up_part_prop_lists()

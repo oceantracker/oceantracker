@@ -75,7 +75,7 @@ class PolygonStats2D_timeBased(_CorePolygonMethods, gridded_statistics2D.Gridded
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x'])
 
-    def _create_file_variables(self,nc):
+    def _create_file_binned_variables(self, nc):
 
         if not self.params['write']: return
 
@@ -161,7 +161,7 @@ class PolygonStats2D_ageBased(_CorePolygonMethods, gridded_statistics2D.GriddedS
         self.check_class_required_fields_prop_etc(required_props_list=['age'])
 
 
-    def _create_file_variables(self,nc):
+    def _create_file_binned_variables(self, nc):
 
         # set up space for requested particle properties
         dims= (self.grid['age_bins'].shape[0], len(si.class_roles.release_groups), len(self.params['polygon_list']))

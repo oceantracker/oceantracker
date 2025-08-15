@@ -80,7 +80,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
 
 
 
-    def _create_file_variables(self, nc):
+    def _create_file_binned_variables(self, nc):
         if not self.params['write']:  return
 
         stats_grid = self.grid
