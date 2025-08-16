@@ -94,7 +94,8 @@ def read_stats_file(file_name, nt=None):
             b = d['count_all_selected_particles'] if d['global_attributes']['backtracking'] == 1 else d['count_all_alive_particles']
 
         if d['stats_type'] == 'grid':
-            d['connectivity_matrix'] = d['count'] / b[..., np.newaxis, np.newaxis]
+            bb =  b[..., np.newaxis, np.newaxis ] if 'z_dim' not in d['dimensions'] else b[..., np.newaxis, np.newaxis, np.newaxis ]
+            d['connectivity_matrix'] = d['count'] / bb
         else:
             d['connectivity_matrix'] = d['count'] / b[..., np.newaxis]
 

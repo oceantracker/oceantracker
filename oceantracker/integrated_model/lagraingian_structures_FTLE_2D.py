@@ -211,8 +211,8 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
         nc.create_dimension('release_grid_cols', c + 2)
         nc.create_dimension('grid_dim', params['grid_center'].shape[0])
         nc.create_dimension(si.dim_names.vector2D, 2)
-        nc.create_dimension(si.dim_names.grid_rows, r)
-        nc.create_dimension(si.dim_names.grid_cols, c)
+        nc.create_dimension(si.dim_names.grid_row_y, r)
+        nc.create_dimension(si.dim_names.grid_col_x, c)
 
         # write release group
         nc.write_variable('time', self.time, 'time_dim', dtype=np.float64,

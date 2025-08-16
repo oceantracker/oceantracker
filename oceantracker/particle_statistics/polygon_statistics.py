@@ -34,10 +34,10 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         self.create_count_variables(info['count_dims'],'time')
         self.set_up_part_prop_lists()
 
-        nc = self.open_output_file()
 
-    def open_output_file(self):
-        nc = super().open_output_file()
+
+    def open_output_file(self,file_name):
+        nc = super().open_output_file(file_name)
         self.nWrites = 0
         self.add_time_variables_to_file(nc)
         add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
@@ -126,7 +126,6 @@ class PolygonStats2D_ageBased(_BaseParticleLocationStats):
 
         self.set_up_part_prop_lists()
 
-        nc = self.open_output_file()
 
     def _create_file_binned_variables(self, nc):
 

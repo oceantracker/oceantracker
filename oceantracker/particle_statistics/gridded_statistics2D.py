@@ -24,21 +24,19 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         # set up regular grid for  stats
         super().initial_setup()
         info = self.info
-
         self.create_grid_variables()
         dm = si.dim_names
         info['count_dims']= {dm.time: None,
                        dm.release_group:len(si.class_roles.release_groups),
-                       dm.x:  self.grid['y'].shape[1],
-                       dm.y:  self.grid['x'].shape[1]}
+                       dm.grid_row_y:  self.grid['x_grid'].shape[1],
+                       dm.grid_col_x:  self.grid['x_grid'].shape[2]}
 
         self.create_count_variables(info['count_dims'],'time')
         self.set_up_part_prop_lists()
 
-        nc = self.open_output_file()
 
-    def open_output_file(self):
-        nc = super().open_output_file()
+    def open_output_file(self, file_name):
+        nc = super().open_output_file(file_name)
         self.nWrites = 0
         self.add_time_variables_to_file(nc)
         self.add_grid_variables_to_file(nc)
@@ -70,30 +68,31 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         release_groupID = part_prop['IDrelease_group'].used_buffer()
         p_x= part_prop['x'].used_buffer()
 
-        self._do_counts_and_summing_numba(release_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
+        self._do_counts_and_summing_numba(release_groupID, p_x,
+                                          stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
+                                          stats_grid['grid_spacings'],
                                           self.count_time_slice, self.count_all_selected_particles_time_slice,
                                           self.prop_data_list, self.sum_prop_data_list, sel)
         pass
 
     @staticmethod
     @njitOT
-    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, count, count_all_particles, prop_list, sum_prop_list, sel):
+    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges,grid_spacings, count, count_all_particles, prop_list, sum_prop_list, sel):
         # for time based heatmaps zero counts for one time slice
         count[:]=0
         count_all_particles[:] = 0
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
-
+        dx= grid_spacings[0]
+        dy = grid_spacings
         for n in sel:
 
             ng = group_ID[n]
             count_all_particles[ng] += 1
 
             # assumes equal spacing
-            dx = x_edges[ng, 1] - x_edges[ng, 0]
-            dy = y_edges[ng, 1] - y_edges[ng, 0]
-            r = int(np.floor((x[n, 1] - y_edges[ng,0]) / dy))  # row is y, column x
-            c = int(np.floor((x[n, 0] - x_edges[ng,0]) / dx))
+            r = int(np.floor((x[n, 1] - y_edges[ng,0]) / grid_spacings[1]))  # row is y, column x
+            c = int(np.floor((x[n, 0] - x_edges[ng,0]) / grid_spacings[0]))
 
             if 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1:
                 count[ng, r, c] += 1
@@ -122,19 +121,17 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
         self.create_age_variables()
         dm = si.dim_names
         info['count_dims']= {dm.age: self.grid['age_bins'].size,
-                       dm.release_group:len(si.class_roles.release_groups),
-                       dm.x:  self.grid['y'].shape[1],
-                       dm.y:  self.grid['x'].shape[1]}
+                            dm.release_group:len(si.class_roles.release_groups),
+                            dm.grid_row_y: self.grid['x_grid'].shape[1],
+                            dm.grid_col_x: self.grid['x_grid'].shape[2]}
 
         self.create_count_variables(info['count_dims'],'age')
 
         self.set_up_part_prop_lists()
 
-        nc = self.open_output_file()
-
-    def open_output_file(self):
+    def open_output_file(self,file_name):
         self.nWrites = 0
-        nc = super().open_output_file()
+        nc = super().open_output_file(file_name)
         self.add_grid_variables_to_file(nc)
         return nc
 
@@ -152,7 +149,9 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
         p_x = part_prop['x'].used_buffer()
         p_age = part_prop['age'].used_buffer()
 
-        self._do_counts_and_summing_numba(release_groupID, p_x, stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
+        self._do_counts_and_summing_numba(release_groupID, p_x,
+                        stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
+                        stats_grid['grid_spacings'],
                         self.count_age_bins,
                          self.count_all_selected_particles,
                           self.prop_data_list, self.sum_prop_data_list,
@@ -160,18 +159,17 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
 
     @staticmethod
     @njitOT
-    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, count, count_all_particles, prop_list, sum_prop_list,
+    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges,grid_spacings, count, count_all_particles, prop_list, sum_prop_list,
                                      age_bin_edges, age, sel):
         # (no zeroing as accumulated over  whole run)
         da = age_bin_edges[1] - age_bin_edges[0]
 
         for n in sel:
             ng = group_ID[n]
-            dx = x_edges[ng, 1] - x_edges[ng, 0]
-            dy = y_edges[ng, 1] - y_edges[ng, 0]
 
-            r = int(np.floor((x[n, 1] - y_edges[ng, 0]) / dy))  # row is y, column x
-            c = int(np.floor((x[n, 0] - x_edges[ng, 0]) / dx))
+            #grids may have release group centers , so coods differ by release group
+            r = int(np.floor((x[n, 1] - y_edges[ng, 0]) / grid_spacings[1]))  # row is y, column x
+            c = int(np.floor((x[n, 0] - x_edges[ng, 0]) / grid_spacings[0]))
             na = int(np.floor((age[n] - age_bin_edges[0]) / da))
 
             if 0 <= na < (age_bin_edges.size - 1):

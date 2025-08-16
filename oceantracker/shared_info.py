@@ -8,6 +8,8 @@ from oceantracker.util.message_logger import  MessageLogger
 
 from time import  perf_counter
 
+large_float = 1.0e32
+
 # useful utility classes to enable auto complete
 class _Object(object):  pass
 
@@ -36,7 +38,7 @@ class _DefaultSettings(definitions._AttribDict):
                 #'write_output_files =     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web' )
     write_dry_cell_flag = PVC(True, bool,
                 doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots,may create large grid file, currently cannot be used with nested grids ' )
-    max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,min=.00001,units='sec',
+    max_run_duration = PVC(large_float, float,min=.00001,units='sec',
                            doc_str='Useful in testing setup with shorter runs, as normally run duration is determined from release groups. This  limits the maximum duration in seconds of model runs.' )  # limit all cases to this duration
     max_particles = PVC(10**10, int, min=1, doc_str='Maximum number of particles to release, useful to restrict if splitting particles' )  # limit all cases to this number
 
@@ -153,7 +155,7 @@ class _RunInfo(definitions._AttribDict):
 
 class _UseFullInfo(definitions._AttribDict):
     # default reader classes used by auto-detection of file type
-    large_float = 1.0E50
+    large_float = large_float
 
 # Shared class, build using the above
 #------------------------------------------------------------

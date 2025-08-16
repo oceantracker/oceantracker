@@ -13,7 +13,7 @@
     "tracks_writer": {
         "update_interval": 3600,
         "write_dry_cell_flag": false,
-        "time_steps_per_per_file": 10
+        "time_steps_per_per_file": null
     },
     "reader": {
         "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
@@ -90,7 +90,7 @@
         {
             "grid_size": [
                 120,
-                121
+                130
             ],
             "grid_span": [
                 10000,
@@ -110,7 +110,7 @@
         {
             "grid_size": [
                 120,
-                121
+                130
             ],
             "grid_span": [
                 10000,
@@ -206,6 +206,27 @@
             ],
             "class_name": "PolygonStats2D_ageBased",
             "name": "my_poly_stats_age"
+        },
+        {
+            "grid_size": [
+                120,
+                130
+            ],
+            "grid_span": [
+                10000,
+                10000
+            ],
+            "release_group_centered_grids": true,
+            "update_interval": 7200,
+            "particle_property_list": [
+                "a_pollutant",
+                "water_depth"
+            ],
+            "z_min": -10,
+            "start": "2017-01-01T02:30:00",
+            "z_max": 2,
+            "class_name": "GriddedStats3D_timeBased",
+            "name": "my_heat_3Dmap_time"
         }
     ],
     "velocity_modifiers": [

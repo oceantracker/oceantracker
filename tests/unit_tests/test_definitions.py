@@ -148,7 +148,7 @@ pp1= dict(name='a_pollutant',  # must have a user given name
 my_heat_map_time = dict(name='my_heatmap_time',
          class_name='GriddedStats2D_timeBased',
          # the below are optional settings/parameters
-         grid_size=[120, 121],  # number of east and north cells in the heat map
+         grid_size=[120, 130],  # number of rows, cols cells in the heat map
         grid_span = [10000,10000],
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
@@ -161,7 +161,7 @@ my_heat_map_time = dict(name='my_heatmap_time',
 my_heat_map_age = dict(name='my_heatmap_age',
          class_name='GriddedStats2D_ageBased',
          # the below are optional settings/parameters
-         grid_size=[120, 121],  # number of east and north cells in the heat map
+         grid_size=[120, 130],  # number of east and north cells in the heat map
         grid_span = [10000,10000],
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
@@ -245,7 +245,7 @@ def compare_reference_run_tracks(case_info_file, args):
     print('\t max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
 
     dt = tracks['time'] - tracks_ref['time']
-    print('times,  min/max diff ', np.nanmin(dt), np.nanmax(dt))
+    print('times, \t  min/max diff ', np.nanmin(dt), np.nanmax(dt))
     if False:
         from matplotlib import  pyplot as plt
         v='status'
@@ -271,16 +271,16 @@ def compare_reference_run_stats(case_info_file, args):
 
 
         print(f'Stats  compare ref: "{name}"')
-        print('\t countsref/new', stats_ref['count'].sum(), stats['count'].sum(),
-              'max diff counts-ref run counts =',np.max(np.abs(stats['count'] - stats_ref['count'])))
-        print('\t count all selected ref/new', stats_ref['count_all_selected_particles'].sum(),
+        print('\t counts, ref/new', stats_ref['count'].sum(), stats['count'].sum(),
+              '\t max diff counts-ref run counts =',np.max(np.abs(stats['count'] - stats_ref['count'])))
+        print('\t count all selected, ref/new', stats_ref['count_all_selected_particles'].sum(),
               stats['count_all_selected_particles'].sum(),
-              'max diff counts-ref run counts =',
+              '\t\t\t\t\t max diff counts-ref run counts =',
               np.max(np.abs(stats['count_all_selected_particles'] - stats_ref['count_all_selected_particles'])))
 
-        print('\t count all alive ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
+        print('\t count all alive, ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
              'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
-                      'max diff counts-ref run counts =',np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])))
+                      '\t max diff counts-ref run counts =',np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])))
 
         for prop_name in params['particle_property_list']:
             if prop_name not in stats_ref: continue

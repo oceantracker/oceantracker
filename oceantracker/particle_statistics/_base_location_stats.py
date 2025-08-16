@@ -48,7 +48,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         self.add_default_params(count_start_date= PTC(None,  obsolete=True,  doc_str='Use "start" parameter'),
                                 count_end_date= PTC(None,   obsolete=True,  doc_str='Use "end" parameter'))
-
+        self.nc = None
         info = self.info
         self.grid = {}
         self.sum_binned_part_prop = {}
@@ -65,42 +65,51 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # to spped status check make map with trues at index of status to include in counts
         self.statuses_to_count_map = status_util.build_select_status_map(params['status_list'])
 
-        #set particle depth and water depth limits for counting particles
+        # set water depth range (not using tide)
+        f = si.info.large_float
+        info['water_depth_range'] = np.asarray([-f, f])
+        if params['water_depth_min'] is not None:  info['water_depth_range'][0] = params['water_depth_min']
+        if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']
 
-        f = 1.0E32
+        if info['water_depth_range'][0] > info['water_depth_range'][1]:
+            ml.msg(
+                f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
+                caller=self, error=True)
+        # set what z values to count bewteen, or near sea bed etc in 2D counts
+        self.set_z_range_for_counts()
+
+        self.add_scheduler('count_scheduler', start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
+        pass
+
+    def set_z_range_for_counts(self):
+        # set particle depth and water depth limits for 2D counting of particles
+        ml = si.msg_logger
+        info = self.info
+        params = self.params
+
         info['depth_sel_mode'] = 0
-        if params['z_min'] is not None or params['z_max'] is not None :
+        f = si.info.large_float
+        if params['z_min'] is not None or params['z_max'] is not None:
             # count based on give z values
             info['depth_sel_mode'] = 1
             info['z_range'] = np.asarray([-f, f])
             if params['z_min'] is not None:  info['z_range'][0] = params['z_min']
             if params['z_max'] is not None:  info['z_range'][1] = params['z_max']
             if info['z_range'][0] > info['z_range'][1]:
-                ml.msg(f'Require zmin > zmax, (z_min,z_max) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', error=True, caller=self,
-                                  hint ='z=0 is mean water level, so z is mostly < 0')
+                ml.msg(f'Require zmin > zmax, (z_min,z_max) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ',
+                       error=True, caller=self,
+                       hint='z=0 is mean water level, so z is mostly < 0')
 
             if params['near_seabed'] is not None or params['near_seasurface'] is not None:
-                ml.msg(f'Have set  one of params  "near_seabed" or  "near_seasurface" and also one of (z_min,z_max)', fatal_error=True, caller=self,
+                ml.msg(f'Have set  one of params  "near_seabed" or  "near_seasurface" and also one of (z_min,z_max)',
+                       fatal_error=True, caller=self,
                        hint='Cannot set both depth selections , add different particle_statistics  class for each type of depth selection')
 
-        elif params['near_seabed'] is not None: info['depth_sel_mode'] = 2
+        elif params['near_seabed'] is not None:
+            info['depth_sel_mode'] = 2
 
-        elif params['near_seasurface'] is not None:  info['depth_sel_mode'] = 3
-
-        # set water depth range (not using tide)
-        info['water_depth_range'] = np.asarray([-f, f])
-        if params['water_depth_min'] is not None:  info['water_depth_range'][0] = params['water_depth_min']
-        if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']
-
-        if info['water_depth_range'][0]> info['water_depth_range'][1]:
-            ml.msg(f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
-                     caller=self,error=True)
-
-        self.add_scheduler('count_scheduler', start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
-
-
-
-        pass
+        elif params['near_seasurface'] is not None:
+            info['depth_sel_mode'] = 3
 
 
     def check_part_prop_list(self):
@@ -131,25 +140,27 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         basic_util.nopass()
 
-    def open_output_file(self):
+    def open_file_if_needed(self):
         info = self.info
-        if self.params['write']:
 
+        if self.nc is None:
             info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
-            info['output_file'] += f'_{info["instanceID"]}_{self.params["name"]}.nc'
-            self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, info['output_file']), 'w')
-
+            info['output_file'] += f'_{info["instanceID"]:03}_{self.params["name"]}.nc'
+            file_name = path.join(si.run_info.run_output_dir, info['output_file'])
             # add counting dims to file
-            for name, s  in info['count_dims'].items():
-                self.nc.create_dimension(name, s)
-        else:
-            self.nc = None
+            self.nc = self.open_output_file(file_name)
 
-        return self.nc
+    def open_output_file(self,file_name):
+        nc = NetCDFhandler(file_name, 'w')
+        info = self.info
+        for name, s in info['count_dims'].items():
+            nc.create_dimension(name, s)
+        return nc
 
     def create_time_variables(self):
         self.nWrites = 0
     def create_grid_variables(self):
+        # creates 2D grid variables
         stats_grid= self.grid
         params= self.params
         info = self.info
@@ -202,7 +213,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         stats_grid['x_bin_edges'] = np.zeros( (n_grids, base_x_bin_edges.size), dtype=np.float64)
         stats_grid['y_bin_edges'] = np.zeros( (n_grids, base_y_bin_edges.size), dtype=np.float64)
 
-
+        # grids may have release group centers, so grid coords differ by release group
         for n_grid, p in enumerate(info['grid_centers']):
             stats_grid['x'][n_grid, :] = p[0] + base_x
             stats_grid['y'][n_grid, :] = p[1] + base_y
@@ -220,6 +231,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 x, y = cord_transforms.local_grid_deg_to_meters(x,y, x[0,0], y[0,0])
             stats_grid['cell_area'][n_grid, :, :] =(x[:-1, 1:]-x[:-1, :-1])*(y[1:,:-1]-y[:-1:,:-1])
 
+        #spacings the same for all release group grids
+        stats_grid['grid_spacings'] = np.asarray([base_x[1] - base_x[0], base_y[1] - base_y[0], ])
+        pass
     def create_polygon_variables_part_prop(self):
         ml = si.msg_logger
         params = self.params
@@ -355,7 +369,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         sel = self.select_particles_to_count(sel)
 
         #update prop list data, as buffer may have expanded
-        # do this only when part buffer expansion occurs??
+        # todo , do this only when part buffer expansion occurs as array changes, add expanf bffer to all clases??
         part_prop = si.class_roles.particle_properties
         for n, name in enumerate(self.sum_binned_part_prop.keys()):
             self.prop_data_list[n]= part_prop[name].data
@@ -435,40 +449,43 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                            description='number released so far from each release group')
 
     def add_grid_variables_to_file(self, nc):
-
+        dn = si.dim_names
         stats_grid = self.grid
-        nc.create_dimension('x_dim', stats_grid['x'].shape[1])
-        nc.create_dimension('y_dim', stats_grid['y'].shape[1])
 
-        nc.write_variable('x', stats_grid['x'], ['release_groups_dim', 'x_dim'], description='Mid point of grid cell',
+        dim_names = [key for key in self.info['count_dims']]
+
+        nc.write_variable('x', stats_grid['x'], [dn.release_group, dim_names[3]], description='Mid point of grid cell',
                           units='m or deg')
-        nc.write_variable('y', stats_grid['y'], ['release_group_dim', 'y_dim'], description='Mid point of grid cell')
-        nc.write_variable('x_grid', stats_grid['x_grid'], ['release_groups_dim', 'y_dim', 'x_dim'],
+        nc.write_variable('y', stats_grid['y'], [dn.release_group, dim_names[2]], description='Mid point of grid cell')
+
+        nc.write_variable('x_grid', stats_grid['x_grid'],dim_names[1:4],
                           description='x for mid point of grid cell, full grid')
-        nc.write_variable('y_grid', stats_grid['y_grid'], ['release_groups_dim', 'y_dim', 'x_dim'],
+        nc.write_variable('y_grid', stats_grid['y_grid'], dim_names[1:4],
                           description='y for mid point of grid cell, full grid')
-        nc.write_variable('cell_area', stats_grid['cell_area'], ['release_groups_dim', 'y_dim', 'x_dim'],
+        nc.write_variable('cell_area', stats_grid['cell_area'], dim_names[1:4],
                           description='Horizontal area of each cell', units='m^2')
-
-
+        nc.write_variable('grid_spacings', stats_grid['grid_spacings'], 'spacings_dim',
+                            units=' m or deg. if geographic coords',
+                          description='x for mid point of grid cell, full grid')
 
     def create_count_variables(self,dims:dict, mode:str):
         # set up space for requested particle properties
         # working count space, row are (y,x)
+        params = self.params
         dim_sizes =[ val for val in dims.values()]
+
         if mode=='time':
-            use_dims= dim_sizes[1:]
+            use_dims =dim_sizes[1:]
             self.count_time_slice = np.full(use_dims, 0, np.int64)
             self.count_all_selected_particles_time_slice = np.full((use_dims[0],), 0, np.int64)
             self.count_all_alive_particles = np.full((use_dims[0],), 0, np.int64)
 
         elif mode =='age':
-            use_dims= dim_sizes
+            use_dims = dim_sizes
             self.count_age_bins = np.full(use_dims, 0, np.int64)
             self.count_all_selected_particles = np.full(use_dims[:2], 0, np.int64)
             self.count_all_alive_particles = np.full(use_dims[:2], 0, np.int64)
 
-        params = self.params
         for p in params['particle_property_list']:
             self.sum_binned_part_prop[p] = np.full(use_dims, 0.)  # zero for  summing
 

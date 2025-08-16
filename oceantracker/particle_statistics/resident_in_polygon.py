@@ -64,7 +64,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         # do standard stats initialize
         super().initial_setup()  # set up using regular grid for  stats
 
-        self.open_output_file()
+        self.open_output_file(file_name)
 
         self.create_time_variables(self.nc)
         self._create_file_variables(self.nc)

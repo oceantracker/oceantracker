@@ -40,13 +40,17 @@ def main(args):
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
     # add a  particle statistics
+
+
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_time))
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_age))
     ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time,
                                                polygon_list=[dict(points=hm['polygon'])]))
     ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_age,
                                                polygon_list=[dict(points=hm['polygon'])]))
-
+    ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_time,
+                                               name='my_heat_3Dmap_time', class_name='GriddedStats3D_timeBased',
+                                               z_min=-10, z_max=2))
 
     #ot.add_class('particle_statistics',**test_definitions.my_resident_in_polygon)
 

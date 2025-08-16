@@ -19,7 +19,6 @@ version.update( python_version = sys.version,python_major_version= sys.version_i
                 python_minor_version = sys.version_info.minor, python_micro_version= sys.version_info.micro,)
 
 
-max_timedelta_in_seconds = 1000*365*24*3600
 
 docs_base_url= 'https://oceantracker.github.io/oceantracker/_build/html/'
 package_dir = path.dirname(__file__)
@@ -126,8 +125,9 @@ class _DimensionNames(_AttribDict):
     vector3D: str = 'vector3D'
     triangle: str = 'triangle_dim'
     age: str = 'age_dim'
-    x: str = 'x_dim'
-    y: str = 'y_dim'
+    grid_row_y: str = 'row_y_dim'
+    grid_col_x: str = 'col_x_dim'
+    z: str = 'z_dim'
     node  = 'node_dim'
     cell = 'cell_dim'
     release_group= 'release_group_dim'

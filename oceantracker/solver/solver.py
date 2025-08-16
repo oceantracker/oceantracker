@@ -359,7 +359,8 @@ class Solver(ParameterBaseClass):
         # update and write stats
         t0 = perf_counter()
         for name, i in si.class_roles.particle_statistics.items():
-            if i.schedulers['count_scheduler'].do_task(n_time_step):
+            if i.schedulers['count_scheduler'].do_task(n_time_step) and i.params['write']:
+                i.open_file_if_needed()
                 i.timed_update(n_time_step, time_sec, alive)
 
         si.block_timer('Update statistics', t0)

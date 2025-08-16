@@ -11,8 +11,8 @@
     "particle_buffer_initial_size": 200,
     "NUMBA_cache_code": true,
     "use_resuspension": false,
-    "restart_interval": 10800,
-    "throw_debug_error": 1,
+    "restart_interval": null,
+    "throw_debug_error": 0,
     "reader": {
         "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
@@ -44,7 +44,7 @@
         {
             "grid_size": [
                 120,
-                121
+                130
             ],
             "grid_span": [
                 10000,
@@ -57,7 +57,7 @@
                 "water_depth"
             ],
             "age_bin_size": 86400,
-            "max_age_to_bin": 259200,
+            "max_age_to_bin": 86400,
             "z_min": -10.0,
             "class_name": "GriddedStats2D_ageBased",
             "name": "my_heatmap_age"
@@ -65,6 +65,6 @@
     ],
     "tracks_writer": {
         "update_interval": 1800,
-        "time_steps_per_per_file": 10
+        "time_steps_per_per_file": null
     }
 }

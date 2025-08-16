@@ -46,13 +46,13 @@
         }
     ],
     "tracks_writer": {
-        "time_steps_per_per_file": 5
+        "time_steps_per_per_file": null
     },
     "particle_statistics": [
         {
             "grid_size": [
                 120,
-                121
+                130
             ],
             "grid_span": [
                 10000,
