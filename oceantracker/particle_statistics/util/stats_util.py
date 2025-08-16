@@ -13,7 +13,9 @@ def _count_all_alive_time(status,  release_group, count_all_alive, alive):
 
     for nn in range(alive.size):
         n = alive[nn]
+    #for n in range(status.size):
         count_all_alive[release_group[n]] += status[n] >= stationary_status
+    pass
 
 
 @njitOT

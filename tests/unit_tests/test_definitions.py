@@ -168,7 +168,7 @@ my_heat_map_age = dict(name='my_heatmap_age',
          particle_property_list=['a_pollutant','water_depth'],  # request a heat map for the decaying part. prop. added above
          #status_list=[],  # only count the particles which are moving
         age_bin_size= 24*3600,
-        max_age_to_bin=3*24*3600,
+        max_age_to_bin=24*3600,
         z_min=-10.,  # only count particles at locations above z=-2m
          )
 
@@ -271,14 +271,15 @@ def compare_reference_run_stats(case_info_file, args):
 
 
         print(f'Stats  compare ref: "{name}"')
-        print('\t counts', stats_ref['count'].sum(), stats['count'].sum(),
+        print('\t countsref/new', stats_ref['count'].sum(), stats['count'].sum(),
               'max diff counts-ref run counts =',np.max(np.abs(stats['count'] - stats_ref['count'])))
-        print('\t count all selected', stats_ref['count_all_selected_particles'].sum(),
+        print('\t count all selected ref/new', stats_ref['count_all_selected_particles'].sum(),
               stats['count_all_selected_particles'].sum(),
               'max diff counts-ref run counts =',
               np.max(np.abs(stats['count_all_selected_particles'] - stats_ref['count_all_selected_particles'])))
 
-        print('\t count all alive', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
+        print('\t count all alive ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
+             'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
                       'max diff counts-ref run counts =',np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])))
 
         for prop_name in params['particle_property_list']:

@@ -123,7 +123,7 @@
                 "water_depth"
             ],
             "age_bin_size": 86400,
-            "max_age_to_bin": 259200,
+            "max_age_to_bin": 86400,
             "z_min": -10.0,
             "class_name": "GriddedStats2D_ageBased",
             "name": "my_heatmap_age"

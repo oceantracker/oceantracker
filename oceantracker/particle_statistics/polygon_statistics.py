@@ -42,7 +42,7 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         self.add_time_variables_to_file(nc)
         add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
 
-        # time polygon count variables
+        # time polygon count variables to append over time
         dims = self.info['count_dims']
         dim_names = [key for key in dims]
         nc.create_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
@@ -70,7 +70,7 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         p_x       = part_prop['x'].used_buffer()
 
         stats_grid = self.grid
-        stats_util._count_all_alive_time(part_prop['status'].data, part_prop['IDrelease_group'].data,
+        stats_util._count_all_alive_time(part_prop['status'].used_buffer(), part_prop['IDrelease_group'].data,
                                          self.count_all_alive_particles, alive)
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
