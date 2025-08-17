@@ -13,7 +13,7 @@
     "tracks_writer": {
         "update_interval": 3600,
         "write_dry_cell_flag": false,
-        "time_steps_per_per_file": null
+        "time_steps_per_per_file": 10
     },
     "reader": {
         "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",

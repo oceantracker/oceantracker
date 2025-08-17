@@ -365,7 +365,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         if si.run_info.is3D_run:
             sel = self.sel_depth_range(sel)
-
+        # users over ride thismethod  to further sub-select those to count
         sel = self.select_particles_to_count(sel)
 
         #update prop list data, as buffer may have expanded
@@ -405,11 +405,11 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
         self.nWrites += 1
 
-    def info_to_write_at_end(self) : pass
+    def info_to_write_on_file_close(self) : pass
 
     def close_file(self):
         nc = self.nc
-        self.info_to_write_at_end()
+        self.info_to_write_on_file_close()
         # write total released in each release group
         num_released = [i.info['number_released'] for name, i in si.class_roles.release_groups.items()]
         nc.write_variable('number_released_each_release_group', np.asarray(num_released, dtype=np.int64),
@@ -453,20 +453,19 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         stats_grid = self.grid
 
         dim_names = [key for key in self.info['count_dims']]
-
-        nc.write_variable('x', stats_grid['x'], [dn.release_group, dim_names[3]], description='Mid point of grid cell',
+        nc.write_variable('x', stats_grid['x'], [dim_names[1], dim_names[3]], description='Mid point of grid cell',
                           units='m or deg')
-        nc.write_variable('y', stats_grid['y'], [dn.release_group, dim_names[2]], description='Mid point of grid cell')
+        nc.write_variable('y', stats_grid['y'], [dim_names[1], dim_names[2]],
+                          description='Mid point of grid cell', units='m or degrees',)
 
-        nc.write_variable('x_grid', stats_grid['x_grid'],dim_names[1:4],
-                          description='x for mid point of grid cell, full grid')
+        nc.write_variable('x_grid', stats_grid['x_grid'],dim_names[1:4]                        ,
+                          description='x for mid point of grid cell, full grid',  units='m or degrees')
         nc.write_variable('y_grid', stats_grid['y_grid'], dim_names[1:4],
-                          description='y for mid point of grid cell, full grid')
+                          description='y for mid point of grid cell, full grid', units='m or degrees')
         nc.write_variable('cell_area', stats_grid['cell_area'], dim_names[1:4],
                           description='Horizontal area of each cell', units='m^2')
         nc.write_variable('grid_spacings', stats_grid['grid_spacings'], 'spacings_dim',
-                            units=' m or deg. if geographic coords',
-                          description='x for mid point of grid cell, full grid')
+                          description='x for mid point of grid cell, full grid', units='m or degrees')
 
     def create_count_variables(self,dims:dict, mode:str):
         # set up space for requested particle properties

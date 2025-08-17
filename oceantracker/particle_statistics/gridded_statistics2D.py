@@ -18,8 +18,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         # set up info/attributes
         self.add_grid_params()
 
-
-
     def initial_setup(self):
         # set up regular grid for  stats
         super().initial_setup()
@@ -33,7 +31,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         self.create_count_variables(info['count_dims'],'time')
         self.set_up_part_prop_lists()
-
 
     def open_output_file(self, file_name):
         nc = super().open_output_file(file_name)
@@ -183,7 +180,7 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
     def write_time_varying_stats(self, time_sec):
         pass # no writing on the fly in aged based states
 
-    def info_to_write_at_end(self):
+    def info_to_write_on_file_close(self):
         # only write age count variables as whole at end of run
 
         nc = self.nc

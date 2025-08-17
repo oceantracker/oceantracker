@@ -120,7 +120,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                                          self.prop_data_list, self.sum_prop_data_list, sel)
 
 
-    def info_to_write_at_end(self):
+    def info_to_write_on_file_close(self):
         nc = self.nc
         nc.write_variable('release_times', self.schedulers['count_scheduler'].scheduled_times, ['pulse_dim'], dtype=np.float64, attributes={'times_pulses_released': ' times in seconds since 1970'})
 

@@ -168,7 +168,7 @@ class PolygonStats2D_ageBased(_BaseParticleLocationStats):
                                          self.count_all_selected_particles, self.prop_data_list, self.sum_prop_data_list, sel, stats_grid['age_bin_edges'], p_age)
     def write_time_varying_stats(self, time_sec):
         pass # no writing on the fly in aged based states
-    def info_to_write_at_end(self):
+    def info_to_write_on_file_close(self):
         # write variables whole
         nc = self.nc
         stats_grid = self.grid

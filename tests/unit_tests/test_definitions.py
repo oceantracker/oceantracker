@@ -272,7 +272,7 @@ def compare_reference_run_stats(case_info_file, args):
 
         print(f'Stats  compare ref: "{name}"')
         print('\t counts, ref/new', stats_ref['count'].sum(), stats['count'].sum(),
-              '\t max diff counts-ref run counts =',np.max(np.abs(stats['count'] - stats_ref['count'])))
+              '\t\t\t max diff counts-ref run counts =',np.max(np.abs(stats['count'] - stats_ref['count'])))
         print('\t count all selected, ref/new', stats_ref['count_all_selected_particles'].sum(),
               stats['count_all_selected_particles'].sum(),
               '\t\t\t\t\t max diff counts-ref run counts =',

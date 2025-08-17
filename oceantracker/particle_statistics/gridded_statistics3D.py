@@ -1,17 +1,16 @@
 
 import numpy as np
 from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
-
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
-from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-#from oceantracker.util.parameter_checking import ParameterListCheckerV2 as PLC2
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_statistics.gridded_statistics2D import GriddedStats2D_timeBased
 from oceantracker.particle_statistics.util import stats_util
 
 class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
     # class to hold counts of particles inside 3D grid cells
-    
+    '''
+    Counts particles into 3D regular grid at given interval. Extends 2D grid version.
+    '''
     def __init__(self):
         # set up info/attributes
         super().__init__()
@@ -69,10 +68,9 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         params = self.params
         
         # Set up vertical grid
-        vsize = params['vertical_grid_size']
-
         # Make vertical bin edges
-        stats_grid['z_bin_edges'] = np.linspace(params['z_min'], params['z_max'], vsize +1)
+        vsize = params['vertical_grid_size']
+        stats_grid['z_bin_edges'] = np.linspace(params['z_min'], params['z_max'], vsize + 1)
         dz = float((params['z_max']- params['z_min'] ) / vsize)
 
         # Make vertical bin centers
@@ -80,20 +78,16 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         stats_grid['grid_spacings'] = np.append(stats_grid['grid_spacings'],dz)
         stats_grid['cell_volume'] = stats_grid['cell_area'] * dz
 
-
-
     def do_counts(self, n_time_step, time_sec, sel, alive):
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
 
-        # Get particle properties
-        release_groupID = part_prop['IDrelease_group'].used_buffer()
-        p_x = part_prop['x'].used_buffer()
-
-        stats_util._count_all_alive_time(part_prop['status'].data, part_prop['IDrelease_group'].data,
+        stats_util._count_all_alive_time(part_prop['status'].data,
+                                         part_prop['IDrelease_group'].data,
                                          self.count_all_alive_particles, alive)
-
-        self._do_counts_and_summing_numba(release_groupID, p_x, 
+        self._do_counts_and_summing_numba(
+                            part_prop['IDrelease_group'].data,
+                            part_prop['x'].data,
                             stats_grid['x_bin_edges'],
                             stats_grid['y_bin_edges'],
                             stats_grid['z_bin_edges'],
@@ -116,7 +110,6 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
             sum_prop_list[m][:] = 0.
 
         for n in sel:
-
             ng = group_ID[n]
             count_all_selected_particles[ng] += 1
 
@@ -128,29 +121,30 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
 
             # Check if particle is inside grid bounds
             if (0 <= r < y_edges.shape[1] - 1 and
-                    0 <= c < x_edges.shape[1] - 1 and
-                    0 <= k < z_edges.shape[0] - 1):
+                0 <= c < x_edges.shape[1] - 1 and
+                0 <= k < z_edges.shape[0] - 1):
 
                 count[ng, r, c, k] += 1
                 # Sum particle properties
                 for m in range(len(prop_list)):
                     sum_prop_list[m][ng, r, c, k] += prop_list[m][n]
 
-    def info_to_write_at_end(self):
+    def info_to_write_on_file_close(self):
         nc = self.nc
         stats_grid = self.grid
 
         # Write x, y grid info using parent method
-        super().info_to_write_at_end()
+        super().info_to_write_on_file_close()
 
+        dim_names = [key for key in self.info['count_dims']]
         # Write z grid info
-        nc.write_variable('z', stats_grid['z'], ['z_dim'],
+        nc.write_variable('z', stats_grid['z'], [dim_names[4]], units='m',
                           description='Mid point of vertical grid cell')
 
         # Write grid cell volume
-        nc.write_variable('grid_cell_volume', stats_grid['cell_volume'], [si.dim_names.release_group, 'y_dim', 'x_dim'],
+        nc.write_variable('grid_cell_volume', stats_grid['cell_volume'],
+                          dim_names[1:4],units='m^3',
                           description='Volume of each 3D grid cell')
-
     def sel_depth_range(self, sel) :
         # dummy depth range sel as 3D grid sets depth range
         return sel
