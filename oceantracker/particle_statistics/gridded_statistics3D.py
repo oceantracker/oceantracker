@@ -93,7 +93,6 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                             stats_grid['z_bin_edges'],
                             stats_grid['grid_spacings'],
                             self.count_time_slice,
-                            self.count_all_selected_particles_time_slice,
                             self.prop_data_list,
                             self.sum_prop_data_list,
                             sel)
@@ -102,16 +101,15 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
     @njitOT
     def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges, z_edges,
                                      grid_spacings, count,
-                                     count_all_selected_particles, prop_list, sum_prop_list, sel):
+                                     prop_list, sum_prop_list, sel):
         # Zero counts for this time slice
         count[:] = 0
-        count_all_selected_particles[:] = 0
+
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
 
         for n in sel:
             ng = group_ID[n]
-            count_all_selected_particles[ng] += 1
 
             # assumes equal spacing, in meters or deg. if geographic
             # Calculate grid indices

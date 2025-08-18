@@ -91,7 +91,7 @@ def read_stats_file(file_name, nt=None):
         if 'backtracking' not in d['global_attributes']:
             b = d['count_all_particles'] # version prior to june 2025
         else:
-            b = d['count_all_selected_particles'] if d['global_attributes']['backtracking'] == 1 else d['count_all_alive_particles']
+            b = d['count_all_alive_particles']
 
         if d['stats_type'] == 'grid':
             bb =  b[..., np.newaxis, np.newaxis ] if 'z_dim' not in d['dimensions'] else b[..., np.newaxis, np.newaxis, np.newaxis ]

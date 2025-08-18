@@ -31,7 +31,7 @@ class _BaseParticleProperty(ParameterBaseClass):
                                     'type': PVC('user', str,obsolete=True,
                                                 doc_str='type of particle property, used to manage how to update particle property',
                                                 ),
-                                     'release_group_parameters':PLC(None, str, expert=True, doc_str='In development: release group specific particle prop params'),
+                                     #'release_group_parameters':PLC(None, str, expert=True, doc_str='In development: release group specific particle prop params'),
               })
 
         self.role_doc('Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')

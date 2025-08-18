@@ -18,9 +18,6 @@ class InsidePolygonsNonOverlapping2D(ManuallyUpdatedParticleProperty):
 
         self.add_default_params({'polygon_list':[]})
 
-    def check_requirements(self):
-        self.check_class_required_fields_prop_etc(required_props_list=['x'])
-
     def initial_setup(self, **kwargs):
         super().initial_setup()
         # set up polygons instances

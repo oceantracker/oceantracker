@@ -11,7 +11,7 @@ stationary_status = int(si.particle_status_flags.stationary)  # compile this con
 from oceantracker.particle_statistics.util import  stats_util
 class GriddedStats2D_timeBased(_BaseParticleLocationStats):
     # class to hold counts of particles inside grid squares
-
+    #todo add concenration within counting layer , zmin-zmax, tide =depth, for near bottom
     def __init__(self):
         # set up info/attributes
         super().__init__()
@@ -41,9 +41,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         # time grid count variables
         dims = self.info['count_dims']
         dim_names = [key for key in dims]
-        nc.create_variable('count_all_selected_particles', dim_names[:2], np.int64,
-                           compression_level=si.settings.NCDF_compression_level,
-                           description='counts of all particles selected to be  within grid, eg by depth range etc wherethe inside grid or not')
         nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64,
                            compression_level=si.settings.NCDF_compression_level,
                            description='counts of all alive particles everywhere')
@@ -68,16 +65,17 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self._do_counts_and_summing_numba(release_groupID, p_x,
                                           stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                                           stats_grid['grid_spacings'],
-                                          self.count_time_slice, self.count_all_selected_particles_time_slice,
+                                          self.count_time_slice,
                                           self.prop_data_list, self.sum_prop_data_list, sel)
         pass
 
     @staticmethod
     @njitOT
-    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges,grid_spacings, count, count_all_particles, prop_list, sum_prop_list, sel):
+    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges,grid_spacings, count,
+                                     prop_list, sum_prop_list, sel):
         # for time based heatmaps zero counts for one time slice
         count[:]=0
-        count_all_particles[:] = 0
+
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
         dx= grid_spacings[0]
@@ -85,7 +83,6 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         for n in sel:
 
             ng = group_ID[n]
-            count_all_particles[ng] += 1
 
             # assumes equal spacing
             r = int(np.floor((x[n, 1] - y_edges[ng,0]) / grid_spacings[1]))  # row is y, column x
@@ -150,13 +147,13 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
                         stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                         stats_grid['grid_spacings'],
                         self.count_age_bins,
-                         self.count_all_selected_particles,
-                          self.prop_data_list, self.sum_prop_data_list,
-                          stats_grid['age_bin_edges'], p_age, sel)
+                        self.prop_data_list, self.sum_prop_data_list,
+                        stats_grid['age_bin_edges'], p_age, sel)
 
     @staticmethod
     @njitOT
-    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges,grid_spacings, count, count_all_particles, prop_list, sum_prop_list,
+    def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges,grid_spacings, count,
+                                     prop_list, sum_prop_list,
                                      age_bin_edges, age, sel):
         # (no zeroing as accumulated over  whole run)
         da = age_bin_edges[1] - age_bin_edges[0]
@@ -170,7 +167,6 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
             na = int(np.floor((age[n] - age_bin_edges[0]) / da))
 
             if 0 <= na < (age_bin_edges.size - 1):
-                count_all_particles[na, ng] += 1 # count all in each age band
                 if 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1 :
                     count[na, ng, r, c] += 1
                     # sum particle properties
@@ -188,9 +184,6 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
         dim_names = [key for key in self.info['count_dims']]
         nc.write_variable('count', self.count_age_bins, dim_names,
                           description= 'counts of particles in grid at given ages, for each release group')
-        nc.write_variable('count_all_selected_particles', self.count_all_selected_particles,
-                          dim_names[:2],
-                          description='counts of all particles selected to be counted in age bands for each release group ( eg selected by z range)')
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles,
                           dim_names[:2],
                           description='counts of all particles alive from each release group, into age bins')

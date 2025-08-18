@@ -38,6 +38,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 water_depth_min =  PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
                 water_depth_max =  PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
                 particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
+
                 #coords_in_lat_lon_order =  PVC(False, bool,
                 #    doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
                 status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),obsolete=True,
@@ -398,7 +399,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         fh['num_released_total'][n_write] = num_released.sum() # total all release groups so far
 
         fh['count'][n_write, ...] = self.count_time_slice[:, ...]
-        fh['count_all_selected_particles'][n_write, ...] = self.count_all_selected_particles_time_slice[:, ...]
         fh['count_all_alive_particles'][n_write, ...] = self.count_all_alive_particles[:, ...]
 
         for key, item in self.sum_binned_part_prop.items():
@@ -476,13 +476,11 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         if mode=='time':
             use_dims =dim_sizes[1:]
             self.count_time_slice = np.full(use_dims, 0, np.int64)
-            self.count_all_selected_particles_time_slice = np.full((use_dims[0],), 0, np.int64)
             self.count_all_alive_particles = np.full((use_dims[0],), 0, np.int64)
 
         elif mode =='age':
             use_dims = dim_sizes
             self.count_age_bins = np.full(use_dims, 0, np.int64)
-            self.count_all_selected_particles = np.full(use_dims[:2], 0, np.int64)
             self.count_all_alive_particles = np.full(use_dims[:2], 0, np.int64)
 
         for p in params['particle_property_list']:

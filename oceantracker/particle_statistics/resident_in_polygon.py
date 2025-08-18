@@ -1,5 +1,5 @@
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC, merge_params_with_defaults
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterCoordsChecker as PCC, merge_params_with_defaults
 from copy import  deepcopy
 from oceantracker.release_groups.polygon_release import PolygonRelease
 from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
@@ -11,51 +11,28 @@ from numba import njit
 #todo much clearner to  have user define polygon list for residence time per polygon like stats polygon!
 
 class ResidentInPolygon(_BaseParticleLocationStats):
+    '''
+    Caculate residence times within a single given polygon for each release group'
+    based on
+
+    Lucas, L. V., & Deleersnijder, E. (2020). Timescale Methods for Simplifying, Understanding and Modeling Biophysical and Water Quality Processes in Coastal Aquatic Ecosystems: A Review. Water 2020, Vol. 12, Page 2717, 12(10), 2717. https://doi.org/10.3390/W12102717
+    '''
     def __init__(self):
         # set up info/attributes
         super().__init__()
 
-        self.add_default_params({'name_of_polygon_release_group':  PVC(None, str,is_required=True,
-                                doc_str='"name" parameter of polygon release group to count paticles for residence time , (release group "name"  must be set by user). Particles inside this release groups polygon are conted to be used to calculate its residence time'),
-                                 'role_output_file_tag': PVC('residence', str),
-                                 })
+        self.add_default_params(points = PCC(None,doc_str='Points for 2D polygon to calc residence times, as N by 2 list or numpy array'))
+        self.remove_default_params(['particle_property_list'])
 
     def add_required_classes_and_settings(self):
+        # add polygon entry exit times class to use in residency calcs
         info = self.info
         params = self.params
-        ml = si.msg_logger
+        info['PolygonEntryExitTimes_prop_name'] = f'{params["name"]}_PolygonEntryExitTimes'
 
-        # find associated release group
-        if params['name_of_polygon_release_group'] not in si.class_roles.release_groups:
-            ml.msg(params['class_name'].split('.')[-1] + ' no polygon release group of name ' + params[
-                'name_of_polygon_release_group'] +
-                   ' user must name release group for residence time counts ' + ', available release group names are ' + str(
-                list(si.class_roles.release_groups.keys())),
-                   caller=self, error=True)
-
-        rg = si.class_roles.release_groups[params['name_of_polygon_release_group']]
-        if not isinstance(rg, PolygonRelease):
-            ml.msg(params['class_name'].split('.')[-1] + ' Named  release group "' + params[
-                'name_of_polygon_release_group'] +
-                   '" is not a subclass of  PolygonRelease class, residence time must be associated with a polygon release ',
-                   caller=self, error=True)
-
-        self.release_group_to_count = rg
-        self.info['release_group_name'] = rg.params['name']
-        self.info['release_group_ID_to_count'] = rg.info['instanceID']
-
-
-        # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
-        polygon = merge_params_with_defaults(
-            {'name': 'residence_for_release_group' + params['name_of_polygon_release_group'],
-             'points': self.release_group_to_count.params['points']}, si.default_polygon_dict_params,
-            si.msg_logger)
-        # create resident in polygon for single release group
-        pgm = si.core_class_roles.particle_group_manager
-        self.info['inside_polygon_particle_prop'] = f'resident_in_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
-        si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D',
-                     name=self.info['inside_polygon_particle_prop'],
-                     polygon_list=[polygon], write=False)
+        si.add_class('particle_properties', class_name='PolygonEntryExitTimes',
+                     name=info['PolygonEntryExitTimes_prop_name'], write=False,
+                     points=params['points'])
 
     def initial_setup(self, **kwargs):
 
@@ -64,19 +41,13 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         # do standard stats initialize
         super().initial_setup()  # set up using regular grid for  stats
 
-        self.open_output_file(file_name)
 
-        self.create_time_variables(self.nc)
         self._create_file_variables(self.nc)
 
         self.set_up_part_prop_lists()
 
 
-    def check_requirements(self):
-        params = self.params
-        self.check_class_required_fields_prop_etc()
-
-    def _create_file_variables(self, nc):
+    def _create_file_variables_old(self, nc):
 
         if not self.params['write']: return
 
@@ -84,7 +55,6 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         num_pulses= self.schedulers['count_scheduler'].info['number_scheduled_times']
         nc.create_dimension('pulse_dim', dim_size=num_pulses)
         nc.create_variable('count', dim_names, np.int64, description='counts of particles in each pulse of release group inside release polygon at given times')
-        nc.create_variable('count_all_selected_particles', ['time_dim', 'pulse_dim'], np.int64, description='counts of particles in each, whether inside polygon or not at given times')
 
         # set up space for requested particle properties
         # working count space

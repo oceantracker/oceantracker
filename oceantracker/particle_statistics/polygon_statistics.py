@@ -47,9 +47,6 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         dim_names = [key for key in dims]
         nc.create_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in each polygon at given times, for each release group')
-        nc.create_variable('count_all_selected_particles', dim_names[:2],
-                           compression_level=si.settings.NCDF_compression_level,
-                           dtype=np.int64, description='counts of all selected particles whether in a polygon or not')
         nc.create_variable('count_all_alive_particles', dim_names[:2],
                            compression_level=si.settings.NCDF_compression_level,
                            dtype=np.int64, description='counts of all particles whether selected or not')
@@ -79,21 +76,19 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         # do counts
         self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
                                          release_groupID, p_x, self.count_time_slice,
-                                          self.count_all_selected_particles_time_slice,
                                           self.prop_data_list, self.sum_prop_data_list, sel)
     @staticmethod
     @njitOT
-    def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list, sel):
+    def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count,
+                                     prop_list, sum_prop_list, sel):
 
         # zero out counts in the count time slices
         count[:] = 0
-        count_all_particles[:] = 0
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
 
         for n in sel:
             n_group= group_ID[n]
-            count_all_particles[n_group] += 1  # all particles counter whether in a polygon or not
             n_poly = inside_polygons[n]
 
             if n_poly == -1 : continue # in no polygon so no count
@@ -164,8 +159,9 @@ class PolygonStats2D_ageBased(_BaseParticleLocationStats):
 
         # loop over statistics polygons
         self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
-                                          release_groupID, p_x, self.count_age_bins,
-                                         self.count_all_selected_particles, self.prop_data_list, self.sum_prop_data_list, sel, stats_grid['age_bin_edges'], p_age)
+                                release_groupID, p_x, self.count_age_bins,
+                                self.prop_data_list, self.sum_prop_data_list,
+                                sel, stats_grid['age_bin_edges'], p_age)
     def write_time_varying_stats(self, time_sec):
         pass # no writing on the fly in aged based states
     def info_to_write_on_file_close(self):
@@ -175,9 +171,6 @@ class PolygonStats2D_ageBased(_BaseParticleLocationStats):
         dim_names = [key for key in self.info['count_dims']]
         nc.write_variable('count', self.count_age_bins, dim_names,
                           description='counts of particles in grid at given ages, for each release group')
-
-        nc.write_variable('count_all_selected_particles', self.count_all_selected_particles, dim_names[:2],
-                          description='counts of  particles in all age bands for each release group, whether inside a polygon or not')
 
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],
                           description='counts of  all alive particles, not just those selected to be counted')
@@ -192,7 +185,8 @@ class PolygonStats2D_ageBased(_BaseParticleLocationStats):
 
     @staticmethod
     @njitOT
-    def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count, count_all_particles, prop_list, sum_prop_list,
+    def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count,
+                                     prop_list, sum_prop_list,
                                      sel, age_bin_edges, age):
 
         # (no zeroing as accumulated over  whole run)
@@ -204,8 +198,6 @@ class PolygonStats2D_ageBased(_BaseParticleLocationStats):
             if 0 <= na < (age_bin_edges.shape[0] - 1):
                 # only count those in age bins
                 ng= group_ID[n]
-                count_all_particles[na,ng] += 1
-
                 n_poly = inside_polygons[n]
                 if n_poly == -1: continue # in no polygon so no count
 
