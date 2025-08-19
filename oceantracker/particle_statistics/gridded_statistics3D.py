@@ -127,12 +127,12 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                 for m in range(len(prop_list)):
                     sum_prop_list[m][ng, r, c, k] += prop_list[m][n]
 
-    def info_to_write_on_file_close(self):
-        nc = self.nc
+    def info_to_write_on_file_close(self, nc):
+
         stats_grid = self.grid
 
         # Write x, y grid info using parent method
-        super().info_to_write_on_file_close()
+        super().info_to_write_on_file_close(nc)
 
         dim_names = [key for key in self.info['count_dims']]
         # Write z grid info

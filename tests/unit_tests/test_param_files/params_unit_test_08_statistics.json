@@ -13,7 +13,7 @@
     "tracks_writer": {
         "update_interval": 3600,
         "write_dry_cell_flag": false,
-        "time_steps_per_per_file": 10
+        "time_steps_per_per_file": null
     },
     "reader": {
         "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
@@ -87,6 +87,36 @@
         }
     ],
     "particle_statistics": [
+        {
+            "points": [
+                [
+                    1597682.0,
+                    5486972
+                ],
+                [
+                    1598604,
+                    5487275
+                ],
+                [
+                    1598886,
+                    5486464
+                ],
+                [
+                    1597917.0,
+                    5484000
+                ],
+                [
+                    1597300,
+                    5484000
+                ],
+                [
+                    1597682,
+                    5486972
+                ]
+            ],
+            "class_name": "ResidentInPolygon",
+            "name": "my_resident_in_polygon"
+        },
         {
             "grid_size": [
                 120,

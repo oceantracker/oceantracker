@@ -187,9 +187,6 @@ my_poly_stats_age = dict(class_name='PolygonStats2D_ageBased',
 
 my_resident_in_polygon =dict(name='my_resident_in_polygon',
         class_name='ResidentInPolygon',
-        name_of_polygon_release_group= 'my_polygon_release',
-        update_interval= 3600,
-        particle_property_list=['a_pollutant','water_depth'],
         #status_list=[],
         )
 
@@ -276,12 +273,12 @@ def compare_reference_run_stats(case_info_file, args):
         print('\t count all alive, ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
              'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
                       '\t max diff counts-ref run counts =',np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])))
-
-        for prop_name in params['particle_property_list']:
-            if prop_name not in stats_ref: continue
-            dc = np.abs(stats[prop_name] - stats_ref[prop_name])
-            print(f'\t Property  "{prop_name}"', 'max mag.',
-                  np.nanmax(np.abs(stats[prop_name])), np.nanmax(np.abs(stats_ref[prop_name])), ', max diff =', np.max(dc[np.isfinite(dc)]))
+        if 'particle_property_list' in params:
+            for prop_name in params['particle_property_list']:
+                if prop_name not in stats_ref: continue
+                dc = np.abs(stats[prop_name] - stats_ref[prop_name])
+                print(f'\t Property  "{prop_name}"', 'max mag.',
+                      np.nanmax(np.abs(stats[prop_name])), np.nanmax(np.abs(stats_ref[prop_name])), ', max diff =', np.max(dc[np.isfinite(dc)]))
 
     pass
 def show_track_plot(case_info_file, args,colour_with=None):

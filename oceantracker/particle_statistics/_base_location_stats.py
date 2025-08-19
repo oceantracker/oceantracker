@@ -55,6 +55,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.sum_binned_part_prop = {}
         info['output_file'] = None
         self.role_doc('Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are \n * separated by release group \n * can be a time series of statistics or put be in particle age bins.')
+        self.nWrites = 0
 
     def initial_setup(self):
 
@@ -114,10 +115,12 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
 
     def check_part_prop_list(self):
+        params = self.params
+        if 'particle_property_list' not in params: return
 
         part_prop = si.class_roles.particle_properties
         names=[]
-        for name in self.params['particle_property_list']:
+        for name in params['particle_property_list']:
 
             si.msg_logger.spell_check(f'Particle property name "{name}" not recognised',
                                       name, si.class_roles.particle_properties.keys(),
@@ -159,7 +162,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         return nc
 
     def create_time_variables(self):
-        self.nWrites = 0
+        pass
     def create_grid_variables(self):
         # creates 2D grid variables
         stats_grid= self.grid
@@ -351,7 +354,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         '''do particle counts'''
         part_prop = si.class_roles.particle_properties
         info = self.info
-        self.start_update_timer()
 
         num_in_buffer = si.run_info.particles_in_buffer
 
@@ -366,7 +368,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         if si.run_info.is3D_run:
             sel = self.sel_depth_range(sel)
-        # users over ride thismethod  to further sub-select those to count
+        # users override this method  to further sub-select those to count
         sel = self.select_particles_to_count(sel)
 
         #update prop list data, as buffer may have expanded
@@ -378,15 +380,13 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.do_counts(n_time_step, time_sec, sel, alive)
 
         self.write_time_varying_stats(time_sec)
+        self.nWrites += 1
 
-        self.stop_update_timer()
-
-
-    def write_time_varying_stats(self, time):
+    def write_time_varying_stats(self, time_sec):
         # write nth step in file
         n_write = self.nWrites
         fh = self.nc.file_handle
-        fh['time'][n_write] = time
+        fh['time'][n_write] = time_sec
 
         release_groups = si.class_roles.release_groups
 
@@ -403,13 +403,13 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         for key, item in self.sum_binned_part_prop.items():
             self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
-        self.nWrites += 1
 
-    def info_to_write_on_file_close(self) : pass
+
+    def info_to_write_on_file_close(self,nc) : pass
 
     def close_file(self):
         nc = self.nc
-        self.info_to_write_on_file_close()
+        self.info_to_write_on_file_close(nc)
         # write total released in each release group
         num_released = [i.info['number_released'] for name, i in si.class_roles.release_groups.items()]
         nc.write_variable('number_released_each_release_group', np.asarray(num_released, dtype=np.int64),

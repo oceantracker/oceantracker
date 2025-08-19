@@ -78,8 +78,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
-        dx= grid_spacings[0]
-        dy = grid_spacings
+
         for n in sel:
 
             ng = group_ID[n]
@@ -176,10 +175,8 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
     def write_time_varying_stats(self, time_sec):
         pass # no writing on the fly in aged based states
 
-    def info_to_write_on_file_close(self):
+    def info_to_write_on_file_close(self, nc):
         # only write age count variables as whole at end of run
-
-        nc = self.nc
         stats_grid = self.grid
         dim_names = [key for key in self.info['count_dims']]
         nc.write_variable('count', self.count_age_bins, dim_names,

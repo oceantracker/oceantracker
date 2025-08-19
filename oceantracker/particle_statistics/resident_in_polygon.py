@@ -1,7 +1,7 @@
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterCoordsChecker as PCC, merge_params_with_defaults
 from copy import  deepcopy
-from oceantracker.release_groups.polygon_release import PolygonRelease
+from oceantracker.particle_statistics.util import stats_util
 from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 
 from oceantracker.shared_info import shared_info as si
@@ -22,103 +22,83 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         super().__init__()
 
         self.add_default_params(points = PCC(None,doc_str='Points for 2D polygon to calc residence times, as N by 2 list or numpy array'))
+
+        # todo are prop values useful, add?
         self.remove_default_params(['particle_property_list'])
 
     def add_required_classes_and_settings(self):
         # add polygon entry exit times class to use in residency calcs
         info = self.info
         params = self.params
-        info['PolygonEntryExitTimes_prop_name'] = f'{params["name"]}_PolygonEntryExitTimes'
+        info['polygon_entry_exit_times_prop_name'] = f'{params["name"]}_polygon_entry_exit_times'
 
         si.add_class('particle_properties', class_name='PolygonEntryExitTimes',
-                     name=info['PolygonEntryExitTimes_prop_name'], write=False,
+                     name=info['polygon_entry_exit_times_prop_name'], write=False,
                      points=params['points'])
 
     def initial_setup(self, **kwargs):
 
-        ml = si.msg_logger
+        info  = self.info
         params = self.params
         # do standard stats initialize
-        super().initial_setup()  # set up using regular grid for  stats
+        super().initial_setup()
+
+        dm = si.dim_names
+        info['count_dims']= {
+                        dm.time: None,
+                        dm.release_group:len(si.class_roles.release_groups)}
+
+        # create count, residence time buffers
+        dim_sizes =(info['count_dims'][dm.release_group],)
+        self.count_time_slice = np.full(dim_sizes, 0, np.int64)
+        self.count_all_alive_particles = np.full(dim_sizes, 0, np.int64)
 
 
-        self._create_file_variables(self.nc)
+    def open_output_file(self,file_name):
+        self.nWrites = 0
+        nc = super().open_output_file(file_name)
+        self.add_time_variables_to_file(nc)
 
-        self.set_up_part_prop_lists()
+        # time grid count variables
+        dims = self.info['count_dims']
+        dim_names = [key for key in dims]
+        nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64,
+                           compression_level=si.settings.NCDF_compression_level,
+                           description='counts of all alive particles everywhere')
+        nc.create_variable('count', dims.keys(), np.int64, compression_level=si.settings.NCDF_compression_level,
+                           description='counts of particles in spatial bins at given times, for each release group')
+        return nc
 
-
-    def _create_file_variables_old(self, nc):
-
-        if not self.params['write']: return
-
-        dim_names = ('time_dim', 'pulse_dim')
-        num_pulses= self.schedulers['count_scheduler'].info['number_scheduled_times']
-        nc.create_dimension('pulse_dim', dim_size=num_pulses)
-        nc.create_variable('count', dim_names, np.int64, description='counts of particles in each pulse of release group inside release polygon at given times')
-
-        # set up space for requested particle properties
-        # working count space
-        self.count_time_slice = np.full((num_pulses,), 0, np.int64)
-        self.count_all_particles_time_slice = np.full_like(self.count_time_slice, 0, np.int64)
-
-        for p_name in self.params['particle_property_list']:
-            if p_name in si.class_roles.particle_properties:
-                self.sum_binned_part_prop[p_name] = np.full(num_pulses, 0.)  # zero for  summing
-                nc.create_variable('sum_' + p_name, dim_names, np.float64, description='sum of particle property inside polygon  ' + p_name)
-            else:
-                si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning= True)
-
-    def create_grid_variables(self, nc): pass
-
-    def do_counts(self,n_time_step, time_sec, sel):
+    def do_counts(self,n_time_step, time_sec, sel, alive):
 
         part_prop = si.class_roles.particle_properties
-        rg  = self.release_group_to_count
 
-        # manual update which polygon particles are inside
-        inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
-        inside_poly_prop.update(n_time_step, time_sec, sel)
-
-        # do counts
-        self._do_counts_and_summing_numba(inside_poly_prop.data,
+        stats_util._count_all_alive_time(part_prop['status'].data,
                                          part_prop['IDrelease_group'].data,
-                                         part_prop['IDpulse'].data,
-                                         self.info['release_group_ID_to_count'],
-                                         self.info['z_range'],
-                                         part_prop['x'].data,
-                                         self.count_time_slice, self.count_all_particles_time_slice,
-                                         self.prop_data_list, self.sum_prop_data_list, sel)
+                                         self.count_all_alive_particles, alive)
+        # manual update of eresidence times
+        self._do_counts_and_summing_numba(
+                        part_prop[self.info['polygon_entry_exit_times_prop_name']].data,
+                        part_prop['IDrelease_group'].data,
+                        self.count_time_slice,
+                        sel)
 
 
-    def info_to_write_on_file_close(self):
-        nc = self.nc
-        nc.write_variable('release_times', self.schedulers['count_scheduler'].scheduled_times, ['pulse_dim'], dtype=np.float64, attributes={'times_pulses_released': ' times in seconds since 1970'})
+    def info_to_write_on_file_close(self,nc):
+        pass
 
     @staticmethod
     @njitOT
-    def _do_counts_and_summing_numba(in_polgon,
-                                     release_group_ID, pulse_ID, required_release_group, zrange, x, count,
-                                     count_all_particles, prop_list, sum_prop_list, sel):
+    def _do_counts_and_summing_numba(polygon_entry_exit_times,
+                        IDrelease_group,
+                        counts,
+                        sel):
         # count those of each pulse inside release polygon
-
-        # zero out counts in the count time slices
-        count[:] = 0
-        count_all_particles[:] = 0
-        for m in range(len(prop_list)):
-            sum_prop_list[m][:] = 0.
+        counts[:] = 0
 
         for n in sel:
-            if  release_group_ID[n] == required_release_group:
-                pulse= pulse_ID[n]
+            ng = IDrelease_group[n]
+            counts[ng] += 1
 
-                # count all particles not whether in volume or not
-                count_all_particles[pulse] += 1  # all particles count whether in a polygon or not , whether in required depth range or not
 
-                if x.shape[1] == 3 and not (zrange[0] <= x[n, 2] <= zrange[1]): continue
 
-                if in_polgon[n] >= 0: # only one polygon
-
-                    count[pulse] += 1
-                    # sum particle properties
-                    for m in range(len(prop_list)):
-                        sum_prop_list[m][pulse] += prop_list[m][n]

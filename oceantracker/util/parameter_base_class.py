@@ -129,7 +129,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
     def timed_update(self, n_time_step, time_sec, alive=None):
         t0 = perf_counter()
         if alive is None:
-            self.update(n_time_step, time_sec)
+            self.update(n_time_step, time_sec) # legacy code
         else:
             self.update(n_time_step, time_sec, alive)
 
