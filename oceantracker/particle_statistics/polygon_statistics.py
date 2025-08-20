@@ -16,13 +16,13 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         super().__init__()
         # set up info/attributes
         self.add_default_params({'role_output_file_tag': PVC('stats_polygon_time',str)})
-        self.add_polygon_params()
+        self._add_polygon_params()
 
     def initial_setup(self):
         # set up regular grid for  stats
         super().initial_setup()
         info = self.info
-        self.create_polygon_variables_part_prop()
+        self._create_polygon_variables_part_prop()
         self.create_time_variables()
 
         dm = si.dim_names
@@ -38,22 +38,15 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
 
     def open_output_file(self,file_name):
         nc = super().open_output_file(file_name)
-        self.nWrites = 0
         self.add_time_variables_to_file(nc)
         add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
 
         # time polygon count variables to append over time
-        dims = self.info['count_dims']
-        dim_names = [key for key in dims]
-        nc.create_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
-                           description='counts of particles in each polygon at given times, for each release group')
-        nc.create_variable('count_all_alive_particles', dim_names[:2],
-                           compression_level=si.settings.NCDF_compression_level,
-                           dtype=np.int64, description='counts of all particles whether selected or not')
-
-        for p in self.params['particle_property_list']:
-            nc.create_variable('sum_' + p,list(dims.keys()), np.float64, description='sum of particle property inside bin')
+        self._create_common_time_varying_stats(nc)
         return nc
+
+    def write_time_varying_stats(self, time_sec):
+        self._write_common_time_varying_stats(time_sec)
 
     def do_counts(self,n_time_step, time_sec, sel, alive):
 
@@ -103,15 +96,15 @@ class PolygonStats2D_ageBased(_BaseParticleLocationStats):
     def __init__(self):
         super().__init__()
         self.add_default_params({'role_output_file_tag': PVC('stats_polygon_age',str)})
-        self.add_age_params()
-        self.add_polygon_params()
+        self._add_age_params()
+        self._add_polygon_params()
 
     def initial_setup(self):
         # set up regular grid for  stats
         super().initial_setup()
         info = self.info
-        self.create_polygon_variables_part_prop()
-        self.create_age_variables()
+        self._create_polygon_variables_part_prop()
+        self._create_age_variables()
         dm = si.dim_names
         info['count_dims']= {dm.age: self.grid['age_bins'].size,
                        dm.release_group:len(si.class_roles.release_groups),
@@ -162,15 +155,16 @@ class PolygonStats2D_ageBased(_BaseParticleLocationStats):
                                 release_groupID, p_x, self.count_age_bins,
                                 self.prop_data_list, self.sum_prop_data_list,
                                 sel, stats_grid['age_bin_edges'], p_age)
-    #def write_time_varying_stats(self, time_sec):
-   #     pass
-        #super().write_time_varying_stats(time_sec)
+
+    def write_time_varying_stats(self, time_sec):
+        pass  # no writing on the fly in aged based states
+
 
     def info_to_write_on_file_close(self, nc):
         # write variables whole
         nc = self.nc
         stats_grid = self.grid
-        dim_names = [key for key in self.info['count_dims']]
+        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
         nc.write_variable('count', self.count_age_bins, dim_names,
                           description='counts of particles in grid at given ages, for each release group')
 

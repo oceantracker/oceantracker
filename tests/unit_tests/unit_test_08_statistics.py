@@ -1,3 +1,5 @@
+import numpy as np
+
 from oceantracker.main import OceanTracker
 
 from tests.unit_tests import test_definitions
@@ -22,16 +24,17 @@ def main(args):
     #ot.settings(NUMBA_cache_code = True)
     hm = test_definitions.hydro_model['demoSchism3D']
     ot.add_class('reader', **hm['reader'])
-
-    # add a point release
+    points = np.asarray(hm['polygon'])
     ot.add_class('release_groups',
-                            name='point 1',  # name used internal to refer to this release
+                 **dict(test_definitions.my_polygon_release, points= points))
+    ot.add_class('release_groups',
+                            name='point inside polygon',  # name used internal to refer to this release
                              class_name='PointRelease',  # class to use
-                             points=[[1594000, 5484200, -2]],
+                             points=np.mean(points,axis=0),
                              # the below are optional settings/parameters
                              release_interval=timestep,  # seconds between releasing particles
                              pulse_size=500)  # how many are released each interval
-    ot.add_class('release_groups',**test_definitions.my_polygon_release)
+
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
@@ -40,16 +43,16 @@ def main(args):
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
     # add a  particle statistics
-    ot.add_class('particle_statistics', **dict(test_definitions.my_resident_in_polygon, points=hm['polygon']))
+    ot.add_class('particle_statistics', **dict(test_definitions.my_resident_in_polygon, points=points))
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_time))
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_age))
     ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time,
-                                               polygon_list=[dict(points=hm['polygon'])]))
+                                                   polygon_list=[dict(points=hm['polygon'])]))
     ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_age,
-                                               polygon_list=[dict(points=hm['polygon'])]))
+                                                   polygon_list=[dict(points=hm['polygon'])]))
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_time,
-                                               name='my_heat_3Dmap_time', class_name='GriddedStats3D_timeBased',
-                                               z_min=-10, z_max=2))
+                                                       name='my_heat_3Dmap_time', class_name='GriddedStats3D_timeBased',
+                                                       z_min=-10, z_max=2))
 
 
 

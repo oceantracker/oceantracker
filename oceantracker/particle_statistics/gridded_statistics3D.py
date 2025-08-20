@@ -34,7 +34,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         super().initial_setup()
         info = self.info
         stats_grid = self.grid
-        self.create_grid_variables()
+        self._create_grid_variables()
 
         dm = si.dim_names
         info['count_dims']= {dm.time: None,
@@ -59,9 +59,9 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                    error=True, caller=self,
                    hint='z=0 is mean water level, so z is mostly < 0')
 
-    def create_grid_variables(self):
+    def _create_grid_variables(self):
         # First set up x,y bins using parent method
-        super().create_grid_variables()
+        super()._create_grid_variables()
         
         # Then add z bins
         stats_grid = self.grid
@@ -134,7 +134,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         # Write x, y grid info using parent method
         super().info_to_write_on_file_close(nc)
 
-        dim_names = [key for key in self.info['count_dims']]
+        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
         # Write z grid info
         nc.write_variable('z', stats_grid['z'], [dim_names[4]], units='m',
                           description='Mid point of vertical grid cell')

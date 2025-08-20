@@ -6,6 +6,7 @@ from oceantracker.shared_info import shared_info as si
 stationary_status = int(si.particle_status_flags.stationary)
 status_unknown= int(si.particle_status_flags.unknown)
 
+def get_dim_names(dims_dict): return [key for key in dims_dict.keys()]
 @njitOT
 def _count_all_alive_time(status,  release_group, count_all_alive, alive):
 

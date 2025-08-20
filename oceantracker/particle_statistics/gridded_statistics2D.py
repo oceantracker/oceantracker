@@ -22,7 +22,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         # set up regular grid for  stats
         super().initial_setup()
         info = self.info
-        self.create_grid_variables()
+        self._create_grid_variables()
         dm = si.dim_names
         info['count_dims']= {dm.time: None,
                        dm.release_group:len(si.class_roles.release_groups),
@@ -32,22 +32,15 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self.create_count_variables(info['count_dims'],'time')
         self.set_up_part_prop_lists()
 
+    def write_time_varying_stats(self, time_sec):
+        self._write_common_time_varying_stats(time_sec)
+
     def open_output_file(self, file_name):
         nc = super().open_output_file(file_name)
-        self.nWrites = 0
         self.add_time_variables_to_file(nc)
         self.add_grid_variables_to_file(nc)
+        self._create_common_time_varying_stats(nc)
 
-        # time grid count variables
-        dims = self.info['count_dims']
-        dim_names = [key for key in dims]
-        nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64,
-                           compression_level=si.settings.NCDF_compression_level,
-                           description='counts of all alive particles everywhere')
-        nc.create_variable('count',dims.keys(), np.int64, compression_level=si.settings.NCDF_compression_level,
-                           description='counts of particles in spatial bins at given times, for each release group')
-        for p in self.params['particle_property_list']:
-            nc.create_variable('sum_' + p,list(dims.keys()), np.float64, description='sum of particle property inside bin')
         return nc
 
     def do_counts(self,n_time_step, time_sec, sel, alive):
@@ -104,14 +97,14 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
         super().__init__()
         # set up info/attributes
         self.add_grid_params()
-        self.add_age_params()
+        self._add_age_params()
 
     def initial_setup(self):
         # set up regular grid for  stats
         super().initial_setup()
         info = self.info
-        self.create_grid_variables()
-        self.create_age_variables()
+        self._create_grid_variables()
+        self._create_age_variables()
         dm = si.dim_names
         info['count_dims']= {dm.age: self.grid['age_bins'].size,
                             dm.release_group:len(si.class_roles.release_groups),
@@ -178,7 +171,7 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
     def info_to_write_on_file_close(self, nc):
         # only write age count variables as whole at end of run
         stats_grid = self.grid
-        dim_names = [key for key in self.info['count_dims']]
+        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
         nc.write_variable('count', self.count_age_bins, dim_names,
                           description= 'counts of particles in grid at given ages, for each release group')
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles,
