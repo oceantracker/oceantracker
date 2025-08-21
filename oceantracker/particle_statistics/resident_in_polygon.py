@@ -52,7 +52,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         si.add_class('particle_properties',
                  class_name='ManuallyUpdatedParticleProperty',
                  dtype='int32',
-                initial_value=0,
+                initial_value = 0,
                  name=info['entry_count_prop'],
                  write=False)
 
