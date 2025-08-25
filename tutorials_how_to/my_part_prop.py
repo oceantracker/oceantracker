@@ -12,8 +12,7 @@ class TimeAtStatus(CustomParticleProperty):
 
     def __init__(self):
         super().__init__() # must call parent class to get its parameters etc 
-        psf = si.particle_status_flags
-        self.add_default_params( required_status= PVC(psf.moving, str,
+        self.add_default_params( required_status= PVC('moving', str,
                                         possible_values =[key  for key, item in si.particle_status_flags.items() if item >=0 ],
                                                     doc_str='The particle status to count the time spend'),
                                 description=PVC('total time particle spends in a given status', # optional description and units are added to part. prop. netcdf variables attributes
