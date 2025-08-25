@@ -43,7 +43,7 @@ def main(args):
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
     # add a  particle statistics
-    ot.add_class('particle_statistics', **dict(test_definitions.my_resident_in_polygon, points=points))
+
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_time))
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_age))
     ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time,
@@ -53,7 +53,8 @@ def main(args):
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_time,
                                                        name='my_heat_3Dmap_time', class_name='GriddedStats3D_timeBased',
                                                        z_min=-10, z_max=2))
-
+    #ot.add_class('particle_statistics', **dict(test_definitions.my_resident_in_polygon, points=points,
+    #                                           class_name='oceantracker.particle_statistics.dev.resident_in_polygon.ResidentInPolygon'))
 
 
     ot.add_class('velocity_modifiers', name='terminal_velocity_test',
