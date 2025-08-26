@@ -215,7 +215,10 @@ class _BaseReleaseGroup(ParameterBaseClass):
         for key in release_info.keys():
             data = release_info[key]
             if has_points:
-                result[key] = data[sel, ...]
+                try:
+                    result[key] = data[sel, ...]
+                except:
+                    pass
             else:
                 # make empty output
                 s = (0,) + data.shape[1:] if data.ndim > 1 else (0,)

@@ -1,13 +1,13 @@
 {
     "output_file_base": "unit_test_03_release_group_errors_00",
-    "root_output_dir": "C:\\Auck_work\\oceantracker_output\\unit_tests",
+    "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
     "time_step": 900,
     "use_random_seed": true,
     "debug": true,
     "use_dispersion": false,
     "use_A_Z_profile": false,
     "reader": {
-        "input_dir": "C:\\Auck_work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
+        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
     },
     "release_groups": [
@@ -43,7 +43,7 @@
                 ]
             ],
             "release_interval": 900,
-            "pulse_size": 1,
+            "pulse_size": 2,
             "class_name": "PointRelease",
             "name": "my_point_release"
         },
@@ -75,7 +75,7 @@
                 ]
             ],
             "release_interval": 900,
-            "pulse_size": 1,
+            "pulse_size": 2,
             "z_min": -2.0,
             "z_max": 0.5,
             "class_name": "PolygonRelease",
@@ -83,7 +83,7 @@
         },
         {
             "release_interval": 1800,
-            "pulse_size": 1,
+            "pulse_size": 2,
             "grid_center": [
                 1601000,
                 5484000
