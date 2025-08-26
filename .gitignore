@@ -16,3 +16,5 @@ venv
 /temp.prof
 /docs/_build/html/_static/sphinx_highlight.js
 /docs/_build/html/.buildinfo.bak
+
+*.py[cod]
