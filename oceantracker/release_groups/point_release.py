@@ -37,7 +37,7 @@ class PointRelease(_BaseReleaseGroup):
         self.release_info = self._check_all_inside_water_depth_range(self.release_info)
 
         self._add_bounding_box( self.release_info['x'])
-        params['points'] = self.release_info['x'] # keep those inside domain
+        params['points'] = self.release_info['x'] # keep those inside domain and water depth range
 
         self.info['number_per_release'] = params['pulse_size'] * self.release_info['x'].shape[0]
 
