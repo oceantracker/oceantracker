@@ -11,13 +11,11 @@ from oceantracker.util import cord_transforms
 class InsidePolygon(object):
     # finds points inside given polygon (M,2) vertices as numpy array
     # may be a closed or not closed polygon
-    def __init__(self,verticies,geographic_coords=None, bounds_sub_grid_size=20):
+    def __init__(self,verticies,geographic_coords=None):
         self.geographic_coords = geographic_coords
         self.points = self._make_closed(verticies).astype(np.float64) # close  polygon if needed
-        self._build_inside_indicies_func(self.points, bounds_sub_grid_size)
+        self._pred_calcs(self.points)
 
-        # build number function wrapped in precalc data as constants
-        self._build_inside_indicies_func(self.points, bounds_sub_grid_size)
 
     def is_inside(self, xq,  out = None):
         # returns vector of booleans if each point in (N,2) numpy array of points
@@ -56,7 +54,7 @@ class InsidePolygon(object):
         else: # only return those found
             return indices[0]
 
-    def _build_inside_indicies_func(self, vert, bounds_sub_grid_size):
+    def _pred_calcs(self, vert):
         # do precalulations require to build a function to find indicies of points inside a polygon
         # 1) build set of bounding boxes for each line of polygon
         # 2) recalculates inv_slope for intersection calc and bounding box
@@ -206,7 +204,7 @@ if __name__ == '__main__':
     out = np.zeros((N,), dtype=np.int32)
 
     # speed tests
-    P= InsidePolygon(v,bounds_sub_grid_size = 20)
+    P= InsidePolygon(v)
 
     nrepeats = 10
     P.inside_indices(x[:3, :], out=out)
