@@ -3,7 +3,7 @@
 from numba import njit, types as nbtypes
 #from  matplotlib import nxutils
 import numpy as np
-import time
+from  time import  perf_counter
 import copy
 from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.util import cord_transforms
@@ -48,7 +48,6 @@ class InsidePolygon(object):
         indices = self.inside_ray_tracing_indices(xq,
                                                   self.line_bounds, self.slope_inv, self.polygon_bounds,
                                                   active, out, out_outside)
-
         if also_return_indices_outside:
             return indices # return both  those inside and outside
         else: # only return those found
@@ -65,7 +64,7 @@ class InsidePolygon(object):
         self.polygon_bounds = np.array([np.min(vert[:,0]), np.max(vert[:,0]),
                                        np.min(vert[:,1]),  np.max(vert[:,1]) ])
     @staticmethod
-    @njitOT
+    @njitOT # not sure why, by numba version is 100 times slower to compile, but runs only 30 times faster ???
     def _get_line_bounds_and_slopeinv(vert):
         nv = vert.shape[0]
         line_bounds = np.zeros((nv, 3, 2), dtype=np.float64)
@@ -77,16 +76,16 @@ class InsidePolygon(object):
             xy[0,:]= vert[n,:]
             xy[1,:]= vert[(n + 1) % nv,:]
             # sort to get bounds of segment lower left and upper right
-            xyb[:, 0] = np.sort(xy[:, 0])
-            xyb[:, 1] = np.sort(xy[:, 1])
-            line_bounds[n, :2, :] = xyb.copy()
+            xyb[0, 0], xyb[1, 0] = xy[:, 0].min(), xy[:, 0].max()
+            xyb[0, 1], xyb[1, 1] = xy[:, 1].min(), xy[:, 1].max()
+
+            for m in range(2): line_bounds[n, m, :] = xyb[m, :]
+            # start of line , used with intercept to find intersections
+            line_bounds[n, 2, :] = xy[0, :]
 
             # slope, line origin  must come from unordered line
             if xy[1, 1] != xy[0, 1]:
                 slope_inv[n] = (xy[1, 0] - xy[0, 0]) / (xy[1, 1] - xy[0, 1])
-
-            # start of line , used with intercept to find intersections
-            line_bounds[n, 2, :] = xy[0, :].astype(np.float64)
         return  line_bounds, slope_inv
 
     def _make_closed(self, p):
@@ -157,8 +156,6 @@ class InsidePolygon(object):
 
         return inside_IDs[:n_inside], outside_IDs[:n_outside]
 
-
-
 def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
     msg=[]
     polygons=[]
@@ -173,8 +170,6 @@ def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
         poly.update({'points': p.points.tolist()})
     return polygons, msg
 
-
-
 def make_anticlockwise_polygon(xy):
     # ensure points in polygon are ordered in anti-clockwise order
     is_clockwise = np.sum(np.arctan2( xy[:,0],xy[:,1]  ),axis=0) > 0
@@ -188,7 +183,7 @@ if __name__ == '__main__':
     N=10**6
 
 
-    v = np.array([[5.5      , -5],
+    v1 = np.array([[5.5      , -5],
                   [  5.11      , -10.00907385],
                   [  5.11      , -14.68307385],
                   [  6.89      , -14.68307385],
@@ -196,6 +191,12 @@ if __name__ == '__main__':
                   [0, -8],
                   [ -1      , 3]
                   ])
+    # add more points to make larger polygon tp test speed
+    v= v1[0,:].copy().reshape((1,2))
+    for n in range(v1.shape[0]-1):
+        vadd = np.linspace(v1[n,:],v1[n+1,:],100,dtype=np.float64)
+        v =  np.append(v,vadd[1:,:],axis=0)
+
     dx =.5
     bounds = [np.min(v[:,0]) -dx, np.max(v[:,0]) +dx, np.min(v[:,1]) -dx, np.max(v[:,1]) +dx]
     x = np.stack(((np.random.rand(N, )-.5)*np.diff(bounds[:2]), (np.random.rand(N, )-.5)*np.diff(bounds[2:])),axis=1) + np.mean(v,axis=0)
@@ -204,15 +205,20 @@ if __name__ == '__main__':
     out = np.zeros((N,), dtype=np.int32)
 
     # speed tests
+    t0 = perf_counter()
     P= InsidePolygon(v)
+    print(' with compile', perf_counter()-t0)
+    t0 = perf_counter()
+    P = InsidePolygon(v)
+    print(' after compile', perf_counter() - t0)
 
     nrepeats = 10
-    P.inside_indices(x[:3, :], out=out)
-    t0=time.time()
+    P.inside_indices(x[:3, :], out=out) # compile code
+    t0=perf_counter()
 
     for n in range(nrepeats):
         indices_inside = P.inside_indices(x,active=active, out= out)
-    print('indicies inside', time.time() - t0, nrepeats*N/10**6,'million points checked')
+    print('indicies inside', perf_counter() - t0, nrepeats*N/10**6,'million points checked')
 
 
     # test plots
