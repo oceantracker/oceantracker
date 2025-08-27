@@ -46,7 +46,7 @@
         }
     ],
     "tracks_writer": {
-        "time_steps_per_per_file": null
+        "time_steps_per_per_file": 5
     },
     "particle_statistics": [
         {

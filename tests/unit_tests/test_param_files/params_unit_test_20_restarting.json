@@ -11,8 +11,8 @@
     "particle_buffer_initial_size": 200,
     "NUMBA_cache_code": true,
     "use_resuspension": false,
-    "restart_interval": null,
-    "throw_debug_error": 0,
+    "restart_interval": 10800,
+    "throw_debug_error": 1,
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc"
@@ -65,6 +65,6 @@
     ],
     "tracks_writer": {
         "update_interval": 1800,
-        "time_steps_per_per_file": null
+        "time_steps_per_per_file": 10
     }
 }

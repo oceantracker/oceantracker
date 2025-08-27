@@ -1,9 +1,8 @@
 import numpy as np
-import numba as nb
 from numba.typed import List as NumbaList
-from oceantracker.util.polygon_util import make_anticlockwise_polygon
-from oceantracker.util import  basic_util, cord_transforms
-from oceantracker.util.numba_util import njitOT, njitOTparallel
+from oceantracker.util.oldver.polygon_util_v01a import make_anticlockwise_polygon
+from oceantracker.util import cord_transforms
+from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import shared_info as si
 
 # build node to cell map
@@ -252,7 +251,6 @@ if __name__ == "__main__":
     # testing and timing of above routines
     from oceantracker.util import ncdf_util
     from matplotlib import pyplot as plt
-    from oceantracker.util import message_logger
     from time import perf_counter
     fn = 'G:\\Hindcasts_large\\MalbroughSounds_10year_benPhD\\2008\\schism_marl20080101_00z_3D.nc'
     nc = ncdf_util.NetCDFhandler(fn)

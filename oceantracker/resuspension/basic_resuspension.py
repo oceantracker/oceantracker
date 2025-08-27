@@ -18,6 +18,9 @@ class BasicResuspension(_BaseResuspension):
                                  'critical_friction_velocity': PVC(0.,float, min=0.),
                                  })
 
+    def add_required_classes_and_settings(self):
+        i = si.add_custom_field('friction_velocity', dict(write_interp_particle_prop_to_tracks_file=False),
+                                default_classID='field_friction_velocity')
     # is 3D test of parent
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(requires3D=True)

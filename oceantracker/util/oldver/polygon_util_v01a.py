@@ -47,9 +47,7 @@ class InsidePolygon(object):
 
         active = active.astype(np.int32) # ensure its int32
         # get tuple of found and not found
-        indices = self.inside_ray_tracing_indices(xq,
-                                                  self.line_bounds, self.slope_inv, self.polygon_bounds,
-                                                  active, out, out_outside)
+        indices = self.inside_ray_tracing_indices_fun(xq,  active, out, out_outside)
 
         if also_return_indices_outside:
             return indices # return both  those inside and outside
@@ -83,6 +81,41 @@ class InsidePolygon(object):
         self.polygon_bounds = np.array([np.min(vert[:,0]), np.max(vert[:,0]),
                          np.min(vert[:,1]),  np.max(vert[:,1]) ])
 
+        # make an initial function to find if points inside with one subcell
+        x = np.linspace(self.polygon_bounds[0], self.polygon_bounds[1], 2)
+        y = np.linspace(self.polygon_bounds[2], self.polygon_bounds[3],  2)
+        overlap = np.ones((1, 1), dtype=np.int8)
+        self.inside_ray_tracing_indices_fun = self.make_inside_ray_tracing_indices_subgrids(self.line_bounds, self.slope_inv, self.polygon_bounds,
+                                                                                       x, y, overlap)
+
+        # set up sub-grid of bounds to speed eliminating points from full check for ray tracing
+        x = np.linspace(self.polygon_bounds[0], self.polygon_bounds[1], bounds_sub_grid_size + 1)
+        y = np.linspace(self.polygon_bounds[2], self.polygon_bounds[3], bounds_sub_grid_size + 1) # break symetry to test
+        overlap = np.zeros((y.size-1, x.size-1), dtype=np.int8)
+
+        # check if any of 4 corners of each cell is inside polygon
+        for r in np.arange(y.size - 1):
+            for c in np.arange(x.size-1):
+                xq = np.asarray([[x[c],y[r]],[x[c+1],y[r]],[x[c+1],y[r+1]],[x[c],y[r+1]]])
+                corner_inside_polygon = np.any(self.is_inside(xq))
+                vertex_inside_sub_grid = False
+                for p in self.points:
+
+                    if x[c] <= p[0] <= x[c+1] and y[r] <= p[1] <= y[r+1]:
+                        vertex_inside_sub_grid = True
+                        break # stop if any vertex inside the rectangle
+                        
+                overlap[r,c] = corner_inside_polygon or vertex_inside_sub_grid
+
+
+        # setup sub grid info and  find inside_ray_tracing_indices_fun  which exploits the sub grid
+        self.sub_grid_x = x
+        self.sub_grid_y = y
+        self.sub_grid_overlaps_polygon = overlap
+        self.inside_ray_tracing_indices_fun = self.make_inside_ray_tracing_indices_subgrids(self.line_bounds, self.slope_inv, self.polygon_bounds,
+                                                                                       self.sub_grid_x, self.sub_grid_y, self.sub_grid_overlaps_polygon)
+        pass
+
     def _make_closed(self, p):
         # inside works whether closed or not, but ensure a closed polygon unless requested
         if np.any(p[0,:] != p[-1,:]):
@@ -98,14 +131,11 @@ class InsidePolygon(object):
         if self.geographic_coords:
             xy =  cord_transforms.WGS84_to_UTM(xy, in_lat_lon_order=False)
 
-        x,y = xy[:,0], xy[:,1]
-        return self._get_area_numba(x,y)
 
-    @staticmethod
-    @njitOT
-    def _get_area_numba(x,y):
+        x,y = xy[:,0], xy[:,1]
         n = len(x)
         area = 0.0
+
         for i in range(n):
             j = (i + 1) % n
             area += x[i] * y[j]
@@ -115,43 +145,57 @@ class InsidePolygon(object):
         return area
 
     @staticmethod
-    @njitOT
-    def inside_ray_tracing_indices(xq_vals,lb, slope_inv, bounds, active, inside_IDs, outside_IDs):
-        # finds if points indside polygon based on ray from point to +ve x
-        # based on odd number of crossings of lines of polygon, resilt is in boolean working space, "inside"
-        # this version returns the indices of those inside,  in first n_found values of index buffer
-        # if outside.shape[0] > 1 then those outside are also put in outside buffer
+    def make_inside_ray_tracing_indices_subgrids(lb, slope_inv, bounds, sub_grid_x, sub_grid_y, sub_grid_overlaps_polygon):
+        # wrapper to make faster reduce number of arguments anf faster by compling fixed array references into code
 
-        n_inside = 0
-        n_outside= 0
+        # useful constants
+        sub_grid_dx = sub_grid_x[1] - sub_grid_x[0]
+        sub_grid_dy = sub_grid_y[1] - sub_grid_y[0]
 
-        for n in active:
-            xq= xq_vals[n,: ]
-            xints = 0
-            inside = False
-            if bounds[0] <= xq[0] <= bounds[1] and bounds[2] <= xq[1] <= bounds[3]:  # inside bounds of polygon
-                for i in range(lb.shape[0]):
-                    # get line's bounding box, faster to do this in one line tuple assignment
-                    p1x, p1y, p2x, p2y = lb[i, 0, 0], lb[i, 0, 1], lb[i, 1, 0], lb[i, 1, 1]
-                    if p1y < xq[1] <= p2y:
-                        if xq[0] <= p2x:
-                            if p1y != p2y:
-                                xints = (xq[1] - lb[i, 2, 1]) * slope_inv[i] + lb[i, 2, 0]
-                            if p1x == p2x or xq[0] <= xints:
-                                inside = not inside
-            if inside :
-                # add to index list if inside
-                inside_IDs[n_inside] = n
-                n_inside += 1
+        @njitOT
+        def inside_ray_tracing_indices(xq_vals, active, inside_IDs, outside_IDs):
+            # finds if points indside polygon based on ray from point to +ve x
+            # based on odd number of crossings of lines of polygon, resilt is in boolean working space, "inside"
+            # this version returns the indices of those inside,  in first n_found values of index buffer
+            # if outside.shape[0] > 1 then those outside are also put in outside buffer
 
-            elif outside_IDs.shape[0] > 1:
-                # only insert not found if outside_IDs is given as full size
-                outside_IDs[n_outside] = n
-                n_outside +=1
+            n_inside = 0
+            n_outside= 0
+            r_lims = sub_grid_overlaps_polygon.shape[0]-1
+            c_lims = sub_grid_overlaps_polygon.shape[1]-1
 
-        return inside_IDs[:n_inside], outside_IDs[:n_outside]
+            for n in active:
+                xq= xq_vals[n,: ]
+                xints = 0
+                inside = False
+                if bounds[0] <= xq[0] <= bounds[1] and bounds[2] <= xq[1] <= bounds[3]:  # inside bounds of polygon
+                    # check if point in subgrid cell overlaping the polygon
+                    c , r = int((xq[0]-sub_grid_x[0])/sub_grid_dx), int((xq[1]-sub_grid_y[0])/sub_grid_dy)
+                    # only look at polygon if subcell does not overlap polygon
+                    #  also make sure point on edge of bounds round down
+                    if sub_grid_overlaps_polygon[min(r, r_lims), min(c, c_lims)] == 1:
+                        for i in range(lb.shape[0]):
+                            # get line's bounding box, faster to do this in one line tuple assignment
+                            p1x, p1y, p2x, p2y = lb[i, 0, 0], lb[i, 0, 1], lb[i, 1, 0], lb[i, 1, 1]
+                            if p1y < xq[1] <= p2y:
+                                if xq[0] <= p2x:
+                                    if p1y != p2y:
+                                        xints = (xq[1] - lb[i, 2, 1]) * slope_inv[i] + lb[i, 2, 0]
+                                    if p1x == p2x or xq[0] <= xints:
+                                        inside = not inside
+                if inside :
+                    # add to index list if inside
+                    inside_IDs[n_inside] = n
+                    n_inside += 1
 
+                elif outside_IDs.shape[0] > 1:
+                    # only insert not found if outside_IDs is given as full size
+                    outside_IDs[n_outside] = n
+                    n_outside +=1
 
+            return inside_IDs[:n_inside], outside_IDs[:n_outside]
+
+        return inside_ray_tracing_indices
 
 def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
     msg=[]
@@ -179,7 +223,7 @@ def make_anticlockwise_polygon(xy):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    N=10**6
+    N=10**4
 
 
     v = np.array([[5.5      , -5],
@@ -219,13 +263,19 @@ if __name__ == '__main__':
     else:
         print('no points')
 
-
+    x, y = np.meshgrid(P.sub_grid_x, P.sub_grid_y)
+    plt.plot(x,y,c=[.8,.8,.8])
+    plt.plot(x.T, y.T, c=[.8, .8, .8])
     plt.plot(v[:, 0], v[:, 1], 'k-', markersize=10, )
     plt.plot(P.points[:, 0], P.points[:, 1], 'k--', markersize=10, )
     plt.plot(xtest[:,0],xtest[:,1],'x',markersize=3,color=[1,0,0])
     plt.plot(xtest[indices_inside, 0], xtest[indices_inside, 1], '.', markersize=4, color=[0, 1, 0])
 
-
+    x,y = np.meshgrid(P.sub_grid_x,P.sub_grid_y)
+    x = .5*(x[:-1,:-1]+x[1:,1:])
+    y = .5 * (y[:-1, :-1] + y[1:, 1:])
+    sel=P.sub_grid_overlaps_polygon ==0
+    plt.scatter(x[sel],y[sel],marker='x', c='k', s=8)
 
     plt.show()
 

@@ -19,7 +19,7 @@
             "z_fraction_water_velocity",
             "z_fraction"
         ],
-        "time_steps_per_per_file": null
+        "time_steps_per_per_file": 10
     },
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
