@@ -9,6 +9,12 @@ def add_particle_status_values_to_netcdf(nc):
     for key, val in si.particle_status_flags.items():
         nc.create_attribute('status_' + key, int(val))
 
+def add_release_group_names_to_netcdf(nc,si):
+    rg_names = np.asarray([key for key in si.class_roles.release_groups.keys()])
+    nc.write_variable('release_group_names', rg_names, [si.dim_names.release_group, ],
+                      description='names of each release group in release_group dim, may have trailing blanks')
+
+
 def write_release_group_netcdf():
     '''Write release groups data to own file for each case '''
     fn =  si.run_info.output_file_base + '_release_groups.nc'
@@ -48,7 +54,6 @@ def write_release_group_netcdf():
 
         nc.write_variable(v_name, points, dims, units='meters or decimal deg. as  (lon, lat)',
                           description='release locations, not outside grid', attributes=attr)
-
 
     nc.close()
     return fn

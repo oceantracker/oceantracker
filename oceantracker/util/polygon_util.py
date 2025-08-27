@@ -60,28 +60,36 @@ class InsidePolygon(object):
         # do precalulations require to build a function to find indicies of points inside a polygon
         # 1) build set of bounding boxes for each line of polygon
         # 2) recalculates inv_slope for intersection calc and bounding box
-        # 3) form subgrid of bounding region with vaules =1 if polygon overlays  subgrid cell
         # assumes a closed polygon
-        #todo this can be much faster with numba?
-        nv = vert.shape[0]
-        self.line_bounds = np.zeros((nv,3,2),dtype=np.float64)
-        xyb= np.zeros((2,2),dtype=np.float64)
-        self.slope_inv = np.zeros((nv,),dtype=np.float64)
-        for n in range(nv-1):
-            xy =vert[ [n,  (n+1) % nv ],:]   # cords of this line
-            xyb[:, 0] = np.sort(xy[:, 0])
-            xyb[:, 1] = np.sort(xy[:, 1])
-            self.line_bounds[n,:2,:] = copy.copy(xyb)
 
-            # slope, line origin  must come from unordered line
-            if xy[1,1] != xy[0,1]:
-                self.slope_inv[n] = (xy[1,0] - xy[0,0])/(xy[1,1] - xy[0,1])
-
-            # start of line , used with intercept to find intersections
-            self.line_bounds[n,2, :] = xy[0, :].astype(np.float64)
+        self.line_bounds, self.slope_inv=self._get_line_bounds_and_slopeinv(vert )
 
         self.polygon_bounds = np.array([np.min(vert[:,0]), np.max(vert[:,0]),
                          np.min(vert[:,1]),  np.max(vert[:,1]) ])
+    @staticmethod
+    @njitOT
+    def _get_line_bounds_and_slopeinv(vert):
+        nv = vert.shape[0]
+        line_bounds = np.zeros((nv, 3, 2), dtype=np.float64)
+        slope_inv = np.zeros((nv,), dtype=np.float64)
+        xyb = np.zeros((2, 2), dtype=np.float64)
+        xy = xyb.copy()
+        for n in range(nv - 1):
+            # cords of this line segment
+            xy[0,:]= vert[n,:]
+            xy[1,:]= vert[(n + 1) % nv,:]
+            # sort to get bounds of segment
+            xyb[:, 0] = np.sort(xy[:, 0])
+            xyb[:, 1] = np.sort(xy[:, 1])
+            line_bounds[n, :2, :] = xyb.copy()
+
+            # slope, line origin  must come from unordered line
+            if xy[1, 1] != xy[0, 1]:
+                slope_inv[n] = (xy[1, 0] - xy[0, 0]) / (xy[1, 1] - xy[0, 1])
+
+            # start of line , used with intercept to find intersections
+            line_bounds[n, 2, :] = xy[0, :].astype(np.float64)
+        return  line_bounds, slope_inv
 
     def _make_closed(self, p):
         # inside works whether closed or not, but ensure a closed polygon unless requested

@@ -1,5 +1,5 @@
 import numpy as np
-from oceantracker.util import basic_util, status_util
+from oceantracker.util import basic_util, status_util, output_util
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from os import  path
@@ -161,11 +161,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
             nc.create_dimension(name, s)
         self.nWrites = 0
 
-        # write release group names
-        rg_names =np.asarray([key for key in si.class_roles.release_groups.keys()])
-        max_len = max([len(name) for name in rg_names])
-        nc.write_variable('release_group_names',rg_names,[si.dim_names.release_group,],
-                          description='names of each release group in release_group dim, may have trailing blanks')
+        output_util.add_release_group_names_to_netcdf(nc, si)
         return nc
 
     def create_time_variables(self):
