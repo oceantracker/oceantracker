@@ -10,6 +10,10 @@ class _BaseResuspension(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
         self.add_default_params({}) # must be 3D
 
+    def add_required_classes_and_settings(self):
+        i = si.add_custom_field('friction_velocity', dict(write_interp_particle_prop_to_tracks_file=False),
+                                default_classID='field_friction_velocity')
+
     # all particles checked to see if they need status changing
     def update(self,n_time_step, time_sec, active): basic_util.nopass('must have update',self)
 

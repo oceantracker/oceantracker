@@ -45,7 +45,16 @@ def main(args):
 
     # run with default resupension
     ot.add_class('resuspension', critical_friction_velocity=0.01, class_name='Resuspension')
+
+
     case_info_file1 = ot.run()
+
+    # run with basic resupension
+    if True:
+        ot.add_class('resuspension', critical_friction_velocity=0.01, class_name='BasicResuspension')
+        case_info_file2 = ot.run()
+        test_definitions.show_track_plot(case_info_file2, args)
+        test_definitions.plot_vert_section(case_info_file2,args, fraction_to_read=0.01 )
 
     # compare water depth at that in schism zcor
     if args.plot:
@@ -91,12 +100,7 @@ def main(args):
 
 
 
-    # run with basic resupension
-    if True:
-        ot.add_class('resuspension', critical_friction_velocity=0.01, class_name='BasicResuspension')
-        case_info_file2 = ot.run()
-        test_definitions.show_track_plot(case_info_file2, args)
-        test_definitions.plot_vert_section(case_info_file2,args, fraction_to_read=0.01 )
+
 
 
     return  ot.params

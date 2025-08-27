@@ -1,5 +1,6 @@
 # basic definitions
 # to avoid circular imports definitions.py file cannot import any oceantracker modules
+import oceantracker
 
 package_fancy_name= 'OceanTracker'
 
@@ -7,9 +8,9 @@ from os import path, sep
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 0.5,minor=3, revision  = 100, date = '2025-08-13', parameter_ver=0.5)
+version= dict(major= 1.0,minor=0, revision  = 1, date = '2025-08-27', parameter_ver=0.5)
 version['str'] = f"{version['major']:.2f}.{version['minor']:02d}.{version['revision']:04d}-{version['date']}"
-
+#version = oceantracker.__version__
 try:
     version['git_revision'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
 except:

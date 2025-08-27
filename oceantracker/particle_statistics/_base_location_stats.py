@@ -160,6 +160,12 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
         for name, s in info['count_dims'].items():
             nc.create_dimension(name, s)
         self.nWrites = 0
+
+        # write release group names
+        rg_names =np.asarray([key for key in si.class_roles.release_groups.keys()])
+        max_len = max([len(name) for name in rg_names])
+        nc.write_variable('release_group_names',rg_names,[si.dim_names.release_group,],
+                          description='names of each release group in release_group dim, may have trailing blanks')
         return nc
 
     def create_time_variables(self):
