@@ -228,27 +228,27 @@ class _BaseReader(ParameterBaseClass):
         grid = self.grid
 
         msg_logger = si.msg_logger
-        msg_logger.progress_marker('Starting grid setup',tabs=2)
+        msg_logger.progress_marker('Starting grid setup',tabs=0)
 
         # node to cell map
         t0 = perf_counter()
         grid['node_to_tri_map'], grid['tri_per_node'] = triangle_utilities.build_node_to_triangle_map(grid['triangles'], grid['x'])
-        msg_logger.progress_marker('built node to triangles map', start_time=t0,tabs=2)
+        msg_logger.progress_marker('built node to triangles map', start_time=t0,tabs=1)
 
         # adjacency map
         t0 = perf_counter()
         grid['adjacency'] = triangle_utilities.build_adjacency_from_node_tri_map(grid['node_to_tri_map'], grid['tri_per_node'], grid['triangles'])
-        msg_logger.progress_marker('built triangle adjacency matrix', start_time=t0,tabs=2)
+        msg_logger.progress_marker('built triangle adjacency matrix', start_time=t0,tabs=1)
 
         # boundary triangles
         t0 = perf_counter()
         grid['is_boundary_triangle'] = triangle_utilities.get_boundary_triangles(grid['adjacency'])
-        msg_logger.progress_marker('found boundary triangles', start_time=t0,tabs=2)
+        msg_logger.progress_marker('found boundary triangles', start_time=t0,tabs=1)
         t0 = perf_counter()
         grid['grid_outline'] = triangle_utilities.build_grid_outlines(grid['triangles'], grid['adjacency'],
                                             grid['is_boundary_triangle'], grid['node_to_tri_map'], grid['x'])
 
-        msg_logger.progress_marker('built domain and island outlines', start_time=t0,tabs=2)
+        msg_logger.progress_marker('built domain and island outlines', start_time=t0,tabs=1)
 
         # make island and domain nodes, not in regular grid some nodes may be unsed so mark as land
         grid['node_type'] = np.full(grid['x'].shape[0],  si.node_types.land,dtype=np.int8) # mark all as land
@@ -264,7 +264,7 @@ class _BaseReader(ParameterBaseClass):
 
         t0 = perf_counter()
         grid['triangle_area'] = triangle_utilities.calcuate_triangle_areas(grid['x'], grid['triangles'],info['geographic_coords'])
-        msg_logger.progress_marker('calculated triangle areas', start_time=t0,tabs=2)
+        msg_logger.progress_marker('calculated triangle areas', start_time=t0,tabs=1)
 
 
         # adjust node type and adjacent for open boundaries
@@ -295,7 +295,7 @@ class _BaseReader(ParameterBaseClass):
         #grid['water_depth_at_nodes'] = np.full((grid['x'].shape[0],3), 0, dtype=np.float32)
         #for n  in range(3):
         #    pass
-        msg_logger.progress_marker('Finished grid setup', tabs=2)
+        msg_logger.progress_marker('Finished grid setup', tabs=0)
 
     def build_vertical_grid(self):
         # setup transforms on the data, eg regrid vertical if 3D to same sigma levels

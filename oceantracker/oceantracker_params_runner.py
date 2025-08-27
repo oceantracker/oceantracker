@@ -298,12 +298,14 @@ class OceanTrackerParamsRunner(object):
     def _initial_setup_all_classes(self,working_params):
         # initialise all classes, order is important!
         crumbs='initial_setup_all_classes>'
+
         t0 = perf_counter()
         settings = si.settings
         ri = si.run_info
         fgm = si.core_class_roles.field_group_manager
 
         fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
+        si.msg_logger.progress_marker('Starting initial setup of all classes')
 
         # write reader info to json
         d = fgm.get_reader_info()
@@ -372,7 +374,7 @@ class OceanTrackerParamsRunner(object):
             si.core_class_roles.integrated_model.initial_setup()
 
 
-        si.msg_logger.progress_marker('Done initial setup of all classes', start_time=t0)
+        si.msg_logger.progress_marker('Done initial setup of all classes', start_time=t0,tabs=1)
 
     def _final_setup_all_classes(self):
         # finalise alll classes setup  after all initialised
