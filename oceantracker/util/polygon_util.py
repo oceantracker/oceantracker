@@ -5,7 +5,7 @@ from numba import njit, types as nbtypes
 import numpy as np
 import time
 import copy
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.util import cord_transforms
 
 class InsidePolygon(object):
@@ -62,10 +62,10 @@ class InsidePolygon(object):
         # 2) recalculates inv_slope for intersection calc and bounding box
         # assumes a closed polygon
 
-        self.line_bounds, self.slope_inv=self._get_line_bounds_and_slopeinv(vert )
+        self.line_bounds, self.slope_inv = self._get_line_bounds_and_slopeinv(vert )
 
         self.polygon_bounds = np.array([np.min(vert[:,0]), np.max(vert[:,0]),
-                         np.min(vert[:,1]),  np.max(vert[:,1]) ])
+                                       np.min(vert[:,1]),  np.max(vert[:,1]) ])
     @staticmethod
     @njitOT
     def _get_line_bounds_and_slopeinv(vert):
@@ -78,7 +78,7 @@ class InsidePolygon(object):
             # cords of this line segment
             xy[0,:]= vert[n,:]
             xy[1,:]= vert[(n + 1) % nv,:]
-            # sort to get bounds of segment
+            # sort to get bounds of segment lower left and upper right
             xyb[:, 0] = np.sort(xy[:, 0])
             xyb[:, 1] = np.sort(xy[:, 1])
             line_bounds[n, :2, :] = xyb.copy()
