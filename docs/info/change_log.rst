@@ -7,6 +7,17 @@ Known issues
 __________________
 
 
+Version '1.01.001 2025-09-01'
+_________________________
+
+#. Compact track files are by default converted to rectangular form for easier post procssing at end of run. Chucking produces only slighly larger files.
+#. On the fly stats restuctured internally and  tested to ensure results, but file output names may be slighly different
+#. Faster writing of compact track files during run using chunking
+#. Restart working after crash, with saving  state working for particle tracks, working on restart of on the fly stats
+#. Radius release around a point is now a seperate class from point release
+#. Timing for major blocks are given on output screen at end of run
+#. Grid release bug for more pulse size > 1 fixed
+
 Version '0.5.0.000 2024-12-20'
 _________________________
 
@@ -31,7 +42,7 @@ must also be groegraphic in (lon, lat) order, eg. release points, polygons, stat
 
 #. Now reads new Schism v5 multi-file output, where 3D fields are in separate files
 
-#. In helper method in add_class "name" is  now optional, will auto nane eg ParticleRelease_0001
+#. In helper method in add_class "name" is  now optional, will auto name eg ParticleRelease_0001
 
 #. Can auto detect if hydro-model has lat lng cords, by looking at bounds of grid coordinates.
 

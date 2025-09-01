@@ -39,7 +39,8 @@ if __name__ == "__main__":
     N= 10**6
    # N = 10 ** 3
 
-    work = 100
+    work = 50
+    work = 1
     reps = 50
     ty= np.int32
     probs = np.asarray([.05, .15, .8])
