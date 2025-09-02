@@ -67,7 +67,7 @@ def generate_dev_environment(pyproject_data, name="oceantracker-dev"):
             *all_optional_deps,
             *conda_dev_tools,
             "pip",
-            {"pip": ["-e ."]}
+            {"pip": ["-e .[dev]"]}
         ]
     }
     

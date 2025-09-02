@@ -1,4 +1,4 @@
-name: oceantracker-dev
+name: oceantracker-test
 channels:
 - conda-forge
 - defaults
@@ -26,4 +26,4 @@ dependencies:
 - make
 - pip
 - pip:
-  - -e .
+  - -e .[dev]
