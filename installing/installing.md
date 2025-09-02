@@ -1,86 +1,89 @@
-Install using pip 
-________________________________________
+# Installation
 
+We recommend using Python environments to install OceanTracker.
+This ensures that the versions of the necessary packages are handled correctly and makes the entire process more reliable for users and developers.
+The recommended way to create these environments is by using Mamba, a fast version of Anaconda.
 
-1.    Install/update anaconda or miniconda if not already available
-    
-        https://www.anaconda.com/docs/getting-started/miniconda/install
+You can find the documentation on how to install mamba [here]
+(https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
 
-2. create virtual environment ( python 3.10 recommended)
-    at command prompt  :  ``conda create -n oceantracker python=3.10``
-3. Activate new environment   ``conda activate oceantracker``
-4. install ocean tracker    ``pip install oceantracker``
+## Install using pip 
+
+If this is your first time using OceanTracker, the easiest way to install it is via pip.
+
+```bash
+# Create a new conda environmen
+mamba create -n oceantracker
+mamba activate oceantracker
+
+# Install dependencies via conda
+mamba install -c conda-forge numba numpy netcdf4 xarray scipy pyproj matplotlib pyyaml psutil
+
+# Install oceantracker via pip
+pip install oceantracker
+```
 
 Note: 
-- Oceantracker will work in Python 3.11 and 3.12, Python version 3.10 is preferred, as currently  not all required external imported  packages for plotting work in 3.11
--  may need to run Conda as Admin on  Windows
-- pip install will not include how_to notebooks and the demo hindcasts they use 
+- You may need to run Conda as Admin on  Windows
+- Using this method you won't have easy access to the tutorials directly.
+  However, you can simply download them manually from [github](https://github.com/oceantracker/oceantracker/tree/ed3186156d5cfe9b7b2c7c15452c7c25be5ceae9/tutorials_how_to)
 
-Install using git repository
-________________________________________
+Please reach out, either via mail or by writing a github issue, if you are running into bugs. We'd be happy to fix them.
 
-this includes how_to notebooks and the demo hindcasts they use
+## Install by building from source
 
-1. Change dir to where oceantracker files will be stored , e.g. 
+This is recommended if you plan on working with OceanTracker more extensively or if you are already familiar with python development environments.
 
-    ``cd  mycodedir``
+```bash
+# Navigate to a directory of your choice
+cd /path/to/your/directory
 
-2. Ensure git is installed, then clone repository
+# Clone or download the repository
+git clone https://github.com/oceantracker/oceantracker.git
+cd oceantracker
 
-    git clone https://github.com/oceantracker/oceantracker.git
+# Create and activate the environment
+mamba env create -f environment.yml
+mamba activate oceantracker
 
-3. Change dir to oceantracker package folder, eg.
+# Or if you plan to contribute the development of oceantracker
+mamba env create -f environment-deps.yml
+mamba activate oceantracker
+```
 
-    ``cd ./oceantracker``
+You can also create your own environment as before by
+```
+cd /path/to/your/directory
 
-3. Manually build a Conda environment
- 
+# Clone or download the repository
+git clone https://github.com/oceantracker/oceantracker.git
+cd oceantracker
 
-        ``conda create -n oceantracker python=3.10`` 
+mamba create -n name_of_your_environment python=3.12
+mamba activate -n name_of_your_environment
 
+pip install -e .
+# or
+# pip install -e .[dev]
+```
 
+## Initial test runs
 
-    Activate new environment
+To check that everything runs as intended at this stage you can test your installation by launching your python shell
 
-        ``conda activate oceantracker``
-   
-   Then install these packages 
+```bash
+python
+```
 
-   ``conda install conda-forge::numba=0.56.4``  if using python 3.10
+Check that you are using the correct python environment
+```python
+import sys
+print(sys.executable)
+```
 
-   ``conda install conda-forge::numba``  if using python 3.11 or higher
-         
-   ``conda install anaconda::numpy`` 
- 
-   ``conda install conda-forge::netcdf4``
+and then try to spin up OceanTracker
 
-    ``conda install anaconda::xarray`` 
-
-    ``conda install conda-forge::dask``
-        
-   ``conda install anaconda::scipy``
-
-   ``conda install conda-forge::pyproj``
-
-   ``conda install anaconda::pyyaml``
-
-   ``conda install conda-forge::psutil``
-
-   ``conda install conda-forge::python-dateutil``
-
-   ``conda install conda-forge::matplotlib``
-
-7. Make oceantracker package findable
-   
-   From root dir of oceantracker package
-
-   ``pip install --no-deps -e .`` 
-
-8. To add ability to make animation movies if needed
-
-   ``conda install conda-forge::ffmpeg``
-
-
-9. To work with iPython/Jupyter notebooks
-
-   ``conda install anaconda::ipykernel``
+```python
+import oceantracker
+print(f"OceanTracker version: {oceantracker.__version__}")
+```
