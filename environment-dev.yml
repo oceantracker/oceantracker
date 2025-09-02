@@ -1,0 +1,30 @@
+name: oceantracker-dev
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python>=3.10
+- numba
+- numpy
+- netcdf4
+- xarray
+- scipy
+- pyproj
+- psutil
+- matplotlib
+- pyyaml
+- build
+- twine
+- sphinx>=4.0
+- sphinx-rtd-theme
+- nbsphinx
+- pandoc
+- jupyter
+- jupyterlab
+- ipykernel
+- ipywidgets
+- git
+- make
+- pip
+- pip:
+  - -e .

@@ -5,6 +5,7 @@ help:
 	@echo "  clean          Remove all build, test, coverage and Python artifacts"
 	@echo "  clean-build    Remove build artifacts"
 	@echo "  clean-pyc      Remove Python file artifacts"
+	@echo "  env            Generate environment.yml files from pyproject.toml"
 # 	@echo "  clean-test     Remove test and coverage artifacts"
 # 	@echo "  lint           Check style with flake8 and black"
 # 	@echo "  format         Format code with black"
@@ -62,13 +63,16 @@ clean-pyc:
 # 	$(MAKE) -C docs clean
 # 	$(MAKE) -C docs html
 
+env:
+	python installing/generate_environment_yaml.py
+
 install: clean
 	pip install .
 
 install-dev: clean
 	pip install -e .[dev]
 
-build: clean
+build: clean env
 	python -m build
 
 # upload: clean build
