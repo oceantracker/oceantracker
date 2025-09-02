@@ -48,7 +48,14 @@ def load_track_data(case_info_file_name, var_list=None, fraction_to_read= None, 
 
 def _extract_useful_info(case_info, d):
     # get release group info
-    if 'version_info' in case_info and 'major' in case_info['version_info'] and case_info['version_info']['major'] >= 0.5:
+
+    major = case_info['version_info']['oceantracker_major_version']
+    minor = case_info['version_info']['oceantracker_minor_version']
+    micro = case_info['version_info']['oceantracker_micro_version']
+
+
+    if (major > 0) or (major == 0 and minor >=5 and micro >= 2):
+    # if 'version_info' in case_info and 'major' in case_info['version_info'] and case_info['version_info']['major'] >= 0.5:
         prg_info = read_ncdf_output_files.read_release_groups_info(path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['release_groups']))
 
     else:
