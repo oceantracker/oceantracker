@@ -132,7 +132,7 @@ class OceanTrackerParamsRunner(object):
         setup_util.check_python_version(ml)
 
         ml.hori_line()
-        ml.msg(f'{definitions.package_fancy_name} version {definitions.version["str"]}  starting setup helper "main.py":')
+        ml.msg(f'{definitions.package_fancy_name} version {definitions.version["oceantracker_version"]}  starting setup helper "main.py":')
 
         # split params in to settings, core and class role params
         si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
@@ -185,7 +185,7 @@ class OceanTrackerParamsRunner(object):
 
         ml.set_screen_tag('setup')
         ml.hori_line()
-        ml.msg(f' {definitions.package_fancy_name} version {definitions.version["str"]} ')
+        ml.msg(f' {definitions.package_fancy_name} version {definitions.version["oceantracker_version"]} ')
 
 
         ml.exit_if_prior_errors('settings/parameters have errors')

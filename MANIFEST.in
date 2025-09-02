@@ -1,0 +1,15 @@
+include README.md
+include LICENSE.md
+include pyproject.toml
+include environment*.yml
+recursive-include oceantracker *.py
+recursive-include demo_param_files *.json *.yaml *.yml
+recursive-include tutorials_how_to *.ipynb *.py
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store
+exclude dev/
+exclude tests/
+exclude docs/_build/
+exclude *.egg-info/
+exclude output/

@@ -17,4 +17,5 @@ venv
 /docs/_build/html/_static/sphinx_highlight.js
 /docs/_build/html/.buildinfo.bak
 
+dist/
 *.py[cod]

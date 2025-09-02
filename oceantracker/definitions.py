@@ -8,16 +8,26 @@ from os import path, sep
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 1.0,minor=0, revision  = 1, date = '2025-08-27', parameter_ver=0.5)
-version['str'] = f"{version['major']:.2f}.{version['minor']:02d}.{version['revision']:04d}-{version['date']}"
-#version = oceantracker.__version__
+version= dict()
+version['oceantracker_version'] = oceantracker.__version__
+version['oceantracker_major_version'] = int(oceantracker.__version__.split('.')[0])
+version['oceantracker_minor_version'] = int(oceantracker.__version__.split('.')[1])
+version['oceantracker_micro_version'] = int(oceantracker.__version__.split('.')[2])
 try:
-    version['git_revision'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
+    version['git_commit_hash'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
 except:
-    version['git_revision'] = 'unknown'
+    version['git_commit_hash'] = 'unknown'
+try:
+    version['date'] = subprocess.check_output(['git', 'log', '-1', '--format=%cd'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
+except:
+    version['date'] = 'unknown'
 
-version.update( python_version = sys.version,python_major_version= sys.version_info.major,
-                python_minor_version = sys.version_info.minor, python_micro_version= sys.version_info.micro,)
+version.update(
+    python_version = sys.version,
+    python_major_version= sys.version_info.major,
+    python_minor_version = sys.version_info.minor, 
+    python_micro_version= sys.version_info.micro,
+    )
 
 
 
