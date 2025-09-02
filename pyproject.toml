@@ -84,7 +84,8 @@ packages = ["oceantracker"]
 oceantracker = ["**/*.py", "**/*.json", "**/*.yaml", "**/*.yml"]
 
 [tool.setuptools.exclude-package-data]
-"*" = ["tests*", "dev*", "docs*", "__pycache__*", "*.pyc"]
+# "*" = ["tests*", "dev*", "docs*", "__pycache__*", "*.pyc"]
+"*" = ["__pycache__*", "*.pyc"]
 
 # Black configuration
 # [tool.black]
