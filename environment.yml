@@ -15,6 +15,7 @@ dependencies:
 - pyyaml
 - ffmpeg
 - ipykernel
+- requests
 - pip
 - pip:
   - -e .

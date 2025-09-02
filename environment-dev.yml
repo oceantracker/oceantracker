@@ -15,12 +15,9 @@ dependencies:
 - pyyaml
 - ffmpeg
 - ipykernel
+- requests
 - build
 - twine
-- sphinx>=4.0
-- sphinx-rtd-theme
-- nbsphinx
-- pandoc
 - jupyter
 - jupyterlab
 - ipykernel

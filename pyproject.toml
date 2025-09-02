@@ -41,7 +41,8 @@ dependencies = [
     "matplotlib",
     "pyyaml",
     "ffmpeg",
-    "ipykernel"
+    "ipykernel",
+    "requests",
 ]
 
 [project.urls]
