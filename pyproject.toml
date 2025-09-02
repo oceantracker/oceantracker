@@ -40,6 +40,8 @@ dependencies = [
     "psutil",
     "matplotlib",
     "pyyaml",
+    "ffmpeg",
+    "ipykernel"
 ]
 
 [project.urls]
@@ -59,12 +61,12 @@ dev = [
 #     "mypy",
 #     "pre-commit",
 ]
-docs = [
-    "sphinx>=4.0",
-    "sphinx-rtd-theme",
-    "nbsphinx",
-    "pandoc",
-]
+# docs = [
+#     "sphinx>=4.0",
+#     "sphinx-rtd-theme",
+#     "nbsphinx",
+#     "pandoc",
+# ]
 # test = [
 #     "pytest>=7.0",
 #     "pytest-cov",

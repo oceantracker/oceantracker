@@ -13,6 +13,8 @@ dependencies:
 - psutil
 - matplotlib
 - pyyaml
+- ffmpeg
+- ipykernel
 - pip
 - pip:
   - -e .

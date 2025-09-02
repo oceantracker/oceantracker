@@ -13,6 +13,8 @@ dependencies:
 - psutil
 - matplotlib
 - pyyaml
+- ffmpeg
+- ipykernel
 - build
 - twine
 - sphinx>=4.0
