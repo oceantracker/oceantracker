@@ -3,20 +3,26 @@
 Change log
 ###########################
 
-Known issues
-__________________
 
+Version '0.5.2.0 2025-09-01'
+____________________________
 
-Version '1.01.001 2025-09-01'
-_________________________
+Breaking changes
+----------------
+#. Radius release around a point is now a separate class from point release
+#. Changed default of track writer to write output in "rectangular form" instead of "compact form" for easier user post-processing
+#. On-the-fly statistic output file names are slightly different from the last version, due to some internal restructuring
 
-#. Compact track files are by default converted to rectangular form for easier post procssing at end of run. Chucking produces only slighly larger files.
-#. On the fly stats restuctured internally and  tested to ensure results, but file output names may be slighly different
-#. Faster writing of compact track files during run using chunking
-#. Restart working after crash, with saving  state working for particle tracks, working on restart of on the fly stats
-#. Radius release around a point is now a seperate class from point release
+New features
+------------
+#. Added a "restart" feature to pick up a simulation after a crash. Simulations now occasionally write simulation states to disk. Not yet implemented for on-the-fly statistics.
+#. Faster writing of compact track files through the use of chunking
 #. Timing for major blocks are given on output screen at end of run
+
+Bug fixes
+---------
 #. Grid release bug for more pulse size > 1 fixed
+
 
 Version '0.5.0.000 2024-12-20'
 _________________________
