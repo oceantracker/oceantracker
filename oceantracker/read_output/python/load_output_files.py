@@ -48,11 +48,12 @@ def load_track_data(case_info_file_name, var_list=None, fraction_to_read= None, 
 
 def _extract_useful_info(case_info, d):
     # get release group info
-
-    major = case_info['version_info']['oceantracker_major_version']
-    minor = case_info['version_info']['oceantracker_minor_version']
-    micro = case_info['version_info']['oceantracker_micro_version']
-
+    vi = case_info['version_info']
+    if 'revision' in vi:
+        # pre aug 2025
+        major, minor, micro = vi['major'],  vi['minor'], vi['revision']
+    else:
+        major, minor, micro, patch = vi['major'], vi['minor'], vi['micro'], vi['patch']
 
     if (major > 0) or (major == 0 and minor >=5 and micro >= 2):
     # if 'version_info' in case_info and 'major' in case_info['version_info'] and case_info['version_info']['major'] >= 0.5:

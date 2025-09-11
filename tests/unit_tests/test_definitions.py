@@ -1,10 +1,25 @@
+import sys
 from os import path
 
 import shutil
 import numpy as np
+from numba.core.types import Object
+
 from oceantracker import definitions
 
 from copy import deepcopy
+
+class dummy():pass
+def check_args(args):
+
+    if args is None:
+
+        args= dummy()
+        args.reference_case = False
+        args.plot=False
+        args.norun=False
+        args.variant = None
+    return args
 
 def base_settings(fn,args,label=None):
     s = path.split(fn)[-1].split('.')[0]

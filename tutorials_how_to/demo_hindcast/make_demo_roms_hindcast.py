@@ -74,7 +74,7 @@ if __name__ == '__main__':
     # read and plot
     print('reading',out_file)
     r = NetCDFhandler(out_file)
-    var = r.read_variables(r.var_names())
+    var = r.read_variables(r.all_var_names())
     x, y =var['lon_rho'],var['lat_rho']
     depth = var['h']
     depth[var['mask_rho']==0]=np.nan

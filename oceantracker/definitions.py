@@ -9,10 +9,10 @@ import subprocess, sys
 from dataclasses import  dataclass, asdict
 
 version= dict()
-version['oceantracker_version'] = oceantracker.__version__
-version['oceantracker_major_version'] = int(oceantracker.__version__.split('.')[0])
-version['oceantracker_minor_version'] = int(oceantracker.__version__.split('.')[1])
-version['oceantracker_micro_version'] = int(oceantracker.__version__.split('.')[2])
+v = version
+v['oceantracker_version'] = oceantracker.__version__
+v['major'],v['minor'],v['micro'],v['patch'] = [int(v) for v in v['oceantracker_version'].split('.')]
+
 try:
     version['git_commit_hash'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
 except:

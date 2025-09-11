@@ -1,9 +1,11 @@
 from oceantracker.main import OceanTracker
 
 import numpy as np
-from tests.unit_tests import test_definitions
+import test_definitions
 
-def main(args):
+def main(args=None):
+    args= test_definitions.check_args(args)
+
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__,args))
     ot.settings(time_step=1800,
@@ -12,7 +14,7 @@ def main(args):
                 use_A_Z_profile=False,
                 regrid_z_to_uniform_sigma_levels=True,
                 particle_buffer_initial_size= 500,
-                NUMBA_cache_code=True,
+                #NUMBA_cache_code=True,
                 use_resuspension=False,
 
                 )
@@ -126,4 +128,6 @@ def main(args):
     return  ot.params
 
 
+if __name__ == '__main__':
 
+    main()

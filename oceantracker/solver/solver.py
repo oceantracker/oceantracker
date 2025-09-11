@@ -158,7 +158,7 @@ class Solver(ParameterBaseClass):
 
             if abs(t2 - ri.start_time) > ri.duration: break
             if si.settings.throw_debug_error == 1 and nt2 >= int(0.2*model_times.size):
-                raise(Exception(f'Debug error solver step,setting throw_debug_error =1 at {time_util.seconds_to_isostr(t1)}'))
+                raise(Exception(f'Restart testing, throwing deliberate error at {time_util.seconds_to_isostr(t1)}'))
 
         ri.end_time = t2
         ri.model_end_date = t2.astype('datetime64[s]')
