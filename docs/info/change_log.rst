@@ -3,8 +3,25 @@
 Change log
 ###########################
 
-Known issues
-__________________
+
+Version '0.5.2.0 2025-09-01'
+____________________________
+
+Breaking changes
+----------------
+#. Radius release around a point is now a separate class from point release
+#. Changed default of track writer to write output in "rectangular form" instead of "compact form" for easier user post-processing
+#. On-the-fly statistic output file names are slightly different from the last version, due to some internal restructuring
+
+New features
+------------
+#. Added a "restart" feature to pick up a simulation after a crash. Simulations now occasionally write simulation states to disk. Not yet implemented for on-the-fly statistics.
+#. Faster writing of compact track files through the use of chunking
+#. Timing for major blocks are given on output screen at end of run
+
+Bug fixes
+---------
+#. Grid release bug for more pulse size > 1 fixed
 
 
 Version '0.5.0.000 2024-12-20'
@@ -31,7 +48,7 @@ must also be groegraphic in (lon, lat) order, eg. release points, polygons, stat
 
 #. Now reads new Schism v5 multi-file output, where 3D fields are in separate files
 
-#. In helper method in add_class "name" is  now optional, will auto nane eg ParticleRelease_0001
+#. In helper method in add_class "name" is  now optional, will auto name eg ParticleRelease_0001
 
 #. Can auto detect if hydro-model has lat lng cords, by looking at bounds of grid coordinates.
 

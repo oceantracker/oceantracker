@@ -32,10 +32,9 @@ def setup_output_dir(settings, crumbs='', caller=None):
         run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
 
     # clear existing folder and make a new dir, if not restarting
-    if path.isdir(run_output_dir) : #and not si.settings.restart:
-        shutil.rmtree(run_output_dir)
-
-    makedirs(run_output_dir)  # make  new clean folder
+    if not si.settings.restart:
+        if path.isdir(run_output_dir) : shutil.rmtree(run_output_dir)
+        makedirs(run_output_dir)  # make  new clean folder
 
     # write a copy of user given parameters, to help with debugging and code support
     fb = 'users_params_' + settings['output_file_base']
@@ -43,14 +42,11 @@ def setup_output_dir(settings, crumbs='', caller=None):
                     'run_output_dir': run_output_dir,
                     'output_file_base': settings['output_file_base'],
                     'raw_output_file_base': copy(settings['output_file_base']),
-                    # this is need for grid file so it does not get a case number in // runs
+                    # this is needed for grid file so it does not get a case number in // runs
                     'caseInfo_file': settings['output_file_base'] + '_caseInfo.json',
-                    'runLog_file': settings['output_file_base'] + '_runScreen.log',
-                    'run_error_file': settings['output_file_base'] + '_run.err',
                     'users_params_json': fb + '.json',
                     }
     return output_files
-
 
 def write_raw_user_params(output_files, params,msg_logger):
     fn= output_files['output_file_base']+'_raw_user_params.json'
@@ -122,9 +118,9 @@ def check_python_version(msg_logger):
         if not ( p_major > 2 and p_minor >= 9):
             ml.msg('Oceantracker requires Python 3 , version >= 3.10  and < 3.11',
                          hint=install_hint, warning=True, tabs=1)
-        if (p_major == 3 and p_minor >= 11):
-            ml.msg('Oceantracker is compatible with Python 3.11,  however not all external imported packages have been updated to be compatible with 3.11', warning=True,
-                   hint='Down grade to python 3.10 if unexplained issues in external packages')
+        if (p_major == 3 and p_minor >= 12):
+            ml.msg(f'Oceantracker is compatible with Python {p_major}{p_minor},  however not all external imported packages have been updated to be compatible with 3.12', warning=True,
+                   hint='Down grade to python 3.11 if unexplained issues in external packages')
 
 def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', caller = None):
     # set numba config via environment variables,

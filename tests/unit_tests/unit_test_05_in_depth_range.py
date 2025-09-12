@@ -11,7 +11,6 @@ def main(args):
             # use_A_Z_profile=False,
             regrid_z_to_uniform_sigma_levels=False,
              #NUMBA_cache_code=True,
-                #NCDF_particle_chunk= 50000
                 )
 
     ot.add_class('tracks_writer',update_interval = 600, write_dry_cell_flag=False,
@@ -24,7 +23,7 @@ def main(args):
     ot.add_class('reader', **hm['reader'])
 
     # add a point release
-    ot.add_class('release_groups',**test_definitions.rg_ploy1)
+    ot.add_class('release_groups', **test_definitions.my_polygon_release)
 
 
     # add a decaying particle property,# with exponential decay based on age
@@ -34,7 +33,7 @@ def main(args):
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.ps1)
+    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
 
 
 
@@ -45,7 +44,7 @@ def main(args):
     case_info_file = ot.run()
 
 
-    tracks= test_definitions.read_tracks(case_info_file)
+    tracks= test_definitions.load_tracks(case_info_file)
 
     dz = tracks['x'][:,:,2] + tracks['water_depth']
 

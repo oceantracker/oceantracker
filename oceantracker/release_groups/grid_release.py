@@ -62,7 +62,7 @@ class GridRelease(_BaseReleaseGroup):
         pass
 
     def get_hori_release_locations(self, time_sec):
-        # filter pre-calculated reslease info
+        # filter pre-calculated release info
         rg = self._apply_dry_cell_and_user_filters(self.release_info, time_sec)
         rg = self._clone_release_info(rg, self.params['pulse_size'])
         return rg
@@ -72,5 +72,5 @@ class GridRelease(_BaseReleaseGroup):
         super()._add_bookeeping_release_info(release_part_prop) # get standard release bookeeping prop
 
         # add row column origin part prop data, for each pulse
-        release_part_prop['grid_release_row_col'] = np.repeat(self.info['map_grid_index_to_row_column'], self.params['pulse_size'], axis=0)
+        release_part_prop['grid_release_row_col'] = np.repeat(self.info['map_grid_index_to_row_column'], 1, axis=0)
         return release_part_prop

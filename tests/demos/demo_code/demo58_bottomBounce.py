@@ -9,7 +9,7 @@ runInfo_file_name, has_errors = main.run(params)
 # output is now in output/demo58_bottomBounce
 
 # below only required for plotting
-from oceantracker.read_output.python import load_track_data
+from oceantracker.read_output.python.load_output_files import load_track_data
 from oceantracker.plot_output.plot_tracks import animate_particles
 from oceantracker.plot_output.plot_tracks import plot_path_in_vertical_section, plot_relative_height
 

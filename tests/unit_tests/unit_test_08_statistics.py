@@ -1,3 +1,5 @@
+import numpy as np
+
 from oceantracker.main import OceanTracker
 
 from tests.unit_tests import test_definitions
@@ -10,7 +12,10 @@ def main(args):
                 screen_output_time_interval=1800,
              use_A_Z_profile=False,
             regrid_z_to_uniform_sigma_levels=False,
-             NUMBA_cache_code=True,)
+             NUMBA_cache_code=True,
+                use_dispersion=False,
+                use_resuspension=False,
+                )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
                time_steps_per_per_file= None if args.reference_case else 10  # dont split files ref case to test reading split files
@@ -19,22 +24,17 @@ def main(args):
     #ot.settings(NUMBA_cache_code = True)
     hm = test_definitions.hydro_model['demoSchism3D']
     ot.add_class('reader', **hm['reader'])
+    points = np.asarray(hm['polygon'])
+    ot.add_class('release_groups',
+                 **dict(test_definitions.my_polygon_release, points= points))
+    ot.add_class('release_groups',
+                            name='point inside polygon',  # name used internal to refer to this release
+                             class_name='PointRelease',  # class to use
+                             points=np.mean(points,axis=0),
+                             # the below are optional settings/parameters
+                             release_interval=timestep,  # seconds between releasing particles
+                             pulse_size=500)  # how many are released each interval
 
-    # add a point release
-    ot.add_class('release_groups',
-                            name='point 1',  # name used internal to refer to this release
-                             class_name='PointRelease',  # class to use
-                             points=[[1594000, 5484200, -2]],
-                             # the below are optional settings/parameters
-                             release_interval=timestep,  # seconds between releasing particles
-                             pulse_size=500)  # how many are released each interval
-    ot.add_class('release_groups',
-                            name='point 2',  # name used internal to refer to this release
-                             class_name='PointRelease',  # class to use
-                             points=[[1593000, 5484200, -2]],
-                             # the below are optional settings/parameters
-                             release_interval=timestep,  # seconds between releasing particles
-                             pulse_size=500)  # how many are released each interval
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
@@ -42,26 +42,32 @@ def main(args):
     ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay')
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
-    # add a gridded particle statistic to plot heat map
-    ps = dict(test_definitions.ps1)
-    ot.add_class('particle_statistics', **dict(test_definitions.poly_stats,name='polystats_time',  polygon_list=[dict(points=hm['polygon'])]))
+    # add a  particle statistics
+
+    ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_time))
+    ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_age))
+    ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_time,
+                                                   polygon_list=[dict(points=hm['polygon'])]))
+    ot.add_class('particle_statistics', **dict(test_definitions.my_poly_stats_age,
+                                                   polygon_list=[dict(points=hm['polygon'])]))
+    ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_time,
+                                                       name='my_heat_3Dmap_time', class_name='GriddedStats3D_timeBased',
+                                                       z_min=-10, z_max=2))
+    #ot.add_class('particle_statistics', **dict(test_definitions.my_resident_in_polygon, points=points,
+    #                                           class_name='oceantracker.particle_statistics.dev.resident_in_polygon.ResidentInPolygon'))
 
 
-    ot.add_class('particle_statistics', **dict(test_definitions.poly_stats_age,name='poly_stats_age',   polygon_list=[dict(points=hm['polygon'])]))
+    ot.add_class('velocity_modifiers', name='terminal_velocity_test',
+                 class_name='TerminalVelocity', value=-0.0001)
+    ot.add_class('resuspension', critical_friction_velocity=0.005)
 
 
     case_info_file = ot.run()
 
+    test_definitions.compare_reference_run_tracks(case_info_file, args)
+    test_definitions.compare_reference_run_stats(case_info_file, args)
 
     test_definitions.show_track_plot(case_info_file, args)
-    from oceantracker.read_output.python import load_output_files
-    # check stats
-    for name in ['polystats_time', 'poly_stats_age']:
-        #stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
-        stats= load_output_files.load_stats_data(case_info_file, name=name)
-        #dc = stats['count'] - stats_ref['count']
-        #print(' stats  name ',  name,'counts', stats_ref['count'].sum(), stats['count'].sum(),'max diff counts-ref run counts =',np.nanmax(np.abs(dc)))
-
     return  ot.params
 
 

@@ -31,7 +31,7 @@ class _BaseParticleProperty(ParameterBaseClass):
                                     'type': PVC('user', str,obsolete=True,
                                                 doc_str='type of particle property, used to manage how to update particle property',
                                                 ),
-                                     'release_group_parameters':PLC(None, str, expert=True, doc_str='In development: release group specific particle prop params'),
+                                     #'release_group_parameters':PLC(None, str, expert=True, doc_str='In development: release group specific particle prop params'),
               })
 
         self.role_doc('Particle properties hold data at current time step for each particle, accessed using their ``"name"`` parameter. Particle properties  many be \n * core properties set internally (eg particle location x )\n * derive from hindcast fields, \n * be calculated from other particle properties by user added class.')
@@ -108,8 +108,9 @@ class _BaseParticleProperty(ParameterBaseClass):
     def copy(self, prop_name, active):
         # copy from named particle
         part_prop= si.class_roles.particle_properties
-
-        particle_operations_util.copy(self.data, part_prop[prop_name].data, active)
+        particle_operations_util.copy(self.data,
+                                part_prop[prop_name].data,
+                                active)
 
     def fill_buffer(self,value):
         self.data[:si.run_info.particles_in_buffer,...] = value

@@ -39,13 +39,6 @@ class OceanTrackerParamsRunner(object):
             # and set up output directory and log file
             self._do_setup(user_given_params)
 
-            if si.settings.restart:
-                # load restart info
-                fn = path.join(si.run_info.run_output_dir, 'saved_state', 'state_info.json')
-                if not path.isfile(fn):
-                    ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
-                           fatal_error=True, hint=f'missing file  {fn}')
-                si.restart_info = json_util.read_JSON(fn)
 
             ml.msg(f'Starting user param. runner: "{si.run_info.output_file_base}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
@@ -89,18 +82,25 @@ class OceanTrackerParamsRunner(object):
 
 
         # performance
-        ml.msg(f'Timings: total = {(perf_counter()-  self.start_time):5.1f} sec',tabs=2)
+        total_time = perf_counter()-  self.start_time
+        ml.msg(f'Timings: total = {total_time:5.1f} sec',tabs=2)
 
-        for name in ['Setup','Reading hindcast','Initial cell guess', 'RK integration',
+        timers=['Setup','Reading hindcast','Initial cell guess', 'RK integration',
+                        'Find horizontal cell','Find vertical cell',
                       'Interpolate fields', 'Update statistics',
-                     'Update custom particle properties']:
-            if name in si.block_timers:  ml.msg(f'{name}  {si.block_timers[name]["time"]:4.2f} s\t', tabs=4)
+                     'Update custom particle prop.']
+        l = max([len(s) for s in timers])
+        for name in timers:
+            if name in si.block_timers:
+                t = si.block_timers[name]["time"]
+                ml.msg(f'{name + " "*(l-len(name))} {t:4.2f} s\t {100*t/total_time:4.1f}%', tabs=4)
 
+        # core physics timing
         for name in ['resuspension','dispersion','tracks_writer', 'integrated_model']:
             if si.core_class_roles[name] is not None:
-                ml.msg(f'{name}  {si.core_class_roles[name].info["time_spent_updating"]:4.2f} s\t\t', tabs=4)
+                t= si.core_class_roles[name].info["time_spent_updating"]
+                ml.msg(f'{name + " "*(l-len(name))} {t:4.2f} s\t {100*t/total_time:4.1f}%', tabs=4)
 
-        ml.msg('')
         ml.msg(f'{num_errors:3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes', tabs=1)
 
         if num_errors > 0:
@@ -117,6 +117,9 @@ class OceanTrackerParamsRunner(object):
 
         ml.close()
 
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, 'completion_state.json'),
+                                 dict(code_error_free=case_info_file is not None ))
+
         return case_info_file
 
     def _do_setup(self, user_given_params):
@@ -129,7 +132,7 @@ class OceanTrackerParamsRunner(object):
         setup_util.check_python_version(ml)
 
         ml.hori_line()
-        ml.msg(f'{definitions.package_fancy_name} version {definitions.version["str"]}  starting setup helper "main.py":')
+        ml.msg(f'{definitions.package_fancy_name} version {definitions.version["oceantracker_version"]}  starting setup helper "main.py":')
 
         # split params in to settings, core and class role params
         si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
@@ -141,10 +144,25 @@ class OceanTrackerParamsRunner(object):
         # setup output dir and msg files
         si.output_files = setup_util.setup_output_dir(si.settings, crumbs='Setting up output dir')
 
-        si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(
-            si.output_files['run_output_dir'],
-            si.output_files[
-                'output_file_base'] + '_caseLog')  # message logger output file setup
+        # copy basic  shortcuts to run info
+        ri = si.run_info
+
+        # move stuff to run info as central repository
+        ri.run_output_dir = si.output_files['run_output_dir']
+        ri.output_file_base = si.output_files['output_file_base']
+        ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
+        ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
+
+        if si.settings.restart:
+            # load restart info
+            fn = path.join(si.run_info.run_output_dir, 'saved_state', 'state_info.json')
+            if not path.isfile(fn):
+                ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
+                       fatal_error=True, hint=f'missing file  {fn}')
+            si.restart_info = json_util.read_JSON(fn)
+            ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(si.restart_info["time"])}')
+
+        si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(si)  # message logger output file setup
 
         si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
@@ -167,16 +185,8 @@ class OceanTrackerParamsRunner(object):
 
         ml.set_screen_tag('setup')
         ml.hori_line()
-        ml.msg(f' {definitions.package_fancy_name} version {definitions.version["str"]} ')
+        ml.msg(f' {definitions.package_fancy_name} version {definitions.version["oceantracker_version"]} ')
 
-        # cpty basic  shortcuts to run info
-        ri = si.run_info
-
-        # move stuff to run info as central repository
-        ri.run_output_dir = si.output_files['run_output_dir']
-        ri.output_file_base = si.output_files['output_file_base']
-        ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
-        ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
 
         ml.exit_if_prior_errors('settings/parameters have errors')
 
@@ -231,6 +241,7 @@ class OceanTrackerParamsRunner(object):
 
         # -----------done -------------------------------
         si.output_files['release_groups'] = output_util.write_release_group_netcdf()  # write release groups
+        ml.hori_line('Closing all classes')
         for i in si._all_class_instance_pointers_iterator(): i.close()  # close all instances, eg their files if not close etc
 
         # check for non-releases
@@ -287,23 +298,23 @@ class OceanTrackerParamsRunner(object):
     def _initial_setup_all_classes(self,working_params):
         # initialise all classes, order is important!
         crumbs='initial_setup_all_classes>'
+
         t0 = perf_counter()
         settings = si.settings
-        
-        
+        ri = si.run_info
         fgm = si.core_class_roles.field_group_manager
-        #fgm.final_setup()
+
         fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
+        si.msg_logger.progress_marker('Starting initial setup of all classes')
 
         # write reader info to json
         d = fgm.get_reader_info()
         json_util.write_JSON(path.join(si.run_info.run_output_dir, f'{si.run_info.output_file_base}_hindcast_info.json'), d)
 
-
-        # schedule all release groups
-        number_released = np.zeros((si.run_info.times.size, ), dtype= np.int64)
+        # schedule all release groups, now run start and end are known
+        ri.cumulative_number_released = np.zeros((si.run_info.times.size, ), dtype= np.int64)
+        ri.forecasted_number_alive = ri.cumulative_number_released.copy()
         max_ages = []
-
         for name, i in si.class_roles.release_groups.items():
             p = i.params
             i.initial_setup() # delayed set up
@@ -312,19 +323,25 @@ class OceanTrackerParamsRunner(object):
             # max_ages needed for culling operations
             i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
             max_ages.append(i.params['max_age'])
-            number_released += i.schedulers['release'].task_flag *i.info['number_per_release']  # find total released at each time step
 
-        # use forcast number alive to set up particle chunking, for memory buffers and output files
-        ri = si.run_info
-        ri.forcasted_total_released = number_released.sum()
-        ri.forcasted_number_alive = np.cumsum(number_released)
-        ri.forcasted_max_number_alive = ri.forcasted_number_alive.max()
+            # find total released to date at each time step
+            i.info['cumulative_number_released'] = np.cumsum(i.schedulers['release'].task_flag *i.info['number_per_release'])
+            ri.cumulative_number_released += i.info['cumulative_number_released']
 
-        # particle chunking, chose smaler of forcasted or given buffer sise
-        settings.particle_buffer_initial_size = min(ri.forcasted_max_number_alive, settings.particle_buffer_initial_size)
+            # after max age at nt1,  number alive is constant
+            nt1 = min(int(i.params['max_age']/si.settings.time_step),  si.run_info.times.size-1)
+            i.info['forecasted_number_alive'] = i.info['cumulative_number_released'].copy()
+            i.info['forecasted_number_alive'][nt1:] = i.info['cumulative_number_released'][nt1]
+            #none alive after time step nt2
+            nt2 = min(nt1 + int(i.params['max_age'] / si.settings.time_step) +1, si.run_info.times.size)
+            i.info['forecasted_number_alive'][nt2:] = 0
+            ri.forecasted_number_alive += i.info['forecasted_number_alive']
 
-        if settings.NCDF_particle_chunk is None:
-            settings.NCDF_particle_chunk = ri.forcasted_max_number_alive
+        # use forecast number alive to set up particle chunking, for memory buffers and output files
+        ri.forecasted_max_number_alive = int(ri.forecasted_number_alive.max())
+
+        # particle buffer, choose smaller of forecasted or given buffer sise
+        settings.particle_buffer_initial_size = min(ri.forecasted_max_number_alive, settings.particle_buffer_initial_size)
 
         # particle group manager for particle handing infra-structure
         pgm = si.core_class_roles.particle_group_manager
@@ -332,11 +349,6 @@ class OceanTrackerParamsRunner(object):
 
         # record max age for each group, used to kill old particles
         pgm.info['max_age_for_each_release_group'] = np.asarray(max_ages)
-
-        # with particle mager and sizes  now do release group initialization
-
-        for name, rg in si.class_roles.release_groups.items():
-            rg.initial_setup()
 
         # make other core classes
         ccr = si.core_class_roles
@@ -362,7 +374,7 @@ class OceanTrackerParamsRunner(object):
             si.core_class_roles.integrated_model.initial_setup()
 
 
-        si.msg_logger.progress_marker('Done initial setup of all classes', start_time=t0)
+        si.msg_logger.progress_marker('Done initial setup of all classes', start_time=t0,tabs=1)
 
     def _final_setup_all_classes(self):
         # finalise alll classes setup  after all initialised
@@ -410,8 +422,7 @@ class OceanTrackerParamsRunner(object):
             duration = si.info.large_float if rg_params['duration'] is None else rg_params['duration']
 
             # end time takes presence over given duration
-            if rg_params['end'] is not None:
-                duration = abs(end-start)
+            if rg_params['end'] is not None: duration = abs(end-start)
 
             life_span = duration if rg_params['max_age'] is None else duration + rg_params['max_age']
 
@@ -440,9 +451,7 @@ class OceanTrackerParamsRunner(object):
 
         # record info in run
         ri.start_time = start_time
-        ri.end_time = end_time
-        ri.duration = duration
-        ri.times    = ri.start_time  + md * np.arange(0., ri.duration + si.settings.time_step, si.settings.time_step)
+        ri.times    = ri.start_time  + md * np.arange(0., duration + si.settings.time_step, si.settings.time_step)
         ri.end_time = ri.times[-1] # adjust end to last time step
 
         # useful information
@@ -561,8 +570,8 @@ class OceanTrackerParamsRunner(object):
 
                 # full parameters
                 p = deepcopy(i2.params)
-                if key == 'release_groups':  # don't put release point locations which may make json too big
-                    p['points'] = 'points may be too large for json, read release_groups netCDF file, '
+                if key == 'release_groups' and p['points'].shape[0] > 100:  # don't put release point locations which may make json too big
+                    p['points'] = 'more than 100 points for this release group, so  too large for json, read release_groups netCDF file, '
                 d['working_params']['class_roles'][key][key2] = p
 
         # rewrite release groups in net cdf
@@ -619,32 +628,15 @@ class OceanTrackerParamsRunner(object):
 
     def _write_error_info(self,e):
 
-        if si.run_info.run_output_dir is None:
-            # if nowhere to write
-            print(e)
-            print(traceback.format_exc())
-            return
 
+        si.msg_logger.msg('Caught error>>>>>>>>>>')
+        si.msg_logger.msg(str(e))
+        si.msg_logger.msg(traceback.format_exc())
         if hasattr(si.msg_logger,'error_file_name'):
             si.msg_logger.write_error_log_file(e)
 
-        file_base = si.run_info.run_output_dir
 
-        if si.core_class_roles.solver is not None and 'n_time_step' in si:
-            solver_info = si.core_class_roles.solver.info
-            n_time_step = solver_info['n_time_step']
-            time_sec = solver_info['time_sec']
-        else:
-            n_time_step = -999
-            time_sec =  0.
 
-        # save current particle properties
-        if len(si.class_roles.particle_properties) > 0:
-            save_state_util.save_part_prop(path.join(file_base,'particle_prop_on_error.nc'), si, n_time_step, time_sec)
-
-        save_state_util.save_settings_class_params(path.join(file_base,'settings_params_on_error.json'), si)
-        # save class info
-        save_state_util.save_class_info(path.join(file_base,'info_on_error.json'), si, n_time_step, time_sec)
 
 
 

@@ -3,7 +3,6 @@
     "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
     "time_step": 240,
     "use_random_seed": true,
-    "NCDF_time_chunk": 1,
     "debug": true,
     "use_A_Z_profile": true,
     "screen_output_time_interval": 240,
@@ -82,7 +81,7 @@
         {
             "grid_size": [
                 120,
-                121
+                130
             ],
             "grid_span": [
                 10000,
@@ -97,7 +96,7 @@
             "z_min": -10.0,
             "start": "2017-01-01T02:30:00",
             "class_name": "GriddedStats2D_timeBased",
-            "name": "my_heatmap"
+            "name": "my_heatmap_time"
         }
     ],
     "dispersion": {

@@ -1,9 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from oceantracker.util import  ncdf_util, triangle_utilities, polygon_util
+from oceantracker.util import  ncdf_util, triangle_utilities
 from oceantracker.interpolator.util import triangle_interpolator_util
 from oceantracker.reader.SCHISM_reader import read_hgrid_file
-from numba import njit
 from scipy import spatial
 def read_hydo_model(file_name, hgrid_file):
     nc = ncdf_util.NetCDFhandler(file_name)

@@ -11,7 +11,7 @@ import make_demo_plots
 import build_and_test_demos
 import numpy as np
 from oceantracker.read_output.python import load_output_files
-from oceantracker.read_output.python import load_stats_data, load_concentration_data
+from oceantracker.read_output.python.load_output_files import load_stats_data, load_concentration_data
 from oceantracker.plot_output.plot_statistics import plot_heat_map, animate_heat_map
 
 two_points= [[1594500, 5483000], [1598000, 5486100]]

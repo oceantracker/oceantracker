@@ -1,11 +1,6 @@
 import numpy as np
-from time import  perf_counter
-import copy
-from oceantracker.util.numba_util import njitOT
-from oceantracker.util import cord_transforms
-from oceantracker.util import polygon_util, triangle_utilities
 from scipy.spatial import cKDTree
-from oceantracker.interpolator.util import find_initial_cell
+
 
 class InsidePolygonWithinGrid(object):
     # finds points inside given polygon (M,2) vertices as numpy array
@@ -75,7 +70,6 @@ class InsidePolygonWithinGrid(object):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    import xarray as xr
     from oceantracker.util.ncdf_util import NetCDFhandler
 
 

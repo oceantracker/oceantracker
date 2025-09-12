@@ -19,12 +19,15 @@ def main(args):
     ot.add_class('release_groups', name='my_radius_release',  # name used internal to refer to this release
              class_name='RadiusRelease',  # class to use
              points=[[1593000., 5487000], [1593000, 5484000],],
-             radius = 1000, release_interval=1800, pulse_size=2)
+             radius = 1000, release_interval=1800, pulse_size=2,
+             start = '2017-01-01T02:00:00',
+             end='2017-01-01T12:00:00',
+             max_age=3*3600)
 
     ot.add_class('release_groups', name='my_point_release',  # name used internal to refer to this release
              class_name='PointRelease',  # class to use
              points=[[1593000., 5491000], [1593000, 5481000],],
-             release_interval=900, pulse_size=1)
+             release_interval=900, pulse_size=2)
     poly =np.asarray([[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
                      [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]])
     #poly= poly - np.asarray([0,1000])
@@ -32,12 +35,12 @@ def main(args):
                     class_name='PolygonRelease',  # class to use
                     points=poly,
                     # the below are optional settings/parameters
-                    release_interval=900, pulse_size=1,
+                    release_interval=900, pulse_size=2,
                     z_min=-2., z_max=0.5)
 
     ot.add_class( 'release_groups',name='my_grid_release',  # name used internal to refer to this release
                     class_name='GridRelease',
-                  release_interval=1800, pulse_size=1,
+                  release_interval=1800, pulse_size=2,
                   grid_center=[1601000, 5484000],
                   grid_span=[1000, 3000], grid_size=[3, 4],)
 
@@ -50,6 +53,7 @@ def main(args):
 
     case_info_file = ot.run()
 
+    test_definitions.compare_reference_run_tracks(case_info_file,args)
     test_definitions.show_track_plot(case_info_file, args,colour_with='IDrelease_group')
 
     return ot.params

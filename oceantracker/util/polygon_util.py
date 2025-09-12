@@ -3,21 +3,25 @@
 from numba import njit, types as nbtypes
 #from  matplotlib import nxutils
 import numpy as np
-import time
+from  time import  perf_counter
 import copy
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.util import cord_transforms
 
 class InsidePolygon(object):
     # finds points inside given polygon (M,2) vertices as numpy array
     # may be a closed or not closed polygon
-    def __init__(self,verticies,geographic_coords=None, bounds_sub_grid_size=20):
+    # uses horizontal ray method, counting crossings of polygon segments
+    # by a ray  from point to +inf in x direction
+    #
+    # has two variants original and a faster version with num_ystrips>0/
+    # This precalculates lists of segments which overlap evenly spaced strips of y,
+    # then only checks those polygon segments overlapping  the ystrip containing the point
+
+    def __init__(self,verticies,geographic_coords=None):
         self.geographic_coords = geographic_coords
         self.points = self._make_closed(verticies).astype(np.float64) # close  polygon if needed
-        self._build_inside_indicies_func(self.points, bounds_sub_grid_size)
-
-        # build number function wrapped in precalc data as constants
-        self._build_inside_indicies_func(self.points, bounds_sub_grid_size)
+        self._pred_calcs(self.points)
 
     def is_inside(self, xq,  out = None):
         # returns vector of booleans if each point in (N,2) numpy array of points
@@ -29,7 +33,7 @@ class InsidePolygon(object):
         b[index] =True
         return b
 
-    def inside_indices(self, xq, active=None, out = None, also_return_indices_outside = False, out_outside=None):
+    def inside_indices(self, xq, active=None, out = None):
         # returns vector of indices for each point in (N,2) numpy array of points
         # for only isActive particles
 
@@ -38,83 +42,75 @@ class InsidePolygon(object):
 
         if out is None:  out = np.zeros((xq.shape[0],), dtype=np.int32)
 
-        if also_return_indices_outside:
-            if out_outside is None:  out_outside = np.zeros((xq.shape[0],), dtype=np.int32)
-        else:
-            out_outside = np.zeros((1,), dtype=np.int32)  # allows numba code to compile and tesl it not to return indices of thsoe outside
-
         if active is None:  active = np.arange(xq.shape[0]) # search all xq for those inside
 
         active = active.astype(np.int32) # ensure its int32
         # get tuple of found and not found
-        indices = self.inside_ray_tracing_indices_fun(xq,  active, out, out_outside)
+        indices = self.inside_ray_tracing_indices(xq,
+                                                  self.line_bounds, self.slope_inv, self.polygon_bounds,
+                                                  active, out)
+        return indices
 
-        if also_return_indices_outside:
-            return indices # return both  those inside and outside
-        else: # only return those found
-            return indices[0]
-
-    def _build_inside_indicies_func(self, vert, bounds_sub_grid_size):
+    def _pred_calcs(self, vert):
         # do precalulations require to build a function to find indicies of points inside a polygon
         # 1) build set of bounding boxes for each line of polygon
         # 2) recalculates inv_slope for intersection calc and bounding box
-        # 3) form subgrid of bounding region with vaules =1 if polygon overlays  subgrid cell
         # assumes a closed polygon
-        #todo this can be much faster with numba?
-        nv = vert.shape[0]
-        self.line_bounds = np.zeros((nv,3,2),dtype=np.float64)
-        xyb= np.zeros((2,2),dtype=np.float64)
-        self.slope_inv = np.zeros((nv,),dtype=np.float64)
-        for n in range(nv-1):
-            xy =vert[ [n,  (n+1) % nv ],:]   # cords of this line
-            xyb[:, 0] = np.sort(xy[:, 0])
-            xyb[:, 1] = np.sort(xy[:, 1])
-            self.line_bounds[n,:2,:] = copy.copy(xyb)
 
-            # slope, line origin  must come from unordered line
-            if xy[1,1] != xy[0,1]:
-                self.slope_inv[n] = (xy[1,0] - xy[0,0])/(xy[1,1] - xy[0,1])
-
-            # start of line , used with intercept to find intersections
-            self.line_bounds[n,2, :] = xy[0, :].astype(np.float64)
+        self.line_bounds, self.slope_inv = self._get_line_bounds_and_slopeinv(vert )
 
         self.polygon_bounds = np.array([np.min(vert[:,0]), np.max(vert[:,0]),
-                         np.min(vert[:,1]),  np.max(vert[:,1]) ])
+                                       np.min(vert[:,1]),  np.max(vert[:,1]) ])
 
-        # make an initial function to find if points inside with one subcell
-        x = np.linspace(self.polygon_bounds[0], self.polygon_bounds[1], 2)
-        y = np.linspace(self.polygon_bounds[2], self.polygon_bounds[3],  2)
-        overlap = np.ones((1, 1), dtype=np.int8)
-        self.inside_ray_tracing_indices_fun = self.make_inside_ray_tracing_indices_subgrids(self.line_bounds, self.slope_inv, self.polygon_bounds,
-                                                                                       x, y, overlap)
+    @staticmethod
+    @njitOT # not sure why, by numba version is 100 times slower to compile, but runs only 30 times faster ???
+    def _get_line_bounds_and_slopeinv(vert):
+        nv = vert.shape[0]
+        line_bounds = np.zeros((nv, 3, 2), dtype=np.float64)
+        slope_inv = np.zeros((nv,), dtype=np.float64)
+        xyb = np.zeros((2, 2), dtype=np.float64)
+        xy = xyb.copy()
+        for n in range(nv - 1):
+            # cords of this line segment
+            xy[0,:]= vert[n,:]
+            xy[1,:]= vert[(n + 1) % nv,:]
+            # sort to get bounds of segment lower left and upper right
+            xyb[0, 0], xyb[1, 0] = xy[:, 0].min(), xy[:, 0].max()
+            xyb[0, 1], xyb[1, 1] = xy[:, 1].min(), xy[:, 1].max()
 
-        # set up sub-grid of bounds to speed eliminating points from full check for ray tracing
-        x = np.linspace(self.polygon_bounds[0], self.polygon_bounds[1], bounds_sub_grid_size + 1)
-        y = np.linspace(self.polygon_bounds[2], self.polygon_bounds[3], bounds_sub_grid_size + 1) # break symetry to test
-        overlap = np.zeros((y.size-1, x.size-1), dtype=np.int8)
+            for m in range(2): line_bounds[n, m, :] = xyb[m, :]
+            # start of line , used with intercept to find intersections
+            line_bounds[n, 2, :] = xy[0, :]
 
-        # check if any of 4 corners of each cell is inside polygon
-        for r in np.arange(y.size - 1):
-            for c in np.arange(x.size-1):
-                xq = np.asarray([[x[c],y[r]],[x[c+1],y[r]],[x[c+1],y[r+1]],[x[c],y[r+1]]])
-                corner_inside_polygon = np.any(self.is_inside(xq))
-                vertex_inside_sub_grid = False
-                for p in self.points:
+            # slope, line origin  must come from unordered line
+            if xy[1, 1] != xy[0, 1]:
+                slope_inv[n] = (xy[1, 0] - xy[0, 0]) / (xy[1, 1] - xy[0, 1])
+        return  line_bounds, slope_inv
 
-                    if x[c] <= p[0] <= x[c+1] and y[r] <= p[1] <= y[r+1]:
-                        vertex_inside_sub_grid = True
-                        break # stop if any vertex inside the rectangle
-                        
-                overlap[r,c] = corner_inside_polygon or vertex_inside_sub_grid
+    @staticmethod
+    @njitOT
+    def _precalc_strips(vert,y_strip):
+        # find edges which fall within each interval of y_strip
+        n_strips = y_strip.size - 1
+        sIndex_temp= np.zeros((n_strips,vert.shape[0]-1,), dtype=np.int32)
+        sIndexCount= np.zeros((n_strips,), dtype=np.int32)
+        dy= y_strip[1] - y_strip[0]
+        y0= y_strip[0]
+        y = vert[:,1]
+        for n in range(vert.shape[0]-1):
 
+            ns1= int((y[n]-y0)/dy)
+            ns2 = int((y[n+1] - y0) / dy)
+            if ns2 < ns1: ns1, ns2 = ns2, ns1 # put ns1 in order
+            for ns in  range(ns1,ns2+1):
+                sIndex_temp[ns, sIndexCount[ns]]= n
+                sIndexCount[ns] +=1
+        # build list of arrays of edge indices in each strip
+        edge_index_strip_list =[]
+        for ns in range(n_strips):
+            edge_index_strip_list.append(np.unique(sIndex_temp[ns,:sIndexCount[ns]]))
+        return edge_index_strip_list
 
-        # setup sub grid info and  find inside_ray_tracing_indices_fun  which exploits the sub grid
-        self.sub_grid_x = x
-        self.sub_grid_y = y
-        self.sub_grid_overlaps_polygon = overlap
-        self.inside_ray_tracing_indices_fun = self.make_inside_ray_tracing_indices_subgrids(self.line_bounds, self.slope_inv, self.polygon_bounds,
-                                                                                       self.sub_grid_x, self.sub_grid_y, self.sub_grid_overlaps_polygon)
-        pass
 
     def _make_closed(self, p):
         # inside works whether closed or not, but ensure a closed polygon unless requested
@@ -131,11 +127,14 @@ class InsidePolygon(object):
         if self.geographic_coords:
             xy =  cord_transforms.WGS84_to_UTM(xy, in_lat_lon_order=False)
 
-
         x,y = xy[:,0], xy[:,1]
+        return self._get_area_numba(x,y)
+
+    @staticmethod
+    @njitOT
+    def _get_area_numba(x,y):
         n = len(x)
         area = 0.0
-
         for i in range(n):
             j = (i + 1) % n
             area += x[i] * y[j]
@@ -145,57 +144,39 @@ class InsidePolygon(object):
         return area
 
     @staticmethod
-    def make_inside_ray_tracing_indices_subgrids(lb, slope_inv, bounds, sub_grid_x, sub_grid_y, sub_grid_overlaps_polygon):
-        # wrapper to make faster reduce number of arguments anf faster by compling fixed array references into code
+    @njitOT
+    def inside_ray_tracing_indices(xq_vals, lb, slope_inv, bounds, active, out):
+        # finds if points indside polygon based on ray from point to +ve x
+        # based on odd number of crossings of lines of polygon, resilt is in boolean working space, "inside"
+        # this version returns the indices of those inside,  as first n_found values of index buffer
 
-        # useful constants
-        sub_grid_dx = sub_grid_x[1] - sub_grid_x[0]
-        sub_grid_dy = sub_grid_y[1] - sub_grid_y[0]
+        n_inside = 0
 
-        @njitOT
-        def inside_ray_tracing_indices(xq_vals, active, inside_IDs, outside_IDs):
-            # finds if points indside polygon based on ray from point to +ve x
-            # based on odd number of crossings of lines of polygon, resilt is in boolean working space, "inside"
-            # this version returns the indices of those inside,  in first n_found values of index buffer
-            # if outside.shape[0] > 1 then those outside are also put in outside buffer
+        for n in active:
+            xq= xq_vals[n,: ]
+            xints = -np.inf
+            inside = False
+            if bounds[0] <= xq[0] <= bounds[1] and bounds[2] <= xq[1] <= bounds[3]:  # inside bounds of polygon
+                for i in range(lb.shape[0]):
+                    # get line's bounding box, faster to do this in one line tuple assignment
+                    p1x, p1y, p2x, p2y = lb[i, 0, 0], lb[i, 0, 1], lb[i, 1, 0], lb[i, 1, 1]
 
-            n_inside = 0
-            n_outside= 0
-            r_lims = sub_grid_overlaps_polygon.shape[0]-1
-            c_lims = sub_grid_overlaps_polygon.shape[1]-1
+                    if p1y < xq[1] <= p2y and xq[0] <= p2x:
+                        # point is in y bounds of polygon segment
+                        # and  left of RHS of polygon segment
+                        # then check intersection
+                        if p1y != p2y:
+                            xints = (xq[1] - lb[i, 2, 1]) * slope_inv[i] + lb[i, 2, 0]
+                        if p1x == p2x or xq[0] <= xints:
+                            # intersection to right of point
+                            inside = not inside
+            if inside :
+                # add to index list if inside
+                out[n_inside] = n
+                n_inside += 1
 
-            for n in active:
-                xq= xq_vals[n,: ]
-                xints = 0
-                inside = False
-                if bounds[0] <= xq[0] <= bounds[1] and bounds[2] <= xq[1] <= bounds[3]:  # inside bounds of polygon
-                    # check if point in subgrid cell overlaping the polygon
-                    c , r = int((xq[0]-sub_grid_x[0])/sub_grid_dx), int((xq[1]-sub_grid_y[0])/sub_grid_dy)
-                    # only look at polygon if subcell does not overlap polygon
-                    #  also make sure point on edge of bounds round down
-                    if sub_grid_overlaps_polygon[min(r, r_lims), min(c, c_lims)] == 1:
-                        for i in range(lb.shape[0]):
-                            # get line's bounding box, faster to do this in one line tuple assignment
-                            p1x, p1y, p2x, p2y = lb[i, 0, 0], lb[i, 0, 1], lb[i, 1, 0], lb[i, 1, 1]
-                            if p1y < xq[1] <= p2y:
-                                if xq[0] <= p2x:
-                                    if p1y != p2y:
-                                        xints = (xq[1] - lb[i, 2, 1]) * slope_inv[i] + lb[i, 2, 0]
-                                    if p1x == p2x or xq[0] <= xints:
-                                        inside = not inside
-                if inside :
-                    # add to index list if inside
-                    inside_IDs[n_inside] = n
-                    n_inside += 1
+        return out[:n_inside]
 
-                elif outside_IDs.shape[0] > 1:
-                    # only insert not found if outside_IDs is given as full size
-                    outside_IDs[n_outside] = n
-                    n_outside +=1
-
-            return inside_IDs[:n_inside], outside_IDs[:n_outside]
-
-        return inside_ray_tracing_indices
 
 def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
     msg=[]
@@ -211,8 +192,6 @@ def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
         poly.update({'points': p.points.tolist()})
     return polygons, msg
 
-
-
 def make_anticlockwise_polygon(xy):
     # ensure points in polygon are ordered in anti-clockwise order
     is_clockwise = np.sum(np.arctan2( xy[:,0],xy[:,1]  ),axis=0) > 0
@@ -223,59 +202,57 @@ def make_anticlockwise_polygon(xy):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    N=10**4
 
 
-    v = np.array([[5.5      , -5],
-                  [  5.11      , -10.00907385],
-                  [  5.11      , -14.68307385],
-                  [  6.89      , -14.68307385],
+
+    v1 = np.array([[5.5      , -5],
+                  [  5.5      , -14],# vert segment
+                  [  7      , -14],# hori segement
                   [ 10    , -10.00907385],
                   [0, -8],
                   [ -1      , 3]
                   ])
-    dx =.5
-    bounds = [np.min(v[:,0]) -dx, np.max(v[:,0]) +dx, np.min(v[:,1]) -dx, np.max(v[:,1]) +dx]
+    v1=  np.append(v1, np.array([[5.5 , -5],]),axis=0)
+    # add more points to make larger polygon tp test speed
+    N = 10 **6
+    nrepeats = 100
+    n_split=175 # min val is 2
+
+    v= np.zeros((0,2),dtype=np.float64)
+    for n in range(v1.shape[0]-1):
+        vadd = np.linspace(v1[n,:],v1[n+1,:],n_split+1,dtype=np.float64)
+        v =  np.append(v,vadd[:-1,:],axis=0)
+
+    dx =5
+    bounds = [np.min(v[:,0]) -dx, np.max(v[:,0]) +dx, np.min(v[:,1]) -dx, np.max(v[:,1]) ]
     x = np.stack(((np.random.rand(N, )-.5)*np.diff(bounds[:2]), (np.random.rand(N, )-.5)*np.diff(bounds[2:])),axis=1) + np.mean(v,axis=0)
 
-    active = np.sort(np.flatnonzero(np.random.rand(N) > 0.1))
+    active = np.sort(np.flatnonzero(np.random.rand(N) > 0.9))
     out = np.zeros((N,), dtype=np.int32)
 
     # speed tests
-    P= InsidePolygon(v,bounds_sub_grid_size = 20)
+    t0 = perf_counter()
+    P= InsidePolygon(v)
+    print(' with compile', perf_counter()-t0)
 
-    nrepeats = 10
-    P.inside_indices(x[:3, :], out=out)
-    t0=time.time()
+
+    P.inside_indices(x[:3, :], out=out) # compile code
+    t0=perf_counter()
 
     for n in range(nrepeats):
         indices_inside = P.inside_indices(x,active=active, out= out)
-    print('indicies inside', time.time() - t0, nrepeats*N/10**6,'million points checked')
+    print('indicies inside', perf_counter() - t0, nrepeats*N/10**6,'million points checked, polyugon size',v.shape[0])
 
 
     # test plots
-    xtest = x[::20,:]
+    xtest = x[::50,:]
     indices_inside = P.inside_indices(xtest)
-    # check index and boolean agree
-    indices_inside_check = np.flatnonzero(P.is_inside(xtest))
-    if indices_inside.size > 0:
-        print('compare', np.max(np.abs(indices_inside-indices_inside_check)))
-    else:
-        print('no points')
 
-    x, y = np.meshgrid(P.sub_grid_x, P.sub_grid_y)
-    plt.plot(x,y,c=[.8,.8,.8])
-    plt.plot(x.T, y.T, c=[.8, .8, .8])
     plt.plot(v[:, 0], v[:, 1], 'k-', markersize=10, )
-    plt.plot(P.points[:, 0], P.points[:, 1], 'k--', markersize=10, )
+    x,y = P.points[:, 0], P.points[:, 1]
+    plt.plot(x,y, 'k--', markersize=10, )
     plt.plot(xtest[:,0],xtest[:,1],'x',markersize=3,color=[1,0,0])
     plt.plot(xtest[indices_inside, 0], xtest[indices_inside, 1], '.', markersize=4, color=[0, 1, 0])
-
-    x,y = np.meshgrid(P.sub_grid_x,P.sub_grid_y)
-    x = .5*(x[:-1,:-1]+x[1:,1:])
-    y = .5 * (y[:-1, :-1] + y[1:, 1:])
-    sel=P.sub_grid_overlaps_polygon ==0
-    plt.scatter(x[sel],y[sel],marker='x', c='k', s=8)
 
     plt.show()
 

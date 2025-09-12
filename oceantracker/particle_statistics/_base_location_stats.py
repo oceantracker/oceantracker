@@ -1,23 +1,23 @@
 import numpy as np
-from oceantracker.util import basic_util, status_util
+from oceantracker.util import basic_util, status_util, output_util
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from os import  path
-from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC, ParameterTimeChecker as PTC
+from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC
+from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParameterTimeChecker as PTC
+from oceantracker.util.parameter_checking import  merge_params_with_defaults
 from numba.typed import List as NumbaList
-from numba import  njit
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util import cord_transforms
+from oceantracker.particle_statistics.util import stats_util
 from oceantracker.shared_info import shared_info as si
+from oceantracker.particle_statistics.util.optional_stats_methods import _OptionalStatsMethods
+class _BaseParticleLocationStats(_OptionalStatsMethods):
 
-from oceantracker.util import time_util
-
-status_unknown= int(si.particle_status_flags.unknown)
-class _BaseParticleLocationStats(ParameterBaseClass):
 
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        #todo add depth range for count
+
         self.add_default_params(
                 update_interval =   PVC(60*60.,float,units='sec',
                                doc_str='Time in seconds between calculating statistics, wil be rounded to be a multiple of the particle tracking time step'),
@@ -25,7 +25,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 end =  PTC(None,  doc_str='Stop particle counting from this iso date-time, default is end of model run'),
                 duration =  PVC(None, float, min=0.,units='sec',
                         doc_str='How long to do counting after start time, can be used instead of "end" parameter'),
-
                 role_output_file_tag =            PVC('stats_base',str,doc_str='tag on output file for this class'),
                 write =                       PVC(True,bool,doc_str='Write statistcs to disk'),
                 status_list= PLC(['stationary','stranded_by_tide','on_bottom','moving'], str,
@@ -39,6 +38,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 water_depth_min =  PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
                 water_depth_max =  PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
                 particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
+
                 #coords_in_lat_lon_order =  PVC(False, bool,
                 #    doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
                 status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),obsolete=True,
@@ -46,12 +46,16 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 status_max=PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),obsolete=True,
                              doc_str='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'),
                 )
+
         self.add_default_params(count_start_date= PTC(None,  obsolete=True,  doc_str='Use "start" parameter'),
                                 count_end_date= PTC(None,   obsolete=True,  doc_str='Use "end" parameter'))
-
+        self.nc = None
+        info = self.info
+        self.grid = {}
         self.sum_binned_part_prop = {}
-        self.info['output_file'] = None
+        info['output_file'] = None
         self.role_doc('Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are \n * separated by release group \n * can be a time series of statistics or put be in particle age bins.')
+        self.nWrites = 0
 
     def initial_setup(self):
 
@@ -63,47 +67,60 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # to spped status check make map with trues at index of status to include in counts
         self.statuses_to_count_map = status_util.build_select_status_map(params['status_list'])
 
-        #set particle depth and water depth limits for counting particles
+        # set water depth range (not using tide)
+        f = si.info.large_float
+        info['water_depth_range'] = np.asarray([-f, f])
+        if params['water_depth_min'] is not None:  info['water_depth_range'][0] = params['water_depth_min']
+        if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']
 
+        if info['water_depth_range'][0] > info['water_depth_range'][1]:
+            ml.msg(
+                f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
+                caller=self, error=True)
+        # set what z values to count bewteen, or near sea bed etc in 2D counts
+        self.set_z_range_for_counts()
 
-        f = 1.0E32
+        self.add_scheduler('count_scheduler', start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
+        pass
+
+    def set_z_range_for_counts(self):
+        # set particle depth and water depth limits for 2D counting of particles
+        ml = si.msg_logger
+        info = self.info
+        params = self.params
+
         info['depth_sel_mode'] = 0
-        if params['z_min'] is not None or params['z_max'] is not None :
+        f = si.info.large_float
+        if params['z_min'] is not None or params['z_max'] is not None:
             # count based on give z values
             info['depth_sel_mode'] = 1
             info['z_range'] = np.asarray([-f, f])
             if params['z_min'] is not None:  info['z_range'][0] = params['z_min']
             if params['z_max'] is not None:  info['z_range'][1] = params['z_max']
             if info['z_range'][0] > info['z_range'][1]:
-                ml.msg(f'Require zmin > zmax, (z_min,z_max) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ', error=True, caller=self,
-                                  hint ='z=0 is mean water level, so z is mostly < 0')
+                ml.msg(f'Require zmin > zmax, (z_min,z_max) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ',
+                       error=True, caller=self,
+                       hint='z=0 is mean water level, so z is mostly < 0')
 
             if params['near_seabed'] is not None or params['near_seasurface'] is not None:
-                ml.msg(f'Have set  one of params  "near_seabed" or  "near_seasurface" and also one of (z_min,z_max)', fatal_error=True, caller=self,
+                ml.msg(f'Have set  one of params  "near_seabed" or  "near_seasurface" and also one of (z_min,z_max)',
+                       fatal_error=True, caller=self,
                        hint='Cannot set both depth selections , add different particle_statistics  class for each type of depth selection')
 
-        elif params['near_seabed'] is not None: info['depth_sel_mode'] = 2
+        elif params['near_seabed'] is not None:
+            info['depth_sel_mode'] = 2
 
-        elif params['near_seasurface'] is not None:  info['depth_sel_mode'] = 3
+        elif params['near_seasurface'] is not None:
+            info['depth_sel_mode'] = 3
 
-        # set water depth range (not using tide)
-        info['water_depth_range'] = np.asarray([-f, f])
-        if params['water_depth_min'] is not None:  info['water_depth_range'][0] = params['water_depth_min']
-        if params['water_depth_max'] is not None:  info['water_depth_range'][1] = params['water_depth_max']
-
-        if info['water_depth_range'][0]> info['water_depth_range'][1]:
-            ml.msg(f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
-                     caller=self,error=True)
-
-        self.add_scheduler('count_scheduler', start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
-        pass
 
     def check_part_prop_list(self):
+        params = self.params
+        if 'particle_property_list' not in params: return
 
         part_prop = si.class_roles.particle_properties
-
         names=[]
-        for name in self.params['particle_property_list']:
+        for name in params['particle_property_list']:
 
             si.msg_logger.spell_check(f'Particle property name "{name}" not recognised',
                                       name, si.class_roles.particle_properties.keys(),
@@ -123,32 +140,32 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         # set params to reduced list
         self.params['particle_property_list'] = names
 
-    def set_up_spatial_bins(self): basic_util.nopass()
+    def set_up_spatial_bins(self):
 
-    def open_output_file(self):
+        basic_util.nopass()
 
-        if self.params['write']:
-            self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
-            self.info['output_file'] += f'_{self.info["instanceID"]}_{self.params["name"]}.nc'
-            self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
+    def open_file_if_needed(self):
+        info = self.info
 
-            # all stats are separated into  release groups
-            self.nc.add_dimension('release_group_dim', len(si.class_roles.release_groups))
-        else:
-            self.nc = None
+        if self.nc is None:
+            info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
+            info['output_file'] += f'_{info["instanceID"]:03}_{self.params["name"]}.nc'
+            file_name = path.join(si.run_info.run_output_dir, info['output_file'])
+            # add counting dims to file
+            self.nc = self.open_output_file(file_name)
+
+    def open_output_file(self,file_name):
+        nc = NetCDFhandler(file_name, 'w')
+        info = self.info
+        for name, s in info['count_dims'].items():
+            nc.create_dimension(name, s)
         self.nWrites = 0
 
-    def set_up_time_bins(self,nc):
-        # stats time variables commute to all 	for progressive writing
-        nc.add_dimension('time_dim', None)  # unlimited time
-        nc.create_a_variable('time', ['time_dim'],  np.float64,
-                             units='seconds since 1970-01-01 00:00:00',
-                             description= 'time in seconds since 1970/01/01 00:00')
+        output_util.add_release_group_names_to_netcdf(nc, si)
+        return nc
 
-        # other output common to all types of stats
-        nc.create_a_variable('num_released_total', ['time_dim'], np.int32, description='total number released')
-
-        nc.create_a_variable('num_released',  ['time_dim', 'release_group_dim'], np.int32, description='number released so far from each release group')
+    def create_time_variables(self):
+        pass
 
     def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
@@ -164,7 +181,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             elif part_prop[key].get_dtype() != np.float64:
                 si.msg_logger.msg(f'On the fly statistics  can currently only track float64 particle properties, ignoring property  "{key}", of type "{str(part_prop[key].get_dtype())}"',
                                   error=True)
-
             else:
                 names.append(names)
                 self.prop_data_list.append(part_prop[key].data) # must used dataptr here
@@ -186,7 +202,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         pass
 
 
-
     # user overload this method to subset indicies in out of particles to count
     def select_particles_to_count(self, sel): # dummy method
         return sel
@@ -196,139 +211,149 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         part_prop = si.class_roles.particle_properties
         info = self.info
         params = self.params
-
+        buffer = self.get_partID_buffer('depth_sel')
         match info['depth_sel_mode']:
             case 0:
-                sel_subset  = sel # no depth selection
-            case 1:
-                # first select those to count based on status and z location
-                sel_subset = self._sel_z(part_prop['x'].data, info['z_range'],  sel)
+                return sel # no depth selection
+            case 1: # first select in z range
+                return stats_util._sel_z_range(part_prop['x'].data, info['z_range'], sel, buffer)
             case 2: # near sea bed
-                sel_subset= self._sel_near_seabed(part_prop['x'].data, part_prop['water_depth'].data, params['near_seabed'], sel)
+                return stats_util._sel_z_near_seabed(part_prop['x'].data, part_prop['water_depth'].data, params['near_seabed'], sel, buffer)
             case 3:  # near sea surface
-                sel_subset = self._sel_near_seasurface(part_prop['x'].data, part_prop['tide'].data, params['near_seasurface'], sel)
+                return stats_util._sel_z_near_seasurface(part_prop['x'].data, part_prop['tide'].data, params['near_seasurface'], sel, buffer)
 
-        return sel_subset
 
     def update(self,n_time_step, time_sec, alive):
         '''do particle counts'''
         part_prop = si.class_roles.particle_properties
         info = self.info
-        self.start_update_timer()
 
         num_in_buffer = si.run_info.particles_in_buffer
 
         #  count alive particles in each release group (plus age for age based stats)
         # children must implement their own count_alive_particles
-        self.do_alive_particle_counts(self.count_all_alive_particles, alive)
 
         # first select those to count based on status and z location
-        sel = self._sel_status_waterdepth(part_prop['status'].data,
-                                                part_prop['x'].data, part_prop['water_depth'].data.ravel(),
-                                                self.statuses_to_count_map, info['water_depth_range'],
-                                                num_in_buffer, self.get_partID_buffer('B1'))
+        sel = stats_util._sel_status_waterdepth(part_prop['status'].data,
+                                    part_prop['x'].data, part_prop['water_depth'].data.ravel(),
+                                    self.statuses_to_count_map, info['water_depth_range'],
+                                    num_in_buffer, self.get_partID_buffer('B1'))
 
         if si.run_info.is3D_run:
             sel = self.sel_depth_range(sel)
-
+        # users override this method  to further sub-select those to count
         sel = self.select_particles_to_count(sel)
 
         #update prop list data, as buffer may have expanded
-        #todo do this only when expansion occurs??
+        # todo , do this only when part buffer expansion occurs as array changes, add expanf bffer to all clases??
         part_prop = si.class_roles.particle_properties
         for n, name in enumerate(self.sum_binned_part_prop.keys()):
             self.prop_data_list[n]= part_prop[name].data
 
-        self.do_counts(n_time_step, time_sec,sel)
+        self.do_counts(n_time_step, time_sec, sel, alive)
 
-        self.write_time_varying_stats(self.nWrites, time_sec)
+        self.write_time_varying_stats(time_sec)
         self.nWrites += 1
 
-        self.stop_update_timer()
 
-    def do_alive_particle_counts(self, count_all_alive, alive):
-        basic_util.nopass('Stats class must implement method to do counts of all alive particles by release group')
+    def write_time_varying_stats(self, time_sec):
+        basic_util.nopass('must have a write_time_varying_stats', c=self) # no writing on the fly in aged based states
 
-    @staticmethod
-    @njitOT
-    def _sel_status_waterdepth(status, x, water_depth, statuses_to_count_map,  water_depth_range, num_in_buffer, out):
-        n_found = 0
-        for n in range(num_in_buffer):
-            if statuses_to_count_map[status[n]-status_unknown] and water_depth_range[0] <= water_depth[n] <= water_depth_range[1]:
-                out[n_found] = n
-                n_found += 1
+    def info_to_write_on_file_close(self,nc) : pass
 
-        return out[:n_found]
+    def close_file(self):
+        nc = self.nc
+        self.info_to_write_on_file_close(nc)
+        # write total released in each release group
+        num_released = [i.info['number_released'] for name, i in si.class_roles.release_groups.items()]
+        nc.write_variable('number_released_each_release_group', np.asarray(num_released, dtype=np.int64),
+                          ['release_group_dim'], description='Total number released in each release group')
 
-    @staticmethod
-    @njitOT
-    def _sel_z(x, z_range,  sel):
-        # put subset of those found back into start of sel array
-        n_found = 0
-        for n in sel:
-            if z_range[0] <= x[n, 2] <= z_range[1]:
-                sel[n_found] = n
-                n_found += 1
-        return sel[:n_found]
-    @staticmethod
-    @njitOT
-    def _sel_near_seabed(x,water_depth, dz, sel):
-        # put subset of those found back into start of sel array
-        n_found = 0
-        for n in sel:
-            if x[n, 2] <= -water_depth[n] + dz: # water depth is +ve
-                sel[n_found] = n
-                n_found += 1
-        return sel[:n_found]
+        nc.create_attribute('total_num_particles_released',
+                            si.core_class_roles.particle_group_manager.info['particles_released'])
+        nc.create_attribute('particle_status_values_counted', str(self.params['status_list']))
+        nc.create_attribute('backtracking', int(si.settings.backtracking))
+        nc.close()
+        self.nc = None
 
-    @staticmethod
-    @njitOT
-    def _sel_near_seasurface(x, tide, dz, sel):
-        # put subset of those found back into start of sel array
-        n_found = 0
-        for n in sel:
-            if x[n, 2] >= tide[n] - dz:
-                sel[n_found] = n
-                n_found += 1
-        return sel[:n_found]
+    def save_state(self, si, state_dir):
+        basic_util.nopass(f'Restarting from saved state using "save_state" and "restart" methods not yet implemented for class {self.__class__.__name__}S')
 
-    def write_time_varying_stats(self, n_write, time):
-        # write nth step in file
-        fh = self.nc.file_handle
-        fh['time'][n_write] = time
-
-        release_groups = si.class_roles.release_groups
-
-        # write number released
-        num_released = np.zeros((len(release_groups),), dtype=np.int32)
-        for nrg, rg in enumerate(release_groups.values()):
-            num_released[nrg] = rg.info['number_released']
-
-        fh['num_released'][n_write, :] = num_released # for each release group so far
-        fh['num_released_total'][n_write] = num_released.sum() # total all release groups so far
-
-        fh['count'][n_write, ...] = self.count_time_slice[:, ...]
-        fh['count_all_selected_particles'][n_write, ...] = self.count_all_particles_time_slice[:, ...]
-        fh['count_all_alive_particles'][n_write, ...] = self.count_all_alive_particles[:, ...]
-
-        for key, item in self.sum_binned_part_prop.items():
-            self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
-
-    def info_to_write_at_end(self) : pass
+    def restart(self, state_info):
+        # code require to reload save state for this class
+        basic_util.nopass(f'Restarting from saved state using "save_state" and "restart" methods not yet implemented for class {self.__class__.__name__}S')
 
     def close(self):
 
-        nc = self.nc
-        # write total released in each release group
-        num_released=[]
-        for name, i in si.class_roles.release_groups.items():
-            num_released.append(i.info['number_released'])
-
         if self.params['write']:
-            self.info_to_write_at_end()
-            nc.write_a_new_variable('number_released_each_release_group', np.asarray(num_released,dtype=np.int64), ['release_group_dim'], description='Total number released in each release group')
-            nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
-            nc.write_global_attribute('particle_status_values_counted', str(self.params['status_list']))
-            nc.write_global_attribute('backtracking', int(si.settings.backtracking))
-            nc.close()
-        self.nc = None  # parallel pool cant pickle nc
+            self.close_file()
+
+    # add file variables
+    def add_time_variables_to_file(self,nc):
+
+        # stats time variables commute to all 	for progressive writing
+        nc.create_variable('time', ['time_dim'], np.float64,
+                           units='seconds since 1970-01-01 00:00:00',
+                           description='time in seconds since 1970/01/01 00:00')
+
+        # other output common to all types of stats
+        nc.create_variable('num_released_total', ['time_dim'], np.int32, description='total number released')
+
+        nc.create_variable('num_released', ['time_dim', 'release_group_dim'], np.int32,
+                           description='number released so far from each release group')
+
+    def add_grid_variables_to_file(self, nc):
+        dn = si.dim_names
+        stats_grid = self.grid
+
+        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
+        nc.write_variable('x', stats_grid['x'], [dim_names[1], dim_names[3]], description='Mid point of grid cell',
+                          units='m or deg')
+        nc.write_variable('y', stats_grid['y'], [dim_names[1], dim_names[2]],
+                          description='Mid point of grid cell', units='m or degrees',)
+
+        nc.write_variable('x_grid', stats_grid['x_grid'],dim_names[1:4]                        ,
+                          description='x for mid point of grid cell, full grid',  units='m or degrees')
+        nc.write_variable('y_grid', stats_grid['y_grid'], dim_names[1:4],
+                          description='y for mid point of grid cell, full grid', units='m or degrees')
+        nc.write_variable('cell_area', stats_grid['cell_area'], dim_names[1:4],
+                          description='Horizontal area of each cell', units='m^2')
+        nc.write_variable('grid_spacings', stats_grid['grid_spacings'], 'spacings_dim',
+                          description='x for mid point of grid cell, full grid', units='m or degrees')
+
+    def create_count_variables(self,dims:dict, mode:str):
+        # set up space for requested particle properties
+        # working count space, row are (y,x)
+        params = self.params
+        dim_sizes =[ val for val in dims.values()]
+
+        if mode=='time':
+            use_dims =dim_sizes[1:]
+            self.count_time_slice = np.full(use_dims, 0, np.int64)
+            self.count_all_alive_particles = np.full((use_dims[0],), 0, np.int64)
+
+        elif mode =='age':
+            use_dims = dim_sizes
+            self.count_age_bins = np.full(use_dims, 0, np.int64)
+            self.count_all_alive_particles = np.full(use_dims[:2], 0, np.int64)
+
+        if 'particle_property_list' in params:
+            for p in params['particle_property_list']:
+                self.sum_binned_part_prop[p] = np.full(use_dims, 0.)  # zero for  summing
+
+    def add_grid_params(self):
+        self.add_default_params({
+            'grid_size': PLC([100, 99], int, fixed_len=2, min=1, max=10 ** 5,
+                             doc_str='number of (rows, columns) in grid, where rows is y size, cols x size, values should be odd, so will be rounded up to next '),
+            'release_group_centered_grids': PVC(False, bool,
+                                                doc_str='Center grid on the release groups  mean horizontal location or center of release polygon. '),
+            'grid_center': PCC(None, single_cord=True, is3D=False,
+                               doc_str='center of the statistics grid as (x,y), must be given if not using  release_group_centered_grids',
+                               units='meters'),
+            'grid_span': PLC(None, float, doc_str='(width-x, height-y)  of the statistics grid',
+                             units='meters (dx,dy) or degrees (dlon, dlat) if geographic',
+                             is_required=True),
+            'role_output_file_tag': PVC('stats_gridded_time_2D', str),
+        })
+        self.info['type'] = 'gridded'
+

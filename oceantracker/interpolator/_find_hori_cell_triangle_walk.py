@@ -49,7 +49,7 @@ class FindHoriCellTriangleWalk(object):
                  #   adjacency=grid['adjacency_with_dry_edges']
                  )
         )
-        si.msg_logger.progress_marker('built barycentric-transform matrix', start_time=t0,tabs=2)
+        si.msg_logger.progress_marker('Built barycentric-transform matrix', start_time=t0,tabs=0)
 
         # classes need by this class
         crumbs = 'interpolator intitial_setup>'

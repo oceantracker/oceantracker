@@ -5,6 +5,7 @@ from oceantracker.definitions import docs_base_url
 import difflib
 from time import sleep
 import inspect
+import shutil
 
 class OTerror(Exception):
     def __init__(self, message='-no error message given',hint=None):
@@ -49,17 +50,21 @@ class MessageLogger(object ):
 
     def set_max_warnings(self, n:int): self.max_warnings = n
 
-    def set_up_files(self, run_output_dir, output_file_base, append=False):
-        # log file
+    def set_up_files(self, si):
+        # log file set up
+        log_file_name = si.run_info['output_file_base'] + '.txt'
+        self.log_file_name = path.join(si.run_info.run_output_dir, log_file_name)
 
-        log_file_name = output_file_base + '.txt'
-        self.log_file_name = path.join(run_output_dir, log_file_name)
-
-        self.log_file = open(self.log_file_name, 'w')
+        if si.settings.restart:
+            shutil.copyfile(si.restart_info['log_file'],self.log_file_name)
+            self.log_file = open(self.log_file_name, 'a')
+            self.msg('>>>> restarting log file')
+        else:
+            self.log_file = open(self.log_file_name, 'w')
 
         # kill any old error file
         error_file_name = 'error_warnings.err'
-        self.error_file_name = path.join(run_output_dir, error_file_name)
+        self.error_file_name = path.join(si.run_info.run_output_dir, error_file_name)
         if path.isfile(self.error_file_name ):
             remove(self.error_file_name)
 
@@ -111,13 +116,13 @@ class MessageLogger(object ):
 
         if caller is not None and (error or warning) :
             if hasattr(caller,'__class__'):
-                origin=  f'Class = {caller.__class__.__name__} '
+                origin=  f'Class = "{caller.__class__.__name__}" '
                 if hasattr(caller,'info'):
                     # add internal name if not None
                     origin += f'role="{caller.info["class_role"]}"' if 'class_role' in caller.info else ''
                     origin +=  ' ' if 'name' not in caller.params or caller.params["name"] is None else f', name="{caller.params["name"]}"'
                     origin += f', instance #[{caller.info["instanceID"]}]'
-                origin += f', class= {caller.__class__.__module__}.{caller.__class__.__name__} '
+                origin += f', class= "{caller.__class__.__module__}.{caller.__class__.__name__}"'
 
             else:
                 origin = caller.__name__
@@ -204,7 +209,7 @@ class MessageLogger(object ):
             f.write(str(e))
             f.write(tb)
 
-    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='', caller=None):
+    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='', caller=None, link=None):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
 
         known = list(possible_values)
@@ -235,6 +240,17 @@ class MessageLogger(object ):
             msg +=  f'{path.basename(l[1])}#{l[2]}-.{l[3]}()>\n\t\t'+ n*'\t'
         self.msg('Traceback > '+ msg)
         pass
+
+    def save_state(self,si,state_dir):
+        self.log_file.close()
+        # save log file
+        state_log = path.join(state_dir,'log_file.txt')
+        shutil.copyfile(path.join(si.run_info.run_output_dir,si.output_files['run_log']),
+                        state_log)
+
+        self.log_file = open(self.log_file_name, 'a')
+
+        return state_log
 
     def close(self):
         if self.log_file is not None:

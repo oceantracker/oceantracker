@@ -3,7 +3,6 @@
     "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
     "time_step": 900,
     "use_random_seed": true,
-    "NCDF_time_chunk": 1,
     "debug": true,
     "use_dispersion": false,
     "use_A_Z_profile": false,
@@ -26,6 +25,9 @@
             "radius": 1000,
             "release_interval": 1800,
             "pulse_size": 2,
+            "start": "2017-01-01T02:00:00",
+            "end": "2017-01-01T12:00:00",
+            "max_age": 10800,
             "class_name": "RadiusRelease",
             "name": "my_radius_release"
         },
@@ -41,7 +43,7 @@
                 ]
             ],
             "release_interval": 900,
-            "pulse_size": 1,
+            "pulse_size": 2,
             "class_name": "PointRelease",
             "name": "my_point_release"
         },
@@ -73,7 +75,7 @@
                 ]
             ],
             "release_interval": 900,
-            "pulse_size": 1,
+            "pulse_size": 2,
             "z_min": -2.0,
             "z_max": 0.5,
             "class_name": "PolygonRelease",
@@ -81,7 +83,7 @@
         },
         {
             "release_interval": 1800,
-            "pulse_size": 1,
+            "pulse_size": 2,
             "grid_center": [
                 1601000,
                 5484000

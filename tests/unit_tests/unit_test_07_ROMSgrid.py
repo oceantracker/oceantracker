@@ -52,7 +52,7 @@ def main(args):
                                              status_list=['moving'],  # only count the particles which are moving
                                              z_min=-10.,  # only count particles at locations above z=-2m
                                         )
-    ot.add_class('particle_statistics',name='my_poly_stats',
+    ot.add_class('particle_statistics',name='my_poly_stats_time',
                                              class_name='PolygonStats2D_timeBased',
                                              # the below are optional settings/parameters
                                              polygon_list=[dict(points=poly_points+.05)],  # number of east and north cells in the heat map
@@ -63,7 +63,7 @@ def main(args):
                                         )
     case_info_file = ot.run()
 
-    test_definitions.compare_reference_run(case_info_file, args)
+    test_definitions.compare_reference_run_tracks(case_info_file, args)
 
     test_definitions.show_track_plot(case_info_file, args)
 

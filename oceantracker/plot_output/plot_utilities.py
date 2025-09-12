@@ -131,17 +131,18 @@ def plot_dry_cells(track_data,show_dry_cells=True, nt=0):
     return pc, dry_cell_data
 
 
-def plot_release_points_and_polygons(d, release_groupID:int = None, ax = plt.gca(), color=[.3,.3,.3]):
+def plot_release_points_and_polygons(d, release_group_name:str = None, ax = plt.gca(), color=[.3,.3,.3]):
     # release_group is 1 based
     
-    if release_groupID is None : 
+    if release_group_name is None :
         # plot all release groups
-        sel = d['particle_release_groups']
+        rgs = d['particle_release_groups']
     else:
-        sel = [list(d['particle_release_groups'].values())[release_groupID]]
+        # dict of one named release group
+        rgs = {release_group_name:d['particle_release_groups'][release_group_name] }
 
     objs=[]
-    for name, rg in sel.items():
+    for name, rg in rgs.items():
 
         p = rg['points'][:,:2]
         if rg['release_type'] == 'polygon':

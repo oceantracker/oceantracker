@@ -33,10 +33,10 @@ def load_track_data(case_info_file_name, var_list=None, fraction_to_read= None, 
 
     case_info = read_case_info_file(case_info_file_name)
 
-    tracks = read_ncdf_output_files.read_particle_tracks_file(case_info['output_files']['tracks_writer'],
-                                                              file_dir=case_info['output_files']['run_output_dir'],
+    tracks = read_ncdf_output_files.merge_track_files(case_info['output_files']['tracks_writer'],
+                                                              dir=case_info['output_files']['run_output_dir'],
                                                               var_list=var_list,
-                                                              file_number=file_number, fraction_to_read=fraction_to_read)
+                                                              fraction_to_read=fraction_to_read)
 
     tracks['grid'] = load_grid(case_info_file_name,gridID=gridID)
 
@@ -48,7 +48,15 @@ def load_track_data(case_info_file_name, var_list=None, fraction_to_read= None, 
 
 def _extract_useful_info(case_info, d):
     # get release group info
-    if 'version_info' in case_info and 'major' in case_info['version_info'] and case_info['version_info']['major'] >= 0.5:
+    vi = case_info['version_info']
+    if 'revision' in vi:
+        # pre aug 2025
+        major, minor, micro = vi['major'],  vi['minor'], vi['revision']
+    else:
+        major, minor, micro, patch = vi['major'], vi['minor'], vi['micro'], vi['patch']
+
+    if (major > 0) or (major == 0 and minor >=5 and micro >= 2):
+    # if 'version_info' in case_info and 'major' in case_info['version_info'] and case_info['version_info']['major'] >= 0.5:
         prg_info = read_ncdf_output_files.read_release_groups_info(path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['release_groups']))
 
     else:

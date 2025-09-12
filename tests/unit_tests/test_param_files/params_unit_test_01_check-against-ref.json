@@ -3,14 +3,12 @@
     "root_output_dir": "C:\\Auck_work\\oceantracker_output\\unit_tests",
     "time_step": 1800,
     "use_random_seed": true,
-    "NCDF_time_chunk": 1,
     "debug": true,
     "use_dispersion": false,
     "screen_output_time_interval": 1800,
     "use_A_Z_profile": false,
     "regrid_z_to_uniform_sigma_levels": true,
     "particle_buffer_initial_size": 500,
-    "NUMBA_cache_code": true,
     "use_resuspension": false,
     "tracks_writer": {
         "update_interval": 3600,
@@ -79,7 +77,7 @@
         {
             "grid_size": [
                 120,
-                121
+                130
             ],
             "grid_span": [
                 10000,
@@ -94,17 +92,13 @@
             "z_min": -10.0,
             "start": "2017-01-01T02:30:00",
             "class_name": "GriddedStats2D_timeBased",
-            "name": "my_heatmap"
+            "name": "my_heatmap_time"
         },
         {
             "update_interval": 3600,
             "particle_property_list": [
+                "a_pollutant",
                 "water_depth"
-            ],
-            "z_min": -2,
-            "grid_size": [
-                120,
-                121
             ],
             "polygon_list": [
                 {
@@ -137,7 +131,7 @@
                 }
             ],
             "class_name": "PolygonStats2D_timeBased",
-            "name": "my_poly_stats"
+            "name": "my_poly_stats_time"
         }
     ]
 }

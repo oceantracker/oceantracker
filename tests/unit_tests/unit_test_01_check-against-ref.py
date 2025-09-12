@@ -1,9 +1,11 @@
 from oceantracker.main import OceanTracker
 
 import numpy as np
-from tests.unit_tests import test_definitions
+import test_definitions
 
-def main(args):
+def main(args=None):
+    args= test_definitions.check_args(args)
+
     ot = OceanTracker()
     ot.settings(**test_definitions.base_settings(__file__,args))
     ot.settings(time_step=1800,
@@ -12,7 +14,7 @@ def main(args):
                 use_A_Z_profile=False,
                 regrid_z_to_uniform_sigma_levels=True,
                 particle_buffer_initial_size= 500,
-                NUMBA_cache_code=True,
+                #NUMBA_cache_code=True,
                 use_resuspension=False,
 
                 )
@@ -39,16 +41,21 @@ def main(args):
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.ps1)
+    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
 
-    ot.add_class('particle_statistics', **test_definitions.poly_stats,   polygon_list=[dict(points=hm['polygon'])])
+    ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time,   polygon_list=[dict(points=hm['polygon'])])
 
-    case_info_file = ot.run()
+    if not args.norun:
+        case_info_file = ot.run()
+    else:
+        case_info_file = test_definitions.get_case_inf_name(ot.params)
+
+    test_definitions.compare_reference_run_tracks(case_info_file, args)
+    test_definitions.compare_reference_run_stats(case_info_file, args)
 
     tests=dict()
-    tracks = test_definitions.read_tracks(case_info_file)
-
-    test_definitions.compare_reference_run(case_info_file, args)
+    tracks = test_definitions.load_tracks(case_info_file)
+    tracks_ref = test_definitions.load_tracks(case_info_file, ref_case=True)
 
     tracks_ref = test_definitions.read_tracks(case_info_file, ref_case=True)
     # check z fractions are in range 0-1
@@ -122,4 +129,6 @@ def main(args):
     return  ot.params
 
 
+if __name__ == '__main__':
 
+    main()

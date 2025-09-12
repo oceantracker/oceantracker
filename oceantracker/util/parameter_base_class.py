@@ -43,7 +43,6 @@ class ParameterBaseClass(_RootParameterBaseClass):
                                   )
 
         self.partID_buffers={} # dict of int32 ID number buffers
-        self.shared_info = None
         self.schedulers ={}
 
 
@@ -130,7 +129,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
     def timed_update(self, n_time_step, time_sec, alive=None):
         t0 = perf_counter()
         if alive is None:
-            self.update(n_time_step, time_sec)
+            self.update(n_time_step, time_sec) # legacy code
         else:
             self.update(n_time_step, time_sec, alive)
 
@@ -169,6 +168,3 @@ class ParameterBaseClass(_RootParameterBaseClass):
         if level >= si.settings.screen_info_level:
             si.msg_logger.msg('info: ' + text,tabs=1)
 
-    def restart(self):
-        # code require to reload save state for this class
-        pass

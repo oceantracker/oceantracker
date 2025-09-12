@@ -18,3 +18,5 @@ venv
 /docs/_build/html/.buildinfo.bak
 *.code-workspace
 .pypirc
+dist/
+*.py[cod]

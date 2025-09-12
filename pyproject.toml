@@ -1,0 +1,142 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oceantracker"
+version = "0.5.2.0"
+description = "Fast offline Lagrangian particle tracking in the Ocean for structured and unstructured grids"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE.md"]
+authors = [
+    {name = "Ross Vennell", email = "ross.vennell@otago.ac.nz"},
+    {name = "Laurin Steidle", email = "laurin.steidle@cawthron.org.nz"}
+]
+maintainers = [
+    {name = "Laurin Steidle", email = "laurin.steidle@cawthron.org.nz"}
+]
+keywords = ["oceanography", "particle tracking", "lagrangian", "ocean modeling"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numba",
+    "numpy",
+    "netcdf4",
+    "xarray",
+    "scipy",
+    "pyproj",
+    "psutil",
+    "matplotlib",
+    "pyyaml",
+    "ffmpeg",
+    "ipykernel",
+    "requests",
+]
+
+[project.urls]
+Homepage = "https://oceantracker.github.io/oceantracker/"
+Documentation = "https://oceantracker.github.io/oceantracker/"
+Repository = "https://github.com/oceantracker/oceantracker"
+Issues = "https://github.com/oceantracker/oceantracker/issues"
+
+[project.optional-dependencies]
+dev = [
+    "build",
+    "twine",
+#     "pytest>=7.0",
+#     "pytest-cov",
+#     "black",
+#     "flake8",
+#     "mypy",
+#     "pre-commit",
+]
+# docs = [
+#     "sphinx>=4.0",
+#     "sphinx-rtd-theme",
+#     "nbsphinx",
+#     "pandoc",
+# ]
+# test = [
+#     "pytest>=7.0",
+#     "pytest-cov",
+#     "pytest-xdist",
+# ]
+
+[project.scripts]
+oceantracker = "oceantracker.run_ot_cmd_line:main"
+
+[tool.setuptools]
+packages = ["oceantracker"]
+
+[tool.setuptools.package-data]
+oceantracker = ["**/*.py", "**/*.json", "**/*.yaml", "**/*.yml"]
+
+[tool.setuptools.exclude-package-data]
+# "*" = ["tests*", "dev*", "docs*", "__pycache__*", "*.pyc"]
+"*" = ["__pycache__*", "*.pyc"]
+
+# Black configuration
+# [tool.black]
+# line-length = 88
+# target-version = ['py310', 'py311']
+# include = '\.pyi?$'
+# exclude = '''
+# /(
+#     \.eggs
+#   | \.git
+#   | \.hg
+#   | \.mypy_cache
+#   | \.tox
+#   | \.venv
+#   | _build
+#   | buck-out
+#   | build
+#   | dist
+# )/
+# '''
+
+# pytest configuration
+# [tool.pytest.ini_options]
+# minversion = "7.0"
+# addopts = "-ra -q --strict-markers --strict-config"
+# testpaths = [
+#     "tests",
+# ]
+# python_files = [
+#     "test_*.py",
+#     "*_test.py",
+# ]
+
+# Coverage configuration
+# [tool.coverage.run]
+# source = ["oceantracker"]
+# omit = [
+#     "*/tests/*",
+#     "*/dev/*",
+#     "*/docs/*",
+#     "*/__pycache__/*",
+# ]
+
+# [tool.coverage.report]
+# exclude_lines = [
+#     "pragma: no cover",
+#     "def __repr__",
+#     "if self.debug:",
+#     "if settings.DEBUG",
+#     "raise AssertionError",
+#     "raise NotImplementedError",
+#     "if 0:",
+#     "if __name__ == .__main__.:",
+# ]

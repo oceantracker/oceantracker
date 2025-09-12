@@ -1,13 +1,13 @@
 # modfiy aspects pof all isActive particles, ie moving and stranded
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 import numpy as np
-from oceantracker.resuspension.resuspension import Resuspension
+from oceantracker.resuspension._base_resuspension import _BaseResuspension
 from oceantracker.util.numba_util import njitOT, njitOTparallel
 from oceantracker.shared_info import  shared_info as si
 
 from numba import  njit
 
-class BasicResuspension(Resuspension):
+class BasicResuspension(_BaseResuspension):
     '''
     A very basic resupension, resuspend a distance of random walk, with variance equal to the constant vertical eddy viscosity
      '''
@@ -18,12 +18,14 @@ class BasicResuspension(Resuspension):
                                  'critical_friction_velocity': PVC(0.,float, min=0.),
                                  })
 
+    def add_required_classes_and_settings(self):
+        i = si.add_custom_field('friction_velocity', dict(write_interp_particle_prop_to_tracks_file=False),
+                                default_classID='field_friction_velocity')
     # is 3D test of parent
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(requires3D=True)
 
     def initial_setup(self,**kwargs): pass
-
 
     def update(self, nb, time, active):
         # do resupension

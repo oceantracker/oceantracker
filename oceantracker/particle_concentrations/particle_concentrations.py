@@ -34,9 +34,9 @@ class  ParticleConcentrations2D(_BaseTriangleProperties):
         super().set_up_output_file()
         # add 2D variables
         nc= self.nc
-        nc.create_a_variable('particle_count',['time_dim','triangle_dim'], self.particle_count.dtype, description='count of particles in each triangle at given time')
-        nc.create_a_variable('particle_concentration', ['time_dim', 'triangle_dim'], self.particle_concentration.dtype, description='concentration of particles in each triangle at given time in particles per meter cubed')
-        nc.create_a_variable('load_concentration', ['time_dim', 'triangle_dim'], self.load_concentration.dtype, description='concentration of  particle load decaying with age in each triangle at given time')
+        nc.create_variable('particle_count', ['time_dim', 'triangle_dim'], self.particle_count.dtype, description='count of particles in each triangle at given time')
+        nc.create_variable('particle_concentration', ['time_dim', 'triangle_dim'], self.particle_concentration.dtype, description='concentration of particles in each triangle at given time in particles per meter cubed')
+        nc.create_variable('load_concentration', ['time_dim', 'triangle_dim'], self.load_concentration.dtype, description='concentration of  particle load decaying with age in each triangle at given time')
 
     def write(self, time_sec):
 

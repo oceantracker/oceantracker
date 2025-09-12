@@ -1,10 +1,25 @@
+import sys
 from os import path
 
 import shutil
 import numpy as np
+from numba.core.types import Object
+
 from oceantracker import definitions
 
 from copy import deepcopy
+
+class dummy():pass
+def check_args(args):
+
+    if args is None:
+
+        args= dummy()
+        args.reference_case = False
+        args.plot=False
+        args.norun=False
+        args.variant = None
+    return args
 
 def base_settings(fn,args,label=None):
     s = path.split(fn)[-1].split('.')[0]
@@ -12,9 +27,9 @@ def base_settings(fn,args,label=None):
     if label is not None: s += f'_{label}'
     d =  dict(output_file_base=s,
             root_output_dir=path.join(definitions.default_output_dir, 'unit_tests'),
+            #root_output_dir=path.join('C:\oceantracker_output', 'unit_tests'),
             time_step=600.,  # 10 min time step
             use_random_seed = True,
-            NCDF_time_chunk=1,
             debug=True,
 
             )
@@ -109,14 +124,14 @@ rg_start_in_datetime1 = dict(name='start_in_datetime1',  # name used internal to
                              release_interval=3600,  # seconds between releasing particles
                              pulse_size=5)  # how many are released each interval
 
-rg_ploy1 = dict(name='my_polygon_release',  # name used internal to refer to this release
-         class_name='PolygonRelease',  # class to use
-         # (x,y) points making up a 2D polygon
-         points=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
-                 [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
-         # the below are optional settings/parameters
-         release_interval=3600, pulse_size=50,
-         z_min=-2., z_max=0.5)
+my_polygon_release = dict(name='my_polygon_release',  # name used internal to refer to this release
+                          class_name='PolygonRelease',  # class to use
+                          # (x,y) points making up a 2D polygon
+                          points=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
+                        [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
+                          # the below are optional settings/parameters
+                          release_interval=3600, pulse_size=50,
+                          )
 
 rg3= dict(name='my_grid_release',  # name used internal to refer to this release
         class_name='GridRelease',  # class to use
@@ -145,10 +160,10 @@ pp1= dict(name='a_pollutant',  # must have a user given name
          initial_value=1000,  # value of property when released
          decay_time_scale=7200.)
 
-ps1 = dict(name='my_heatmap',
+my_heat_map_time = dict(name='my_heatmap_time',
          class_name='GriddedStats2D_timeBased',
          # the below are optional settings/parameters
-         grid_size=[120, 121],  # number of east and north cells in the heat map
+         grid_size=[120, 130],  # number of rows, cols cells in the heat map
         grid_span = [10000,10000],
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
@@ -158,17 +173,38 @@ ps1 = dict(name='my_heatmap',
          z_min=-10.,  # only count particles at locations above z=-2m
          start='2017-01-01T02:30:00',
          )
+my_heat_map_age = dict(name='my_heatmap_age',
+         class_name='GriddedStats2D_ageBased',
+         # the below are optional settings/parameters
+         grid_size=[120, 130],  # number of east and north cells in the heat map
+        grid_span = [10000,10000],
+         release_group_centered_grids=True,  # center a grid around each release group
+         update_interval=7200,  # time interval in sec, between doing particle statists counts
+         particle_property_list=['a_pollutant','water_depth'],  # request a heat map for the decaying part. prop. added above
+         #status_list=[],  # only count the particles which are moving
+        age_bin_size= 24*3600,
+        max_age_to_bin=24*3600,
+        z_min=-10.,  # only count particles at locations above z=-2m
+         )
 
-poly_stats =dict(name='my_poly_stats',
+my_poly_stats_time =dict(name='my_poly_stats_time',
         class_name='PolygonStats2D_timeBased',
         update_interval= 3600,
-        particle_property_list=['water_depth'],
+        particle_property_list=['a_pollutant','water_depth'],
         #status_list=[],
-        z_min= -2,
-        grid_size= [120, 121])
+        )
+my_poly_stats_age = dict(class_name='PolygonStats2D_ageBased',
+                         name='my_poly_stats_age',
+                         max_age_to_bin=4*24*3600,
+                         update_interval=3600,
+                         particle_property_list=['a_pollutant', 'water_depth'],
+                         )
 
-poly_stats_age = deepcopy(poly_stats)
-poly_stats_age.update(class_name='PolygonStats2D_ageBased',name='my_poly_stats_age',max_age_to_bin=4*24*3600)
+my_resident_in_polygon =dict(name='my_resident_in_polygon',
+        class_name='ResidentInPolygon',
+        #status_list=[],
+        )
+
 
 LCS = dict(name='LSC test',
            class_name='dev_LagarangianStructuresFTLE2D',
@@ -177,44 +213,88 @@ ax = [1591000, 1601500, 5478500, 5491000]
 
 
 
-def read_tracks(case_info_file,fraction_to_read=None, ref_case=False):
+def load_tracks(case_info_file, ref_case=False,fraction_to_read=None):
     from oceantracker.read_output.python import load_output_files
 
     fn = case_info_file if not ref_case else case_info_file.replace('unit_tests', 'unit_test_reference_cases')
 
     return load_output_files.load_track_data(fn, fraction_to_read=fraction_to_read)
 
-def compare_reference_run(case_info_file, args):
+def read_tracks(case_info_file, ref_case=False,fraction_to_read=None):
     from oceantracker.read_output.python import load_output_files
+    from oceantracker.read_output.python.read_ncdf_output_files import read_tracks_file, merge_track_files
+
+    case_info_file = case_info_file if not ref_case else case_info_file.replace('unit_tests', 'unit_test_reference_cases')
+    case_info = load_output_files.read_case_info_file(case_info_file)
+    o = case_info['output_files']
+
+    fn = path.join(o['run_output_dir'],o['tracks_writer'][0])
+    #d = read_tracks_file(fn,fraction_to_read=fraction_to_read)
+    d = merge_track_files(o['tracks_writer'],dir=o['run_output_dir'], fraction_to_read=fraction_to_read)
+    return d
+def get_case_inf_name(params):
+    return path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base']+'_caseInfo.json')
+def compare_reference_run_tracks(case_info_file, args):
+
 
     if case_info_file is None : return
+
 
     reference_case_info_file = case_info_file.replace('unit_tests', 'unit_test_reference_cases')
     if args.reference_case:
         # rewrite reference case output
         shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)
 
-    tracks = read_tracks(case_info_file)
-    tracks_ref = read_tracks(case_info_file, ref_case=True)
+    tracks = load_tracks(case_info_file)
+    tracks_ref = load_tracks(case_info_file, ref_case=True)
     dx = np.abs(tracks['x'] - tracks_ref['x'])
 
     # print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
 
     print(f'(x,y,z) differences from reference run: "{path.basename(case_info_file).split(".")[0]}"' )
-    print(' min  ', np.nanmin(np.nanmin(dx, axis=0), axis=0))
-    print(' mean ', np.nanmean(np.nanmean(dx, axis=0), axis=0))
-    print(' max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
+    print('\t min  ', np.nanmin(np.nanmin(dx, axis=0), axis=0))
+    print('\t mean ', np.nanmean(np.nanmean(dx, axis=0), axis=0))
+    print('\t max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
+
+    dt = tracks['time'] - tracks_ref['time']
+    print('times, \t  min/max diff ', np.nanmin(dt), np.nanmax(dt))
+    if False:
+        from matplotlib import  pyplot as plt
+        v='status'
+        plt.plot(np.arange(dx.shape[0]),tracks[v]-tracks_ref[v] )
+        plt.show(block=True)
+
+def compare_reference_run_stats(case_info_file, args):
+    from oceantracker.read_output.python import load_output_files
+    case_info = load_output_files.read_case_info_file(case_info_file)
+
+    reference_case_info_file = case_info_file.replace('unit_tests', 'unit_test_reference_cases')
+    if args.reference_case:
+        # rewrite reference case output
+        shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)
+
 
     # check stats
-    for name in ['my_heatmap','my_poly_stats']:
+    stats_params=case_info['working_params']['class_roles']['particle_statistics']
+    for name, params in stats_params.items():
+        if name not in case_info['output_files']['particle_statistics']: continue
         stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
-        dc = stats['count'] - stats_ref['count']
-        print(' stats  name ',  name,'counts', stats_ref['count'].sum(), stats['count'].sum(),'max diff counts-ref run counts =',np.nanmax(np.abs(dc)))
 
-    # check times
-    dt = np.abs(tracks['time'] - tracks_ref['time'])
-    print('max time difference, sec', np.max(dt))
+
+        print(f'Stats  compare ref: "{name}"')
+        print('\t counts, ref/new', stats_ref['count'].sum(), stats['count'].sum(),
+              '\t\t\t max diff counts-ref run counts =',np.max(np.abs(stats['count'] - stats_ref['count'])))
+        print('\t count all alive, ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
+             'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
+                      '\t max diff counts-ref run counts =',np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])))
+        if 'particle_property_list' in params:
+            for prop_name in params['particle_property_list']:
+                if prop_name not in stats_ref: continue
+                dc = np.abs(stats[prop_name] - stats_ref[prop_name])
+                print(f'\t Property  "{prop_name}"', 'max mag.',
+                      np.nanmax(np.abs(stats[prop_name])), np.nanmax(np.abs(stats_ref[prop_name])), ', max diff =', np.max(dc[np.isfinite(dc)]))
+
     pass
 def show_track_plot(case_info_file, args,colour_with=None):
     from oceantracker.plot_output import plot_tracks
@@ -223,7 +303,7 @@ def show_track_plot(case_info_file, args,colour_with=None):
         print('>>> Run failed no unit test plot')
         return
 
-    tracks= read_tracks(case_info_file)
+    tracks= load_tracks(case_info_file)
 
     movie_file1= path.join(image_dir, 'decay_movie_frame.mp4') if args.save_plots else None
 
@@ -237,5 +317,5 @@ def plot_vert_section(case_info_file, args,fraction_to_read):
     if not args.plot: return
 
     from oceantracker.plot_output.plot_tracks import plot_path_in_vertical_section
-    tracks = read_tracks(case_info_file,fraction_to_read=fraction_to_read)
+    tracks = load_tracks(case_info_file,fraction_to_read=fraction_to_read)
     plot_path_in_vertical_section(tracks, particleID=np.arange(0,tracks['x'].shape[1],10))

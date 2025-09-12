@@ -77,8 +77,7 @@ class MyEncoder(json.JSONEncoder):
 
             elif np.issubdtype(obj, np.integer):
                 # make single numpy int values
-                return str(obj)
-
+                return int(obj)
 
             elif type(obj) == np.timedelta64:
                 return str(obj.astype(timedelta)) # timedelta has better formating

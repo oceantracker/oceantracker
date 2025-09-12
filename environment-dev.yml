@@ -1,0 +1,29 @@
+name: oceantracker-test
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python>=3.10
+- numba
+- numpy
+- netcdf4
+- xarray
+- scipy
+- pyproj
+- psutil
+- matplotlib
+- pyyaml
+- ffmpeg
+- ipykernel
+- requests
+- build
+- twine
+- jupyter
+- jupyterlab
+- ipykernel
+- ipywidgets
+- git
+- make
+- pip
+- pip:
+  - -e .[dev]

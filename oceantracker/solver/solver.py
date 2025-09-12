@@ -1,6 +1,7 @@
 from time import perf_counter
 import psutil
 from os import  path, mkdir
+
 import numpy as np
 from oceantracker.util import time_util, json_util, ncdf_util, save_state_util
 from datetime import datetime
@@ -51,70 +52,53 @@ class Solver(ParameterBaseClass):
         nt_write_time_step_to_screen = max(1, int(si.settings.screen_output_time_interval/si.settings.time_step))
 
         t0_model = perf_counter()
-        ri.free_wheeling = False
         model_times = si.run_info.times
         ml.hori_line()
         # initial buffer fill
-        tr0=perf_counter()
+        tr0 = perf_counter()
         fgm.update_readers(model_times[0])
-        si.block_timer('Read hindcast', tr0)
+        si.block_timer('Reading hindcast', tr0)
+
 
         # run forwards through model time variable, which for backtracking are backwards in time
-        t2 = model_times[0]
-
         ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)}')
-        ml.msg(f', duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}, time step=  {time_util.seconds_to_pretty_duration_string(si.settings.time_step)} ',
+        ml.msg(f'duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}, time step=  {time_util.seconds_to_pretty_duration_string(si.settings.time_step)} ',
                            tabs =2)
 
-
         si.msg_logger.set_screen_tag('S')
+
+        # initial conditions
+        t0_step = perf_counter()
+        nt1 = 0
+        t1 =model_times[0]
+        if si.settings.restart:
+            self._load_saved_state()
+        else:
+            new_particle_indices = pgm.release_particles(nt1,t1 )
+            self._pre_step_bookkeeping(nt1, t1, new_particle_indices)
+
+        ri.time_steps_completed = nt1
+        num_alive = pgm.status_counts_and_kill_old_particles(t1)
+        self._screen_output(nt1, t1, t0_model, perf_counter() - t0_step)
+
         if si.settings.restart_interval is not None:
             # dev- schedule restart saves at given interval after start of run
             self.add_scheduler('save_state',
-                               start=si.settings.restart_interval + si.run_info.start_time,
+                               start=si.run_info.start_time,
                                interval=si.settings.restart_interval )
-        if si.settings.restart:
-            self._load_saved_state()
 
         for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
 
             t0_step = perf_counter()
             self.start_update_timer()
-            time_sec = model_times[n_time_step]
+            t1 = model_times[n_time_step]
             # record info for any error dump
-            info['time_sec'] = time_sec
+            info['time_sec'] = t1
             info['current_time_step'] = n_time_step
 
-            # release particles
-            new_particleIDs = pgm.release_particles(n_time_step, time_sec)
-
-            # count particles of each status and count number >= stationary status
-            num_alive = pgm.status_counts_and_kill_old_particles(time_sec)
-
-            if num_alive == 0:
-                # freewheel until more are released or end of run/hindcast, alive count done at end of loop
-                if not ri.free_wheeling:
-                    # at start note
-                    ml.msg(f'No particles alive at {time_util.seconds_to_pretty_str(time_sec)}, skipping time steps until more are released', note=True)
-                ri.free_wheeling = True
-                continue
-
-            ri.free_wheeling = False  # has ended
-
-            # warn of  high physical memory use
-            if psutil.virtual_memory().percent > 85:
-                ml.msg(' More than 85% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
-                       hint=f'For parallel runs,reduce "processors" setting below max. available (={psutil.cpu_count(logical=False)} cores) \n to have fewer simultaneous cases and/or reduce memory use with smaller reader time_buffer_size ')
-
             tr0 = perf_counter()
-            fgm.update_readers(time_sec)
+            fgm.update_readers(t1)
             si.block_timer('Reading hindcast', tr0)
-
-            # do stats etc updates and write tracks
-            self._pre_step_bookkeeping(n_time_step, time_sec, new_particleIDs)
-
-            if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
-                self.save_state_for_restart(n_time_step, time_sec)
 
             # now modfy location after writing of moving particles
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
@@ -123,45 +107,56 @@ class Solver(ParameterBaseClass):
             # update particle velocity modification prior to integration
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
             for name, i in si.class_roles.velocity_modifiers.items():
-                i.timed_update(n_time_step, time_sec, is_moving)
-
+                i.timed_update(n_time_step, t1, is_moving)
 
             # dispersion is done by random walk
             # by adding to velocity modifier prior to integration step
             if si.settings['use_dispersion']:
                 i = si.core_class_roles.dispersion
-                i.timed_update(n_time_step, time_sec, is_moving)
-
-            # print progress to screen
-            t_step = perf_counter() - t0_step
-            if n_time_step % nt_write_time_step_to_screen == 0:
-                self._screen_output(ri.time_steps_completed, time_sec, t0_model, t_step)
+                i.timed_update(n_time_step, t1, is_moving)
 
             #  Main integration step
             #--------------------------------------
-            self.do_time_step(time_sec, is_moving)
+            self.do_time_step(t1, is_moving)
             #--------------------------------------
+
+            # release particles etc at next time step
+            nt2 = n_time_step + 1
+            t2 = model_times[nt2]
+
+            new_particle_indices = pgm.release_particles(nt2, t2)
+
+            # do stats etc updates and write tracks at new time step
+            self._pre_step_bookkeeping(nt2, t2, new_particle_indices)
+
+            if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
+                self._save_state_for_restart(nt2, t2)
 
             # cull dead particles
             # must be done after last use of "is_moving" in current time step (which refers to permanent  ID buffer which are not culled)
             pgm.remove_dead_particles_from_memory()
 
-            t2 = time_sec + si.settings.time_step * ri.model_direction
+            # count particles of each status and count number >= stationary status
+            num_alive = pgm.status_counts_and_kill_old_particles(t2)
+
+            ri.time_steps_completed += 1
+            # print progress to screen
+            if n_time_step % nt_write_time_step_to_screen == 0:
+                self._screen_output(nt2, t2, t0_model, perf_counter() - t0_step)
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
-            ri.time_steps_completed += 1
             si.block_timer('Time stepping',t0_step)
 
             self.stop_update_timer()
+
+            # warn of  high physical memory use
+            if psutil.virtual_memory().percent > 95:
+                ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
+                       hint=f'Reduce memory used by hindcast with smaller reader param. "time_buffer_size"')
+
             if abs(t2 - ri.start_time) > ri.duration: break
-
-        #raise Exception('debug -error handing check')
-
-        # write out props etc at last step
-
-        if n_time_step > 0: # if more than on set completed
-            self._pre_step_bookkeeping(ri.time_steps_completed, t2) # update and record stuff from last step
-            self._screen_output(ri.time_steps_completed, t2, t0_model, perf_counter() - t0_step)
+            if si.settings.throw_debug_error == 1 and nt2 >= int(0.2*model_times.size):
+                raise(Exception(f'Restart testing, throwing deliberate error at {time_util.seconds_to_isostr(t1)}'))
 
         ri.end_time = t2
         ri.model_end_date = t2.astype('datetime64[s]')
@@ -170,7 +165,8 @@ class Solver(ParameterBaseClass):
         ri.computation_ended = datetime.now()
         ri.computation_duration = datetime.now() -computation_started
 
-    def _pre_step_bookkeeping(self, n_time_step,time_sec, new_particleIDs=np.full((0,),0,dtype=np.int32)):
+    def _pre_step_bookkeeping(self, n_time_step,time_sec,
+                              new_particle_indices=np.full((0,),0,dtype=np.int32)):
         part_prop = si.class_roles.particle_properties
         pgm = si.core_class_roles.particle_group_manager
         fgm = si.core_class_roles.field_group_manager
@@ -189,7 +185,6 @@ class Solver(ParameterBaseClass):
 
         fgm.update_dry_cell_values()
 
-
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
 
         # setup_interp_time_step, cell etc
@@ -201,7 +196,6 @@ class Solver(ParameterBaseClass):
         fgm.update_tidal_stranding_status(time_sec, alive)
 
         # update writable class lists and stats at current time step now props are up to date
-
         self._update_stats(n_time_step, time_sec, alive)
         self._update_concentrations(n_time_step, time_sec)
         self._update_events(n_time_step, time_sec)
@@ -212,17 +206,17 @@ class Solver(ParameterBaseClass):
 
         # write tracks
         if si.settings.write_tracks:
-            t0_write = perf_counter()
             tracks_writer = si.core_class_roles.tracks_writer
+            tracks_writer.start_update_timer()
             tracks_writer.open_file_if_needed()
 
-            if new_particleIDs.size > 0:
-                tracks_writer.write_all_non_time_varing_part_properties(new_particleIDs)  # these must be written on release, to work in compact mode
+            if new_particle_indices.size > 0:
+                tracks_writer.write_all_non_time_varing_part_properties(new_particle_indices)  # these must be written on release, to work in compact mode
 
             # write time varying track data to file if scheduled
             if tracks_writer.schedulers['write_scheduler'].do_task(n_time_step):
                 tracks_writer.write_all_time_varying_prop_and_data()
-
+            tracks_writer.stop_update_timer()
 
         # resuspension is a core trajectory modifier, upated after resupension
         # so those on bottom can be recorded
@@ -237,11 +231,11 @@ class Solver(ParameterBaseClass):
         fgm = si.core_class_roles.field_group_manager
         part_prop = si.class_roles.particle_properties
 
-        # used  copy particle operation directly to save overhead cost
-        particle_operations_util.copy(part_prop['x_last_good'].data, part_prop['x'].data, is_moving)
-        particle_operations_util.copy(part_prop['n_cell_last_good'].data, part_prop['n_cell'].data, is_moving)
-        particle_operations_util.copy(part_prop['status_last_good'].data, part_prop['status'].data, is_moving)
-        particle_operations_util.copy(part_prop['bc_coords_last_good'].data, part_prop['bc_coords'].data, is_moving)
+        # record las t good values og key prop
+        part_prop['x_last_good'].copy('x', is_moving)
+        part_prop['n_cell_last_good'].copy('n_cell', is_moving)
+        part_prop['status_last_good'].copy('status', is_moving)
+        part_prop['bc_coords_last_good'].copy('bc_coords', is_moving)
 
         # do time step
         dt = si.settings.time_step*si.run_info.model_direction
@@ -365,7 +359,8 @@ class Solver(ParameterBaseClass):
         # update and write stats
         t0 = perf_counter()
         for name, i in si.class_roles.particle_statistics.items():
-            if i.schedulers['count_scheduler'].do_task(n_time_step):
+            if i.schedulers['count_scheduler'].do_task(n_time_step) and i.params['write']:
+                i.open_file_if_needed()
                 i.timed_update(n_time_step, time_sec, alive)
 
         si.block_timer('Update statistics', t0)
@@ -392,9 +387,11 @@ class Solver(ParameterBaseClass):
         pass
 
 
-    def save_state_for_restart(self, n_time_step, time_sec):
+    def _save_state_for_restart(self, n_time_step, time_sec):
 
-        si.msg_logger.msg('save_state_for_restart: Restarting is under development and does not yet work!!!', warning=True)
+        si.msg_logger.msg(f'save_state_for_restart at: {time_util.seconds_to_isostr(time_sec)}'
+                          +f', released  {si.core_class_roles.particle_group_manager.info["particles_released"]} so far',
+                          hint='Restarting is under development and does not yet work!!!')
 
         # close time varying output files, eg tracks and stats files first!
         if si.settings.write_tracks:
@@ -405,32 +402,48 @@ class Solver(ParameterBaseClass):
                      date = time_util.seconds_to_isostr(time_sec),
                      state_dir=state_dir,
                      run_output_dir= si.run_info.run_output_dir,
-                     class_info_file=path.join(state_dir, 'class_info.json'),
+                     settings= si.settings.asdict(),
                      part_prop_file =path.join(state_dir, 'particle_properties.nc'),
                     )
+
+        # save class info
+        state['class_info'] = save_state_util.get_class_info(si)
+
         if not path.isdir(state_dir):
             mkdir(state_dir)
 
         # save particle properties
-        save_state_util.save_part_prop(state['part_prop_file'], si, n_time_step, time_sec)
+        save_state_util.save_part_prop_state(state['part_prop_file'], si, n_time_step, time_sec)
 
-        # save class info
-        save_state_util.save_class_info(state['class_info_file'], si, n_time_step, time_sec)
+        state['stats'] = save_state_util.save_stats_state(si, n_time_step, time_sec)
+
+
+        state['log_file'] = si.msg_logger.save_state(si,state_dir)
 
         # write state json for restarting
         json_util.write_JSON(path.join(state_dir, 'state_info.json'),state)
 
     def _load_saved_state(self):
-        ri = si.restart_info
+
+        rsi = si.restart_info
+        class_info = rsi['class_info']
 
         # load particle properties
-        nc = ncdf_util.NetCDFhandler(ri['part_prop_file'])
+        nc = ncdf_util.NetCDFhandler(rsi['part_prop_file'])
         num_part=nc.var_shape('water_velocity')[0]
 
         for name, i in si.class_roles.particle_properties.items():
-            i.data = nc.read_a_variable(name)  # rely on particle buffer expansion
+            i.data = nc.read_variable(name)  # rely on particle buffer expansion
         si.run_info.particles_in_buffer = num_part
-        pass
+        si.core_class_roles.particle_group_manager.info['current_particle_buffer_size'] = num_part
+        nc.close()
 
+        # restore settings
+        #for name,val  in rsi['settings'].items(): si.settings[name] = val
+        si.settings.throw_debug_error = 0 # dont do again
+
+        # reinstate tracks writer state
         if si.settings.write_tracks:
-            si.core_class_roles.tracks_writer.info = ri['core_class_info']['tracks_writer']
+            si.core_class_roles.tracks_writer.info = class_info['core_class_roles']['tracks_writer']
+
+        pass

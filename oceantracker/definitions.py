@@ -1,30 +1,40 @@
 # basic definitions
 # to avoid circular imports definitions.py file cannot import any oceantracker modules
+import oceantracker
 
 package_fancy_name= 'OceanTracker'
 
-from os import path
+from os import path, sep
 import subprocess, sys
 from dataclasses import  dataclass, asdict
 
-version= dict(major= 0.5,minor=2, revision  = 50, date = '2025-04-14', parameter_ver=0.5)
-version['str'] = f"{version['major']:.2f}.{version['minor']:02d}.{version['revision']:04d}-{version['date']}"
+version= dict()
+v = version
+v['oceantracker_version'] = oceantracker.__version__
+v['major'],v['minor'],v['micro'],v['patch'] = [int(v) for v in v['oceantracker_version'].split('.')]
 
 try:
-    version['git_revision'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
+    version['git_commit_hash'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
 except:
-    version['git_revision'] = 'unknown'
+    version['git_commit_hash'] = 'unknown'
+try:
+    version['date'] = subprocess.check_output(['git', 'log', '-1', '--format=%cd'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
+except:
+    version['date'] = 'unknown'
 
-version.update( python_version = sys.version,python_major_version= sys.version_info.major,
-                python_minor_version = sys.version_info.minor, python_micro_version= sys.version_info.micro,)
+version.update(
+    python_version = sys.version,
+    python_major_version= sys.version_info.major,
+    python_minor_version = sys.version_info.minor, 
+    python_micro_version= sys.version_info.micro,
+    )
 
 
-max_timedelta_in_seconds = 1000*365*24*3600
 
 docs_base_url= 'https://oceantracker.github.io/oceantracker/_build/html/'
 package_dir = path.dirname(__file__)
 ot_root_dir = path.dirname(package_dir)
-default_output_dir = path.join(path.dirname(path.dirname(package_dir)),'oceantracker_output')
+default_output_dir = path.join(path.dirname(ot_root_dir),'oceantracker_output')
 
 #todo automate build of known readers list
 known_readers = dict(
@@ -118,12 +128,23 @@ class _EdgeTypes(_AttribDict):
     open_boundary: int = -2
 
 class _DimensionNames(_AttribDict):
-    # used to standardise output dimension names
+    # used to standardise netcdf output dimension names
+    # sizes set on file setupwith create_dimension
     time: str = 'time_dim'
     particle: str  = 'particle_dim'
     vector2D: str  = 'vector2D'
     vector3D: str = 'vector3D'
     triangle: str = 'triangle_dim'
+    age: str = 'age_dim'
+    grid_row_y: str = 'row_y_dim'
+    grid_col_x: str = 'col_x_dim'
+    z: str = 'z_dim'
+    node  = 'node_dim'
+    cell = 'cell_dim'
+    release_group= 'release_group_dim'
+    polygons= 'polygon_dim'
+
+
 
 cell_search_status_flags = _CellSearchStatusFlags()
 

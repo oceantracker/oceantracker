@@ -40,7 +40,8 @@ class _BaseWriter(ParameterBaseClass):
 
         self.nc = None
 
-    def initial_setup(self):pass
+    def initial_setup(self):
+        pass
 
     def final_setup(self):
         params = self.params
@@ -70,8 +71,15 @@ class _BaseWriter(ParameterBaseClass):
 
         self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, info['output_file'][-1]), 'w')
         nc = self.nc
-        nc.write_global_attribute('file_created', datetime.now().isoformat())
+        nc.create_attribute('file_created', datetime.now().isoformat())
         self.setup_file_vars(nc)
+        # write non-time varing prop of those currently alive
+        sel = self._select_part_to_write()
+        part_prop = si.class_roles.particle_properties
+        info['first_ID_in_file'] = part_prop['ID'].get_values(0)
+        nc.create_attribute('first_ID_in_file', info['first_ID_in_file'])
+        self.write_all_non_time_varing_part_properties(sel)
+        
         pass
 
     def setup_file_vars(self, nc): basic_util.nopass('write muse have setup_file_vars method')
@@ -82,12 +90,17 @@ class _BaseWriter(ParameterBaseClass):
         #self.estimate_open_file_size()
         pass
 
-
+    def _select_part_to_write(self):
+        part_prop = si.class_roles.particle_properties
+        alive = part_prop['status'].compare_all_to_a_value('gt', si.particle_status_flags.dead,
+                                                           out=self.get_partID_buffer('B1'))
+        return alive
     def _close_file(self):
         nc = self.nc
+        if nc is None: return
         # write properties only written at end
-        nc.write_global_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
-        nc.write_global_attribute('time_steps_written', self.info['time_steps_written_to_current_file'])
+        nc.create_attribute('total_num_particles_released', si.core_class_roles.particle_group_manager.info['particles_released'])
+        nc.create_attribute('time_steps_written', self.info['time_steps_written_to_current_file'])
         nc.close()
 
         self.nc = None

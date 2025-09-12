@@ -1,0 +1,21 @@
+name: oceantracker
+channels:
+- conda-forge
+- defaults
+dependencies:
+- python>=3.10
+- numba
+- numpy
+- netcdf4
+- xarray
+- scipy
+- pyproj
+- psutil
+- matplotlib
+- pyyaml
+- ffmpeg
+- ipykernel
+- requests
+- pip
+- pip:
+  - -e .

@@ -35,7 +35,7 @@ def main(args):
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.ps1)
+    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
 
     ot.add_class('dispersion', A_H= .2, A_V= 0.001)
     ot.add_class('resuspension', critical_friction_velocity=0.005)

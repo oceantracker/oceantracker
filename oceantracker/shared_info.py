@@ -8,6 +8,8 @@ from oceantracker.util.message_logger import  MessageLogger
 
 from time import  perf_counter
 
+large_float = 1.0e32
+
 # useful utility classes to enable auto complete
 class _Object(object):  pass
 
@@ -36,7 +38,7 @@ class _DefaultSettings(definitions._AttribDict):
                 #'write_output_files =     PVC(True,  bool, doc_str='Set to False if no output files are to be written, eg. for output sent to web' )
     write_dry_cell_flag = PVC(True, bool,
                 doc_str='Write dry cell flag to all cells when writing particle tracks, which can be used to show dry cells on plots,may create large grid file, currently cannot be used with nested grids ' )
-    max_run_duration = PVC(definitions.max_timedelta_in_seconds, float,min=.00001,units='sec',
+    max_run_duration = PVC(large_float, float,min=.00001,units='sec',
                            doc_str='Useful in testing setup with shorter runs, as normally run duration is determined from release groups. This  limits the maximum duration in seconds of model runs.' )  # limit all cases to this duration
     max_particles = PVC(10**10, int, min=1, doc_str='Maximum number of particles to release, useful to restrict if splitting particles' )  # limit all cases to this number
 
@@ -70,15 +72,13 @@ class _DefaultSettings(definitions._AttribDict):
                 doc_str='Allow particles to resuspend')
     processors= PVC(None, int, min=1,
                  doc_str='Maximum number of threads to use in parallelization, default = number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')
-    NCDF_time_chunk = PVC(24, int, min=1,expert=True, doc_str='Used when writing time series to netcdf output, is number of time steps per time chunk in the netcdf file')
+
     NCDF_compression_level = PVC(0, int, min=0,max =9, expert=True,
-                          doc_str='Netcdf compression of output variables, reduces output file sixe, but slows code ')
+                          doc_str='Netcdf compression of output variables, reduces output file size, but slows code ')
     particle_buffer_initial_size = PVC(10_000_000, int, min=1, expert=True,
                    doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive'
                                     )
-    NCDF_particle_chunk =  PVC(None, int, min=1,  expert=True,
-                   doc_str='Chunk size for particle variable Net CDF output files, default is estimated max. particles alive',
-                                    )
+
         #  #'loops_over_hindcast =  PVC(0, int, min=0 )  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
         # profiler = PVC('oceantracker', str, possible_values=available_profile_types,
         #                 doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules ' )
@@ -87,6 +87,10 @@ class _DefaultSettings(definitions._AttribDict):
                            doc_str='Save the particle tracking state at the interval to allow restarting run', units='sec',  expert=True)
     restart = PVC(False, bool, doc_str='Restart from a saved state, requires prior run setting restart_interval',  expert=True)
     min_dead_to_remove = PVC(100_000, int, doc_str='The minimum number of dead particles before they are removed from buffer', expert=True)
+    throw_debug_error = PVC(0, int,min =0,
+                             doc_str='Throw desigated error, eg =1 is mid run error to test restart',
+                             expert=True)
+
 
 # blocks that make up parts of shared info
 class _ClassRoles(definitions._AttribDict):
@@ -127,7 +131,6 @@ class _RunInfo(definitions._AttribDict):
     backtracking =None
     vector_components = None
     model_direction = None
-    free_wheeling = None
     start_time = None
     end_time = None
     current_model_time = None
@@ -145,10 +148,14 @@ class _RunInfo(definitions._AttribDict):
     has_bottom_stress = None
     particle_counts = {}
     particles_in_buffer = 0
+    cumulative_number_released = 0
+    forecasted_number_alive = 0
+    forecasted_max_number_alive = 0
+
 
 class _UseFullInfo(definitions._AttribDict):
     # default reader classes used by auto-detection of file type
-    large_float = 1.0E50
+    large_float = large_float
 
 # Shared class, build using the above
 #------------------------------------------------------------
@@ -174,7 +181,7 @@ class _SharedInfoClass():
     msg_logger = MessageLogger()
     block_timers={}
     class_importer = class_importer_util.ClassImporter(msg_logger)
-
+    restart_info = None
     info = _UseFullInfo
     dim_names = definitions._DimensionNames()
 

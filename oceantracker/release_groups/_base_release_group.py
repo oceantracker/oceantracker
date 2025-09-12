@@ -231,7 +231,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         if n_used == 0:  # check number # points inside
             si.msg_logger.msg(f'No points are inside domain for group "{self.params["name"]}" ',
                               hint='points not in grids coord. system?, or if geographic, not in (lon,lat) order',
-                              error=True, caller=self)
+                              warning=True, caller=self)
 
         if warn_some_outside and n_used < n_given:
             si.msg_logger.msg(f'Discarded {n_given-n_used} points of {n_given}  outside domain for group "{self.params["name"]}",  ',

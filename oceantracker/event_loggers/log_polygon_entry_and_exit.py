@@ -42,8 +42,6 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
         self.set_up_output_file(['event_polygon'] )
 
     def update(self,n_time_step, time_sec):
-        self.start_update_timer()
-
         part_prop = si.class_roles.particle_properties
         event_polygon = part_prop['event_polygon']
         current_polygon_for_event_logging = part_prop['current_polygon_for_event_logging']
@@ -61,5 +59,3 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
 
         # now updates written change polygon ID to no polygon for those exiting
         event_polygon.set_values(-1, IDs_event_ended)
-
-        self.stop_update_timer()

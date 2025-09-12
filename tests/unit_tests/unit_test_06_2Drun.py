@@ -29,14 +29,14 @@ def main(args):
     ot.add_class('particle_properties',name='water_speed', class_name='VectorMagnitude2D',vector_part_prop='water_velocity')
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.ps1)
+    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
 
-    ot.add_class('particle_statistics', **test_definitions.poly_stats,
+    ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time,
                  polygon_list=[dict(points=hm['polygon'])])
 
     case_info_file = ot.run()
 
-    test_definitions.compare_reference_run(case_info_file, args)
+    test_definitions.compare_reference_run_tracks(case_info_file, args)
 
 
 
