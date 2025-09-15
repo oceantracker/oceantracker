@@ -48,15 +48,7 @@ def load_track_data(case_info_file_name, var_list=None, fraction_to_read= None, 
 
 def _extract_useful_info(case_info, d):
     # get release group info
-    vi = case_info['version_info']
-    if 'revision' in vi:
-        # pre aug 2025
-        major, minor, micro = vi['major'],  vi['minor'], vi['revision']
-    else:
-        major, minor, micro, patch = vi['major'], vi['minor'], vi['micro'], vi['patch']
-
-    if (major > 0) or (major == 0 and minor >=5 and micro >= 2):
-    # if 'version_info' in case_info and 'major' in case_info['version_info'] and case_info['version_info']['major'] >= 0.5:
+    if 'run_output_dir' in case_info['output_files']:
         prg_info = read_ncdf_output_files.read_release_groups_info(path.join(case_info['output_files']['run_output_dir'], case_info['output_files']['release_groups']))
 
     else:
