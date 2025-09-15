@@ -279,7 +279,7 @@ if __name__ == "__main__":
 
 
     dest = path.join( definitions.ot_root_dir, 'docs/info/how_to')
-    work_dir = path.join( definitions.ot_root_dir, 'tutorials_how_to')
+    work_dir = path.join( definitions.ot_root_dir)
     chdir(work_dir)
     for f in glob( '*.ipynb'):
         subprocess.run('jupyter nbconvert '+ f + '  --to rst')

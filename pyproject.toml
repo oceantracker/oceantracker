@@ -40,7 +40,7 @@ dependencies = [
     "psutil",
     "matplotlib",
     "pyyaml",
-    "ffmpeg",
+    "ffmpeg-python",
     "ipykernel",
     "requests",
 ]
@@ -55,24 +55,36 @@ Issues = "https://github.com/oceantracker/oceantracker/issues"
 dev = [
     "build",
     "twine",
-#     "pytest>=7.0",
-#     "pytest-cov",
-#     "black",
-#     "flake8",
-#     "mypy",
-#     "pre-commit",
+    # "pytest>=7.0",
+    # "pytest-cov",
+    # "black",
+    # "ruff",
+    # "mypy",
+    # "pre-commit",
 ]
-# docs = [
-#     "sphinx>=4.0",
-#     "sphinx-rtd-theme",
-#     "nbsphinx",
-#     "pandoc",
-# ]
+docs = [
+    "sphinx>=7.0",
+    "sphinx-rtd-theme",
+    "sphinx-autodoc-typehints",
+    "sphinx-toolbox>=3.3.0",
+    "sphinx-changelog",
+    "myst-parser",
+    "nbsphinx",
+    "ipython",
+    "beautifulsoup4",
+    "autodocsumm",
+    "rst2pdf",
+]
 # test = [
 #     "pytest>=7.0",
 #     "pytest-cov",
 #     "pytest-xdist",
+#     "pytest-datadir",
+#     "pytest-regressions",
 # ]
+all = [
+    "oceantracker[dev,docs,test]",
+]
 
 [project.scripts]
 oceantracker = "oceantracker.run_ot_cmd_line:main"
@@ -87,25 +99,36 @@ oceantracker = ["**/*.py", "**/*.json", "**/*.yaml", "**/*.yml"]
 # "*" = ["tests*", "dev*", "docs*", "__pycache__*", "*.pyc"]
 "*" = ["__pycache__*", "*.pyc"]
 
-# Black configuration
-# [tool.black]
-# line-length = 88
-# target-version = ['py310', 'py311']
-# include = '\.pyi?$'
-# exclude = '''
-# /(
-#     \.eggs
-#   | \.git
-#   | \.hg
-#   | \.mypy_cache
-#   | \.tox
-#   | \.venv
-#   | _build
-#   | buck-out
-#   | build
-#   | dist
-# )/
-# '''
+# Sphinx configuration
+[tool.sphinx]
+project = "OceanTracker"
+author = "R. Vennell, L. Steidle"
+copyright = "2024, R. Vennell"
+release = "Beta 0.5"
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.intersphinx",
+    "sphinx_autodoc_typehints",
+    "sphinx_toolbox.collapse",
+    "sphinx_changelog",
+    "myst_parser",
+    "nbsphinx",
+    "autodocsumm",
+]
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+html_theme = "sphinx_rtd_theme"
+html_static_path = ["_static"]
+html_logo = "_static/ocean_tracker.png"
+# intersphinx_mapping = {
+#     "python": ("https://docs.python.org/3", None),
+#     "numpy": ("https://numpy.org/doc/stable/", None),
+#     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+#     "matplotlib": ("https://matplotlib.org/stable/", None),
+# }
+
 
 # pytest configuration
 # [tool.pytest.ini_options]
