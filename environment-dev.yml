@@ -1,4 +1,4 @@
-name: oceantracker-test
+name: oceantracker-dev
 channels:
 - conda-forge
 - defaults
