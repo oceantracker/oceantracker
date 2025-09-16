@@ -5,7 +5,6 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 from oceantracker.util.numpy_util import possible_dtypes
 from oceantracker.shared_info import shared_info as si # proces access to all variables , classes and info
 from oceantracker.util.numba_util import njitOT, njitOTparallel, prange # numba decorators to make code fast
-import numpy as np
 
 class TimeAtStatus(CustomParticleProperty):
     ''' class to calculate the time each particle spends in a given status '''
@@ -41,7 +40,8 @@ class TimeAtStatus(CustomParticleProperty):
                        active)
 
         pass
-    
+
+
     @staticmethod  # Numba code cannot use classes such as self, as Numba only understands basic python variable types and numpy arrays
     @njitOTparallel  # decorator speed up code using numba with parallel threads option
     def _add_time(required_status, time_step, status, total_time, active):
