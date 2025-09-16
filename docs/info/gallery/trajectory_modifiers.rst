@@ -23,7 +23,7 @@ Particles with a random fraction temporarily frozen  on a polygon shaped reef.
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_param_files/demo06_reefstranding.json
+.. literalinclude:: ../../../dev/demo_param_files/demo06_reefstranding.json
     :language: json
     :caption:
 
@@ -36,7 +36,7 @@ Particles with a random fraction temporarily frozen  on a polygon shaped reef.
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_param_files/demo06_reefstranding.yaml
+.. literalinclude:: ../../../dev/demo_param_files/demo06_reefstranding.yaml
     :language: Yaml
     :caption:
 
@@ -68,7 +68,7 @@ Vertical slice showing one example of a falling particle and resuspension, with 
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_param_files/demo58_bottomBounce.json
+.. literalinclude:: ../../../dev/demo_param_files/demo58_bottomBounce.json
     :language: json
     :caption:
 
@@ -82,7 +82,7 @@ Vertical slice showing one example of a falling particle and resuspension, with 
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_param_files/demo58_bottomBounce.yaml
+.. literalinclude:: ../../../dev/demo_param_files/demo58_bottomBounce.yaml
     :language: Yaml
     :caption:
 
@@ -110,7 +110,7 @@ Particles with splitting in two every 6 hours and a 5% chance of dying every 6 h
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_param_files/demo08_particle_splitting.json
+.. literalinclude:: ../../../dev/demo_param_files/demo08_particle_splitting.json
     :language: json
     :caption:
 
@@ -124,7 +124,7 @@ Particles with splitting in two every 6 hours and a 5% chance of dying every 6 h
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../demos/demo_param_files/demo08_particle_splitting.yaml
+.. literalinclude:: ../../../dev/demo_param_files/demo08_particle_splitting.yaml
     :language: Yaml
     :caption:
 

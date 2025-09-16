@@ -11,7 +11,7 @@ Warnings or Notes do not cause OT to exit.
 First step
 ===================
 
-Carefully, look back at the screen output or *_caseLog_log.txt
+Carefully, look back at the screen output or ``*_caseLog_log.txt``
 file, and find the first error flagged.
 Some errors spawn other errors, so look back for the first reported error.
 
@@ -46,16 +46,15 @@ In reporting an error to the developer, please
 
 * Send the to developer the following files:
 
-    # *_caseLog_log.txt, screen log
+    * ``*_caseLog_log.txt``, screen log
 
-    #  *_caseInfo.json, lots of useful info
+    * ``*_caseInfo.json``, lots of useful info
 
-    # *_raw_user_params.json, the raw user supplied settings/parameters
+    * ``*_raw_user_params.json``, the raw user supplied settings/parameters
 
 
 * If requested also give access to
 
     * all the  output files, eg. tracks etc
 
-    * a sample of the hindcast in order to reproduce the bug, with the given *_raw_user_params.json file.
-
+    * a sample of the hindcast in order to reproduce the bug, with the given ``*_raw_user_params.json`` file.
