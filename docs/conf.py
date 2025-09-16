@@ -36,17 +36,9 @@ version = release
 
 # Add any Sphinx extension module names here, as strings.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.intersphinx',
     'sphinx.ext.githubpages',
-    'sphinx_autodoc_typehints',
     'sphinx_toolbox.collapse',
-    'sphinx_changelog',
-    'myst_parser',
     'nbsphinx',
-    'autodocsumm',
     'rst2pdf.pdfbuilder',
 ]
 
