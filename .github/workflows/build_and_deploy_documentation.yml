@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - features/updating_docs_workflow
     paths:
       - 'docs/**'
       - 'oceantracker/**'
