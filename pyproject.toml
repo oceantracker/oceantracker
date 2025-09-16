@@ -64,15 +64,14 @@ dev = [
 ]
 docs = [
     "sphinx>=7.0",
-    "sphinx-rtd-theme",
-    "sphinx-autodoc-typehints",
+    # "sphinx-autodoc-typehints",
     "sphinx-toolbox>=3.3.0",
-    "sphinx-changelog",
-    "myst-parser",
+    # "sphinx-changelog",
+    # "myst-parser",
     "nbsphinx",
     "ipython",
-    "beautifulsoup4",
-    "autodocsumm",
+    # "beautifulsoup4",
+    # "autodocsumm",
     "rst2pdf",
 ]
 # test = [
@@ -82,9 +81,6 @@ docs = [
 #     "pytest-datadir",
 #     "pytest-regressions",
 # ]
-all = [
-    "oceantracker[dev,docs,test]",
-]
 
 [project.scripts]
 oceantracker = "oceantracker.run_ot_cmd_line:main"
@@ -106,16 +102,16 @@ author = "R. Vennell, L. Steidle"
 copyright = "2024, R. Vennell"
 release = "Beta 0.5"
 extensions = [
-    "sphinx.ext.autodoc",
-    "sphinx.ext.napoleon",
+    # "sphinx.ext.autodoc",
+    # "sphinx.ext.napoleon",
     "sphinx.ext.viewcode",
-    "sphinx.ext.intersphinx",
-    "sphinx_autodoc_typehints",
+    # "sphinx.ext.intersphinx",
+    # "sphinx_autodoc_typehints",
     "sphinx_toolbox.collapse",
-    "sphinx_changelog",
-    "myst_parser",
+    # "sphinx_changelog",
+    # "myst_parser",
     "nbsphinx",
-    "autodocsumm",
+    # "autodocsumm",
 ]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]

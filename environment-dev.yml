@@ -13,11 +13,16 @@ dependencies:
 - psutil
 - matplotlib
 - pyyaml
-- ffmpeg
+- ffmpeg-python
 - ipykernel
 - requests
 - build
 - twine
+- sphinx>=7.0
+- sphinx-toolbox>=3.3.0
+- nbsphinx
+- ipython
+- rst2pdf
 - jupyter
 - jupyterlab
 - ipykernel
