@@ -1,4 +1,5 @@
 # build full parm ref from dict and classes defaults
+import os
 from os import path, mkdir, listdir
 from glob import  glob
 import inspect
@@ -65,6 +66,13 @@ class RSTfileBuilder(object):
 
     def write(self):
         file_name = path.join(self.docs_dir, self.file_name)
+
+        # Create directory if it doesn't exist
+        directory = path.dirname(file_name)
+        if not path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+            print(f'Created directory: {directory}')
+
         print('writing:', path.basename(file_name))
         with open(file_name ,'w') as f:
             for l in self.lines:
