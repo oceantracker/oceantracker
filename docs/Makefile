@@ -11,7 +11,7 @@ BUILDDIR      = _build
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: help Makefile clean clean-all build-params convert-notebooks # livehtml linkcheck
+.PHONY: help Makefile clean clean-all build-params convert-notebooks linkcheck
 
 # Clean build directory
 clean:
@@ -57,10 +57,10 @@ build: clean clean-all build-params convert-notebooks html
 # 		--ignore ".git/*"
 
 # Check for broken links
-# linkcheck:
-# 	@$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" "$(BUILDDIR)/linkcheck" $(SPHINXOPTS) $(O)
-# 	@echo
-# 	@echo "Link check complete; look for any errors in $(BUILDDIR)/linkcheck/output.txt."
+linkcheck:
+	@$(SPHINXBUILD) -b linkcheck "$(SOURCEDIR)" "$(BUILDDIR)/linkcheck" $(SPHINXOPTS) $(O)
+	@echo
+	@echo "Link check complete; look for any errors in $(BUILDDIR)/linkcheck/output.txt."
 
 # Build API documentation
 # apidoc:
