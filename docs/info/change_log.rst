@@ -25,7 +25,7 @@ Bug fixes
 
 
 Version '0.5.0.000 2024-12-20'
-_________________________
+______________________________
 
 Faster and simplified internal structure
 
@@ -95,7 +95,7 @@ ______________________________________________________________
 
 #. the frozen particle status name is now stationary, the numerical value remains the same, it is rarely used and is not the same status as stranded by tide
 
-#. post_processing read and plot code has moved, so import statements need to change. read code imports are now "from read_oceantracker.python import *" and for plots "from plot_oceantracker import *"
+#. post_processing read and plot code has moved, so import statements need to change. read code imports are now ``from read_oceantracker.python import *`` and for plots ``from plot_oceantracker import *``
 
 #. Matlab code to read output is now in read_oceantracker.matlab
 

@@ -12,7 +12,7 @@ class SCHISMreaderV5(SCHISMreader):
         # redefine any variable names which differ from older schism format
         self.add_default_params(
             file_mask= PVC('*.nc', str,
-                         doc_str='Mask for file names, for Schism 5 default is "*.nc",, ie.  all netcdf files, finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
+                         doc_str='Mask for file names, for Schism 5 default is ``*.nc``,, ie.  all netcdf files, finds all files matching in ``input_dir`` and its sub dirs that match the file_mask pattern'),
             grid_variable_map= dict(zlevel = PVC('zCoordinates', str),
                                 is_dry_cell= PVC('dryFlagElement', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell'),
                                  bottom_cell_index = PVC('bottom_index_node', str)),

@@ -60,7 +60,7 @@ class _DefaultSettings(definitions._AttribDict):
     add_path = PLC(None,str,doc_str='List of directories to add to python path containing user written classes. Enables import of user written classes outside of current working dir. ')
     time_buffer_size = PVC(24, int, min=2, doc_str='Number of time steps held in hindcast memory buffers', expert = True)
     use_geographic_coords = PVC(False, bool,
-                          doc_str='Used geographic coordinated for inputs and outputs ( lon, lat_), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
+                          doc_str='Used geographic coordinated for inputs and outputs ( lon, lat ), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
                                 expert=True)
     use_A_Z_profile = PVC(False, bool,
                 doc_str='Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files')

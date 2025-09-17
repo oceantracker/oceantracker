@@ -22,13 +22,13 @@ parameters, or by an expert adding their specialised code for novel particle beh
 
 [More about Ocean tracker and gallery](https://oceantracker.github.io/oceantracker/)
 
-[Installing Oceantracker](https://oceantracker.github.io/oceantracker/_build/html/info/installing.html)
+[Installing Oceantracker](https://oceantracker.github.io/oceantracker/info/installing.html)
 
-[Oceantracker User Guide](https://oceantracker.github.io/oceantracker/_build/html/info/users_guide.html)
+[Oceantracker User Guide](https://oceantracker.github.io/oceantracker/info/users_guide.html)
   
-[Running Oceantracker ](https://oceantracker.github.io/oceantracker/_build/html/info/running_ocean_tracker.html)
+[Running Oceantracker ](https://oceantracker.github.io/oceantracker/info/running_ocean_tracker.html)
 
-[Howto tutorials](https://oceantracker.github.io/oceantracker/_build/html/info/how_to.html)
+[Howto tutorials](https://oceantracker.github.io/oceantracker/info/how_to.html)
 
 [1] Vennell, R.,Steidle. L.,  Scheel, M.,Chaput. R., Knight, B. and Smeaton, M, OceanTracker 0.5: Fast Adaptable Lagrangian Particle Tracking in
 Structured and Unstructured Grid, preprint, https://eartharxiv.org/repository/view/8387/ 
