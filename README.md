@@ -24,8 +24,6 @@ parameters, or by an expert adding their specialised code for novel particle beh
 
 [Installing Oceantracker](https://oceantracker.github.io/oceantracker/info/installing.html)
 
-[Oceantracker User Guide](https://oceantracker.github.io/oceantracker/info/users_guide.html)
-  
 [Running Oceantracker ](https://oceantracker.github.io/oceantracker/info/running_ocean_tracker.html)
 
 [Howto tutorials](https://oceantracker.github.io/oceantracker/info/how_to.html)
