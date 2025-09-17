@@ -37,7 +37,7 @@ if __name__ == "__main__":
                  pulse_size=10,
                  release_interval=3600)
 
-    if False:
+    if True:
         case_info_file= ot.run()
     else:
         # plot only

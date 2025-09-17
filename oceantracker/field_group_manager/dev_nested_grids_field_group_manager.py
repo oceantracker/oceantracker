@@ -66,7 +66,6 @@ class DevNestedFields(ParameterBaseClass):
 
             fgm_nested.initial_setup(gridID=n+1, caller=caller)
             fgm_nested.build_reader_fields()
-            fgm_nested.final_setup()
 
             for key, item in checks.items():
                 item.append(fgm_nested.info[key])
@@ -120,7 +119,6 @@ class DevNestedFields(ParameterBaseClass):
     def final_setup(self):
         ml = si.msg_logger
         # do final setup for each grid
-        # check nested grids
         for n, fgm in enumerate(self.fgm_hydro_grids):
             fgm.final_setup()
 
@@ -216,11 +214,10 @@ class DevNestedFields(ParameterBaseClass):
         fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid)
 
         # work through inner grids
-        for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):  # loop over nested rids
+        for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):  # loop over nested grids
 
             # find any on outer grid that are now inside this inner grid
             # todo faster- prebuild a index to show which cells overlap with an  inner and only check if these are inside the inner grid
-
 
             is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid, axis=0))
 
@@ -268,7 +265,6 @@ class DevNestedFields(ParameterBaseClass):
         pass
 
     def interp_field_at_particle_locations(self, field_name, active, output=None):
-
 
         part_prop = si.class_roles.particle_properties
 
