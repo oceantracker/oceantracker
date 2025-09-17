@@ -1,6 +1,6 @@
 # OceanTracker
 
-## Fast particle tracking in structure and unstructured grids
+## Fast particle tracking in structured and unstructured grids
 
 OceanTracker is a fast extendable code for offline particle tracking in structured and  unstructured grids [1].
 OceanTracker currently  supports structured grid ROMs and GLORYS (NEMO/COPERNICUS) 

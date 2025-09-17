@@ -46,7 +46,7 @@ def animate_heat_map(stats_data, release_group_name:str =None, var:str= 'count',
 
     plot_utilities.plot_release_points_and_polygons(stats_data, ax= ax, release_group_name=release_group_name)
 
-    plot_utilities.show_particleNumbers(stats_data['total_num_particles_released'])
+
     plot_utilities.add_heading(heading)
 
     time_text = plt.text(.05, .05, '', transform=ax.transAxes,c='k', zorder=5)
@@ -113,7 +113,9 @@ def plot_heat_map(stats_data,  release_group_name:str = None, nt=-1, axis_lims=N
                   var='count',vmin=None, vmax=None, credit=None, cmap='viridis', heading = None,
                   plot_file_name=None, back_ground_depth=True,back_ground_color_map= None):
     #todo repace var with data_to_plot=, as in other ploting code
-    x,y, z = _get_stats_data(nt, stats_data, var, release_group_name, logscale)
+
+
+    x,y, z = _get_stats_data(nt, stats_data, var,  release_group_name,   logscale)
 
     fig = plt.gcf()
     ax  = plt.gca()
@@ -130,7 +132,6 @@ def plot_heat_map(stats_data,  release_group_name:str = None, nt=-1, axis_lims=N
 
     plot_utilities.plot_release_points_and_polygons(stats_data, release_group_name=release_group_name, ax=ax)
 
-    plot_utilities.show_particleNumbers(stats_data['total_num_particles_released'])
     plot_utilities.add_heading(heading)
 
     fig.tight_layout()
@@ -201,7 +202,7 @@ def _get_stats_data(nt, d, var, release_group_name, logscale, zmin=None):
     # nt is time step or age bin
     z= d[var][nt, :, :, :].astype(np.float64)
     count = d['count'][nt, :, :, :]
-    release_groupID =  list(d['particle_release_groups'].keys()).index(release_group_name)
+    release_groupID= 0 if release_group_name is None else list(d['release_group_names']).index(release_group_name)
     # get ID of named release group
     z = z[release_groupID, :, :]
 

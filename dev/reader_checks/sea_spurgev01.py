@@ -5,10 +5,11 @@ from oceantracker.main import OceanTracker
 if __name__ == "__main__":
     # nested NZ schisim with a  glorys subset
     ot = OceanTracker()
+    duration =  30*24*3600. # 10 days
     ot.settings(output_file_base = 'sea_spurge_test01',
                 root_output_dir= r'D:\OceanTrackerOutput',
                 time_step=3600,
-                max_run_duration = 30*24*3600., # 10 days
+                max_run_duration =duration,
                 #display_grid_at_start=True
                 )
     # Glorys outer grid
@@ -32,10 +33,17 @@ if __name__ == "__main__":
             [179.74114392087887, -35.81375090260477],
             [ 178.9627420221942, -41.47295972674199]
            ]
-    ot.add_class('release_groups',
-                 points = x0,
-                 pulse_size=10,
-                 release_interval=3600)
+
+    for n, x in enumerate(x0):
+        ot.add_class('release_groups',
+                     name = f'rg{n}',
+                     points = x,
+                     pulse_size=10,
+                     release_interval=3600)
+
+    ot.add_class('particle_statistics',release_group_centered_grids=True,class_name='GriddedStats2D_ageBased',
+                 grid_span=[1,1], max_age_to_bin= duration, age_bin_size=duration,
+                 particle_property_list=['hydro_model_gridID','status'] )
 
     if True:
         case_info_file= ot.run()
@@ -43,17 +51,25 @@ if __name__ == "__main__":
         # plot only
         case_info_file = r'D:\OceanTrackerOutput\sea_spurge_test01\sea_spurge_test01_caseInfo.json'
 
-    if True:
-        from oceantracker.plot_output import plot_tracks
-        from oceantracker.read_output.python import load_output_files
+    from oceantracker.read_output.python import load_output_files
 
-        tracks = load_output_files.load_track_data(case_info_file,  gridID=0, fraction_to_read=0.1) # plot inner gridID=1, not outer gridID = 0
+    if False:
+        from oceantracker.plot_output import plot_tracks
+
+
+        tracks = load_output_files.load_track_data(case_info_file,  gridID=1, fraction_to_read=0.1) # plot inner gridID=1, not outer gridID = 0
         anim = plot_tracks.animate_particles(tracks,
                                              colour_using_data=tracks['hydro_model_gridID'],
                                              back_ground_depth=False, vmin=0, vmax=1,
                                              min_status=tracks['particle_status_flags']['outside_open_boundary'],
                                              show_grid=True, show_dry_cells=False, axis_labels=True,
                                              )
+
+    if True:
+        from oceantracker.plot_output import plot_statistics
+        stats = load_output_files.load_stats_data(case_info_file)
+
+        plot_statistics.plot_heat_map(stats, release_group_name='rg1', var='status')
 
 
 
