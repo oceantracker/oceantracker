@@ -64,7 +64,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
         params = self.params
 
         self.check_part_prop_list()
-        # to spped status check make map with trues at index of status to include in counts
+        # to speed status check make map with trues at index of status to include in counts
         self.statuses_to_count_map = status_util.build_select_status_map(params['status_list'])
 
         # set water depth range (not using tide)

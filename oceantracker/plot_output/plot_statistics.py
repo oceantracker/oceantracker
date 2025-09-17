@@ -10,7 +10,7 @@ from oceantracker.util import time_util
 
 def animate_heat_map(stats_data, release_group_name:str =None, var:str= 'count', axis_lims=None, credit=None, interval=20, heading=None,
                      vmin=None, vmax=None, show_grid=False, title=None, logscale=False, caxis= None, cmap='viridis',
-                     movie_file= None, fps=15, dpi=300, back_ground_depth=True, back_ground_color_map= None):
+                     movie_file= None, fps=15, dpi=300, back_ground_depth=True, back_ground_color_map= None,axis_labels=False):
 
     def draw_frame(nt):
 
@@ -42,6 +42,7 @@ def animate_heat_map(stats_data, release_group_name:str =None, var:str= 'count',
     if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
 
     plot_utilities.draw_base_map(stats_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
+                                 axis_labels=axis_labels,
                                  back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
     plot_utilities.plot_release_points_and_polygons(stats_data, ax= ax, release_group_name=release_group_name)
@@ -110,7 +111,7 @@ def animate_concentrations(concentration_data, plot_load=False,  axis_lims=None,
     return anim
 
 def plot_heat_map(stats_data,  release_group_name:str = None, nt=-1, axis_lims=None,show_grid=False, title=None,logscale=False, colour_bar= True,
-                  var='count',vmin=None, vmax=None, credit=None, cmap='viridis', heading = None,
+                  var='count',vmin=None, vmax=None, credit=None, cmap='viridis', heading = None, axis_labels=False,
                   plot_file_name=None, back_ground_depth=True,back_ground_color_map= None):
     #todo repace var with data_to_plot=, as in other ploting code
 
@@ -124,6 +125,7 @@ def plot_heat_map(stats_data,  release_group_name:str = None, nt=-1, axis_lims=N
     if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
 
     plot_utilities.draw_base_map(stats_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
+                                 axis_labels=axis_labels,
                                  back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
     pc.set_clim(vmin, vmax)

@@ -45,7 +45,7 @@ if __name__ == "__main__":
                  grid_span=[1,1], max_age_to_bin= duration, age_bin_size=duration,
                  particle_property_list=['hydro_model_gridID','status'] )
 
-    if True:
+    if False:
         case_info_file= ot.run()
     else:
         # plot only
@@ -53,13 +53,13 @@ if __name__ == "__main__":
 
     from oceantracker.read_output.python import load_output_files
 
-    if False:
+    if True:
         from oceantracker.plot_output import plot_tracks
 
 
-        tracks = load_output_files.load_track_data(case_info_file,  gridID=1, fraction_to_read=0.1) # plot inner gridID=1, not outer gridID = 0
+        tracks = load_output_files.load_track_data(case_info_file,  gridID= 1, fraction_to_read=0.1) # plot inner gridID=1, not outer gridID = 0
         anim = plot_tracks.animate_particles(tracks,
-                                             colour_using_data=tracks['hydro_model_gridID'],
+                                             colour_using_data=tracks['status'],
                                              back_ground_depth=False, vmin=0, vmax=1,
                                              min_status=tracks['particle_status_flags']['outside_open_boundary'],
                                              show_grid=True, show_dry_cells=False, axis_labels=True,
@@ -69,7 +69,7 @@ if __name__ == "__main__":
         from oceantracker.plot_output import plot_statistics
         stats = load_output_files.load_stats_data(case_info_file)
 
-        plot_statistics.plot_heat_map(stats, release_group_name='rg1', var='status')
+        plot_statistics.plot_heat_map(stats, release_group_name='rg1', axis_labels=True,)
 
 
 
