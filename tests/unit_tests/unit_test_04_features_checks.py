@@ -2,7 +2,7 @@ from os import path
 from oceantracker.main import OceanTracker
 from oceantracker import  definitions
 import numpy as np
-from tests.unit_tests import test_definitions
+from unit_tests import test_definitions
 from copy import deepcopy
 
 def main(args):

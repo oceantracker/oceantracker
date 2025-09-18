@@ -1,6 +1,6 @@
 from oceantracker.main import OceanTracker
 
-from tests.unit_tests import test_definitions
+from unit_tests import test_definitions
 
 
 def main(args):

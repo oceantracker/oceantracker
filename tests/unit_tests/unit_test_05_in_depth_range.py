@@ -1,7 +1,7 @@
 from oceantracker.main import OceanTracker
 
 import numpy as np
-from tests.unit_tests import test_definitions
+from unit_tests import test_definitions
 
 def main(args):
     ot = OceanTracker()

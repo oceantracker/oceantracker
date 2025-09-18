@@ -9,7 +9,7 @@
 
 /dev/misc/output/
 /dev/dev_testing/root_output_dir/
-/dev/bug_hunting/Debugg_codes/root_output_dir/
+/dev/bug_hunting/
 
 /docs/_build
 /docs/info/how_to/

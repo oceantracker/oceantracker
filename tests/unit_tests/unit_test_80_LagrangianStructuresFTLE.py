@@ -1,7 +1,7 @@
 from oceantracker.main import OceanTracker
 from oceantracker.plot_output import plot_statistics
 
-from tests.unit_tests import test_definitions
+from unit_tests import test_definitions
 
 
 # double gyre https://shaddenlab.berkeley.edu/uploads/LCS-tutorial/examples.html

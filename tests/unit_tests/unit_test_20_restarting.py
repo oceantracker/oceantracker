@@ -1,6 +1,6 @@
 from oceantracker.main import OceanTracker
 from os import path
-from tests.unit_tests import test_definitions
+from unit_tests import test_definitions
 from oceantracker.util import json_util
 from copy import deepcopy
 import time
