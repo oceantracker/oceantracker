@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oceantracker"
-version = "0.5.2.0"
+version = "0.5.2.51"
 description = "Fast offline Lagrangian particle tracking in the Ocean for structured and unstructured grids"
 readme = "README.md"
 license = "MIT"
@@ -14,6 +14,7 @@ authors = [
     {name = "Laurin Steidle", email = "laurin.steidle@cawthron.org.nz"}
 ]
 maintainers = [
+    {name = "Ross Vennell", email = "ross.vennell@otago.ac.nz"},
     {name = "Laurin Steidle", email = "laurin.steidle@cawthron.org.nz"}
 ]
 keywords = ["oceanography", "particle tracking", "lagrangian", "ocean modeling"]
@@ -27,7 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering :: Physics",
-    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Topic :: Scientific/Engineering :: Oceanography",
 ]
 requires-python = ">=3.10"
 dependencies = [
