@@ -5,7 +5,7 @@ from oceantracker.util.parameter_checking import ParameterListChecker as PLC
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 from oceantracker.fields.reader_field import  ReaderField
 import dateutil
-from oceantracker.util import time_util, ncdf_util
+from oceantracker.util import time_util, ncdf_util, numba_util
 from datetime import datetime
 from os import path
 from oceantracker.util.ncdf_util import NetCDFhandler
@@ -281,8 +281,7 @@ class _BaseReader(ParameterBaseClass):
 
         # now set up time buffers
         time_buffer_size = si.settings.time_buffer_size
-        grid['time'] = np.zeros((time_buffer_size,), dtype=np.float64)
-        grid['date'] = np.zeros((time_buffer_size,), dtype='datetime64[s]')  # time buffer
+
         grid['nt_hindcast'] = np.full((time_buffer_size,), -10, dtype=np.int32)  # what global hindcast timestesps are in the buffer
 
         # space for dry cell info
@@ -450,9 +449,12 @@ class _BaseReader(ParameterBaseClass):
         bi = self.info['buffer_info']
 
 
-        hindcast_fraction = (time_sec - info['start_time']) / info['duration']
+        #hindcast_fraction = (time_sec - info['start_time']) / info['duration']
+        #current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
 
-        current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
+        current_hydro_model_step = numba_util.find_last_less_than(info['time_coord'], time_sec )
+        if si.settings.backtracking:
+            current_hydro_model_step += 1 # need next one if working backward
 
         time_hindcast = self.get_time(current_hydro_model_step)
 

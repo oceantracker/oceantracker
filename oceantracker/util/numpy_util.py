@@ -4,6 +4,10 @@ possible_dtypes=['float64','float32','bool',
                  'int32','int16','int8','int64',
                  ]
 
+
+
+
+
 def smallest_value(dtype:np.dtype):
     if np.issubdtype(dtype, np.floating):
         fill_value = np.nan

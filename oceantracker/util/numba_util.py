@@ -47,6 +47,16 @@ def njitOTparallel(func):
 
     return num_func
 
+@nb.njit
+def find_last_less_than(x, x_val):
+    # find first value just less that x_val in 1D array x
+    n = 0
+    for n in range(x.size-1):
+        if x[n+1] >= x_val:
+           break
+    return n
+
+
 def get_numba_func_info():
     d = dict( config={key: val for key, val in nb.config.__dict__.items()
                    if not key.startswith('_') and type(val) in [None, int, str, float] },

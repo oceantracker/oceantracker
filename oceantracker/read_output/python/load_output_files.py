@@ -71,8 +71,12 @@ def load_concentration_data(case_info_file_name, name= None):
 def load_grid(case_info_file_name, gridID=0):
     # load OT output file grid from  output of load_runInfo() or load_runcase_info()
     case_info = read_case_info_file(case_info_file_name)
+    if type(case_info['output_files']['grid']) == list:
+        grid_file = case_info['output_files']['grid'][gridID]
+    else:
+        # old version with only one grid file
+        grid_file = case_info['output_files']['grid']
 
-    grid_file = case_info['output_files']['grid'][gridID]
     grid_file = path.join(case_info['output_files']['run_output_dir'],grid_file)
 
     d = read_ncdf_output_files.read_grid_file(grid_file)

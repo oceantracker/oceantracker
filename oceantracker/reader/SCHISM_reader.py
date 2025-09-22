@@ -88,15 +88,6 @@ class SCHISMreader(_BaseUnstructuredReader):
         data = self.dataset.read_variable(self.params['grid_variable_map']['zlevel'], nt = nt)
         return data
 
-    @staticmethod
-    def _fix_uninitialized_zcorr_not_used(water_depth,min_water_depth, bottom_cell_index, zcor):
-        # fix zcor profiles in dry cells which are not initialise, so are zero
-
-        for nt in range(zcor.shape[0]):
-            for node in range(zcor.shape[1]):
-                n_bot = bottom_cell_index[node]
-                if zcor[nt,node,-1] == 0 and zcor[nt,n_bot] ==0:
-                    zcor[nt,node,n_bot:] = -water_depth[node] + np.linspace(0,min_water_depth,zcor.shape[2]-n_bot)
 
     def read_triangles(self, grid):
         # read nodes in triangles (N by 3) or mix of triangles and quad cells as  (N by 4)

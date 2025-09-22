@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
         tracks = load_output_files.load_track_data(case_info_file,  gridID= 1, fraction_to_read=0.1) # plot inner gridID=1, not outer gridID = 0
         anim = plot_tracks.animate_particles(tracks,
-                                             colour_using_data=tracks['status'],
+                                             colour_using_data= tracks['status'],# tracks['hydro_model_gridID'],
                                              back_ground_depth=False, vmin=0, vmax=1,
                                              min_status=tracks['particle_status_flags']['outside_open_boundary'],
                                              show_grid=True, show_dry_cells=False, axis_labels=True,

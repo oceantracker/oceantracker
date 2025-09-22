@@ -1,5 +1,7 @@
 import datetime
 
+from xarray.core.nputils import nanmean
+
 from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
 from oceantracker.reader.util.hydromodel_grid_transforms import convert_regular_grid_to_triangles
@@ -16,7 +18,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
-            variable_signature=PLC(['mesh2d_waterdepth','mesh2d_face_nodes'], str, doc_str='Variable names used to test if file is this format'),
+            variable_signature=PLC(['mesh2d_face_nodes'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(True, bool, doc_str='DELFT 3D has indices starting at 1 not zero'),
             load_fields = PLC(['water_depth'], str, doc_str='always load tide and water depth, for dry cells id 2D'),
             grid_variable_map= dict( time= PVC('time', str),
@@ -52,17 +54,18 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                             )
 
     def add_hindcast_info(self):
-
+        ds_info =  self.dataset.info
         dm = self.params['dimension_map']
         fvm= self.params['field_variable_map']
         gm = self.params['grid_variable_map']
         info = self.info
         dims = info['dims']
 
+        if info['z_dim'] not in dims  : dims['mesh2d_nInterfaces' ] = dims['mesh2d_nLayers'] + 1
         if info['is3D']:
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
-            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['num_z_levels'] = dims[info['z_dim']]
             info['all_z_dims'] = dm['all_z_dims']
             # 2 variants of fixed z layer dimension names
             if 'mesh2d_nInterfaces' in dims:
@@ -75,7 +78,15 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                 info['all_z_dims'] = ['nmesh2d_interface','nmesh2d_layer']
 
             info['num_z_levels'] = dims[info['z_dim']]
-            info['vert_grid_type'] = si.vertical_grid_types.Zfixed if 'mesh2d_interface_z' in info['variables']  else si.vertical_grid_types.Sigma
+
+            if 'mesh2d_layer_sigma' in ds_info['variables']:
+                info['vert_grid_type'] = si.vertical_grid_types.Sigma
+
+            elif 'mesh2d_layer_z' in  ds_info['variables']:
+                info['vert_grid_type'] = si.vertical_grid_types.Zfixed
+            else:
+                si.msg_logger.msg('Cannot determine vertical grid type',caller=self, fatal_error=True,
+                                  hint='Delft3D FM file needs variables "mesh2d_layer_sigma" and  "mesh2d_interface_sigma" if sigma grid, or "mesh2d_layer_z" and "mesh2d_interface_z" if fixed z level grid')
 
         # get num nodes in each field
         # is the number of nodes = uniques nodes in the quad mesh
@@ -85,8 +96,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         info['num_nodes'] =  dims[info['node_dim']]
         info['cell_dim'] = 'mesh2d_nFaces' if 'mesh2d_nFaces' in dims else 'nmesh2d_face'
 
-        if info['vert_grid_type'] == si.vertical_grid_types.Sigma:
-            si.msg_logger.msg('DEFT3D FM not yet tested with sigma vertical grid, only tested to work with fixed z level grid', warning=True)
+
 
 
     def read_horizontal_grid_coords(self, grid):
@@ -136,8 +146,18 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         grid = self.grid
         ds = self.dataset
 
+
         if info['vert_grid_type'] == si.vertical_grid_types.Sigma:
-            # assumes first value -1 is at the bottom
+            if False:
+                # relace sigmas if missing
+                print('xx, builing ')
+                depth = ds.read_variable('mesh2d_flowelem_bl')
+                tide = ds.read_variable('mesh2d_s1')
+                z_layer = ds.read_variable('mesh2d_flowelem_zcc')
+                sel = depth > np.nanmean(depth)
+                sigma= z_layer[0,:,sel,:] /(tide[0,sel,:] -depth)
+                # assumes first value -1 is at the bottom
+
             grid['sigma'] = ds.read_variable('mesh2d_interface_sigma').data.astype(np.float32) # layer interfaces
             grid['sigma'][0] = -1.  # not sure why this value is 9.96920997e+36??
             grid['sigma_layer'] = ds.read_variable('mesh2d_layer_sigma').data.astype(np.float32)  # layer center
@@ -227,6 +247,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             # data is at cell center/element/triangle  move to nodes
             data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(
                                         data, grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
+
         if var_info['is3D'] and info['layer_dim'] in var_info['dims']:
             if info['vert_grid_type'] == si.vertical_grid_types.Zfixed :
                 #  interp fixed z layer values to interfaces, must be done after nodal values

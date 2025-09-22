@@ -209,7 +209,7 @@ class RewriteHindcast():
         return data,  e
 
 
-    def DEFT3D_encoding(self):
+    def DELFT3D_encoding(self):
         # add encoding to common variables
         # do not scale encode depth
         self.file_info['time_variable'] = 'time'
@@ -311,7 +311,7 @@ if __name__ == "__main__":
             output_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_test1\compressed_version1'
 
             h= RewriteHindcast(input_dir, file_mask, test=args.test_mode)
-            h.DEFT3D_encoding()
+            h.DELFT3D_encoding()
 
             # use h.encode_var() to override any min,maxs sset in above
 

@@ -55,6 +55,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         release_groupID = part_prop['IDrelease_group'].used_buffer()
         p_x= part_prop['x'].used_buffer()
 
+
         self._do_counts_and_summing_numba(release_groupID, p_x,
                                           stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                                           stats_grid['grid_spacings'],
@@ -134,6 +135,14 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
 
         p_x = part_prop['x'].used_buffer()
         p_age = part_prop['age'].used_buffer()
+
+        # debug code
+        if False:
+            gridIDa=  part_prop['hydro_model_gridID'].get_values(alive)
+            gridIDs = part_prop['hydro_model_gridID'].get_values(sel)
+            print('xx heatmap/grid counts, numbers on each grid ID, alive', np.sum(gridIDa==0),  np.sum(gridIDa==1),
+                  'selected to count', np.sum(gridIDs==0),  np.sum(gridIDs==1) )
+
 
         self._do_counts_and_summing_numba(release_groupID, p_x,
                         stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],

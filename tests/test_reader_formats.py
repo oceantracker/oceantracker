@@ -326,6 +326,20 @@ def get_case(n):
             is3D = True
             show_grid = True
             time_step = 10 * 60
+        case 420:
+            # AREM_perth
+            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\AREM_perth'
+
+            x0 = [[-46.76850063886385, 168.1665833416483],
+                  [-46.6651360690957, 168.5548344059933],
+                  [-46.948229184324596, 168.34936820699286]]
+            x0 = np.flip(np.asarray(x0), axis=1)
+            file_mask = 'AREM*.nc'
+            output_file_base = 'AREM_perth'
+            title = 'AREM_perthi'
+            is3D = True
+            show_grid = True
+            time_step = 10 * 60
 
         case   1100:
             # batic sea GLORYS
