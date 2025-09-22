@@ -32,31 +32,31 @@ def convert_regular_grid_to_triangles(grid,mask):
 
 
 @njitOTparallel
-def convert_z_interfaces_to_fractions(z_interfaces,bottom_cell_index,minimum_total_water_depth):
+def convert_z_interfaces_to_fractions(z_interfaces,bottom_interface_index,minimum_total_water_depth):
     # get z_interfaces (nodes, depths) as fraction of water depth
     z_fractions= np.full_like(z_interfaces,np.nan,dtype=np.float32)
     for n in prange(z_interfaces.shape[0]): # loop over nodes
         z_surface = float(z_interfaces[n, -1])
-        z_bottom= float(z_interfaces[n,bottom_cell_index[n]])
+        z_bottom= float(z_interfaces[n,bottom_interface_index[n]])
         total_water_depth = abs(z_surface-z_bottom)
         if total_water_depth >= minimum_total_water_depth:
-            for nz in range(bottom_cell_index[n], z_interfaces.shape[1]):
+            for nz in range(bottom_interface_index[n], z_interfaces.shape[1]):
                 z_fractions[n,nz] = (z_interfaces[n,nz]-z_bottom)/total_water_depth
         else:
             # make linear if total depth too small, (eg when z_interface not initialised in dry cells,  so is all zeros)
-            z_fractions[n, bottom_cell_index[n]:] = np.arange(0, z_interfaces.shape[1]-bottom_cell_index[n] )/(z_interfaces.shape[1] -1 - bottom_cell_index[n])
+            z_fractions[n, bottom_interface_index[n]:] = np.arange(0, z_interfaces.shape[1]-bottom_interface_index[n] )/(z_interfaces.shape[1] -1 - bottom_interface_index[n])
         pass
     return z_fractions
 
 @njitOT
-def find_node_with_smallest_bot_layer(z_fractions,bottom_cell_index):
+def find_node_with_smallest_bot_layer(z_fractions,bottom_interface_index):
     # find the  profile with thinest bottom layer as fraction of water depth  from layer boundary z_interfaces
 
     node_min= -1
     min_dz= np.inf
     for n in range(z_fractions.shape[0]): # loop over nodes
 
-        dz_bot = z_fractions[n, bottom_cell_index[n] + 1] - z_fractions[n, bottom_cell_index[n]]
+        dz_bot = z_fractions[n, bottom_interface_index[n] + 1] - z_fractions[n, bottom_interface_index[n]]
 
         if dz_bot > 0 and dz_bot < min_dz:
             min_dz = dz_bot
@@ -65,14 +65,14 @@ def find_node_with_smallest_bot_layer(z_fractions,bottom_cell_index):
     return node_min
 
 @njitOTparallel
-def  interp_4D_field_to_fixed_sigma_values(z_interface_fractions,bottom_cell_index,sigma,
+def  interp_4D_field_to_fixed_sigma_values(z_interface_fractions,bottom_interface_index,sigma,
                                            water_depth,tide,z0,minimum_total_water_depth,
                                            data,out, is_water_velocity):
     # assumes time invariant z_interface_fractions, linear interp
     # set up space
     for nt in prange(out.shape[0]):
         for node in range(out.shape[1]):
-            nz_bottom =  int(bottom_cell_index[node])
+            nz_bottom =  int(bottom_interface_index[node])
             nz_data = nz_bottom
             # loop over new levels
             for nz in range(sigma.size-1):
@@ -136,7 +136,7 @@ def convert_mid_layer_sigma_top_bot_layer_values(data, sigma_layer, sigma):
     return data_interface
 
 @njitOT
-def convert_mid_layer_fixedZ_top_bot_layer_values(data_zlayer, z_layer, z, bottom_cell_index,water_depth):
+def convert_mid_layer_fixedZ_top_bot_layer_values(data_zlayer, z_layer, z, bottom_interface_index,water_depth):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
     # used in FVCOM reader
 
@@ -146,7 +146,7 @@ def convert_mid_layer_fixedZ_top_bot_layer_values(data_zlayer, z_layer, z, botto
     for nt in range(2,data_zlayer.shape[0]):
         for n in range(data_zlayer.shape[1]):
             pass
-            for nz in range(bottom_cell_index[n]+1, data_zlayer.shape[2]-1):
+            for nz in range(bottom_interface_index[n]+1, data_zlayer.shape[2]-1):
                 # linear interp levels not, first or last boundary from surronding mid-layer values
                 data_z[nt, n, nz+1] = kernal_linear_interp1D(z_layer[nz], data_zlayer[nt,n, nz],
                                                     z_layer[nz+1], data_zlayer[nt,n, nz+1], z[nz+1])
@@ -155,14 +155,14 @@ def convert_mid_layer_fixedZ_top_bot_layer_values(data_zlayer, z_layer, z, botto
             data_z[nt, n, -1] = data_zlayer[nt, n, -1]
 
             # extrapolate to first z_interface above the bottom, ie top surface of bottom layer, if enough cells
-            nz1 = bottom_cell_index[n]+1
+            nz1 = bottom_interface_index[n]+1
             if nz1+1 < z_layer.size:
                 data_z[nt, n, nz1] = kernal_linear_interp1D(z_layer[nz1], data_zlayer[nt, n, nz1],
                                                 z_layer[nz1+1], data_zlayer[nt, n, nz1+1],
-                                                        z[bottom_cell_index[n]])
+                                                        z[bottom_interface_index[n]])
 
             # make seabed values same as top of bottom layer
-            data_z[nt, n, bottom_cell_index[n]] = data_z[nt, n, nz1]
+            data_z[nt, n, bottom_interface_index[n]] = data_z[nt, n, nz1]
                     # note - preprocessing will make water_velocity zero at seabed
             pass
         pass
@@ -187,7 +187,7 @@ def get_nodal_values_from_weighted_data(data, node_to_tri_map, tri_per_node, cel
                     cell = node_to_tri_map[node, m]
                     val = data[nt, cell, nz]
                     if not np.isnan(val):
-                        # cope with nans in data
+                        # cope with nans in data at same layer level and ignore these
                         node_val += val * cell_center_weights[node, m] # weight this cell value
                         n_good += 1
                 if n_good > 0:

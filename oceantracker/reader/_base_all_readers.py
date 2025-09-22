@@ -93,10 +93,10 @@ class _BaseReader(ParameterBaseClass):
 
     def preprocess_field_variable(self, name,grid, data): return data
 
-    def read_bottom_cell_index(self, grid):
+    def read_bottom_interface_index(self, grid):
         # dummy bottom cell
-        bottom_cell_index = np.full((self.info['num_nodes'],), 0, dtype=np.int32)
-        return bottom_cell_index
+        bottom_interface_index = np.zeros((self.info['num_nodes'],), dtype=np.int32)
+        return bottom_interface_index
 
     def read_open_boundary_data_as_boolean(self, grid):
         is_open_boundary_node = np.full((grid['x'].shape[0],), False)
@@ -302,7 +302,7 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         grid = self.grid
         vgt = si.vertical_grid_types
-        grid['bottom_cell_index'] = self.read_bottom_cell_index(grid).astype(np.int32)
+        grid['bottom_interface_index'] = self.read_bottom_interface_index(grid).astype(np.int32)
 
         # allow vertical regridding to same sigma at all nodes
 
@@ -426,13 +426,13 @@ class _BaseReader(ParameterBaseClass):
         if field.is3D():
             if info['regrid_z_to_uniform_sigma_levels']:
                 # applies to LSC and Slayer grids if requested (the default)
-                data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_cell_index']) # zero bottom before regrid
+                data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_interface_index']) # zero bottom before regrid
                 data = self._vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma('water_velocity', data)
 
             # ensure vel at bottom is zero
             if info['vert_grid_type'] in [si.vertical_grid_types.LSC, si.vertical_grid_types.Zfixed]:
                 # ragged bottom
-                data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_cell_index'])
+                data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_interface_index'])
             else:
                 # First  cell is at the bottom , so set zero
                 data[:, :, 0, :] = 0.
@@ -629,7 +629,7 @@ class _BaseReader(ParameterBaseClass):
         out = np.full(tuple(s), np.nan, dtype=np.float32) # move to interp_4D_field_to_fixed_sigma_values?
 
         data_out = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
-                            grid['z_interface_fractions'], grid['bottom_cell_index'],
+                            grid['z_interface_fractions'], grid['bottom_interface_index'],
                             grid['sigma'],
                             fields['water_depth'].data, fields['tide'].data,
                             si.settings.z0, si.settings.minimum_total_water_depth,

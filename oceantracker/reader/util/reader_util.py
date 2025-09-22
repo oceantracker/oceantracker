@@ -4,14 +4,14 @@ from numba.typed import List as NumbaList
 from oceantracker.util.numba_util import  njitOT
 
 @njitOT
-def set_dry_cell_flag_from_z_interface( triangles, z_interface, bottom_cell_index, minimum_total_water_depth, is_dry_cell,buffer_index):
+def set_dry_cell_flag_from_z_interface( triangles, z_interface, bottom_interface_index, minimum_total_water_depth, is_dry_cell,buffer_index):
     #  flag cells dry if cell any node is dry
     for nb in buffer_index:
         for ntri in range(triangles.shape[0]):
             # count dry nodes
             n_dry = 0
             for m in triangles[ntri, :]:
-                h = z_interface[nb,m, -1] - z_interface[nb,m, bottom_cell_index[m]]
+                h = z_interface[nb,m, -1] - z_interface[nb,m, bottom_interface_index[m]]
                 if h < minimum_total_water_depth: n_dry += 1
             is_dry_cell[nb, ntri] = 1 if n_dry > 0 else 0
 
@@ -62,14 +62,14 @@ def append_split_cell_data(grid,data, axis=0):
 
 
 @njitOT
-def get_values_at_bottom(field_data4D, bottom_cell_index, out=None):
+def get_values_at_bottom(field_data4D, bottom_interface_index, out=None):
     # get values from bottom cell of LSC grid from a 3D time dependent field, (ie 4D with time)
     if out is None:
         s=field_data4D.shape
         out = np.full(s[:2]+(s[3],), np.nan,dtype=field_data4D.dtype)
 
     for n in range(field_data4D.shape[1]):
-        out[:,n,:] = field_data4D[:, n, bottom_cell_index[n], :]
+        out[:,n,:] = field_data4D[:, n, bottom_interface_index[n], :]
     return out
 
 
@@ -119,24 +119,24 @@ def z_interface_node_to_vertex(z_interface, triangles, z_interface_vertex):
 
 
 @njitOT
-def ensure_velocity_at_bottom_is_zero_ragged_bottom(vel_data, bottom_cell_index):
+def ensure_velocity_at_bottom_is_zero_ragged_bottom(vel_data, bottom_interface_index):
     # ensure velocity vector at bottom is zero, as patch LSC vertical grid issue with nodal values spanning change in number of depth levels
     # needed in schsoim LSC grids due to interplotion bug
     for nt in range(vel_data.shape[0]):
         for node in range(vel_data.shape[1]):
-            bottom_node= bottom_cell_index[node]
+            bottom_node= bottom_interface_index[node]
             for component in range(vel_data.shape[3]):
                 vel_data[nt, node, bottom_node, component] = 0.
     return vel_data
 
 @njitOT
-def get_values_at_ragged_bottom(data, bottom_cell_index):
+def get_values_at_ragged_bottom(data, bottom_interface_index):
     # from 4D field
     s = data.shape
     out = np.full(s[:2]+(s[3],), 0.,dtype=data.dtype)
     for nt in range(data.shape[0]):
         for node in range(data.shape[1]):
-            bottom_node= bottom_cell_index[node]
+            bottom_node= bottom_interface_index[node]
             for component in range(data.shape[3]):
                 out[nt, node, component] = data[nt, node, bottom_node, component]
     return out

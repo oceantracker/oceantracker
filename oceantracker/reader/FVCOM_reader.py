@@ -43,7 +43,7 @@ class FVCOMreader(_BaseUnstructuredReader):
                         y = PVC('lat', str, doc_str='y location of nodes'),
                         z_interface=PVC('zcor', str),
                         triangles =PVC('SCHISM_hgrid_face_nodes', str),
-                        bottom_cell_index =PVC('node_bottom_index', str),
+                        bottom_interface_index =PVC('node_bottom_index', str),
                         is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                         ),
                 variable_signature = PLC(['u', 'v', 'zeta'], str,
@@ -69,7 +69,6 @@ class FVCOMreader(_BaseUnstructuredReader):
         info['num_nodes'] = info['dims'][info['node_dim']]
 
 
-
     def build_vertical_grid(self):
 
         # time invarient z fractions at layer needed for super.build_vertical_grid
@@ -93,11 +92,11 @@ class FVCOMreader(_BaseUnstructuredReader):
         # for use in Slayer vertical grids
         # get profile with the smallest bottom layer  tickness as basis for first sigma layer
         node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['z_interface_fractions'],
-                                                                                              grid['bottom_cell_index'])
+                                                                                              grid['bottom_interface_index'])
 
         # use layer fractions from this node to give layer fractions everywhere
         # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
-        nz_bottom = grid['bottom_cell_index'][node_thinest_bot_layer]
+        nz_bottom = grid['bottom_interface_index'][node_thinest_bot_layer]
 
         # stretch sigma out to same number of depth cells,
         # needed for LSC grid if node_min profile is not full number of cells
@@ -131,7 +130,6 @@ class FVCOMreader(_BaseUnstructuredReader):
         # calcuate z_interface from depth fractions, tide and water depth
         # FVCOM has fraction of depth < from free surface, with top value first in z dim of arrAy
         # todo check first value is the bottom or free surface+-, look like free surface??
-
 
         # time varying z_interface from fixed water depth fractions and total water depth at nodes
         water_depth = fields['water_depth'].data[:, :, :, 0]

@@ -174,7 +174,7 @@ def time_dependent_3D_vector_field_data_in_all_layers(n_buffer, fractional_time_
 
 @njitOTparallel
 def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps, F_data,
-                                            triangles, bottom_cell_index,
+                                            triangles, bottom_interface_index,
                                             n_cell, bc_coords, nz_cell, z_fraction,
                                             F_out, active):
     #  time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
@@ -198,7 +198,7 @@ def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps
             n_node = triangles[n_cell[n], m]
 
             # for LSC grid need to get the highest node of nz or bottom at each triangle vertex
-            nzb =  bottom_cell_index[n_node]  # bottom node at this vertex
+            nzb =  bottom_interface_index[n_node]  # bottom node at this vertex
             nz_below = max(nzb, nz)
             nz_above = max(nzb, nz + 1)
             # add contributions from layer above and below particle, for each spatial component at two time steps
@@ -209,7 +209,7 @@ def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps
 #@function_profiler(__name__)
 @njitOTparallel
 def time_dependent_3D_vector_field_ragged_bottom(n_buffer, fractional_time_steps, F_data,
-                                                 triangles, bottom_cell_index,
+                                                 triangles, bottom_interface_index,
                                                  n_cell, bc_coords, nz_cell, z_fraction,
                                                  F_out, active):
     #  time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
@@ -230,7 +230,7 @@ def time_dependent_3D_vector_field_ragged_bottom(n_buffer, fractional_time_steps
             n_node = triangles[n_cell[n], m]
 
             # for LSC grid need to get the highest node of nz or bottom at each triangle vertex
-            nzb =  bottom_cell_index[n_node]  # bottom node at this vertex
+            nzb =  bottom_interface_index[n_node]  # bottom node at this vertex
             nz_below = max(nzb, nz)
             nz_above = max(nzb, nz + 1)
             # loop over vector components

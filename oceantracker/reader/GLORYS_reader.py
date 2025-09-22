@@ -28,7 +28,7 @@ class GLORYSreader(_BaseStructuredReader):
                         x = PVC('longitude', str, doc_str='x location of nodes'),
                         y = PVC('latitude', str, doc_str='y location of nodes'),
                         z = PVC('depth', str, doc_str='interface depth levels'),
-                        bottom_cell_index=PVC('deptho_lev', str, doc_str='deepest vertical cell for each node'),
+                        bottom_interface_index=PVC('deptho_lev', str, doc_str='deepest vertical cell for each node'),
                         ),
             field_variable_map= {'water_velocity': PLC(['uo', 'vo','wo'], str),
                                    'tide': PVC(None, str, doc_str='maps standard internal field name to file variable name'),
@@ -115,22 +115,22 @@ class GLORYSreader(_BaseStructuredReader):
         super().build_vertical_grid()
 
 
-    def read_bottom_cell_index(self, grid):
+    def read_bottom_interface_index(self, grid):
         # bottom cell is in data files
         ds = self.dataset
         info = self.info
         gm = self.params['grid_variable_map']
-        grid['bottom_cell_index_grid'] = ds.read_variable(gm['bottom_cell_index']).data - self.params['one_based_indices']
+        grid['bottom_interface_index_grid'] = ds.read_variable(gm['bottom_interface_index']).data - self.params['one_based_indices']
         # file cell count is top down, convert to bottom up index
-        grid['bottom_cell_index_grid'] = info['num_z_interfaces'] - grid['bottom_cell_index_grid'] # do this before making an it to capture nans
+        grid['bottom_interface_index_grid'] = info['num_z_interfaces'] - grid['bottom_interface_index_grid'] # do this before making an it to capture nans
 
         # land nodes use 0
-        sel = np.isnan(grid['bottom_cell_index_grid'])
-        grid['bottom_cell_index_grid'][sel] = 0
+        sel = np.isnan(grid['bottom_interface_index_grid'])
+        grid['bottom_interface_index_grid'][sel] = 0
 
-        grid['bottom_cell_index_grid'] =    grid['bottom_cell_index_grid'].astype(np.int32)
+        grid['bottom_interface_index_grid'] =    grid['bottom_interface_index_grid'].astype(np.int32)
 
-        return grid['bottom_cell_index_grid'].ravel()
+        return grid['bottom_interface_index_grid'].ravel()
 
     def read_file_var_as_4D_nodal_values(self,var_name, var_info,  nt=None):
         # reformat file variable into 4D time,node,depth, components  form

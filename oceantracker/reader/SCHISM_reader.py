@@ -25,7 +25,7 @@ class SCHISMreader(_BaseUnstructuredReader):
                         y = PVC('SCHISM_hgrid_node_y', str, doc_str='y location of nodes'),
                         z_interface=PVC('zcor', str),
                         triangles =PVC('SCHISM_hgrid_face_nodes', str),
-                        bottom_cell_index =PVC('node_bottom_index', str),
+                        bottom_interface_index =PVC('node_bottom_index', str),
                         is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                         ),
             'field_variable_map': {'water_velocity': PLC(['hvel', 'vertical_velocity'], str),
@@ -77,7 +77,7 @@ class SCHISMreader(_BaseUnstructuredReader):
             info['z_dim'] = dm['z']
             info['num_z_interfaces'] = info['dims'][info['z_dim']]
             info['all_z_dims'] = dm['all_z_dims']
-            info['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_cell_index'] in info['variables'] \
+            info['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_interface_index'] in info['variables'] \
                                                                         else si.vertical_grid_types.Slayer
 
         info['node_dim'] = params['dimension_map']['node']
@@ -106,18 +106,18 @@ class SCHISMreader(_BaseUnstructuredReader):
 
 
 
-    def read_bottom_cell_index(self, grid):
+    def read_bottom_interface_index(self, grid):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid
         info = self.info
-        var_name = self.params['grid_variable_map']['bottom_cell_index']
+        var_name = self.params['grid_variable_map']['bottom_interface_index']
 
         if var_name in info['variables']:
-            bottom_cell_index=  self.dataset.read_variable(var_name).data - 1
+            bottom_interface_index=  self.dataset.read_variable(var_name).data - 1
         else:
             # S  grid bottom cell index = zero
-            bottom_cell_index = np.zeros((self.info['num_nodes'],), dtype=np.int32)
+            bottom_interface_index = np.zeros((self.info['num_nodes'],), dtype=np.int32)
 
-        return bottom_cell_index
+        return bottom_interface_index
 
     def read_dry_cell_data(self,nt_index, buffer_index):
         # calculate dry cell flags, if any cell node is then dry is_dry_cell_buffer=1
@@ -151,14 +151,14 @@ class SCHISMreader(_BaseUnstructuredReader):
         z_interface =ds.read_variable(gm['z_interface']).data[0,:,:]
 
         # use node with thinest top/bot layers as template for all sigma levels
-        grid['z_interface_fractions'] = hydromodel_grid_transforms.convert_z_interfaces_to_fractions(z_interface, grid['bottom_cell_index'], si.settings.minimum_total_water_depth)
+        grid['z_interface_fractions'] = hydromodel_grid_transforms.convert_z_interfaces_to_fractions(z_interface, grid['bottom_interface_index'], si.settings.minimum_total_water_depth)
 
         # get profile with the smallest bottom layer  tickness as basis for first sigma layer
-        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['z_interface_fractions'],grid['bottom_cell_index'])
+        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['z_interface_fractions'],grid['bottom_interface_index'])
 
         # use layer fractions from this node to give layer fractions everywhere
         # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
-        nz_bottom = grid['bottom_cell_index'][node_thinest_bot_layer]
+        nz_bottom = grid['bottom_interface_index'][node_thinest_bot_layer]
 
         # stretch sigma out to same number of depth cells,
         # needed for LSC grid if node_min profile is not full number of cells
@@ -173,7 +173,7 @@ class SCHISMreader(_BaseUnstructuredReader):
             sel = np.arange(0, z_interface.shape[0], 100)
             water_depth,junk = self.read_field_var(nc, self.params['field_variable_map']['water_depth'])
             sel=sel[water_depth[sel]> 10]
-            index_frac = (np.arange(z_interface.shape[1])[np.newaxis,:] - grid['bottom_cell_index'][sel,np.newaxis]) / (z_interface.shape[1] - grid['bottom_cell_index'][sel,np.newaxis])
+            index_frac = (np.arange(z_interface.shape[1])[np.newaxis,:] - grid['bottom_interface_index'][sel,np.newaxis]) / (z_interface.shape[1] - grid['bottom_interface_index'][sel,np.newaxis])
             z_interface[z_interface < -1.0e4] = np.nan
 
             #plt.plot(index_frac.T,z_interface[sel,:].T,'.')

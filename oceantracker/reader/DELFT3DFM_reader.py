@@ -30,7 +30,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                         z_layer=PVC('mesh2d_layer_z', str, doc_str='Mid layer z'),
                         triangles= PVC('mesh2d_face_nodes', str),
                         quad_face_nodes=PVC('mesh2d_face_nodes', str),
-                        bottom_cell_index= PVC(None, str),
+                        bottom_interface_index= PVC(None, str),
                         is_dry_cell=PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                             ),
             dimension_map=dict(
@@ -84,6 +84,11 @@ class DELF3DFMreader(_BaseUnstructuredReader):
 
             elif 'mesh2d_layer_z' in  ds_info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Zfixed
+
+            elif 'mesh2d_flowelem_zcc' in  ds_info['variables']:
+                # mixed sigma, tide moving z levels, ie LSC type grid
+                info['vert_grid_type'] = si.vertical_grid_types.LSC
+
             else:
                 si.msg_logger.msg('Cannot determine vertical grid type',caller=self, fatal_error=True,
                                   hint='Delft3D FM file needs variables "mesh2d_layer_sigma" and  "mesh2d_interface_sigma" if sigma grid, or "mesh2d_layer_z" and "mesh2d_interface_z" if fixed z level grid')
@@ -148,22 +153,14 @@ class DELF3DFMreader(_BaseUnstructuredReader):
 
 
         if info['vert_grid_type'] == si.vertical_grid_types.Sigma:
-            if False:
-                # relace sigmas if missing
-                print('xx, builing ')
-                depth = ds.read_variable('mesh2d_flowelem_bl')
-                tide = ds.read_variable('mesh2d_s1')
-                z_layer = ds.read_variable('mesh2d_flowelem_zcc')
-                sel = depth > np.nanmean(depth)
-                sigma= z_layer[0,:,sel,:] /(tide[0,sel,:] -depth)
-                # assumes first value -1 is at the bottom
-
             grid['sigma'] = ds.read_variable('mesh2d_interface_sigma').data.astype(np.float32) # layer interfaces
             grid['sigma'][0] = -1.  # not sure why this value is 9.96920997e+36??
             grid['sigma_layer'] = ds.read_variable('mesh2d_layer_sigma').data.astype(np.float32)  # layer center
             # shift to be zero at bottom
             grid['sigma'] = 1.+ grid['sigma']
             grid['sigma_layer'] = 1. + grid['sigma_layer']
+        elif info['vert_grid_type'] == si.vertical_grid_types.LSC:
+            pass
         else:
             # fixed z levels
             grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)  # layer boundary fractions reversed from negative values
@@ -172,25 +169,24 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         super().build_vertical_grid()
 
 
-
         # need to add a layer between first given z level and bottom
-        grid['bottom_cell_index'] = np.maximum(grid['bottom_cell_index']-1, 0)
+        grid['bottom_interface_index'] = np.maximum(grid['bottom_interface_index']-1, 0)
 
 
-    def read_bottom_cell_index(self, grid):
+    def read_bottom_interface_index(self, grid):
         gm = self.params['grid_variable_map']
         fm = self.params['field_variable_map']
         info =  self.info
         ds = self.dataset
 
-        if info['vert_grid_type'] == si.vertical_grid_types.Zfixed:
+        if info['vert_grid_type'] in [si.vertical_grid_types.Zfixed, si.vertical_grid_types.LSC]:
             # find bottom cell based on nans in a dummy read of mid-layer velocity after it has been converted to nodal values
             u = ds.read_variable(fm['water_velocity'][0], nt=0).data  # from non nans in first hori velocity time step
             u = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(u,
                                 grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
-            bottom_cell_index = self.find_layer_with_first_non_nan(u[0, :, :])
+            bottom_cell_index = self.find_z_index_with_first_non_nan(u[0, :, :])
         else:
-            # bottom cell is the first cell
+            # bottom cell is the first cell in sigma grid
             bottom_cell_index = np.zeros((info['num_nodes'],),  dtype=np.int32)
 
         return bottom_cell_index
@@ -252,7 +248,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             if info['vert_grid_type'] == si.vertical_grid_types.Zfixed :
                 #  interp fixed z layer values to interfaces, must be done after nodal values
                 data = hydromodel_grid_transforms.convert_mid_layer_fixedZ_top_bot_layer_values(
-                    data, grid['z_layer'], grid['z'], grid['bottom_cell_index'], grid['water_depth'])
+                    data, grid['z_layer'], grid['z'], grid['bottom_interface_index'], grid['water_depth'])
             else:
                 # sigma grid
                 data = hydromodel_grid_transforms. convert_mid_layer_sigma_top_bot_layer_values(data, grid['sigma_layer'], grid['sigma'])
@@ -269,15 +265,15 @@ class DELF3DFMreader(_BaseUnstructuredReader):
 
     @staticmethod
     @njitOT
-    def find_layer_with_first_non_nan(data):
+    def find_z_index_with_first_non_nan(data):
         # find cell with the bottom, from first mid-layer velocities not a nan
         n_nodes=data.shape[0]
-        n_z_interfaces = data.shape[1]
-        depth_cell_with_bottom = np.full((n_nodes,),n_z_interfaces-1, dtype=np.int32)
+        n_zs = data.shape[1]
+        index_with_first_non_nan = np.full((n_nodes,),n_zs-1, dtype=np.int32)
         for n in range(n_nodes):
-            for nz in range(n_z_interfaces-1): # loop over depth cells
+            for nz in range(n_zs-1): # loop over depth cells
                 if ~np.isnan(data[n, nz]) :# find first non-nan
-                    depth_cell_with_bottom[n] = nz # note some water depths are <0, land?
+                    index_with_first_non_nan[n] = nz # note some water depths are <0, land?
                     break
 
-        return depth_cell_with_bottom
+        return index_with_first_non_nan

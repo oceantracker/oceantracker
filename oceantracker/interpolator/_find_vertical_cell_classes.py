@@ -164,7 +164,7 @@ class FindVerticalCellSlayerLSCGrid(object):
         z_fraction = part_prop['z_fraction'].data
         z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
 
-        self.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,grid['triangles'], grid['z_interface'], grid['bottom_cell_index'],
+        self.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,grid['triangles'], grid['z_interface'], grid['bottom_interface_index'],
                                                       n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                                       current_buffer_steps, fractional_time_steps,
                                                       self.walk_counts,
@@ -174,7 +174,7 @@ class FindVerticalCellSlayerLSCGrid(object):
     @staticmethod
     @njitOTparallel
     def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
-                                                      triangles, z_interface, bottom_cell_index,
+                                                      triangles, z_interface, bottom_interface_index,
                                                       n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                                       current_buffer_steps, fractional_time_steps,
                                                       walk_counts,
@@ -205,7 +205,7 @@ class FindVerticalCellSlayerLSCGrid(object):
 
             deepest_bottom_cell = nz_top_cell
             for m in range(3):
-                bottom_nz_nodes[m] = bottom_cell_index[nodes[m]]
+                bottom_nz_nodes[m] = bottom_interface_index[nodes[m]]
                 deepest_bottom_cell = min(bottom_nz_nodes[m], deepest_bottom_cell)
 
             # preserve status if stranded by tide
@@ -321,14 +321,14 @@ class FindVerticalCellZfixed(object):
         z_fraction = part_prop['z_fraction'].data
         z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
 
-        self.get_depth_cell_fixedZ(xq, grid['triangles'], grid['bottom_cell_index'],
+        self.get_depth_cell_fixedZ(xq, grid['triangles'], grid['bottom_interface_index'],
                              grid['water_depth'], fields['tide'].data, grid['z'], grid['nz_map'], grid['dz_map'],
                              n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                              current_buffer_steps, fractional_time_steps,
                              active, si.settings.z0)
     @staticmethod
     @njitOT
-    def get_depth_cell_fixedZ(xq, triangles, bottom_cell_index,water_depth,tide,
+    def get_depth_cell_fixedZ(xq, triangles, bottom_interface_index,water_depth,tide,
                                     z, nz_map,dz_map,
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                     current_buffer_steps, fractional_time_steps,
@@ -345,7 +345,7 @@ class FindVerticalCellZfixed(object):
                 z_bot -= bc_coords[n, m] * water_depth[nodes[m]]
                 # for ragged bottom, get the deepest cell
                 # a particle could be amonst the 3 nodes
-                deepest_bottom_cell = min(bottom_cell_index[nodes[m]],deepest_bottom_cell)
+                deepest_bottom_cell = min(bottom_interface_index[nodes[m]],deepest_bottom_cell)
 
             # preserve status if stranded by tide
             if status[n] == status_stranded_by_tide:

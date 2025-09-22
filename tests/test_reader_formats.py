@@ -486,7 +486,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', default=None, type= int)
-    parser.add_argument('-uniform', action='store_false')
+    parser.add_argument('-nativez', action='store_true')
     parser.add_argument('-gridplot', action='store_true')
     parser.add_argument('-plot', action='store_true')
     parser.add_argument('-skip_run', action='store_true')
@@ -506,7 +506,7 @@ if __name__ == '__main__':
         params, plot_opt= get_case(n)
         params['display_grid_at_start'] = True # ti use giput to get cords
         params.update( root_output_dir = root_output_dir,
-                    regrid_z_to_uniform_sigma_levels = args.uniform,
+                    regrid_z_to_uniform_sigma_levels = not args.nativez,
                     dev_debug_plots = args.debug_plots,
                     use_A_Z_profile = False,
                     debug=True,
