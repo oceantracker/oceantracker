@@ -52,12 +52,12 @@ class FrictionVelocity(CustomFieldBase):
                                                    si.settings.z0, self.data)
         elif info['mode'] == 2:
             # native vertical grid
-            self.calc_friction_velocity_from_Slayer_or_LSC_grid(buffer_index, grid['zlevel'],
+            self.calc_friction_velocity_from_Slayer_or_LSC_grid(buffer_index, grid['z_interface'],
                                                                 grid['bottom_cell_index'],
                                                                 si.settings.z0, fields['water_velocity'].data,
                                                                 self.data)
         elif info['mode'] == 3:
-            self.calc_friction_velocity_fixed_zlevels_grid(buffer_index, grid['z'],
+            self.calc_friction_velocity_fixed_z_interfaces_grid(buffer_index, grid['z'],
                                             grid['water_depth'],
                                             grid['bottom_cell_index'],
                                             si.settings.z0, fields['water_velocity'].data,
@@ -68,13 +68,13 @@ class FrictionVelocity(CustomFieldBase):
 
     @staticmethod
     @njitOT
-    def calc_friction_velocity_from_Slayer_or_LSC_grid(buffer_index, zlevel, bottom_cell_index, z0, water_velocity, out):
+    def calc_friction_velocity_from_Slayer_or_LSC_grid(buffer_index, z_interface, bottom_cell_index, z0, water_velocity, out):
         # get friction velocity from bottom cell, if velocity is zero at base of bottom cell
         # based on log layer  u= u_* log(z/z0)/kappa
         for nt in buffer_index:
-            for n in np.arange(zlevel.shape[1]): # loop over nodes
+            for n in np.arange(z_interface.shape[1]): # loop over nodes
                 nz1=bottom_cell_index[n]+1
-                dz =  zlevel[nt, n, nz1] - zlevel[nt, n, bottom_cell_index[n]] # size of bottom cell
+                dz =  z_interface[nt, n, nz1] - z_interface[nt, n, bottom_cell_index[n]] # size of bottom cell
 
                 if dz >  0.2:
                     speed = np.sqrt(water_velocity[nt, n, nz1, 0]**2 + water_velocity[nt, n, nz1, 1]**2)
@@ -101,7 +101,7 @@ class FrictionVelocity(CustomFieldBase):
 
     @staticmethod
     @njitOT
-    def calc_friction_velocity_fixed_zlevels_grid(buffer_index, z, water_depth,
+    def calc_friction_velocity_fixed_z_interfaces_grid(buffer_index, z, water_depth,
                                                   bottom_cell_index, z0,
                                                   water_velocity, out):
 

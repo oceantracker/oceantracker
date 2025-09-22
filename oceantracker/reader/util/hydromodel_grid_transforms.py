@@ -32,25 +32,25 @@ def convert_regular_grid_to_triangles(grid,mask):
 
 
 @njitOTparallel
-def convert_zlevels_to_fractions(zlevels,bottom_cell_index,minimum_total_water_depth):
-    # get zlevels (nodes, depths) as fraction of water depth
-    z_fractions= np.full_like(zlevels,np.nan,dtype=np.float32)
-    for n in prange(zlevels.shape[0]): # loop over nodes
-        z_surface = float(zlevels[n, -1])
-        z_bottom= float(zlevels[n,bottom_cell_index[n]])
+def convert_z_interfaces_to_fractions(z_interfaces,bottom_cell_index,minimum_total_water_depth):
+    # get z_interfaces (nodes, depths) as fraction of water depth
+    z_fractions= np.full_like(z_interfaces,np.nan,dtype=np.float32)
+    for n in prange(z_interfaces.shape[0]): # loop over nodes
+        z_surface = float(z_interfaces[n, -1])
+        z_bottom= float(z_interfaces[n,bottom_cell_index[n]])
         total_water_depth = abs(z_surface-z_bottom)
         if total_water_depth >= minimum_total_water_depth:
-            for nz in range(bottom_cell_index[n], zlevels.shape[1]):
-                z_fractions[n,nz] = (zlevels[n,nz]-z_bottom)/total_water_depth
+            for nz in range(bottom_cell_index[n], z_interfaces.shape[1]):
+                z_fractions[n,nz] = (z_interfaces[n,nz]-z_bottom)/total_water_depth
         else:
-            # make linear if total depth too small, (eg when zlevel not initialised in dry cells,  so is all zeros)
-            z_fractions[n, bottom_cell_index[n]:] = np.arange(0, zlevels.shape[1]-bottom_cell_index[n] )/(zlevels.shape[1] -1 - bottom_cell_index[n])
+            # make linear if total depth too small, (eg when z_interface not initialised in dry cells,  so is all zeros)
+            z_fractions[n, bottom_cell_index[n]:] = np.arange(0, z_interfaces.shape[1]-bottom_cell_index[n] )/(z_interfaces.shape[1] -1 - bottom_cell_index[n])
         pass
     return z_fractions
 
 @njitOT
 def find_node_with_smallest_bot_layer(z_fractions,bottom_cell_index):
-    # find the  profile with thinest bottom layer as fraction of water depth  from layer boundary zlevels
+    # find the  profile with thinest bottom layer as fraction of water depth  from layer boundary z_interfaces
 
     node_min= -1
     min_dz= np.inf
@@ -65,10 +65,10 @@ def find_node_with_smallest_bot_layer(z_fractions,bottom_cell_index):
     return node_min
 
 @njitOTparallel
-def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,sigma,
+def  interp_4D_field_to_fixed_sigma_values(z_interface_fractions,bottom_cell_index,sigma,
                                            water_depth,tide,z0,minimum_total_water_depth,
                                            data,out, is_water_velocity):
-    # assumes time invariant zlevel_fractions, linear interp
+    # assumes time invariant z_interface_fractions, linear interp
     # set up space
     for nt in prange(out.shape[0]):
         for node in range(out.shape[1]):
@@ -77,18 +77,18 @@ def  interp_4D_field_to_fixed_sigma_values(zlevel_fractions,bottom_cell_index,si
             # loop over new levels
             for nz in range(sigma.size-1):
 
-                # if the sigma is above next zlevel, move data zlevel index up one
-                nz_data +=  sigma[nz] > zlevel_fractions[node, nz_data+1] # branch-less increment
-                nz_data = min(nz_data, zlevel_fractions.shape[1] - 2) # bound it to be one less than top cell
+                # if the sigma is above next z_interface, move data z_interface index up one
+                nz_data +=  sigma[nz] > z_interface_fractions[node, nz_data+1] # branch-less increment
+                nz_data = min(nz_data, z_interface_fractions.shape[1] - 2) # bound it to be one less than top cell
 
                 # do vertical linear interp
-                # get fraction within zlevel layer to use in interp
-                dzf= abs(zlevel_fractions[node, nz_data + 1] - zlevel_fractions[node, nz_data])
+                # get fraction within z_interface layer to use in interp
+                dzf= abs(z_interface_fractions[node, nz_data + 1] - z_interface_fractions[node, nz_data])
                 if dzf < .001:
                     f = 0.
                     dzf = 0.0
                 else:
-                    f = (sigma[nz] - zlevel_fractions[node, nz_data])/dzf
+                    f = (sigma[nz] - z_interface_fractions[node, nz_data])/dzf
 
                 # if in bottom data cell use log interp if water velocity
                 # by adjusting f
@@ -220,22 +220,22 @@ def get_node_to_cell_map(cell_nodes, n_nodes):
     return node_to_cell_map, cells_per_node
 
 @njitOT
-def convert_layer_field_to_levels_from_depth_fractions_at_each_node(data, zfraction_layer, zfraction_level):
+def convert_layer_field_to_levels_from_interface_fractions_at_each_node(data, z_layer_fraction, z_interface_fraction):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depths
     # used in FVCOM reader
-    data_levels = np.full((data.shape[0], data.shape[1], zfraction_level.shape[1]), 0., dtype=np.float32)
+    data_levels = np.full((data.shape[0], data.shape[1], z_interface_fraction.shape[1]), 0., dtype=np.float32)
 
     for nt in range(data.shape[0]):
         for n in range(data.shape[1]):
             for nz in range(1,data.shape[2]):
                 # linear interp levels not, first or last boundary
-                data_levels[nt, n, nz] = kernal_linear_interp1D(zfraction_layer[n, nz - 1], data[nt, n, nz - 1], zfraction_layer[n, nz], data[nt, n, nz], zfraction_level[n, nz])
+                data_levels[nt, n, nz] = kernal_linear_interp1D(z_layer_fraction[n, nz - 1], data[nt, n, nz - 1], z_layer_fraction[n, nz], data[nt, n, nz], z_interface_fraction[n, nz])
 
             # extrapolate to top zlevel
-            data_levels[nt, n, -1] = kernal_linear_interp1D(zfraction_layer[n, - 2], data[nt, n, -2], zfraction_layer[n, -1], data[nt, n, -1], zfraction_level[n, -1])
+            data_levels[nt, n, -1] = kernal_linear_interp1D(z_layer_fraction[n, - 2], data[nt, n, -2], z_layer_fraction[n, -1], data[nt, n, -1], z_interface_fraction[n, -1])
 
             # extrapolate to bottom zlevel
-            data_levels[nt, n, 0] = kernal_linear_interp1D(zfraction_layer[n, 0], data[nt, n, 0], zfraction_layer[n, 1], data[nt, n, 1], zfraction_level[n, 0])
+            data_levels[nt, n, 0] = kernal_linear_interp1D(z_layer_fraction[n, 0], data[nt, n, 0], z_layer_fraction[n, 1], data[nt, n, 1], z_interface_fraction[n, 0])
 
     return data_levels
 

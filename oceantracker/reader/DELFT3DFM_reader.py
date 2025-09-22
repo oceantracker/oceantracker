@@ -65,7 +65,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         if info['is3D']:
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
-            info['num_z_levels'] = dims[info['z_dim']]
+            info['num_z_interfaces'] = dims[info['z_dim']]
             info['all_z_dims'] = dm['all_z_dims']
             # 2 variants of fixed z layer dimension names
             if 'mesh2d_nInterfaces' in dims:
@@ -77,7 +77,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                 info['layer_dim'] = 'nmesh2d_layer'
                 info['all_z_dims'] = ['nmesh2d_interface','nmesh2d_layer']
 
-            info['num_z_levels'] = dims[info['z_dim']]
+            info['num_z_interfaces'] = dims[info['z_dim']]
 
             if 'mesh2d_layer_sigma' in ds_info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Sigma
@@ -272,10 +272,10 @@ class DELF3DFMreader(_BaseUnstructuredReader):
     def find_layer_with_first_non_nan(data):
         # find cell with the bottom, from first mid-layer velocities not a nan
         n_nodes=data.shape[0]
-        n_zlevels = data.shape[1]
-        depth_cell_with_bottom = np.full((n_nodes,),n_zlevels-1, dtype=np.int32)
+        n_z_interfaces = data.shape[1]
+        depth_cell_with_bottom = np.full((n_nodes,),n_z_interfaces-1, dtype=np.int32)
         for n in range(n_nodes):
-            for nz in range(n_zlevels-1): # loop over depth cells
+            for nz in range(n_z_interfaces-1): # loop over depth cells
                 if ~np.isnan(data[n, nz]) :# find first non-nan
                     depth_cell_with_bottom[n] = nz # note some water depths are <0, land?
                     break

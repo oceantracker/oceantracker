@@ -23,7 +23,7 @@ class SCHISMreader(_BaseUnstructuredReader):
                         time=PVC('time', str, doc_str='Name of time variable in hindcast'),
                         x = PVC('SCHISM_hgrid_node_x', str, doc_str='x location of nodes'),
                         y = PVC('SCHISM_hgrid_node_y', str, doc_str='y location of nodes'),
-                        zlevel=PVC('zcor', str),
+                        z_interface=PVC('zcor', str),
                         triangles =PVC('SCHISM_hgrid_face_nodes', str),
                         bottom_cell_index =PVC('node_bottom_index', str),
                         is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
@@ -75,7 +75,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         if info['is3D']:
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
-            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][info['z_dim']]
             info['all_z_dims'] = dm['all_z_dims']
             info['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_cell_index'] in info['variables'] \
                                                                         else si.vertical_grid_types.Slayer
@@ -84,8 +84,8 @@ class SCHISMreader(_BaseUnstructuredReader):
         info['num_nodes'] = info['dims'][info['node_dim']]
 
 
-    def read_zlevel(self, nt):
-        data = self.dataset.read_variable(self.params['grid_variable_map']['zlevel'], nt = nt)
+    def read_z_interface(self, nt):
+        data = self.dataset.read_variable(self.params['grid_variable_map']['z_interface'], nt = nt)
         return data
 
 
@@ -147,14 +147,14 @@ class SCHISMreader(_BaseUnstructuredReader):
         ds = self.dataset
         gm = self.params['grid_variable_map']
 
-        # read first zlevel time step
-        zlevel =ds.read_variable(gm['zlevel']).data[0,:,:]
+        # read first z_interface time step
+        z_interface =ds.read_variable(gm['z_interface']).data[0,:,:]
 
         # use node with thinest top/bot layers as template for all sigma levels
-        grid['zlevel_fractions'] = hydromodel_grid_transforms.convert_zlevels_to_fractions(zlevel, grid['bottom_cell_index'], si.settings.minimum_total_water_depth)
+        grid['z_interface_fractions'] = hydromodel_grid_transforms.convert_z_interfaces_to_fractions(z_interface, grid['bottom_cell_index'], si.settings.minimum_total_water_depth)
 
         # get profile with the smallest bottom layer  tickness as basis for first sigma layer
-        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['zlevel_fractions'],grid['bottom_cell_index'])
+        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['z_interface_fractions'],grid['bottom_cell_index'])
 
         # use layer fractions from this node to give layer fractions everywhere
         # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
@@ -162,24 +162,24 @@ class SCHISMreader(_BaseUnstructuredReader):
 
         # stretch sigma out to same number of depth cells,
         # needed for LSC grid if node_min profile is not full number of cells
-        zf_model = grid['zlevel_fractions'][node_thinest_bot_layer, nz_bottom:]
-        nz = grid['zlevel_fractions'].shape[1]
+        zf_model = grid['z_interface_fractions'][node_thinest_bot_layer, nz_bottom:]
+        nz = grid['z_interface_fractions'].shape[1]
         nz_fractions = nz - nz_bottom
         grid['sigma'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
 
         if False:
             # debug plots sigma
             from matplotlib import pyplot as plt
-            sel = np.arange(0, zlevel.shape[0], 100)
+            sel = np.arange(0, z_interface.shape[0], 100)
             water_depth,junk = self.read_field_var(nc, self.params['field_variable_map']['water_depth'])
             sel=sel[water_depth[sel]> 10]
-            index_frac = (np.arange(zlevel.shape[1])[np.newaxis,:] - grid['bottom_cell_index'][sel,np.newaxis]) / (zlevel.shape[1] - grid['bottom_cell_index'][sel,np.newaxis])
-            zlevel[zlevel < -1.0e4] = np.nan
+            index_frac = (np.arange(z_interface.shape[1])[np.newaxis,:] - grid['bottom_cell_index'][sel,np.newaxis]) / (z_interface.shape[1] - grid['bottom_cell_index'][sel,np.newaxis])
+            z_interface[z_interface < -1.0e4] = np.nan
 
-            #plt.plot(index_frac.T,zlevel[sel,:].T,'.')
+            #plt.plot(index_frac.T,z_interface[sel,:].T,'.')
             #plt.show(block=True)
-            plt.plot(index_frac.T, grid['zlevel_fractions'][sel, :].T, lw=0.1)
-            plt.plot(index_frac.T,grid['zlevel_fractions'][sel, :].T, '.')
+            plt.plot(index_frac.T, grid['z_interface_fractions'][sel, :].T, lw=0.1)
+            plt.plot(index_frac.T,grid['z_interface_fractions'][sel, :].T, '.')
 
             plt.show(block=True)
 

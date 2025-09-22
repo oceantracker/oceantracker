@@ -23,6 +23,11 @@ Bug fixes
 ---------
 #. Grid release bug for more pulse size > 1 fixed
 
+Misc.
+-------
+
+# missing L in name of delft3d reader class added
+# made more robust converstion of time to hindcast to
 
 Version '0.5.0.000 2024-12-20'
 ______________________________
@@ -315,7 +320,7 @@ _____________________________
 8. merged calaculate velocity by add_modifiers into solver  core particle_velocity class now gone
 9. sharedinfo.class_interators_dict is now sharedinfo.class_list_interators 
 10. brought field class, eg friction velocity, into line with initialize from parameters, as for all other classes
-11. total water_depth feild added automatically, using zlevels if available, otherwise tide and water depth ( as schism "tide" is not always top zlevel in dry cells)
+11. total water_depth feild added automatically, using zlevels if available, otherwise tide and water depth ( as schism "tide" is not always top z_interface in dry cells)
 12. added shared_params['use_numpy_random_seed'] boolean, for testing only!
 13. (not yet working in linux) ?? short version of long class names eg, 'class_name': 'oceantracker.particle_release_groups.polygon_release.PolygonRelease', with the oceantracker package can optionally use class name only, eg PolygonRelease, this requires
 14. added ability for any class to add the fields or particle properties they need to operate

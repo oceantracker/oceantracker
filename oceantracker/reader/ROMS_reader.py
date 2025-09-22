@@ -75,7 +75,7 @@ class ROMSreader(_BaseStructuredReader):
         if info['is3D']:
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
-            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][info['z_dim']]
             info['all_z_dims'] = dm['all_z_dims']
             info['vert_grid_type'] = si.vertical_grid_types.Sigma  # Slayer uses zero bottom cell, so treated the dame
 
@@ -190,7 +190,7 @@ class ROMSreader(_BaseStructuredReader):
         data = data.reshape( (s[0],s[1]*s[2], s[3])) # this should match flatten in "C" order
 
         if 's_rho' in var_info['dims']:
-            # convert mid-layer values to values at layer boundaries, ie zlevels
+            # convert mid-layer values to values at layer boundaries, ie z_interfaces
             data = convert_mid_layer_sigma_top_bot_layer_values(data, grid['sigma_layer'], grid['sigma'])
 
         # add dummy vector components axis, note in ROMS vectors are stored in netcdf as individual components,

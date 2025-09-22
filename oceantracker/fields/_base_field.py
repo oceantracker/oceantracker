@@ -30,7 +30,7 @@ class _BaseField(ParameterBaseClass):
 
         s= [si.settings.time_buffer_size if params['time_varying'] else 1,
             reader_info['num_nodes'],
-            reader_info['num_z_levels'] if params['is3D'] else 1,
+            reader_info['num_z_interfaces'] if params['is3D'] else 1,
             (3 if params['is3D'] else 2) if params['is_vector'] else 1
             ]
 

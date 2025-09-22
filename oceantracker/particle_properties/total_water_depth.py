@@ -26,6 +26,6 @@ class TotalWaterDepth(ManuallyUpdatedParticleProperty):
     @staticmethod
     @njitOT
     def get_time_dependent_total_water_depth_from_tide_and_water_depth(tide, water_depth, total_water_depth, active):
-        # get total time dependent water depth as 4D field  from top and bottom cell of LSC grid zlevels
+        # get total time dependent water depth as 4D field  from top and bottom cell of LSC grid z_interfaces
         for n in active:
             total_water_depth[n] = abs(tide[n] + water_depth[n])

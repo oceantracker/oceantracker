@@ -41,7 +41,7 @@ class FVCOMreader(_BaseUnstructuredReader):
                         time=PVC('time', str, doc_str='Name of time variable in hindcast'),
                         x = PVC('lon', str, doc_str='x location of nodes'),
                         y = PVC('lat', str, doc_str='y location of nodes'),
-                        zlevel=PVC('zcor', str),
+                        z_interface=PVC('zcor', str),
                         triangles =PVC('SCHISM_hgrid_face_nodes', str),
                         bottom_cell_index =PVC('node_bottom_index', str),
                         is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
@@ -61,7 +61,7 @@ class FVCOMreader(_BaseUnstructuredReader):
         if info['is3D']:
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
-            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][info['z_dim']]
             info['all_z_dims'] = dm['all_z_dims']
             info['vert_grid_type'] = si.vertical_grid_types.Slayer
 
@@ -77,8 +77,8 @@ class FVCOMreader(_BaseUnstructuredReader):
         ds = self.dataset
         z = ds.read_variable('siglev').data.astype(np.float32).T
         zlayer = ds.read_variable('siglay').data.astype(np.float32).T
-        grid['zlevel_fractions']  = 1. + np.flip(z, axis=1)  # layer boundary fractions
-        grid['zlevel_fractions_layer'] = 1. + np.flip(zlayer, axis=1)  # layer center fractions
+        grid['z_interface_fractions']  = 1. + np.flip(z, axis=1)  # layer boundary fractions
+        grid['z_layer_fractions'] = 1. + np.flip(zlayer, axis=1)  # layer center fractions
 
         # make distance weighting matrix for triangle center values at nodal points
         grid['cell_center_weights'] = hydromodel_grid_transforms.calculate_inv_dist_weights_at_node_locations(
@@ -92,7 +92,7 @@ class FVCOMreader(_BaseUnstructuredReader):
     def set_up_uniform_sigma(self, grid):
         # for use in Slayer vertical grids
         # get profile with the smallest bottom layer  tickness as basis for first sigma layer
-        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['zlevel_fractions'],
+        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['z_interface_fractions'],
                                                                                               grid['bottom_cell_index'])
 
         # use layer fractions from this node to give layer fractions everywhere
@@ -101,8 +101,8 @@ class FVCOMreader(_BaseUnstructuredReader):
 
         # stretch sigma out to same number of depth cells,
         # needed for LSC grid if node_min profile is not full number of cells
-        zf_model = grid['zlevel_fractions'][node_thinest_bot_layer, nz_bottom:]
-        nz = grid['zlevel_fractions'].shape[1]
+        zf_model = grid['z_interface_fractions'][node_thinest_bot_layer, nz_bottom:]
+        nz = grid['z_interface_fractions'].shape[1]
         nz_fractions = nz - nz_bottom
         grid['sigma'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
 
@@ -127,17 +127,16 @@ class FVCOMreader(_BaseUnstructuredReader):
         grid['quad_cells_to_split'] =  np.full((0,),0, np.int32)
 
 
-    def read_zlevel(self, nc,grid,fields, file_index, zlevel_buffer, buffer_index):
-        # calcuate zlevel from depth fractions, tide and water depth
+    def read_z_interface(self, nc,grid,fields, file_index, z_interface_buffer, buffer_index):
+        # calcuate z_interface from depth fractions, tide and water depth
         # FVCOM has fraction of depth < from free surface, with top value first in z dim of arrAy
         # todo check first value is the bottom or free surface+-, look like free surface??
 
 
-        # time varying zlevel from fixed water depth fractions and total water depth at nodes
+        # time varying z_interface from fixed water depth fractions and total water depth at nodes
         water_depth = fields['water_depth'].data[:, :, :, 0]
         tide = fields['tide'].data[:, :, :, 0]
-
-        zlevel_buffer[buffer_index, ...] = grid['zlevel_fractions'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
+        z_interface_buffer[buffer_index, ...] = grid['z_interface_fractions'][np.newaxis, ...]*(tide[buffer_index, :, :]+water_depth) - water_depth
 
     def read_dry_cell_data(self, nt_index, buffer_index):
         ds = self.dataset
@@ -178,9 +177,9 @@ class FVCOMreader(_BaseUnstructuredReader):
         # see if z or z water level  in variable and swap z and node dim
         if 'siglay' in var_info['dims']:
             #3D mid layer values
-            # convert mid-layer values to values at layer boundaries, ie zlevels
-            data = hydromodel_grid_transforms.convert_layer_field_to_levels_from_depth_fractions_at_each_node(
-                                data, grid['zlevel_fractions_layer'], grid['zlevel_fractions'])
+            # convert mid-layer values to values at layer boundaries, ie z_interfaces
+            data = hydromodel_grid_transforms.convert_layer_field_to_levels_from_interface_fractions_at_each_node(
+                                data, grid['z_layer_fractions'], grid['z_interface_fractions'])
         elif not 'siglev' in var_info['dims']:
             # 2D field
             data =  data[..., np.newaxis]

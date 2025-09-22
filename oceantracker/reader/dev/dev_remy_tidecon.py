@@ -43,7 +43,7 @@ class CSreader(GenericUnstructuredReader):
     def is_hindcast3D(self, nc):
         return False  # 2D for now
 
-    # def get_number_of_z_levels(self, nc):
+    # def get_number_of_z_interfaces(self, nc):
     #     return 2
 
     def is_var_in_file_3D(self, nc, var_name_in_file):

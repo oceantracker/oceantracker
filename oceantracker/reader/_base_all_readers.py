@@ -83,7 +83,7 @@ class _BaseReader(ParameterBaseClass):
 
     def read_triangles(self, grid):     nopass('need a read_triangle methods for both structured (which makes trianglation from mesh) and unstructured grids')
 
-    def read_zlevel(self, nt):   pass
+    def read_z_interface(self, nt):   pass
 
     def read_dry_cell_data(self, nt_index, buffer_index):
         # read dry cell as =1 wet = 0
@@ -155,10 +155,10 @@ class _BaseReader(ParameterBaseClass):
             self.build_vertical_grid()
         else:
             # 2D
-            grid['zlevel'] = None
+            grid['z_interface'] = None
 
         #todo is below cneeded???
-        for name in ['zlevel', 'zlevel_fractions']:
+        for name in ['z_interface', 'z_interface_fractions']:
             if name in grid:
                 v = grid[name]
                 if v is not None and v.dtype != np.float32:
@@ -310,13 +310,13 @@ class _BaseReader(ParameterBaseClass):
             self.set_up_uniform_sigma(grid)  # add an estimated sigma to the grid
 
 
-        # set up zlevels if needed
+        # set up z_interfaces if needed
         info['read_zlevels'] = False
         if info['vert_grid_type'] in [vgt.LSC, vgt.Slayer]:
             # native  vertical grid option, could be  Schisim LCS vertical grid
             # used to size field data arrays
-            s = [si.settings.time_buffer_size, grid['x'].shape[0], info['num_z_levels']]
-            grid['zlevel'] = np.zeros(s, dtype=np.float32, order='c')
+            s = [si.settings.time_buffer_size, grid['x'].shape[0], info['num_z_interfaces']]
+            grid['z_interface'] = np.zeros(s, dtype=np.float32, order='c')
             info['read_zlevels'] = True
 
     def find_and_split_quad_cells(self, tri):
@@ -584,7 +584,7 @@ class _BaseReader(ParameterBaseClass):
 
         if si.run_info.is3D_run and self.info['read_zlevels']:
             # read zlevel if native vertical grid of types Slayer or LSC
-            grid['zlevel'][buffer_index,...] =  self.read_zlevel(nt)
+            grid['z_interface'][buffer_index,...] =  self.read_z_interface(nt)
         pass
 
 
@@ -629,7 +629,7 @@ class _BaseReader(ParameterBaseClass):
         out = np.full(tuple(s), np.nan, dtype=np.float32) # move to interp_4D_field_to_fixed_sigma_values?
 
         data_out = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
-                            grid['zlevel_fractions'], grid['bottom_cell_index'],
+                            grid['z_interface_fractions'], grid['bottom_cell_index'],
                             grid['sigma'],
                             fields['water_depth'].data, fields['tide'].data,
                             si.settings.z0, si.settings.minimum_total_water_depth,
@@ -641,7 +641,7 @@ class _BaseReader(ParameterBaseClass):
             nt = 1
             n = 75
 
-            plt.plot(grid['zlevel_fractions'][ n, :], data[nt, n, :, 0], c='g')
+            plt.plot(grid['z_interface_fractions'][ n, :], data[nt, n, :, 0], c='g')
             plt.plot(grid['sigma'],data_out[nt,n,:,0],c='r')
             plt.show()
         return data_out

@@ -42,16 +42,16 @@ class VerticalGradient(CustomFieldBase):
                                                grid['bottom_cell_index'], si.settings.z0, self.data)
         else:
             # z levels
-            _calc_field_vert_grad_from_zlevels(fields[self.params['get_grad_of_field_named']].data,grid['zlevel'],
+            _calc_field_vert_grad_from_z_interfaces(fields[self.params['get_grad_of_field_named']].data,grid['z_interface'],
                                     grid['bottom_cell_index'], si.settings.z0, self.data)
 
 @njitOT
-def _calc_field_vert_grad_from_zlevels(field4D,zlevel,bottom_cell_index,z0,gradient_field):
+def _calc_field_vert_grad_from_z_interfaces(field4D,z_interface,bottom_cell_index,z0,gradient_field):
 
     for nt in range(field4D.shape[0]):
         for node  in  range(field4D.shape[1]):
             for nz in  range(bottom_cell_index[node],field4D.shape[2]-1):
-                dz = zlevel[nt,node,nz+1] - zlevel[nt,node,nz]
+                dz = z_interface[nt,node,nz+1] - z_interface[nt,node,nz]
                 if dz > z0:
                     for ncomp in range(field4D.shape[3]):
                         gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp] - field4D[nt, node, nz, ncomp])/dz

@@ -49,7 +49,7 @@ class _BaseGenericReader(_BaseReader):
         if info['is3D']:
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
-            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][info['z_dim']]
             info['all_z_dims'] = dm['all_z_dims']
             info['vert_grid_type'] = params['vertical_grid_type']
 

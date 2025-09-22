@@ -58,12 +58,12 @@ class GLORYSreader(_BaseStructuredReader):
         if info['is3D']:
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
-            info['num_z_levels'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][info['z_dim']]
             info['all_z_dims'] = dm['all_z_dims']
             if 'deptho_lev' in info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Zfixed
             else:
-                si.msg_logger.msg('Glorys reader under development, only works for fixed zlevel grids, eg NEMO (output with "deptho_lev" variable) , contact developer to extend to sigma and other vertical grids',
+                si.msg_logger.msg('Glorys reader under development, only works for fixed z_interface grids, eg NEMO (output with "deptho_lev" variable) , contact developer to extend to sigma and other vertical grids',
                                   hint='Please provide hindcast example files to test fixes against', fatal_error=True)
         else:
             info['vert_grid_type'] = None
@@ -122,7 +122,7 @@ class GLORYSreader(_BaseStructuredReader):
         gm = self.params['grid_variable_map']
         grid['bottom_cell_index_grid'] = ds.read_variable(gm['bottom_cell_index']).data - self.params['one_based_indices']
         # file cell count is top down, convert to bottom up index
-        grid['bottom_cell_index_grid'] = info['num_z_levels'] - grid['bottom_cell_index_grid'] # do this before making an it to capture nans
+        grid['bottom_cell_index_grid'] = info['num_z_interfaces'] - grid['bottom_cell_index_grid'] # do this before making an it to capture nans
 
         # land nodes use 0
         sel = np.isnan(grid['bottom_cell_index_grid'])

@@ -4,14 +4,14 @@ from numba.typed import List as NumbaList
 from oceantracker.util.numba_util import  njitOT
 
 @njitOT
-def set_dry_cell_flag_from_zlevel( triangles, zlevel, bottom_cell_index, minimum_total_water_depth, is_dry_cell,buffer_index):
+def set_dry_cell_flag_from_z_interface( triangles, z_interface, bottom_cell_index, minimum_total_water_depth, is_dry_cell,buffer_index):
     #  flag cells dry if cell any node is dry
     for nb in buffer_index:
         for ntri in range(triangles.shape[0]):
             # count dry nodes
             n_dry = 0
             for m in triangles[ntri, :]:
-                h = zlevel[nb,m, -1] - zlevel[nb,m, bottom_cell_index[m]]
+                h = z_interface[nb,m, -1] - z_interface[nb,m, bottom_cell_index[m]]
                 if h < minimum_total_water_depth: n_dry += 1
             is_dry_cell[nb, ntri] = 1 if n_dry > 0 else 0
 
@@ -74,7 +74,7 @@ def get_values_at_bottom(field_data4D, bottom_cell_index, out=None):
 
 
 @njitOT
-def depth_aver_SlayerLSC_in4D(field_data4D, zlevel, first_cell_offset):
+def depth_aver_SlayerLSC_in4D(field_data4D, z_interface, first_cell_offset):
     # depth average time varying reader 4D data dim(time, node, depth, components) and return for LSC vertical grid
     # return as 4D variable dim(time, node, 1, components)
 
@@ -86,14 +86,14 @@ def depth_aver_SlayerLSC_in4D(field_data4D, zlevel, first_cell_offset):
         for n in range(out.shape[1]):  # loop over node
 
             n0 = first_cell_offset[n]
-            h = zlevel[nt, n, -1] - zlevel[nt, n, n0]
+            h = z_interface[nt, n, -1] - z_interface[nt, n, n0]
             if h <= 0:
                 out[nt, n, 0, :] = 0.0
                 continue
             for m in range(out.shape[3]):  # loop over vector components
                 d = 0.
                 for nz in range(n0, field_data4D.shape[2] - 1):
-                    d += 0.5 * (field_data4D[nt, n, nz, m] + field_data4D[nt, n, nz + 1, m]) * (zlevel[nt, n, nz + 1] - zlevel[nt, n, nz])
+                    d += 0.5 * (field_data4D[nt, n, nz, m] + field_data4D[nt, n, nz + 1, m]) * (z_interface[nt, n, nz + 1] - z_interface[nt, n, nz])
                 out[nt, n, 0, m] = d / h
     return out
 
@@ -109,13 +109,13 @@ def get_time_dependent_triangle_water_depth_from_total_water_depth_at_nodes(tota
                 out[nt,m] += total_water_depth_at_nodes[nt, triangles[m,v]] / 3.0  # todo use simple average, but better way?
 
 @njitOT
-def zlevel_node_to_vertex(zlevel, triangles, zlevel_vertex):
-    # get zlevel at triangle vertices
-    for nt in range(zlevel.shape[0]):
+def z_interface_node_to_vertex(z_interface, triangles, z_interface_vertex):
+    # get z_interface at triangle vertices
+    for nt in range(z_interface.shape[0]):
         for ntri in range(triangles.shape[0]):
-            for nz in range(zlevel.shape[2]):
+            for nz in range(z_interface.shape[2]):
                 for m in range(3):
-                    zlevel_vertex[nt, ntri, nz, m] = zlevel[nt, triangles[ntri,m],  nz]
+                    z_interface_vertex[nt, ntri, nz, m] = z_interface[nt, triangles[ntri,m],  nz]
 
 
 @njitOT

@@ -164,7 +164,7 @@ class FindVerticalCellSlayerLSCGrid(object):
         z_fraction = part_prop['z_fraction'].data
         z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
 
-        self.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,grid['triangles'], grid['zlevel'], grid['bottom_cell_index'],
+        self.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,grid['triangles'], grid['z_interface'], grid['bottom_cell_index'],
                                                       n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                                       current_buffer_steps, fractional_time_steps,
                                                       self.walk_counts,
@@ -174,7 +174,7 @@ class FindVerticalCellSlayerLSCGrid(object):
     @staticmethod
     @njitOTparallel
     def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
-                                                      triangles, zlevel, bottom_cell_index,
+                                                      triangles, z_interface, bottom_cell_index,
                                                       n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                                       current_buffer_steps, fractional_time_steps,
                                                       walk_counts,
@@ -184,17 +184,17 @@ class FindVerticalCellSlayerLSCGrid(object):
         # nz_with_bottom must be time independent
         # vertical walk to search for a particle's layer in the grid, nz_cell
 
-        def _eval_z_at_nz_cell(tf,nz_cell, zlevel1, zlevel2, nodes, nz_bottom_nodes, nz_top_cell, BCcord):
+        def _eval_z_at_nz_cell(tf,nz_cell, z_interface1, z_interface2, nodes, nz_bottom_nodes, nz_top_cell, BCcord):
             # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
             z = 0.
             for m in range(3):
                 nz = max(min(nz_cell, nz_top_cell + 1), nz_bottom_nodes[m])  # move up to bottom, so not out of range
-                z += BCcord[m] * (zlevel1[nodes[m], nz] * tf[0] + zlevel2[nodes[m], nz] * tf[1])
+                z += BCcord[m] * (z_interface1[nodes[m], nz] * tf[0] + z_interface2[nodes[m], nz] * tf[1])
             return z
 
-        nz_top_cell = zlevel.shape[2] - 2
-        zl1 = zlevel[current_buffer_steps[0], ...]
-        zl2 = zlevel[current_buffer_steps[1], ...]
+        nz_top_cell = z_interface.shape[2] - 2
+        zl1 = z_interface[current_buffer_steps[0], ...]
+        zl2 = z_interface[current_buffer_steps[1], ...]
 
         bottom_nz_nodes = np.zeros((3,), dtype=np.int32)
         for nn in range(active.size):  # loop over active particles
@@ -223,7 +223,7 @@ class FindVerticalCellSlayerLSCGrid(object):
             # make any already on bottom active, may be flagged on bottom if found on bottom, below
             if status[n] == status_on_bottom: status[n] = status_moving
 
-            # find zlevel above and below  current vertical cell
+            # find z_interface above and below  current vertical cell
             nz = nz_cell[n]
             z_below = _eval_z_at_nz_cell(fractional_time_steps, nz, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
 

@@ -249,7 +249,7 @@ def base_param(is3D=False, isBackwards = False):
         # tweak for circle flow 3D
         r=params['reader']
         r['field_variables'].update({ 'water_velocity' : ['u','v', 'w']})
-        r['grid_variable_map'].update({'zlevel': 'zlevel'})
+        r['grid_variable_map'].update({'z_interface': 'zlevel'})
         r['dimension_map'].update({'z': 'zlevel'})
         r['file_mask'] = params['reader']['file_mask'].replace('2D', '3D')
         params['dispersion'].update({'A_H': 0.,'A_V': 0.})

@@ -29,7 +29,7 @@ class TotalWaterDepth(CustomFieldBase):
     @njitOT
     def get_time_dependent_total_water_depth_from_tide_and_water_depth(tide, water_depth,
                                                                        min_total_water_depth, total_water_depth):
-        # get total time dependent water depth as 4D field  from top and bottom cell of LSC grid zlevels
+        # get total time dependent water depth as 4D field  from top and bottom cell of LSC grid z_interfaces
         for nt in range(tide.shape[0]):
             for node in range(tide.shape[1]):
                 d = tide[nt, node,0,0] + water_depth[node]
