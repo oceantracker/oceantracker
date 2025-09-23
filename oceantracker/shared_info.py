@@ -27,8 +27,7 @@ class _DefaultSettings(definitions._AttribDict):
                             min=0, max =10)
 
     backtracking =   PVC(False, bool, doc_str='Run model backwards in time')
-    regrid_z_to_uniform_sigma_levels = PVC(True, bool,
-                doc_str='much faster 3D runs by re-griding hydo-model fields in the z to uniform sigma levels on read (eg. SCHISM), based on sigma most curve z_interface profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS' )
+
     display_grid_at_start = PVC(False, bool,
                 doc_str='Pause during strat up to plot the grid for checking using matplotlib, clicking om image will print a coord' )
     dev_debug_plots = PVC(False, bool,expert=True, doc_str='show any debug plot generated at give dbug_level, not for general use' )
@@ -90,6 +89,8 @@ class _DefaultSettings(definitions._AttribDict):
     throw_debug_error = PVC(0, int,min =0,
                              doc_str='Throw desigated error, eg =1 is mid run error to test restart',
                              expert=True)
+    regrid_z_to_uniform_sigma_levels = PVC(True, bool, obsolete=True,
+                                           doc_str='seting "regrid_z_to_uniform_sigma_levels" has moved to be a reader parameter, so set when adding reader class')
 
 
 # blocks that make up parts of shared info

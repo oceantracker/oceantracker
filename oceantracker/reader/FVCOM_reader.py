@@ -77,7 +77,7 @@ class FVCOMreader(_BaseUnstructuredReader):
         z = ds.read_variable('siglev').data.astype(np.float32).T
         zlayer = ds.read_variable('siglay').data.astype(np.float32).T
         grid['z_interface_fractions']  = 1. + np.flip(z, axis=1)  # layer boundary fractions
-        grid['z_layer_fractions'] = 1. + np.flip(zlayer, axis=1)  # layer center fractions
+        grid['z_layer_fixed_fractions'] = 1. + np.flip(zlayer, axis=1)  # layer center fractions
 
         # make distance weighting matrix for triangle center values at nodal points
         grid['cell_center_weights'] = hydromodel_grid_transforms.calculate_inv_dist_weights_at_node_locations(
@@ -170,14 +170,14 @@ class FVCOMreader(_BaseUnstructuredReader):
         # some variables at nodes, some at cell center ( eg u,v,w)
         if 'nele' in var_info['dims']:
             # data is at cell center/element/triangle  move to nodes
-            data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(data, grid['node_to_tri_map'], grid['tri_per_node'], grid['cell_center_weights'])
+            data = hydromodel_grid_transforms.get_nodal_values_from_weighted_cell_values(data, grid['node_to_tri_map'], grid['tri_per_node'], grid['cell_center_weights'])
 
         # see if z or z water level  in variable and swap z and node dim
         if 'siglay' in var_info['dims']:
             #3D mid layer values
             # convert mid-layer values to values at layer boundaries, ie z_interfaces
             data = hydromodel_grid_transforms.convert_layer_field_to_levels_from_interface_fractions_at_each_node(
-                                data, grid['z_layer_fractions'], grid['z_interface_fractions'])
+                                data, grid['z_layer_fixed_fractions'], grid['z_interface_fractions'])
         elif not 'siglev' in var_info['dims']:
             # 2D field
             data =  data[..., np.newaxis]

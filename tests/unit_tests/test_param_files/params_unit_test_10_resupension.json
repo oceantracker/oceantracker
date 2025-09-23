@@ -6,7 +6,6 @@
     "debug": true,
     "screen_output_time_interval": 300,
     "use_A_Z_profile": false,
-    "regrid_z_to_uniform_sigma_levels": false,
     "tracks_writer": {
         "update_interval": 300,
         "write_dry_cell_flag": true

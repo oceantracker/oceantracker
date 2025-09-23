@@ -8,14 +8,14 @@ def main(args):
     ot.settings(time_step=1800,use_dispersion=False,
                 screen_output_time_interval=1800,
              use_A_Z_profile=True,
-            regrid_z_to_uniform_sigma_levels=False,
+
             particle_buffer_initial_size= 200,
              NUMBA_cache_code=True,
                 use_resuspension = False,
                 min_dead_to_remove=50,
         )
     hm = test_definitions.hydro_model['demoSchism3D']
-    ot.add_class('reader', **hm['reader'])
+    ot.add_class('reader', **hm['reader'],  regrid_z_to_uniform_sigma_levels=False)
 
     # add a point release
     ot.add_class('release_groups',**dict(test_definitions.rg_basic,max_age=2*3600))

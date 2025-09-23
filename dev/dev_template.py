@@ -26,7 +26,7 @@ if __name__ == "__main__":
         use_dispersion=True,
         screen_output_time_interval=1800,
         use_A_Z_profile=True,
-        regrid_z_to_uniform_sigma_levels=True )
+        )
 
     # set up reader
     demo_hindcast_dir =path.join(path.dirname(definitions.package_dir), 'demos')

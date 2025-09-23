@@ -9,7 +9,6 @@ def main(args):
     ot.settings(time_step=60, screen_output_time_interval=1800,
                 #use_dispersion=False,
             # use_A_Z_profile=False,
-            regrid_z_to_uniform_sigma_levels=False,
              #NUMBA_cache_code=True,
                 )
 

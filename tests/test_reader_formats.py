@@ -17,7 +17,6 @@ def default_params():
          'use_A_Z_profile': False,
         'output_file_base': None,
         'root_output_dir': None,
-        'regrid_z_to_uniform_sigma_levels': True,
         'particle_properties': [{'name':'part_decay',  'class_name': 'AgeDecay',
                                 'decay_time_scale': 1. * 3600 * 24}],
         'release_groups':[ {'name':'P1', 'points': [], 'pulse_size': 10,
@@ -330,10 +329,10 @@ def get_case(n):
             # AREM_perth
             root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\AREM_perth'
 
-            x0 = [[-46.76850063886385, 168.1665833416483],
-                  [-46.6651360690957, 168.5548344059933],
-                  [-46.948229184324596, 168.34936820699286]]
-            x0 = np.flip(np.asarray(x0), axis=1)
+            x0 = [[136.8448876148498, -34.437943839048],
+                  [135.86483495818868, -36.55882205292946],
+                  [138.07902799731195, -34.96816339251836],
+                  [139.20427364014512, -36.12404201908376]]
             file_mask = 'AREM*.nc'
             output_file_base = 'AREM_perth'
             title = 'AREM_perthi'
@@ -454,7 +453,7 @@ def get_case(n):
     params.update(user_note=title,output_file_base=output_file_base,
 
                   max_run_duration= max_days*24*3600, time_step= time_step, use_open_boundary=use_open_boundary )
-    params['reader'].update(input_dir=root_input_dir,
+    params['reader'].update(input_dir=root_input_dir, regrid_z_to_uniform_sigma_levels = not args.nativez,
                             file_mask=file_mask,
                             class_name=reader)
     if water_depth_file is not None:
@@ -506,7 +505,7 @@ if __name__ == '__main__':
         params, plot_opt= get_case(n)
         params['display_grid_at_start'] = True # ti use giput to get cords
         params.update( root_output_dir = root_output_dir,
-                    regrid_z_to_uniform_sigma_levels = not args.nativez,
+
                     dev_debug_plots = args.debug_plots,
                     use_A_Z_profile = False,
                     debug=True,

@@ -27,43 +27,44 @@ class _BaseReader(ParameterBaseClass):
 
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
-        self.add_default_params({
-            'input_dir': PVC(None, str, is_required=True),
-            'file_mask': PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
-            'geographic_coords': PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
+        self.add_default_params(
+            input_dir= PVC(None, str, is_required=True),
+            file_mask= PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
+            geographic_coords= PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
                                      expert=True),
-            'vertical_regrid': PVC(True, bool, doc_str='Convert vertical grid to same sigma levels across domain'),
-            'time_buffer_size': PVC(24, int, min=2, doc_str='This reader parameter has be removed,  now a top level setting , use  setting "time_buffer_size"', obsolete=True),
-            'load_fields': PLC(None, str,
+            vertical_regrid= PVC(True, bool, doc_str='Convert vertical grid to same sigma levels across domain'),
+            time_buffer_size= PVC(24, int, min=2, doc_str='This reader parameter has be removed,  now a top level setting , use  setting "time_buffer_size"', obsolete=True),
+            load_fields= PLC(None, str,
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                make_list_unique=True),
-            'one_based_indices': PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
-            'variable_signature':PLC(None, str,doc_str='Variable names used to test if file is this format, in addition to time , x and velocity variables '),
-            'EPSG_code': PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
-            'max_numb_files_to_load': PVC(10 ** 7, int, min=1, doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run'),
-
-            'variable_signature': PLC(None, str, doc_str='Variable names used to test if file is this format', is_required=True),
-
-            'grid_variable_map': dict(
+            one_based_indices= PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
+            EPSG_code= PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
+            max_numb_files_to_load= PVC(10 ** 7, int, min=1,
+                                        doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run'),
+            variable_signature = PLC(None, str, doc_str='Variable names used to test if file is this format', is_required=True),
+            grid_variable_map= dict(
                             time=PVC('time', str, doc_str='Name of time variable in hindcast',is_required=True),
                             x=PVC(None, str, doc_str='x location of nodes', is_required=True),
                             y=PVC(None, str, doc_str='y location of nodes', is_required=True),
                             ),
-            'field_variable_map': dict(
+            field_variable_map= dict(
                             water_depth=PVC(None, str, doc_str='maps standard internal field name to file variable name',
                                 ),
                 water_velocity=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
                 water_velocity_depth_averaged=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
                             ),
-            'dimension_map': dict(
+            dimension_map= dict(
                             vector2D=PVC(None, str, doc_str='name of dimension names for 2D vectors'),
                             vector3D=PVC(None, str, doc_str='name of dimension names for 3D vectors'),
                             z=PVC( None, str, doc_str='name of dimensions for z layer boundaries '),
                             all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables', is_required=True),
                             ),
-            'field_variables' : PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
-            'drop_variables': PLC(None, str, expert=True, doc_str='List of problematic file variable names to ignore, eg non-critcal variables not present in all files/all times', make_list_unique=True),
-        })  # list of normal required dimensions
+        field_variables= PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
+        drop_variables= PLC(None, str, expert=True, doc_str='List of problematic file variable names to ignore, eg non-critcal variables not present in all files/all times', make_list_unique=True),
+        regrid_z_to_uniform_sigma_levels = PVC(True, bool,
+                doc_str='much faster 3D runs by re-griding hydo-model fields for S-layer or LSC vertical grids (eg. SCHISM),  into uniform sigma levels on read based on sigma most curve z_interface profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS')
+
+        )  # list of normal required dimensions
 
         self.info['buffer_info'] = dict( time_steps_in_buffer = [])
         self.grid={}
@@ -306,7 +307,7 @@ class _BaseReader(ParameterBaseClass):
 
         # allow vertical regridding to same sigma at all nodes
 
-        if info['regrid_z_to_uniform_sigma_levels']:
+        if params['regrid_z_to_uniform_sigma_levels']:
             self.set_up_uniform_sigma(grid)  # add an estimated sigma to the grid
 
 
@@ -421,10 +422,11 @@ class _BaseReader(ParameterBaseClass):
     def update_water_velocity_field(self, buffer_index, nt):
         field = self.fields['water_velocity']
         data = self.read_field_data('water_velocity', field, nt)
+        params = self.params
         info = self.info
 
         if field.is3D():
-            if info['regrid_z_to_uniform_sigma_levels']:
+            if params['regrid_z_to_uniform_sigma_levels']:
                 # applies to LSC and Slayer grids if requested (the default)
                 data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_interface_index']) # zero bottom before regrid
                 data = self._vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma('water_velocity', data)
@@ -521,10 +523,10 @@ class _BaseReader(ParameterBaseClass):
 
         # read grid time, zlevel
         # do this after reading fields as some hindcasts required tide field to get zlevel, eg FVCOM
+        self.update_tide_field(buffer_index, nt_available)
         self.read_time_varying_grid_variables(nt_available, buffer_index)
 
-        # read fields - tide and  water velocity
-        self.update_tide_field(buffer_index, nt_available)
+        # read fields - tide
         self.update_water_velocity_field(buffer_index, nt_available)
 
         # read time varying vector and scalar reader fields
@@ -534,7 +536,7 @@ class _BaseReader(ParameterBaseClass):
 
             data =  self.read_field_data(name, field, nt_available)
 
-            if field.is3D() and si.settings['regrid_z_to_uniform_sigma_levels']:
+            if field.is3D() and params['regrid_z_to_uniform_sigma_levels']:
                 data = self._vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma(name, data)
 
             # insert data
@@ -585,6 +587,7 @@ class _BaseReader(ParameterBaseClass):
         if si.run_info.is3D_run and self.info['read_zlevels']:
             # read zlevel if native vertical grid of types Slayer or LSC
             grid['z_interface'][buffer_index,...] =  self.read_z_interface(nt)
+
         pass
 
 

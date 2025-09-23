@@ -136,40 +136,67 @@ def convert_mid_layer_sigma_top_bot_layer_values(data, sigma_layer, sigma):
     return data_interface
 
 @njitOT
-def convert_mid_layer_fixedZ_top_bot_layer_values(data_zlayer, z_layer, z, bottom_interface_index,water_depth):
+def convert_3Dfield_fixed_z_layer_to_fixed_z_interface_values(data_zlayer, z_layer_fixed, z, bottom_layer_index,water_depth):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
     # used in FVCOM reader
 
     # interface values have one more level than mid_layer data
+    # add one interfacical layer at top
     data_z = np.full((data_zlayer.shape[0],data_zlayer.shape[1],data_zlayer.shape[2]+1), np.nan, dtype=np.float32)
 
-    for nt in range(2,data_zlayer.shape[0]):
+    for nt in range(data_zlayer.shape[0]):
         for n in range(data_zlayer.shape[1]):
-            pass
-            for nz in range(bottom_interface_index[n]+1, data_zlayer.shape[2]-1):
+            for nz in range(bottom_layer_index[n], data_zlayer.shape[2]-1):
                 # linear interp levels not, first or last boundary from surronding mid-layer values
-                data_z[nt, n, nz+1] = kernal_linear_interp1D(z_layer[nz], data_zlayer[nt,n, nz],
-                                                    z_layer[nz+1], data_zlayer[nt,n, nz+1], z[nz+1])
+                data_z[nt, n, nz+1] = kernal_linear_interp1D(z_layer_fixed[nz], data_zlayer[nt,n, nz],
+                                                    z_layer_fixed[nz+1], data_zlayer[nt,n, nz+1], z[nz+1])
 
             # make top level same as middle of top layer value, ie no shear
             data_z[nt, n, -1] = data_zlayer[nt, n, -1]
 
-            # extrapolate to first z_interface above the bottom, ie top surface of bottom layer, if enough cells
-            nz1 = bottom_interface_index[n]+1
-            if nz1+1 < z_layer.size:
-                data_z[nt, n, nz1] = kernal_linear_interp1D(z_layer[nz1], data_zlayer[nt, n, nz1],
-                                                z_layer[nz1+1], data_zlayer[nt, n, nz1+1],
-                                                        z[bottom_interface_index[n]])
+            # extrapolate to first z_interface downwards the bottom
+            nz1 = bottom_layer_index[n]
+            data_z[nt, n, nz1] = kernal_linear_interp1D(z_layer_fixed[nz1], data_zlayer[nt, n, nz1],
+                                                z_layer_fixed[nz1+1], data_zlayer[nt, n, nz1+1],
+                                                        z[bottom_layer_index[n]-1])
 
-            # make seabed values same as top of bottom layer
-            data_z[nt, n, bottom_interface_index[n]] = data_z[nt, n, nz1]
-                    # note - preprocessing will make water_velocity zero at seabed
             pass
         pass
     return data_z
 
 @njitOT
-def get_nodal_values_from_weighted_data(data, node_to_tri_map, tri_per_node, cell_center_weights):
+def convert_3Dfield_LSC_layer_to_LSC_interface(data_layer, z_layer, z_interface, bottom_layer_index):
+    # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
+    # used in FVCOM reader
+
+    # interface values have one more level than mid_layer data
+    data_interface = np.full(data_layer.shape[:2] + (data_layer.shape[2]+1,), np.nan, dtype=np.float32)
+
+    for nt in range(data_layer.shape[0]):
+        for n in range(data_layer.shape[1]):
+            pass
+            for nz in range(bottom_layer_index[n], data_layer.shape[2]-1):
+                # linear interp levels not, first or last boundary from surrounding mid-layer values
+                data_interface[nt, n, nz+1] = kernal_linear_interp1D(
+                                                    z_layer[nt,n, nz], data_layer[nt,n, nz],
+                                                    z_interface[nt,n, nz+1],data_layer[nt,n, nz+1],
+                                                    z_interface[nt, n , nz+1])
+
+            # make top level same as middle of top layer value, ie no shear
+            data_interface[nt, n, -1] = data_layer[nt, n, -1]
+
+            # extrapolate to first z_interface above the bottom, ie top surface of bottom layer, if enough cells
+            nz1 = bottom_layer_index[n]
+            data_interface[nt, n, nz1] = kernal_linear_interp1D(z_layer[nt,n, nz1], data_layer[nt, n, nz1],
+                                                z_layer[nt,n, nz1+1], data_layer[nt, n, nz1+1],
+                                                        z_interface[nt, n , nz1-1])
+            pass
+        pass
+    return data_interface
+
+
+@njitOT
+def get_nodal_values_from_weighted_cell_values(data, node_to_tri_map, tri_per_node, cell_center_weights):
     # get nodal values from 4D data in surrounding cells based in distance weighting
     # used in FVCOM, DELFT3D FM  reader
 

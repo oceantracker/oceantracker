@@ -1,16 +1,13 @@
-import datetime
-
-from xarray.core.nputils import nanmean
+from numba.core.cgutils import false_bit
 
 from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
-from oceantracker.reader.util.hydromodel_grid_transforms import convert_regular_grid_to_triangles
 from  oceantracker.util import time_util, numpy_util
 import numpy as np
 from oceantracker.util.triangle_utilities import split_quad_cells
 from oceantracker.reader.util import  reader_util
-from oceantracker.reader.util import  hydromodel_grid_transforms
-from oceantracker.util.numba_util import  njitOT
+from oceantracker.reader.util import  hydromodel_grid_transforms as hg_trans
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.shared_info import shared_info as si
 
 class DELF3DFMreader(_BaseUnstructuredReader):
@@ -18,7 +15,10 @@ class DELF3DFMreader(_BaseUnstructuredReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
-            variable_signature=PLC(['mesh2d_face_nodes'], str, doc_str='Variable names used to test if file is this format'),
+        regrid_z_to_uniform_sigma_levels=PVC(False, bool,
+                       doc_str='much faster 3D runs by re-griding hydo-model fields for S-layer or LSC vertical grids (eg. SCHISM),  into uniform sigma levels on read based on sigma most curve z_interface profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS'),
+
+        variable_signature=PLC(['mesh2d_face_nodes'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(True, bool, doc_str='DELFT 3D has indices starting at 1 not zero'),
             load_fields = PLC(['water_depth'], str, doc_str='always load tide and water depth, for dry cells id 2D'),
             grid_variable_map= dict( time= PVC('time', str),
@@ -27,7 +27,8 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                         x_cell=PVC('mesh2d_face_x', str, doc_str='x location of cell centers'),
                         y_cell=PVC('mesh2d_face_y', str, doc_str='y location of cell center'),
                         z= PVC('mesh2d_interface_z', str,doc_str='Layer edges depths'),
-                        z_layer=PVC('mesh2d_layer_z', str, doc_str='Mid layer z'),
+                        z_layer_fixed=PVC('mesh2d_layer_z', str, doc_str='Mid layer z for fixed z grid'),
+                        z_layer_LSC =PVC('mesh2d_flowelem_zcc', str),
                         triangles= PVC('mesh2d_face_nodes', str),
                         quad_face_nodes=PVC('mesh2d_face_nodes', str),
                         bottom_interface_index= PVC(None, str),
@@ -52,6 +53,16 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                                                 doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
                             )
+
+    def add_required_classes_and_settings(self,**kwargs):
+        params = self.params
+
+        if params['regrid_z_to_uniform_sigma_levels']:
+            si.msg_logger.msg('Regridding DELFT3D mixed sigma, fixed z vertical grid not yet implemented, using native vertical grid',
+                              hint='disabling vertical regridding ',
+                          warning=True)
+        params['regrid_z_to_uniform_sigma_levels'] = False
+        pass
 
     def add_hindcast_info(self):
         ds_info =  self.dataset.info
@@ -88,6 +99,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             elif 'mesh2d_flowelem_zcc' in  ds_info['variables']:
                 # mixed sigma, tide moving z levels, ie LSC type grid
                 info['vert_grid_type'] = si.vertical_grid_types.LSC
+                fvm['water_depth'] = 'mesh2d_bldepth'
 
             else:
                 si.msg_logger.msg('Cannot determine vertical grid type',caller=self, fatal_error=True,
@@ -100,8 +112,6 @@ class DELF3DFMreader(_BaseUnstructuredReader):
 
         info['num_nodes'] =  dims[info['node_dim']]
         info['cell_dim'] = 'mesh2d_nFaces' if 'mesh2d_nFaces' in dims else 'nmesh2d_face'
-
-
 
 
     def read_horizontal_grid_coords(self, grid):
@@ -145,8 +155,9 @@ class DELF3DFMreader(_BaseUnstructuredReader):
     def build_vertical_grid(self):
         # add time invariant vertical grid variables needed for transformations
         # first values in z axis is the top? so flip
-        gm = self.params['grid_variable_map']
-        fm = self.params['field_variable_map']
+        params= self.params
+        gm = params['grid_variable_map']
+        fm = params['field_variable_map']
         info = self.info
         grid = self.grid
         ds = self.dataset
@@ -164,13 +175,9 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         else:
             # fixed z levels
             grid['z'] = ds.read_variable(gm['z']).data.astype(np.float32)  # layer boundary fractions reversed from negative values
-            grid['z_layer'] = ds.read_variable(gm['z_layer']).data.astype(np.float32)   # layer center fractions
+            grid['z_layer_fixed'] = ds.read_variable(gm['z_layer_fixed']).data.astype(np.float32)   # layer center fractions
 
         super().build_vertical_grid()
-
-
-        # need to add a layer between first given z level and bottom
-        grid['bottom_interface_index'] = np.maximum(grid['bottom_interface_index']-1, 0)
 
 
     def read_bottom_interface_index(self, grid):
@@ -182,15 +189,15 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         if info['vert_grid_type'] in [si.vertical_grid_types.Zfixed, si.vertical_grid_types.LSC]:
             # find bottom cell based on nans in a dummy read of mid-layer velocity after it has been converted to nodal values
             u = ds.read_variable(fm['water_velocity'][0], nt=0).data  # from non nans in first hori velocity time step
-            u = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(u,
+            u = hg_trans.get_nodal_values_from_weighted_cell_values(u,
                                 grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
-            bottom_cell_index = self.find_z_index_with_first_non_nan(u[0, :, :])
+            grid['bottom_layer_index'] = self.find_z_index_with_first_non_nan(u[0, :, :])
+            bottom_interface_index =  grid['bottom_layer_index'].copy() # not one less as extra layer is added at the top
         else:
             # bottom cell is the first cell in sigma grid
-            bottom_cell_index = np.zeros((info['num_nodes'],),  dtype=np.int32)
+            bottom_interface_index = np.zeros((info['num_nodes'],),  dtype=np.int32)
 
-        return bottom_cell_index
-
+        return bottom_interface_index
 
     def build_hori_grid(self, grid):
 
@@ -211,12 +218,12 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         grid['quad_face_nodes'][sel] = 0
         grid['quad_face_nodes'] = grid['quad_face_nodes'].astype(np.int32) - 1
 
-        grid['node_to_quad_cell_map'],grid['quad_cells_per_node'] = hydromodel_grid_transforms.get_node_to_cell_map(grid['quad_face_nodes'], grid['x'].shape[0])
+        grid['node_to_quad_cell_map'],grid['quad_cells_per_node'] = hg_trans.get_node_to_cell_map(grid['quad_face_nodes'], grid['x'].shape[0])
 
         # get weights based on inverse distance between node
         # and data inside quad cell interior
 
-        grid['edge_val_weights'] =hydromodel_grid_transforms.calculate_inv_dist_weights_at_node_locations(
+        grid['edge_val_weights'] =hg_trans.calculate_inv_dist_weights_at_node_locations(
                                             grid['x'], grid['x_cell'],
                                             grid['node_to_quad_cell_map'], grid['quad_cells_per_node'])
 
@@ -241,17 +248,21 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         # some variables at nodes, some at edge mid points ( eg u,v,w)
         if info['cell_dim'] in var_info['dims']:
             # data is at cell center/element/triangle  move to nodes
-            data = hydromodel_grid_transforms.get_nodal_values_from_weighted_data(
+            data = hg_trans.get_nodal_values_from_weighted_cell_values(
                                         data, grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
 
         if var_info['is3D'] and info['layer_dim'] in var_info['dims']:
             if info['vert_grid_type'] == si.vertical_grid_types.Zfixed :
                 #  interp fixed z layer values to interfaces, must be done after nodal values
-                data = hydromodel_grid_transforms.convert_mid_layer_fixedZ_top_bot_layer_values(
-                    data, grid['z_layer'], grid['z'], grid['bottom_interface_index'], grid['water_depth'])
+                data = hg_trans.convert_3Dfield_fixed_z_layer_to_fixed_z_interface_values(
+                    data, grid['z_layer_fixed'], grid['z'], grid['bottom_layer_index'], grid['water_depth'])
+
+            elif info['vert_grid_type'] == si.vertical_grid_types.LSC:
+                data = hg_trans.convert_3Dfield_LSC_layer_to_LSC_interface(data,grid['z_layer_LSC' ],grid['z_interface'],
+                                                                           grid['bottom_layer_index'])
             else:
                 # sigma grid
-                data = hydromodel_grid_transforms. convert_mid_layer_sigma_top_bot_layer_values(data, grid['sigma_layer'], grid['sigma'])
+                data = hg_trans. convert_mid_layer_sigma_top_bot_layer_values(data, grid['sigma_layer'], grid['sigma'])
 
         # add dummy component axis
         data = data[..., np.newaxis]
@@ -260,8 +271,26 @@ class DELF3DFMreader(_BaseUnstructuredReader):
 
     def setup_water_depth_field(self):
         i = self._add_a_reader_field('water_depth')
-        i.data = self.read_field_data('water_depth', i) # read time in varient field
-        i.data = -i.data   # depth seems to be read as upwards z at node, so rervese z
+        i.data = self.read_field_data('water_depth', i)
+
+
+    def read_z_interface(self, nt):
+        grid = self.grid
+        z_layer_cell = self.dataset.read_variable(self.params['grid_variable_map']['z_layer_LSC'], nt = nt)
+        # convert to nodal values
+        grid['z_layer_LSC' ] = hg_trans.get_nodal_values_from_weighted_cell_values(
+                                        z_layer_cell.data,
+                                        grid['node_to_quad_cell_map'],
+                                        grid['quad_cells_per_node'],
+                                        grid['edge_val_weights'])
+        # get interfacial values
+        data = np.full((nt.size,) + grid['z_interface' ].shape[1:],np.nan, dtype=np.float32 ) # todo faster make a buffer
+        self.find_z_interface_from_layer_values(grid['z_layer_LSC' ],grid['water_depth'],
+                                            self.fields['tide'].data,
+                                                 grid['bottom_layer_index'], data)
+        # find nodal bottom interface index
+
+        return data
 
     @staticmethod
     @njitOT
@@ -277,3 +306,19 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                     break
 
         return index_with_first_non_nan
+
+    @staticmethod
+    @njitOTparallel
+    def find_z_interface_from_layer_values(zlayer_nodes, water_depth, tide,bottom_layer_index,  z_interface):
+        # find cell with the bottom, from first mid-layer velocities not a nan
+        # adding one interface layer at top
+        #     more exact with layer thicknesses, but these not in file?? so use mean
+        for nt in prange(zlayer_nodes.shape[0]): # time loop
+            for n in range(zlayer_nodes.shape[1]): # node loop
+                for nz in range(bottom_layer_index[n], zlayer_nodes.shape[2]-1):
+                    z_interface[nt,n,nz+1] = 0.5*(zlayer_nodes[nt,n,nz] + zlayer_nodes[nt,n,nz+1] )
+
+                z_interface[nt, n, -1 ]  = tide[nt,n,0,0]
+                z_interface[nt, n, bottom_layer_index[n]] = -water_depth[n]
+
+        pass

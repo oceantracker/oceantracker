@@ -8,7 +8,7 @@ def main(args):
     ot.settings(time_step=1800,
                 use_dispersion=False,
              use_A_Z_profile=False,
-            regrid_z_to_uniform_sigma_levels=True)
+     )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
                  ) # keep file small
@@ -16,7 +16,7 @@ def main(args):
     #ot.settings(NUMBA_cache_code = True)
     hm = test_definitions.hydro_model['demoROMS']
 
-    ot.add_class('reader', **hm['reader'])
+    ot.add_class('reader', **hm['reader'], regrid_z_to_uniform_sigma_levels=True)
 
     # add a point release
     ot.add_class('release_groups',points=  [-69.5, 43.5], release_interval= 1800)

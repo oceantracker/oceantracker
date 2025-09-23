@@ -194,7 +194,6 @@ params_list.append(p10)
 schsim_base_params=\
 {'output_file_base' :'demo50_SCHISM_basic', 'debug': True,'time_step': 120,
             'NUMBA_cache_code': False,'use_A_Z_profile' : False,
-            'regrid_z_to_uniform_sigma_levels': True,
                 #'numba_caching': False,
         'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreader',
                     'input_dir':  path.join(input_dir,'schsim3D'),
