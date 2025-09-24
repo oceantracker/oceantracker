@@ -36,8 +36,8 @@ class VerticalGradient(CustomFieldBase):
         self.check_class_required_fields_prop_etc(requires3D=True,)
     def update(self,fields,grid,nt):
 
-        if 'sigma' in grid:
-            _calc_field_vert_grad_from_sigma_levels(fields[self.params['get_grad_of_field_named']].data, grid['sigma'],
+        if 'sigma_interface' in grid:
+            _calc_field_vert_grad_from_sigma_levels(fields[self.params['get_grad_of_field_named']].data, grid['sigma_interface'],
                                                fields['tide'].data,fields['water_depth'].data,
                                                grid['bottom_interface_index'], si.settings.z0, self.data)
         else:

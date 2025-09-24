@@ -46,7 +46,7 @@ class FrictionVelocity(CustomFieldBase):
         if info['mode'] == 1:
             # sigma model
             self.calc_friction_velocity_Sigma_grid(buffer_index,
-                                                   grid['sigma'],
+                                                   grid['sigma_interface'],
                                                    fields['tide'].data, fields['water_depth'].data,
                                                    fields['water_velocity'].data,
                                                    si.settings.z0, self.data)
@@ -76,7 +76,7 @@ class FrictionVelocity(CustomFieldBase):
                 nz1=bottom_interface_index[n]+1
                 dz =  z_interface[nt, n, nz1] - z_interface[nt, n, bottom_interface_index[n]] # size of bottom cell
 
-                if dz >  0.2:
+                if dz >  0.1:
                     speed = np.sqrt(water_velocity[nt, n, nz1, 0]**2 + water_velocity[nt, n, nz1, 1]**2)
                     out[nt, n, 0, 0] = 0.4*speed/np.log((dz+z0)/z0)
                 else:
@@ -113,7 +113,7 @@ class FrictionVelocity(CustomFieldBase):
                 nz1 = bottom_interface_index[n]+1
                 dz =  z[nz1] + water_depth[n] # size of bottom cell
 
-                if dz >  0.2:
+                if dz >  0.1:
                     speed = np.sqrt(water_velocity[nt, n, nz1, 0]**2 + water_velocity[nt, n, nz1, 1]**2)
                     out[nt, n, 0, 0] = 0.4*speed/np.log((dz+z0)/z0)
                 else:

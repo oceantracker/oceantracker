@@ -240,7 +240,7 @@ def get_case(n):
             title = 'ROMS test'
             show_grid = True
         case 400:
-            # DELFT FM
+            # DELFT FM, fixed z
             root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\DELF3DFM_silawasi'
             x0= [[-0.4876992148036644, 129.18935660697986],
                  [-2.788645108730445, 123.88768495956097]]
@@ -298,7 +298,7 @@ def get_case(n):
             show_grid = True
 
         case 410:
-            # circular  quay
+            # circular  quay, sigma
             root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\CirQuay'
 
             x0= [[337172.6806029637, 6252142.38595879],
@@ -312,7 +312,7 @@ def get_case(n):
             show_grid = True
 
         case 411:
-            # DELFT FM hananui
+            # DELFT FM hananui, sigma
             root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_test1\Version_2'
 
             x0 = [[-46.76850063886385, 168.1665833416483],
@@ -326,7 +326,7 @@ def get_case(n):
             show_grid = True
             time_step = 10 * 60
         case 420:
-            # AREM_perth
+            # AREM_perth, mixed fixed z and sigma vert grid
             root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\AREM_perth'
 
             x0 = [[136.8448876148498, -34.437943839048],

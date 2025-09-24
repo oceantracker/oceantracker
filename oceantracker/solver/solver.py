@@ -54,6 +54,7 @@ class Solver(ParameterBaseClass):
         t0_model = perf_counter()
         model_times = si.run_info.times
         ml.hori_line()
+
         # initial buffer fill
         tr0 = perf_counter()
         fgm.update_readers(model_times[0])

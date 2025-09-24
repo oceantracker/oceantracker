@@ -64,6 +64,7 @@ class OceanTrackerParamsRunner(object):
             si.msg_logger.write_error_log_file(e)
 
         except Exception as e:
+            si.msg_logger.write_error_log_file(e)
             ml.msg(f' Unexpected error  ', error=True, hint=err_hint)
 
 

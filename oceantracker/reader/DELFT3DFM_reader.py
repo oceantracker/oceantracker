@@ -43,7 +43,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                          ),
             field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
                         'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
-                        'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
+                        'water_depth': PVC('mesh2d_bldepth', str, doc_str='maps standard internal field name to file variable name'),
                         'water_temperature': PVC('mesh2d_tem1', str, doc_str='maps standard internal field name to file variable name'),
                         'salinity': PVC('mesh2d_sa1', str, doc_str='maps standard internal field name to file variable name'),
                         'wind_stress': PLC(None, str, doc_str='maps standard internal field name to file variable name'),
@@ -66,13 +66,17 @@ class DELF3DFMreader(_BaseUnstructuredReader):
 
     def add_hindcast_info(self):
         ds_info =  self.dataset.info
-        dm = self.params['dimension_map']
-        fvm= self.params['field_variable_map']
-        gm = self.params['grid_variable_map']
+        params = self.params
+        dm = params['dimension_map']
+        fvm= params['field_variable_map']
+        gm = params['grid_variable_map']
         info = self.info
         dims = info['dims']
 
+        # tweak varaitions in dims and variable names
         if info['z_dim'] not in dims  : dims['mesh2d_nInterfaces' ] = dims['mesh2d_nLayers'] + 1
+        if fvm['water_depth'] not in  ds_info['variables']:  fvm['water_depth'] =  'mesh2d_waterdepth'
+
         if info['is3D']:
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
@@ -99,8 +103,6 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             elif 'mesh2d_flowelem_zcc' in  ds_info['variables']:
                 # mixed sigma, tide moving z levels, ie LSC type grid
                 info['vert_grid_type'] = si.vertical_grid_types.LSC
-                fvm['water_depth'] = 'mesh2d_bldepth'
-
             else:
                 si.msg_logger.msg('Cannot determine vertical grid type',caller=self, fatal_error=True,
                                   hint='Delft3D FM file needs variables "mesh2d_layer_sigma" and  "mesh2d_interface_sigma" if sigma grid, or "mesh2d_layer_z" and "mesh2d_interface_z" if fixed z level grid')
@@ -164,11 +166,11 @@ class DELF3DFMreader(_BaseUnstructuredReader):
 
 
         if info['vert_grid_type'] == si.vertical_grid_types.Sigma:
-            grid['sigma'] = ds.read_variable('mesh2d_interface_sigma').data.astype(np.float32) # layer interfaces
-            grid['sigma'][0] = -1.  # not sure why this value is 9.96920997e+36??
+            grid['sigma_interface'] = ds.read_variable('mesh2d_interface_sigma').data.astype(np.float32) # layer interfaces
+            grid['sigma_interface'][0] = -1.  # not sure why this value is 9.96920997e+36??
             grid['sigma_layer'] = ds.read_variable('mesh2d_layer_sigma').data.astype(np.float32)  # layer center
             # shift to be zero at bottom
-            grid['sigma'] = 1.+ grid['sigma']
+            grid['sigma_interface'] = 1.+ grid['sigma_interface']
             grid['sigma_layer'] = 1. + grid['sigma_layer']
         elif info['vert_grid_type'] == si.vertical_grid_types.LSC:
             pass
@@ -192,7 +194,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             u = hg_trans.get_nodal_values_from_weighted_cell_values(u,
                                 grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
             grid['bottom_layer_index'] = self.find_z_index_with_first_non_nan(u[0, :, :])
-            bottom_interface_index =  grid['bottom_layer_index'].copy() # not one less as extra layer is added at the top
+            bottom_interface_index =  grid['bottom_layer_index'] #  layer 0, maps down to interface 0
         else:
             # bottom cell is the first cell in sigma grid
             bottom_interface_index = np.zeros((info['num_nodes'],),  dtype=np.int32)
@@ -254,15 +256,17 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         if var_info['is3D'] and info['layer_dim'] in var_info['dims']:
             if info['vert_grid_type'] == si.vertical_grid_types.Zfixed :
                 #  interp fixed z layer values to interfaces, must be done after nodal values
-                data = hg_trans.convert_3Dfield_fixed_z_layer_to_fixed_z_interface_values(
+                data = hg_trans.convert_3Dfield_fixed_z_layer_to_fixed_z_interface(
                     data, grid['z_layer_fixed'], grid['z'], grid['bottom_layer_index'], grid['water_depth'])
 
             elif info['vert_grid_type'] == si.vertical_grid_types.LSC:
                 data = hg_trans.convert_3Dfield_LSC_layer_to_LSC_interface(data,grid['z_layer_LSC' ],grid['z_interface'],
                                                                            grid['bottom_layer_index'])
+                pass
             else:
                 # sigma grid
-                data = hg_trans. convert_mid_layer_sigma_top_bot_layer_values(data, grid['sigma_layer'], grid['sigma'])
+                data = hg_trans. convert_3Dfield_sigma_layer_to_sigma_interface(data, grid['sigma_interface'], grid['sigma_interface'])
+                pass
 
         # add dummy component axis
         data = data[..., np.newaxis]

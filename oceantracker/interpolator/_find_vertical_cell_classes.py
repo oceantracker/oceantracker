@@ -33,7 +33,7 @@ class FindVerticalCellSigmaGrid(object):
         # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
         # the smalest sigms later thickness is at the bottom
 
-        grid['sigma_nz_map'], grid['sigma_map_dz'] = make_search_map(grid['sigma'])
+        grid['sigma_nz_map'], grid['sigma_map_dz'] = make_search_map(grid['sigma_interface'])
 
 
     def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
@@ -53,7 +53,7 @@ class FindVerticalCellSigmaGrid(object):
                                     fields['water_depth'].data.ravel(),
                                     fields['tide'].data,
                                     si.settings.minimum_total_water_depth,
-                                    grid['sigma'], grid['sigma_nz_map'], grid['sigma_map_dz'],
+                                    grid['sigma_interface'], grid['sigma_nz_map'], grid['sigma_map_dz'],
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                     current_buffer_steps, fractional_time_steps,
                                     active, si.settings.z0)

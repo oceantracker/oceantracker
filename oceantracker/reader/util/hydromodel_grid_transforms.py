@@ -1,7 +1,5 @@
 import numpy as np
-from numba import njit
 from oceantracker.interpolator.util.interp_kernals import kernal_linear_interp1D
-from copy import copy
 from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.util.triangle_utilities import split_quad_cells
 
@@ -115,28 +113,34 @@ def  interp_4D_field_to_fixed_sigma_values(z_interface_fractions,bottom_interfac
 
     return out
 
-@njitOT
-def convert_mid_layer_sigma_top_bot_layer_values(data, sigma_layer, sigma):
-    # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
+@njitOTparallel
+def convert_3Dfield_sigma_layer_to_sigma_interface(data_layer, sigma_layer, sigma_interface):
+    # convert nodal values at depth at center of the cell to values on the boundaries between cells based on fractional layer/boundary depthsz
     # used in FVCOM reader
-    data_interface = np.full((data.shape[0],) + (data.shape[1],) + (sigma.shape[0],), 0., dtype=np.float32)
+    data_interface = np.full(data_layer.shape[:2] + (sigma_interface.size,), 0., dtype=np.float32)
 
-    for nt in range(data.shape[0]):
-        for n in range(data.shape[1]):
-            for nz in range(1, data.shape[2]):
+    for nt in prange(data_layer.shape[0]):
+        for n in range(data_layer.shape[1]):
+            for nz in range(0, data_layer.shape[2] - 1):
                 # linear interp levels not, first or last boundary
-                data_interface[nt, n, nz] = kernal_linear_interp1D(sigma_layer[nz - 1], data[nt, n, nz - 1], sigma_layer[nz], data[nt, n, nz], sigma[nz])
-
-            # extrapolate to top zlevel
-            data_interface[nt, n, -1] = kernal_linear_interp1D(sigma_layer[-2], data[nt, n, -2], sigma_layer[-1], data[nt, n, -1], sigma[-1])
-
-            # extrapolate to bottom zlevel
-            data_interface[nt, n, 0] = kernal_linear_interp1D(sigma_layer[0], data[nt, n, 0], sigma_layer[1], data[nt, n, 1], sigma[0])
-
+                data_interface[nt, n, nz+1] = kernal_linear_interp1D(
+                                                    sigma_layer[nz], data_layer[nt, n, nz],
+                                                    sigma_layer[nz+1], data_layer[nt, n, nz + 1],
+                                                    sigma_interface[nz + 1])
+            # extrapolate to top sigma interface
+            data_interface[nt, n, -1] = kernal_linear_interp1D(
+                                                    sigma_layer[-2], data_layer[nt, n, -2],
+                                                    sigma_layer[-1], data_layer[nt, n, -1],
+                                                    sigma_interface[-1])
+            # extrapolate to bottom sigma interface
+            data_interface[nt, n, 0] = kernal_linear_interp1D(
+                                                    sigma_layer[0], data_layer[nt, n, 0],
+                                                    sigma_layer[1], data_layer[nt, n, 1],
+                                                    sigma_interface[0])
     return data_interface
 
-@njitOT
-def convert_3Dfield_fixed_z_layer_to_fixed_z_interface_values(data_zlayer, z_layer_fixed, z, bottom_layer_index,water_depth):
+#@njitOTparallel
+def convert_3Dfield_fixed_z_layer_to_fixed_z_interface(data_zlayer, z_layer_fixed, z, bottom_layer_index, water_depth):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
     # used in FVCOM reader
 
@@ -144,7 +148,7 @@ def convert_3Dfield_fixed_z_layer_to_fixed_z_interface_values(data_zlayer, z_lay
     # add one interfacical layer at top
     data_z = np.full((data_zlayer.shape[0],data_zlayer.shape[1],data_zlayer.shape[2]+1), np.nan, dtype=np.float32)
 
-    for nt in range(data_zlayer.shape[0]):
+    for nt in prange(data_zlayer.shape[0]):
         for n in range(data_zlayer.shape[1]):
             for nz in range(bottom_layer_index[n], data_zlayer.shape[2]-1):
                 # linear interp levels not, first or last boundary from surronding mid-layer values
@@ -156,15 +160,15 @@ def convert_3Dfield_fixed_z_layer_to_fixed_z_interface_values(data_zlayer, z_lay
 
             # extrapolate to first z_interface downwards the bottom
             nz1 = bottom_layer_index[n]
-            data_z[nt, n, nz1] = kernal_linear_interp1D(z_layer_fixed[nz1], data_zlayer[nt, n, nz1],
+            data_z[nt, n, nz1] = kernal_linear_interp1D(
+                                                z_layer_fixed[nz1], data_zlayer[nt, n, nz1],
                                                 z_layer_fixed[nz1+1], data_zlayer[nt, n, nz1+1],
-                                                        z[bottom_layer_index[n]-1])
-
+                                                z[bottom_layer_index[n]])
             pass
         pass
     return data_z
 
-@njitOT
+@njitOTparallel
 def convert_3Dfield_LSC_layer_to_LSC_interface(data_layer, z_layer, z_interface, bottom_layer_index):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
     # used in FVCOM reader
@@ -172,14 +176,14 @@ def convert_3Dfield_LSC_layer_to_LSC_interface(data_layer, z_layer, z_interface,
     # interface values have one more level than mid_layer data
     data_interface = np.full(data_layer.shape[:2] + (data_layer.shape[2]+1,), np.nan, dtype=np.float32)
 
-    for nt in range(data_layer.shape[0]):
+    for nt in prange(data_layer.shape[0]):
         for n in range(data_layer.shape[1]):
             pass
             for nz in range(bottom_layer_index[n], data_layer.shape[2]-1):
                 # linear interp levels not, first or last boundary from surrounding mid-layer values
                 data_interface[nt, n, nz+1] = kernal_linear_interp1D(
                                                     z_layer[nt,n, nz], data_layer[nt,n, nz],
-                                                    z_interface[nt,n, nz+1],data_layer[nt,n, nz+1],
+                                                    z_interface[nt,n, nz+1], data_layer[nt,n, nz+1],
                                                     z_interface[nt, n , nz+1])
 
             # make top level same as middle of top layer value, ie no shear
@@ -187,15 +191,16 @@ def convert_3Dfield_LSC_layer_to_LSC_interface(data_layer, z_layer, z_interface,
 
             # extrapolate to first z_interface above the bottom, ie top surface of bottom layer, if enough cells
             nz1 = bottom_layer_index[n]
-            data_interface[nt, n, nz1] = kernal_linear_interp1D(z_layer[nt,n, nz1], data_layer[nt, n, nz1],
+            data_interface[nt, n, nz1] = kernal_linear_interp1D(
+                                                z_layer[nt,n, nz1], data_layer[nt, n, nz1],
                                                 z_layer[nt,n, nz1+1], data_layer[nt, n, nz1+1],
-                                                        z_interface[nt, n , nz1-1])
+                                                z_interface[nt, n , nz1])
             pass
         pass
     return data_interface
 
 
-@njitOT
+@njitOTparallel
 def get_nodal_values_from_weighted_cell_values(data, node_to_tri_map, tri_per_node, cell_center_weights):
     # get nodal values from 4D data in surrounding cells based in distance weighting
     # used in FVCOM, DELFT3D FM  reader
@@ -203,7 +208,7 @@ def get_nodal_values_from_weighted_cell_values(data, node_to_tri_map, tri_per_no
     s = (data.shape[0],len(node_to_tri_map)) + data.shape[2:4]
     data_nodes = np.full( s, np.nan, dtype=np.float32)
 
-    for nt in range(data.shape[0]): # loop over time steps
+    for nt in prange(data.shape[0]): # loop over time steps
 
         for node in range(s[1]): # loop over triangles
             for nz in range(s[2]):

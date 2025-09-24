@@ -434,9 +434,9 @@ class _BaseReader(ParameterBaseClass):
             # ensure vel at bottom is zero
             if info['vert_grid_type'] in [si.vertical_grid_types.LSC, si.vertical_grid_types.Zfixed]:
                 # ragged bottom
-                data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_interface_index'])
+                reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_interface_index'])
             else:
-                # First  cell is at the bottom , so set zero
+                # First  cell is at the bottom for sigma and Slayer, so set zero
                 data[:, :, 0, :] = 0.
 
         field.data[buffer_index, ...] = data

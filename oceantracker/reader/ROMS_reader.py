@@ -23,7 +23,7 @@ from oceantracker.shared_info import shared_info as si
 
 
 from oceantracker.reader.util import reader_util
-from oceantracker.reader.util.hydromodel_grid_transforms import convert_mid_layer_sigma_top_bot_layer_values
+from oceantracker.reader.util.hydromodel_grid_transforms import convert_3Dfield_sigma_layer_to_sigma_interface
 from oceantracker.util.ncdf_util import NetCDFhandler
 # todo use ROMs turbulent viscosity for dispersion
 #todo use  openbondary data to improve identifcation of open boundary nodes?
@@ -117,7 +117,7 @@ class ROMSreader(_BaseStructuredReader):
         # first values in z axis is the top? so flip
         grid = self.grid
         ds = self.dataset
-        grid['sigma']       = 1. + ds.read_variable('s_w').data.astype(np.float32)  # layer boundary fractions reversed from negative values
+        grid['sigma_interface']       = 1. + ds.read_variable('s_w').data.astype(np.float32)  # layer boundary fractions reversed from negative values
         grid['sigma_layer'] = 1. + ds.read_variable('s_rho').data.astype(np.float32)  # layer center fractions
 
 
@@ -191,7 +191,7 @@ class ROMSreader(_BaseStructuredReader):
 
         if 's_rho' in var_info['dims']:
             # convert mid-layer values to values at layer boundaries, ie z_interfaces
-            data = convert_mid_layer_sigma_top_bot_layer_values(data, grid['sigma_layer'], grid['sigma'])
+            data = convert_3Dfield_sigma_layer_to_sigma_interface(data, grid['sigma_layer'], grid['sigma_interface'])
 
         # add dummy vector components axis, note in ROMS vectors are stored in netcdf as individual components,
         data = data[:, :, :, np.newaxis]

@@ -127,7 +127,7 @@ def ensure_velocity_at_bottom_is_zero_ragged_bottom(vel_data, bottom_interface_i
             bottom_node= bottom_interface_index[node]
             for component in range(vel_data.shape[3]):
                 vel_data[nt, node, bottom_node, component] = 0.
-    return vel_data
+
 
 @njitOT
 def get_values_at_ragged_bottom(data, bottom_interface_index):
