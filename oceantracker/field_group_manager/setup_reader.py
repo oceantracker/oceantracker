@@ -422,16 +422,20 @@ def _check_time_consistency(reader):
 
         reader.info['time_step_repeats'] = [[time_util.seconds_to_isostr(a), time_util.seconds_to_isostr(b)] for a, b in zip(t1, t2)]
 
-
-
     sel = np.flatnonzero( dt > 3 * reader.info['time_step'])
     if np.any(sel):
         t1 = reader.info['time_coord'][sel]
         t2 = reader.info['time_coord'][sel+1]
 
-        si.msg_logger.msg('Some hindcasts time steps are longer than 3 average time steps',
-                          hint = f'Hindcast may be missing files or othe time error, eg at {time_util. seconds_to_isostr(t1[0])} to {time_util. seconds_to_isostr(t2[0])}, see hindcast_info.json for full list of dates', warning=True)
+        si.msg_logger.msg('Some hindcast time steps are longer than 3 average time steps',error=True,
+                        hint = f'Hindcast may be missing files or othe time error, eg at {time_util. seconds_to_isostr(t1[0])} to {time_util. seconds_to_isostr(t2[0])}, see hindcast_info.json for full list of dates', warning=True)
 
-        reader.info['time_step_errors'] =[ [time_util. seconds_to_isostr(a),time_util. seconds_to_isostr(b) ] for a,b in zip(t1,t2) ]
+        for d1,d2  in [ [time_util. seconds_to_isostr(a),time_util. seconds_to_isostr(b) ] for a,b in zip(t1,t2) ]:
+            si.msg_logger.msg(f'Gap from {d1}  to {d2}' , error=True, tabs=2)
+
+        si.msg_logger.msg('Hindcast must have all time steps', fatal_error=True,
+                            hint=f'Find missing files, check al time steps are in all files, covering above time gaps')
+
+
 
     return

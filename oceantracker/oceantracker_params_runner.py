@@ -3,7 +3,6 @@ import sys
 from copy import deepcopy, copy
 from os import path
 import numpy as np
-from oceantracker.util.parameter_base_class import ParameterBaseClass
 
 from time import  perf_counter
 from oceantracker.util.message_logger import OTerror, OTfatal_error, OTunexpected_error
@@ -49,23 +48,22 @@ class OceanTrackerParamsRunner(object):
 
         except OTerror as e:
             ml.msg(f'Parameters/setup has errors', hint= 'see above')
+            si.msg_logger.write_error_log_file(e)
 
         except OTfatal_error as e:
-            self._write_error_info(e)
-
-            ml.msg(f'Single parameter/setup error requiring immediate exit', hint=err_hint)
+            ml.msg(f'Single parameter/setup error requiring immediate exit', hint=err_hint, error=True)
+            si.msg_logger.write_error_log_file(e)
 
         except FileNotFoundError as e:
-            self._write_error_info(e)
-            ml.msg(f'Could not find hindcast file? or other required file',  hint=err_hint)
+            ml.msg(f'Could not find hindcast file? or other required file',  hint=err_hint, error=True)
+            si.msg_logger.write_error_log_file(e)
 
         except OSError as e:
             # path may already exist, but if not through other error, exit
-            self._write_error_info(e)
-            si.msg_logger.msg(f'Failed to make run output dir or invalid file name', hint=err_hint )
+            si.msg_logger.msg(f'Failed to make run output dir or invalid file name', hint=err_hint, error=True )
+            si.msg_logger.write_error_log_file(e)
 
         except Exception as e:
-            self._write_error_info(e)
             ml.msg(f' Unexpected error  ', error=True, hint=err_hint)
 
 
@@ -73,7 +71,6 @@ class OceanTrackerParamsRunner(object):
         ml.set_screen_tag('end')
         ml.hori_line()
         # write a sumary of errors etc
-        num_errors = len(ml.errors_list)
 
         ml.msg(f'Finished "{"??" if  si.run_info.output_file_base is None else si.run_info.output_file_base}"'
                            + ',  started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()))
@@ -101,12 +98,22 @@ class OceanTrackerParamsRunner(object):
                 t= si.core_class_roles[name].info["time_spent_updating"]
                 ml.msg(f'{name + " "*(l-len(name))} {t:4.2f} s\t {100*t/total_time:4.1f}%', tabs=4)
 
-        ml.msg(f'{num_errors:3d} errors, {len(ml.warnings_list):3d} warnings, {len(ml.notes_list):3d} notes', tabs=1)
+        # show any errors etc, at end as well
+        ml.hori_line(f'Issues    (check above,  any errors repeated below)')
+        el  = ml.msg_lists
+        num_errors = len(el['fatal_error']) + len(el['error'])
+        ml.msg(f'{num_errors:3d} errors,  {len(el["strong_warning"]):3d} strong warnings, {len(el["warning"]):3d} warnings, {len(el["note"]):3d} notes', tabs=1)
+        for v in ml.msg_lists['strong_warning']:
+            ml.msg('Strong_warning >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=1)
 
-        if num_errors > 0:
 
+        if  num_errors > 0:
             ml.msg(f'>>>>>>> Found {num_errors:2d} errors <<<<<<<<<<<<',
-                hint='Look for first error above  or in  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
+                   hint='Look for first error above or below  or in  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
+            for v in ml.msg_lists['error']:
+                ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
+            for v in ml.msg_lists['fatal_error']:
+                ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
             ml.msg('')
 
         ml.hori_line(f'Finished: output in "{si.run_info.run_output_dir}"')
@@ -533,16 +540,14 @@ class OceanTrackerParamsRunner(object):
              'output_files': deepcopy(si.output_files),
              'version_info':   si.run_info.version,
              'computer_info':  si.run_info.computer_info,
-
+             'errors_warnings_notes': si.msg_logger.msg_lists,
              'working_params': dict(settings = si.settings.asdict() ,core_class_roles={}, class_roles={}),
              'timing':dict(block_timings=[], function_timers= {}),
              'update_timers': {},
              'settings' : si.settings.asdict(),
              'run_info' : info,
              'particle_status_flags': si.particle_status_flags.asdict(),
-             'errors': si.msg_logger.errors_list,
-             'warnings': si.msg_logger.warnings_list,
-             'notes': si.msg_logger.notes_list,
+
              'release_group_info': {},
              'scheduler_info': {},
              'class_roles_info': {},
@@ -626,14 +631,6 @@ class OceanTrackerParamsRunner(object):
         json_util.write_JSON(case_info_file, d)
         return case_info_file
 
-    def _write_error_info(self,e):
-
-
-        si.msg_logger.msg('Caught error>>>>>>>>>>')
-        si.msg_logger.msg(str(e))
-        si.msg_logger.msg(traceback.format_exc())
-        if hasattr(si.msg_logger,'error_file_name'):
-            si.msg_logger.write_error_log_file(e)
 
 
 

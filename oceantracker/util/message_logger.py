@@ -7,6 +7,7 @@ from time import sleep
 import inspect
 import shutil
 
+
 class OTerror(Exception):
     def __init__(self, message='-no error message given',hint=None):
         # Call the base class constructor with the parameters it needs
@@ -34,13 +35,9 @@ class MessageLogger(object ):
 
     def reset(self):
 
-        self.warnings_list=[]
-        self.errors_list=[]
-        self.notes_list = []
+        self.msg_lists = dict(fatal_error=[],error=[],warning=[],  strong_warning=[],note=[])
+
         self.log_file = None
-        self.error_count = 0
-        self.warning_count = 0
-        self.note_count = 0
         self.max_warnings = 25
 
 
@@ -70,9 +67,9 @@ class MessageLogger(object ):
 
         return  log_file_name, error_file_name
 
-    def msg(self, msg_text, warning=False, note=False,
+    def msg(self, msg_text, note=False,
             hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,
-            possible_values=None,
+            possible_values=None, warning=False,strong_warning=False,
             error=False, fatal_error=False, exception = None,
             traceback_str=None, dev=False):
         
@@ -85,17 +82,21 @@ class MessageLogger(object ):
         # first line of message
         if error:
             m = self._append_message(m, '>>> Error: ' + msg_text, tabs)
-            self.error_count += 1
+            self._add_to_msg_list('error', msg_text, hint, crumbs, caller)
 
         elif warning:
             m= self._append_message(m,'>>> Warning: ' + msg_text, tabs)
-            self.warning_count += 1
-            if self.warning_count > self.max_warnings: return
+            if  len(self.msg_lists['warning']) > self.max_warnings: return
+            self._add_to_msg_list('warning', msg_text, hint, crumbs, caller)
+        elif strong_warning:
+            m = self._append_message(m, '>>> Strong warning: ' + msg_text, tabs)
+            if len(self.msg_lists['strong_warning']) > self.max_warnings: return
+            self._add_to_msg_list('strong_warning', msg_text, hint, crumbs, caller)
 
         elif note:
             m= self._append_message(m, '>>> Note: ' + msg_text, tabs)
-            self.note_count += 1
-            if self.note_count > self.max_warnings: return
+            if len(self.msg_lists['note']) > self.max_warnings: return
+            self._add_to_msg_list('note', msg_text, hint, crumbs, caller)
 
         else:
             m = self._append_message(m, msg_text, tabs)
@@ -133,21 +134,15 @@ class MessageLogger(object ):
 
         pass
         # write message lines
-
         for l in  m.split('\n')[:-1]: # drop last \n
             ll = self.screen_tag + ' ' + l
             print(ll)
             if self.log_file is not None:
                 self.log_file.write(ll + '\n')
 
-        # keep list ond warnings errors etc to print at end
-        if error:  self.errors_list.append(m)
-                #self.build_stack()
-        if warning: self.warnings_list.append(m)
-        if note:self.notes_list.append(m)
-
         # todo add traceback to message?
         if fatal_error:
+            self._add_to_msg_list('fatal_error', msg_text, hint, crumbs, caller)
             raise OTerror('Fatal error cannot continue')
         pass
     def _append_message(self, m, msg, tabs):
@@ -157,14 +152,13 @@ class MessageLogger(object ):
             m += (tabs + int(n > 0))*tab + s + '\n'
         return m
 
-    def has_errors(self): return  self.error_count > 0
+    def has_errors(self): return  len(self.msg_lists['error']) > 0
 
     def exit_if_prior_errors(self,msg, caller=None, crumbs=''):
         if self.has_errors():
             self.hori_line()
             self.msg(msg + '>>> Fatal errors, can not continue', crumbs= crumbs, caller=caller)
-            for m in self.errors_list:
-                self.msg(m)
+            self.show_all_strong_warnings_and_errors()
             self.hori_line()
             sleep(1) # allow time for messages to print
             raise OTerror('Fatal error cannot continue >>> ' + msg if msg is not None else '', hint='Check above or run.err file for errors')
@@ -184,14 +178,10 @@ class MessageLogger(object ):
 
         self.msg('- ' + msg, tabs=tabs)
 
-    def show_all_warnings_and_errors(self):
-        for t in [self.warnings_list, self.errors_list]:
-            tt= list(set(t))
-            for m in tt:
-                for l in m.split('\n'):
-                    print(self.screen_tag + ' ' + l)
-                    if self.log_file is not None:
-                        self.log_file.write(l + '\n')
+    def show_all_strong_warnings_and_errors(self):
+        for m in [self.msg_lists['strong_warning'], self.msg_lists['errors']]:
+            self.msg(m['msg'],hint= m['hint'],caller=m['caller'],crumbs=m['crumbs'])
+
 
     def write_error_log_file(self, e):
         sleep(.5)
@@ -201,9 +191,12 @@ class MessageLogger(object ):
 
         with open(path.normpath(self.error_file_name),'w') as f:
             f.write('_____ Known warnings and Errors ________________________________\n')
-            for t in [self.notes_list, self.warnings_list, self.errors_list]:
-                for l in t:
-                    f.write(self.screen_tag + ' ' + l + '\n')
+            for l, ml in self.msg_lists.items():
+                for m in ml:
+                    f.write( f'{l} >>> {m["msg"]} \n')
+                    f.write(f'\t\t hint  : {m["hint"]}\n')
+                    f.write(f'\t\t crumbs: {m["crumbs"]} \n')
+                    f.write(f'\t\t caller: {m["caller"]} \n')
 
             f.write('________Trace back_____________________________\n')
             f.write(str(e))
@@ -256,3 +249,9 @@ class MessageLogger(object ):
         if self.log_file is not None:
             self.log_file.close()
             self.log_file = None
+
+
+    def _add_to_msg_list(self,msg_type,msg,hint,crumbs, caller):
+        self.msg_lists[msg_type].append(
+            dict(msg=msg, hint=hint, crumbs=crumbs, caller=str(caller))
+        )
