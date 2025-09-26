@@ -15,7 +15,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
-        regrid_z_to_uniform_sigma_levels=PVC(False, bool,
+        regrid_z_to_sigma_levels=PVC(False, bool,
                        doc_str='much faster 3D runs by re-griding hydo-model fields for S-layer or LSC vertical grids (eg. SCHISM),  into uniform sigma levels on read based on sigma most curve z_interface profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS'),
 
         variable_signature=PLC(['mesh2d_face_nodes'], str, doc_str='Variable names used to test if file is this format'),
@@ -57,11 +57,11 @@ class DELF3DFMreader(_BaseUnstructuredReader):
     def add_required_classes_and_settings(self,**kwargs):
         params = self.params
 
-        if params['regrid_z_to_uniform_sigma_levels']:
+        if params['regrid_z_to_sigma_levels']:
             si.msg_logger.msg('Regridding DELFT3D mixed sigma, fixed z vertical grid not yet implemented, using native vertical grid',
                               hint='disabling vertical regridding ',
                           warning=True)
-        params['regrid_z_to_uniform_sigma_levels'] = False
+        params['regrid_z_to_sigma_levels'] = False
         pass
 
     def add_hindcast_info(self):
@@ -80,7 +80,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
         if info['is3D']:
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = dims[info['z_dim']]
+
             info['all_z_dims'] = dm['all_z_dims']
             # 2 variants of fixed z layer dimension names
             if 'mesh2d_nInterfaces' in dims:
@@ -103,13 +103,17 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             elif 'mesh2d_flowelem_zcc' in  ds_info['variables']:
                 # mixed sigma, tide moving z levels, ie LSC type grid
                 info['vert_grid_type'] = si.vertical_grid_types.LSC
+                if params['regrid_z_to_sigma_levels']:
+                    si.msg_logger.msg(
+                        'Regridding DELFT3D mixed sigma, fixed z vertical grid not yet implemented, using native vertical grid',
+                        hint='disabling vertical regridding ',
+                        warning=True)
+                params['regrid_z_to_sigma_levels'] = False
             else:
                 si.msg_logger.msg('Cannot determine vertical grid type',caller=self, fatal_error=True,
                                   hint='Delft3D FM file needs variables "mesh2d_layer_sigma" and  "mesh2d_interface_sigma" if sigma grid, or "mesh2d_layer_z" and "mesh2d_interface_z" if fixed z level grid')
-
         # get num nodes in each field
         # is the number of nodes = uniques nodes in the quad mesh
-
         info['node_dim'] = 'mesh2d_nNodes' if 'mesh2d_nNodes' in dims else 'nmesh2d_node'
 
         info['num_nodes'] =  dims[info['node_dim']]
@@ -257,8 +261,8 @@ class DELF3DFMreader(_BaseUnstructuredReader):
             if info['vert_grid_type'] == si.vertical_grid_types.Zfixed :
                 #  interp fixed z layer values to interfaces, must be done after nodal values
                 data = hg_trans.convert_3Dfield_fixed_z_layer_to_fixed_z_interface(
-                    data, grid['z_layer_fixed'], grid['z'], grid['bottom_layer_index'], grid['water_depth'])
-
+                                    data, grid['z_layer_fixed'], grid['z'], grid['bottom_layer_index'], grid['water_depth'])
+                pass
             elif info['vert_grid_type'] == si.vertical_grid_types.LSC:
                 data = hg_trans.convert_3Dfield_LSC_layer_to_LSC_interface(data,grid['z_layer_LSC' ],grid['z_interface'],
                                                                            grid['bottom_layer_index'])

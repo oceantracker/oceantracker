@@ -15,7 +15,7 @@ def main(args):
                 min_dead_to_remove=50,
         )
     hm = test_definitions.hydro_model['demoSchism3D']
-    ot.add_class('reader', **hm['reader'],  regrid_z_to_uniform_sigma_levels=False)
+    ot.add_class('reader', **hm['reader'],  regrid_z_to_sigma_levels=False)
 
     # add a point release
     ot.add_class('release_groups',**dict(test_definitions.rg_basic,max_age=2*3600))

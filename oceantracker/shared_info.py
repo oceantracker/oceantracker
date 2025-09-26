@@ -90,9 +90,7 @@ class _DefaultSettings(definitions._AttribDict):
                              doc_str='Throw desigated error, eg =1 is mid run error to test restart',
                              expert=True)
     regrid_z_to_uniform_sigma_levels = PVC(True, bool, obsolete=True,
-                                           doc_str='seting "regrid_z_to_uniform_sigma_levels" has moved to be a reader parameter, so set when adding reader class')
-
-
+                                           doc_str='setting "regrid_z_to_uniform_sigma_levels" has moved to be a reader parameter "regrid_z_to_sigma_levels", so set when adding reader class')
 # blocks that make up parts of shared info
 class _ClassRoles(definitions._AttribDict):
     release_groups =[]

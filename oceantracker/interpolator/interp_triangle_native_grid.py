@@ -24,7 +24,7 @@ class  InterpTriangularGrid(_BaseInterp):
         self.add_default_params({'bc_walk_tol': PVC(1.0e-3, float,min = 0.),
                                  'max_search_steps': PVC(500,int, min =1)})
         self.info['current_buffer_index'] = np.zeros((2,), dtype=np.int32)
-
+        self.info['bad_z_fraction_count'] = 0
     def add_required_classes_and_settings(self):
         info = self.info
 
@@ -174,8 +174,14 @@ class  InterpTriangularGrid(_BaseInterp):
 
     def find_vertical_cell(self, fields, xq, current_buffer_steps,fractional_time_steps, active):
         # locate vertical cell in place
+        info = self.info
         t0 = perf_counter()
-        self._get_vert_cell(fields, xq, current_buffer_steps, fractional_time_steps, active)
+        info['bad_z_fraction_count'] = self._get_vert_cell(fields, xq, current_buffer_steps, fractional_time_steps, active)
+
+        if info['bad_z_fraction_count'] > 0 :
+            si.msg_logger.msg(f'Out of range vertical layer fraction calculated, number counted so far {info["bad_z_fraction_count"]}', strong_warning=True,caller = self,
+            hint='issue with 3D vertical grid hindcast values? reader encountered unknown variant of hindcast vertical grid?')
+
         si.block_timer('Find vertical cell', t0)
 
     #@function_profiler(__name__)

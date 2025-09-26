@@ -16,7 +16,7 @@ def main(args):
     #ot.settings(NUMBA_cache_code = True)
     hm = test_definitions.hydro_model['demoROMS']
 
-    ot.add_class('reader', **hm['reader'], regrid_z_to_uniform_sigma_levels=True)
+    ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True)
 
     # add a point release
     ot.add_class('release_groups',points=  [-69.5, 43.5], release_interval= 1800)

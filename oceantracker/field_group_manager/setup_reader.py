@@ -69,15 +69,15 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
 
     info['vert_grid_type_in_files'] = copy(info['vert_grid_type'])
 
-    if info['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and reader_params['regrid_z_to_uniform_sigma_levels']:
+    if info['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and reader_params['regrid_z_to_sigma_levels']:
         info['vert_grid_type'] = vgt.Sigma
-        reader_params['regrid_z_to_uniform_sigma_levels'] = True
+        reader_params['regrid_z_to_sigma_levels'] = True
 
-    elif info['vert_grid_type'] in [vgt.Slayer, vgt.LSC]  and not reader_params['regrid_z_to_uniform_sigma_levels']:
-        reader_params['regrid_z_to_uniform_sigma_levels'] = False
+    elif info['vert_grid_type'] in [vgt.Slayer, vgt.LSC]  and not reader_params['regrid_z_to_sigma_levels']:
+        reader_params['regrid_z_to_sigma_levels'] = False
 
     elif info['vert_grid_type'] in [vgt.Sigma, vgt.Zfixed]:
-        reader_params['regrid_z_to_uniform_sigma_levels'] = False
+        reader_params['regrid_z_to_sigma_levels'] = False
 
     elif info['is3D']:
         si.msg_logger.msg(f'Unknown grid vertical type "{info["vert_grid_type"]}"',

@@ -7,14 +7,14 @@
     "use_dispersion": false,
     "screen_output_time_interval": 1800,
     "use_A_Z_profile": true,
-    "regrid_z_to_uniform_sigma_levels": false,
     "particle_buffer_initial_size": 200,
     "NUMBA_cache_code": true,
     "use_resuspension": false,
     "min_dead_to_remove": 50,
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
-        "file_mask": "demo_hindcast_schisim3D*.nc"
+        "file_mask": "demo_hindcast_schisim3D*.nc",
+        "regrid_z_to_sigma_levels": false
     },
     "release_groups": [
         {

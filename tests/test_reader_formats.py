@@ -344,7 +344,6 @@ def get_case(n):
             # batic sea GLORYS
             x0 = [ [58.36351222050503, 21.7318678553635],
                 [55.54839701166633, 16.870008930959628],
-
                    ]
             x0=np.asarray(x0)
             x0[:,:2] = np.flip(x0[:,:2], axis=1)
@@ -453,7 +452,7 @@ def get_case(n):
     params.update(user_note=title,output_file_base=output_file_base,
 
                   max_run_duration= max_days*24*3600, time_step= time_step, use_open_boundary=use_open_boundary )
-    params['reader'].update(input_dir=root_input_dir, regrid_z_to_uniform_sigma_levels = not args.nativez,
+    params['reader'].update(input_dir=root_input_dir, regrid_z_to_sigma_levels = not args.nativez,
                             file_mask=file_mask,
                             class_name=reader)
     if water_depth_file is not None:

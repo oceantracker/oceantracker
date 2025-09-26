@@ -165,7 +165,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         zf_model = grid['z_interface_fractions'][node_thinest_bot_layer, nz_bottom:]
         nz = grid['z_interface_fractions'].shape[1]
         nz_fractions = nz - nz_bottom
-        grid['sigma'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
+        grid['sigma_interface'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
 
         if False:
             # debug plots sigma

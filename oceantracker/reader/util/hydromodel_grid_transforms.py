@@ -139,31 +139,29 @@ def convert_3Dfield_sigma_layer_to_sigma_interface(data_layer, sigma_layer, sigm
                                                     sigma_interface[0])
     return data_interface
 
-#@njitOTparallel
-def convert_3Dfield_fixed_z_layer_to_fixed_z_interface(data_zlayer, z_layer_fixed, z, bottom_layer_index, water_depth):
+@njitOTparallel
+def convert_3Dfield_fixed_z_layer_to_fixed_z_interface(data_layer, z_layer, z_interface, bottom_layer_index, water_depth):
     # convert values at depth at center of the cell to values on the boundaries between cells baed on fractional layer/boundary depthsz
     # used in FVCOM reader
 
     # interface values have one more level than mid_layer data
     # add one interfacical layer at top
-    data_z = np.full((data_zlayer.shape[0],data_zlayer.shape[1],data_zlayer.shape[2]+1), np.nan, dtype=np.float32)
+    data_z = np.full((data_layer.shape[0], data_layer.shape[1], data_layer.shape[2] + 1), np.nan, dtype=np.float32)
 
-    for nt in prange(data_zlayer.shape[0]):
-        for n in range(data_zlayer.shape[1]):
-            for nz in range(bottom_layer_index[n], data_zlayer.shape[2]-1):
+    for nt in prange(data_layer.shape[0]):
+        for n in range(data_layer.shape[1]):
+            for nz in range(bottom_layer_index[n], data_layer.shape[2] - 1):
                 # linear interp levels not, first or last boundary from surronding mid-layer values
-                data_z[nt, n, nz+1] = kernal_linear_interp1D(z_layer_fixed[nz], data_zlayer[nt,n, nz],
-                                                    z_layer_fixed[nz+1], data_zlayer[nt,n, nz+1], z[nz+1])
+                data_z[nt, n, nz+1] = kernal_linear_interp1D(z_layer[nz], data_layer[nt,n, nz],
+                                                             z_layer[nz + 1], data_layer[nt,n, nz + 1],
+                                                             z_interface[nz + 1])
 
             # make top level same as middle of top layer value, ie no shear
-            data_z[nt, n, -1] = data_zlayer[nt, n, -1]
+            data_z[nt, n, -1] = data_layer[nt, n, -1]
 
-            # extrapolate to first z_interface downwards the bottom
-            nz1 = bottom_layer_index[n]
-            data_z[nt, n, nz1] = kernal_linear_interp1D(
-                                                z_layer_fixed[nz1], data_zlayer[nt, n, nz1],
-                                                z_layer_fixed[nz1+1], data_zlayer[nt, n, nz1+1],
-                                                z[bottom_layer_index[n]])
+            # don't extrapolate  down to bottom as may be a very large distance, so copy layer value to bottom
+            #   velocity will be zeroed out after read
+            data_z[nt, n, bottom_layer_index[n]] = data_layer[nt, n, bottom_layer_index[n]]
             pass
         pass
     return data_z

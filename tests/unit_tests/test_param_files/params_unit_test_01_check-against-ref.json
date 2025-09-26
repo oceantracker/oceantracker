@@ -22,7 +22,7 @@
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc",
-        "regrid_z_to_uniform_sigma_levels": true
+        "regrid_z_to_sigma_levels": true
     },
     "release_groups": [
         {

@@ -4,11 +4,9 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
 from oceantracker.fields.reader_field import  ReaderField
-import dateutil
 from oceantracker.util import time_util, ncdf_util, numba_util
 from datetime import datetime
 from os import path
-from oceantracker.util.ncdf_util import NetCDFhandler
 from time import perf_counter
 from oceantracker.util.basic_util import nopass
 import oceantracker.reader.util.hydromodel_grid_transforms as hydromodel_grid_transforms
@@ -20,8 +18,6 @@ from oceantracker.util import triangle_utilities, basic_util, cord_transforms
 from oceantracker.reader.util import reader_util
 
 from oceantracker.shared_info import shared_info as si
-
-from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
 class _BaseReader(ParameterBaseClass):
 
@@ -61,12 +57,13 @@ class _BaseReader(ParameterBaseClass):
                             ),
         field_variables= PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
         drop_variables= PLC(None, str, expert=True, doc_str='List of problematic file variable names to ignore, eg non-critcal variables not present in all files/all times', make_list_unique=True),
-        regrid_z_to_uniform_sigma_levels = PVC(True, bool,
+        regrid_z_to_sigma_levels = PVC(True, bool,
                 doc_str='much faster 3D runs by re-griding hydo-model fields for S-layer or LSC vertical grids (eg. SCHISM),  into uniform sigma levels on read based on sigma most curve z_interface profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS')
 
         )  # list of normal required dimensions
 
         self.info['buffer_info'] = dict( time_steps_in_buffer = [])
+        self.info["vert_grid_type"] = None
         self.grid={}
         self.fields ={}
 
@@ -148,15 +145,34 @@ class _BaseReader(ParameterBaseClass):
     def final_setup(self):      pass
 
     def _build_hori_and_vert_grids(self, ):
+        params = self.params
         grid= self.grid
+        info = self.info
         self.build_hori_grid(grid)
         self._construct_hori_grid_variables()
+        si.msg_logger.hori_line('Hindcast info')
+        si.msg_logger.msg(f'Hydro-model is "{"3D" if info["is3D"] else "2D"}", type "{self.__class__.__name__}"',
+                          tabs=2, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
+        si.msg_logger.msg(f'Geographic coords = "{info["geographic_coords"]}" ', tabs=4)
+        si.msg_logger.msg(f'Hindcast start: {info["start_date"]}  end:  {info["end_date"]}', tabs=4)
+        dt = time_util.seconds_to_pretty_duration_string(info['time_step'])
+        si.msg_logger.msg(f'time step = {dt}, number of time steps= {info["total_time_steps"]} ',
+                          tabs=5)
+        si.msg_logger.msg('grid bounding box = ' + info['bounding_box'], tabs=5)
+
+        si.msg_logger.msg(
+            f"has:  A_Z profile={info['has_A_Z_profile']},  bottom stress={info['has_bottom_stress']}, regrid to sigma={params['regrid_z_to_sigma_levels']} ",
+            tabs=5)
+
 
         if self.info['is3D']:
             self.build_vertical_grid()
         else:
             # 2D
             grid['z_interface'] = None
+
+        si.msg_logger.msg(f'vertical grid type = {info["vert_grid_type"]}', tabs=5)
+        si.msg_logger.hori_line()
 
         #todo is below cneeded???
         for name in ['z_interface', 'z_interface_fractions']:
@@ -202,16 +218,7 @@ class _BaseReader(ParameterBaseClass):
         b = f'{np.array2string(bounds[0], precision=3, floatmode="fixed")} to {np.array2string(bounds[1], precision=3, floatmode="fixed")}'
 
         info['bounding_box'] = b
-        si.msg_logger.msg(f'Hydro-model is "{"3D" if info["is3D"] else "2D"}", type "{self.__class__.__name__}"',
-                          tabs=2, hint=f'Files found in dir and sub-dirs of "{self.params["input_dir"]}"')
-        si.msg_logger.msg(f'Geographic coords = "{info["geographic_coords"] }" ',tabs=4)
-        si.msg_logger.msg(f'Hindcast start: {info["start_date"]}  end:  {info["end_date"]}', tabs=4)
-        dt = time_util.seconds_to_pretty_duration_string(info['time_step'])
-        si.msg_logger.msg(f'time step = {dt}, number of time steps= {info["total_time_steps"]} ',
-            tabs=5)
-        si.msg_logger.msg('grid bounding box = ' + b, tabs=5)
-        si.msg_logger.msg(f"has:  A_Z profile={info['has_A_Z_profile']}  bottom stress={info['has_bottom_stress']}", tabs=5)
-        si.msg_logger.hori_line()
+
         # reader triangles
         self.read_triangles(grid)
         grid['quad_cells_to_split'],grid['triangles'] = self.find_and_split_quad_cells(grid['triangles'])
@@ -307,7 +314,7 @@ class _BaseReader(ParameterBaseClass):
 
         # allow vertical regridding to same sigma at all nodes
 
-        if params['regrid_z_to_uniform_sigma_levels']:
+        if params['regrid_z_to_sigma_levels']:
             self.set_up_uniform_sigma(grid)  # add an estimated sigma to the grid
 
 
@@ -426,9 +433,9 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
 
         if field.is3D():
-            if params['regrid_z_to_uniform_sigma_levels']:
+            if params['regrid_z_to_sigma_levels']:
                 # applies to LSC and Slayer grids if requested (the default)
-                data = reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_interface_index']) # zero bottom before regrid
+                reader_util.ensure_velocity_at_bottom_is_zero_ragged_bottom(data, self.grid['bottom_interface_index']) # zero bottom before regrid
                 data = self._vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma('water_velocity', data)
 
             # ensure vel at bottom is zero
@@ -536,7 +543,7 @@ class _BaseReader(ParameterBaseClass):
 
             data =  self.read_field_data(name, field, nt_available)
 
-            if field.is3D() and params['regrid_z_to_uniform_sigma_levels']:
+            if field.is3D() and params['regrid_z_to_sigma_levels']:
                 data = self._vertical_regrid_Slayer_or_LSC_grid_to_uniform_sigma(name, data)
 
             # insert data
@@ -628,12 +635,12 @@ class _BaseReader(ParameterBaseClass):
         fields = self.fields
 
         s = list(np.asarray(data.shape, dtype=np.int32))
-        s[2] = grid['sigma'].size
+        s[2] = grid['sigma_interface'].size
         out = np.full(tuple(s), np.nan, dtype=np.float32) # move to interp_4D_field_to_fixed_sigma_values?
 
         data_out = hydromodel_grid_transforms.interp_4D_field_to_fixed_sigma_values(
                             grid['z_interface_fractions'], grid['bottom_interface_index'],
-                            grid['sigma'],
+                            grid['sigma_interface'],
                             fields['water_depth'].data, fields['tide'].data,
                             si.settings.z0, si.settings.minimum_total_water_depth,
                             data, out,
@@ -645,7 +652,7 @@ class _BaseReader(ParameterBaseClass):
             n = 75
 
             plt.plot(grid['z_interface_fractions'][ n, :], data[nt, n, :, 0], c='g')
-            plt.plot(grid['sigma'],data_out[nt,n,:,0],c='r')
+            plt.plot(grid['sigma_interface'],data_out[nt,n,:,0],c='r')
             plt.show()
         return data_out
 
