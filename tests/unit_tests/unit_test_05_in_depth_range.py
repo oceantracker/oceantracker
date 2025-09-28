@@ -19,7 +19,7 @@ def main(args):
 
     #ot.settings(NUMBA_cache_code = True)
     hm = test_definitions.hydro_model['demoSchism3D']
-    ot.add_class('reader', **hm['reader'])
+    ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=False)
 
     # add a point release
     ot.add_class('release_groups', **test_definitions.my_polygon_release)

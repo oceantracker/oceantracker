@@ -141,10 +141,11 @@ class OceanTrackerParamsRunner(object):
 
         ml.hori_line()
         ml.msg(f'{definitions.package_fancy_name} version {definitions.version["oceantracker_version"]}  starting setup helper "main.py":')
+        ml.msg(f'Started > "{user_given_params["output_file_base"]}"')
 
         # split params in to settings, core and class role params
         si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
-                                                             crumbs='Buling working params')
+                                                             crumbs='Bulding working params ')
         ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults', caller=self)
 
         si.add_settings(si.working_params['settings'])  # add full settings to shared info

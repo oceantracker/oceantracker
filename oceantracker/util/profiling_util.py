@@ -73,7 +73,6 @@ if __name__ == "__main__":
 
     set_profile_mode('functions')
 
-    #@function_profiler(__file__)
     def test_fun(a, b):
         sleep(.1)
         return a + b

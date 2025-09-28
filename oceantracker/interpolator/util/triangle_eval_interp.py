@@ -206,7 +206,6 @@ def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps
                       + bc_coords[n, m] * (F2[n_node, nz_below] * zf1 + F2[n_node, nz_above] * zf) * fractional_time_steps[1]  # second time step
 
 
-#@function_profiler(__name__)
 @njitOTparallel
 def time_dependent_3D_vector_field_ragged_bottom(n_buffer, fractional_time_steps, F_data,
                                                  triangles, bottom_interface_index,
@@ -239,9 +238,9 @@ def time_dependent_3D_vector_field_ragged_bottom(n_buffer, fractional_time_steps
                 F_out[n, c] +=    bc_coords[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*fractional_time_steps[0]  \
                                 + bc_coords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*fractional_time_steps[1]  # second time step
                 pass
-
+            pass
         pass
-
+    pass
 
 # below are development ideas
 #_______________________________________________

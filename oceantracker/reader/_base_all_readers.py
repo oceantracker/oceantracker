@@ -496,7 +496,6 @@ class _BaseReader(ParameterBaseClass):
 
             self.stop_update_timer()
 
-    #@function_profiler(__name__)
     def fill_time_buffer(self,time_sec):
         # fill as much of  hindcast buffer as possible starting at global hindcast time step nt0_buffer
         # fill buffer starting at hindcast time step nt0_buffer

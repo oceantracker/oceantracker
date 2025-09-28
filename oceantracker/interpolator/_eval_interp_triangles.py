@@ -108,7 +108,7 @@ class EvalInterpTriangles(object):
                                                                               grid['triangles'], grid['bottom_interface_index'],
                                                                               part_prop['n_cell'].data, part_prop['bc_coords'].data, part_prop['nz_cell'].data, part_prop['z_fraction'].data,
                                                                               output, active)
-
+        pass
 # special case give bc and cell, used to evaluate water depth and tide  for checking release points
 # interp_named_field_at_given_locations_and_time(self, field_name, x, n_cell=None,bc_coords=None, time_sec= None ):
 # todo add??

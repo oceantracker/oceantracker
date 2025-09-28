@@ -90,9 +90,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
         si.run_info.particle_counts['current_status_counts'] = info['current_status_counts']
 
-
-
-    #@function_profiler(__name__)
     def release_particles(self,n_time_step, time_sec):
         # see if any group is ready to release
 
@@ -183,7 +180,6 @@ class ParticleGroupManager(ParameterBaseClass):
 
         si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
 
-    #@function_profiler(__name__)
     def update_PartProp(self,n_time_step, time_sec, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
         t0 = perf_counter()

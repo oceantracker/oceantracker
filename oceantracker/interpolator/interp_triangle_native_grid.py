@@ -28,9 +28,7 @@ class  InterpTriangularGrid(_BaseInterp):
     def add_required_classes_and_settings(self):
         info = self.info
 
-    #@function_profiler(__name__)
 
-    
     def initial_setup(self, reader):
         super().initial_setup(reader)  # children must call this parent class to default shared_params etc
         params = self.params
@@ -150,7 +148,6 @@ class  InterpTriangularGrid(_BaseInterp):
             part_prop['n_cell'].set_values(n_cell[fixed], IDs_failed_walk[fixed])
             part_prop['bc_coords'].set_values(bc[fixed,:], IDs_failed_walk[fixed])
 
-
             # recheck for repeated failures of failed searched, which must be outside domain if not found by intial serarch
             if np.any(~fixed):
                 sel2= IDs_failed_walk[~fixed]
@@ -184,7 +181,6 @@ class  InterpTriangularGrid(_BaseInterp):
 
         si.block_timer('Find vertical cell', t0)
 
-    #@function_profiler(__name__)
     def are_points_inside_domain(self,xq):
         n_cell, bc, is_inside_domain  = self.find_initial_hori_cell_method(xq)
         part_data = dict(x = xq, n_cell=n_cell, bc_coords=bc)
