@@ -33,6 +33,8 @@ class MessageLogger(object ):
         for l in link_map:
             self.links[l[0]]= docs_base_url + l[1]
 
+        self.error_file_name = 'error_warnings.err'
+
     def reset(self):
 
         self.msg_lists = dict(fatal_error=[],error=[],warning=[],  strong_warning=[],note=[])
@@ -60,12 +62,11 @@ class MessageLogger(object ):
             self.log_file = open(self.log_file_name, 'w')
 
         # kill any old error file
-        error_file_name = 'error_warnings.err'
-        self.error_file_name = path.join(si.run_info.run_output_dir, error_file_name)
-        if path.isfile(self.error_file_name ):
-            remove(self.error_file_name)
+        error_file_name = path.join(si.run_info.run_output_dir, self.error_file_name)
+        if path.isfile(error_file_name ):
+            remove(error_file_name)
 
-        return  log_file_name, error_file_name
+        return  log_file_name, self.error_file_name
 
     def msg(self, msg_text, note=False,
             hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,
@@ -183,13 +184,13 @@ class MessageLogger(object ):
             self.msg(m['msg'],hint= m['hint'],caller=m['caller'],crumbs=m['crumbs'])
 
 
-    def write_error_log_file(self, e):
+    def write_error_log_file(self, e, si):
         sleep(.5)
         self.msg(str(e))
         tb = traceback.format_exc()
         self.msg(tb)
-
-        with open(path.normpath(self.error_file_name),'w') as f:
+        error_file_name = path.join(si.run_info.run_output_dir, self.error_file_name)
+        with open(path.normpath(error_file_name),'w') as f:
             f.write('_____ Known warnings and Errors ________________________________\n')
             for l, ml in self.msg_lists.items():
                 for m in ml:

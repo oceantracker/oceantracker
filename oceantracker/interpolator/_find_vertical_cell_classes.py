@@ -113,10 +113,6 @@ class FindVerticalCellSigmaGrid(object):
             # correction,  if zf is below  approx nz
             nz -= zf < sigma[nz]  # faster branch-less minus 1
 
-            # check results
-            #  sigma_map_zf = np.arange(sigma_map_nz.size)*sigma_map_dz
-            #  [(q, nz, zf,ns, sigma[ sigma_map_nz[q]], sigma_map_nz[q],sigma_map_z[q]) for q in range(sigma_map_nz.size) ]
-
             # get fraction within the sigma layer
             z_fraction[n] = (zf - sigma[nz]) / (sigma[nz + 1] - sigma[nz])
             bad_z_fraction_count +=  not  -0.05 <  z_fraction[n] < 1.05
@@ -400,7 +396,7 @@ def make_search_map(z):
     z_range = z[-1] - z[0]
     nz = int(np.ceil(z_range/ dz_map))  # number of levels in evenly map > number layers in z
 
-    z_map = np.linspace(z[0]-dz_map/3, z[-1]+ dz_map/3, nz+1).astype(np.float64)
+    z_map = np.linspace(z[0], z[-1]+ dz_map/3, nz+1).astype(np.float64)
 
     # insert a 1 at map levels containing a  hydro models interface z value
     sel = np.floor((z - z_map[0]) / dz_map).astype(np.int32)
