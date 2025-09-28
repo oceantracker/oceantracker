@@ -1,6 +1,6 @@
 from oceantracker.main import OceanTracker
 import numpy as np
-from unit_tests import test_definitions
+import test_definitions
 
 def main(args):
     ot = OceanTracker()
@@ -10,8 +10,7 @@ def main(args):
              use_A_Z_profile=False,
      )
 
-    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
-                 ) # keep file small
+    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,)
 
     #ot.settings(NUMBA_cache_code = True)
     hm = test_definitions.hydro_model['demoROMS']

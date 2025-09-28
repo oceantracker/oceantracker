@@ -81,9 +81,12 @@ class _AttribDict():
         for key, item in self.__class__.__dict__.items():
             if not key.startswith('_'):
                 setattr(self, key, item)
+        pass
+
     def asdict(self): return self.__dict__
 
-    def keys(self): return  self.possible_values()
+    def keys(self): return  self.__class__.__dict__
+
     def possible_values(self):  return list(self.__dict__.keys())
 
     def items(self): return  self.__dict__.items()

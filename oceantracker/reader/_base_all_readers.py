@@ -171,7 +171,7 @@ class _BaseReader(ParameterBaseClass):
             # 2D
             grid['z_interface'] = None
 
-        si.msg_logger.msg(f'vertical grid type = {info["vert_grid_type"]}', tabs=5)
+        si.msg_logger.msg(f'vertical grid type = "{info["vert_grid_type_in_files"]}", using vertical grid  "{info["vert_grid_type"]}"', tabs=5)
         si.msg_logger.hori_line()
 
         #todo is below cneeded???
@@ -702,7 +702,7 @@ class _BaseReader(ParameterBaseClass):
         nc.create_attribute('geographic_coords_used', 1 if self.info['geographic_coords'] else 0)
 
         # ad node types to grid file attributes
-        for nt, val in self.si.node_types.asdict().items():
+        for nt, val in self.si.node_types.items():
             nc.create_attribute(f'node_typeID_{nt}', val)
 
 
