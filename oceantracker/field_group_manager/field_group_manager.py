@@ -72,7 +72,7 @@ class FieldGroupManager(ParameterBaseClass):
         self.reader.write_grid(info['gridID'])
 
         pass
-        if si.settings['display_grid_at_start']:
+        if si.settings.display_grid_at_start:
             from matplotlib import pyplot as plt
             from oceantracker.plot_output.plot_utilities import display_grid
             display_grid(grid, 1)

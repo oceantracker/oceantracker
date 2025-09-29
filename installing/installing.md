@@ -14,7 +14,7 @@ If this is your first time using OceanTracker, the easiest way to install it is 
 
 ::
 
-    # Create a new conda environmen
+    # Create a new conda environment
     mamba create -n oceantracker
     mamba activate oceantracker
 

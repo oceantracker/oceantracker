@@ -82,7 +82,7 @@ class CompactTracksWriter(_BaseWriter):
                                chunksizes=chunking,
                                description=i.params['description'], compression_level=comp)
 
-        if si.settings['write_dry_cell_flag']:
+        if si.settings.write_dry_cell_flag:
             grid = si.core_class_roles.field_group_manager.reader.grid
             nc.create_dimension(si.dim_names.triangle, grid['triangles'].shape[0])
             nc.create_variable('dry_cell_index', [si.dim_names.time, si.dim_names.triangle], dtype=np.uint8,
@@ -141,7 +141,7 @@ class CompactTracksWriter(_BaseWriter):
         for name in info['variables_to_write']['time_varying_part_prop']:
             nc.file_handle.variables[name][self.file_index[0]:self.file_index[1], ...] = part_prop[name].data[self.sel_alive, ...]
 
-        if si.settings['write_dry_cell_flag']:
+        if si.settings.write_dry_cell_flag:
             # wont run if nested grids
             grid = si.core_class_roles.field_group_manager.reader.grid
             nc.file_handle.variables['dry_cell_index'][info['time_steps_written_to_current_file'], :] = grid['dry_cell_index'].reshape(1, -1)

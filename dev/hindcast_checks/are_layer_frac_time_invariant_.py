@@ -21,24 +21,12 @@ zcor_depth= get_values_at_ragged_bottom(d['zcor'][:,:,:,np.newaxis],nbot)[:,:,0]
 
 
 frac = (d['zcor'] - zcor_depth[:,:, np.newaxis]) /(d['zcor'][:,:,-1]-zcor_depth)[:,:,np.newaxis]
-nt=10
-for n, nb in enumerate( np.unique(nbot)):
-    sel = np.flatnonzero(nbot ==nb)
-    ff = frac[nt,sel,nb:].T
-    print('spatial range', nb,ff.max(axis=1)-ff.min(axis=1),)
 
 for n, nb in enumerate( np.unique(nbot)):
     sel = np.flatnonzero(nbot ==nb)
     ff = frac[:,sel,nb:]
-    range =  ff.max(axis=1)-ff.min(axis=1)
-    print('time variation', nb,range.max(axis=1),)
+    dff = ff[1:,...] - ff[:-1,...]
+    range = np.nanmax(ff,axis=0)-np.nanmin(ff,axis=0) # time range
+    print('time variation',nb, ':', np.nanmax(np.abs(range),axis=0)) # node range
 
 
-if False:
-
-    plt.scatter(frac,zcor_depth-depth,s=4)
-    plt.xlabel('water_depth')
-    plt.ylabel('zcor water depth- water depth')
-
-    plt.title(fn)
-    plt.show()

@@ -410,3 +410,128 @@ def make_search_map(z):
     # check map
     #  [(q, z[nz_map[q]],  nz_map[q],z_map[q]) for q in range(nz_map.size) ]
     return nz_map, z_map
+
+
+
+class dev_FindVerticalCell_LSCv2(object):
+    # this assumes fractional interface fractions vary between nodes, but not in time
+    def __init__(self, grid, params):
+        self.grid, self.params = grid, params
+        self.info = {}
+        self._make_sigma_depth_cell_search_map(grid)
+        pass
+    def _make_sigma_depth_cell_search_map(self, grid):
+        # add lookup map to grid
+        # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
+        # the smalest sigms later thickness is at the bottom
+
+        grid['sigma_nz_map'], grid['sigma_map_z'] = make_search_map(grid['sigma_interface'])
+
+
+    def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
+        # locate vertical cell in place
+        part_prop = si.class_roles.particle_properties
+        n_cell = part_prop['n_cell'].data
+        status = part_prop['status'].data
+        bc_coords = part_prop['bc_coords'].data
+        grid = self.grid
+
+        nz_cell = part_prop['nz_cell'].data
+        z_fraction = part_prop['z_fraction'].data
+        z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
+
+        bad_z_fraction_count= self.get_depth_cell_sigma_layers(xq,
+                                    grid['triangles'],
+                                    fields['water_depth'].data.ravel(),
+                                    fields['tide'].data,
+                                    si.settings.minimum_total_water_depth,
+                                    grid['sigma_interface'], grid['sigma_nz_map'], grid['sigma_map_z'],
+                                    n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
+                                    current_buffer_steps, fractional_time_steps,
+                                    active, si.settings.z0)
+        return bad_z_fraction_count
+
+    @staticmethod
+    @njitOTparallel
+    def get_depth_cell(xq, triangles, water_depth, tide, minimum_total_water_depth,
+                                    nodal_depth_fractions, nodal_sigma_map_nz,nodal_sigma_map_z,
+                                    n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
+                                    current_buffer_steps, fractional_time_steps,
+                                    active, z0):
+        # view without redundant dim of 4D field
+        tide1 = tide[current_buffer_steps[0], :, 0, 0]
+        tide2 = tide[current_buffer_steps[1], :, 0, 0]
+        frac0, frac1 = fractional_time_steps[0], fractional_time_steps[1]
+        sigma_map_dz =  sigma_map_z[1] - sigma_map_z[0]
+
+        bad_z_fraction_count = 0
+
+        for nn in nb.prange(active.size):  # loop over active particles
+            n = active[nn]
+            nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
+
+            zq = float(xq[n, 2])
+
+            # interp water depth
+            z_bot = 0.
+            for m in range(3):
+                z_bot -= bc_coords[n, m] * water_depth[nodes[m]]
+
+            # preserve status if stranded by tide
+            if status[n] == status_stranded_by_tide:
+                nz_cell[n] = 0
+                xq[n, 2] = z_bot
+                z_fraction[n] = 0.0
+                z_fraction_water_velocity[n] = 0.0
+                continue
+
+            # interp tide
+            z_top = 0.
+            for m in range(3):
+                z_top += bc_coords[n, m] * (tide1[nodes[m]] * frac0 + tide2[nodes[m]] * frac1)
+
+            # clip z into range
+            zq = min(max(zq, z_bot), z_top)
+
+            twd = max(abs(z_top - z_bot), minimum_total_water_depth)
+            zf = max(0., min(abs(zq - z_bot) / twd, 0.9999))  # with rounding keep, it just below surface, and at or above bottom
+
+            # get  nz from evenly space sigma map, but zf always < 1, due to above
+            nz_map = int(zf/sigma_map_dz)  # find index in map
+
+            # get approx nz from map
+            nz = sigma_map_nz[nz_map]
+
+            # correction,  if zf is below  approx nz
+            nz -= zf < sigma[nz]  # faster branch-less minus 1
+
+            # get fraction within the sigma layer
+            z_fraction[n] = (zf - sigma[nz]) / (sigma[nz + 1] - sigma[nz])
+            bad_z_fraction_count +=  not  -0.05 <  z_fraction[n] < 1.05
+
+            # make any already on bottom active, may be flagged on bottom if found on bottom below
+            if status[n] == status_on_bottom:
+                status[n] = status_moving
+
+            # extra work if in bottom cell
+            z_fraction_water_velocity[n] = z_fraction[n]
+            pass
+            if nz == 0:
+                z0f = z0 / twd  # z0 as fraction of water depth
+                # set status if on the bottom set status
+                if zf < z0f:
+                    # on bottom
+                    status[n] = status_on_bottom
+                    zq = z_bot
+                    z_fraction_water_velocity[n] = 0.0
+                else:
+                    # adjust z fraction so that linear interp acts like log layer
+                    z1 = (sigma[1] - sigma[0]) * twd  # dimensional bottom layer thickness
+                    z0p = z0 / z1
+                    z_fraction_water_velocity[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
+
+            # record new depth cell and z
+            nz_cell[n] = nz
+            xq[n, 2] = zq
+
+        return bad_z_fraction_count

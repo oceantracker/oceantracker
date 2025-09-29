@@ -22,7 +22,7 @@ class FrictionVelocity(CustomFieldBase):
     def add_required_classes_and_settings(self, reader_info):
         info = self.info
 
-        if si.settings['use_bottom_stress']:
+        if si.settings.use_bottom_stress:
             si.add_reader_field('bottom_stress',dict(write_interp_particle_prop_to_tracks_file=False))
             info['mode'] = 4
         else:
@@ -64,7 +64,7 @@ class FrictionVelocity(CustomFieldBase):
                                             self.data)
         elif info['mode'] == 4:
             self.calc_friction_velocity_from_bottom_stress(buffer_index, fields['bottom_stress'].data,
-                                                           si.settings['water_density'], self.data)
+                                                           si.settings.water_density, self.data)
 
     @staticmethod
     @njitOT

@@ -273,7 +273,7 @@ class OceanTrackerParamsRunner(object):
                 i= si.add_class(role,params=params)
             pass
 
-        if si.settings['use_dispersion']:
+        if si.settings.use_dispersion:
             i = si.add_class('dispersion', params= ccr['dispersion'])
 
         if fgm.info['is3D']:
@@ -363,10 +363,10 @@ class OceanTrackerParamsRunner(object):
         ccr = si.core_class_roles
         ccr.solver.initial_setup()
 
-        if si.settings['use_dispersion']:
+        if si.settings.use_dispersion:
             ccr.dispersion.initial_setup()
 
-        if si.run_info.is3D_run and si.settings['use_resuspension']:
+        if si.run_info.is3D_run and si.settings.use_resuspension:
             ccr.resuspension.initial_setup()
 
 
@@ -537,7 +537,7 @@ class OceanTrackerParamsRunner(object):
                          number_particles_released= pgm.info['particles_released'] if pgm  is not None else None ))
         info.update(si.run_info.asdict())
         # base class variable warnings is common with all descendants of parameter_base_class
-        d = {'user_note': si.settings['user_note'],
+        d = {'user_note': si.settings.user_note,
              'file_written': datetime.now().isoformat(),
              'output_files': deepcopy(si.output_files),
              'version_info':   si.run_info.version,

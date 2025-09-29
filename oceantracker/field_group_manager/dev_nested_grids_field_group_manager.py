@@ -103,10 +103,10 @@ class DevNestedFields(ParameterBaseClass):
                    crumbs='Nested reader set up', fatal_error=True, caller=self)
 
         # dry cell flag
-        if si.settings['write_dry_cell_flag']:
+        if si.settings.write_dry_cell_flag:
             ml.msg(f'Cannot write dry cell flag to tracks files for nested grids, disabling dry cell writes',
                    crumbs='Nested reader set up ',  note=True)
-            si.settings['write_dry_cell_flag'] = False
+            si.settings.write_dry_cell_flag = False
 
         #todo check hindcasts over lap
         pass

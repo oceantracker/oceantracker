@@ -112,7 +112,7 @@ class Solver(ParameterBaseClass):
 
             # dispersion is done by random walk
             # by adding to velocity modifier prior to integration step
-            if si.settings['use_dispersion']:
+            if si.settings.use_dispersion:
                 i = si.core_class_roles.dispersion
                 i.timed_update(n_time_step, t1, is_moving)
 

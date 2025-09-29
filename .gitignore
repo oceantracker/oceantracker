@@ -27,3 +27,4 @@ dist/
 *.py[cod]
 *.nb[ic]
 .pypirc
+/tests/profiling/results/pyinstrument/

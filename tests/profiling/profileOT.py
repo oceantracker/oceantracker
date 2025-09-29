@@ -14,7 +14,7 @@ from oceantracker.util.json_util import read_JSON , write_JSON
 def get_params(datasource=1):
     time_step = 60  # 5min
     release_interval = 3600
-    pulse_size = 50000
+    pulse_size = 20000
     calculation_interval = 3 * 3600
     if datasource==1:
         output_file_base= 'Sounds'
@@ -114,7 +114,7 @@ def run(profiler_name, params):
     ci = read_JSON(case_info_file)
     d = path.join(profile_dir, profiler_name, params['output_file_base'], platform.processor().replace(' ', '_').replace(',', '_'))
     makedirs(d, exist_ok=True)
-    fnn = path.join(d, results_file + '_CodeVer_' + ci['version_info']['str'].replace(' ', '_').replace(',', '_'))
+    fnn = path.join(d, results_file + '_CodeVer_' + ci['version_info']['oceantracker_version'])
 
     # copy case file
     #write_JSON(fnn +'_caseInfo.json', ci)
@@ -123,6 +123,7 @@ def run(profiler_name, params):
     return fnn
 
 if __name__ == '__main__':
+
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--datasource', default=1, type=int)
@@ -173,7 +174,7 @@ if __name__ == '__main__':
         remove(prof_file)
 
     elif args.profiler==1:
-        import pyinstrument
+
         from pyinstrument import Profiler, renderers
 
         profiler = Profiler(interval=0.0001)
@@ -181,9 +182,10 @@ if __name__ == '__main__':
         fnn = run('pyinstrument', params)
         profiler.stop()
 
-        with open(fnn + '.html', mode='w') as f:
-            f.write(profiler.output_html(timeline=False))
-        print('written Pyinstrument html')
+        profiler.open_in_browser(timeline=False)
+        #with open(fnn + '.html', mode='w') as f:
+        #    f.write(profiler.output_html())
+        #print('written Pyinstrument html')
 
     elif args.profiler == 2:
         #params['profiler'] = 'none'

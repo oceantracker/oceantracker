@@ -45,7 +45,7 @@ class RandomWalk(_BaseDispersion):
             # use constant A_Z
             info['random_walk_size'][2] =  self._calc_walk(self.params['A_V'], dt)
 
-        info['random_walk_velocity'] = info['random_walk_size'] / si.settings['time_step']  # velocity equivalent of random walk distance
+        info['random_walk_velocity'] = info['random_walk_size'] / si.settings.time_step  # velocity equivalent of random walk distance
 
     def _calc_walk(self, A_turb, dt):
         # this is variance of particle motion in each vector direction,

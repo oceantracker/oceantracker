@@ -128,7 +128,7 @@ class ParticleGroupManager(ParameterBaseClass):
         info= self.info
         # check if buffer needs expanding
         smax = si.run_info.particles_in_buffer + release_data['x'].shape[0]
-        if smax > si.settings['max_particles']: return # no more can be released
+        if smax > si.settings.max_particles: return # no more can be released
 
         if smax > self.info['current_particle_buffer_size']:
             self._expand_particle_buffers(smax)

@@ -81,7 +81,7 @@ class RectangularTracksWriter(_BaseWriter):
                                description=i.params['description'],
                                compression_level=si.settings.NCDF_compression_level)
 
-        if si.settings['write_dry_cell_flag']:
+        if si.settings.write_dry_cell_flag:
             grid = si.core_class_roles.field_group_manager.reader.grid
             nc.create_dimension(si.dim_names.triangle, grid['triangles'].shape[0])
             nc.create_variable('dry_cell_index', [si.dim_names.time, si.dim_names.triangle], dtype=np.uint8,
@@ -131,7 +131,7 @@ class RectangularTracksWriter(_BaseWriter):
             nc.file_handle.variables[name][nt, offset_range[0]:offset_range[1], ...] = b
            #nc.file_handle.variables[name][nt, offsets, ...] = part_prop[name].data[self.part_to_write, ...]
 
-        if si.settings['write_dry_cell_flag']:
+        if si.settings.write_dry_cell_flag:
             # wont run if nested grids
             grid = si.core_class_roles.field_group_manager.reader.grid
             nc.file_handle.variables['dry_cell_index'][info['time_steps_written_to_current_file'], :] = grid['dry_cell_index'].reshape(1, -1)
