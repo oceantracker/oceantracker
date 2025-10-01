@@ -1,16 +1,16 @@
 # basic definitions
 # to avoid circular imports definitions.py file cannot import any oceantracker modules
-import oceantracker
 
 package_fancy_name= 'OceanTracker'
 
 from os import path, sep
 import subprocess, sys
 from dataclasses import  dataclass, asdict
+from importlib.metadata import version as get_version
 
 version= dict()
 v = version
-v['oceantracker_version'] = oceantracker.__version__
+v['oceantracker_version'] = get_version("oceantracker")
 v['major'],v['minor'],v['micro'],v['patch'] = [int(v) for v in v['oceantracker_version'].split('.')]
 
 try:
