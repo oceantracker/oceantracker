@@ -47,55 +47,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         
         # Check write_interval configuration and set up running mean if needed
         if params['write_interval'] is not None:
-            if params['write_interval'] <= params['update_interval']:
-                ml.msg(f'Parameter "write_interval" ({params["write_interval"]}s) must be greater than '
-                      f'"update_interval" ({params["update_interval"]}s) to enable averaging',
-                      hint='Set write_interval > update_interval for running mean, or set write_interval=None for standard behavior',
-                      error=True, caller=self,
-                      crumbs=f'Particle Statistic "{params["name"]}"')
-                return
-            
-            # Check if write_interval is a multiple of update_interval
-            ratio = params['write_interval'] / params['update_interval']
-            if abs(ratio - round(ratio)) > 1e-6:  # Not a clean multiple
-                ml.msg(f'Parameter "write_interval" ({params["write_interval"]}s) is not a multiple of '
-                      f'"update_interval" ({params["update_interval"]}s)',
-                      hint=f'Consider using write_interval = {round(ratio) * params["update_interval"]}s for cleaner averaging',
-                      warning=True, caller=self,
-                      crumbs=f'Particle Statistic "{params["name"]}"')
-            
-            # Enable running mean
-            self.use_running_mean = True
-        
-            # Initialize running mean tracking variables
-            self.running_count_sum = None
-            self.running_alive_sum = None
-            self.running_prop_sums = {}
-            self.n_updates_in_interval = 0
-            self.last_write_time = None
-            
-            # Initialize accumulator arrays for running mean
-            self.running_count_sum = np.zeros_like(self.count_time_slice, dtype=np.float64)
-            self.running_alive_sum = np.zeros_like(self.count_all_alive_particles, dtype=np.float64)
-
-            # Initialize property accumulator arrays
-            if 'particle_property_list' in params and params['particle_property_list']:
-                for key, prop in self.sum_binned_part_prop.items():
-                    self.running_prop_sums[key] = self.sum_binned_part_prop[key].copy()
-            
-            # Set up write scheduler different from update interval
-            # self.add_scheduler('write_scheduler', 
-            #                  start=params['start'], 
-            #                  end=params['end'], 
-            #                  duration=params['duration'],
-            #                  interval=params['write_interval'], 
-            #                  caller=self)
-                
-            ml.msg(f'Running mean enabled: updating every {params["update_interval"]}s, '
-                  f'writing averaged values every {params["write_interval"]}s',
-                  hint='Statistics will be averaged over write_interval before writing',
-                  crumbs=f'Particle Statistic "{params["name"]}"')
-            
+            self._initialize_running_mean()
         else:
             self.use_running_mean = False
 
@@ -146,6 +98,67 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             # Standard behavior: write at every update
             self.write_time_varying_stats(time_sec)
             self.nWrites += 1
+
+    def _initialize_running_mean(self):
+        params = self.params
+        ml = si.msg_logger
+        
+        # Validate that write_interval is greater than update_interval
+        if params['write_interval'] <= params['update_interval']:
+            ml.msg(f'Parameter "write_interval" ({params["write_interval"]}s) must be greater than '
+                    f'"update_interval" ({params["update_interval"]}s) to enable averaging',
+                    hint='Set write_interval > update_interval for running mean, or set write_interval=None for standard behavior',
+                    error=True, caller=self,
+                    crumbs=f'Particle Statistic "{params["name"]}"')
+            return
+        
+        # Check if write_interval is a multiple of update_interval
+        ratio = params['write_interval'] / params['update_interval']
+        if abs(ratio - round(ratio)) > 1e-6:  # Not a clean multiple
+            ml.msg(f'Parameter "write_interval" ({params["write_interval"]}s) is not a multiple of '
+                    f'"update_interval" ({params["update_interval"]}s)',
+                    hint=f'Consider using write_interval = {round(ratio) * params["update_interval"]}s for cleaner averaging',
+                    warning=True, caller=self,
+                    crumbs=f'Particle Statistic "{params["name"]}"')
+        
+        self._initialize_buffer_variables_for_running_mean()
+        
+        # Set up write scheduler different from update interval
+        self.add_scheduler('write_scheduler', 
+                            start=params['start'], 
+                            end=params['end'], 
+                            duration=params['duration'],
+                            interval=params['write_interval'], 
+                            caller=self)
+            
+        ml.msg(f'Running mean enabled: updating every {params["update_interval"]}s, '
+                f'writing averaged values every {params["write_interval"]}s',
+                hint='Statistics will be averaged over write_interval before writing',
+                crumbs=f'Particle Statistic "{params["name"]}"')
+
+
+    def _initialize_buffer_variables_for_running_mean(self):
+            params = self.params
+            
+            # Enable running mean
+            self.use_running_mean = True
+        
+            # Initialize running mean tracking variables
+            self.running_count_sum = None
+            self.running_alive_sum = None
+            self.running_prop_sums = {}
+            self.n_updates_in_interval = 0
+            self.last_write_time = None
+            
+            # Initialize accumulator arrays for running mean
+            self.running_count_sum = np.zeros_like(self.count_time_slice, dtype=np.float64)
+            self.running_alive_sum = np.zeros_like(self.count_all_alive_particles, dtype=np.float64)
+
+            # Initialize property accumulator arrays
+            if 'particle_property_list' in params and params['particle_property_list']:
+                for key, prop in self.sum_binned_part_prop.items():
+                    self.running_prop_sums[key] = self.sum_binned_part_prop[key].copy()
+
 
     def _accumulate_for_running_mean(self):
         """Accumulate current counts for running mean calculation"""
