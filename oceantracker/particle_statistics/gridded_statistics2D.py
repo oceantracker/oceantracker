@@ -83,14 +83,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
             self._accumulate_for_running_mean()
             
             # Check if it's time to write averaged values
-            if self.last_write_time is None:
-                self.last_write_time = time_sec
-                # self.last_write_time = self.schedulers['count_scheduler'].scheduled_times[0]
-            
-            # Use the write scheduler if available, otherwise check manually
-            should_write = (time_sec - self.last_write_time) >= params['write_interval']
-            
-            if should_write and self.n_updates_in_interval > 0:
+            if self.schedulers['write_scheduler'].do_task(n_time_step):
                 self._write_averaged_stats(time_sec)
                 self._reset_running_mean_accumulators()
                 self.last_write_time = time_sec
