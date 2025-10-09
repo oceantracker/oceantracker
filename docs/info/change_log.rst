@@ -3,9 +3,15 @@
 Change log
 ###########################
 
+Version '0.5.2.53 2025-10-09'
+____________________________
+
+Misc.
+-----
+#. Removed forecasted_number_alive and cumulative_number_alive from release_group.info to reduce runInfo.json file size
 
 Version '0.5.2.0 2025-09-01'
-____________________________
+____________________________    
 
 Breaking changes
 ----------------
