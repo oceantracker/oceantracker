@@ -277,11 +277,13 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
         self.nc = None
 
     def save_state(self, si, state_dir):
-        basic_util.nopass(f'Restarting from saved state using "save_state" and "restart" methods not yet implemented for class {self.__class__.__name__}S')
+        basic_util.nopass(f'Restarting from saved state using "save_state" and "restart" methods not yet implemented for class {self.__class__.__name__}S',
+                          caller=self)
 
     def restart(self, state_info):
         # code require to reload save state for this class
-        basic_util.nopass(f'Restarting from saved state using "save_state" and "restart" methods not yet implemented for class {self.__class__.__name__}S')
+        basic_util.nopass(f'Restarting from saved state using "save_state" and "restart" methods not yet implemented for class {self.__class__.__name__}S',
+                          caller = self)
 
     def close(self):
 
