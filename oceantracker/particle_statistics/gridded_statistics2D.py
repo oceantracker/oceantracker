@@ -1,6 +1,7 @@
 import numpy as np
+from os import path
 from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
-
+from oceantracker.util.ncdf_util import NetCDFhandler
 
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
@@ -16,7 +17,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_grid_params()
+        self._add_grid_params()
 
     def initial_setup(self):
         # set up regular grid for  stats
@@ -97,7 +98,7 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self.add_grid_params()
+        self._add_grid_params()
         self._add_age_params()
 
     def initial_setup(self):
@@ -194,3 +195,22 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
             # need to write final sums of properties  after all age counts done across all times
             nc.write_variable('sum_' + key, item[:], dims, description='sum of particle property inside grid bins  ' + key)
 
+    def save_state(self, si, state_dir):
+
+        fn = path.join(state_dir,f'stats_state_{self.params["name"]}.nc')
+        nc = NetCDFhandler(fn,mode='w')
+        self.info_to_write_on_file_close(nc)
+        nc.close()
+        return fn
+
+    def restart(self, state_info, file_name=None):
+        nc = NetCDFhandler(file_name, mode='r')
+
+        self.count_age_bins = nc.read_variable('count')
+        self.count_all_alive_particles = nc.read_variable('count_all_alive_particles')
+
+        for name, s in self.sum_binned_part_prop.items():
+            self.sum_binned_part_prop[name] = nc.read_variable(f'sum_{name}')
+
+        nc.close()
+        pass

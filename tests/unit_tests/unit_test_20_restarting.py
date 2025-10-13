@@ -1,6 +1,6 @@
 from oceantracker.main import OceanTracker
 from os import path
-from unit_tests import test_definitions
+import test_definitions
 from oceantracker.util import json_util
 from copy import deepcopy
 import time
@@ -25,7 +25,7 @@ def main(args):
                 screen_output_time_interval=1800,
              use_A_Z_profile=True,
             particle_buffer_initial_size= 200,
-             NUMBA_cache_code=True,
+             NUMBA_cache_code=False,
                 use_random_seed=True,
                 use_resuspension = False,
                 restart_interval = None if args.reference_case else 3*3600,
@@ -44,7 +44,9 @@ def main(args):
     #ot.add_class('particle_statistics', **test_definitions.my_heat_map_time)
     #ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time, polygon_list=[dict(points=hm['polygon'])])
 
-    ot.add_class('particle_statistics', **test_definitions.my_heat_map_age)
+    ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_age,
+                 update_interval=ot.params['time_step']
+                                               ))
     #ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time, polygon_list=[dict(points=hm['polygon'])])
 
     ot.add_class('tracks_writer', update_interval=1800,
@@ -60,7 +62,7 @@ def main(args):
 
     test_definitions.compare_reference_run_tracks(case_info_file, args)
     test_definitions.show_track_plot(case_info_file, args)
-
+    test_definitions.compare_reference_run_stats(case_info_file,args)
     return  ot.params
 
 

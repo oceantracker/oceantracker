@@ -1,6 +1,6 @@
 {
     "output_file_base": "unit_test_01_check-against-ref_00",
-    "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\unit_tests",
+    "root_output_dir": "C:\\Work\\oceantracker_output\\unit_tests",
     "time_step": 1800,
     "use_random_seed": true,
     "debug": true,
@@ -20,7 +20,7 @@
         "time_steps_per_per_file": 10
     },
     "reader": {
-        "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
+        "input_dir": "C:\\Work\\oceantracker\\tutorials_how_to\\demo_hindcast\\schsim3D",
         "file_mask": "demo_hindcast_schisim3D*.nc",
         "regrid_z_to_sigma_levels": true
     },

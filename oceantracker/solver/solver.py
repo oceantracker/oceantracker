@@ -405,6 +405,7 @@ class Solver(ParameterBaseClass):
                      run_output_dir= si.run_info.run_output_dir,
                      settings= si.settings.asdict(),
                      part_prop_file =path.join(state_dir, 'particle_properties.nc'),
+                     stats_files=dict(),
                     )
 
         # save class info
@@ -416,8 +417,10 @@ class Solver(ParameterBaseClass):
         # save particle properties
         save_state_util.save_part_prop_state(state['part_prop_file'], si, n_time_step, time_sec)
 
-        state['stats'] = save_state_util.save_stats_state(si, n_time_step, time_sec)
-
+        # save stats state
+        state['stats']= dict()
+        for name, i in si.class_roles['particle_statistics'].items():
+            state['stats_files'][name]= i.save_state(si, state_dir)
 
         state['log_file'] = si.msg_logger.save_state(si,state_dir)
 
@@ -447,4 +450,7 @@ class Solver(ParameterBaseClass):
         if si.settings.write_tracks:
             si.core_class_roles.tracks_writer.info = class_info['core_class_roles']['tracks_writer']
 
+        # restore stats from
+        for name, i in si.class_roles['particle_statistics'].items():
+            i.restart(rsi, file_name= rsi['stats_files'][name])
         pass

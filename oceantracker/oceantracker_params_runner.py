@@ -290,6 +290,13 @@ class OceanTrackerParamsRunner(object):
             for params in param_list:
                 i = si.add_class(role, params=params)
 
+        # checks to enable restart,
+        # enforce update interval matches save state interval
+        if si.settings.restart_interval  is not None:
+            for role in ['particle_statistics']:
+                for name, i in si.class_roles[role].items():
+                    pass
+
         if ccr['integrated_model'] is not None:
             si.add_class('integrated_model', ccr['integrated_model'])
         pass
