@@ -408,7 +408,8 @@ class Solver(ParameterBaseClass):
                      restart_time_step=n_time_step,
                      run_start_date=time_util.seconds_to_isostr(si.run_info.start_time),
                      restart_date = time_util.seconds_to_isostr(time_sec),
-                     state_dir=state_dir,
+                     particles_released= si.core_class_roles.particle_group_manager.info['particles_released'],
+                    state_dir=state_dir,
                      run_output_dir= si.run_info.run_output_dir,
                      settings= si.settings.asdict(),
                      part_prop_file =path.join(state_dir, 'particle_properties.nc'),
@@ -438,6 +439,7 @@ class Solver(ParameterBaseClass):
 
         rsi = si.restart_info
         class_info = rsi['class_info']
+        pgm= si.core_class_roles.particle_group_manager
 
         # load particle properties
         nc = ncdf_util.NetCDFhandler(rsi['part_prop_file'])
@@ -446,7 +448,11 @@ class Solver(ParameterBaseClass):
         for name, i in si.class_roles.particle_properties.items():
             i.data = nc.read_variable(name)  # rely on particle buffer expansion
         si.run_info.particles_in_buffer = num_part
-        si.core_class_roles.particle_group_manager.info['current_particle_buffer_size'] = num_part
+
+        # set new buffer size and number release so far
+        # needed to set particle ID correctly
+        pgm.info['current_particle_buffer_size'] = num_part
+        pgm.info['particles_released'] = rsi['particles_released']
         nc.close()
 
         # restore settings

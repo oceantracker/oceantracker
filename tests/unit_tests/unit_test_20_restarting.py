@@ -37,7 +37,8 @@ def main(args):
     ot.add_class('reader', **hm['reader'])
 
     # add a point release
-    ot.add_class('release_groups',**test_definitions.rg_release_interval0)
+    ot.add_class('release_groups',**dict(test_definitions.rg_release_interval0,
+                 release_interval=3600))
 
     ot.add_class('particle_properties', **test_definitions.pp1)  # add a new property to particle_properties role
 

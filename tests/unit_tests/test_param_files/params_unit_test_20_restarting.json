@@ -25,7 +25,7 @@
                     -2
                 ]
             ],
-            "release_interval": 0,
+            "release_interval": 3600,
             "pulse_size": 5,
             "class_name": "PointRelease",
             "name": "release_interval0"

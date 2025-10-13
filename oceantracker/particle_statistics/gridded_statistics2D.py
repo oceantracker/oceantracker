@@ -209,7 +209,7 @@ class GriddedStats2D_ageBased(_BaseParticleLocationStats):
         self.count_age_bins = nc.read_variable('count')
         self.count_all_alive_particles = nc.read_variable('count_all_alive_particles')
 
-        # copy in summed properties, to preserve prop_list variables
+        # copy in summed properties, to preserve references in sum_prop_data_list that is used inside numba
         for name, s in self.sum_binned_part_prop.items():
             self.sum_binned_part_prop[name][:] = nc.read_variable(f'sum_{name}')
 
