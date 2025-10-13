@@ -50,7 +50,7 @@
                 10000
             ],
             "release_group_centered_grids": true,
-            "update_interval": 1800,
+            "update_interval": 9000,
             "particle_property_list": [
                 "a_pollutant",
                 "water_depth"

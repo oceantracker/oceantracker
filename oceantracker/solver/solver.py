@@ -70,11 +70,15 @@ class Solver(ParameterBaseClass):
 
         # initial conditions
         t0_step = perf_counter()
-        nt1 = 0
-        t1 =model_times[0]
+
+
         if si.settings.restart:
+            nt1 = si.restart_info['restart_time_step']
+            t1 = model_times[nt1]
             self._load_saved_state()
         else:
+            nt1 = 0
+            t1 = model_times[0]
             new_particle_indices = pgm.release_particles(nt1,t1 )
             self._pre_step_bookkeeping(nt1, t1, new_particle_indices)
 
@@ -87,15 +91,15 @@ class Solver(ParameterBaseClass):
             self.add_scheduler('save_state',
                                start=si.run_info.start_time,
                                interval=si.settings.restart_interval )
-
-        for n_time_step  in range(model_times.size-1): # one less step as last step is initial condition for next block
+        # run one less step as last step is initial condition for next block
+        # first step is zero or restart time step
+        for n_time_step  in range(nt1, model_times.size-1):
 
             t0_step = perf_counter()
             self.start_update_timer()
             t1 = model_times[n_time_step]
             # record info for any error dump
             info['time_sec'] = t1
-            info['current_time_step'] = n_time_step
 
             tr0 = perf_counter()
             fgm.update_readers(t1)
@@ -399,8 +403,11 @@ class Solver(ParameterBaseClass):
             si.core_class_roles.tracks_writer._close_file()
 
         state_dir = path.join(si.run_info.run_output_dir, 'saved_state')
-        state = dict(time=time_sec,
-                     date = time_util.seconds_to_isostr(time_sec),
+        state = dict(run_start_time= si.run_info.start_time,
+                     restart_time=time_sec,
+                     restart_time_step=n_time_step,
+                     run_start_date=time_util.seconds_to_isostr(si.run_info.start_time),
+                     restart_date = time_util.seconds_to_isostr(time_sec),
                      state_dir=state_dir,
                      run_output_dir= si.run_info.run_output_dir,
                      settings= si.settings.asdict(),
@@ -450,7 +457,7 @@ class Solver(ParameterBaseClass):
         if si.settings.write_tracks:
             si.core_class_roles.tracks_writer.info = class_info['core_class_roles']['tracks_writer']
 
-        # restore stats from
+        # restore stats from netcdf
         for name, i in si.class_roles['particle_statistics'].items():
             i.restart(rsi, file_name= rsi['stats_files'][name])
         pass

@@ -293,12 +293,13 @@ def compare_reference_run_stats(case_info_file, args):
                 if prop_name not in stats_ref: continue
                 prop_sum = f'sum_{prop_name}'
                 dc = np.abs(stats[prop_sum] - stats_ref[prop_sum])
-                print(f'\t Property sums "{prop_sum}"', 'max mag.',
-                      np.nanmax(np.abs(stats[prop_sum])), np.nanmax(np.abs(stats_ref[prop_sum])), ', max diff =',
+                print(f'\t Property sums "{prop_sum}"', 'max mag. ref/new',
+                      np.nanmax(np.abs(stats_ref[prop_sum])),np.nanmax(np.abs(stats[prop_sum])),  ', max diff =',
                       np.max(dc[np.isfinite(dc)]))
                 dc = np.abs(stats[prop_name] - stats_ref[prop_name])
-                print(f'\t Property  "{prop_name}"', 'max mag.',
-                      np.nanmax(np.abs(stats[prop_name])), np.nanmax(np.abs(stats_ref[prop_name])), ', max diff =', np.max(dc[np.isfinite(dc)]))
+                print(f'\t Property  "{prop_name}"', 'max mag. ref/new',
+                      np.nanmax(np.abs(stats_ref[prop_name])),np.nanmax(np.abs(stats[prop_name])),
+                      ', max diff =', np.max(dc[np.isfinite(dc)]))
 
     pass
 def show_track_plot(case_info_file, args,colour_with=None):

@@ -169,7 +169,7 @@ class OceanTrackerParamsRunner(object):
                 ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
                        fatal_error=True, hint=f'missing file  {fn}')
             si.restart_info = json_util.read_JSON(fn)
-            ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(si.restart_info["time"])}')
+            ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(si.restart_info["restart_time"])}')
 
         si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(si)  # message logger output file setup
 
@@ -447,8 +447,6 @@ class OceanTrackerParamsRunner(object):
 
         # set model run start/end time allowing for back tracking
         start_time = np.min(md * np.asarray(first_time)) * md
-
-        if si.settings.restart: start_time = si.restart_info['time']
 
         end_time   = np.max(md * np.asarray(last_time)) * md
 
