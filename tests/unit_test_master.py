@@ -45,7 +45,7 @@ if __name__ == "__main__":
     for n, name in test_list:
         p = importlib.import_module(name)
         params = p.main(args)
-        if params is not None:
-            json_util.write_JSON(path.join(param_dir,f'params_{name}.json'),params)
+        #if params is not None:
+        #    json_util.write_JSON(path.join(param_dir,f'params_{name}.json'),params)
 
 

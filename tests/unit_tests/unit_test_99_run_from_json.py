@@ -6,6 +6,6 @@ def main(args):
 
 
     python_file= os.path.join(definitions.package_dir,'run_ot_cmd_line.py')
-    json_file= os.path.join(os.path.dirname(definitions.package_dir),'tests/unit_tests/test_param_files/params_unit_test_90_schism56_plots.json')
+    json_file= os.path.join(definitions.default_output_dir,'unit_tests/unit_test_90_schism56_plots_00/unit_test_90_schism56_plots_00_raw_user_params.json')
 
     os.system(f"python  {python_file}  {json_file}")

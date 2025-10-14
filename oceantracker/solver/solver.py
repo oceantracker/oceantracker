@@ -19,7 +19,7 @@ class Solver(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
 
         self.add_default_params({
-                        'RK_order':                   PVC(4, int, possible_values=[1, 2, 4]),
+                        'RK_order':  PVC(4, int, possible_values=[1, 2, 4]),
                         'n_sub_steps': PVC(None, int, obsolete=True,  doc_str ='use shared_parameter "time_step", run may not have required time step'),
                         'screen_output_step_count': PVC(None, int, obsolete=True,  doc_str='use main setting "screen_output_time_interval" in seconds. ie not a solver setting')
                             })
@@ -439,17 +439,17 @@ class Solver(ParameterBaseClass):
 
         rsi = si.restart_info
         class_info = rsi['class_info']
-        pgm= si.core_class_roles.particle_group_manager
+        pgm = si.core_class_roles.particle_group_manager
 
         # load particle properties
         nc = ncdf_util.NetCDFhandler(rsi['part_prop_file'])
-        num_part=nc.var_shape('water_velocity')[0]
+        num_part = nc.var_shape('water_velocity')[0]
 
         for name, i in si.class_roles.particle_properties.items():
             i.data = nc.read_variable(name)  # rely on particle buffer expansion
         si.run_info.particles_in_buffer = num_part
 
-        # set new buffer size and number release so far
+        # set new buffer size and number release so far,
         # needed to set particle ID correctly
         pgm.info['current_particle_buffer_size'] = num_part
         pgm.info['particles_released'] = rsi['particles_released']
