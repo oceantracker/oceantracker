@@ -26,8 +26,8 @@ def base_settings(fn,args,label=None):
     if args.variant is not None: s+=f'_{args.variant:02d}'
     if label is not None: s += f'_{label}'
     d =  dict(output_file_base=s,
-            root_output_dir=path.join(definitions.default_output_dir, 'dev_tests'),
-            #root_output_dir=path.join('C:\oceantracker_output', 'dev_tests'),
+            root_output_dir=path.join(definitions.default_output_dir, 'dev_runs'),
+            #root_output_dir=path.join('C:\oceantracker_output', 'dev_runs'),
             time_step=600.,  # 10 min time step
             use_random_seed = True,
             debug=True,
@@ -216,7 +216,7 @@ ax = [1591000, 1601500, 5478500, 5491000]
 def load_tracks(case_info_file, ref_case=False,fraction_to_read=None):
     from oceantracker.read_output.python import load_output_files
 
-    fn = case_info_file if not ref_case else case_info_file.replace('dev_tests', 'unit_test_reference_cases')
+    fn = case_info_file if not ref_case else case_info_file.replace('dev_runs', 'unit_test_reference_cases')
 
     return load_output_files.load_track_data(fn, fraction_to_read=fraction_to_read)
 
@@ -224,7 +224,7 @@ def read_tracks(case_info_file, ref_case=False,fraction_to_read=None):
     from oceantracker.read_output.python import load_output_files
     from oceantracker.read_output.python.read_ncdf_output_files import read_tracks_file, merge_track_files
 
-    case_info_file = case_info_file if not ref_case else case_info_file.replace('dev_tests', 'unit_test_reference_cases')
+    case_info_file = case_info_file if not ref_case else case_info_file.replace('dev_runs', 'unit_test_reference_cases')
     case_info = load_output_files.read_case_info_file(case_info_file)
     o = case_info['output_files']
 
@@ -240,7 +240,7 @@ def compare_reference_run_tracks(case_info_file, args):
     if case_info_file is None : return
 
 
-    reference_case_info_file = case_info_file.replace('dev_tests', 'unit_test_reference_cases')
+    reference_case_info_file = case_info_file.replace('dev_runs', 'unit_test_reference_cases')
     if args.reference_case:
         # rewrite reference case output
         shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)
@@ -268,7 +268,7 @@ def compare_reference_run_stats(case_info_file, args):
     from oceantracker.read_output.python import load_output_files
     case_info = load_output_files.read_case_info_file(case_info_file)
 
-    reference_case_info_file = case_info_file.replace('dev_tests', 'unit_test_reference_cases')
+    reference_case_info_file = case_info_file.replace('dev_runs', 'unit_test_reference_cases')
     if args.reference_case:
         # rewrite reference case output
         shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)

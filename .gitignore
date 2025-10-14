@@ -4,8 +4,8 @@
 /dev/demos/output/
 /tests/nextVer/output/
 /dev/demos/root_output_dir/
-/tests/dev_tests/output/
-/tests/dev_tests/reference_case_output/
+/tests/dev_runs/output/
+/tests/dev_runs/reference_case_output/
 
 /dev/misc/output/
 /dev/dev_testing/root_output_dir/
