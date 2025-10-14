@@ -1,11 +1,11 @@
 .idea
 
 /tests/output/
-/tests/demos/output/
+/dev/demos/output/
 /tests/nextVer/output/
-/tests/demos/root_output_dir/
-/tests/unit_tests/output/
-/tests/unit_tests/reference_case_output/
+/dev/demos/root_output_dir/
+/tests/dev_tests/output/
+/tests/dev_tests/reference_case_output/
 
 /dev/misc/output/
 /dev/dev_testing/root_output_dir/

@@ -5,7 +5,7 @@ from glob import glob
 import importlib
 import  sys
 from oceantracker.util import json_util, yaml_util
-import unit_tests.test_definitions
+import dev_tests.test_definitions
 import oceantracker.main
 
 if __name__ == "__main__":
@@ -24,7 +24,7 @@ if __name__ == "__main__":
 
     test_dir =path.join(definitions.ot_root_dir,'tests')
     info=[]
-    files_dir = path.join(test_dir,'unit_tests')
+    files_dir = path.join(test_dir,'dev_tests')
     for n in glob(path.join(files_dir,'unit_*.py')):
         name = path.split(n)[-1].split('.')[0]
         info.append([ int(name.split('_')[2]),name])
