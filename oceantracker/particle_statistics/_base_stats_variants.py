@@ -18,7 +18,6 @@ class _BaseAgeStats(ParameterBaseClass):
                                      units='sec'),
                                  })
 
-
     def save_state(self, si, state_dir):
 
         fn = path.join(state_dir,f'stats_state_{self.params["name"]}.nc')
