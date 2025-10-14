@@ -48,7 +48,7 @@ def main(args):
     ot.add_class('particle_statistics', **dict(test_definitions.my_heat_map_age,
                  update_interval=5*ot.params['time_step']
                                                ))
-    #ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time, polygon_list=[dict(points=hm['polygon'])])
+    ot.add_class('particle_statistics', **test_definitions.my_poly_stats_age, polygon_list=[dict(points=hm['polygon'])])
 
     ot.add_class('tracks_writer', update_interval=1800,
                  time_steps_per_per_file=None if args.reference_case else 10)

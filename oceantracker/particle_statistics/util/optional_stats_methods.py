@@ -22,16 +22,7 @@ class _OptionalStatsMethods(ParameterBaseClass):
                                 )
         self.info['type'] = 'polygon'
 
-    def _add_age_params(self):
-        self.add_default_params({'role_output_file_tag': PVC('stats_gridded_age', str),
-                                 'min_age_to_bin': PVC(0., float, min=0., doc_str='Min. particle age to count',
-                                                       units='sec'),
-                                 'max_age_to_bin': PVC(None, float, min=1., doc_str='Max. particle age to count',
-                                                       units='sec', is_required=True),
-                                 'age_bin_size': PVC(7 * 24 * 3600., float, min=1,
-                                                     doc_str='Size of bins to count ages into, default= 1 week',
-                                                     units='sec'),
-                                 })
+
 
     def _create_grid_variables(self):
         # creates 2D grid variables

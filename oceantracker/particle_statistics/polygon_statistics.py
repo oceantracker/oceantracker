@@ -5,7 +5,7 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.util.numba_util import njitOT, prange, njitOTparallel
 from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
-
+from oceantracker.particle_statistics import _base_stats_variants
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_statistics.util import stats_util
 
@@ -91,11 +91,12 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
             for m in range(len(prop_list)):
                 sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
 
-class PolygonStats2D_ageBased(_BaseParticleLocationStats):
+class PolygonStats2D_ageBased(_base_stats_variants._BaseAgeStats,
+                              _BaseParticleLocationStats):
 
     def __init__(self):
         super().__init__()
-        self.add_default_params({'role_output_file_tag': PVC('stats_polygon_age',str)})
+        self.add_default_params(role_output_file_tag= PVC('stats_polygon_age',str))
         self._add_age_params()
         self._add_polygon_params()
 
@@ -159,10 +160,8 @@ class PolygonStats2D_ageBased(_BaseParticleLocationStats):
     def write_time_varying_stats(self, time_sec):
         pass  # no writing on the fly in aged based states
 
-
     def info_to_write_on_file_close(self, nc):
         # write variables whole
-        nc = self.nc
         stats_grid = self.grid
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
         nc.write_variable('count', self.count_age_bins, dim_names,
