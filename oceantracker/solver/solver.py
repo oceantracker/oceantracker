@@ -465,5 +465,5 @@ class Solver(ParameterBaseClass):
 
         # restore stats from netcdf
         for name, i in si.class_roles['particle_statistics'].items():
-            i.restart(rsi, file_name= rsi['stats_files'][name])
+            i.restart(rsi)
         pass

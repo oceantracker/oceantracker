@@ -9,13 +9,13 @@ class _BaseAgeStats(ParameterBaseClass):
 
     def _add_age_params(self):
         self.add_default_params({
-                                 'min_age_to_bin': PVC(0., float, min=0., doc_str='Min. particle age to count',
-                                                       units='sec'),
-                                 'max_age_to_bin': PVC(None, float, min=1., doc_str='Max. particle age to count',
-                                                       units='sec', is_required=True),
-                                 'age_bin_size': PVC(7 * 24 * 3600., float, min=1,
-                                                     doc_str='Size of bins to count ages into, default= 1 week',
-                                                     units='sec'),
+                 'min_age_to_bin': PVC(0., float, min=0., doc_str='Min. particle age to count',
+                                       units='sec'),
+                 'max_age_to_bin': PVC(None, float, min=1., doc_str='Max. particle age to count',
+                                       units='sec', is_required=True),
+                 'age_bin_size': PVC(7 * 24 * 3600., float, min=1,
+                                     doc_str='Size of bins to count ages into, default= 1 week',
+                                     units='sec'),
                                  })
 
 
@@ -27,7 +27,8 @@ class _BaseAgeStats(ParameterBaseClass):
         nc.close()
         return fn
 
-    def restart(self, state_info, file_name=None):
+    def restart(self, state_info):
+        file_name = state_info['stats_files'][self.params['name']]
         nc = NetCDFhandler(file_name, mode='r')
 
         self.count_age_bins = nc.read_variable('count')

@@ -165,7 +165,7 @@ class PolygonStats2D_ageBased(_base_stats_variants._BaseAgeStats,
         stats_grid = self.grid
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
         nc.write_variable('count', self.count_age_bins, dim_names,
-                          description='counts of particles in grid at given ages, for each release group')
+                          description='counts of particles in each stats polygon at given ages, for each release group')
 
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],
                           description='counts of  all alive particles, not just those selected to be counted')
