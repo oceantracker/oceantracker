@@ -31,3 +31,13 @@ def setup():
 
     return args
 
+    #schism demo points, polygons
+    schism_data=dict(deep_point=[1594000, 5484200, -2], # deep water
+                     deep_polygon=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
+                        [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
+                     )
+
+    rg_basic = dict(name='rg_basic',  # name used internal to refer to this release
+                    class_name='PointRelease',  # class to use
+                    release_interval=1800,  # seconds between releasing particles
+                    pulse_size=5)
