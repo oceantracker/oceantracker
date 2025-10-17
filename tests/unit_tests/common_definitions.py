@@ -24,12 +24,8 @@ def get_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', type=int)
-    parser.add_argument('--mod', type=int)
     parser.add_argument('-devmode', action='store_true')
     parser.add_argument('-norun', action='store_true')
-    parser.add_argument('-native_z_grid', action='store_true')
-    parser.add_argument('--variant', default=0, type=int)
-    parser.add_argument('-backtracking', action='store_true')
     parser.add_argument('-reference_case', action='store_true')
     parser.add_argument('-plot', action='store_true')
     parser.add_argument('-save_plots', action='store_true')
@@ -68,11 +64,14 @@ my_heat_map_time = dict(name='my_heatmap_time',
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
          particle_property_list=['a_pollutant','water_depth'],  # request a heat map for the decaying part. prop. added above
-         #status_list=[],  # only count the particles which are moving
-
-         z_min=-10.,  # only count particles at locations above z=-2m
-         start='2017-01-01T02:30:00',
+         status_list=['moving'],  # only count the particles which are moving
+         z_min=-10.,  # only count particles at locations above z=-10m
          )
+
+def get_test_num(name):
+    # extraxt test numner from funct name
+    return int(name.split('test')[1].split('_')[0])
+
 
 def compare_reference_run(case_info_file, args):
     if case_info_file is None : return None, None

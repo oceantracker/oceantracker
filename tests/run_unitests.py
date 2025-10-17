@@ -11,8 +11,7 @@ import dev_runs.test_definitions
 import oceantracker.main
 import inspect
 
-def get_test_num(name):
-    return int(name.split('test')[1].split('_')[0])
+
 
 if __name__ == "__main__":
 
@@ -22,11 +21,17 @@ if __name__ == "__main__":
 
     sys.path.append(files_dir)
 
+    # build dict of tests
+    tests={}
     for fname in glob( path.join(  files_dir ,'test*.py')):
         mod_name = path.basename(fname).split('.')[0]
-        if get_test_num(mod_name) != args.mod: continue
+
         mod = importlib.import_module( mod_name)
         for name, F in inspect.getmembers(mod):
             if not inspect.isfunction(F): continue
-            if get_test_num(name) != args.test: continue
-            F()
+            tests[cd.get_test_num(name)] = F
+
+    # run all or one test
+    for number, F in tests.items():
+        if not args.test and number != args.test: continue
+        F()
