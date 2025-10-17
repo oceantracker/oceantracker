@@ -74,25 +74,22 @@ my_heat_map_time = dict(name='my_heatmap_time',
          start='2017-01-01T02:30:00',
          )
 
-
-
-
 def compare_reference_run(case_info_file, args):
-
-    if case_info_file is None : return
+    if case_info_file is None : return None, None
 
     case_dir =  path.dirname(case_info_file)
     reference_case_dir = case_dir.replace('unit_tests', 'unit_tests_reference_cases')
     reference_case_info_file = path.join(reference_case_dir,path.basename(case_info_file))
 
     case_info = load_output_files.read_case_info_file(case_info_file)
-
+    ref_case_info = load_output_files.read_case_info_file(reference_case_info_file)
     if args.reference_case:
         # rewrite reference case output
         shutil.copytree(case_dir, reference_case_dir, dirs_exist_ok=True)
 
     tracks = load_output_files.load_track_data(case_info_file)
     tracks_ref = load_output_files.load_track_data(reference_case_info_file)
+
     dx = np.abs(tracks['x'] - tracks_ref['x'])
 
     # print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
@@ -104,6 +101,7 @@ def compare_reference_run(case_info_file, args):
 
     dt = tracks['time'] - tracks_ref['time']
     print('times, \t  min/max diff ', np.nanmin(dt), np.nanmax(dt))
+
 
     # compare stats
     stats_params = case_info['working_params']['class_roles']['particle_statistics']
@@ -133,3 +131,4 @@ def compare_reference_run(case_info_file, args):
                 print(f'\t Property  "{prop_name}"', 'max mag. ref/new',
                       np.nanmax(np.abs(stats_ref[prop_name])), np.nanmax(np.abs(stats[prop_name])),
                       ', max diff =', np.max(dc[np.isfinite(dc)]))
+
