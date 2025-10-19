@@ -74,11 +74,12 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         dims = info['dims']
 
         # tweak varaitions in dims and variable names
-        if info['z_dim'] not in dims  : dims['mesh2d_nInterfaces' ] = dims['mesh2d_nLayers'] + 1
+
         if fvm['water_depth'] not in  ds_info['variables']:  fvm['water_depth'] =  'mesh2d_waterdepth'
 
         if info['is3D']:
             # sort out z dim and vertical grid size
+            if info['z_dim'] not in dims: dims['mesh2d_nInterfaces'] = dims['mesh2d_nLayers'] + 1
             info['z_dim'] = dm['z']
 
             info['all_z_dims'] = dm['all_z_dims']
