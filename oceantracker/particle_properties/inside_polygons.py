@@ -1,6 +1,6 @@
 from oceantracker.particle_properties._base_particle_properties import ManuallyUpdatedParticleProperty
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.util.oldver.polygon_util_v01a import set_up_list_of_polygon_instances
+from oceantracker.util.polygon_util import set_up_list_of_polygon_instances
 
 from oceantracker.shared_info import shared_info as si
 

@@ -1,6 +1,6 @@
 import numpy as np
 from numba.typed import List as NumbaList
-from oceantracker.util.oldver.polygon_util_v01a import make_anticlockwise_polygon
+from oceantracker.util.polygon_util import make_anticlockwise_polygon
 from oceantracker.util import cord_transforms
 from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import shared_info as si
