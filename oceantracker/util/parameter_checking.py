@@ -58,7 +58,8 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
 
         elif type(item) == dict:
             # nested param dict
-            params[key] = merge_params_with_defaults(params[key], item,   msg_logger, crumbs=parent_crumb + crumb_seperator + key)
+            params[key] = merge_params_with_defaults(params[key], item,   msg_logger,check_for_unknown_keys=check_for_unknown_keys,
+                                                     crumbs=parent_crumb + crumb_seperator + key)
 
         elif type(item) == list:
             # a nested list of  param dict

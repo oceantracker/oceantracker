@@ -197,6 +197,7 @@ my_poly_stats_age = dict(class_name='PolygonStats2D_ageBased',
                          name='my_poly_stats_age',
                          max_age_to_bin=4*24*3600,
                          update_interval=3600,
+                         age_bin_size=24 * 3600,
                          particle_property_list=['a_pollutant', 'water_depth'],
                          )
 
