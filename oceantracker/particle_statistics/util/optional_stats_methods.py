@@ -124,12 +124,12 @@ class _OptionalStatsMethods(ParameterBaseClass):
             ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,
                    fatal_error=True, hint='eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
 
-
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
         info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
         si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D',
                      name=info['inside_polygon_particle_prop'],initialize=True,
                      polygon_list=params['polygon_list'], write=False)
+
     def _create_age_variables(self):
         # this set up age bins, not time
         params = self.params
