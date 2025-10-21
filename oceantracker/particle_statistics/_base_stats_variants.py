@@ -13,9 +13,9 @@ class _BaseAgeStats(ParameterBaseClass):
                                        units='sec'),
                  'max_age_to_bin': PVC(None, float, min=1., doc_str='Max. particle age to count',
                                        units='sec', is_required=True),
-                 'age_bin_size': PVC(7 * 24 * 3600., float, min=1,
-                                     doc_str='Size of bins to count ages into, default= 1 week',
-                                     units='sec'),
+                 'age_bin_size': PVC(None, float, min=1,
+                                     doc_str='Size of bins to count ages into',
+                                     units='sec', is_required=True),
                                  })
 
     def save_state(self, si, state_dir):
