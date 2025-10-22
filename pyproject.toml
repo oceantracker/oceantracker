@@ -56,8 +56,7 @@ Issues = "https://github.com/oceantracker/oceantracker/issues"
 dev = [
     "build",
     "twine",
-    # "pytest>=7.0",
-    # "pytest-cov",
+    "pytest>=7.0",
     # "black",
     # "ruff",
     # "mypy",
@@ -75,13 +74,9 @@ docs = [
     # "autodocsumm",
     "rst2pdf",
 ]
-# test = [
-#     "pytest>=7.0",
-#     "pytest-cov",
-#     "pytest-xdist",
-#     "pytest-datadir",
-#     "pytest-regressions",
-# ]
+test = [
+    "pytest>=7.0",
+]
 
 [project.scripts]
 oceantracker = "oceantracker.run_ot_cmd_line:main"
@@ -128,35 +123,12 @@ html_logo = "_static/ocean_tracker.png"
 
 
 # pytest configuration
-# [tool.pytest.ini_options]
-# minversion = "7.0"
+[tool.pytest.ini_options]
+minversion = "7.0"
 # addopts = "-ra -q --strict-markers --strict-config"
-# testpaths = [
-#     "tests",
-# ]
-# python_files = [
-#     "test_*.py",
-#     "*_test.py",
-# ]
-
-# Coverage configuration
-# [tool.coverage.run]
-# source = ["oceantracker"]
-# omit = [
-#     "*/tests/*",
-#     "*/dev/*",
-#     "*/docs/*",
-#     "*/__pycache__/*",
-# ]
-
-# [tool.coverage.report]
-# exclude_lines = [
-#     "pragma: no cover",
-#     "def __repr__",
-#     "if self.debug:",
-#     "if settings.DEBUG",
-#     "raise AssertionError",
-#     "raise NotImplementedError",
-#     "if 0:",
-#     "if __name__ == .__main__.:",
-# ]
+testpaths = [
+    "tests/unit_tests",
+]
+python_files = [
+    "test*.py",
+]

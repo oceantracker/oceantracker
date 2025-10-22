@@ -1,4 +1,5 @@
-import common_definitions as cd
+import tests.unit_tests.common_definitions as cd
+# import common_definitions as cd
 from oceantracker.main import OceanTracker
 
 def test001_schism_native3D():
@@ -15,7 +16,7 @@ def test001_schism_native3D():
     ot.add_class('particle_statistics', **cd.my_heat_map_time)
 
     case_info_file = ot.run()
-    # add assert   case_info_file is None
+    assert case_info_file is not None
 
     cd.compare_reference_run(case_info_file, args)
 
