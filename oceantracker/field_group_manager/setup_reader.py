@@ -18,6 +18,7 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
     # detect reader format and add clas_name to params
     reader = _detect_hydro_file_format(reader_params, dataset,  crumbs=crumbs)
 
+
     # discard problematic variables
     for file_var in reader.params['drop_variables']:
         if file_var in reader.dataset.info['variables']:
@@ -257,6 +258,7 @@ def _time_sort_files(reader, crumbs):
     ds_info['dates'] = time_util.seconds_to_isostr( time)
 
     pass
+
 def _catalog_fields(reader, crumbs=None):
     # categorise field variables
     params = reader.params

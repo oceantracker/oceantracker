@@ -54,7 +54,7 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                                    },
                             )
 
-    def add_required_classes_and_settings(self,**kwargs):
+    def initial_setup(self):
         params = self.params
 
         if params['regrid_z_to_sigma_levels']:
@@ -62,7 +62,8 @@ class DELF3DFMreader(_BaseUnstructuredReader):
                               hint='disabling vertical regridding ',
                           warning=True)
         params['regrid_z_to_sigma_levels'] = False
-        pass
+
+        super().initial_setup()
 
     def add_hindcast_info(self):
         ds_info =  self.dataset.info

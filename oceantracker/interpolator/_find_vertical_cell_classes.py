@@ -48,7 +48,7 @@ class FindVerticalCellSigmaGrid(object):
         z_fraction = part_prop['z_fraction'].data
         z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
 
-        bad_z_fraction_count= self.get_depth_cell_sigma_layers(xq,
+        bad_z_fraction_count = self.get_depth_cell_sigma_layers(xq,
                                     grid['triangles'],
                                     fields['water_depth'].data.ravel(),
                                     fields['tide'].data,
@@ -57,6 +57,8 @@ class FindVerticalCellSigmaGrid(object):
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                     current_buffer_steps, fractional_time_steps,
                                     active, si.settings.z0)
+
+
         return bad_z_fraction_count
 
     @staticmethod
@@ -162,21 +164,30 @@ class FindVerticalCellSlayerLSCGrid(object):
         z_fraction = part_prop['z_fraction'].data
         z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
 
-        bad_z_fraction_count= self.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,grid['triangles'], grid['z_interface'], grid['bottom_interface_index'],
+        bad_z_fraction_count = self.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,grid['triangles'], grid['z_interface'], grid['bottom_interface_index'],
                                                       n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                                       current_buffer_steps, fractional_time_steps,
                                                       self.walk_counts,
-                                                      active, si.settings.z0)
+                                                      active, si.settings.z0, part_prop['tide'].data)
+
+
+        if False:
+            # compare zlevel and tide
+            import matplotlib.pyplot as plt
+            plt.scatter(si.core_class_roles.field_group_manager.reader.fields['tide'].data[:,:,0,0],grid['z_interface'][:,:,-1],  c='b', s=.1)
+            plt.grid('on')
+            plt.show()
+
         return bad_z_fraction_count
 
     @staticmethod
-    @njitOTparallel
+    #@njitOTparallel
     def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                                       triangles, z_interface, bottom_interface_index,
                                                       n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                                       current_buffer_steps, fractional_time_steps,
                                                       walk_counts,
-                                                      active, z0):
+                                                      active, z0,part_prop_tide):
         # find the zlayer for each node of cell containing each particle and at two time slices of hindcast  between nz_bottom and number of z levels
         # nz_with_bottom is the lowest cell in grid, is 0 for slayer vertical grids, but may be > 0 for LSC grids
         # nz_with_bottom must be time independent
@@ -286,9 +297,14 @@ class FindVerticalCellSlayerLSCGrid(object):
             nz_cell[n] = nz
             xq[n, 2] = zq  # may differ if clipped into water depth range
 
+            #if abs(zq-part_prop_tide[n]) > .2 and part_prop_tide[n] !=0 and n==0:
+            #    print('xx debug vert cell find', zq, part_prop_tide[n],'below', z_below,'above', z_above)
+            #    pass
+
             # step count stats, tidal stranded particles are not counted
             #walk_counts[0] += n_vertical_steps
             #walk_counts[1] = max(walk_counts[1], n_vertical_steps)  # record max number of steps
+
         return bad_z_fraction_count
 
 class FindVerticalCellZfixed(object):
