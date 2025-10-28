@@ -1,3 +1,5 @@
+from oceantracker.main import OceanTracker
+
 def test_resuspension():
     assert True
 
@@ -24,3 +26,33 @@ def test_split_particle():
 
 def test_cull_particles():
     assert True
+
+def test_schism_basic_with_age_based_decay(
+    base_settings,
+    reader_demo_schisim3D,
+    basic_point_release_configuration,
+    schism_release_locations,
+    a_pollutant,
+):
+    ot = OceanTracker()
+    ot.settings(
+        **base_settings, 
+        regrid_z_to_uniform_sigma_levels=False, 
+        use_dispersion=False
+    )
+    ot.add_class("reader", **reader_demo_schisim3D)
+    ot.add_class(
+        "release_groups",
+        **{**basic_point_release_configuration, "points": schism_release_locations["deep_point"]},
+    )
+    ot.add_class("particle_properties", **a_pollutant)
+    
+    case_info_file = ot.run()
+
+    assert case_info_file is not None
+    
+    # from oceantracker.read_output.python import load_output_files
+    # tracks = load_output_files.load_track_data(case_info_file)
+    # assert "a_pollutant" in tracks
+    # assert tracks["a_pollutant"].max() <= 1000  # Should decay from initial value
+

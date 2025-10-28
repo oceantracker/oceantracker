@@ -41,28 +41,32 @@ def base_settings(request, default_root_output_dir):
     )
 
 @pytest.fixture
-def rg_P1():
-    """Basic point release configuration"""
+def basic_point_release_configuration():
     return dict(
-        name="rg_basic",
+        name="basic",
         class_name="PointRelease",
         release_interval=1800,
         pulse_size=5,
     )
 
 @pytest.fixture
-def schism_demo():
-    """SCHISM demo locations"""
+def schism_release_locations():
     return dict(
         deep_point=[1594000, 5484200, -2],
         deep_polygon=[
-            [1597682.0, 5486972],
+            [1597682, 5486972],
             [1598604, 5487275],
             [1598886, 5486464],
-            [1597917.0, 5484000],
+            [1597917, 5484000],
             [1597300, 5484000],
             [1597682, 5486972],
         ],
+    )
+
+@pytest.fixture
+def schism_poly_release_location():
+    """SCHISM demo polygon release locations"""
+    return dict(
     )
 
 @pytest.fixture
@@ -76,7 +80,21 @@ def a_pollutant():
     )
 
 @pytest.fixture
-def my_heat_map_time():
+def gridded_2D_timeBased():
+    """Heat map statistics configuration"""
+    return dict(
+        name="my_heatmap_time",
+        class_name="GriddedStats2D_timeBased",
+        grid_size=[120, 130],
+        grid_span=[10000, 10000],
+        release_group_centered_grids=True,
+        update_interval=7200,
+        status_list=["moving"],
+        z_min=-10.0,
+    )
+
+@pytest.fixture
+def gridded_2D_timeBased_with_PartProp():
     """Heat map statistics configuration"""
     return dict(
         name="my_heatmap_time",
