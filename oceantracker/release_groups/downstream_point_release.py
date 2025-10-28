@@ -77,10 +77,7 @@ class DownstreamPointRelease(PointRelease):
     
     def move_hori_release_locations_downstream(self, release_info, time_sec, distance):
         # get a unit vector pointing downstream at each release location
-        fgm = self.si.core_class_roles.field_group_manager
-        interpolator = self.si.core_class_roles.reader.interpolator
-
-        downstream_vector_norm = self._get_downstream_vector(self.release_info, time_sec)
+        downstream_vector_norm = self._get_downstream_vector(release_info, time_sec)
 
         release_locations_xy = release_info['x'][:, :2]  # only horizontal part
         new_release_locations_xy = release_locations_xy + downstream_vector_norm * distance
@@ -120,47 +117,3 @@ class DownstreamPointRelease(PointRelease):
         downstream_vector = np.divide(horiz_velocity, norm, where=norm != 0)
 
         return downstream_vector
-
-
-# @njitOTparallel
-def time_dependent_3D_vector_field_data_in_all_layers(
-    n_buffer,
-    fractional_time_steps,
-    F_data,
-    triangles,
-    n_cell,
-    bc_coords,
-    nz_cell,
-    z_fraction,
-    F_out,
-    active,
-):
-    #  time dependent 3D linear interpolation in place, ie write directly to F_out for isActive particles
-
-    # create views to remove redundant dim at current and next time step, improves speed?
-    F1 = F_data[n_buffer[0], :, :, :]
-    F2 = F_data[n_buffer[1], :, :, :]
-    frac0, frac1 = fractional_time_steps[0], fractional_time_steps[1]
-
-    # loop over active particles and vector components
-    for nn in nb.prange(active.size):
-        n = active[nn]
-        zf2 = z_fraction[n]
-        zf1 = 1.0 - zf2
-        nz = nz_cell[n]
-
-        # loop over each vertex in triangle
-        for c in range(3):
-            F_out[n, c] = 0.0  # zero out for summing
-
-        for m in range(3):
-            # loop vertex of tri
-            node = triangles[n_cell[n], m]
-            for c in range(3):
-                # add contributions from layer above and below particle, for each spatial component at two time steps
-                # slightly faster with temp variable, as allows more LLVM optimisations?
-                temp = (F1[node, nz, c] * zf1 + F1[node, nz + 1, c] * zf2) * frac0
-                temp += (
-                    F2[node, nz, c] * zf1 + F2[node, nz + 1, c] * zf2
-                ) * frac1  # second time step
-                F_out[n, c] += bc_coords[n, m] * temp

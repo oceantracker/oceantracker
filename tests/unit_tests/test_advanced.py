@@ -56,3 +56,22 @@ def test_schism_basic_with_age_based_decay(
     # assert "a_pollutant" in tracks
     # assert tracks["a_pollutant"].max() <= 1000  # Should decay from initial value
 
+def test_downstream_point_release(
+    base_settings,
+    reader_demo_schisim3D,
+    downstream_point_release_configuration,
+    schism_release_locations,
+):
+
+    ot = OceanTracker()
+    ot.settings(
+        **base_settings, regrid_z_to_uniform_sigma_levels=False, use_dispersion=False
+    )
+    ot.add_class("reader", **reader_demo_schisim3D)
+    ot.add_class(
+        "release_groups",
+        **{**downstream_point_release_configuration, "points": schism_release_locations["multi_point"]},
+    )
+    case_info_file = ot.run()
+
+    assert case_info_file is not None

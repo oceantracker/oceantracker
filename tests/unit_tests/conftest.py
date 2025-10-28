@@ -50,8 +50,26 @@ def basic_point_release_configuration():
     )
 
 @pytest.fixture
+def downstream_point_release_configuration():
+    return dict(
+        name="downstream",
+        class_name="DownstreamPointRelease",
+        release_interval=1800,
+        pulse_size=5,
+        downstream_distance=10,
+    )
+
+@pytest.fixture
 def schism_release_locations():
     return dict(
+        multi_point=[
+            [1594000, 5484200, -2], # center point
+            # the following have a 100m offset 
+            [1594100, 5485200, -2], # north point
+            [1593900, 5483200, -2], # south point
+            [1594000, 5484300, -2], # east point
+            [1593900, 5484100, -2], # west point
+        ],
         deep_point=[1594000, 5484200, -2],
         deep_polygon=[
             [1597682, 5486972],
