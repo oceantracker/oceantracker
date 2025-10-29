@@ -148,7 +148,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         gm = self.params['grid_variable_map']
 
         # read first z_interface time step
-        z_interface =ds.read_variable(gm['z_interface']).data[0,:,:]
+        z_interface =ds.read_variable(gm['z_interface'],[0]).data[0,:,:]
 
         # use node with thinest top/bot layers as template for all sigma levels
         grid['z_interface_fractions'] = hydromodel_grid_transforms.convert_z_interfaces_to_fractions(z_interface, grid['bottom_interface_index'], si.settings.minimum_total_water_depth)

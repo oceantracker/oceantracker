@@ -52,7 +52,7 @@ def find_last_less_than(x, x_val):
     # find first value just less that x_val in 1D array x
     n = 0
     for n in range(x.size-1):
-        if x[n+1] >= x_val:
+        if x[n] >= x_val:
            break
     return n
 

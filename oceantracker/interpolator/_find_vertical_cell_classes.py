@@ -181,7 +181,7 @@ class FindVerticalCellSlayerLSCGrid(object):
         return bad_z_fraction_count
 
     @staticmethod
-    #@njitOTparallel
+    @njitOTparallel
     def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                                       triangles, z_interface, bottom_interface_index,
                                                       n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,

@@ -473,7 +473,6 @@ class _BaseReader(ParameterBaseClass):
         # abs makes it work when backtracking
         s = abs(time_sec - time_hindcast) / info['time_step']
         fractional_time_steps =  np.asarray([1.0 - s, s])
-        fractional_time_steps[1] = s
 
         if np.any(np.abs(fractional_time_steps) > 1.1):
             si.msg_logger.msg(f'unexpected error in times, fractional time steps is greater than 1 = {str(fractional_time_steps)}',
@@ -589,8 +588,6 @@ class _BaseReader(ParameterBaseClass):
         if si.run_info.is3D_run and self.info['read_zlevels']:
             # read zlevel if native vertical grid of types Slayer or LSC
             grid['z_interface'][buffer_index,...] =  self.read_z_interface(nt)
-
-        pass
 
 
     def decode_time(self,time):
