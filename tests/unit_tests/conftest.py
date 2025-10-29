@@ -112,6 +112,21 @@ def gridded_2D_timeBased():
     )
 
 @pytest.fixture
+def gridded_2D_timeBased_runningMean():
+    """Heat map statistics configuration"""
+    return dict(
+        name="my_heatmap_time",
+        class_name="GriddedStats2D_timeBased_runningMean",
+        grid_size=[120, 130],
+        grid_span=[10000, 10000],
+        write_interval=7200*3,
+        release_group_centered_grids=True,
+        update_interval=7200,
+        status_list=["moving"],
+        z_min=-10.0,
+    )
+
+@pytest.fixture
 def gridded_2D_timeBased_with_PartProp():
     """Heat map statistics configuration"""
     return dict(

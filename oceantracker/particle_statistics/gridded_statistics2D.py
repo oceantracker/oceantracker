@@ -1,4 +1,5 @@
 import numpy as np
+from datetime import datetime
 from os import path
 from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.util.ncdf_util import NetCDFhandler
@@ -173,7 +174,6 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
         if self.schedulers['write_scheduler'].do_task(n_time_step):
             self._write_averaged_stats(time_sec)
             self._reset_running_mean_accumulators()
-            self.last_write_time = time_sec
 
     def _initialize_buffer_variables_for_running_mean(self):
             params = self.params
@@ -186,7 +186,6 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
             self.running_alive_sum = None
             self.running_prop_sums = {}
             self.n_updates_in_interval = 0
-            self.last_write_time = None
             
             # Initialize accumulator arrays for running mean
             self.running_count_sum = np.zeros_like(self.count_time_slice, dtype=np.float64)
@@ -249,6 +248,13 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
     def _write_averaged_stats(self, time_sec):
         """Write time-averaged statistics"""
         if self.n_updates_in_interval == 0:
+            return
+        elif int(self.params['write_interval']/self.params['update_interval']) > self.n_updates_in_interval:
+            # In the current implementatin of the solver it updates once just after the release
+            # before any particles have been moved.
+            # We could design the scheduler to avoid this,
+            # but this method clears this data out of the avg stack 
+            # which I (Laurin) think is more intuitive to the user.
             return
         
         # Calculate averages

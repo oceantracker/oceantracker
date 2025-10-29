@@ -1,6 +1,7 @@
 from oceantracker.main import OceanTracker
+from tests.unit_tests.conftest import gridded_2D_timeBased
 
-def test_gridded_statistics_2D_time_based(
+def test_gridded_statistics_2D_timeBased(
     base_settings,
     reader_demo_schisim3D,
     basic_point_release_configuration,
@@ -24,7 +25,31 @@ def test_gridded_statistics_2D_time_based(
     case_info_file = ot.run()
 
     assert case_info_file is not None
-    assert True
+
+def test_gridded_statistics_2D_timeBased_runningMean(
+    base_settings,
+    reader_demo_schisim3D,
+    basic_point_release_configuration,
+    schism_release_locations,
+    gridded_2D_timeBased_runningMean,
+):
+
+    ot = OceanTracker()
+    ot.settings(
+        **base_settings, 
+        regrid_z_to_uniform_sigma_levels=False, 
+        use_dispersion=False
+    )
+    ot.add_class("reader", **reader_demo_schisim3D)
+    ot.add_class(
+        "release_groups",
+        **{**basic_point_release_configuration, "points": schism_release_locations["deep_point"]},
+    )
+    ot.add_class("particle_statistics", **gridded_2D_timeBased_runningMean)
+    
+    case_info_file = ot.run()
+
+    assert case_info_file is not None
 
 def test_gridded_statistics_2D_age_based():
     assert True
