@@ -19,7 +19,7 @@ def test_schism_comparision():
     # case_info_file = ot.run()
     # assert case_info_file is not None
 
-    # cd.compare_reference_run(case_info_file)
+    # cd.compare_reference_run_tracks(case_info_file)
 
 def test_schism_resuspension():
     assert True

@@ -1,6 +1,6 @@
 from oceantracker.main import OceanTracker
 
-from unit_tests import test_definitions
+from dev_runs import test_definitions
 
 def main(args):
     ot = OceanTracker()
@@ -35,7 +35,7 @@ def main(args):
 
 
     if True:
-        test_definitions.compare_reference_run(case_info_file, args)
+        test_definitions.compare_reference_run_tracks(case_info_file, args)
         #test_definitions.show_track_plot(case_info_file, args)
 
     return  ot.params

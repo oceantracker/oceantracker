@@ -1,3 +1,4 @@
+
 import sys
 from os import path
 
@@ -197,6 +198,7 @@ my_poly_stats_age = dict(class_name='PolygonStats2D_ageBased',
                          name='my_poly_stats_age',
                          max_age_to_bin=4*24*3600,
                          update_interval=3600,
+                         age_bin_size=24 * 3600,
                          particle_property_list=['a_pollutant', 'water_depth'],
                          )
 
@@ -234,6 +236,7 @@ def read_tracks(case_info_file, ref_case=False,fraction_to_read=None):
     return d
 def get_case_inf_name(params):
     return path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base']+'_caseInfo.json')
+
 def compare_reference_run_tracks(case_info_file, args):
 
 

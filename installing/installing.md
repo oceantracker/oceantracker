@@ -14,12 +14,11 @@ If this is your first time using OceanTracker, the easiest way to install it is 
 
 ::
 
-    # Create a new conda environment
+    # Create a new mamba/conda environment
+    # conda create -n oceantracker
     mamba create -n oceantracker
+    # conda activate oceantracker
     mamba activate oceantracker
-
-    # Install dependencies via conda
-    mamba install -c conda-forge numba numpy netcdf4 xarray scipy pyproj matplotlib pyyaml psutil
 
     # Install oceantracker via pip
     pip install oceantracker
@@ -50,8 +49,8 @@ This is recommended if you plan on working with OceanTracker more extensively or
     mamba activate oceantracker
 
     # Or if you plan to contribute the development of oceantracker
-    mamba env create -f environment-deps.yml
-    mamba activate oceantracker
+    mamba env create -f environment-dev.yml
+    mamba activate oceantracker-dev
 
 You can also create your own environment as before by::
 

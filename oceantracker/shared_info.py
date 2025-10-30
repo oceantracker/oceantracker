@@ -91,6 +91,8 @@ class _DefaultSettings(definitions._AttribDict):
                              expert=True)
     regrid_z_to_uniform_sigma_levels = PVC(True, bool, obsolete=True,
                                            doc_str='setting "regrid_z_to_uniform_sigma_levels" has moved to be a reader parameter "regrid_z_to_sigma_levels", so set when adding reader class')
+    regrid_z_to_sigma_levels = PVC(True, bool, obsolete=True,
+                                           doc_str='setting "regrid_z_to_sigma_levels" has moved to be a reader parameter "regrid_z_to_sigma_levels", so set when adding reader class')
 # blocks that make up parts of shared info
 class _ClassRoles(definitions._AttribDict):
     release_groups =[]
@@ -222,7 +224,7 @@ class _SharedInfoClass():
         if type(params) != dict :
             ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}',
                         error=True, crumbs=crumbs,
-                        check_for_unknown_keys=check_for_unknown_keys, caller=caller)
+                         caller=caller)
             return None
 
         params= dict(params,**kwargs) # join params and kwargs

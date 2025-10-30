@@ -1,7 +1,7 @@
 import numpy as np
 from  oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParamValueChecker as PVC
-from oceantracker.util.oldver.polygon_util_v01a import  InsidePolygon
+from oceantracker.util.polygon_util import  InsidePolygon
 
 from oceantracker.shared_info import shared_info as si
 

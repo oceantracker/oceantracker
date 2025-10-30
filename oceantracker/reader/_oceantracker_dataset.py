@@ -85,7 +85,8 @@ class OceanTrackerDataSet(object):
 
         time_dim =info['time_dim']
 
-        if nt is None: nt = np.zeros((1,),dtype=np.int32)
+        if nt is None: nt = np.arange(vi['dims'][time_dim],dtype=np.int32)
+
         nt = np.asarray(nt)
         nt_required = nt.copy()
 
@@ -109,10 +110,7 @@ class OceanTrackerDataSet(object):
             ds = self._open_file(fi['name'])
             if files_read == 0:
                 # first files time step
-                try:
-                    out = ds[file_var_name][{time_dim: file_offsets}].compute()
-                except Exception as e:
-                    raise(e)
+                out = ds[file_var_name][{time_dim: file_offsets}].compute()
             else:
                 # next files time steps
                 try:

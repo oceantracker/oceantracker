@@ -51,7 +51,7 @@ class MessageLogger(object ):
 
     def set_up_files(self, si):
         # log file set up
-        log_file_name = si.run_info['output_file_base'] + '.txt'
+        log_file_name = si.run_info['output_file_base'] + '_log.txt'
         self.log_file_name = path.join(si.run_info.run_output_dir, log_file_name)
 
         if si.settings.restart:
@@ -180,7 +180,7 @@ class MessageLogger(object ):
         self.msg('- ' + msg, tabs=tabs)
 
     def show_all_strong_warnings_and_errors(self):
-        for m in [self.msg_lists['strong_warning'], self.msg_lists['errors']]:
+        for m in [self.msg_lists['strong_warning'], self.msg_lists['error']]:
             self.msg(m['msg'],hint= m['hint'],caller=m['caller'],crumbs=m['crumbs'])
 
 

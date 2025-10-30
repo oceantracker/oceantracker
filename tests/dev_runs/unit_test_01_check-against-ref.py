@@ -11,7 +11,7 @@ def main(args=None):
     ot.settings(time_step=1800,
                 use_dispersion=False,
                 screen_output_time_interval=1800,
-                use_A_Z_profile=False,
+                use_A_Z_profile=True,
 
                 particle_buffer_initial_size= 500,
                 #NUMBA_cache_code=True,
@@ -33,6 +33,7 @@ def main(args=None):
     ot.add_class('release_groups',**test_definitions.rg_release_interval0)
     ot.add_class('release_groups', **test_definitions.rg_start_in_datetime1)
 
+    #ot.add_class('trajectory_modifiers', class_name='oceantracker.trajectory_modifiers.surface_float.SurfaceFloat', name='surface')
 
     # add a decaying particle property,# with exponential decay based on age
     ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
@@ -44,6 +45,7 @@ def main(args=None):
     ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
 
     ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time,   polygon_list=[dict(points=hm['polygon'])])
+
 
     if not args.norun:
         case_info_file = ot.run()
@@ -98,7 +100,6 @@ def main(args=None):
         plt.show()
 
 
-
         fig, axs = plt.subplots(4,1)
 
         ax= axs[0]
@@ -117,6 +118,8 @@ def main(args=None):
         ax.set_title('z_fraction_water_velocity')
 
         ax = axs[3]
+        ax.plot(time, tracks_ref['tide'][:, sel_ref],'--', c='g')
+        ax.plot(time, tracks['tide'][:, sel],'--', c='r')
         ax.plot(time, x_ref[:, :, 2], c='g')
         ax.plot(time, x[:, :, 2], c='r')
         ax.set_title('z')
