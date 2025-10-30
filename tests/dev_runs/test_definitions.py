@@ -1,3 +1,4 @@
+
 import sys
 from os import path
 
@@ -235,6 +236,7 @@ def read_tracks(case_info_file, ref_case=False,fraction_to_read=None):
     return d
 def get_case_inf_name(params):
     return path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base']+'_caseInfo.json')
+
 def compare_reference_run_tracks(case_info_file, args):
 
 

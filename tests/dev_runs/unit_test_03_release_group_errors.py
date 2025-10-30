@@ -2,7 +2,7 @@ import numpy as np
 
 from oceantracker.main import OceanTracker
 from copy import deepcopy
-from unit_tests import test_definitions
+from dev_runs import test_definitions
 
 def main(args):
     ot = OceanTracker()
@@ -53,7 +53,8 @@ def main(args):
 
     case_info_file = ot.run()
 
-    test_definitions.compare_reference_run(case_info_file, args)
+    test_definitions.compare_reference_run_tracks(case_info_file, args)
+
     test_definitions.show_track_plot(case_info_file, args,colour_with='IDrelease_group')
 
     return ot.params

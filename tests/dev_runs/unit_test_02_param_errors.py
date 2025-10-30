@@ -1,6 +1,6 @@
 from oceantracker.main import OceanTracker
 from copy import deepcopy
-from unit_tests import test_definitions
+from dev_runs import test_definitions
 
 def main(args):
 
