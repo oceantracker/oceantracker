@@ -1,6 +1,6 @@
 import numpy as np
 from numba import njit
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 
 from oceantracker.shared_info import shared_info as si
@@ -15,9 +15,10 @@ class SurfaceFloat(_BaseTrajectoryModifier):
         self._move_to_free_surface(part_prop['x'].data, part_prop['tide'].data, active)
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _move_to_free_surface(x, tide, active):
-        for n in active:
+        for nn in prange(active.size):
+            n = active[nn]
             x[n, 2] = tide[n]
 
 

@@ -54,7 +54,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                                    },
                             )
 
-    def add_required_classes_and_settings(self,**kwargs):
+    def initial_setup(self):
         params = self.params
 
         if params['regrid_z_to_sigma_levels']:
@@ -62,7 +62,8 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                               hint='disabling vertical regridding ',
                           warning=True)
         params['regrid_z_to_sigma_levels'] = False
-        pass
+
+        super().initial_setup()
 
     def add_hindcast_info(self):
         ds_info =  self.dataset.info
@@ -284,19 +285,35 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
 
 
     def read_z_interface(self, nt):
+        params = self.params
         grid = self.grid
-        z_layer_cell = self.dataset.read_variable(self.params['grid_variable_map']['z_layer_LSC'], nt = nt)
+        z_layer_cell = self.dataset.read_variable(params['grid_variable_map']['z_layer_LSC'], nt = nt)
         # convert to nodal values
         grid['z_layer_LSC' ] = hg_trans.get_nodal_values_from_weighted_cell_values(
                                         z_layer_cell.data,
                                         grid['node_to_quad_cell_map'],
                                         grid['quad_cells_per_node'],
                                         grid['edge_val_weights'])
+        # get tide and water depth ( can not  use ring buffer as time step order may not match)
+        tide = self.dataset.read_variable(params['field_variable_map']['tide'], nt = nt)
+        tide = tide.data[:,:, np.newaxis]# make 3D
+        tide = hg_trans.get_nodal_values_from_weighted_cell_values(
+                                        tide,
+                                        grid['node_to_quad_cell_map'],
+                                        grid['quad_cells_per_node'],
+                                        grid['edge_val_weights'])
+        water_depth = self.dataset.read_variable(params['field_variable_map']['water_depth'], nt=nt)
+        water_depth = water_depth.data[np.newaxis, :, np.newaxis]  # make 3D
+        water_depth = hg_trans.get_nodal_values_from_weighted_cell_values(
+            water_depth,
+            grid['node_to_quad_cell_map'],
+            grid['quad_cells_per_node'],
+            grid['edge_val_weights'])
+
         # get interfacial values
         data = np.full((nt.size,) + grid['z_interface' ].shape[1:],np.nan, dtype=np.float32 ) # todo faster make a buffer
-        self.find_z_interface_from_layer_values(grid['z_layer_LSC' ],grid['water_depth'],
-                                            self.fields['tide'].data,
-                                                 grid['bottom_layer_index'], data)
+        self.find_z_interface_from_layer_values(grid['z_layer_LSC' ],water_depth,
+                                            tide, grid['bottom_layer_index'], data)
         # find nodal bottom interface index
 
         return data
@@ -327,7 +344,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                 for nz in range(bottom_layer_index[n], zlayer_nodes.shape[2]-1):
                     z_interface[nt,n,nz+1] = 0.5*(zlayer_nodes[nt,n,nz] + zlayer_nodes[nt,n,nz+1] )
 
-                z_interface[nt, n, -1 ]  = tide[nt,n,0,0]
-                z_interface[nt, n, bottom_layer_index[n]] = -water_depth[n]
+                z_interface[nt, n, -1 ]  = tide[nt,n, 0]
+                z_interface[nt, n, bottom_layer_index[n]] = -water_depth[0, n, 0]
 
         pass

@@ -169,7 +169,7 @@ class OceanTrackerParamsRunner(object):
                 ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
                        fatal_error=True, hint=f'missing file  {fn}')
             si.restart_info = json_util.read_JSON(fn)
-            ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(si.restart_info["time"])}')
+            ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(si.restart_info["restart_time"])}')
 
         si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(si)  # message logger output file setup
 
@@ -290,6 +290,13 @@ class OceanTrackerParamsRunner(object):
             for params in param_list:
                 i = si.add_class(role, params=params)
 
+        # checks to enable restart,
+        # enforce update interval matches save state interval
+        if si.settings.restart_interval  is not None:
+            for role in ['particle_statistics']:
+                for name, i in si.class_roles[role].items():
+                    pass
+
         if ccr['integrated_model'] is not None:
             si.add_class('integrated_model', ccr['integrated_model'])
         pass
@@ -334,17 +341,17 @@ class OceanTrackerParamsRunner(object):
             max_ages.append(i.params['max_age'])
 
             # find total released to date at each time step
-            i.info['cumulative_number_released'] = np.cumsum(i.schedulers['release'].task_flag *i.info['number_per_release'])
-            ri.cumulative_number_released += i.info['cumulative_number_released']
+            cumulative_number_released = np.cumsum(i.schedulers['release'].task_flag *i.info['number_per_release'])
+            ri.cumulative_number_released += cumulative_number_released
 
             # after max age at nt1,  number alive is constant
             nt1 = min(int(i.params['max_age']/si.settings.time_step),  si.run_info.times.size-1)
-            i.info['forecasted_number_alive'] = i.info['cumulative_number_released'].copy()
-            i.info['forecasted_number_alive'][nt1:] = i.info['cumulative_number_released'][nt1]
+            forecasted_number_alive = cumulative_number_released.copy()
+            forecasted_number_alive[nt1:] = cumulative_number_released[nt1]
             #none alive after time step nt2
             nt2 = min(nt1 + int(i.params['max_age'] / si.settings.time_step) +1, si.run_info.times.size)
-            i.info['forecasted_number_alive'][nt2:] = 0
-            ri.forecasted_number_alive += i.info['forecasted_number_alive']
+            forecasted_number_alive[nt2:] = 0
+            ri.forecasted_number_alive += forecasted_number_alive
 
         # use forecast number alive to set up particle chunking, for memory buffers and output files
         ri.forecasted_max_number_alive = int(ri.forecasted_number_alive.max())
@@ -440,8 +447,6 @@ class OceanTrackerParamsRunner(object):
 
         # set model run start/end time allowing for back tracking
         start_time = np.min(md * np.asarray(first_time)) * md
-
-        if si.settings.restart: start_time = si.restart_info['time']
 
         end_time   = np.max(md * np.asarray(last_time)) * md
 

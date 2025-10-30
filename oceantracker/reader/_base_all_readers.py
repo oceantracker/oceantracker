@@ -28,7 +28,6 @@ class _BaseReader(ParameterBaseClass):
             file_mask= PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
             geographic_coords= PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
                                      expert=True),
-            vertical_regrid= PVC(True, bool, doc_str='Convert vertical grid to same sigma levels across domain'),
             time_buffer_size= PVC(24, int, min=2, doc_str='This reader parameter has be removed,  now a top level setting , use  setting "time_buffer_size"', obsolete=True),
             load_fields= PLC(None, str,
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
@@ -112,15 +111,12 @@ class _BaseReader(ParameterBaseClass):
     # core reader processes
 
     def initial_setup(self):
-        info = self.info
-
-        # build dat set from reader builder catalog
+        # build data set from reader builder catalog
 
         # map variable internal names to names in NETCDF file
         # set update default value and vector variables map  based on given list
         # first build data set
 
-        info = self.info
         self._build_hori_and_vert_grids()
 
         pass
@@ -477,7 +473,6 @@ class _BaseReader(ParameterBaseClass):
         # abs makes it work when backtracking
         s = abs(time_sec - time_hindcast) / info['time_step']
         fractional_time_steps =  np.asarray([1.0 - s, s])
-        fractional_time_steps[1] = s
 
         if np.any(np.abs(fractional_time_steps) > 1.1):
             si.msg_logger.msg(f'unexpected error in times, fractional time steps is greater than 1 = {str(fractional_time_steps)}',
@@ -593,8 +588,6 @@ class _BaseReader(ParameterBaseClass):
         if si.run_info.is3D_run and self.info['read_zlevels']:
             # read zlevel if native vertical grid of types Slayer or LSC
             grid['z_interface'][buffer_index,...] =  self.read_z_interface(nt)
-
-        pass
 
 
     def decode_time(self,time):

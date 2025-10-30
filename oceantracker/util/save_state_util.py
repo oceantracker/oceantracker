@@ -25,9 +25,6 @@ def save_part_prop_state(file_name, si, n_time_step, time_sec ):
 
     nc.close()
 
-def save_stats_state(si, n_time_step, time_sec):
-    pass
-
 def get_class_info(si ):
         # record current state of all  class info
         d= dict(core_class_roles={},class_roles={},)

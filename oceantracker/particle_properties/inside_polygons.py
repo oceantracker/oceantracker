@@ -1,14 +1,14 @@
 from oceantracker.particle_properties._base_particle_properties import ManuallyUpdatedParticleProperty
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
-from oceantracker.util.oldver.polygon_util_v01a import set_up_list_of_polygon_instances
+from oceantracker.util.polygon_util import set_up_list_of_polygon_instances
 
 from oceantracker.shared_info import shared_info as si
 
 class InsidePolygonsNonOverlapping2D(ManuallyUpdatedParticleProperty):
     '''
     particle property giving ID of 2D polygon which particle is inside. -1 if in no polygon
-    assumes non-overlapping polygons, ie so only inside one at a time, ie the first it is found inside,
-    does not check if polygons overlap
+    assumes non-overlapping polygons, ie does not check if polygons overlap.
+    If they are overlapping particles are "inside" the last polygon that was checked in which they are contained
     '''
     def __init__(self):
         super().__init__()
@@ -26,18 +26,11 @@ class InsidePolygonsNonOverlapping2D(ManuallyUpdatedParticleProperty):
     def update(self,n_time_step, time_sec, active):
         # find polygon each particle is inside
         part_prop = si.class_roles.particle_properties
-
         # make all inside no polyg
         self.set_values(-1, active)
 
-        # loop over polygons
-        # faster if those already found to be inside previously polygon are eliminated
-        to_search = active # for first polygon search all those IDs which are active
-
         for n, poly in enumerate(self.polygons):
             # assumes non-overlapping polygons, ie so only inside one at a time, the first polygon it is inside
-            inside, out_side = poly.inside_indices(part_prop['x'].used_buffer(), active=to_search, out=self.get_partID_buffer('B1'),
-                                                   also_return_indices_outside=True, out_outside=self.get_partID_subset_buffer('B1'))
+            inside = poly.inside_indices(part_prop['x'].used_buffer(), active=active, out=self.get_partID_buffer('B1'))
             self.set_values(n, inside)
-            to_search = out_side # on next polygon only search those not in precceding polygons
 

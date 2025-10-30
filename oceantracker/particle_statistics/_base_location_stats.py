@@ -279,7 +279,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
     def save_state(self, si, state_dir):
         basic_util.nopass(f'Restarting from saved state using "save_state" and "restart" methods not yet implemented for class {self.__class__.__name__}S')
 
-    def restart(self, state_info):
+    def restart(self, state_info, file_name=None):
         # code require to reload save state for this class
         basic_util.nopass(f'Restarting from saved state using "save_state" and "restart" methods not yet implemented for class {self.__class__.__name__}S')
 
@@ -341,8 +341,9 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
             for p in params['particle_property_list']:
                 self.sum_binned_part_prop[p] = np.full(use_dims, 0.)  # zero for  summing
 
-    def add_grid_params(self):
+    def _add_grid_params(self):
         self.add_default_params({
+
             'grid_size': PLC([100, 99], int, fixed_len=2, min=1, max=10 ** 5,
                              doc_str='number of (rows, columns) in grid, where rows is y size, cols x size, values should be odd, so will be rounded up to next '),
             'release_group_centered_grids': PVC(False, bool,

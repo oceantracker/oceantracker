@@ -4,7 +4,40 @@ Change log
 ###########################
 
 
-Version '0.5.2.0 2025-09-01'
+Version '0.5.53 2025-10-30'
+____________________________
+
+Breaking changes
+----------------
+#. Changed required parameters for ageBased GriddedStats. 'max_age_to_bin' & 'age_bin_size' are now required to avoid confusion.
+#. For overlapping polygons - which is not yet properly supported - the behaviour has changed. Now the particle is assigned to the last checked polygon instead of the first if it is contained both.
+
+New features
+------------
+#. Added "hotstart" capabilities. OT can now be configured to write "states" at fixed time intervals from which the simulation can be restarted.
+#. Added gridded running average statistic (GriddedStats2D_timeBased_runningMean) which can be used to reduce output file sized (i.e. if writing all stats time steps is to large)
+#. Added "DownstreamPointRelease" class to release particles a fixed user defined distance downstream based on the local instantaneous flow direction.
+#. Started moving from "custom testing suit" to pytest to make development for new devs easier.
+
+Bug fixes
+---------
+#. is_inside in InsidePolygon to calculate e.g. polygon based stats used an old method. New one should be significantly faster. 
+#. fixed several issues in Delft3D reader
+
+Misc.
+-----
+#. Removed forecasted_number_alive and cumulative_number_alive from release_group.info to reduce runInfo.json file size
+
+
+Version '0.5.2.52 2025-10-01'
+_____________________________
+
+Hotfix
+-------
+#. base __init__ was using a circular import that broke "import oceantracker"
+
+
+Version '0.5.2.51 2025-09-01'
 ____________________________
 
 Breaking changes

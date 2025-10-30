@@ -22,16 +22,7 @@ class _OptionalStatsMethods(ParameterBaseClass):
                                 )
         self.info['type'] = 'polygon'
 
-    def _add_age_params(self):
-        self.add_default_params({'role_output_file_tag': PVC('stats_gridded_age', str),
-                                 'min_age_to_bin': PVC(0., float, min=0., doc_str='Min. particle age to count',
-                                                       units='sec'),
-                                 'max_age_to_bin': PVC(None, float, min=1., doc_str='Max. particle age to count',
-                                                       units='sec', is_required=True),
-                                 'age_bin_size': PVC(7 * 24 * 3600., float, min=1,
-                                                     doc_str='Size of bins to count ages into, default= 1 week',
-                                                     units='sec'),
-                                 })
+
 
     def _create_grid_variables(self):
         # creates 2D grid variables
@@ -133,12 +124,12 @@ class _OptionalStatsMethods(ParameterBaseClass):
             ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,
                    fatal_error=True, hint='eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
 
-
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
         info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
         si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D',
                      name=info['inside_polygon_particle_prop'],initialize=True,
                      polygon_list=params['polygon_list'], write=False)
+
     def _create_age_variables(self):
         # this set up age bins, not time
         params = self.params
