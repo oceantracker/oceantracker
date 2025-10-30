@@ -31,7 +31,7 @@ def get_params(datasource=1):
 
     elif datasource==3:
         output_file_base= 'demo_SCHISM_3D'
-        input_dir =  '..\\demos\\demo_hindcast'
+        input_dir = '../../dev/demos\\demo_hindcast'
         file_mask  = 'demoHindcastSchism3D.nc'
         root_output_dir = 'output'
         time_step = 60  # 1min

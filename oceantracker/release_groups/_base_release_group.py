@@ -178,7 +178,15 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
         # add z if not given
         if  release_info['x'].shape[1] < 3:
-            release_info['x']= np.concatenate((release_info['x'], np.full((release_info['x'].shape[0], 1), 0, dtype=release_info['x'].dtype)), axis=1)
+            release_info['x']= np.concatenate(
+                (
+                    release_info['x'],
+                    np.full((release_info['x'].shape[0], 1),
+                    0,
+                    dtype=release_info['x'].dtype)
+                ),
+                axis=1
+            )
 
         if params['release_at_surface']:
             release_info['x'][:, 2] = release_info['tide'] - params['release_offset_from_surface_or_bottom']
