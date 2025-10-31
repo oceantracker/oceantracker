@@ -53,10 +53,9 @@ Repository = "https://github.com/oceantracker/oceantracker"
 Issues = "https://github.com/oceantracker/oceantracker/issues"
 
 [project.optional-dependencies]
-dev = [
+dev_ops = [
     "build",
     "twine",
-    "pytest>=7.0",
     # "black",
     # "ruff",
     # "mypy",
@@ -64,18 +63,19 @@ dev = [
 ]
 docs = [
     "sphinx>=7.0",
-    # "sphinx-autodoc-typehints",
     "sphinx-toolbox>=3.3.0",
-    # "sphinx-changelog",
-    # "myst-parser",
     "nbsphinx",
     "ipython",
-    # "beautifulsoup4",
-    # "autodocsumm",
     "rst2pdf",
 ]
 test = [
     "pytest>=7.0",
+    "pytest-xdist",
+]
+dev = [
+    "dev_ops",
+    "docs",
+    "test",
 ]
 
 [project.scripts]
@@ -126,6 +126,7 @@ html_logo = "_static/ocean_tracker.png"
 [tool.pytest.ini_options]
 minversion = "7.0"
 # addopts = "-ra -q --strict-markers --strict-config"
+addopts = "-n auto"
 testpaths = [
     "tests/unit_tests",
 ]

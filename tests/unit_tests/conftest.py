@@ -15,7 +15,7 @@ def default_root_output_dir():
     )
 
 @pytest.fixture
-def reader_demo_schisim3D():
+def reader_schism3D():
     """Demo SCHISM 3D reader configuration"""
     return dict(
         input_dir=path.join(demo_hindcast_dir, "schsim3D"),
@@ -38,10 +38,18 @@ def base_settings(request, default_root_output_dir):
     return dict(
         output_file_base=func_name,
         root_output_dir=default_root_output_dir,
+        time_step=1800,
+        use_dispersion=False,
+        write_tracks=True,
+        regrid_z_to_uniform_sigma_levels=False,
     )
 
+# ------------------------------------------------------------------------------------
+# Release configurations
+# ------------------------------------------------------------------------------------
+
 @pytest.fixture
-def basic_point_release_configuration():
+def basic_point_release():
     return dict(
         name="basic",
         class_name="PointRelease",
@@ -60,8 +68,54 @@ def downstream_point_release_configuration():
     )
 
 @pytest.fixture
+def polygon_release_configuration():
+    return dict(
+        name="my_polygon_release",
+        class_name="PolygonRelease",
+        release_interval=1800,
+        pulse_size=2,
+    )
+
+@pytest.fixture
+def grid_release_degrees():
+    """Grid release for lat/lon in degrees"""
+    return dict(
+        name="my_grid_release",
+        class_name="GridRelease",
+        release_interval=1800,
+        pulse_size=2,
+        grid_span=[0.2, 0.2],
+        grid_size=[3, 4],
+    )
+
+@pytest.fixture
+def grid_release_meters():
+    """Grid release for coordinates in meters"""
+    return dict(
+        name="my_grid_release",
+        class_name="GridRelease",
+        release_interval=1800,
+        pulse_size=2,
+        grid_span=[100, 100],
+        grid_size=[3, 4],
+    )
+
+@pytest.fixture
+def radius_release_meters():
+    """Radius release for coordinates in meters"""
+    return dict(
+        name="my_radius_release",
+        class_name="RadiusRelease",
+        release_interval=1800,
+        pulse_size=2,
+        radius=100,
+    )
+
+
+@pytest.fixture
 def schism_release_locations():
     return dict(
+        point=[1594000, 5484200],
         multi_point=[
             [1594000, 5484200, -2], # center point
             # the following have a 100m offset 
@@ -82,10 +136,23 @@ def schism_release_locations():
     )
 
 @pytest.fixture
-def schism_poly_release_location():
-    """SCHISM demo polygon release locations"""
+def roms_release_locations():
+    """ROMS demo release locations (US East Coast, lat/lon order)"""
     return dict(
+        point=[-69.5, 43.5],
+        multi_point=[
+            [-69.5, 43.5],
+            [-68.96, 44.1],
+        ],
+        polygon=np.asarray([
+            [-69.0, 43.5],
+            [-69.2, 43.5],
+            [-69.2, 43.7],
+            [-69.1, 43.7],
+            [-69.0, 43.5]
+        ]),
     )
+
 
 @pytest.fixture
 def a_pollutant():
@@ -137,6 +204,21 @@ def gridded_2D_timeBased_with_PartProp():
         release_group_centered_grids=True,
         update_interval=7200,
         particle_property_list=["a_pollutant", "water_depth"],
+        status_list=["moving"],
+        z_min=-10.0,
+    )
+
+@pytest.fixture
+def roms_gridded_2D_timeBased():
+    """ROMS-specific heat map statistics configuration (smaller grid spans for lat/lon)"""
+    return dict(
+        name="my_heatmap",
+        class_name="GriddedStats2D_timeBased",
+        grid_size=[60, 121],
+        grid_span=[1, 1.5],
+        release_group_centered_grids=True,
+        update_interval=1800,
+        particle_property_list=["water_speed"],
         status_list=["moving"],
         z_min=-10.0,
     )

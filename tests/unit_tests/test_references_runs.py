@@ -1,5 +1,6 @@
 from oceantracker.main import OceanTracker
 
+@pytest.mark.skip(reason="Not implemented yet")
 def test_schism_comparision():
     assert True
     
@@ -21,6 +22,7 @@ def test_schism_comparision():
 
     # cd.compare_reference_run_tracks(case_info_file)
 
+@pytest.mark.skip(reason="Not implemented yet")
 def test_schism_resuspension():
     assert True
 
