@@ -35,7 +35,7 @@ class _OptionalStatsMethods(ParameterBaseClass):
             params['release_group_centered_grids'] = True
 
         if params['release_group_centered_grids']:
-            # get centers from mid release group
+            # get centers from midrelease group
             # loop over release groups to get bin edges
             info['grid_centers']= []
             for ngroup, name in enumerate(si.class_roles.release_groups.keys()):
@@ -98,6 +98,7 @@ class _OptionalStatsMethods(ParameterBaseClass):
         #spacings the same for all release group grids
         stats_grid['grid_spacings'] = np.asarray([base_x[1] - base_x[0], base_y[1] - base_y[0], ])
         pass
+
     def _create_polygon_variables_part_prop(self):
         ml = si.msg_logger
         params = self.params
@@ -129,61 +130,7 @@ class _OptionalStatsMethods(ParameterBaseClass):
                      name=info['inside_polygon_particle_prop'],initialize=True,
                      polygon_list=params['polygon_list'], write=False)
 
-    def _create_age_variables(self):
-        # this set up age bins, not time
-        params = self.params
-        ml = si.msg_logger
-        stats_grid = self.grid
 
-        # check age limits to bin particle ages into,  equal bins in given range
-        params['max_age_to_bin'] = min(params['max_age_to_bin'], si.run_info.duration)
-        params['max_age_to_bin'] = max(params['age_bin_size'], params['max_age_to_bin']) # at least one bin
 
-        if params['min_age_to_bin'] >=  params['max_age_to_bin']: params['min_age_to_bin'] = 0
-        age_range = params['max_age_to_bin']- params['min_age_to_bin']
-        if params['age_bin_size'] > age_range:  params['age_bin_size'] = age_range
 
-        # set up age bin edges
-        dage= params['age_bin_size']
-        stats_grid['age_bin_edges'] = float(si.run_info.model_direction) * np.arange(params['min_age_to_bin'], params['max_age_to_bin']+dage, dage)
 
-        if stats_grid['age_bin_edges'].shape[0] ==0:
-            ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',
-                     caller=self, error=True)
-
-        stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
-
-    def _write_common_time_varying_stats(self, time_sec):
-        # write nth step in file
-        n_write = self.nWrites
-        fh = self.nc.file_handle
-        fh['time'][n_write] = time_sec
-
-        release_groups = si.class_roles.release_groups
-
-        # write number released
-        num_released = np.zeros((len(release_groups),), dtype=np.int32)
-        for nrg, rg in enumerate(release_groups.values()):
-            num_released[nrg] = rg.info['number_released']
-
-        fh['num_released'][n_write, :] = num_released # for each release group so far
-        fh['num_released_total'][n_write] = num_released.sum() # total all release groups so far
-
-        fh['counts_inside'][n_write, ...] = self.counts_inside_time_slice[:, ...]
-        fh['count_all_alive_particles'][n_write, ...] = self.count_all_alive_particles[:, ...]
-
-        for key, item in self.sum_binned_part_prop.items():
-            self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
-
-    def _create_common_time_varying_stats(self,nc):
-        params = self.params
-        dims = self.info['count_dims']
-        dim_names =  stats_util.get_dim_names(dims)
-        nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64,
-                           compression_level=si.settings.NCDF_compression_level,
-                           description='counts of all alive particles everywhere')
-        nc.create_variable('counts_inside', dims.keys(), np.int64, compression_level=si.settings.NCDF_compression_level,
-                           description='counts of particles in spatial bins at given times, for each release group')
-        if 'particle_property_list' in params:
-            for p in params['particle_property_list']:
-                nc.create_variable('sum_' + p,list(dims.keys()), np.float64, description='sum of particle property inside bin')

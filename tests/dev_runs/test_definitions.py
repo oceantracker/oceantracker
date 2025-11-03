@@ -188,6 +188,7 @@ my_heat_map_age = dict(name='my_heatmap_age',
         z_min=-10.,  # only count particles at locations above z=-2m
          )
 
+
 my_poly_stats_time =dict(name='my_poly_stats_time',
         class_name='PolygonStats2D_timeBased',
         update_interval= 3600,
@@ -201,6 +202,7 @@ my_poly_stats_age = dict(class_name='PolygonStats2D_ageBased',
                          age_bin_size=24 * 3600,
                          particle_property_list=['a_pollutant', 'water_depth'],
                          )
+
 
 my_resident_in_polygon =dict(name='my_resident_in_polygon',
         class_name='ResidentInPolygon',

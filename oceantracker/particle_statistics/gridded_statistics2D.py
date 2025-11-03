@@ -6,7 +6,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-
+from oceantracker.particle_statistics._base_stats_variants import  _BaseTimeStats
 from oceantracker.shared_info import shared_info as si
 
 stationary_status = int(si.particle_status_flags.stationary)  # compile this constant into numba code
@@ -15,7 +15,7 @@ from oceantracker.particle_statistics._base_stats_variants import  _BaseAgeStats
 
 
 
-class GriddedStats2D_timeBased(_BaseParticleLocationStats):
+class GriddedStats2D_timeBased(_BaseTimeStats, _BaseParticleLocationStats):
     # class to hold counts of particles inside grid squares
     def __init__(self):
         # set up info/attributes
@@ -44,11 +44,9 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         '''Do particle counts'''
         super().update(n_time_step, time_sec, alive)
 
-        self.write_time_varying_stats(time_sec)
+        self._write_common_time_varying_stats(time_sec)
         self.nWrites += 1
 
-    def write_time_varying_stats(self, time_sec):
-        self._write_common_time_varying_stats(time_sec)
 
     def open_output_file(self, file_name):
         nc = super().open_output_file(file_name)
@@ -310,11 +308,11 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
 
 
         self._do_counts_and_summing_numba(release_groupID, p_x,
-                        stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
-                        stats_grid['grid_spacings'],
-                        self.count_age_bins,
-                        self.prop_data_list, self.sum_prop_data_list,
-                        stats_grid['age_bin_edges'], p_age, sel)
+                                          stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
+                                          stats_grid['grid_spacings'],
+                                          self.counts_inside_age_bins,
+                                          self.prop_data_list, self.sum_prop_data_list,
+                                          stats_grid['age_bin_edges'], p_age, sel)
 
     @staticmethod
     @njitOT
@@ -339,14 +337,11 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
                     for m in range(len(prop_list)):
                         sum_prop_list[m][na, ng, r, c] += prop_list[m][n]
 
-    def write_time_varying_stats(self, time_sec):
-        pass # no writing on the fly in aged based states
-
     def info_to_write_on_file_close(self, nc):
         # only write age count variables as whole at end of run
         stats_grid = self.grid
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
-        nc.write_variable('counts_inside', self.count_age_bins, dim_names,
+        nc.write_variable('counts_inside', self.counts_inside_age_bins, dim_names,
                           description= 'counts of particles in grid at given ages, for each release group')
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles,
                           dim_names[:2],

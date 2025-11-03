@@ -98,8 +98,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
         # write everything at the end
         return nc
 
-    def write_time_varying_stats(self, time_sec):
-        pass # all writes at the end
+
     def do_counts(self,n_time_step, time_sec, sel, alive):
         params = self.params
         info = self.info

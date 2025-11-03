@@ -5,6 +5,51 @@ from oceantracker.util.parameter_checking import ParameterListChecker as PLC, Pa
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParameterTimeChecker as PTC
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.particle_statistics.util import stats_util
+import numpy  as np
+from oceantracker.shared_info import shared_info as si
+
+
+class _BaseTimeStats(ParameterBaseClass):
+
+    def _add_time_params(self):
+        self.add_default_params( )
+
+    def _create_common_time_varying_stats(self,nc):
+        params = self.params
+        dims = self.info['count_dims']
+        dim_names =  stats_util.get_dim_names(dims)
+        nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64,
+                           compression_level=si.settings.NCDF_compression_level,
+                           description='counts of all alive particles everywhere')
+        nc.create_variable('counts_inside', dims.keys(), np.int64, compression_level=si.settings.NCDF_compression_level,
+                           description='counts of particles in spatial bins at given times, for each release group')
+        if 'particle_property_list' in params:
+            for p in params['particle_property_list']:
+                nc.create_variable('sum_' + p,list(dims.keys()), np.float64, description='sum of particle property inside bin')
+
+    def _write_common_time_varying_stats(self, time_sec):
+        # write nth step in file
+        n_write = self.nWrites
+        fh = self.nc.file_handle
+        fh['time'][n_write] = time_sec
+
+        release_groups = si.class_roles.release_groups
+
+        # write number released
+        num_released = np.zeros((len(release_groups),), dtype=np.int32)
+        for nrg, rg in enumerate(release_groups.values()):
+            num_released[nrg] = rg.info['number_released']
+
+        fh['num_released'][n_write, :] = num_released # for each release group so far
+        fh['num_released_total'][n_write] = num_released.sum() # total all release groups so far
+
+        fh['counts_inside'][n_write, ...] = self.counts_inside_time_slice[:, ...]
+        fh['count_all_alive_particles'][n_write, ...] = self.count_all_alive_particles[:, ...]
+
+        for key, item in self.sum_binned_part_prop.items():
+            self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
+
+
 class _BaseAgeStats(ParameterBaseClass):
 
     def _add_age_params(self):
@@ -18,6 +63,30 @@ class _BaseAgeStats(ParameterBaseClass):
                                      units='sec', is_required=True),
                                  })
 
+    def _create_age_variables(self):
+        # this set up age bins, not time
+        params = self.params
+        ml = si.msg_logger
+        stats_grid = self.grid
+
+        # check age limits to bin particle ages into,  equal bins in given range
+        params['max_age_to_bin'] = min(params['max_age_to_bin'], si.run_info.duration)
+        params['max_age_to_bin'] = max(params['age_bin_size'], params['max_age_to_bin']) # at least one bin
+
+        if params['min_age_to_bin'] >=  params['max_age_to_bin']: params['min_age_to_bin'] = 0
+        age_range = params['max_age_to_bin']- params['min_age_to_bin']
+        if params['age_bin_size'] > age_range:  params['age_bin_size'] = age_range
+
+        # set up age bin edges
+        dage= params['age_bin_size']
+        stats_grid['age_bin_edges'] = float(si.run_info.model_direction) * np.arange(params['min_age_to_bin'], params['max_age_to_bin']+dage, dage)
+
+        if stats_grid['age_bin_edges'].shape[0] ==0:
+            ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',
+                     caller=self, error=True)
+
+        stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
+
     def save_state(self, si, state_dir):
 
         fn = path.join(state_dir,f'stats_state_{self.params["name"]}.nc')
@@ -30,7 +99,7 @@ class _BaseAgeStats(ParameterBaseClass):
         file_name = state_info['stats_files'][self.params['name']]
         nc = NetCDFhandler(file_name, mode='r')
 
-        self.count_age_bins = nc.read_variable('counts_inside')
+        self.counts_inside_age_bins = nc.read_variable('counts_inside')
         self.count_all_alive_particles = nc.read_variable('count_all_alive_particles')
 
         # copy in summed properties, to preserve references in sum_prop_data_list that is used inside numba

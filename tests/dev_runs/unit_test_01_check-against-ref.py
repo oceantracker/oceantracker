@@ -43,9 +43,10 @@ def main(args=None):
 
     # add a gridded particle statistic to plot heat map
     ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
+    ot.add_class('particle_statistics', **test_definitions.my_heat_map_age)
 
     ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time,   polygon_list=[dict(points=hm['polygon'])])
-
+    ot.add_class('particle_statistics', **test_definitions.my_poly_stats_age, polygon_list=[dict(points=hm['polygon'])])
 
     if not args.norun:
         case_info_file = ot.run()

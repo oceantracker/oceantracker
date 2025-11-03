@@ -5,11 +5,11 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.util.numba_util import njitOT, prange, njitOTparallel
 from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
-from oceantracker.particle_statistics import _base_stats_variants
+from oceantracker.particle_statistics._base_stats_variants import _BaseTimeStats, _BaseAgeStats
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_statistics.util import stats_util
 
-class PolygonStats2D_timeBased(_BaseParticleLocationStats):
+class PolygonStats2D_timeBased(_BaseTimeStats,_BaseParticleLocationStats):
     # class to hold counts of particles inside 2D polygons squares
 
     def __init__(self):
@@ -38,7 +38,7 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         '''Do particle counts'''
         super().update(n_time_step, time_sec, alive)
 
-        self.write_time_varying_stats(time_sec)
+        self._write_common_time_varying_stats(time_sec)
         self.nWrites += 1
 
 
@@ -51,8 +51,6 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         self._create_common_time_varying_stats(nc)
         return nc
 
-    def write_time_varying_stats(self, time_sec):
-        self._write_common_time_varying_stats(time_sec)
 
     def do_counts(self,n_time_step, time_sec, sel, alive):
 
@@ -97,8 +95,7 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
             for m in range(len(prop_list)):
                 sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
 
-class PolygonStats2D_ageBased(_base_stats_variants._BaseAgeStats,
-                              _BaseParticleLocationStats):
+class PolygonStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
 
     def __init__(self):
         super().__init__()
@@ -127,7 +124,7 @@ class PolygonStats2D_ageBased(_base_stats_variants._BaseAgeStats,
         # set up space for requested particle properties
         dims= (self.grid['age_bins'].shape[0], len(si.class_roles.release_groups), len(self.params['polygon_list']))
         # working count space, row are (y,x)
-        self.count_age_bins = np.full(dims, 0, np.int64)
+        self.counts_inside_age_bins = np.full(dims, 0, np.int64)
         # counts in each age bin, whether inside polygon or not
         self.count_all_particles = np.full(dims[:-1] , 0, np.int64)
         self.count_all_alive_particles = np.full(dims[:-1], 0, np.int64)
@@ -159,18 +156,15 @@ class PolygonStats2D_ageBased(_base_stats_variants._BaseAgeStats,
 
         # loop over statistics polygons
         self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
-                                release_groupID, p_x, self.count_age_bins,
-                                self.prop_data_list, self.sum_prop_data_list,
-                                sel, stats_grid['age_bin_edges'], p_age)
-
-    def write_time_varying_stats(self, time_sec):
-        pass  # no writing on the fly in aged based states
+                                          release_groupID, p_x, self.counts_inside_age_bins,
+                                          self.prop_data_list, self.sum_prop_data_list,
+                                          sel, stats_grid['age_bin_edges'], p_age)
 
     def info_to_write_on_file_close(self, nc):
         # write variables whole
         stats_grid = self.grid
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
-        nc.write_variable('counts_inside', self.count_age_bins, dim_names,
+        nc.write_variable('counts_inside', self.counts_inside_age_bins, dim_names,
                           description='counts of particles in each stats polygon at given ages, for each release group')
 
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],

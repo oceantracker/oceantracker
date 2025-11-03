@@ -257,9 +257,6 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
         self.update_count += 1
 
 
-    def write_time_varying_stats(self, time_sec):
-        basic_util.nopass('must have a write_time_varying_stats', c=self) # no writing on the fly in aged based states
-
     def info_to_write_on_file_close(self,nc) : pass
 
     def close_file(self):
@@ -335,7 +332,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
 
         elif mode =='age':
             use_dims = dim_sizes
-            self.count_age_bins = np.full(use_dims, 0, np.int64)
+            self.counts_inside_age_bins = np.full(use_dims, 0, np.int64)
             self.count_all_alive_particles = np.full(use_dims[:2], 0, np.int64)
 
         if 'particle_property_list' in params:
