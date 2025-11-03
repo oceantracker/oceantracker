@@ -56,6 +56,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
         info['output_file'] = None
         self.role_doc('Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are \n * separated by release group \n * can be a time series of statistics or put be in particle age bins.')
         self.nWrites = 0
+        self.update_count=0
 
     def initial_setup(self):
 
@@ -81,6 +82,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
         self.set_z_range_for_counts()
 
         self.add_scheduler('count_scheduler', start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
+        self._setup_release_counts()
         pass
 
     def set_z_range_for_counts(self):
@@ -251,9 +253,8 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
             self.prop_data_list[n]= part_prop[name].data
 
         self.do_counts(n_time_step, time_sec, sel, alive)
-
-        self.write_time_varying_stats(time_sec)
-        self.nWrites += 1
+        self._update_release_counts()
+        self.update_count += 1
 
 
     def write_time_varying_stats(self, time_sec):
@@ -329,7 +330,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
 
         if mode=='time':
             use_dims =dim_sizes[1:]
-            self.count_time_slice = np.full(use_dims, 0, np.int64)
+            self.counts_inside_time_slice = np.full(use_dims, 0, np.int64)
             self.count_all_alive_particles = np.full((use_dims[0],), 0, np.int64)
 
         elif mode =='age':
@@ -357,4 +358,19 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
             'role_output_file_tag': PVC('stats_gridded_time_2D', str),
         })
         self.info['type'] = 'gridded'
+
+    # setup and recode number released for global counts of all released particles
+    def _setup_release_counts(self):
+        n_release = len(si.class_roles.release_groups)
+        n_updates = self.schedulers['count_scheduler'].scheduled_times.size
+        self.released_so_far= np.zeros((n_updates,n_release), dtype=np.int64)
+        pass
+
+    def _update_release_counts(self):
+        nt = self.update_count
+        for nrg, (name,i) in  enumerate(si.class_roles.release_groups.items()):
+            self.released_so_far[nt, nrg] = i.info['number_released']
+
+
+
 

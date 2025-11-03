@@ -92,7 +92,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                             stats_grid['y_bin_edges'],
                             stats_grid['z_bin_edges'],
                             stats_grid['grid_spacings'],
-                            self.count_time_slice,
+                            self.counts_inside_time_slice,
                             self.prop_data_list,
                             self.sum_prop_data_list,
                             sel)

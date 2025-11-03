@@ -30,7 +30,7 @@ class _BaseAgeStats(ParameterBaseClass):
         file_name = state_info['stats_files'][self.params['name']]
         nc = NetCDFhandler(file_name, mode='r')
 
-        self.count_age_bins = nc.read_variable('count')
+        self.count_age_bins = nc.read_variable('counts_inside')
         self.count_all_alive_particles = nc.read_variable('count_all_alive_particles')
 
         # copy in summed properties, to preserve references in sum_prop_data_list that is used inside numba

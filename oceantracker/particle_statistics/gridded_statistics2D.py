@@ -42,31 +42,8 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
     def update(self, n_time_step, time_sec, alive):
         '''Do particle counts'''
-        part_prop = si.class_roles.particle_properties
-        info = self.info
-        params = self.params
-        
-        num_in_buffer = si.run_info.particles_in_buffer
+        super().update(n_time_step, time_sec, alive)
 
-        # Select particles to count based on status and z location
-        sel = stats_util._sel_status_waterdepth(part_prop['status'].data,
-                                    part_prop['x'].data, part_prop['water_depth'].data.ravel(),
-                                    self.statuses_to_count_map, info['water_depth_range'],
-                                    num_in_buffer, self.get_partID_buffer('B1'))
-
-        if si.run_info.is3D_run:
-            sel = self.sel_depth_range(sel)
-        
-        # Users override this method to further sub-select those to count
-        sel = self.select_particles_to_count(sel)
-
-        # Update prop list data, as buffer may have expanded
-        for n, name in enumerate(self.sum_binned_part_prop.keys()):
-            self.prop_data_list[n] = part_prop[name].data
-
-        # Perform the counts
-        self.do_counts(n_time_step, time_sec, sel, alive)
-        
         self.write_time_varying_stats(time_sec)
         self.nWrites += 1
 
@@ -96,7 +73,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self._do_counts_and_summing_numba(release_groupID, p_x,
                                           stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                                           stats_grid['grid_spacings'],
-                                          self.count_time_slice,
+                                          self.counts_inside_time_slice,
                                           self.prop_data_list, self.sum_prop_data_list, sel)
 
     @staticmethod
@@ -142,31 +119,9 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
     
     def update(self, n_time_step, time_sec, alive):
         '''Do particle counts with running mean support'''
-        part_prop = si.class_roles.particle_properties
-        info = self.info
-        params = self.params
-        
-        num_in_buffer = si.run_info.particles_in_buffer
 
-        # Select particles to count based on status and z location
-        sel = stats_util._sel_status_waterdepth(part_prop['status'].data,
-                                    part_prop['x'].data, part_prop['water_depth'].data.ravel(),
-                                    self.statuses_to_count_map, info['water_depth_range'],
-                                    num_in_buffer, self.get_partID_buffer('B1'))
+        super().update(n_time_step, time_sec, alive)
 
-        if si.run_info.is3D_run:
-            sel = self.sel_depth_range(sel)
-        
-        # Users override this method to further sub-select those to count
-        sel = self.select_particles_to_count(sel)
-
-        # Update prop list data, as buffer may have expanded
-        for n, name in enumerate(self.sum_binned_part_prop.keys()):
-            self.prop_data_list[n] = part_prop[name].data
-
-        # Perform the counts
-        self.do_counts(n_time_step, time_sec, sel, alive)
-        
         # Handle writing based on running mean configuration
         self._accumulate_for_running_mean()
         
@@ -188,7 +143,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
             self.n_updates_in_interval = 0
             
             # Initialize accumulator arrays for running mean
-            self.running_count_sum = np.zeros_like(self.count_time_slice, dtype=np.float64)
+            self.running_count_sum = np.zeros_like(self.counts_inside_time_slice, dtype=np.float64)
             self.running_alive_sum = np.zeros_like(self.count_all_alive_particles, dtype=np.float64)
 
             # Initialize property accumulator arrays
@@ -236,7 +191,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
     def _accumulate_for_running_mean(self):
         """Accumulate current counts for running mean calculation"""
         # Add current counts to running sum
-        self.running_count_sum += self.count_time_slice.astype(np.float64)
+        self.running_count_sum += self.counts_inside_time_slice.astype(np.float64)
         self.running_alive_sum += self.count_all_alive_particles.astype(np.float64)
         
         # Accumulate property sums
@@ -262,7 +217,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
         avg_alive = self.running_alive_sum / self.n_updates_in_interval
         
         # And replace the non-running-average data to write it with the existing method
-        self.count_time_slice = avg_count
+        self.counts_inside_time_slice = avg_count
         self.count_all_alive_particles = avg_alive
 
         # Average property sums
@@ -391,7 +346,7 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
         # only write age count variables as whole at end of run
         stats_grid = self.grid
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
-        nc.write_variable('count', self.count_age_bins, dim_names,
+        nc.write_variable('counts_inside', self.count_age_bins, dim_names,
                           description= 'counts of particles in grid at given ages, for each release group')
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles,
                           dim_names[:2],

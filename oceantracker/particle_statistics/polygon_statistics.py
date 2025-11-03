@@ -34,6 +34,12 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
         self.create_count_variables(info['count_dims'],'time')
         self.set_up_part_prop_lists()
 
+    def update(self, n_time_step, time_sec, alive):
+        '''Do particle counts'''
+        super().update(n_time_step, time_sec, alive)
+
+        self.write_time_varying_stats(time_sec)
+        self.nWrites += 1
 
 
     def open_output_file(self,file_name):
@@ -68,7 +74,7 @@ class PolygonStats2D_timeBased(_BaseParticleLocationStats):
 
         # do counts
         self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
-                                         release_groupID, p_x, self.count_time_slice,
+                                          release_groupID, p_x, self.counts_inside_time_slice,
                                           self.prop_data_list, self.sum_prop_data_list, sel)
     @staticmethod
     @njitOT
@@ -164,7 +170,7 @@ class PolygonStats2D_ageBased(_base_stats_variants._BaseAgeStats,
         # write variables whole
         stats_grid = self.grid
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
-        nc.write_variable('count', self.count_age_bins, dim_names,
+        nc.write_variable('counts_inside', self.count_age_bins, dim_names,
                           description='counts of particles in each stats polygon at given ages, for each release group')
 
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],

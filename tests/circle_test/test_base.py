@@ -98,7 +98,7 @@ def plot_gridded_stats(log,seq_num, annotate_polygon=True, nfig=1):
     else:
         lab ='Age'
 
-    s = readOutputFiles.read_stats_file(l['file_name'], ['x', 'y', 'count', 'sum_water_depth', 'sum_age', 'sum_age_decay'])
+    s = readOutputFiles.read_stats_file(l['file_name'], ['x', 'y', 'counts_inside', 'sum_water_depth', 'sum_age', 'sum_age_decay'])
 
     plt.figure()
 
@@ -108,14 +108,14 @@ def plot_gridded_stats(log,seq_num, annotate_polygon=True, nfig=1):
     if annotate_polygon:
         pfile_mask= l['file_name'].replace('gridded','polygon').split('_0')
         pfile_name=glob.glob(pfile_mask[0]+'*.nc')[0]
-        poly = readOutputFiles.read_polygon_stats(pfile_name, var_list=['count', 'sum_water_depth', 'sum_age', 'sum_age_decay'])
+        poly = readOutputFiles.read_polygon_stats(pfile_name, var_list=['counts_inside', 'sum_water_depth', 'sum_age', 'sum_age_decay'])
 
 
     for ng in range(n_groups):
         xi,yi = np.meshgrid(s['x'][ng,:],s['y'][ng,:])
         np1= ng*4  # 4 subplot
 
-        count = np.nansum(s['count'][:, ng, :, :].astype(np.float64),axis=0)
+        count = np.nansum(s['counts_inside'][:, ng, :, :].astype(np.float64),axis=0)
         count[count==0.] = np.nan
 
         plt.subplot(n_groups, 4, 1 + np1)
@@ -130,7 +130,7 @@ def plot_gridded_stats(log,seq_num, annotate_polygon=True, nfig=1):
         plt.xticks([])
         plt.yticks([])
         if annotate_polygon:
-            polygon_count= np.sum(poly['count'][:,ng,:].astype(np.float64),axis=0)
+            polygon_count= np.sum(poly['counts_inside'][:,ng,:].astype(np.float64),axis=0)
             polygon_anotation(poly,polygon_count)
 
 

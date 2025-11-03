@@ -23,7 +23,6 @@ class _OptionalStatsMethods(ParameterBaseClass):
         self.info['type'] = 'polygon'
 
 
-
     def _create_grid_variables(self):
         # creates 2D grid variables
         stats_grid= self.grid
@@ -170,7 +169,7 @@ class _OptionalStatsMethods(ParameterBaseClass):
         fh['num_released'][n_write, :] = num_released # for each release group so far
         fh['num_released_total'][n_write] = num_released.sum() # total all release groups so far
 
-        fh['count'][n_write, ...] = self.count_time_slice[:, ...]
+        fh['counts_inside'][n_write, ...] = self.counts_inside_time_slice[:, ...]
         fh['count_all_alive_particles'][n_write, ...] = self.count_all_alive_particles[:, ...]
 
         for key, item in self.sum_binned_part_prop.items():
@@ -183,7 +182,7 @@ class _OptionalStatsMethods(ParameterBaseClass):
         nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64,
                            compression_level=si.settings.NCDF_compression_level,
                            description='counts of all alive particles everywhere')
-        nc.create_variable('count', dims.keys(), np.int64, compression_level=si.settings.NCDF_compression_level,
+        nc.create_variable('counts_inside', dims.keys(), np.int64, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in spatial bins at given times, for each release group')
         if 'particle_property_list' in params:
             for p in params['particle_property_list']:
