@@ -13,7 +13,7 @@ def test_run_roms3D(
     ot.add_class("reader", **reader_demo_ROMS)
     ot.add_class(
         "release_groups",
-        **{**basic_point_release, "points": roms_release_locations["point_releases"]},
+        **{**basic_point_release, "points": roms_release_locations["point"]},
     )
     # # Add polygon release
     # ot.add_class(
