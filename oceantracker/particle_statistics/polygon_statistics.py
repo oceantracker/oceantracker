@@ -23,7 +23,7 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BaseParticleLocationStats):
         super().initial_setup()
         info = self.info
         self._create_polygon_variables_part_prop()
-        self.create_time_variables()
+
 
         dm = si.dim_names
         info['count_dims']= {dm.time: None,

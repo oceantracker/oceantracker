@@ -203,6 +203,29 @@ my_poly_stats_age = dict(class_name='PolygonStats2D_ageBased',
                          particle_property_list=['a_pollutant', 'water_depth'],
                          )
 
+my_heat_map3D_time = dict(name='my_heatmap3D_time',
+            class_name = "GriddedStats3D_timeBased",
+            grid_size = [120, 130, 5],
+            vertical_grid_size = 10,
+            grid_span = [10000, 10000],
+            particle_property_list=['a_pollutant', 'water_depth'],
+            release_group_centered_grids = True,
+            update_interval = 7200,
+            status_list = ["moving"],
+            z_max = -5.0,
+            z_min = -10.0,)
+
+my_heat_map2D_time_runningMean = dict(
+            name = "my_heat_map3D_time_runningMean",
+            class_name = "GriddedStats2D_timeBased_runningMean",
+            grid_size = [120, 130],
+            grid_span = [10000, 10000],
+            write_interval = 7200 * 3,
+            release_group_centered_grids = True,
+            update_interval = 7200,
+            status_list = ["moving"],
+            z_min = -10.0,
+            )
 
 my_resident_in_polygon =dict(name='my_resident_in_polygon',
         class_name='ResidentInPolygon',

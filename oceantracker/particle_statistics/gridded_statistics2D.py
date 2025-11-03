@@ -6,7 +6,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-from oceantracker.particle_statistics._base_stats_variants import  _BaseTimeStats
+from oceantracker.particle_statistics._base_stats_variants import  _BaseTimeStats, _BaseGrid2DStats
 from oceantracker.shared_info import shared_info as si
 
 stationary_status = int(si.particle_status_flags.stationary)  # compile this constant into numba code
@@ -15,13 +15,13 @@ from oceantracker.particle_statistics._base_stats_variants import  _BaseAgeStats
 
 
 
-class GriddedStats2D_timeBased(_BaseTimeStats, _BaseParticleLocationStats):
+class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLocationStats):
     # class to hold counts of particles inside grid squares
     def __init__(self):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self._add_grid_params()
+        self._add_2D_grid_params()
     
     def initial_setup(self):
         # set up regular grid for stats
@@ -246,7 +246,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
     #     nc.create_attribute('write_interval', self.params['write_interval'])
 
 
-class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
+class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocationStats):
 
     # does grid stats  based on age, but must keep whole stats grid in memory so ages can bw bined
     # bins all particles across all times into age bins,
@@ -260,7 +260,7 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
         self.add_default_params(
             role_output_file_tag= PVC('stats_gridded_age', str),)
 
-        self._add_grid_params()
+        self._add_2D_grid_params()
         self._add_age_params()
 
     def initial_setup(self):

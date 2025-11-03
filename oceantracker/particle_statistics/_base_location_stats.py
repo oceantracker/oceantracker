@@ -11,6 +11,7 @@ from oceantracker.util import cord_transforms
 from oceantracker.particle_statistics.util import stats_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_statistics.util.optional_stats_methods import _OptionalStatsMethods
+
 class _BaseParticleLocationStats(_OptionalStatsMethods):
 
 
@@ -165,9 +166,6 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
 
         output_util.add_release_group_names_to_netcdf(nc, si)
         return nc
-
-    def create_time_variables(self):
-        pass
 
     def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
@@ -339,22 +337,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
             for p in params['particle_property_list']:
                 self.sum_binned_part_prop[p] = np.full(use_dims, 0.)  # zero for  summing
 
-    def _add_grid_params(self):
-        self.add_default_params({
 
-            'grid_size': PLC([100, 99], int, fixed_len=2, min=1, max=10 ** 5,
-                             doc_str='number of (rows, columns) in grid, where rows is y size, cols x size, values should be odd, so will be rounded up to next '),
-            'release_group_centered_grids': PVC(False, bool,
-                                                doc_str='Center grid on the release groups  mean horizontal location or center of release polygon. '),
-            'grid_center': PCC(None, single_cord=True, is3D=False,
-                               doc_str='center of the statistics grid as (x,y), must be given if not using  release_group_centered_grids',
-                               units='meters'),
-            'grid_span': PLC(None, float, doc_str='(width-x, height-y)  of the statistics grid',
-                             units='meters (dx,dy) or degrees (dlon, dlat) if geographic',
-                             is_required=True),
-            'role_output_file_tag': PVC('stats_gridded_time_2D', str),
-        })
-        self.info['type'] = 'gridded'
 
     # setup and recode number released for global counts of all released particles
     def _setup_release_counts(self):
