@@ -10,9 +10,8 @@ from numba.typed import List as NumbaList
 from oceantracker.util import cord_transforms
 from oceantracker.particle_statistics.util import stats_util
 from oceantracker.shared_info import shared_info as si
-from oceantracker.particle_statistics.util.optional_stats_methods import _OptionalStatsMethods
 
-class _BaseParticleLocationStats(_OptionalStatsMethods):
+class _BaseParticleLocationStats(ParameterBaseClass):
 
 
     def __init__(self):
@@ -284,38 +283,6 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
         if self.params['write']:
             self.close_file()
 
-    # add file variables
-    def add_time_variables_to_file(self,nc):
-
-        # stats time variables commute to all 	for progressive writing
-        nc.create_variable('time', ['time_dim'], np.float64,
-                           units='seconds since 1970-01-01 00:00:00',
-                           description='time in seconds since 1970/01/01 00:00')
-
-        # other output common to all types of stats
-        nc.create_variable('num_released_total', ['time_dim'], np.int32, description='total number released')
-
-        nc.create_variable('num_released', ['time_dim', 'release_group_dim'], np.int32,
-                           description='number released so far from each release group')
-
-    def add_grid_variables_to_file(self, nc):
-        dn = si.dim_names
-        stats_grid = self.grid
-
-        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
-        nc.write_variable('x', stats_grid['x'], [dim_names[1], dim_names[3]], description='Mid point of grid cell',
-                          units='m or deg')
-        nc.write_variable('y', stats_grid['y'], [dim_names[1], dim_names[2]],
-                          description='Mid point of grid cell', units='m or degrees',)
-
-        nc.write_variable('x_grid', stats_grid['x_grid'],dim_names[1:4]                        ,
-                          description='x for mid point of grid cell, full grid',  units='m or degrees')
-        nc.write_variable('y_grid', stats_grid['y_grid'], dim_names[1:4],
-                          description='y for mid point of grid cell, full grid', units='m or degrees')
-        nc.write_variable('cell_area', stats_grid['cell_area'], dim_names[1:4],
-                          description='Horizontal area of each cell', units='m^2')
-        nc.write_variable('grid_spacings', stats_grid['grid_spacings'], 'spacings_dim',
-                          description='x for mid point of grid cell, full grid', units='m or degrees')
 
     def create_count_variables(self,dims:dict, mode:str):
         # set up space for requested particle properties
@@ -338,8 +305,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
                 self.sum_binned_part_prop[p] = np.full(use_dims, 0.)  # zero for  summing
 
 
-
-    # setup and recode number released for global counts of all released particles
+    # setup and record number released for global counts of all released particles
     def _setup_release_counts(self):
         n_release = len(si.class_roles.release_groups)
         n_updates = self.schedulers['count_scheduler'].scheduled_times.size

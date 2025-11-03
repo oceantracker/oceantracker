@@ -50,7 +50,7 @@ class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLoc
 
     def open_output_file(self, file_name):
         nc = super().open_output_file(file_name)
-        self.add_time_variables_to_file(nc)
+        self._create_time_file_variables(nc)
         self.add_grid_variables_to_file(nc)
         self._create_common_time_varying_stats(nc)
         return nc
@@ -116,7 +116,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
         self._initialize_running_mean()
     
     def update(self, n_time_step, time_sec, alive):
-        '''Do particle counts with running mean support'''
+        '''Do particle count with running mean support'''
 
         super().update(n_time_step, time_sec, alive)
 
@@ -346,9 +346,9 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles,
                           dim_names[:2],
                           description='counts of all particles alive from each release group, into age bins')
-        nc.write_variable('age_bins', stats_grid['age_bins'], ['age_bin_dim'], description='center of age bin, ie age axis of heat map in seconds')
-        nc.write_variable('age_bin_edges', stats_grid['age_bin_edges'], ['age_bin_edges'], description='center of age bin, ie age axis of heat map in seconds')
 
+        self._add_age_bins_to_file(nc)
+        
         # particle property sums
         dims = ('age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim')
         for key, item in self.sum_binned_part_prop.items():

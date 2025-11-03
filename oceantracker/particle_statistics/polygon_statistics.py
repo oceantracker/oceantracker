@@ -5,11 +5,11 @@ from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, Para
 from oceantracker.util.parameter_base_class import   ParameterBaseClass
 from oceantracker.util.numba_util import njitOT, prange, njitOTparallel
 from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
-from oceantracker.particle_statistics._base_stats_variants import _BaseTimeStats, _BaseAgeStats
+from oceantracker.particle_statistics._base_stats_variants import _BaseTimeStats, _BaseAgeStats, _BasePolygonStats
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_statistics.util import stats_util
 
-class PolygonStats2D_timeBased(_BaseTimeStats,_BaseParticleLocationStats):
+class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLocationStats):
     # class to hold counts of particles inside 2D polygons squares
 
     def __init__(self):
@@ -44,7 +44,7 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BaseParticleLocationStats):
 
     def open_output_file(self,file_name):
         nc = super().open_output_file(file_name)
-        self.add_time_variables_to_file(nc)
+        self._create_time_file_variables(nc)
         add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
 
         # time polygon count variables to append over time
@@ -95,7 +95,7 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BaseParticleLocationStats):
             for m in range(len(prop_list)):
                 sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
 
-class PolygonStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
+class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLocationStats):
 
     def __init__(self):
         super().__init__()
@@ -170,8 +170,7 @@ class PolygonStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],
                           description='counts of  all alive particles, not just those selected to be counted')
 
-        nc.write_variable('age_bins', stats_grid['age_bins'], ['age_bin_dim'], description='center of age bin, ie age axis in seconds')
-        nc.write_variable('age_bin_edges', stats_grid['age_bin_edges'], ['num_age_bin_edges'], description='edges of age bins in seconds')
+        self._add_age_bins_to_file(nc)
 
         # particle property sums
         for key, item in self.sum_binned_part_prop.items():

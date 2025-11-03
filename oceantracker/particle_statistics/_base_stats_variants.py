@@ -1,10 +1,11 @@
 from os import path
 
 from oceantracker.util.parameter_base_class import ParameterBaseClass
-from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC
+from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParameterTimeChecker as PTC
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.particle_statistics.util import stats_util
+from oceantracker.util import cord_transforms
 import numpy  as np
 from oceantracker.shared_info import shared_info as si
 
@@ -49,6 +50,20 @@ class _BaseTimeStats(ParameterBaseClass):
         for key, item in self.sum_binned_part_prop.items():
             self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
 
+    # add file variables
+    def _create_time_file_variables(self, nc):
+
+        # stats time variables commute to all 	for progressive writing
+        nc.create_variable('time', ['time_dim'], np.float64,
+                           units='seconds since 1970-01-01 00:00:00',
+                           description='time in seconds since 1970/01/01 00:00 counts were made')
+
+        # other output common to all types of stats
+        nc.create_variable('num_released_total', ['time_dim'], np.int32, description='total number released to date')
+
+        nc.create_variable('num_released', ['time_dim', 'release_group_dim'], np.int32,
+                           description='number released so far from each release group')
+
 
 class _BaseAgeStats(ParameterBaseClass):
 
@@ -86,6 +101,12 @@ class _BaseAgeStats(ParameterBaseClass):
                      caller=self, error=True)
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
+
+    def _add_age_bins_to_file(self,nc):
+        stats_grid = self.grid
+        nc.write_variable('age_bins', stats_grid['age_bins'], ['age_bin_dim'], description='center of age bin, ie age axis of heat map in seconds')
+        nc.write_variable('age_bin_edges', stats_grid['age_bin_edges'], ['age_bin_edges'], description='center of age bin, ie age axis of heat map in seconds')
+
 
     def save_state(self, si, state_dir):
 
@@ -129,3 +150,137 @@ class _BaseGrid2DStats(ParameterBaseClass):
             'role_output_file_tag': PVC('stats_gridded_time_2D', str),
         })
         self.info['type'] = 'gridded'
+
+    def _create_grid_variables(self):
+        # creates 2D grid variables
+        stats_grid= self.grid
+        params= self.params
+        info = self.info
+        #todo mover from info to params??
+
+        # default if no center given use release groups
+        if params['grid_center'] is None:
+            params['release_group_centered_grids'] = True
+
+        if params['release_group_centered_grids']:
+            # get centers from midrelease group
+            # loop over release groups to get bin edges
+            info['grid_centers']= []
+            for ngroup, name in enumerate(si.class_roles.release_groups.keys()):
+                rg = si.class_roles.release_groups[name]
+                x0 = rg.info['bounding_box_ll_ul']  # works for point and polygon releases,
+                x_release_group_center = np.nanmean(x0[:, :2], axis=0)
+                info['grid_centers'].append(x_release_group_center)
+            info['grid_centers'] = np.asarray(info['grid_centers'])
+
+        else:
+            # use given grid center for all
+            info['grid_centers'] =  np.tile(params['grid_center'],(len(si.class_roles.release_groups),1))
+
+        gsize = np.asarray(params['grid_size'])
+        gsize = gsize + (gsize+1) % 2  # grid size must be odd to ensure middle of center cell at mid point , a required by re
+        gspan = params['grid_span']
+
+        # make bin centers
+        base_x = np.linspace(-gspan[0] / 2, gspan[0] / 2, gsize[1] )
+        base_y = np.linspace(-gspan[1] / 2, gspan[1] / 2, gsize[0])
+
+        # make bin edges for counting inside, which is one grid cell larger
+        # deal with special case of unit grid
+
+        dx = gspan[0] if gsize[1] == 1 else float(np.diff(base_x[:2]))
+        dy = gspan[1] if gsize[0] == 1 else float(np.diff(base_y[:2]))
+        gspan_edges = gspan + np.asarray([dx,dy]) #  edges are one cell larger
+        base_x_bin_edges = np.linspace(-gspan_edges[0]/2, gspan_edges[0]/2, gsize[1] + 1)
+        base_y_bin_edges = np.linspace(-gspan_edges[1]/2, gspan_edges[1]/2, gsize[0] + 1)
+
+        # make copies for each release group
+        #   make empty arrays
+        n_grids= info['grid_centers'].shape[0]
+        stats_grid['x'] = np.zeros((n_grids, base_x.size), dtype=np.float64)
+        stats_grid['y'] = np.zeros( (n_grids, base_y.size), dtype=np.float64)
+        stats_grid['x_grid'] = np.zeros((n_grids, base_y.size,base_x.size), dtype=np.float64)
+        stats_grid['y_grid'] = np.zeros((n_grids,base_y.size,base_x.size), dtype=np.float64)
+        stats_grid['cell_area'] = np.zeros((n_grids, base_y.size,base_x.size), dtype=np.float64)
+        stats_grid['x_bin_edges'] = np.zeros( (n_grids, base_x_bin_edges.size), dtype=np.float64)
+        stats_grid['y_bin_edges'] = np.zeros( (n_grids, base_y_bin_edges.size), dtype=np.float64)
+
+        # grids may have release group centers, so grid coords differ by release group
+        for n_grid, p in enumerate(info['grid_centers']):
+            stats_grid['x'][n_grid, :] = p[0] + base_x
+            stats_grid['y'][n_grid, :] = p[1] + base_y
+            stats_grid['x_bin_edges'][n_grid, :] = p[0] + base_x_bin_edges
+            stats_grid['y_bin_edges'][n_grid, :] = p[1] + base_y_bin_edges
+
+            # full mesh x, y
+            x, y = np.meshgrid(stats_grid['x'][n_grid, :], stats_grid['y'][n_grid, :])
+            stats_grid['x_grid'][n_grid, :, :], stats_grid['y_grid'][n_grid, :, :] = x, y
+
+            # get cell area im meters even if in geographic coords
+            x,y = np.meshgrid(stats_grid['x_bin_edges'][n_grid, :], stats_grid['y_bin_edges'][n_grid, :])
+
+            if si.settings.use_geographic_coords:
+                x, y = cord_transforms.local_grid_deg_to_meters(x,y, x[0,0], y[0,0])
+            stats_grid['cell_area'][n_grid, :, :] =(x[:-1, 1:]-x[:-1, :-1])*(y[1:,:-1]-y[:-1:,:-1])
+
+        #spacings the same for all release group grids
+        stats_grid['grid_spacings'] = np.asarray([base_x[1] - base_x[0], base_y[1] - base_y[0], ])
+        pass
+
+    def add_grid_variables_to_file(self, nc):
+        dn = si.dim_names
+        stats_grid = self.grid
+
+        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
+        nc.write_variable('x', stats_grid['x'], [dim_names[1], dim_names[3]], description='Mid point of grid cell',
+                          units='m or deg')
+        nc.write_variable('y', stats_grid['y'], [dim_names[1], dim_names[2]],
+                          description='Mid point of grid cell', units='m or degrees',)
+
+        nc.write_variable('x_grid', stats_grid['x_grid'],dim_names[1:4]                        ,
+                          description='x for mid point of grid cell, full grid',  units='m or degrees')
+        nc.write_variable('y_grid', stats_grid['y_grid'], dim_names[1:4],
+                          description='y for mid point of grid cell, full grid', units='m or degrees')
+        nc.write_variable('cell_area', stats_grid['cell_area'], dim_names[1:4],
+                          description='Horizontal area of each cell', units='m^2')
+        nc.write_variable('grid_spacings', stats_grid['grid_spacings'], 'spacings_dim',
+                          description='x for mid point of grid cell, full grid', units='m or degrees')
+
+class _BasePolygonStats(ParameterBaseClass):
+    def _add_polygon_params(self):
+        self.add_default_params(polygon_list=[],
+                                use_release_group_polygons=PVC(False, bool,
+                                                               doc_str='Omit polygon_list param and use all polygon release polygons as statistics/counting polygons, useful for building release group polygon to polygon connectivity matrix.'),
+                                )
+        self.info['type'] = 'polygon'
+
+    def _create_polygon_variables_part_prop(self):
+        ml = si.msg_logger
+        params = self.params
+        info = self.info
+        # pre fill  polygon list from release groups if requested
+        if params['use_release_group_polygons']:
+            params['polygon_list'] = []
+            for name, i in si.class_roles.release_groups.items():
+                if i.info['release_type'] == 'polygon':
+                    params['polygon_list'].append({'name': name, 'points': i.params['points']})
+
+            if len(params['polygon_list']) == 0:
+                ml.msg('There are no polygon releases to use as statistic polygons',
+                       hint='must have at least one polygon release defined to use the use_release_group_polygons parameter, or use statistics polygon_list parameter',
+                       fatal_error=True, caller=self)
+        else:
+            # use given polygon list
+            for n, p in enumerate(params['polygon_list']):
+                p = merge_params_with_defaults(p, si.default_polygon_dict_params,
+                                               si.msg_logger, crumbs='polygon_statistics_merging polygon list')
+
+        if len(params['polygon_list']) == 0:
+            ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,
+                   fatal_error=True, hint='eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
+
+        # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
+        info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'
+        si.add_class('particle_properties', class_name='InsidePolygonsNonOverlapping2D',
+                     name=info['inside_polygon_particle_prop'], initialize=True,
+                     polygon_list=params['polygon_list'], write=False)

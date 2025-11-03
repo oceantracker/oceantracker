@@ -60,7 +60,7 @@ def write_release_group_netcdf():
 
 
 def add_polygon_list_to_group_netcdf(nc,polygon_list):
-    '''Write poygon in the file groups data to own file for each case '''
+    ''' Write polygon in the file groups data to own file for each case '''
     # loop over polygon_list
     for ID, p in  enumerate(polygon_list):
 
@@ -72,6 +72,6 @@ def add_polygon_list_to_group_netcdf(nc,polygon_list):
                     polygon_name=f'polygon{ID:04d}' if p['name'] is None else p['name'])
         nc.write_variable(v_name, points, [dim_name, 'vector2D'],
                           units='meters or decimal deg. as  (lon, lat)',
-                          description='stats ploygon cords',
+                          description='polygon cords',
                           attributes=attr)
     pass
