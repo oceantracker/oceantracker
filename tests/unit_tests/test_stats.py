@@ -47,9 +47,25 @@ def test_gridded_statistics_2D_timeBased_runningMean(
 def test_gridded_statistics_2D_age_based():
     assert True
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_gridded_statistics_3D_time_based():
-    assert True
+def test_gridded_statistics_3D_time_based(
+    base_settings,
+    reader_schism3D,
+    basic_point_release,
+    schism_release_locations,
+    gridded_3D_timeBased,
+):
+    ot = OceanTracker()
+    ot.settings(**base_settings)
+    ot.add_class("reader", **reader_schism3D)
+    ot.add_class(
+        "release_groups",
+        **{**basic_point_release, "points": schism_release_locations["deep_point"]},
+    )
+    ot.add_class("particle_statistics", **gridded_3D_timeBased)
+    
+    case_info_file = ot.run()
+
+    assert case_info_file is not None
 
 @pytest.mark.skip(reason="Not implemented yet")
 def test_gridded_statistics_3D_age_based():
