@@ -350,13 +350,23 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                           description='counts of all particles alive from each release group, into age bins')
 
         self._add_age_bins_to_file(nc)
-        self._add_age_binned_release_counts_to_file(nc)
+
+        # add connectives
+        counts_released_age_binned = self._add_age_binned_release_counts_to_file(nc)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            connectivity_released =  self.counts_inside_age_bins/counts_released_age_binned[:,:,np.newaxis,np.newaxis].astype(np.float64)
+        connectivity_released[~np.isfinite(connectivity_released)] = np.nan
+
+        nc.write_variable('connectivity_released', connectivity_released, dim_names,
+                          description='Age binned connectivity of each grid cell as fraction =counts_inside/ counts_released_age_binned, ie includes dead and those outside open boundaries ')
 
         # particle property sums
         dims = ('age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim')
         for key, item in self.sum_binned_part_prop.items():
             # need to write final sums of properties  after all age counts done across all times
             nc.write_variable('sum_' + key, item[:], dims, description='sum of particle property inside grid bins  ' + key)
+
+
 
         # to do:
         # * add metadata about running mean if enabled

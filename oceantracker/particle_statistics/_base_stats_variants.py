@@ -136,9 +136,11 @@ class _BaseAgeStats(ParameterBaseClass):
                             description='total number released since start of run at counting times for  each release group')
 
         # age bin all released particles
-        age_binned_counts= self._age_binned_release_counts(times, number_released_to_date, stats_grid['age_bin_edges'])
-        nc.write_variable('counts_released', age_binned_counts, [dn.age_bin, dn.release_group],
+        counts_released_age_binned= self._age_binned_release_counts(times, number_released_to_date, stats_grid['age_bin_edges'])
+        nc.write_variable('counts_released', counts_released_age_binned, [dn.age_bin, dn.release_group],
                                 description='all particles released in age bins for each release group')
+        return  counts_released_age_binned
+
 
 
     def save_state(self, si, state_dir):

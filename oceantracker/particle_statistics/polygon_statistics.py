@@ -175,8 +175,15 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
                           description='counts of  all alive particles, not just those selected to be counted')
 
         self._add_age_bins_to_file(nc)
-        self._add_age_binned_release_counts_to_file(nc)
+        counts_released_age_binned = self._add_age_binned_release_counts_to_file(nc)
 
+        # add connectives
+        with np.errstate(divide='ignore', invalid='ignore'):
+            connectivity_released = self.counts_inside_age_bins.astype(np.float64) / counts_released_age_binned[:, :,  np.newaxis].astype(np.float64)
+        connectivity_released[~np.isfinite(connectivity_released)] = np.nan
+
+        nc.write_variable('connectivity_released', connectivity_released, dim_names,
+                          description='Age binned connectivity of each polygon as fraction =counts_inside/ counts_released_age_binned, ie includes dead and those outside open boundaries ')
 
         # particle property sums
         for key, item in self.sum_binned_part_prop.items():

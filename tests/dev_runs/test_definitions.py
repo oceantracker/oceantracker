@@ -320,9 +320,8 @@ def compare_reference_run_stats(case_info_file, args):
             print('\t counts_released, ref/new', stats_ref['counts_released'].sum(), stats['counts_released'].sum(),
                '\t max diff counts-ref run counts =', np.max(np.abs(stats['counts_released'] - stats_ref['counts_released'])))
 
-            s = list(stats_ref['counts_inside'].shape[:2]) + (stats_ref['counts_inside'].ndim - stats_ref['counts_released'].ndim) * [1]
-            c_ref = stats_ref['counts_inside']/stats_ref['counts_released'].reshape(s)
-            c  = stats['counts_inside'] /  stats['counts_released'].reshape(s)
+            c_ref = stats_ref['connectivity_released']
+            c  = stats['connectivity_released']
             c_ref= c_ref[np.isfinite(c_ref)]
             c = c[np.isfinite(c)]
             print('\t connectives > 1.01 ref=', (c_ref > 1.001).sum(),'run =', (c> 1.001).sum(), ' counts',
