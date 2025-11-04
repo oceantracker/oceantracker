@@ -276,6 +276,7 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                             dm.grid_col_x: self.grid['x_grid'].shape[2]}
 
         self.create_count_variables(info['count_dims'],'age')
+        self._setup_release_counts()
 
         self.set_up_part_prop_lists()
 
@@ -295,6 +296,8 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                             part_prop['IDrelease_group'].data,
                             part_prop['age'].data,  stats_grid['age_bin_edges'],
                             self.count_all_alive_particles, alive)
+
+        self._update_release_counts()
 
         p_x = part_prop['x'].used_buffer()
         p_age = part_prop['age'].used_buffer()
@@ -320,7 +323,6 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                                      prop_list, sum_prop_list,
                                      age_bin_edges, age, sel):
         # (no zeroing as accumulated over  whole run)
-        da = age_bin_edges[1] - age_bin_edges[0]
 
         for n in sel:
             ng = group_ID[n]
@@ -328,7 +330,7 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
             #grids may have release group centers , so coods differ by release group
             r = int(np.floor((x[n, 1] - y_edges[ng, 0]) / grid_spacings[1]))  # row is y, column x
             c = int(np.floor((x[n, 0] - x_edges[ng, 0]) / grid_spacings[0]))
-            na = int(np.floor((age[n] - age_bin_edges[0]) / da))
+            na = stats_util._get_age_bin(age[n], age_bin_edges)
 
             if 0 <= na < (age_bin_edges.size - 1):
                 if 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1 :
@@ -348,7 +350,8 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                           description='counts of all particles alive from each release group, into age bins')
 
         self._add_age_bins_to_file(nc)
-        
+        self._add_age_binned_release_counts_to_file(nc)
+
         # particle property sums
         dims = ('age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim')
         for key, item in self.sum_binned_part_prop.items():

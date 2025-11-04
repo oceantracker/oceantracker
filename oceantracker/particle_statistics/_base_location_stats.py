@@ -82,7 +82,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.set_z_range_for_counts()
 
         self.add_scheduler('count_scheduler', start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
-        self._setup_release_counts()
+
         pass
 
     def set_z_range_for_counts(self):
@@ -250,8 +250,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.prop_data_list[n]= part_prop[name].data
 
         self.do_counts(n_time_step, time_sec, sel, alive)
-        self._update_release_counts()
         self.update_count += 1
+
 
 
     def info_to_write_on_file_close(self,nc) : pass
@@ -305,17 +305,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 self.sum_binned_part_prop[p] = np.full(use_dims, 0.)  # zero for  summing
 
 
-    # setup and record number released for global counts of all released particles
-    def _setup_release_counts(self):
-        n_release = len(si.class_roles.release_groups)
-        n_updates = self.schedulers['count_scheduler'].scheduled_times.size
-        self.released_so_far= np.zeros((n_updates,n_release), dtype=np.int64)
-        pass
 
-    def _update_release_counts(self):
-        nt = self.update_count
-        for nrg, (name,i) in  enumerate(si.class_roles.release_groups.items()):
-            self.released_so_far[nt, nrg] = i.info['number_released']
 
 
 

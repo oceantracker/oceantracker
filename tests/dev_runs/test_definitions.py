@@ -106,7 +106,7 @@ rg_min_depth = dict(name='min_depth',  # name used internal to refer to this rel
                     water_depth_min= 500,
                     #    tim=['2017-01-01T08:30:00','2017-01-01T01:30:00'],
                     # the below are optional settings/parameters
-                    release_interval=3600,  # seconds between releasing particles
+                    release_interval=1800,  # seconds between releasing particles
                     pulse_size=5)  # how many are released each interval
 rg_outside_domain = dict( name='outside_open_boundary',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
@@ -183,7 +183,7 @@ my_heat_map_age = dict(name='my_heatmap_age',
          update_interval=7200,  # time interval in sec, between doing particle statists counts
          particle_property_list=['a_pollutant','water_depth'],  # request a heat map for the decaying part. prop. added above
          #status_list=[],  # only count the particles which are moving
-        age_bin_size= 24*3600,
+        age_bin_size= 2*3600,
         max_age_to_bin=24*3600,
         z_min=-10.,  # only count particles at locations above z=-2m
          )
@@ -197,9 +197,9 @@ my_poly_stats_time =dict(name='my_poly_stats_time',
         )
 my_poly_stats_age = dict(class_name='PolygonStats2D_ageBased',
                          name='my_poly_stats_age',
-                         max_age_to_bin=4*24*3600,
+                         max_age_to_bin=24*3600,
                          update_interval=3600,
-                         age_bin_size=24 * 3600,
+                         age_bin_size=2 * 3600,
                          particle_property_list=['a_pollutant', 'water_depth'],
                          )
 
@@ -315,6 +315,19 @@ def compare_reference_run_stats(case_info_file, args):
         print('\t count all alive, ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
              'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
                       '\t max diff counts-ref run counts =',np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])))
+
+        if  'counts_released' in stats_ref:
+            print('\t counts_released, ref/new', stats_ref['counts_released'].sum(), stats['counts_released'].sum(),
+               '\t max diff counts-ref run counts =', np.max(np.abs(stats['counts_released'] - stats_ref['counts_released'])))
+
+            s = list(stats_ref['counts_inside'].shape[:2]) + (stats_ref['counts_inside'].ndim - stats_ref['counts_released'].ndim) * [1]
+            c_ref = stats_ref['counts_inside']/stats_ref['counts_released'].reshape(s)
+            c  = stats['counts_inside'] /  stats['counts_released'].reshape(s)
+            c_ref= c_ref[np.isfinite(c_ref)]
+            c = c[np.isfinite(c)]
+            print('\t connectives > 1.01 ref=', (c_ref > 1.001).sum(),'run =', (c> 1.001).sum(), ' counts',
+                  'ref range =', c_ref.min(),'-', c_ref.max(), 'run range =', c_ref.min(),'-', c_ref.max())
+            pass
         if 'particle_property_list' in params:
             for prop_name in params['particle_property_list']:
                 if prop_name not in stats_ref: continue

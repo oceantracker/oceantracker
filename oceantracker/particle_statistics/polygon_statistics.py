@@ -8,6 +8,7 @@ from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
 from oceantracker.particle_statistics._base_stats_variants import _BaseTimeStats, _BaseAgeStats, _BasePolygonStats
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_statistics.util import stats_util
+from oceantracker.particle_statistics.util.stats_util import _get_age_bin
 
 class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLocationStats):
     # class to hold counts of particles inside 2D polygons squares
@@ -115,7 +116,7 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
                        dm.polygons:  len(self.params['polygon_list'])}
 
         self.create_count_variables(info['count_dims'],'age')
-
+        self._setup_release_counts()
         self.set_up_part_prop_lists()
 
 
@@ -139,6 +140,9 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
 
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
+
+        self._update_release_counts()
+
 
         # set up pointers to particle properties, only point to those in buffer as no need to look at those beyond buffer
         release_groupID   = part_prop['IDrelease_group'].used_buffer()
@@ -171,6 +175,8 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
                           description='counts of  all alive particles, not just those selected to be counted')
 
         self._add_age_bins_to_file(nc)
+        self._add_age_binned_release_counts_to_file(nc)
+
 
         # particle property sums
         for key, item in self.sum_binned_part_prop.items():
@@ -184,11 +190,10 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
                                      sel, age_bin_edges, age):
 
         # (no zeroing as accumulated over  whole run)
-        da = age_bin_edges[1] - age_bin_edges[0]
 
         for n in sel:
 
-            na = int(np.floor((age[n] - age_bin_edges[0]) / da))
+            na = stats_util._get_age_bin(age[n], age_bin_edges)
             if 0 <= na < (age_bin_edges.shape[0] - 1):
                 # only count those in age bins
                 ng= group_ID[n]
