@@ -248,9 +248,8 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
 
 class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocationStats):
 
-    # does grid stats  based on age, but must keep whole stats grid in memory so ages can bw bined
     # bins all particles across all times into age bins,
-
+    # does grid stats  based on age, but must keep whole stats grid in memory so ages can bw binned
     # NOTE: note to get unbiased stats, need to stop releasing particles 'max_age_to_bin' before end of run
 
     def __init__(self):
@@ -338,40 +337,4 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                     # sum particle properties
                     for m in range(len(prop_list)):
                         sum_prop_list[m][na, ng, r, c] += prop_list[m][n]
-
-    def info_to_write_on_file_close(self, nc):
-        # only write age count variables as whole at end of run
-        stats_grid = self.grid
-        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
-        nc.write_variable('counts_inside', self.counts_inside_age_bins, dim_names,
-                          description= 'counts of particles in grid at given ages, for each release group')
-        nc.write_variable('count_all_alive_particles', self.count_all_alive_particles,
-                          dim_names[:2],
-                          description='counts of all particles alive from each release group, into age bins')
-
-        self._add_age_bins_to_file(nc)
-
-        # add connectives
-        counts_released_age_binned = self._add_age_binned_release_counts_to_file(nc)
-        with np.errstate(divide='ignore', invalid='ignore'):
-            connectivity_released =  self.counts_inside_age_bins/counts_released_age_binned[:,:,np.newaxis,np.newaxis].astype(np.float64)
-        connectivity_released[~np.isfinite(connectivity_released)] = np.nan
-
-        nc.write_variable('connectivity_released', connectivity_released, dim_names,
-                          description='Age binned connectivity of each grid cell as fraction =counts_inside/ counts_released_age_binned, ie includes dead and those outside open boundaries ')
-
-        # particle property sums
-        dims = ('age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim')
-        for key, item in self.sum_binned_part_prop.items():
-            # need to write final sums of properties  after all age counts done across all times
-            nc.write_variable('sum_' + key, item[:], dims, description='sum of particle property inside grid bins  ' + key)
-
-
-
-        # to do:
-        # * add metadata about running mean if enabled
-        # if self.use_running_mean:
-        #     nc.create_attribute('statistics_type', 'running_mean')
-        #     nc.create_attribute('update_interval', self.params['update_interval'])
-        #     nc.create_attribute('write_interval', self.params['write_interval'])
 

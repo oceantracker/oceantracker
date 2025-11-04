@@ -261,6 +261,14 @@ def read_tracks(case_info_file, ref_case=False,fraction_to_read=None):
 def get_case_inf_name(params):
     return path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base']+'_caseInfo.json')
 
+
+# Define color codes
+RED = '\033[91m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BLUE = '\033[94m'
+RESET = '\033[0m' # Resets to default color and style
+
 def compare_reference_run_tracks(case_info_file, args):
 
 
@@ -314,17 +322,17 @@ def compare_reference_run_stats(case_info_file, args):
               '\t\t\t max diff counts-ref run counts =',np.max(np.abs(stats['counts_inside'] - stats_ref['counts_inside'])))
         print('\t count all alive, ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
              'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
-                      '\t max diff counts-ref run counts =',np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])))
+                     '\t max diff counts-ref run counts =' +RED ,np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])), RESET)
 
         if  'counts_released' in stats_ref:
             print('\t counts_released, ref/new', stats_ref['counts_released'].sum(), stats['counts_released'].sum(),
                '\t max diff counts-ref run counts =', np.max(np.abs(stats['counts_released'] - stats_ref['counts_released'])))
 
-            c_ref = stats_ref['connectivity_released']
-            c  = stats['connectivity_released']
+            c_ref = stats_ref['connectivity_age_released']
+            c  = stats['connectivity_age_released']
             c_ref= c_ref[np.isfinite(c_ref)]
             c = c[np.isfinite(c)]
-            print('\t connectives > 1.01 ref=', (c_ref > 1.001).sum(),'run =', (c> 1.001).sum(), ' counts',
+            print( '\t connectives > 1.01 ref='+RED  , (c_ref > 1.001).sum(),RESET+ 'run ='+RED, (c> 1.001).sum(), RESET+ ' counts',
                   'ref range =', c_ref.min(),'-', c_ref.max(), 'run range =', c_ref.min(),'-', c_ref.max())
             pass
         if 'particle_property_list' in params:
@@ -338,7 +346,7 @@ def compare_reference_run_stats(case_info_file, args):
                 dc = np.abs(stats[prop_name] - stats_ref[prop_name])
                 print(f'\t Property  "{prop_name}"', 'max mag. ref/new',
                       np.nanmax(np.abs(stats_ref[prop_name])),np.nanmax(np.abs(stats[prop_name])),
-                      ', max diff =', np.max(dc[np.isfinite(dc)]))
+                      ', max diff ='+RED  , np.max(dc[np.isfinite(dc)]), RESET)
 
     pass
 def show_track_plot(case_info_file, args,colour_with=None):

@@ -74,32 +74,7 @@ def read_stats_file(file_name, nt=None):
     else:
         d['stats_type'] = 'grid'
 
-    # read count first fot mean value calc
-    d['limits']['counts_inside'] = {'min': np.nanmin(d['counts_inside']), 'max': np.nanmax(d['counts_inside'])}
 
-    # get mean values
-    new_data ={}
-    for var, vals in d.items():
-        if var.startswith('sum_'):
-            name = var.removeprefix('sum_')
-            with np.errstate(divide='ignore', invalid='ignore'):
-                new_data[name] = d[var]/d['counts_inside'] # calc mean
-                d['limits'][name] = {'min' : np.nanmin(new_data[name]), 'max': np.nanmax(new_data[name])}
-
-    with np.errstate(divide='ignore', invalid='ignore'):
-        # conectivity calc. is different depending on direction, use all particles if forwards, selected if backwards
-        if 'backtracking' not in d['global_attributes']:
-            b = d['count_all_particles'] # version prior to june 2025
-        else:
-            b = d['count_all_alive_particles']
-
-        if d['stats_type'] == 'grid':
-            bb =  b[..., np.newaxis, np.newaxis ] if 'z_dim' not in d['dimensions'] else b[..., np.newaxis, np.newaxis, np.newaxis ]
-            d['connectivity_matrix'] = d['counts_inside'] / bb
-        else:
-            d['connectivity_matrix'] = d['counts_inside'] / b[..., np.newaxis]
-
-    d.update(new_data)
     nc.close()
     return d
 

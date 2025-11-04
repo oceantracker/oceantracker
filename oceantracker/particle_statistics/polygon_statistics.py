@@ -164,31 +164,6 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
                                           self.prop_data_list, self.sum_prop_data_list,
                                           sel, stats_grid['age_bin_edges'], p_age)
 
-    def info_to_write_on_file_close(self, nc):
-        # write variables whole
-        stats_grid = self.grid
-        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
-        nc.write_variable('counts_inside', self.counts_inside_age_bins, dim_names,
-                          description='counts of particles in each stats polygon at given ages, for each release group')
-
-        nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],
-                          description='counts of  all alive particles, not just those selected to be counted')
-
-        self._add_age_bins_to_file(nc)
-        counts_released_age_binned = self._add_age_binned_release_counts_to_file(nc)
-
-        # add connectives
-        with np.errstate(divide='ignore', invalid='ignore'):
-            connectivity_released = self.counts_inside_age_bins.astype(np.float64) / counts_released_age_binned[:, :,  np.newaxis].astype(np.float64)
-        connectivity_released[~np.isfinite(connectivity_released)] = np.nan
-
-        nc.write_variable('connectivity_released', connectivity_released, dim_names,
-                          description='Age binned connectivity of each polygon as fraction =counts_inside/ counts_released_age_binned, ie includes dead and those outside open boundaries ')
-
-        # particle property sums
-        for key, item in self.sum_binned_part_prop.items():
-            # need to write final sums of properties  after all age counts done across all times
-            nc.write_variable('sum_' + key, item[:], dim_names, description='sum of particle property inside bin  ' + key)
 
     @staticmethod
     @njitOT

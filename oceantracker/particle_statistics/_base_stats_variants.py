@@ -6,6 +6,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParameterTimeChecker as PTC
 from oceantracker.util.ncdf_util import NetCDFhandler
+from oceantracker.util import cord_transforms
 from oceantracker.particle_statistics.util import stats_util
 
 import numpy  as np
@@ -19,16 +20,18 @@ class _BaseTimeStats(ParameterBaseClass):
 
     def _create_common_time_varying_stats(self,nc):
         params = self.params
-        dims = self.info['count_dims']
+        dims =  self.info['count_dims']
         dim_names =  stats_util.get_dim_names(dims)
         nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64,
                            compression_level=si.settings.NCDF_compression_level,
                            description='counts of all alive particles everywhere')
-        nc.create_variable('counts_inside', dims.keys(), np.int64, compression_level=si.settings.NCDF_compression_level,
+        nc.create_variable('counts_inside', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in spatial bins at given times, for each release group')
+
         if 'particle_property_list' in params:
             for p in params['particle_property_list']:
-                nc.create_variable('sum_' + p,list(dims.keys()), np.float64, description='sum of particle property inside bin')
+                nc.create_variable('sum_' + p,dim_names, dtype= np.float64, description= f'sum of particle property {p} inside bin')
+                nc.create_variable(p, dim_names, dtype=np.float32, description=f'Average particle property {p} inside cell  = sum prop/counts_inside')
 
     def _write_common_time_varying_stats(self, time_sec):
         # write nth step in file
@@ -50,7 +53,13 @@ class _BaseTimeStats(ParameterBaseClass):
         fh['count_all_alive_particles'][n_write, ...] = self.count_all_alive_particles[:, ...]
 
         for key, item in self.sum_binned_part_prop.items():
-            self.nc.file_handle['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
+            fh['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
+
+            # write mean
+            with np.errstate(divide='ignore', invalid='ignore'):
+                val = item / self.counts_inside_time_slice  # calc mean
+            val[~np.isfinite(val)] = np.nan
+            fh[key][n_write, ...] = val[:]  # write sums  working in original view
 
     # add file variables
     def _create_time_file_variables(self, nc):
@@ -86,6 +95,7 @@ class _BaseAgeStats(ParameterBaseClass):
         ml = si.msg_logger
         stats_grid = self.grid
 
+
         # check age limits to bin particle ages into,  equal bins in given range
         params['max_age_to_bin'] = min(params['max_age_to_bin'], si.run_info.duration)
         params['max_age_to_bin'] = max(params['age_bin_size'], params['max_age_to_bin']) # at least one bin
@@ -103,6 +113,41 @@ class _BaseAgeStats(ParameterBaseClass):
                      caller=self, error=True)
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
+
+    def info_to_write_on_file_close(self, nc):
+        # write variables whole
+        stats_grid = self.grid
+        counts_inside_age_bins = self.counts_inside_age_bins
+
+        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
+        nc.write_variable('counts_inside', counts_inside_age_bins, dim_names,
+                          description='counts of particles in each stats polygon at given ages, for each release group')
+
+        nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],
+                          description='counts of  all alive particles, not just those selected to be counted')
+
+        self._add_age_bins_to_file(nc)
+        counts_released_age_binned = self._add_age_binned_release_counts_to_file(nc)
+
+        # add connectives
+        s = list(counts_inside_age_bins.shape[:2]) + (counts_inside_age_bins.ndim - counts_released_age_binned.ndim) * [1]
+        with np.errstate(divide='ignore', invalid='ignore'):
+            connectivity_age_released = counts_inside_age_bins / counts_released_age_binned.reshape(s)
+        connectivity_age_released[~np.isfinite(connectivity_age_released)] = np.nan
+
+        nc.write_variable('connectivity_age_released', connectivity_age_released, dim_names,
+                          description='Age binned connectivity of each polygon as fraction =counts_inside/ counts_released_age_binned, ie includes dead and those outside open boundaries ')
+
+        # particle property sums
+        for key, item in self.sum_binned_part_prop.items():
+            # need to write final sums of properties  after all age counts done across all times
+            nc.write_variable('sum_' + key, item[:], dim_names, description='sum of particle property inside bin  ' + key)
+            name = key.removeprefix('sum_')
+            with np.errstate(divide='ignore', invalid='ignore'):
+                val = item / self.counts_inside_age_bins  # calc mean
+            val[~np.isfinite(val)] = np.nan
+            nc.write_variable(key, val, dim_names, dtype=np.float32,
+                              description=f'Average particle property {name} for particles inside bin  = sum_{key}/counts_inside')
 
     def _add_age_bins_to_file(self,nc):
         stats_grid = self.grid
