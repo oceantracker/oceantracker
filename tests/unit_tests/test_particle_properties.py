@@ -32,3 +32,27 @@ def test_total_water_depth():
 @pytest.mark.skip(reason="Not implemented yet")
 def test_water_speed():
     pass
+
+@pytest.fixture
+def water_speed_property():
+    """Water speed vector magnitude property"""
+    return dict(
+        name="water_speed",
+        class_name="VectorMagnitude2D",
+        vector_part_prop="water_velocity",
+    )
+
+@pytest.fixture
+def distance_travelled_property():
+    """Distance travelled property"""
+    return dict(
+        class_name="DistanceTravelled",
+    )
+
+@pytest.fixture
+def age_decay_property():
+    """Age decay property"""
+    return dict(
+        class_name="AgeDecay",
+        name="test_decay",
+    )

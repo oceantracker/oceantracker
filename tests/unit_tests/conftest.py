@@ -7,6 +7,31 @@ import numpy as np
 package_dir = path.dirname(definitions.package_dir)
 demo_hindcast_dir = path.join(package_dir, "tutorials_how_to", "demo_hindcast")
 
+def pytest_addoption(parser):
+    """Add custom command line options"""
+    parser.addoption(
+        "--create-reference",
+        action="store_true",
+        default=False,
+        help="Create reference data for validation tests"
+    )
+    parser.addoption(
+        "--create-plots",
+        action="store_true",
+        default=False,
+        help="Create and save plots from test runs"
+    )
+
+@pytest.fixture
+def create_reference_data_flag(request):
+    """Flag to create reference data - set via command line or environment"""
+    return request.config.getoption("--create-reference", default=False)
+
+@pytest.fixture
+def show_plots_flag(request):
+    """Flag to create and save plots - set via command line"""
+    return request.config.getoption("--create-plots", default=False)
+
 @pytest.fixture
 def default_root_output_dir():
     """Root directory for test outputs"""
@@ -15,8 +40,12 @@ def default_root_output_dir():
     )
 
 @pytest.fixture
+def reference_data_dir():
+    """Directory for storing reference/validation data"""
+    return path.join(path.dirname(__file__), "data", "output_data")
+
+@pytest.fixture
 def reader_schism3D():
-    """Demo SCHISM 3D reader configuration"""
     return dict(
         input_dir=path.join(demo_hindcast_dir, "schsim3D"),
         file_mask="demo_hindcast_schisim3D*.nc",
@@ -24,7 +53,6 @@ def reader_schism3D():
 
 @pytest.fixture
 def reader_demo_ROMS():
-    """Demo ROMS reader configuration"""
     return dict(
         input_dir=path.join(demo_hindcast_dir, "ROMS"), 
         file_mask="ROMS3D_00*.nc"
@@ -44,10 +72,6 @@ def base_settings(request, default_root_output_dir):
         regrid_z_to_uniform_sigma_levels=False,
     )
 
-# ------------------------------------------------------------------------------------
-# Release configurations
-# ------------------------------------------------------------------------------------
-
 @pytest.fixture
 def basic_point_release():
     return dict(
@@ -56,6 +80,17 @@ def basic_point_release():
         release_interval=1800,
         pulse_size=5,
     )
+
+# @pytest.fixture
+# def datetime_start_release_configuration():
+#     """Release configuration with datetime start"""
+#     return dict(
+#         name="start_in_datetime1",
+#         class_name="PointRelease",
+#         start="2017-01-01T03:30:00",
+#         release_interval=3600,
+#         pulse_size=5,
+#     )
 
 @pytest.fixture
 def downstream_point_release_configuration():
@@ -237,4 +272,14 @@ def roms_gridded_2D_timeBased():
         particle_property_list=["water_speed"],
         status_list=["moving"],
         z_min=-10.0,
+    )
+
+@pytest.fixture
+def polygon_stats_timeBased():
+    """Polygon statistics time-based configuration"""
+    return dict(
+        name="my_poly_stats_time",
+        class_name="PolygonStats2D_timeBased",
+        update_interval=3600,
+        particle_property_list=["water_depth"],
     )
