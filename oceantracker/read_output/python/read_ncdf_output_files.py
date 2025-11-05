@@ -115,7 +115,7 @@ def read_residence_file(file_name, var_list=[]):
 
 
     # read count first for mean value calc
-    for v in ['counts_inside','count_all_particles','time']:
+    for v in ['count','count_all_particles','time']:
         d[v]  = nc.read_variable(v)
         d['limits'][v] = {'min': np.nanmin(d[v]), 'max': np.nanmax(d[v])}
         if v in var_list: var_list.remove(v)
@@ -127,7 +127,7 @@ def read_residence_file(file_name, var_list=[]):
             # check if summed version is in file and calc mean
             d['sum_'+ var] = nc.read_variable('sum_' + var)
             with np.errstate(divide='ignore', invalid='ignore'):
-                d[var] = d['sum_' + var]/d['counts_inside'] # calc mean
+                d[var] = d['sum_' + var]/d['count'] # calc mean
 
         else:
             print('Warning reading residence file ' + file_name + ', cannot load variable ' + var + ', is not in file ')
