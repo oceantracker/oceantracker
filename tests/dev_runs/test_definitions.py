@@ -287,12 +287,12 @@ def compare_reference_run_tracks(case_info_file, args):
     # print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
 
     print(f'(x,y,z) differences from reference run: "{path.basename(case_info_file).split(".")[0]}"' )
-    print('\t min  ', np.nanmin(np.nanmin(dx, axis=0), axis=0))
-    print('\t mean ', np.nanmean(np.nanmean(dx, axis=0), axis=0))
-    print('\t max  ', np.nanmax(np.nanmax(dx, axis=0), axis=0))
+    print('\t min  ' +RED, np.nanmin(np.nanmin(dx, axis=0), axis=0), RESET)
+    print('\t mean '+RED, np.nanmean(np.nanmean(dx, axis=0), axis=0), RESET)
+    print('\t max  '+RED, np.nanmax(np.nanmax(dx, axis=0), axis=0), RESET)
 
     dt = tracks['time'] - tracks_ref['time']
-    print('times, \t  min/max diff ', np.nanmin(dt), np.nanmax(dt))
+    print('times, \t  min/max diff ' + RED, np.nanmin(dt), np.nanmax(dt), RESET)
     if False:
         from matplotlib import  pyplot as plt
         v='status'
@@ -319,7 +319,7 @@ def compare_reference_run_stats(case_info_file, args):
 
         print(f'Stats  compare ref: "{name}"')
         print('\t counts, ref/new', stats_ref['counts_inside'].sum(), stats['counts_inside'].sum(),
-              '\t\t\t max diff counts-ref run counts =',np.max(np.abs(stats['counts_inside'] - stats_ref['counts_inside'])))
+              '\t\t\t max diff counts-ref run counts =' +RED,np.max(np.abs(stats['counts_inside'] - stats_ref['counts_inside'])), RESET)
         print('\t count all alive, ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
              'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
                      '\t max diff counts-ref run counts =' +RED ,np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])), RESET)

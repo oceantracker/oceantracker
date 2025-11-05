@@ -129,7 +129,7 @@ class _BaseAgeStats(ParameterBaseClass):
         self._add_age_bins_to_file(nc)
         counts_released_age_binned = self._add_age_binned_release_counts_to_file(nc)
 
-        # add connectives
+        # add connectives, works for both polygon and grid stats, using s to reshape
         s = list(counts_inside_age_bins.shape[:2]) + (counts_inside_age_bins.ndim - counts_released_age_binned.ndim) * [1]
         with np.errstate(divide='ignore', invalid='ignore'):
             connectivity_age_released = counts_inside_age_bins / counts_released_age_binned.reshape(s)
