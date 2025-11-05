@@ -43,9 +43,13 @@ def main(args=None):
 
     # add a gridded particle statistic to plot heat map
     ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
+    ot.add_class('particle_statistics', **test_definitions.my_heat_map_age)
 
     ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time,   polygon_list=[dict(points=hm['polygon'])])
+    ot.add_class('particle_statistics', **test_definitions.my_poly_stats_age, polygon_list=[dict(points=hm['polygon'])])
 
+    ot.add_class('particle_statistics', **test_definitions.my_heat_map3D_time)
+    ot.add_class('particle_statistics', **test_definitions.my_heat_map2D_time_runningMean)
 
     if not args.norun:
         case_info_file = ot.run()
@@ -57,9 +61,8 @@ def main(args=None):
 
     tests=dict()
     tracks = test_definitions.load_tracks(case_info_file)
-    tracks_ref = test_definitions.load_tracks(case_info_file, ref_case=True)
-
     tracks_ref = test_definitions.read_tracks(case_info_file, ref_case=True)
+
     # check z fractions are in range 0-1
     z_fraction= tracks['z_fraction']
     sel = np.logical_or(z_fraction < -.01, z_fraction > 1.01)

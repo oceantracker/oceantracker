@@ -16,8 +16,8 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         super().__init__()
         # add 3D specific parameters
         self.add_default_params(
-            vertical_grid_size= PVC(20, int, min=1, max=10**3,
-                                    doc_str='Number of vertical grid cells'),
+            grid_size= PLC([101, 99,5], int, fixed_len=3, min=1, max=10 ** 5,
+                             doc_str='number of (rows, columns, layers) in grid, where rows is y size, cols x size, values should be odd, so will be rounded up to next '),
             z_min = PVC(None, float, doc_str='Bottom of 3D counting grid', is_required=True,
                         units='meters above mean water at  z=0, so is < 0 at depth'),
             z_max = PVC(None, float, doc_str='Top of 3D counting grid',is_required=True,
@@ -69,7 +69,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         
         # Set up vertical grid
         # Make vertical bin edges
-        vsize = params['vertical_grid_size']
+        vsize = params['grid_size'][2]
         stats_grid['z_bin_edges'] = np.linspace(params['z_min'], params['z_max'], vsize + 1)
         dz = float((params['z_max']- params['z_min'] ) / vsize)
 
@@ -92,7 +92,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                             stats_grid['y_bin_edges'],
                             stats_grid['z_bin_edges'],
                             stats_grid['grid_spacings'],
-                            self.count_time_slice,
+                            self.counts_inside_time_slice,
                             self.prop_data_list,
                             self.sum_prop_data_list,
                             sel)

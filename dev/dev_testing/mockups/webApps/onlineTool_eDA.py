@@ -205,7 +205,7 @@ class Online_eDNA(OTreRunner.OceanTrackerReRunner):
         s=self.otsim.shared_info.user_classes['particle_statistics'][0]
 
         with np.errstate(divide='ignore', invalid='ignore'):
-            count   = np.sum(s.count_time_slice[0], axis=0)
+            count   = np.sum(s.counts_inside_time_slice[0], axis=0)
             unit_conc    = np.sum(s.sum_binned_part_prop['DNAdecay'][0],axis=0)/count
             depth   = np.sum(s.sum_binned_part_prop['water_depth'][0], axis=0)/count
 

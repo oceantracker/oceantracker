@@ -8,7 +8,7 @@ import oceantracker.plot_output.plot_utilities as plot_utilities
 from matplotlib import animation
 from oceantracker.util import time_util
 
-def animate_heat_map(stats_data, release_group_name:str =None, var:str= 'count', axis_lims=None, credit=None, interval=20, heading=None,
+def animate_heat_map(stats_data, release_group_name:str =None, var:str= 'counts_inside', axis_lims=None, credit=None, interval=20, heading=None,
                      vmin=None, vmax=None, show_grid=False, title=None, logscale=False, caxis= None, cmap='viridis',
                      movie_file= None, fps=15, dpi=300, back_ground_depth=True, back_ground_color_map= None,axis_labels=False):
 
@@ -111,7 +111,7 @@ def animate_concentrations(concentration_data, plot_load=False,  axis_lims=None,
     return anim
 
 def plot_heat_map(stats_data,  release_group_name:str = None, nt=-1, axis_lims=None,show_grid=False, title=None,logscale=False, colour_bar= True,
-                  var='count',vmin=None, vmax=None, credit=None, cmap='viridis', heading = None, axis_labels=False,
+                  var='counts_inside',vmin=None, vmax=None, credit=None, cmap='viridis', heading = None, axis_labels=False,
                   plot_file_name=None, back_ground_depth=True,back_ground_color_map= None):
     #todo repace var with data_to_plot=, as in other ploting code
 
@@ -203,7 +203,7 @@ def _get_stats_data(nt, d, var, release_group_name, logscale, zmin=None):
     # sum/average over all or 1 release group dim
     # nt is time step or age bin
     z= d[var][nt, :, :, :].astype(np.float64)
-    count = d['count'][nt, :, :, :]
+    count = d['counts_inside'][nt, :, :, :]
     release_groupID= 0 if release_group_name is None else list(d['release_group_names']).index(release_group_name)
     # get ID of named release group
     z = z[release_groupID, :, :]
@@ -232,10 +232,10 @@ def plot_residence(residence_data, heading=None, plot_file_name=None):
     ax.set_xlabel('Days since first pulse release')
     ax.set_ylabel('Number of each pulse residence in polygon')
 
-    npulses= residence_data['count'].shape[1]
+    npulses= residence_data['counts_inside'].shape[1]
     t= (residence_data['time']-residence_data['time'][0])/3600/24.
     for npulse in range(npulses):
-        d =residence_data['count'][:, npulse]
+        d =residence_data['counts_inside'][:, npulse]
         i = (d > 0).argmax()
         ax.plot(t[i:],d[i:] )
 

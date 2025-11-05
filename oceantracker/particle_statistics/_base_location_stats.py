@@ -10,8 +10,8 @@ from numba.typed import List as NumbaList
 from oceantracker.util import cord_transforms
 from oceantracker.particle_statistics.util import stats_util
 from oceantracker.shared_info import shared_info as si
-from oceantracker.particle_statistics.util.optional_stats_methods import _OptionalStatsMethods
-class _BaseParticleLocationStats(_OptionalStatsMethods):
+
+class _BaseParticleLocationStats(ParameterBaseClass):
 
 
     def __init__(self):
@@ -56,6 +56,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
         info['output_file'] = None
         self.role_doc('Particle statistics, based on spatial particle counts and particle properties in a grid or within polygons. Statistics are \n * separated by release group \n * can be a time series of statistics or put be in particle age bins.')
         self.nWrites = 0
+        self.update_count=0
 
     def initial_setup(self):
 
@@ -81,6 +82,7 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
         self.set_z_range_for_counts()
 
         self.add_scheduler('count_scheduler', start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
+
         pass
 
     def set_z_range_for_counts(self):
@@ -163,9 +165,6 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
 
         output_util.add_release_group_names_to_netcdf(nc, si)
         return nc
-
-    def create_time_variables(self):
-        pass
 
     def set_up_part_prop_lists(self):
         # set up list of part prop and sums to enable averaging of particle properties
@@ -251,13 +250,9 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
             self.prop_data_list[n]= part_prop[name].data
 
         self.do_counts(n_time_step, time_sec, sel, alive)
-
-        self.write_time_varying_stats(time_sec)
-        self.nWrites += 1
+        self.update_count += 1
 
 
-    def write_time_varying_stats(self, time_sec):
-        basic_util.nopass('must have a write_time_varying_stats', c=self) # no writing on the fly in aged based states
 
     def info_to_write_on_file_close(self,nc) : pass
 
@@ -288,38 +283,6 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
         if self.params['write']:
             self.close_file()
 
-    # add file variables
-    def add_time_variables_to_file(self,nc):
-
-        # stats time variables commute to all 	for progressive writing
-        nc.create_variable('time', ['time_dim'], np.float64,
-                           units='seconds since 1970-01-01 00:00:00',
-                           description='time in seconds since 1970/01/01 00:00')
-
-        # other output common to all types of stats
-        nc.create_variable('num_released_total', ['time_dim'], np.int32, description='total number released')
-
-        nc.create_variable('num_released', ['time_dim', 'release_group_dim'], np.int32,
-                           description='number released so far from each release group')
-
-    def add_grid_variables_to_file(self, nc):
-        dn = si.dim_names
-        stats_grid = self.grid
-
-        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
-        nc.write_variable('x', stats_grid['x'], [dim_names[1], dim_names[3]], description='Mid point of grid cell',
-                          units='m or deg')
-        nc.write_variable('y', stats_grid['y'], [dim_names[1], dim_names[2]],
-                          description='Mid point of grid cell', units='m or degrees',)
-
-        nc.write_variable('x_grid', stats_grid['x_grid'],dim_names[1:4]                        ,
-                          description='x for mid point of grid cell, full grid',  units='m or degrees')
-        nc.write_variable('y_grid', stats_grid['y_grid'], dim_names[1:4],
-                          description='y for mid point of grid cell, full grid', units='m or degrees')
-        nc.write_variable('cell_area', stats_grid['cell_area'], dim_names[1:4],
-                          description='Horizontal area of each cell', units='m^2')
-        nc.write_variable('grid_spacings', stats_grid['grid_spacings'], 'spacings_dim',
-                          description='x for mid point of grid cell, full grid', units='m or degrees')
 
     def create_count_variables(self,dims:dict, mode:str):
         # set up space for requested particle properties
@@ -329,32 +292,21 @@ class _BaseParticleLocationStats(_OptionalStatsMethods):
 
         if mode=='time':
             use_dims =dim_sizes[1:]
-            self.count_time_slice = np.full(use_dims, 0, np.int64)
+            self.counts_inside_time_slice = np.full(use_dims, 0, np.int64)
             self.count_all_alive_particles = np.full((use_dims[0],), 0, np.int64)
 
         elif mode =='age':
             use_dims = dim_sizes
-            self.count_age_bins = np.full(use_dims, 0, np.int64)
+            self.counts_inside_age_bins = np.full(use_dims, 0, np.int64)
             self.count_all_alive_particles = np.full(use_dims[:2], 0, np.int64)
 
         if 'particle_property_list' in params:
             for p in params['particle_property_list']:
                 self.sum_binned_part_prop[p] = np.full(use_dims, 0.)  # zero for  summing
 
-    def _add_grid_params(self):
-        self.add_default_params({
 
-            'grid_size': PLC([100, 99], int, fixed_len=2, min=1, max=10 ** 5,
-                             doc_str='number of (rows, columns) in grid, where rows is y size, cols x size, values should be odd, so will be rounded up to next '),
-            'release_group_centered_grids': PVC(False, bool,
-                                                doc_str='Center grid on the release groups  mean horizontal location or center of release polygon. '),
-            'grid_center': PCC(None, single_cord=True, is3D=False,
-                               doc_str='center of the statistics grid as (x,y), must be given if not using  release_group_centered_grids',
-                               units='meters'),
-            'grid_span': PLC(None, float, doc_str='(width-x, height-y)  of the statistics grid',
-                             units='meters (dx,dy) or degrees (dlon, dlat) if geographic',
-                             is_required=True),
-            'role_output_file_tag': PVC('stats_gridded_time_2D', str),
-        })
-        self.info['type'] = 'gridded'
+
+
+
+
 

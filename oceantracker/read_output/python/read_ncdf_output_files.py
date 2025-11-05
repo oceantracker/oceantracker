@@ -74,32 +74,7 @@ def read_stats_file(file_name, nt=None):
     else:
         d['stats_type'] = 'grid'
 
-    # read count first fot mean value calc
-    d['limits']['count'] = {'min': np.nanmin(d['count']), 'max': np.nanmax(d['count'])}
 
-    # get mean values
-    new_data ={}
-    for var, vals in d.items():
-        if var.startswith('sum_'):
-            name = var.removeprefix('sum_')
-            with np.errstate(divide='ignore', invalid='ignore'):
-                new_data[name] = d[var]/d['count'] # calc mean
-                d['limits'][name] = {'min' : np.nanmin(new_data[name]), 'max': np.nanmax(new_data[name])}
-
-    with np.errstate(divide='ignore', invalid='ignore'):
-        # conectivity calc. is different depending on direction, use all particles if forwards, selected if backwards
-        if 'backtracking' not in d['global_attributes']:
-            b = d['count_all_particles'] # version prior to june 2025
-        else:
-            b = d['count_all_alive_particles']
-
-        if d['stats_type'] == 'grid':
-            bb =  b[..., np.newaxis, np.newaxis ] if 'z_dim' not in d['dimensions'] else b[..., np.newaxis, np.newaxis, np.newaxis ]
-            d['connectivity_matrix'] = d['count'] / bb
-        else:
-            d['connectivity_matrix'] = d['count'] / b[..., np.newaxis]
-
-    d.update(new_data)
     nc.close()
     return d
 
@@ -140,7 +115,7 @@ def read_residence_file(file_name, var_list=[]):
 
 
     # read count first for mean value calc
-    for v in ['count','count_all_particles','time']:
+    for v in ['counts_inside','count_all_particles','time']:
         d[v]  = nc.read_variable(v)
         d['limits'][v] = {'min': np.nanmin(d[v]), 'max': np.nanmax(d[v])}
         if v in var_list: var_list.remove(v)
@@ -152,7 +127,7 @@ def read_residence_file(file_name, var_list=[]):
             # check if summed version is in file and calc mean
             d['sum_'+ var] = nc.read_variable('sum_' + var)
             with np.errstate(divide='ignore', invalid='ignore'):
-                d[var] = d['sum_' + var]/d['count'] # calc mean
+                d[var] = d['sum_' + var]/d['counts_inside'] # calc mean
 
         else:
             print('Warning reading residence file ' + file_name + ', cannot load variable ' + var + ', is not in file ')

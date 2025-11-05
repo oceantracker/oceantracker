@@ -6,7 +6,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-
+from oceantracker.particle_statistics._base_stats_variants import  _BaseTimeStats, _BaseGrid2DStats
 from oceantracker.shared_info import shared_info as si
 
 stationary_status = int(si.particle_status_flags.stationary)  # compile this constant into numba code
@@ -15,13 +15,13 @@ from oceantracker.particle_statistics._base_stats_variants import  _BaseAgeStats
 
 
 
-class GriddedStats2D_timeBased(_BaseParticleLocationStats):
+class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLocationStats):
     # class to hold counts of particles inside grid squares
     def __init__(self):
         # set up info/attributes
         super().__init__()
         # set up info/attributes
-        self._add_grid_params()
+        self._add_2D_grid_params()
     
     def initial_setup(self):
         # set up regular grid for stats
@@ -42,40 +42,15 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
 
     def update(self, n_time_step, time_sec, alive):
         '''Do particle counts'''
-        part_prop = si.class_roles.particle_properties
-        info = self.info
-        params = self.params
-        
-        num_in_buffer = si.run_info.particles_in_buffer
+        super().update(n_time_step, time_sec, alive)
 
-        # Select particles to count based on status and z location
-        sel = stats_util._sel_status_waterdepth(part_prop['status'].data,
-                                    part_prop['x'].data, part_prop['water_depth'].data.ravel(),
-                                    self.statuses_to_count_map, info['water_depth_range'],
-                                    num_in_buffer, self.get_partID_buffer('B1'))
-
-        if si.run_info.is3D_run:
-            sel = self.sel_depth_range(sel)
-        
-        # Users override this method to further sub-select those to count
-        sel = self.select_particles_to_count(sel)
-
-        # Update prop list data, as buffer may have expanded
-        for n, name in enumerate(self.sum_binned_part_prop.keys()):
-            self.prop_data_list[n] = part_prop[name].data
-
-        # Perform the counts
-        self.do_counts(n_time_step, time_sec, sel, alive)
-        
-        self.write_time_varying_stats(time_sec)
+        self._write_common_time_varying_stats(time_sec)
         self.nWrites += 1
 
-    def write_time_varying_stats(self, time_sec):
-        self._write_common_time_varying_stats(time_sec)
 
     def open_output_file(self, file_name):
         nc = super().open_output_file(file_name)
-        self.add_time_variables_to_file(nc)
+        self._create_time_file_variables(nc)
         self.add_grid_variables_to_file(nc)
         self._create_common_time_varying_stats(nc)
         return nc
@@ -96,7 +71,7 @@ class GriddedStats2D_timeBased(_BaseParticleLocationStats):
         self._do_counts_and_summing_numba(release_groupID, p_x,
                                           stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
                                           stats_grid['grid_spacings'],
-                                          self.count_time_slice,
+                                          self.counts_inside_time_slice,
                                           self.prop_data_list, self.sum_prop_data_list, sel)
 
     @staticmethod
@@ -141,32 +116,10 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
         self._initialize_running_mean()
     
     def update(self, n_time_step, time_sec, alive):
-        '''Do particle counts with running mean support'''
-        part_prop = si.class_roles.particle_properties
-        info = self.info
-        params = self.params
-        
-        num_in_buffer = si.run_info.particles_in_buffer
+        '''Do particle count with running mean support'''
 
-        # Select particles to count based on status and z location
-        sel = stats_util._sel_status_waterdepth(part_prop['status'].data,
-                                    part_prop['x'].data, part_prop['water_depth'].data.ravel(),
-                                    self.statuses_to_count_map, info['water_depth_range'],
-                                    num_in_buffer, self.get_partID_buffer('B1'))
+        super().update(n_time_step, time_sec, alive)
 
-        if si.run_info.is3D_run:
-            sel = self.sel_depth_range(sel)
-        
-        # Users override this method to further sub-select those to count
-        sel = self.select_particles_to_count(sel)
-
-        # Update prop list data, as buffer may have expanded
-        for n, name in enumerate(self.sum_binned_part_prop.keys()):
-            self.prop_data_list[n] = part_prop[name].data
-
-        # Perform the counts
-        self.do_counts(n_time_step, time_sec, sel, alive)
-        
         # Handle writing based on running mean configuration
         self._accumulate_for_running_mean()
         
@@ -188,7 +141,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
             self.n_updates_in_interval = 0
             
             # Initialize accumulator arrays for running mean
-            self.running_count_sum = np.zeros_like(self.count_time_slice, dtype=np.float64)
+            self.running_count_sum = np.zeros_like(self.counts_inside_time_slice, dtype=np.float64)
             self.running_alive_sum = np.zeros_like(self.count_all_alive_particles, dtype=np.float64)
 
             # Initialize property accumulator arrays
@@ -236,7 +189,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
     def _accumulate_for_running_mean(self):
         """Accumulate current counts for running mean calculation"""
         # Add current counts to running sum
-        self.running_count_sum += self.count_time_slice.astype(np.float64)
+        self.running_count_sum += self.counts_inside_time_slice.astype(np.float64)
         self.running_alive_sum += self.count_all_alive_particles.astype(np.float64)
         
         # Accumulate property sums
@@ -262,7 +215,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
         avg_alive = self.running_alive_sum / self.n_updates_in_interval
         
         # And replace the non-running-average data to write it with the existing method
-        self.count_time_slice = avg_count
+        self.counts_inside_time_slice = avg_count
         self.count_all_alive_particles = avg_alive
 
         # Average property sums
@@ -293,11 +246,10 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
     #     nc.create_attribute('write_interval', self.params['write_interval'])
 
 
-class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
+class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocationStats):
 
-    # does grid stats  based on age, but must keep whole stats grid in memory so ages can bw bined
     # bins all particles across all times into age bins,
-
+    # does grid stats  based on age, but must keep whole stats grid in memory so ages can bw binned
     # NOTE: note to get unbiased stats, need to stop releasing particles 'max_age_to_bin' before end of run
 
     def __init__(self):
@@ -307,7 +259,7 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
         self.add_default_params(
             role_output_file_tag= PVC('stats_gridded_age', str),)
 
-        self._add_grid_params()
+        self._add_2D_grid_params()
         self._add_age_params()
 
     def initial_setup(self):
@@ -323,6 +275,7 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
                             dm.grid_col_x: self.grid['x_grid'].shape[2]}
 
         self.create_count_variables(info['count_dims'],'age')
+        self._setup_release_counts()
 
         self.set_up_part_prop_lists()
 
@@ -343,6 +296,8 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
                             part_prop['age'].data,  stats_grid['age_bin_edges'],
                             self.count_all_alive_particles, alive)
 
+        self._update_release_counts()
+
         p_x = part_prop['x'].used_buffer()
         p_age = part_prop['age'].used_buffer()
 
@@ -355,11 +310,11 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
 
 
         self._do_counts_and_summing_numba(release_groupID, p_x,
-                        stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
-                        stats_grid['grid_spacings'],
-                        self.count_age_bins,
-                        self.prop_data_list, self.sum_prop_data_list,
-                        stats_grid['age_bin_edges'], p_age, sel)
+                                          stats_grid['x_bin_edges'], stats_grid['y_bin_edges'],
+                                          stats_grid['grid_spacings'],
+                                          self.counts_inside_age_bins,
+                                          self.prop_data_list, self.sum_prop_data_list,
+                                          stats_grid['age_bin_edges'], p_age, sel)
 
     @staticmethod
     @njitOT
@@ -367,7 +322,6 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
                                      prop_list, sum_prop_list,
                                      age_bin_edges, age, sel):
         # (no zeroing as accumulated over  whole run)
-        da = age_bin_edges[1] - age_bin_edges[0]
 
         for n in sel:
             ng = group_ID[n]
@@ -375,7 +329,7 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
             #grids may have release group centers , so coods differ by release group
             r = int(np.floor((x[n, 1] - y_edges[ng, 0]) / grid_spacings[1]))  # row is y, column x
             c = int(np.floor((x[n, 0] - x_edges[ng, 0]) / grid_spacings[0]))
-            na = int(np.floor((age[n] - age_bin_edges[0]) / da))
+            na = stats_util._get_age_bin(age[n], age_bin_edges)
 
             if 0 <= na < (age_bin_edges.size - 1):
                 if 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1 :
@@ -383,32 +337,4 @@ class GriddedStats2D_ageBased(_BaseAgeStats, _BaseParticleLocationStats):
                     # sum particle properties
                     for m in range(len(prop_list)):
                         sum_prop_list[m][na, ng, r, c] += prop_list[m][n]
-
-    def write_time_varying_stats(self, time_sec):
-        pass # no writing on the fly in aged based states
-
-    def info_to_write_on_file_close(self, nc):
-        # only write age count variables as whole at end of run
-        stats_grid = self.grid
-        dim_names =  stats_util.get_dim_names(self.info['count_dims'])
-        nc.write_variable('count', self.count_age_bins, dim_names,
-                          description= 'counts of particles in grid at given ages, for each release group')
-        nc.write_variable('count_all_alive_particles', self.count_all_alive_particles,
-                          dim_names[:2],
-                          description='counts of all particles alive from each release group, into age bins')
-        nc.write_variable('age_bins', stats_grid['age_bins'], ['age_bin_dim'], description='center of age bin, ie age axis of heat map in seconds')
-        nc.write_variable('age_bin_edges', stats_grid['age_bin_edges'], ['age_bin_edges'], description='center of age bin, ie age axis of heat map in seconds')
-
-        # particle property sums
-        dims = ('age_bin_dim', 'release_group_dim', 'y_dim', 'x_dim')
-        for key, item in self.sum_binned_part_prop.items():
-            # need to write final sums of properties  after all age counts done across all times
-            nc.write_variable('sum_' + key, item[:], dims, description='sum of particle property inside grid bins  ' + key)
-
-        # to do:
-        # * add metadata about running mean if enabled
-        # if self.use_running_mean:
-        #     nc.create_attribute('statistics_type', 'running_mean')
-        #     nc.create_attribute('update_interval', self.params['update_interval'])
-        #     nc.create_attribute('write_interval', self.params['write_interval'])
 
