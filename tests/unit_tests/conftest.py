@@ -219,8 +219,7 @@ def gridded_3D_timeBased():
     return dict(
         name="my_heatmap_time",
         class_name="GriddedStats3D_timeBased",
-        grid_size=[120, 130],
-        vertical_grid_size=10,
+        grid_size=[120, 130, 10],
         grid_span=[10000, 10000],
         release_group_centered_grids=True,
         update_interval=7200,
