@@ -192,7 +192,7 @@ class ResidentInPolygon(_BaseParticleLocationStats):
                         compression_level=si.settings.NCDF_compression_level, units='s',
                         description='Average exposure time, i.e. total time particles inside polygon, for each release group. is = sum_exposure_time/count_exposure_time')
 
-        nc.write_variable('counts_inside', self.count,
+        nc.write_variable('count', self.count,
                           dim_names, dtype=np.int32,
                           compression_level=si.settings.NCDF_compression_level,
                           description='Counts inside and outside polygon for any user depth/status restrictions, is alive, stationary, on bottom, stranded, or moving , z_min/z_max etc')

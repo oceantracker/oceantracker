@@ -25,7 +25,7 @@ class _BaseTimeStats(ParameterBaseClass):
         nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64,
                            compression_level=si.settings.NCDF_compression_level,
                            description='counts of all alive particles everywhere')
-        nc.create_variable('counts_inside', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
+        nc.create_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in spatial bins at given times, for each release group')
 
         if 'particle_property_list' in params:
@@ -49,7 +49,7 @@ class _BaseTimeStats(ParameterBaseClass):
         fh['num_released'][n_write, :] = num_released # for each release group so far
         fh['num_released_total'][n_write] = num_released.sum() # total all release groups so far
 
-        fh['counts_inside'][n_write, ...] = self.counts_inside_time_slice[:, ...]
+        fh['count'][n_write, ...] = self.counts_inside_time_slice[:, ...]
         fh['count_all_alive_particles'][n_write, ...] = self.count_all_alive_particles[:, ...]
 
         for key, item in self.sum_binned_part_prop.items():
@@ -120,7 +120,7 @@ class _BaseAgeStats(ParameterBaseClass):
         counts_inside_age_bins = self.counts_inside_age_bins
 
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
-        nc.write_variable('counts_inside', counts_inside_age_bins, dim_names,
+        nc.write_variable('count', counts_inside_age_bins, dim_names,
                           description='counts of particles in each stats polygon at given ages, for each release group')
 
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],
@@ -200,7 +200,7 @@ class _BaseAgeStats(ParameterBaseClass):
         file_name = state_info['stats_files'][self.params['name']]
         nc = NetCDFhandler(file_name, mode='r')
 
-        self.counts_inside_age_bins = nc.read_variable('counts_inside')
+        self.counts_inside_age_bins = nc.read_variable('count')
         self.count_all_alive_particles = nc.read_variable('count_all_alive_particles')
 
         # insert number released so far

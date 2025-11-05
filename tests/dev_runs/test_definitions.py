@@ -318,8 +318,8 @@ def compare_reference_run_stats(case_info_file, args):
 
 
         print(f'Stats  compare ref: "{name}"')
-        print('\t counts, ref/new', stats_ref['counts_inside'].sum(), stats['counts_inside'].sum(),
-              '\t\t\t max diff counts-ref run counts =' +RED,np.max(np.abs(stats['counts_inside'] - stats_ref['counts_inside'])), RESET)
+        print('\t counts, ref/new', stats_ref['count'].sum(), stats['count'].sum(),
+              '\t\t\t max diff counts-ref run counts =' +RED,np.max(np.abs(stats['count'] - stats_ref['count'])), RESET)
         print('\t count all alive, ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
              'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
                      '\t max diff counts-ref run counts =' +RED ,np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])), RESET)
