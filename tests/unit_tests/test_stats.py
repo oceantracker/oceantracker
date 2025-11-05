@@ -27,6 +27,7 @@ def test_gridded_statistics_2D_timeBased(
 
 
 def test_gridded_statistics_2D_timeBased_runningMean(
+    default_stats_configuration,
     gridded_2D_timeBased_runningMean,
 ):
     ot = default_stats_configuration
@@ -41,6 +42,7 @@ def test_gridded_statistics_2D_age_based():
 
 
 def test_gridded_statistics_3D_time_based(
+    default_stats_configuration,
     gridded_3D_timeBased,
 ):
     ot = default_stats_configuration
@@ -56,6 +58,7 @@ def test_gridded_statistics_3D_age_based():
 
 
 def test_gridded_statistics_2D_schism_with_particle_prop(
+    default_stats_configuration,
     a_pollutant,
     gridded_2D_timeBased_with_PartProp,
 ):
