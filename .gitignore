@@ -1,4 +1,5 @@
 .idea
+.coverage
 
 /tests/output/
 /dev/demos/output/
