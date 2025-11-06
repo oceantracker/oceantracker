@@ -36,12 +36,16 @@ def test_gridded_statistics_2D_timeBased_runningMean(
     assert case_info_file is not None
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_gridded_statistics_2D_age_based():
-    assert True
+def test_gridded_statistics_2D_ageBased(
+    default_stats_configuration, gridded_2D_ageBased
+    ):
+    ot = default_stats_configuration
+    ot.add_class("particle_statistics", **gridded_2D_ageBased)
+    case_info_file = ot.run()
+    assert case_info_file is not None
 
 
-def test_gridded_statistics_3D_time_based(
+def test_gridded_statistics_3D_timeBased(
     default_stats_configuration,
     gridded_3D_timeBased,
 ):
@@ -53,7 +57,7 @@ def test_gridded_statistics_3D_time_based(
 
 
 @pytest.mark.skip(reason="Not implemented yet")
-def test_gridded_statistics_3D_age_based():
+def test_gridded_statistics_3D_ageBased():
     assert True
 
 
@@ -71,11 +75,25 @@ def test_gridded_statistics_2D_schism_with_particle_prop(
     assert case_info_file is not None
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_polygon_statistics_2D_time_based():
-    assert True
+def test_polygon_statistics_2D_timeBased(
+    default_stats_configuration, polygon_stats_2D_timeBased,schism_release_locations
+    ):
+    ot = default_stats_configuration
+    ot.add_class("particle_statistics", 
+                 **{**polygon_stats_2D_timeBased,
+                    "polygon_list":schism_release_locations["polygons"]},
+                    )
+    case_info_file = ot.run()
+    assert case_info_file is not None
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_polygon_statistics_2D_age_based():
-    assert True
+def test_polygon_statistics_2D_ageBased(
+    default_stats_configuration, polygon_stats_2D_ageBased,schism_release_locations
+    ):
+    ot = default_stats_configuration
+    ot.add_class("particle_statistics", 
+                 **{**polygon_stats_2D_ageBased,
+                    "polygon_list":schism_release_locations["polygons"]},
+                    )
+    case_info_file = ot.run()
+    assert case_info_file is not None

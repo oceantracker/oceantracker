@@ -29,7 +29,7 @@ def test_schism_validation_run_small(
     basic_point_release,
     schism_release_locations,
     gridded_2D_timeBased,
-    polygon_stats_timeBased,
+    polygon_stats_timeBased_waterDepth,
     reference_data_dir,
     test_name,
     default_plot_output_path,
@@ -59,6 +59,7 @@ def test_schism_validation_run_small(
                 | {"name": "single_point_release", "release_interval": 0}
             ),
             "points": schism_release_locations["deep_point"],
+            # "points": schism_release_locations["polygons"][0]["points"],
         },
     )
     # Add statistics
@@ -66,8 +67,8 @@ def test_schism_validation_run_small(
     ot.add_class(
         "particle_statistics",
         **{
-            **polygon_stats_timeBased,
-            "polygon_list": [dict(points=schism_release_locations["deep_polygon"])],
+            **polygon_stats_timeBased_waterDepth,
+            "polygon_list": schism_release_locations["polygons"],
         },
     )
     # Run the model

@@ -21,7 +21,7 @@ def test_polygon_release(
         "release_groups",
         **{
             **polygon_release_configuration,
-            "points": schism_release_locations["deep_polygon"],
+            "points": schism_release_locations["polygons"][0]["points"],
         },
     )
     case_info_file = ot.run()
