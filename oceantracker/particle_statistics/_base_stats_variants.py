@@ -247,7 +247,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
         })
         self.info['type'] = 'gridded'
 
-    def _create_grid_variables(self):
+    def _create_grid_variables_new(self):
         # creates 2D grid variables
         stats_grid = self.grid
         params = self.params
@@ -330,7 +330,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
         params['grid_size'][:2] = grid_size
         pass
 
-    def _create_grid_variables_old(self):
+    def _create_grid_variables(self):
         # creates 2D grid variables
         stats_grid= self.grid
         params= self.params
