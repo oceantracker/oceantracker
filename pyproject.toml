@@ -127,8 +127,7 @@ html_logo = "_static/ocean_tracker.png"
 # pytest configuration
 [tool.pytest.ini_options]
 minversion = "7.0"
-# addopts = "-ra -q --strict-markers --strict-config"
-addopts = "-n auto"
+addopts = "-n logical"
 testpaths = [
     "tests/unit_tests",
 ]

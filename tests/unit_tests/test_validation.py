@@ -37,7 +37,7 @@ def test_schism_validation_run_small(
 ):
     ot = OceanTracker()
     ot.settings(
-        **base_settings,
+        **{**base_settings, "write_tracks": True},
         use_A_Z_profile=True, # do we need this for the base reference test?
     )
     ot.add_class(

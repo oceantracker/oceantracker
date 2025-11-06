@@ -2,65 +2,118 @@ from oceantracker.main import OceanTracker
 import pytest
 
 
-def test_regridding(
-    base_settings,
-    reader_schism3D,
-    basic_point_release,
-    schism_release_locations,
+@pytest.fixture
+def default_advanced_tests_configuration(
+    base_settings, reader_schism3D, basic_point_release, schism_release_locations
 ):
-
+    """Returns a pre-configured OceanTracker instance with common setup."""
     ot = OceanTracker()
-    ot.settings(**(base_settings | {"regrid_z_to_uniform_sigma_levels": True}))
+    ot.settings(**base_settings)
     ot.add_class("reader", **reader_schism3D)
     ot.add_class(
         "release_groups",
         **{**basic_point_release, "points": schism_release_locations["deep_point"]},
     )
-    # ot.add_class("particle_properties", **a_pollutant)
-    # ot.add_class("particle_statistics", **my_heat_map_time)
-    case_info_file = ot.run()
+    return ot
 
+
+def test_regridding(default_advanced_tests_configuration):
+    ot = default_advanced_tests_configuration
+    # Override settings with regrid option
+    ot.settings(regrid_z_to_uniform_sigma_levels=True)
+    case_info_file = ot.run()
     assert case_info_file is not None
 
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_resuspension():
-    assert True
+def test_resuspension(default_advanced_tests_configuration):
+    ot = default_advanced_tests_configuration
+    ot.add_class("resuspension", critical_friction_velocity=0.005)
+    case_info_file = ot.run()
+    assert case_info_file is not None
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_stranding():
-    assert True
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_backtracking():
-    assert True
+def test_backtracking(default_advanced_tests_configuration):
+    ot = default_advanced_tests_configuration
+    # Override settings with backtracking option
+    ot.settings(backtracking=True)
+    case_info_file = ot.run()
+    assert case_info_file is not None
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_terminal_velocity():
-    assert True
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_track_writer():
-    assert True
+def test_terminal_velocity(default_advanced_tests_configuration):
+    ot = default_advanced_tests_configuration
+    ot.add_class(
+        "velocity_modifiers",
+        name="terminal_velocity_test",
+        class_name="TerminalVelocity",
+        value=-0.001,
+    )
+    case_info_file = ot.run()
+    assert case_info_file is not None
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_settle_in_polygon():
-    assert True
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_surface_float():
-    assert True
+def test_track_writer(default_advanced_tests_configuration):
+    ot = default_advanced_tests_configuration
+    # Override settings with write_tracks option
+    ot.settings(write_tracks=True)
+    case_info_file = ot.run()
+    assert case_info_file is not None
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_split_particle():
-    assert True
 
-@pytest.mark.skip(reason="Not implemented yet")
-def test_cull_particles():
-    assert True
+def test_settle_in_polygon(default_advanced_tests_configuration, schism_release_locations):
+    ot = default_advanced_tests_configuration
+    ot.add_class(
+        "trajectory_modifiers",
+        name="SurfaceFloat",
+        class_name="oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon",
+        polygon=schism_release_locations['polygons'][0],
+        probability_of_settlement=0.1,
+        settlement_duration=14400,
+    )
+    case_info_file = ot.run()
+    assert case_info_file is not None
 
-    
-    # from oceantracker.read_output.python import load_output_files
-    # tracks = load_output_files.load_track_data(case_info_file)
-    # assert "a_pollutant" in tracks
-    # assert tracks["a_pollutant"].max() <= 1000  # Should decay from initial value
+
+def test_surface_float(default_advanced_tests_configuration):
+    ot = default_advanced_tests_configuration
+    ot.add_class(
+        "trajectory_modifiers",
+        name="SurfaceFloat",
+        class_name="oceantracker.trajectory_modifiers.surface_float.SurfaceFloat",
+    )
+    case_info_file = ot.run()
+    assert case_info_file is not None
+
+
+def test_split_particle(default_advanced_tests_configuration):
+    ot = default_advanced_tests_configuration
+    ot.add_class(
+        "trajectory_modifiers",
+        name="SurfaceFloat",
+        class_name="oceantracker.trajectory_modifiers.split_particles.SplitParticles",
+        interval=3600,
+        statuses=["moving"],
+    )
+    case_info_file = ot.run()
+    assert case_info_file is not None
+
+
+def test_cull_particles(default_advanced_tests_configuration):
+    ot = default_advanced_tests_configuration
+    ot.add_class(
+        "trajectory_modifiers",
+        class_name="CullParticles",
+        probability=1.0,
+        interval=3600,
+        statuses=["stranded_by_tide", "on_bottom"],
+    )
+    case_info_file = ot.run()
+    assert case_info_file is not None
+
+
+def test_dont_block_dry_cells(default_advanced_tests_configuration):
+    ot = default_advanced_tests_configuration
+    # Override settings with block_dry_cells option
+    ot.settings(block_dry_cells=False)
+    case_info_file = ot.run()
+    assert case_info_file is not None

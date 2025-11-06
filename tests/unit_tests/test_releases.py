@@ -75,3 +75,13 @@ def test_downstream_point_release(
     case_info_file = ot.run()
 
     assert case_info_file is not None
+
+@pytest.mark.skip(reason="Not implemented yet")
+def test_release_at_surface():
+    pass
+
+
+@pytest.mark.skip(reason="Not implemented yet")
+def test_datetime_start_stop_releases():
+    pass
+

@@ -72,7 +72,7 @@ def base_settings(request, default_root_output_dir):
         root_output_dir=default_root_output_dir,
         time_step=1800,
         use_dispersion=False,
-        write_tracks=True,
+        write_tracks=False,
         regrid_z_to_uniform_sigma_levels=False,
     )
 
