@@ -324,6 +324,12 @@ def compare_reference_run_stats(case_info_file, args):
              'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
                      '\t max diff counts-ref run counts =' +RED ,np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])), RESET)
 
+        if 'x_grid' in stats_ref:
+            print('\t grid differences , x_grid/y_grid diff. ', (stats['x_grid']-  stats_ref['x_grid']).max(), (stats['y_grid']-  stats_ref['y_grid']).max())
+            print('\t grid lower left , x_grid/y_grid diff. ', stats['x_grid'][0,0,0] - stats_ref['x_grid'][0, 0,0],  stats['y_grid'][0,0,0] - stats_ref['y_grid'][0, 0,0])
+            print('\t grid upper right left , x_grid/y_grid diff. ', stats['x_grid'][0, -1, -1] - stats_ref['x_grid'][0, -1, -1] ,
+                  stats['y_grid'][0,-1, -1]  - stats_ref['y_grid'][0,-1, -1] )
+
         if  'counts_released' in stats_ref:
             print('\t counts_released, ref/new', stats_ref['counts_released'].sum(), stats['counts_released'].sum(),
                '\t max diff counts-ref run counts =', np.max(np.abs(stats['counts_released'] - stats_ref['counts_released'])))
@@ -344,9 +350,13 @@ def compare_reference_run_stats(case_info_file, args):
                       np.nanmax(np.abs(stats_ref[prop_sum])),np.nanmax(np.abs(stats[prop_sum])),  ', max diff =',
                       np.max(dc[np.isfinite(dc)]))
                 dc = np.abs(stats[prop_name] - stats_ref[prop_name])
-                print(f'\t Property  "{prop_name}"', 'max mag. ref/new',
+
+                try:
+                    print(f'\t Property  "{prop_name}"', 'max mag. ref/new',
                       np.nanmax(np.abs(stats_ref[prop_name])),np.nanmax(np.abs(stats[prop_name])),
                       ', max diff ='+RED  , np.max(dc[np.isfinite(dc)]), RESET)
+                except Exception as e:
+                    raise('ccvcvf')
 
     pass
 def show_track_plot(case_info_file, args,colour_with=None):

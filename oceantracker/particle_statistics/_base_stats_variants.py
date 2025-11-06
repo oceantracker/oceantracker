@@ -6,7 +6,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParameterTimeChecker as PTC
 from oceantracker.util.ncdf_util import NetCDFhandler
-from oceantracker.util import cord_transforms
+from oceantracker.util import cord_transforms, regular_grid_util
 from oceantracker.particle_statistics.util import stats_util
 
 import numpy  as np
@@ -249,6 +249,89 @@ class _BaseGrid2DStats(ParameterBaseClass):
 
     def _create_grid_variables(self):
         # creates 2D grid variables
+        stats_grid = self.grid
+        params = self.params
+        info = self.info
+        # todo mover from info to params??
+
+        # default if no center given use release groups
+        if params['grid_center'] is None:
+            params['release_group_centered_grids'] = True
+
+        if params['release_group_centered_grids']:
+            # get centers from midrelease group
+            # loop over release groups to get bin edges
+            params['grid_centers'] = np.zeros((len(si.class_roles.release_groups), 2), dtype=np.float64)
+            for ngroup, name in enumerate(si.class_roles.release_groups.keys()):
+                rg = si.class_roles.release_groups[name]
+                x0 = rg.info['bounding_box_ll_ul']  # works for point and polygon releases,
+                params['grid_centers'][ngroup, :] = np.nanmean(x0[:, :2], axis=0)
+        else:
+            # use given grid centers
+            if info['grid_centers'].shape[0] == 1:
+                # if only one use all  for all
+                params['grid_centers'] = np.tile(params['grid_center'], (len(si.class_roles.release_groups), 1))
+            else:
+                # one for each release group
+                if params['grid_centers'].shape[0] != len(si.class_roles.release_groups):
+                    si.msg_logger.msg(
+                        'Number of points in "grid_centers" param. is >1 , then it must have the same number of center points',
+                        hint=f'Number of points given = {info["grid_centers"].shape[0]}  number of release groups= {len(si.class_roles.release_groups)} ',
+                        fatal_error=True, caller=self)
+                params['grid_centers'] = params['grid_centers'].shape[0]
+
+        # ensure grid size is odd, so that center of middle cell is at grid center coods
+        grid_size = params['grid_size'][:2] + (np.asarray(params['grid_size'][:2]) % 2 == 0).astype(np.int32)
+
+        # make space for coords
+        n_grids = params['grid_centers'].shape[0]  #
+        s1 = [n_grids, ] + grid_size.tolist()
+        s2 = [n_grids, ] + (grid_size + 1).tolist()
+        stats_grid['x_grid'] = np.zeros(s1, dtype=np.float64)
+        stats_grid['y_grid'] = np.zeros(s1, dtype=np.float64)
+        stats_grid['cell_area'] = np.zeros(s1, dtype=np.float64)
+        stats_grid['x_bin_edges'] = np.zeros([n_grids, grid_size[1] + 1], dtype=np.float64)
+        stats_grid['y_bin_edges'] = np.zeros([n_grids, grid_size[0] + 1], dtype=np.float64)
+
+        # grids may have release group centers, so grid coords differ by release group
+        for n_grid, p in enumerate(params['grid_centers']):
+            x_cell_edges, y_cell_edges, info['bounding_box'] = regular_grid_util.make_regular_grid(
+                                        params['grid_centers'][n_grid, :],  grid_size + 1, params['grid_span'])
+            # get midpoints of cells
+            x_grid = 0.5 * (x_cell_edges[:-1, 1:] + x_cell_edges[:-1, :-1])
+            y_grid = 0.5 * (y_cell_edges[1:, :-1] + y_cell_edges[:-1, :-1])
+
+            stats_grid['x_bin_edges'][n_grid, ...] = x_cell_edges[0, :]
+            stats_grid['y_bin_edges'][n_grid, ...] = y_cell_edges[:, 0]
+
+            stats_grid['x_grid'][n_grid, ...] = x_grid
+            stats_grid['y_grid'][n_grid, ...] = y_grid
+
+            if False:
+                # check grid points
+                from matplotlib import pyplot as plt
+                plt.scatter(x_cell_edges, y_cell_edges, color='r')
+                plt.scatter(stats_grid['x_grid'][n_grid, ...], stats_grid['y_grid'][n_grid, ...], color='g')
+                plt.show(block=True)
+
+            # get cell area im meters even if in geographic coords
+            x, y = x_cell_edges.copy(), y_cell_edges.copy()
+
+            if si.settings.use_geographic_coords:
+                x, y = cord_transforms.local_grid_deg_to_meters(x, y, x[0, 0], y[0, 0])
+            stats_grid['cell_area'][n_grid, :, :] = (x[:-1, 1:] - x[:-1, :-1]) * (y[1:, :-1] - y[:-1:, :-1])
+
+        # non meshed versions
+        stats_grid['x'] = stats_grid['x_grid'][:, 0, :]
+        stats_grid['y'] = stats_grid['y_grid'][:, :, 0]
+
+        # spacings the same for all release group grids, in meters  degrees
+        stats_grid['grid_spacings'] = np.asarray([x[1, 1] - x[0, 0], y[1, 1] - y[0, 0]])
+        params['grid_size'][:2] = grid_size
+        pass
+
+    def _create_grid_variables_old(self):
+        # creates 2D grid variables
         stats_grid= self.grid
         params= self.params
         info = self.info
@@ -318,6 +401,13 @@ class _BaseGrid2DStats(ParameterBaseClass):
             if si.settings.use_geographic_coords:
                 x, y = cord_transforms.local_grid_deg_to_meters(x,y, x[0,0], y[0,0])
             stats_grid['cell_area'][n_grid, :, :] =(x[:-1, 1:]-x[:-1, :-1])*(y[1:,:-1]-y[:-1:,:-1])
+
+            if False:
+                # check grid points
+                from matplotlib import pyplot as plt
+                plt.scatter(x, y, color='r')
+                plt.scatter(stats_grid['x_grid'][n_grid, ...], stats_grid['y_grid'][n_grid, ...], color='g')
+                plt.show(block=True)
 
         #spacings the same for all release group grids
         stats_grid['grid_spacings'] = np.asarray([base_x[1] - base_x[0], base_y[1] - base_y[0], ])
