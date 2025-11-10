@@ -13,13 +13,44 @@ def load_pyproject():
     with open(pyproject_path, "rb") as f:
         return tomllib.load(f)
 
+def resolve_optional_dependencies(optional_deps, group_name, visited=None):
+    """
+    Recursively resolve optional dependencies, handling references to other groups.
+    
+    Args:
+        optional_deps: Dict of all optional dependencies from pyproject.toml
+        group_name: Name of the group to resolve
+        visited: Set of already visited groups (to prevent circular references)
+    
+    Returns:
+        List of resolved dependency strings
+    """
+    if visited is None:
+        visited = set()
+    
+    if group_name in visited:
+        return []
+    
+    visited.add(group_name)
+    resolved = []
+    
+    for dep in optional_deps.get(group_name, []):
+        # Check if this dependency is a reference to another optional group
+        if dep in optional_deps:
+            # Recursively resolve the referenced group
+            resolved.extend(resolve_optional_dependencies(optional_deps, dep, visited))
+        else:
+            # It's an actual package dependency
+            resolved.append(dep)
+    
+    return resolved
+
 def generate_base_environment(pyproject_data, name="oceantracker"):
     """Generate base environment.yml for users."""
     project = pyproject_data["project"]
     
     # Extract Python version requirement
     python_req = project["requires-python"]
-    # Convert ">=3.10,<3.12" to ">=3.10,<3.12"
     python_spec = f"python{python_req}"
     
     env = {
@@ -43,10 +74,21 @@ def generate_dev_environment(pyproject_data, name="oceantracker-dev"):
     python_req = project["requires-python"]
     python_spec = f"python{python_req}"
     
-    # Combine all optional dependencies
+    # Get all optional dependencies
+    optional_deps = project.get("optional-dependencies", {})
+    
+    # Resolve all optional dependencies (this handles nested references)
     all_optional_deps = []
-    for deps in project.get("optional-dependencies", {}).values():
-        all_optional_deps.extend(deps)
+    for group_name in optional_deps.keys():
+        all_optional_deps.extend(resolve_optional_dependencies(optional_deps, group_name))
+    
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_optional_deps = []
+    for dep in all_optional_deps:
+        if dep not in seen:
+            seen.add(dep)
+            unique_optional_deps.append(dep)
     
     # Add some additional dev tools that work better from conda
     conda_dev_tools = [
@@ -64,7 +106,7 @@ def generate_dev_environment(pyproject_data, name="oceantracker-dev"):
         "dependencies": [
             python_spec,
             *project["dependencies"],
-            *all_optional_deps,
+            *unique_optional_deps,
             *conda_dev_tools,
             "pip",
             {"pip": ["-e .[dev]"]}
