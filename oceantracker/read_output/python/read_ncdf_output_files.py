@@ -74,6 +74,19 @@ def read_stats_file(file_name, nt=None):
     else:
         d['stats_type'] = 'grid'
 
+    # read count first fot mean value calc
+    d['limits']['count'] = {'min': np.nanmin(d['count']), 'max': np.nanmax(d['count'])}
+
+    # get mean values oldf version, where average props are not in file
+    new_data ={}
+    for var, vals in d.items():
+        # only calc props if not already in file
+        if var.startswith('sum_') and var.removeprefix('sum_') not in d:
+            name = var.removeprefix('sum_')
+            with np.errstate(divide='ignore', invalid='ignore'):
+                new_data[name] = d[var]/d['count'] # calc mean
+                d['limits'][name] = {'min' : np.nanmin(new_data[name]), 'max': np.nanmax(new_data[name])}
+
 
     nc.close()
     return d

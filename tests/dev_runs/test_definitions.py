@@ -209,13 +209,13 @@ my_heat_map3D_time = dict(name='my_heatmap3D_time',
             grid_span = [10000, 10000],
             particle_property_list=['a_pollutant', 'water_depth'],
             release_group_centered_grids = True,
-            update_interval = 7200,
+            update_interval = 3600,
             status_list = ["moving"],
-            z_max = -5.0,
+            z_max = 0,
             z_min = -10.0,)
 
 my_heat_map2D_time_runningMean = dict(
-            name = "my_heat_map3D_time_runningMean",
+            name = "my_heat_map2D_time_runningMean",
             class_name = "GriddedStats2D_timeBased_runningMean",
             grid_size = [120, 130],
             grid_span = [10000, 10000],
@@ -356,7 +356,7 @@ def compare_reference_run_stats(case_info_file, args):
                       np.nanmax(np.abs(stats_ref[prop_name])),np.nanmax(np.abs(stats[prop_name])),
                       ', max diff ='+RED  , np.max(dc[np.isfinite(dc)]), RESET)
                 except Exception as e:
-                    raise('ccvcvf')
+                    raise(f'debug: Property  "{prop_name}"')
 
     pass
 def show_track_plot(case_info_file, args,colour_with=None):

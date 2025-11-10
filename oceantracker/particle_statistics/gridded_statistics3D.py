@@ -136,8 +136,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
 
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
         # Write z grid info
-        nc.write_variable('z', stats_grid['z'], [dim_names[4]], units='m',
-                          description='Mid point of vertical grid cell')
+        nc.write_variable('z', stats_grid['z'], [dim_names[4]], units='m', description='Mid point of vertical grid cell')
 
         # Write grid cell volume
         nc.write_variable('grid_cell_volume', stats_grid['cell_volume'],

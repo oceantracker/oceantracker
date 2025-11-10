@@ -186,10 +186,7 @@ class _BaseAgeStats(ParameterBaseClass):
                                 description='all particles released in age bins for each release group')
         return  counts_released_age_binned
 
-
-
     def save_state(self, si, state_dir):
-
         fn = path.join(state_dir,f'stats_state_{self.params["name"]}.nc')
         nc = NetCDFhandler(fn,mode='w')
         self.info_to_write_on_file_close(nc)
@@ -209,7 +206,8 @@ class _BaseAgeStats(ParameterBaseClass):
 
         # copy in summed properties, to preserve references in sum_prop_data_list that is used inside numba
         for name, s in self.sum_binned_part_prop.items():
-            self.sum_binned_part_prop[name][:] = nc.read_variable(f'sum_{name}')
+            sn = f'sum_{name}'
+            self.sum_binned_part_prop[sn][:] = nc.read_variable(sn)
 
         nc.close()
         pass
@@ -247,7 +245,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
         })
         self.info['type'] = 'gridded'
 
-    def _create_grid_variables_new(self):
+    def _create_grid_variables(self):
         # creates 2D grid variables
         stats_grid = self.grid
         params = self.params
@@ -330,7 +328,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
         params['grid_size'][:2] = grid_size
         pass
 
-    def _create_grid_variables(self):
+    def _create_grid_variables_old(self):
         # creates 2D grid variables
         stats_grid= self.grid
         params= self.params
