@@ -16,7 +16,10 @@ from oceantracker.particle_statistics._base_stats_variants import  _BaseAgeStats
 
 
 class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLocationStats):
-    # class to hold counts of particles inside grid squares
+    '''
+    Counts particles inside grid grid cells. Grid centered at given loaction, or opionally
+    '''
+
     def __init__(self):
         # set up info/attributes
         super().__init__()
