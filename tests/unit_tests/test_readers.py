@@ -1,6 +1,45 @@
 from oceantracker.main import OceanTracker
+import pytest
 
-def test_run_roms3D(
+
+
+@pytest.mark.skip(reason="Not yet implemented")
+def test_delft3D_2D():
+    pass
+
+
+@pytest.mark.skip(reason="Not yet implemented")
+def test_delft3D_3D():
+    pass
+
+
+@pytest.mark.skip(reason="Not yet implemented")
+def test_FVCOM_2D():
+    pass
+
+
+@pytest.mark.skip(reason="Not yet implemented")
+def test_FVCOM_3D():
+    pass
+
+
+@pytest.mark.skip(reason="Not yet implemented")
+def test_GLORYS_2D():
+    """GLORYS/Nemo"""
+    pass
+
+
+@pytest.mark.skip(reason="Not yet implemented")
+def test_GLORYS_3D():
+    pass
+
+
+@pytest.mark.skip(reason="Not yet implemented")
+def test_FVCOM_3D():
+    pass
+
+
+def test_roms_3D(
     base_settings,
     reader_demo_ROMS,
     basic_point_release,
@@ -48,3 +87,6 @@ def test_run_roms3D(
     case_info_file = ot.run()
 
     assert case_info_file is not None
+
+
+
