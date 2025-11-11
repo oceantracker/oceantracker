@@ -254,7 +254,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
 
 
-    def info_to_write_on_file_close(self,nc) : pass
+    def info_to_write_on_file_close(self,nc) :
+         pass
 
     def close_file(self):
         nc = self.nc
