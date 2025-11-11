@@ -11,7 +11,14 @@ from oceantracker.particle_statistics.util import stats_util
 from oceantracker.particle_statistics.util.stats_util import _get_age_bin
 
 class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLocationStats):
-    # class to hold counts of particles inside 2D polygons squares
+    '''
+    Time series of counts particles inside  given 2D polygons
+    The particles counted can be subsetted by status, water depth etc, default is all alive particles not outside open boundaries.
+    Alive particles have  stationary, no_bottom, stranded or moving status
+    Output in netcdf file split into release groups has at least
+        -counts of particles in the requested subset
+        -counts of all alive particles inside the domain, whether in the subset or not
+    '''
 
     def __init__(self):
         super().__init__()
@@ -97,7 +104,17 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
                 sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
 
 class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLocationStats):
-
+    '''
+    Counts particles inside  given polygons as a histogram  binned by particle age, useful in tracking ages class of larave
+    The particles counted can be subsetted by status, water depth etc, default is all alive particles not outside open boundaries.
+    Alive particles have  stationary, no_bottom, stranded or moving status
+     Output in netcdf file split into release groups and age bins for the entire run ( or user give start to end times)  has at least
+        -counts of particles in the requested subset
+        -counts of all alive particles inside the domain, whether in the subset or not
+        -counts_released_age of all release particles in age bin histogram, incudes those which are outside the domain have died etc.t
+        - connectivity_age_released,  the probability of a released particle being inside each grid cell. that is 
+            the connectivity = counts/counts_released_age
+    '''
     def __init__(self):
         super().__init__()
         self.add_default_params(role_output_file_tag= PVC('stats_polygon_age',str))

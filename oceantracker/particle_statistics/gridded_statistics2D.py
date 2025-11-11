@@ -17,7 +17,13 @@ from oceantracker.particle_statistics._base_stats_variants import  _BaseAgeStats
 
 class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLocationStats):
     '''
-    Counts particles inside grid grid cells. Grid centered at given loaction, or opionally
+    Time series of counts particles inside  cells of a regular grid.
+    Grid is centered at given location, or optionally at the midpoint of each release group
+    The particles counted can be subsetted by status, water depth etc, default is all alive particles not outside open boundaries.
+    Alive particles have  stationary, no_bottom, stranded or moving status
+    Output in netcdf file split into release groups has at least
+        -counts of particles in the requested subset
+        -counts of all alive particles inside the domain, whether in the subset or not
     '''
 
     def __init__(self):
@@ -103,6 +109,15 @@ class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLoc
 
 
 class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
+    '''
+     Time series of counts particles inside  cells of a regular grid.
+    Grid is centered at given location, or optionally at the midpoint of each release group
+    The parciles counted can be subsetted by status, water depth etc, default is all alive particles not outside open boundaries.
+    Alive particles have  stationary, no_bottom, stranded or moving status
+     Output in netcdf file split into release groups has at least
+        - running mean counts of particles in the requested subset
+        - running mean counts of all alive particles inside the domain, whether in the subset or not
+    '''
     def __init__(self):
         super().__init__()
         # Add write_interval parameter for running mean functionality
@@ -251,6 +266,18 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
 
 class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocationStats):
 
+    '''
+    Counts particles inside  cells of a regular grid as a histogram  binned by particle age, useful in tracking ages class of larave 
+    Grid is centered at given location, or optionally at the midpoint of each release group
+    The particles counted can be subsetted by status, water depth etc, default is all alive particles not outside open boundaries.
+    Alive particles have  stationary, no_bottom, stranded or moving status
+     Output in netcdf file split into release groups and age bis for the entire run ( or user give start to end times)  has at least
+        -counts of particles in the requested subset
+        -counts of all alive particles inside the domain, whether in the subset or not
+        -counts_released_age of all release particles in age bin histogram, incudes those which are outside the domain have died etc.t
+        - connectivity_age_released,  the probability of a released particle being inside each grid cell. that is 
+            the connectivity = counts/counts_released_age
+    '''
     # bins all particles across all times into age bins,
     # does grid stats  based on age, but must keep whole stats grid in memory so ages can bw binned
     # NOTE: note to get unbiased stats, need to stop releasing particles 'max_age_to_bin' before end of run
