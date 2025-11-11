@@ -146,6 +146,8 @@ class _DimensionNames(_AttribDict):
     cell = 'cell_dim'
     release_group= 'release_group_dim'
     polygons= 'polygon_dim'
+    age_bin_edges= 'age_bin_edges_dim'
+    age_bin = 'age_bin_dim'
 
 
 

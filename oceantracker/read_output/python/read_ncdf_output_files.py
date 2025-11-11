@@ -77,29 +77,17 @@ def read_stats_file(file_name, nt=None):
     # read count first fot mean value calc
     d['limits']['count'] = {'min': np.nanmin(d['count']), 'max': np.nanmax(d['count'])}
 
-    # get mean values
+    # get mean values oldf version, where average props are not in file
     new_data ={}
     for var, vals in d.items():
-        if var.startswith('sum_'):
+        # only calc props if not already in file
+        if var.startswith('sum_') and var.removeprefix('sum_') not in d:
             name = var.removeprefix('sum_')
             with np.errstate(divide='ignore', invalid='ignore'):
                 new_data[name] = d[var]/d['count'] # calc mean
                 d['limits'][name] = {'min' : np.nanmin(new_data[name]), 'max': np.nanmax(new_data[name])}
 
-    with np.errstate(divide='ignore', invalid='ignore'):
-        # conectivity calc. is different depending on direction, use all particles if forwards, selected if backwards
-        if 'backtracking' not in d['global_attributes']:
-            b = d['count_all_particles'] # version prior to june 2025
-        else:
-            b = d['count_all_alive_particles']
 
-        if d['stats_type'] == 'grid':
-            bb =  b[..., np.newaxis, np.newaxis ] if 'z_dim' not in d['dimensions'] else b[..., np.newaxis, np.newaxis, np.newaxis ]
-            d['connectivity_matrix'] = d['count'] / bb
-        else:
-            d['connectivity_matrix'] = d['count'] / b[..., np.newaxis]
-
-    d.update(new_data)
     nc.close()
     return d
 

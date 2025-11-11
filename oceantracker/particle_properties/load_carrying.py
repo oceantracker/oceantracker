@@ -28,9 +28,7 @@ class ParticleLoad(CustomParticleProperty):
 
         params = self.params
 
-        if len(params['release_group_parameters']) == 0:
-            # all particles have same initial value
-            self.set_values(params['initial_value'], new_part_IDs)
+        self.set_values(params['initial_value'], new_part_IDs)
 
 
     def update(self,n_time_step,time_sec,active):

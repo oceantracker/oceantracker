@@ -3,8 +3,22 @@
 Change log
 ###########################
 
+Version '0.5.2.54 date ???'
+____________________________
 
-Version '0.5.53 2025-10-30'
+Rebulid stats ito use mutiple inheritence
+
+Breaking changes
+----------------
+#. ??
+
+New features
+------------
+
+Added average part. prop.  to stats netcdfs
+Added connectivty calc. to netcdf only for age based stats
+
+Version '0.5.2.53 2025-10-30'
 ____________________________
 
 Breaking changes
