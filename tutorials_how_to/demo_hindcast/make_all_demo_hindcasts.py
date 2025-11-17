@@ -47,8 +47,8 @@ def get_catalog(i, args):
         #nc = NetCDFhandler(f)
         #nc.close()
         ds = xr.open_dataset(f, decode_times=False, decode_coords=False,decode_timedelta=False)
-        t0 =float(ds[i['vars']['time']].compute().data[0])
-        t1 = float(ds[i['vars']['time']].compute().data[0])
+        t0 =float(ds[i['grid']['time']].compute().data[0])
+        t1 = float(ds[i['grid']['time']].compute().data[0])
 
         for v,data in ds.variables.items():
             if v not in vars: vars[v] = dict(fileIDs=np.zeros((0,),dtype=np.int32), t0=np.zeros((0,),dtype=np.float64))
@@ -83,21 +83,27 @@ def get_catalog(i, args):
     return required_files
 
 
-def get_nodes_cells(i,ds) :
+def get_triangulation(i, required_files) :
     # get triangulations and nodes inside axis_lims
-    vars = i['vars']
-    x = ds[vars['x_node']].compute().data
-    y = ds[vars['y_node']].compute().data
-    tri = ds[vars['triangulation']].compute().data
+    grid = i['grid']
+
+    # find first file with node coords
+    for name, v in required_files :
+        ds = xr.open_dataset(name, decode_times=False, decode_coords=False,decode_timedelta=False)
+        if grid['x_node'] in ds.variables: break
+
+    x = ds[grid['x_node']].compute().data
+    y = ds[grid['y_node']].compute().data
+    tri = ds[grid['triangulation']].compute().data
     sel = np.isnan(tri)
     missing = -9990
     tri[sel] = missing
-    tri = tri.astype(np.int32) - int(i['one_based']) # zerobased indcies for python
+    tri = tri.astype(np.int32) - int(i['one_based']) # zero based indcies for python
 
 
     # find  triangles in sub-domain
-    x_tri = np.mean(x[tri[:, :3] - 1], axis=1)
-    y_tri = np.mean(y[tri[:, :3] - 1], axis=1)
+    x_tri = np.mean(x[tri[:, :3]], axis=1)
+    y_tri = np.mean(y[tri[:, :3]], axis=1)
 
     ax = i['axis_limits']
     sel_tri = np.logical_and.reduce((x_tri > ax[0], x_tri < ax[1], y_tri > ax[2], y_tri < ax[3]))
@@ -111,11 +117,21 @@ def get_nodes_cells(i,ds) :
     new_triangulation = np.full((sel_tri.shape[0],4),missing,np.int32)
     for n, val in enumerate(required_nodes.tolist()):
         sel = int(val) == required_tri # where tri matches the required nodes
-        new_triangulation[sel]= n +  i['one_based']
+        new_triangulation[sel]= n +  int(i['one_based'])
 
     new_triangulation[new_triangulation < 0 ] = -1 # make missing 4th values the same
 
-    return dict(required_tri=required_tri,required_nodes=required_nodes, new_triangulation=new_triangulation)
+    if False:
+        import matplotlib.pyplot as plt
+        plt.scatter(x,y,s=.1)
+        plt.scatter(ax[0], ax[2], c='r')
+        plt.scatter(ax[1], ax[3], c='g')
+        plt.show()
+
+
+    return dict(required_tri=required_tri,required_nodes=required_nodes,
+                new_triangulation=new_triangulation,
+                triangulation_dims= ds[grid['triangulation']].dims)
 
 def write_files(i, required_files, args):
 
@@ -128,6 +144,9 @@ def write_files(i, required_files, args):
         for f in glob(out_dir+'/*'):
             remove(f)
 
+    # find file with coords and get new triangulation
+    info = get_triangulation(i, required_files)
+
     required_files = [ [n,]+r for n, r in enumerate(required_files)]# add index to order info to required_files
     order = np.random.choice(len(required_files), len(required_files), replace=False)
     for nn, o in enumerate(order):
@@ -139,40 +158,38 @@ def write_files(i, required_files, args):
         # copy attributes
         for name, val in ds.attrs.items(): ds_out.attrs[name] = val
 
-        #
-        info = get_nodes_cells(i,ds)
-        vars = i['vars']
         dims = i['dims']
 
-        copy_vars = vars['required']
+        copy_vars = i['required_vars']
         # add first optional if found
-        for v in vars['optional']:
+        for v in i['optional_vars']:
             if v in ds.variables:
                 copy_vars.append(v)
                 break
 
         encoding = {}
+        grid = i['grid']
         # add triangulation
         if i['structured']:
             pass
         else:
             # unstructured
-            v = vars['triangulation']
-            ds_out[vars['triangulation']] = xr.DataArray(info['new_triangulation'], dims=ds[vars['triangulation']].dims)
+            ds_out[grid['triangulation']] = xr.DataArray(info['new_triangulation'], dims=info['triangulation_dims'])
             node_dim = dims['node']
-            ds_out[vars['x_node']] = ds[vars['x_node']].isel({node_dim: info['required_nodes']}).compute()
-            ds_out[vars['y_node']] = ds[vars['y_node']].isel({node_dim: info['required_nodes']}).compute()
 
-            if vars['bottom_bin'] in ds.variables:
-                ds_out[vars['bottom_bin'] ] = ds[vars['bottom_bin']].isel({node_dim: info['required_nodes']}).compute().astype(np.int32)
+            if grid['x_node'] in ds.variables:
+                ds_out[grid['x_node']] = ds[grid['x_node']].compute().isel({node_dim: info['required_nodes']})
+                ds_out[grid['y_node']] = ds[grid['y_node']].compute().isel({node_dim: info['required_nodes']})
+
+            if grid['bottom_bin'] in ds.variables:
+                ds_out[grid['bottom_bin'] ] = ds[grid['bottom_bin']].compute().isel({node_dim: info['required_nodes']}).astype(np.int32)
 
             # add time
-            if  vars['time'] in ds.variables:  ds_out[vars['time'] ] = ds [vars['time'] ]
+            if  grid['time'] in ds.variables:  ds_out[grid['time'] ] = ds [grid['time'] ]
 
             for v in copy_vars:
                 if v not in ds.variables: continue
-                data = ds[v].compute()
-                ds_out[v] = data.isel({node_dim: info['required_nodes']}).compute()
+                ds_out[v] = ds[v].compute().isel({node_dim: info['required_nodes']})
 
                 # compress floats
                 if np.issubdtype(ds_out[v],np.floating):
@@ -200,18 +217,16 @@ def schism(m, args):
                     time_decimation=2,
                     axis_limits =  1.0e+06 *np.asarray([ 1.5903,    1.6026,    5.4795,    5.501]), # abel tasman
                     input_mask =r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2012\schism_marl201201*.nc',
-                    vars=dict(
-                            triangulation='SCHISM_hgrid_face_nodes',
-                            x_node='SCHISM_hgrid_node_x',
-                            y_node='SCHISM_hgrid_node_y',
-                            required=['zcor','depth','elev','hvel','diffusivity','bottom_stress'],
-                            optional=['temp','sal'],
+                    grid = dict(triangulation='SCHISM_hgrid_face_nodes',
+                                x_node='SCHISM_hgrid_node_x',
+                                y_node='SCHISM_hgrid_node_y',
+                                time='time',
+                                bottom_bin = 'node_bottom_index'),
+                    required_vars=['zcor','depth','elev','hvel', 'diffusivity','bottom_stress','vertical_velocity'],
+                    optional_vars=['temp','sal'],
+                    dims=dict(
                             time='time',
-                            bottom_bin = 'node_bottom_index'),
-                     dims=dict(
-                            time='time',
-                            node='nSCHISM_hgrid_node',
-                            z ='')
+                            node='nSCHISM_hgrid_node')
                             )
     # set up variants
     match m:
@@ -222,7 +237,11 @@ def schism(m, args):
                     class_name='SCHISMreader',
                     time_decimation=2,
                     input_mask=r'F:\Hindcast_reader_tests\Schimsv5\HaurakiGulfv5\01\*.nc',
+                    axis_limits=[174.74131848445504, 174.92349387270926,-36.69635808784122,  -36.58458475941872],
+                   required_vars = ['horizontalVelX', 'horizontalVelY', 'verticalVelocity',
+                                                          'diffusivity', 'bottomStressX', 'bottomStressY']
                 )
+
             return schism3D
             pass
 
@@ -241,7 +260,7 @@ if __name__ == '__main__':
     parser.add_argument('-full',   action="store_true",  help="long demo hindcasts"    )
     args = parser.parse_args()
 
-    m= 0
+    m= 1
 
     i= get_info(0, m, args)
     # get list of
