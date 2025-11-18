@@ -14,6 +14,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         self.add_default_params({
             'dimension_map': dict(
                         node=PVC('nSCHISM_hgrid_node', str, doc_str='name of nodes dimension in files'),
+                        cell=PVC('nSCHISM_hgrid_face', str, doc_str='name of cell dimension in files'),
                         z=PVC('nSCHISM_vgrid_layers', str, doc_str='name of dimensions for z layer boundaries '),
                         all_z_dims=PLC(['nSCHISM_vgrid_layers'], str, doc_str='All z dims, used to identify  3D variables'),
                         vector2D=PVC('two', str, doc_str='name of dimension names for 2D vectors'),
@@ -101,10 +102,6 @@ class SCHISMreader(_BaseUnstructuredReader):
         tri -= 1
 
         grid['triangles'] = tri
-
-
-
-
 
     def read_bottom_interface_index(self, grid):
         # time invariant bottom cell index, which varies across grid in LSC vertical grid

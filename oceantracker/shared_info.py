@@ -17,9 +17,9 @@ class _Object(object):  pass
 
 class _DefaultSettings(definitions._AttribDict):
 
-    root_output_dir=  PVC('root_output_dir', str, doc_str='base dir for all output files')
+    root_output_dir=  PVC(None, str, is_required=True,  doc_str='base dir for all output files')
     add_date_to_run_output_dir =  PVC(False,bool, doc_str='Append the date to the output dir. name to help in keeping output from different runs separate' )
-    output_file_base =    PVC('output_file_base', str,
+    output_file_base =    PVC('output_file_base', str,is_required=True,
                 doc_str= 'The start/base of all output files and name of sub-dir of "root_output_dir" where output will be written' )
     time_step = PVC(3600., float, min=0.001, units='sec',doc_str='Time step in seconds for all cases' )
     screen_output_time_interval = PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file' )
