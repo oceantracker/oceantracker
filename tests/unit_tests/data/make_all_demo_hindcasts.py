@@ -1,10 +1,9 @@
 import numpy as np
 from glob import glob
-
+from copy import deepcopy
 from os import path, makedirs, remove
 import argparse
 import xarray as xr
-from oceantracker import definitions
 from oceantracker.util import class_importer_util, parameter_checking, message_logger, json_util
 missing_int = -9999
 
@@ -39,9 +38,7 @@ def get_required_var_names(i,args):
     c = i['class_name'][i['class_name'].rfind('.')+1:]
     reader = getattr(mod,c)()
 
-    params = dict(class_name=i['class_name'],
-                  input_dir=path.dirname(i['input_mask']),
-                  file_mask= path.basename(i['input_mask']))
+    params = dict(class_name=i['class_name'], input_dir= i['input_dir'], file_mask= i['file_mask'])
 
     params = parameter_checking.merge_params_with_defaults(params,reader.default_params, msg_logger)
     fmap =  params['field_variable_map']
@@ -90,10 +87,9 @@ def get_required_var_names(i,args):
     return i
 
 def get_catalog(i, args):
-    # for each variable get t a list of files with each variable
+    # find all variables in each file, sort in time order
 
-    file_list= glob(path.join(path.dirname(i['input_mask']),'**',  path.basename(i['input_mask'])),
-                    recursive=True)
+    file_list= glob(path.join(i['input_dir'],'**',  i['file_mask']),recursive=True)
     file_list = np.asarray(file_list)
     vars={}
     f_start_retimes =[]
@@ -150,6 +146,7 @@ def _ensure_int(data):
         data[sel] = missing_int
         data = data.astype(np.int32)  # zero based indcies for python
     return data
+
 def get_triangulation(i, required_files) :
     # get triangulations and nodes inside axis_lims
     grid = i['grid']
@@ -203,7 +200,7 @@ def get_triangulation(i, required_files) :
 
 def write_files(i, required_files, args):
 
-    out_dir = path.join(i['out_dir'],f'{i["name"]}')
+    out_dir = path.join(i['output_dir'],f'{i["name"]}')
     if not path.exists(out_dir):
         makedirs(out_dir)
     else:
@@ -228,7 +225,7 @@ def write_files(i, required_files, args):
     for nn, o in enumerate(order):
         ID, file, vars = required_files[o]
         ds = xr.open_dataset(file, decode_times=False, decode_coords=False,decode_timedelta=False)
-
+        print('starting file: ', path.basename(file))
         ds_out = xr.Dataset()
 
         # copy attributes
@@ -249,15 +246,15 @@ def write_files(i, required_files, args):
         if grid['triangulation'] in ds.variables:
             ds_out[grid['triangulation']] = xr.DataArray(info['new_triangulation'], dims=info['triangulation_dims'])
 
-
         # loop over vars
         for v in copy_vars:
             if v not in ds.variables: continue
+            print('\t\t compressing var=', v)
             data= ds[v].compute()
             # loop over all slicing
             for dim,s  in i['dim_slices'].items():
                 if dim  in data.dims:
-                    print(v,dim)
+
                     data= data.isel({dim:s})
 
             if v in i['required_int_vars']: data.data = _ensure_int(data.data)
@@ -276,9 +273,9 @@ def write_files(i, required_files, args):
         fn = path.join(out_dir,   f'{i["name"]}_{nn:03d}_time_order{ID:03d}.nc')
 
         if len(ds_out.variables) > 0:
-            print('writing file: ', path.basename(fn))
+            print('\t writing file: ', path.basename(fn))
             ds_out.to_netcdf(fn, encoding=encoding)
-            print('\t done file: ', fn, list( ds.variables.keys()))
+            print('\t\t done file: ', fn, list( ds.variables.keys()))
         pass
 
     # write release point json
@@ -288,58 +285,101 @@ def write_files(i, required_files, args):
 
     json_util.write_JSON(path.join(out_dir, 'info.json'), p)
 
+def run(i,output_dir, args):
 
-def schism(m, args):
+    file_base = i['name']
+    input_dir = path.join(i['output_dir'],file_base)
+
+    from oceantracker.main import OceanTracker
+    ot = OceanTracker()
+    ot.settings(root_output_dir=output_dir, output_file_base=file_base, time_step=15*60)
+    ot.add_class('reader', input_dir=input_dir, file_mask=file_base + '*.nc')
+
+    info = json_util.read_JSON(path.join(input_dir, 'info.json'))
+
+    pulse_size= 10000 if args.full else 10
+    if 'deep_point' in info:
+        ot.add_class('release_groups', points=info['deep_point'],
+                     pulse_size=pulse_size, name='deep_point' )
+    if 'coast_point' in info:
+        ot.add_class('release_groups', points=info['coast_point'], pulse_size=pulse_size, name='coast_point' )
+    case_info_file_name= ot.run()
+    return case_info_file_name
+
+
+def schism(args):
     # schism variants
     #todo hgrid file?
-
-    schism3D = dict( name='schism3D', structured=False, one_based=True,
-                    time_decimation=2,
+    base = dict(structured=False, one_based=True,)
+    schism3D = deepcopy(base)
+    schism3D.update( name='schism3D',  time_decimation=2,is3D=True,
                     axis_limits =  1.0e+06 *np.asarray([ 1.5903,    1.6026,    5.4795,    5.501]), # abel tasman
-                    input_mask =r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2012\schism_marl201201*.nc',
+                    input_dir =r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2012',
+                    file_mask= r'schism_marl201201*.nc',
                     class_name= 'oceantracker.reader.SCHISM_reader.SCHISMreader',
                     deep_point=[1594000, 5484200, -2],
                           )
-    # set up variants
-    match m:
-        case 0:
-            return schism3D
-        case 1:
-            schism3D.update( name='schism3D_v5', structured=False, is3D=True, regular_grid=False,one_based=True,
-                   class_name='oceantracker.reader.SCHISM_reader_v5.SCHISMreaderV5',
-                   time_decimation=1,
-                   input_mask=r'F:\Hindcast_reader_tests\Schimsv5\HaurakiGulfv5\01\*.nc',
-                   #axis_limits=[174.74131848445504, 174.77752850329696,-36.69635808784122,  -36.58458475941872],
-                    axis_limits=[175,175.18,-36.4,-36.2],
-                    deep_point=[175.1, -36.3, -2],
-                    coast_point=[175.05, -36.225] )
-            return schism3D
-            pass
 
+    schism3Dv5 = deepcopy(base)
+    schism3Dv5.update(name='schism3D_v5', is3D=True,
+           class_name='oceantracker.reader.SCHISM_reader_v5.SCHISMreaderV5',
+           time_decimation=1,
+           input_dir=r'F:\Hindcast_reader_tests\Schimsv5\HaurakiGulfv5\01',
+            file_mask = r'*.nc',
+            axis_limits=[175,175.18,-36.4,-36.15],
+            deep_point=[175.1, -36.3, -2],
+            coast_point=[175.05, -36.225] )
 
-
-def get_info(n, m, args):
-
-    match n:
-        case 0:
-            i = schism(m, args)
-
-    i['out_dir'] = r'F:\H_Local_drive\ParticleTracking\demo_hindcasts'
-    # i['out_dir']  out_dir=r'c:\demo_hindcasts'
-    return i
+    return [schism3D, schism3Dv5]
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A simple script to greet a user.")
     parser.add_argument('-full',   action="store_true",  help="long demo hindcasts"    )
+    parser.add_argument('-type', type=int, default=-1)
+    parser.add_argument('-variant', type=int, default=-1)
+    parser.add_argument('-run_off', action="store_true", help=" toggle run demo hindcasts off ")
+    parser.add_argument('-write_off', action="store_true", help="toggle write hindcast off")
+    parser.add_argument('-plot', action="store_true", help="plot run")
     args = parser.parse_args()
 
-    m= 1
 
-    i= get_info(0, m, args)
-    i = get_required_var_names(i, args)
-    # get list of
-    required_files= get_catalog(i,args)
-    write_files(i, required_files, args)
+    test_hindcast_out_dir_default  =  path.join(path.dirname(__file__), 'hindcasts')
+
+    if args.full:
+        test_hindcast_output_dir = r'F:\H_Local_drive\ParticleTracking\unit_test_full_hindcasts'
+        run_output_dir = r'D:\OceanTrackerOutput\test_hindcast_readers_full'
+    else:
+        test_hindcast_output_dir= path.join(path.dirname(__file__), 'hindcasts')
+        run_output_dir = r'D:\OceanTrackerOutput\test_hindcast_readers_small'
+
+    readers= [schism(args)]
+    for nr, reader in enumerate(readers):
+        if args.type > -1 and args.type != nr: continue
+        for nv, i in enumerate(reader):
+            if args.variant > -1 and args.variant != nv: continue
+
+            i = get_required_var_names(i, args)
+            i['output_dir'] = test_hindcast_output_dir
+            required_files= get_catalog(i,args) # find all variables in each file, sort in time order
+            if not args.write_off:
+                write_files(i, required_files, args)
+
+            if args.run_off:
+                case_info_file_name= path.join(run_output_dir,i['name'],i['name']+'_caseInfo.json')
+            else:
+                # test run case
+               case_info_file_name= run(i, run_output_dir,args)
+
+
+            if args.plot:
+                from matplotlib import pyplot as plt
+                from oceantracker.plot_output import plot_tracks
+                from oceantracker.read_output.python import load_output_files
+                tracks = load_output_files.load_track_data(case_info_file_name)
+                # animate particles
+                anim = plot_tracks.animate_particles(tracks, axis_lims=None, title='Minimal OceanTracker example',
+                                                     show_dry_cells=True, show_grid=True,
+                                                     )  # use ipython to show video, rather than matplotlib plt.show()
 
     pass
