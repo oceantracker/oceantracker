@@ -217,6 +217,7 @@ def write_files(i, required_files, args):
         info = get_triangulation(i, required_files)
         i['dim_slices'][dims['node']] = info['required_nodes']
         i['dim_slices'][dims['cell']] = info['required_cells']
+        print('cpmpressed: unstructured grid  nodes = ', info['required_nodes'].size, 'cells', info['required_cells'].size,)
 
     required_files = [ [n,]+r for n, r in enumerate(required_files)]# add index to order info to required_files
     order = np.random.choice(len(required_files), len(required_files), replace=False)
@@ -285,6 +286,8 @@ def write_files(i, required_files, args):
 
     json_util.write_JSON(path.join(out_dir, 'info.json'), p)
 
+
+
 def run(i,output_dir, args):
 
     file_base = i['name']
@@ -292,7 +295,7 @@ def run(i,output_dir, args):
 
     from oceantracker.main import OceanTracker
     ot = OceanTracker()
-    ot.settings(root_output_dir=output_dir, output_file_base=file_base, time_step=15*60)
+    ot.settings(root_output_dir=output_dir, output_file_base=file_base, time_step=10*60)
     ot.add_class('reader', input_dir=input_dir, file_mask=file_base + '*.nc')
 
     info = json_util.read_JSON(path.join(input_dir, 'info.json'))
@@ -300,9 +303,10 @@ def run(i,output_dir, args):
     pulse_size= 10000 if args.full else 10
     if 'deep_point' in info:
         ot.add_class('release_groups', points=info['deep_point'],
-                     pulse_size=pulse_size, name='deep_point' )
+                     release_interval=30*60, pulse_size=pulse_size, name='deep_point', )
     if 'coast_point' in info:
-        ot.add_class('release_groups', points=info['coast_point'], pulse_size=pulse_size, name='coast_point' )
+        ot.add_class('release_groups', points=info['coast_point'],
+                     release_interval=30*60, pulse_size=pulse_size, name='coast_point' )
     case_info_file_name= ot.run()
     return case_info_file_name
 
@@ -321,17 +325,30 @@ def schism(args):
                           )
 
     schism3Dv5 = deepcopy(base)
+    dx = 0.05
     schism3Dv5.update(name='schism3D_v5', is3D=True,
            class_name='oceantracker.reader.SCHISM_reader_v5.SCHISMreaderV5',
            time_decimation=1,
            input_dir=r'F:\Hindcast_reader_tests\Schimsv5\HaurakiGulfv5\01',
             file_mask = r'*.nc',
-            axis_limits=[175,175.18,-36.4,-36.15],
+            axis_limits=[175-dx,175.18+dx,-36.4-dx,-36.125+dx],
             deep_point=[175.1, -36.3, -2],
             coast_point=[175.05, -36.225] )
 
     return [schism3D, schism3Dv5]
 
+def GLORYS(args):
+    # schism variants
+    #todo hgrid file?
+    base = dict(structured=True, one_based=True)
+    schism3D = deepcopy(base)
+    schism3D.update( name='GLORYS3Dsigma',  time_decimation=2,is3D=True,
+                    axis_limits =  1.0e+06 *np.asarray([ 1.5903,    1.6026,    5.4795,    5.501]), # abel tasman
+                    input_dir =r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2012',
+                    file_mask= r'schism_marl201201*.nc',
+                    class_name= 'oceantracker.reader.SCHISM_reader.SCHISMreader',
+                    deep_point=[1594000, 5484200, -2],
+                     )
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A simple script to greet a user.")
@@ -350,7 +367,7 @@ if __name__ == '__main__':
         test_hindcast_output_dir = r'F:\H_Local_drive\ParticleTracking\unit_test_full_hindcasts'
         run_output_dir = r'D:\OceanTrackerOutput\test_hindcast_readers_full'
     else:
-        test_hindcast_output_dir= path.join(path.dirname(__file__), 'hindcasts')
+        test_hindcast_output_dir= path.join(path.dirname(__file__),'unit_tests','data', 'hindcasts')
         run_output_dir = r'D:\OceanTrackerOutput\test_hindcast_readers_small'
 
     readers= [schism(args)]
