@@ -95,28 +95,29 @@ def get_catalog(i, args):
     f_start_retimes =[]
     for fileID,f in enumerate(file_list):
 
-        # assumes time in every file
-        #nc = NetCDFhandler(f)
-        #nc.close()
         ds = xr.open_dataset(f, decode_times=False, decode_coords=False,decode_timedelta=False)
 
         # note time dim as time may not be in all files
-        if i['time_var'] in ds.variables :  i['dims']['time'] = ds[i['time_var']].dims[0]
-
-        t0 =float(ds[i['time_var']].compute().data[0])
-        t1 = float(ds[i['time_var']].compute().data[0])
+        # assumes time is aways in files with time dependant variables
+        if i['time_var'] in ds.variables :
+            i['dims']['time'] = ds[i['time_var']].dims[0]
+            t0 =float(ds[i['time_var']].compute().data[0])
 
         for v,data in ds.variables.items():
-            if v not in vars: vars[v] = dict(fileIDs=np.zeros((0,),dtype=np.int32), t0=np.zeros((0,),dtype=np.float64))
+            if v not in vars: vars[v] = dict(fileIDs=np.zeros((0,),dtype=np.int32),
+                                             t0=np.zeros((0,),dtype=np.float64))
             d = vars[v]
-            d['t0'] = np.append(d['t0'],t0)
+            d['dims'] = data.dims
             d['fileIDs'] = np.append(d['fileIDs'],fileID)
+            if i['time_var'] in ds.variables:
+                d['t0'] = np.append(d['t0'],t0)
 
 
     # sort variable filesIDs into time order
     tmax = 15*24*3600 if args.full else 24*3600
 
     for name, d in vars.items():
+
         file_order = np.argsort(d['t0'])
         d['t0'] = d['t0'][file_order]
         d['fileIDs'] = d['fileIDs'][file_order]
@@ -127,6 +128,7 @@ def get_catalog(i, args):
         d['t0'] = d['t0'][nts]
         d['fileIDs'] = d['fileIDs'][nts]
         d['file_names'] = file_list[d['fileIDs'] ]
+
 
     # now build a  dict of unique files with the variables in each
     files=dict()
@@ -338,17 +340,18 @@ def schism(args):
     return [schism3D, schism3Dv5]
 
 def GLORYS(args):
-    # schism variants
-    #todo hgrid file?
-    base = dict(structured=True, one_based=True)
-    schism3D = deepcopy(base)
-    schism3D.update( name='GLORYS3Dsigma',  time_decimation=2,is3D=True,
+
+    base = dict(structured=True, one_based=True,
+                class_name= 'oceantracker.reader.GLORYS_reader.GLORYSreader',)
+    GLORYS3DfizedZ = deepcopy(base)
+    GLORYS3DfizedZ.update( name='GLORYS3DfizedZ',  time_decimation=2,is3D=True,
                     axis_limits =  1.0e+06 *np.asarray([ 1.5903,    1.6026,    5.4795,    5.501]), # abel tasman
-                    input_dir =r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2012',
-                    file_mask= r'schism_marl201201*.nc',
-                    class_name= 'oceantracker.reader.SCHISM_reader.SCHISMreader',
+                    input_dir =r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D',
+                    file_mask= 'cmems*.nc',
+
                     deep_point=[1594000, 5484200, -2],
                      )
+    return [GLORYS3DfizedZ]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A simple script to greet a user.")
@@ -370,7 +373,7 @@ if __name__ == '__main__':
         test_hindcast_output_dir= path.join(path.dirname(__file__),'unit_tests','data', 'hindcasts')
         run_output_dir = r'D:\OceanTrackerOutput\test_hindcast_readers_small'
 
-    readers= [schism(args)]
+    readers= [schism(args)]# [schism(args),GLORYS(args)]
     for nr, reader in enumerate(readers):
         if args.type > -1 and args.type != nr: continue
         for nv, i in enumerate(reader):
