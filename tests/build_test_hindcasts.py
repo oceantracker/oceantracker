@@ -86,62 +86,6 @@ def get_required_var_names(i,args):
     i['required_vars'] = list(set(i['required_vars'])) # make list unique
     return i
 
-def get_catalog(i, args):
-    # find all variables in each file, sort in time order
-
-    file_list= glob(path.join(i['input_dir'],'**',  i['file_mask']),recursive=True)
-    file_list = np.asarray(file_list)
-    vars={}
-    f_start_retimes =[]
-    for fileID,f in enumerate(file_list):
-
-        ds = xr.open_dataset(f, decode_times=False, decode_coords=False,decode_timedelta=False)
-
-        # note time dim as time may not be in all files
-        # assumes time is aways in files with time dependant variables
-        if i['time_var'] in ds.variables :
-            i['dims']['time'] = ds[i['time_var']].dims[0]
-            t0 =float(ds[i['time_var']].compute().data[0])
-
-        for v,data in ds.variables.items():
-            if v not in vars: vars[v] = dict(fileIDs=np.zeros((0,),dtype=np.int32),
-                                             t0=np.zeros((0,),dtype=np.float64))
-            d = vars[v]
-            d['dims'] = data.dims
-            d['fileIDs'] = np.append(d['fileIDs'],fileID)
-            if i['time_var'] in ds.variables:
-                d['t0'] = np.append(d['t0'],t0)
-
-
-    # sort variable filesIDs into time order
-    tmax = 15*24*3600 if args.full else 24*3600
-
-    for name, d in vars.items():
-
-        file_order = np.argsort(d['t0'])
-        d['t0'] = d['t0'][file_order]
-        d['fileIDs'] = d['fileIDs'][file_order]
-        d['files'] =   [ file_list[ID] for ID in  d['fileIDs']]
-
-        # only keep files up to tmax
-        nts = np.flatnonzero(d['t0'] - d['t0'][0] < tmax)
-        d['t0'] = d['t0'][nts]
-        d['fileIDs'] = d['fileIDs'][nts]
-        d['file_names'] = file_list[d['fileIDs'] ]
-
-
-    # now build a  dict of unique files with the variables in each
-    files=dict()
-    for name, d in vars.items():
-        for  f in d['file_names']:
-            key = str(f)
-            if f not in files: files[key]=[]
-            files[key].append(name)
-    required_files =[[name, vars]  for name, vars in files.items() ]
-    return required_files
-
-
-
 def _ensure_int(data):
     if np.issubdtype(data.dtype, np.floating):
         sel = np.isnan(data)
@@ -149,14 +93,15 @@ def _ensure_int(data):
         data = data.astype(np.int32)  # zero based indcies for python
     return data
 
-def get_triangulation(i, required_files) :
+def get_triangulation(i,file_list) :
     # get triangulations and nodes inside axis_lims
     grid = i['grid']
 
     # find first file with node coords
-    for name, v in required_files :
+    for name in file_list :
         ds = xr.open_dataset(name, decode_times=False, decode_coords=False,decode_timedelta=False)
         if grid['x_node'] in ds.variables: break
+        ds.close()
 
     x = ds[grid['x_node']].compute().data
     y = ds[grid['y_node']].compute().data
@@ -200,7 +145,9 @@ def get_triangulation(i, required_files) :
                 new_triangulation=new_triangulation,
                 triangulation_dims= ds[grid['triangulation']].dims)
 
-def write_files(i, required_files, args):
+def write_files(i, args):
+
+    file_list = glob(path.join(i['input_dir'], '**', i['file_mask']), recursive=True)
 
     out_dir = path.join(i['output_dir'],f'{i["name"]}')
     if not path.exists(out_dir):
@@ -213,31 +160,43 @@ def write_files(i, required_files, args):
     if 'dim_slices' not in i: i['dim_slices'] = {}
     dims = i['dims']
 
+    # scan files for first time_dim etc
+    t0= float(np.inf)
+    for n, name in enumerate(file_list):
+        ds = xr.open_dataset(name, decode_times=False, decode_coords=False,decode_timedelta=False)
+
+        if i['time_var'] in ds.variables:
+            dims['time'] = ds[ i['time_var']].dims[0]
+            t0  = min( float(ds[i['time_var']][0]), t0)
+        ds.close()
+
     # find file with coords and get new triangulation
     if not i['structured']:
         # set up slices for unstructured grid
-        info = get_triangulation(i, required_files)
+        info = get_triangulation(i, file_list)
         i['dim_slices'][dims['node']] = info['required_nodes']
         i['dim_slices'][dims['cell']] = info['required_cells']
-        print('cpmpressed: unstructured grid  nodes = ', info['required_nodes'].size, 'cells', info['required_cells'].size,)
+        print('compressed: unstructured grid  nodes = ', info['required_nodes'].size, 'cells', info['required_cells'].size,)
 
-    required_files = [ [n,]+r for n, r in enumerate(required_files)]# add index to order info to required_files
-    order = np.random.choice(len(required_files), len(required_files), replace=False)
+    tmax = 14*24*3600 if args.full else 24*3600
 
+    for nn, file in enumerate(file_list):
 
-    for nn, o in enumerate(order):
-        ID, file, vars = required_files[o]
         ds = xr.open_dataset(file, decode_times=False, decode_coords=False,decode_timedelta=False)
+        if i['time_var'] in ds.variables:
+            # only copy files with first tmax of first time
+            if  ds[i['time_var']].data[0]-t0 >= tmax: continue
         print('starting file: ', path.basename(file))
+
         ds_out = xr.Dataset()
 
         # copy attributes
-        for name, val in ds.attrs.items(): ds_out.attrs[name] = val
+        #for name, val in ds.attrs.items(): ds_out.attrs[name] = val
 
         dims = i['dims']
 
         copy_vars = i['required_vars'] + i['required_int_vars']
-        # add first optional if found
+        # add first optional  variable if found
         for v in i['optional_vars']:
             if v in ds.variables:
                 copy_vars.append(v)
@@ -246,7 +205,7 @@ def write_files(i, required_files, args):
         encoding = {}
         grid = i['grid']
         # add triangulation if present
-        if grid['triangulation'] in ds.variables:
+        if 'triangulation' in grid and grid['triangulation'] in ds.variables:
             ds_out[grid['triangulation']] = xr.DataArray(info['new_triangulation'], dims=info['triangulation_dims'])
 
         # loop over vars
@@ -269,11 +228,11 @@ def write_files(i, required_files, args):
                                dtype=np.int16,  zlib=True, complevel=9 )
             ds_out[v] = data.compute()
 
-        #  time decimate whole dataset, wont work on one time st
+        #  time decimate whole dataset, won't work on one time step per file
         if dims['time'] in ds_out.dims:
             ds_out = ds_out.isel( {dims['time'] : slice(None, None, i['time_decimation'])}).compute()
 
-        fn = path.join(out_dir,   f'{i["name"]}_{nn:03d}_time_order{ID:03d}.nc')
+        fn = path.join(out_dir,   f'{i["name"]}_{nn:03d}.nc')
 
         if len(ds_out.variables) > 0:
             print('\t writing file: ', path.basename(fn))
@@ -287,7 +246,6 @@ def write_files(i, required_files, args):
     if 'deep_point' in i: p['deep_point'] = i['deep_point']
 
     json_util.write_JSON(path.join(out_dir, 'info.json'), p)
-
 
 
 def run(i,output_dir, args):
@@ -344,11 +302,11 @@ def GLORYS(args):
     base = dict(structured=True, one_based=True,
                 class_name= 'oceantracker.reader.GLORYS_reader.GLORYSreader',)
     GLORYS3DfizedZ = deepcopy(base)
-    GLORYS3DfizedZ.update( name='GLORYS3DfizedZ',  time_decimation=2,is3D=True,
+    GLORYS3DfizedZ.update( name='Glorys3DfixedZ',  time_decimation=2,is3D=True,
                     axis_limits =  1.0e+06 *np.asarray([ 1.5903,    1.6026,    5.4795,    5.501]), # abel tasman
                     input_dir =r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D',
                     file_mask= 'cmems*.nc',
-
+                    required_int_var=['mask'],
                     deep_point=[1594000, 5484200, -2],
                      )
     return [GLORYS3DfizedZ]
@@ -373,7 +331,10 @@ if __name__ == '__main__':
         test_hindcast_output_dir= path.join(path.dirname(__file__),'unit_tests','data', 'hindcasts')
         run_output_dir = r'D:\OceanTrackerOutput\test_hindcast_readers_small'
 
-    readers= [schism(args)]# [schism(args),GLORYS(args)]
+
+    readers= [schism(args),GLORYS(args)]
+    readers= [schism(args)]#
+
     for nr, reader in enumerate(readers):
         if args.type > -1 and args.type != nr: continue
         for nv, i in enumerate(reader):
@@ -381,16 +342,14 @@ if __name__ == '__main__':
 
             i = get_required_var_names(i, args)
             i['output_dir'] = test_hindcast_output_dir
-            required_files= get_catalog(i,args) # find all variables in each file, sort in time order
             if not args.write_off:
-                write_files(i, required_files, args)
+                write_files(i, args)
 
             if args.run_off:
                 case_info_file_name= path.join(run_output_dir,i['name'],i['name']+'_caseInfo.json')
             else:
                 # test run case
                case_info_file_name= run(i, run_output_dir,args)
-
 
             if args.plot:
                 from matplotlib import pyplot as plt
