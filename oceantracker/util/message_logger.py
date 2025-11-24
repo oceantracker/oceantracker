@@ -180,7 +180,8 @@ class MessageLogger(object ):
         self.msg('- ' + msg, tabs=tabs)
 
     def show_all_strong_warnings_and_errors(self):
-        for m in [self.msg_lists['strong_warning'], self.msg_lists['error']]:
+        for m in self.msg_lists['strong_warning']+ self.msg_lists['error']+ self.msg_lists['fatal_error']:
+
             self.msg(m['msg'],hint= m['hint'],caller=m['caller'],crumbs=m['crumbs'])
 
 

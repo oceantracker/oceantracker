@@ -5,6 +5,7 @@ from  matplotlib import  pyplot as plt
 import glob
 import xarray as xr
 import random, string
+import argparse
 from copy import deepcopy
 def compute_scale_and_offset_int16(data, missing_value=None):
     # scale data into int32's
@@ -82,6 +83,10 @@ def write_file(ds_in,n_file, nodes,sel_tri, tri, is3D=False):
     return ds_out, e, n_file
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="A simple script to greet a user.")
+    # 2. Add arguments
+    # Positional argument: 'name'
+    parser.add_argument("name", help="The name of the user to greet.")
 
     data_file_mask =r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2017\schism_marl201701*_00z_3D.nc'
     ax=    1.0e+06 *np.asarray([ 1.5903,    1.6026,    5.4795,    5.501]) # abel tasman

@@ -10,6 +10,7 @@ from oceantracker.util import  time_util, json_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
 def make_a_reader_from_params(reader_params, settings, crumbs=''):
+
     crumbs = crumbs + '>build_a_reader '
 
     _check_input_dir(reader_params, crumbs=crumbs)
@@ -146,8 +147,16 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
         fmap= r.params['field_variable_map']
 
         # do basic tests for format for time, x and velocity
-        t = dict(velocity = fmap['water_velocity'][0] in  file_vars  # has normal or depth average velocity
-                                 or fmap['water_velocity_depth_averaged'][0] in  file_vars)
+        p = True
+        if fmap['water_velocity'][0] in file_vars:
+            vel_var = fmap['water_velocity'][0]
+        elif  fmap['water_velocity_depth_averaged'][0] in  file_vars:
+            vel_var = fmap['water_velocity_depth_averaged'][0]
+        else:
+            # neither in file
+            vel_var = 'velocity'
+            p=False
+        t = { vel_var: p}
         # check if other variables in the signature are present
         for s in r.params['variable_signature'] + [gmap['time'], gmap['x']]:
             t[s] = s in ds_info['variables']
@@ -196,7 +205,7 @@ def _time_sort_files(reader, crumbs):
         f['has_time'] =  ds_info['time_var'] in ds.variables
         if f['has_time']:
             time = ds[time_var].compute()
-            time = reader.decode_time(time)
+            time = np.round(reader.decode_time(time),3) # round to milli seconds
             f['start_time'] = float(time[0])
             f['end_time'] = float(time[-1])
             f['time_steps'] = time.size
