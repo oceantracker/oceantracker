@@ -190,6 +190,8 @@ class MessageLogger(object ):
         self.msg(str(e))
         tb = traceback.format_exc()
         self.msg(tb)
+        if si.run_info.run_output_dir is None: return # no folder to write to
+
         error_file_name = path.join(si.run_info.run_output_dir, self.error_file_name)
         with open(path.normpath(error_file_name),'w') as f:
             f.write('_____ Known warnings and Errors ________________________________\n')
