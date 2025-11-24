@@ -53,31 +53,24 @@ Repository = "https://github.com/oceantracker/oceantracker"
 Issues = "https://github.com/oceantracker/oceantracker/issues"
 
 [project.optional-dependencies]
-dev_ops = [
+dev = [
+    # dev_ops
     "build",
     "twine",
-    # "black",
-    # "ruff",
-    # "mypy",
-    # "pre-commit",
-]
-docs = [
+    # docs
     "sphinx>=7.0",
     "sphinx-toolbox>=3.3.0",
     "nbsphinx",
     "ipython",
     "rst2pdf",
-]
-test = [
+    # test
     "pytest>=7.0",
     "pytest-xdist",
     "coverage",
     "pytest-cov",
-]
-dev = [
-    "dev_ops",
-    "docs",
-    "test",
+    "jupyter",
+    "nbclient",
+    "ffmpeg",
 ]
 
 [project.scripts]

@@ -28,6 +28,9 @@ dependencies:
 - coverage
 - pytest-cov
 - jupyter
+- nbclient
+- ffmpeg
+- jupyter
 - jupyterlab
 - ipykernel
 - ipywidgets
