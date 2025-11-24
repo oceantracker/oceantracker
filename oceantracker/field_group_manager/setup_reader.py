@@ -205,7 +205,7 @@ def _time_sort_files(reader, crumbs):
         f['has_time'] =  ds_info['time_var'] in ds.variables
         if f['has_time']:
             time = ds[time_var].compute()
-            time = reader.decode_time(time)
+            time = np.round(reader.decode_time(time),3) # round to milli seconds
             f['start_time'] = float(time[0])
             f['end_time'] = float(time[-1])
             f['time_steps'] = time.size

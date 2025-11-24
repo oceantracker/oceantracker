@@ -111,6 +111,22 @@ def get_triangulation(i,file_list) :
     x_tri = np.mean(x[tri[:, :3]], axis=1)
     y_tri = np.mean(y[tri[:, :3]], axis=1)
 
+    if False:
+        import matplotlib.pyplot as plt
+        plt.triplot(x, y, tri[:,:3], c=[.8,.8,.8], lw=.5)
+        if  'axis_limits' in i:
+            ax = i['axis_limits']
+            plt.scatter(ax[0], ax[2], c='r')
+            plt.scatter(ax[1], ax[3], c='g')
+        if 'coast_point' in i:
+            plt.scatter(i['coast_point'][0], i['coast_point'][1], marker='x', c='g')
+        if 'deep_point' in i:
+            plt.scatter(i['deep_point'][0], i['deep_point'][1],marker='x', c='g')
+        xy= plt.ginput(2)
+        print([float(v) for v in np.asarray(xy).ravel()])
+        plt.show()
+
+
     ax = i['axis_limits']
     sel_tri = np.logical_and.reduce((x_tri > ax[0], x_tri < ax[1], y_tri > ax[2], y_tri < ax[3]))
     sel_tri = np.flatnonzero(sel_tri)
@@ -120,26 +136,12 @@ def get_triangulation(i,file_list) :
     required_nodes=np.unique(required_tri[required_tri >=0])
     required_nodes = np.sort(required_nodes)
 
-    new_triangulation = np.full((sel_tri.shape[0],4),missing_int,np.int32)
+    new_triangulation = np.full((sel_tri.shape[0],tri.shape[1]),missing_int,np.int32)
     for n, val in enumerate(required_nodes.tolist()):
         sel = int(val) == required_tri # where tri matches the required nodes
         new_triangulation[sel]= n +  int(i['one_based'])
 
     new_triangulation[new_triangulation < 0 ] = -1 # make missing 4th values the same
-
-    if False:
-        import matplotlib.pyplot as plt
-        plt.triplot(x, y, tri[:,:3], c=[.8,.8,.8], lw=.5)
-        plt.scatter(ax[0], ax[2], c='r')
-        plt.scatter(ax[1], ax[3], c='g')
-        if 'coast_point' in i:
-            plt.scatter(i['coast_point'][0], i['coast_point'][1], marker='x', c='g')
-        if 'deep_point' in i:
-            plt.scatter(i['deep_point'][0], i['deep_point'][1],marker='x', c='g')
-        xy=plt.ginput(2)
-        print(xy)
-        plt.show()
-
 
     return dict(required_cells=sel_tri,required_nodes=required_nodes,
                 new_triangulation=new_triangulation,
@@ -186,7 +188,12 @@ def write_files(i, args):
         if i['time_var'] in ds.variables:
             # only copy files with first tmax of first time
             if  ds[i['time_var']].data[0]-t0 >= tmax: continue
+            #  time decimate whole dataset, won't work on one time step per file
+            if dims['time'] in ds.dims:
+                ds = ds.isel({dims['time']: slice(None, None, i['time_decimation'])})
+
         print('starting file: ', path.basename(file))
+
 
         ds_out = xr.Dataset()
 
@@ -228,9 +235,7 @@ def write_files(i, args):
                                dtype=np.int16,  zlib=True, complevel=9 )
             ds_out[v] = data.compute()
 
-        #  time decimate whole dataset, won't work on one time step per file
-        if dims['time'] in ds_out.dims:
-            ds_out = ds_out.isel( {dims['time'] : slice(None, None, i['time_decimation'])}).compute()
+
 
         fn = path.join(out_dir,   f'{i["name"]}_{nn:03d}.nc')
 
@@ -284,6 +289,16 @@ def schism(args):
                     deep_point=[1594000, 5484200, -2],
                           )
 
+    schism2D = deepcopy(base)
+    schism2D.update( name='schism2D',  time_decimation=1, is3D=False,
+                    axis_limits = [143.92515111738638, 144.20689192125877,-38.5723758591546,  -38.44437128551422], # abel tasman
+                    #input_dir =r'D:\Hindcast_reader_tests\Schisim\PPB_Hydro_netCDF',
+                     input_dir= r'D:\Hindcasts\Australia\2022_PortPhillipBay2020\HUY2020\schism',
+                    file_mask= r'202001010100.nc',
+                    class_name= 'oceantracker.reader.SCHISM_reader.SCHISMreader',
+                    deep_point=[144.0824017986175, -38.523889278230214, -2],
+                          )
+
     schism3Dv5 = deepcopy(base)
     dx = 0.05
     schism3Dv5.update(name='schism3D_v5', is3D=True,
@@ -295,7 +310,7 @@ def schism(args):
             deep_point=[175.1, -36.3, -2],
             coast_point=[175.05, -36.225] )
 
-    return [schism3D, schism3Dv5]
+    return [schism3D, schism3Dv5, schism2D]
 
 def GLORYS(args):
 

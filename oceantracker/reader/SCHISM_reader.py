@@ -48,11 +48,10 @@ class SCHISMreader(_BaseUnstructuredReader):
         pass
 
     def decode_time(self, time):
-
-        if 'units' in  time.attrs:
-            # is cf time convention compliant
+        try:
+            # try units approach otherwise use old base_date method
             return super().decode_time(time)
-        else:
+        except  Exception as e:
             # older based date schsim version, ignore time zone
             s = time.attrs['base_date'].split()
             d0 = np.datetime64(f'{int(s[0])}-{int(s[1]):02d}-{int(s[2]):02d}')
@@ -60,6 +59,7 @@ class SCHISMreader(_BaseUnstructuredReader):
             d0 = d0 + float(s[3])*3600
             t = time.data + d0
             return t
+
     def initial_setup(self):
         super().initial_setup()
         # use schism min water depth if in file
