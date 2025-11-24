@@ -73,6 +73,9 @@ test = [
     "pytest-xdist",
     "coverage",
     "pytest-cov",
+    "jupyter",
+    "nbclient",
+    "ffmpeg",
 ]
 dev = [
     "dev_ops",
