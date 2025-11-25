@@ -27,18 +27,18 @@ def test_run_2D_model():
 
 def test_run_3D_model(
     base_settings,
-    reader_schism3D,
+    reader_demo_schism3D,
     basic_point_release,
-    schism_release_locations,
+    schism3D_release_locations,
 ):
     """Test SCHISM 3D native grid tracking"""
 
     ot = OceanTracker()
     ot.settings(**base_settings)
-    ot.add_class("reader", **reader_schism3D)
+    ot.add_class("reader", **reader_demo_schism3D)
     ot.add_class(
         "release_groups",
-        **{**basic_point_release, "points": schism_release_locations["deep_point"]},
+        **{**basic_point_release, "points": schism3D_release_locations["deep_point"]},
     )
     # ot.add_class("particle_properties", **a_pollutant)
     # ot.add_class("particle_statistics", **my_heat_map_time)

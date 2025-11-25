@@ -4,15 +4,15 @@ import pytest
 
 @pytest.fixture
 def default_stats_configuration(
-    base_settings, reader_schism3D, basic_point_release, schism_release_locations
+    base_settings, reader_demo_schism3D, basic_point_release, schism3D_release_locations
 ):
     """Returns a pre-configured OceanTracker instance with common setup."""
     ot = OceanTracker()
     ot.settings(**base_settings)
-    ot.add_class("reader", **reader_schism3D)
+    ot.add_class("reader", **reader_demo_schism3D)
     ot.add_class(
         "release_groups",
-        **{**basic_point_release, "points": schism_release_locations["deep_point"]},
+        **{**basic_point_release, "points": schism3D_release_locations["deep_point"]},
     )
     return ot
 
@@ -76,24 +76,24 @@ def test_gridded_statistics_2D_schism_with_particle_prop(
 
 
 def test_polygon_statistics_2D_timeBased(
-    default_stats_configuration, polygon_stats_2D_timeBased,schism_release_locations
+    default_stats_configuration, polygon_stats_2D_timeBased,schism3D_release_locations
     ):
     ot = default_stats_configuration
     ot.add_class("particle_statistics", 
                  **{**polygon_stats_2D_timeBased,
-                    "polygon_list":schism_release_locations["polygons"]},
+                    "polygon_list":schism3D_release_locations["polygons"]},
                     )
     case_info_file = ot.run()
     assert case_info_file is not None
 
 
 def test_polygon_statistics_2D_ageBased(
-    default_stats_configuration, polygon_stats_2D_ageBased,schism_release_locations
+    default_stats_configuration, polygon_stats_2D_ageBased,schism3D_release_locations
     ):
     ot = default_stats_configuration
     ot.add_class("particle_statistics", 
                  **{**polygon_stats_2D_ageBased,
-                    "polygon_list":schism_release_locations["polygons"]},
+                    "polygon_list":schism3D_release_locations["polygons"]},
                     )
     case_info_file = ot.run()
     assert case_info_file is not None
