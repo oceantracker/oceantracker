@@ -5,8 +5,8 @@ from oceantracker.main import OceanTracker
 @pytest.mark.skip(reason='performance')
 def test_run_3D_model_performance(
     base_settings,
-    reader_schism3D,
-    schism_release_locations,
+    reader_demo_schism3D,
+    schism3D_release_locations,
 ):
     """
     Performance test for SCHISM 3D native grid tracking.
@@ -33,14 +33,14 @@ def test_run_3D_model_performance(
         processors=32
         ),  # Smaller timestep = more iterations
     
-    ot.add_class("reader", **reader_schism3D)
+    ot.add_class("reader", **reader_demo_schism3D)
     
     # Large particle release for performance testing
     ot.add_class(
         "release_groups",
         name="performance_test",
         class_name="PointRelease",
-        points=schism_release_locations["deep_point"],
+        points=schism3D_release_locations["deep_point"],
         release_interval=0,  # Release all at model start
         pulse_size=1_000_000,  # Large number of particles
     )
@@ -55,7 +55,7 @@ def test_run_3D_model_performance(
 # def test_run_3D_model_scaling(
 #     base_settings,
 #     reader_demo_schisim3D,
-#     schism_release_locations,
+#     schism3D_release_locations,
 #     particle_count,
 # ):
 #     """
@@ -79,7 +79,7 @@ def test_run_3D_model_performance(
 #         "release_groups",
 #         name=f"scaling_test_{particle_count}",
 #         class_name="PointRelease",
-#         points=schism_release_locations["deep_point"],
+#         points=schism3D_release_locations["deep_point"],
 #         release_interval=300,
 #         pulse_size=particle_count,
 #     )

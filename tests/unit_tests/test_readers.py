@@ -39,51 +39,74 @@ def test_FVCOM_3D():
     pass
 
 
-def test_roms_3D(
+def test_schism3D(
     base_settings,
-    reader_demo_ROMS,
+    reader_schism3D,
     basic_point_release,
-    roms_release_locations,
+    schism3D_release_locations,
 ):
     """Test ROMS 3D grid tracking with multiple release types"""
 
     ot = OceanTracker()
     ot.settings(**base_settings)
-    ot.add_class("reader", **reader_demo_ROMS)
+    ot.add_class("reader", **reader_schism3D)
+    ot.add_class(
+        "release_groups",
+        **{**basic_point_release, "points": schism3D_release_locations["point"]},
+    )
+    case_info_file = ot.run()
+
+    assert case_info_file is not None
+
+
+def test_schism3D_v5(
+    base_settings,
+    reader_schism3D_v5,
+    basic_point_release,
+    schism3Dv5_release_locations,
+):
+    ot = OceanTracker()
+    ot.settings(**base_settings)
+    ot.add_class("reader", **reader_schism3D_v5)
+    ot.add_class(
+        "release_groups",
+        **{**basic_point_release, "points": schism3Dv5_release_locations["point"]},
+    )
+    case_info_file = ot.run()
+
+    assert case_info_file is not None
+
+
+def test_schism2D(
+    base_settings,
+    reader_schism2D,
+    basic_point_release,
+    schism2D_release_locations,
+):
+    ot = OceanTracker()
+    ot.settings(**base_settings)
+    ot.add_class("reader", **reader_schism2D)
+    ot.add_class(
+        "release_groups",
+        **{**basic_point_release, "points": schism2D_release_locations["point"]},
+    )
+    case_info_file = ot.run()
+
+    assert case_info_file is not None
+
+def test_roms_3D(
+    base_settings,
+    reader_demo_roms,
+    basic_point_release,
+    roms_release_locations,
+):
+    ot = OceanTracker()
+    ot.settings(**base_settings)
+    ot.add_class("reader", **reader_demo_roms)
     ot.add_class(
         "release_groups",
         **{**basic_point_release, "points": roms_release_locations["point"]},
     )
-    # # Add polygon release
-    # ot.add_class(
-    #     "release_groups",
-    #     **{
-    #         **polygon_release_configuration,
-    #         "points": roms_release_locations["polygon"],
-    #     },
-    # )
-
-    # # Add grid release
-    # ot.add_class(
-    #     "release_groups",
-    #     **{
-    #         **grid_release_configuration,
-    #         "grid_center": roms_release_locations["grid_center"],
-    #     },
-    # )
-
-    # Add particle properties
-    # ot.add_class("particle_properties", **a_pollutant)
-    # ot.add_class(
-    #     "particle_properties",
-    #     name="water_speed",
-    #     class_name="VectorMagnitude2D",
-    #     vector_part_prop="water_velocity",
-    # )
-    # ot.add_class("particle_properties", class_name="DistanceTravelled")
-
-    # # Add statistics
-    # ot.add_class("particle_statistics", **roms_gridded_2D_timeBased)
     case_info_file = ot.run()
 
     assert case_info_file is not None

@@ -4,15 +4,15 @@ import pytest
 
 @pytest.fixture
 def default_advanced_tests_configuration(
-    base_settings, reader_schism3D, basic_point_release, schism_release_locations
+    base_settings, reader_demo_schism3D, basic_point_release, schism3D_release_locations
 ):
     """Returns a pre-configured OceanTracker instance with common setup."""
     ot = OceanTracker()
     ot.settings(**base_settings)
-    ot.add_class("reader", **reader_schism3D)
+    ot.add_class("reader", **reader_demo_schism3D)
     ot.add_class(
         "release_groups",
-        **{**basic_point_release, "points": schism_release_locations["deep_point"]},
+        **{**basic_point_release, "points": schism3D_release_locations["deep_point"]},
     )
     return ot
 
@@ -60,13 +60,13 @@ def test_track_writer(default_advanced_tests_configuration):
     assert case_info_file is not None
 
 
-def test_settle_in_polygon(default_advanced_tests_configuration, schism_release_locations):
+def test_settle_in_polygon(default_advanced_tests_configuration, schism3D_release_locations):
     ot = default_advanced_tests_configuration
     ot.add_class(
         "trajectory_modifiers",
         name="SurfaceFloat",
         class_name="oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon",
-        polygon=schism_release_locations['polygons'][0],
+        polygon=schism3D_release_locations['polygons'][0],
         probability_of_settlement=0.1,
         settlement_duration=14400,
     )

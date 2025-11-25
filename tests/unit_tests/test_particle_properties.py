@@ -4,15 +4,15 @@ import pytest
 
 @pytest.fixture
 def default_particle_properties_configuration(
-    base_settings, reader_schism3D, basic_point_release, schism_release_locations
+    base_settings, reader_demo_schism3D, basic_point_release, schism3D_release_locations
 ):
     """Returns a pre-configured OceanTracker instance with common setup."""
     ot = OceanTracker()
     ot.settings(**base_settings)
-    ot.add_class("reader", **reader_schism3D)
+    ot.add_class("reader", **reader_demo_schism3D)
     ot.add_class(
         "release_groups",
-        **{**basic_point_release, "points": schism_release_locations["deep_point"]},
+        **{**basic_point_release, "points": schism3D_release_locations["deep_point"]},
     )
     return ot
 
@@ -45,14 +45,14 @@ def test_fractional_water_depth(default_particle_properties_configuration):
 
 
 def test_inside_polygons(
-    default_particle_properties_configuration, schism_release_locations
+    default_particle_properties_configuration, schism3D_release_locations
 ):
     ot = default_particle_properties_configuration
     ot.add_class(
         "particle_properties",
         name="my_inside_poly",
         class_name="oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D",
-        polygon_list=schism_release_locations["polygons"],
+        polygon_list=schism3D_release_locations["polygons"],
     )
     case_info_file = ot.run()
     assert case_info_file is not None
