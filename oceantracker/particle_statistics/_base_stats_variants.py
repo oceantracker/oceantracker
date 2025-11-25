@@ -132,10 +132,10 @@ class _BaseAgeStats(ParameterBaseClass):
         # add connectives, works for both polygon and grid stats, using s to reshape
         s = list(counts_inside_age_bins.shape[:2]) + (counts_inside_age_bins.ndim - counts_released_age_binned.ndim) * [1]
         with np.errstate(divide='ignore', invalid='ignore'):
-            connectivity_age_released = counts_inside_age_bins / counts_released_age_binned.reshape(s)
-        connectivity_age_released[~np.isfinite(connectivity_age_released)] = np.nan
+            connectivity_matrix = counts_inside_age_bins / counts_released_age_binned.reshape(s)
+        connectivity_matrix[~np.isfinite(connectivity_matrix)] = np.nan
 
-        nc.write_variable('connectivity_age_released', connectivity_age_released, dim_names,
+        nc.write_variable('connectivity_matrix', connectivity_matrix, dim_names,
                           description='Age binned connectivity of each polygon as fraction =counts_inside/ counts_released_age_binned, ie includes dead and those outside open boundaries ')
 
         # particle property sums

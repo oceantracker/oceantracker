@@ -15,7 +15,7 @@ def animate_heat_map(stats_data, release_group_name:str =None, var:str= 'count',
     def draw_frame(nt):
 
         x,y, z = _get_stats_data(nt, stats_data, var, release_group_name, logscale, zmin=caxis[0])
-        pc.set_array(z.ravel())
+        pc.set_array(z)
         pc.set_clim(caxis[0],caxis[1])
         if 'time' in stats_data:
             time_text.set_text(time_util.seconds_to_pretty_str(stats_data[stats_data['time_var']][nt],seconds=False))

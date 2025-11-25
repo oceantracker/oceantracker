@@ -275,7 +275,7 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
         -counts of particles in the requested subset
         -counts of all alive particles inside the domain, whether in the subset or not
         -counts_released_age of all release particles in age bin histogram, incudes those which are outside the domain have died etc.t
-        - connectivity_age_released,  the probability of a released particle being inside each grid cell. that is 
+        - connectivity_matrix,  the probability of a released particle being inside each grid cell. that is
             the connectivity = counts/counts_released_age
     '''
     # bins all particles across all times into age bins,

@@ -334,8 +334,8 @@ def compare_reference_run_stats(case_info_file, args):
             print('\t counts_released, ref/new', stats_ref['counts_released'].sum(), stats['counts_released'].sum(),
                '\t max diff counts-ref run counts =', np.max(np.abs(stats['counts_released'] - stats_ref['counts_released'])))
 
-            c_ref = stats_ref['connectivity_age_released']
-            c  = stats['connectivity_age_released']
+            c_ref = stats_ref['connectivity_matrix']
+            c  = stats['connectivity_matrix']
             c_ref= c_ref[np.isfinite(c_ref)]
             c = c[np.isfinite(c)]
             print( '\t connectives > 1.01 ref='+RED  , (c_ref > 1.001).sum(),RESET+ 'run ='+RED, (c> 1.001).sum(), RESET+ ' counts',
