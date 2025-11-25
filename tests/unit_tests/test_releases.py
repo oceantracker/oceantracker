@@ -11,7 +11,7 @@ def default_release_configuration(base_settings, reader_demo_schism3D):
     return ot
 
 
-def test_polygon_release(
+def test_polygon_release_meter(
     default_release_configuration,
     polygon_release_configuration,
     schism3D_release_locations,
@@ -22,6 +22,24 @@ def test_polygon_release(
         **{
             **polygon_release_configuration,
             "points": schism3D_release_locations["polygons"][0]["points"],
+        },
+    )
+    case_info_file = ot.run()
+
+    assert case_info_file is not None
+
+
+def test_polygon_release_lon_lat(
+    default_release_configuration,
+    polygon_release_configuration,
+    schism3Dv5_release_locations,
+):
+    ot = default_release_configuration
+    ot.add_class(
+        "release_groups",
+        **{
+            **polygon_release_configuration,
+            "points": schism3Dv5_release_locations["polygons"][0]["points"],
         },
     )
     case_info_file = ot.run()
