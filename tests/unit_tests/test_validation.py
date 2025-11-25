@@ -25,9 +25,9 @@ def test_schism_resuspension():
 @pytest.mark.validation
 def test_schism_validation_run_small(
     base_settings,
-    reader_schism3D,
+    reader_demo_schism3D,
     basic_point_release,
-    schism_release_locations,
+    schism3D_release_locations,
     gridded_2D_timeBased,
     polygon_stats_timeBased_waterDepth,
     reference_data_dir,
@@ -50,7 +50,7 @@ def test_schism_validation_run_small(
             "z_fraction",
         ],
     )
-    ot.add_class("reader", **reader_schism3D, regrid_z_to_sigma_levels=True)
+    ot.add_class("reader", **reader_demo_schism3D, regrid_z_to_sigma_levels=True)
     ot.add_class(
         "release_groups",
         **{
@@ -58,8 +58,8 @@ def test_schism_validation_run_small(
                 basic_point_release
                 | {"name": "single_point_release", "release_interval": 0}
             ),
-            "points": schism_release_locations["deep_point"],
-            # "points": schism_release_locations["polygons"][0]["points"],
+            "points": schism3D_release_locations["deep_point"],
+            # "points": schism3D_release_locations["polygons"][0]["points"],
         },
     )
     # Add statistics
@@ -68,7 +68,7 @@ def test_schism_validation_run_small(
         "particle_statistics",
         **{
             **polygon_stats_timeBased_waterDepth,
-            "polygon_list": schism_release_locations["polygons"],
+            "polygon_list": schism3D_release_locations["polygons"],
         },
     )
     # Run the model

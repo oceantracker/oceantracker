@@ -6,6 +6,7 @@ import numpy as np
 # Constants can stay as module-level
 package_dir = path.dirname(definitions.package_dir)
 demo_hindcast_dir = path.join(package_dir, "tutorials_how_to", "demo_hindcast")
+unittest_hindast_dir = path.join(package_dir, "tests","unit_tests","data","hindcasts")
 
 def pytest_addoption(parser):
     """Add custom command line options"""
@@ -48,15 +49,37 @@ def reference_data_dir():
 
 
 @pytest.fixture
-def reader_schism3D():
+def reader_demo_schism3D():
     return dict(
         input_dir=path.join(demo_hindcast_dir, "schsim3D"),
         file_mask="demo_hindcast_schisim3D*.nc",
     )
 
+@pytest.fixture
+def reader_schism3D():
+    return dict(
+        input_dir=path.join(unittest_hindast_dir, "schism3D"),
+        file_mask="*.nc",
+    )
+
 
 @pytest.fixture
-def reader_demo_ROMS():
+def reader_schism3D_v5():
+    return dict(
+        input_dir=path.join(unittest_hindast_dir, "schism3D_v5"),
+        file_mask="*.nc",
+    )
+
+
+@pytest.fixture
+def reader_schism2D():
+    return dict(
+        input_dir=path.join(unittest_hindast_dir, "schism2D"),
+        file_mask="*.nc",
+    )
+
+@pytest.fixture
+def reader_demo_roms():
     return dict(
         input_dir=path.join(demo_hindcast_dir, "ROMS"), file_mask="ROMS3D_00*.nc"
     )
@@ -159,7 +182,7 @@ def radius_release_meters():
 
 
 @pytest.fixture
-def schism_release_locations():
+def schism3D_release_locations():
     return dict(
         point=[1594000, 5484200],
         multi_point=[
@@ -182,6 +205,23 @@ def schism_release_locations():
                 ]
             },
         ],
+    )
+
+
+@pytest.fixture
+def schism2D_release_locations():
+    return dict(
+        point=[144.0824,-38.5238],
+        deep_point=[144.0824,-38.5238,-2]
+    )
+
+
+@pytest.fixture
+def schism3Dv5_release_locations():
+    return dict(
+        coastal_point=[175.05,-36.225],
+        point=[175.1,-36.3],
+        deep_point=[175.1,-36.3,-2],
     )
 
 
