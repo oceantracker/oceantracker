@@ -31,15 +31,24 @@ def setup_output_dir(settings, crumbs='', caller=None):
     if settings['add_date_to_run_output_dir']:
         run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
 
-    # clear existing folder and make a new dir, if not restarting
-    if not si.settings.restart:
-        if path.isdir(run_output_dir) : shutil.rmtree(run_output_dir)
+    # if restable and no folder exists them make a new restart folder  existing folder and make a new dir, if not restarting
+    saved_state_dir = path.join(run_output_dir, 'saved_state')
+    si.run_info.restarting = False
+    if si.settings.restart_interval is not None \
+            and path.isdir(saved_state_dir)  \
+            and path.isfile(path.join(saved_state_dir,'state_complete.txt')):
+                si.run_info.restarting = True
+
+    # new run if  not restarting or incomplete saved state
+    if not si.run_info.restarting:
+        if path.isdir(run_output_dir):  shutil.rmtree(run_output_dir)
         makedirs(run_output_dir)  # make  new clean folder
 
     # write a copy of user given parameters, to help with debugging and code support
     fb = 'users_params_' + settings['output_file_base']
     output_files = {'root_output_dir': root_output_dir,
                     'run_output_dir': run_output_dir,
+                    'saved_state_dir': saved_state_dir,
                     'output_file_base': settings['output_file_base'],
                     'raw_output_file_base': copy(settings['output_file_base']),
                     # this is needed for grid file so it does not get a case number in // runs

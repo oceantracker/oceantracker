@@ -87,7 +87,6 @@ def read_stats_file(file_name, nt=None):
                 new_data[name] = d[var]/d['count'] # calc mean
                 d['limits'][name] = {'min' : np.nanmin(new_data[name]), 'max': np.nanmax(new_data[name])}
 
-
     nc.close()
     return d
 

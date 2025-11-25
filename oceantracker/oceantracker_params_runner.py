@@ -78,7 +78,6 @@ class OceanTrackerParamsRunner(object):
         ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
 
 
-
         # performance
         total_time = perf_counter()-  self.start_time
         ml.msg(f'Timings: total = {total_time:5.1f} sec',tabs=2)
@@ -107,7 +106,6 @@ class OceanTrackerParamsRunner(object):
         for v in ml.msg_lists['strong_warning']:
             ml.msg('Strong_warning >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=1)
 
-
         if  num_errors > 0:
             ml.msg(f'>>>>>>> Found {num_errors:2d} errors <<<<<<<<<<<<',
                    hint='Look for first error above or below  or in  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
@@ -122,6 +120,13 @@ class OceanTrackerParamsRunner(object):
 
         if case_info_file is None:
             ml.msg('Fatal errors, run did not complete  ', hint='check for first error above, log file.txt or .err file ', error=True)
+
+        elif si.run_info.restarting:
+            # successful run so clear saved state dir
+            if path.isdir(si.run_info.saved_state_dir):
+                ml.msg(f'Run complete: removing saved state folder {si.run_info.saved_state_dir}')
+                import shutil
+                shutil.rmtree(si.run_info.saved_state_dir)
 
         ml.close()
 
@@ -160,12 +165,14 @@ class OceanTrackerParamsRunner(object):
         # move stuff to run info as central repository
         ri.run_output_dir = si.output_files['run_output_dir']
         ri.output_file_base = si.output_files['output_file_base']
+        ri.saved_state_dir = si.output_files['saved_state_dir']
+
         ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
         ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
 
-        if si.settings.restart:
+        if si.run_info.restarting:
             # load restart info
-            fn = path.join(si.run_info.run_output_dir, 'saved_state', 'state_info.json')
+            fn = path.join(si.run_info.saved_state_dir, 'state_info.json')
             if not path.isfile(fn):
                 ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
                        fatal_error=True, hint=f'missing file  {fn}')
@@ -179,7 +186,7 @@ class OceanTrackerParamsRunner(object):
                hint='see for copies of screen output and user supplied parameters, plus all other output')
 
         # write raw params to a file
-        if not si.settings.restart:
+        if not si.run_info.restarting:
             setup_util.write_raw_user_params(si.output_files, user_given_params, ml)
 
         # setup numba before first import as its environment variable settings  have to be set before first import on Numba
@@ -206,7 +213,7 @@ class OceanTrackerParamsRunner(object):
     def _run_case(self):
         ml = si.msg_logger # shortcut for logger
 
-        # add any usrer given dir to python path
+        # add any user given dir to python path
         for p in si.settings.add_path:
             if path.isdir(p):
                 sys.path.append(path.abspath(p))
@@ -262,6 +269,65 @@ class OceanTrackerParamsRunner(object):
                        caller=i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells?, mismatch of release coords and hindcast, betweem meters and GPS? )')
 
         case_info_file = self._get_case_run_info(self.start_date, self.start_time)
+
+        # ----- wrap up ---------------------------------
+        ml.set_screen_tag('end')
+        ml.hori_line()
+        # write a sumary of errors etc
+
+        ml.msg(f'Finished "{"??" if si.run_info.output_file_base is None else si.run_info.output_file_base}"'
+               + ',  started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()))
+        ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
+
+        # performance
+        total_time = perf_counter() - self.start_time
+        ml.msg(f'Timings: total = {total_time:5.1f} sec', tabs=2)
+
+        timers = ['Setup', 'Reading hindcast', 'Initial cell guess', 'RK integration',
+                  'Find horizontal cell', 'Find vertical cell',
+                  'Interpolate fields', 'Update statistics',
+                  'Update custom particle prop.']
+        l = max([len(s) for s in timers])
+        for name in timers:
+            if name in si.block_timers:
+                t = si.block_timers[name]["time"]
+                ml.msg(f'{name + " " * (l - len(name))} {t:4.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
+
+        # core physics timing
+        for name in ['resuspension', 'dispersion', 'tracks_writer', 'integrated_model']:
+            if si.core_class_roles[name] is not None:
+                t = si.core_class_roles[name].info["time_spent_updating"]
+                ml.msg(f'{name + " " * (l - len(name))} {t:4.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
+
+        # show any errors etc, at end as well
+        ml.hori_line(f'Issues    (check above,  any errors repeated below)')
+        el = ml.msg_lists
+        num_errors = len(el['fatal_error']) + len(el['error'])
+        ml.msg(
+            f'{num_errors:3d} errors,  {len(el["strong_warning"]):3d} strong warnings, {len(el["warning"]):3d} warnings, {len(el["note"]):3d} notes',
+            tabs=1)
+        for v in ml.msg_lists['strong_warning']:
+            ml.msg('Strong_warning >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=1)
+
+        if num_errors > 0:
+            ml.msg(f'>>>>>>> Found {num_errors:2d} errors <<<<<<<<<<<<',
+                   hint='Look for first error above or below  or in  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
+            for v in ml.msg_lists['error']:
+                ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
+            for v in ml.msg_lists['fatal_error']:
+                ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
+            ml.msg('')
+
+        ml.hori_line(f'Finished: output in "{si.run_info.run_output_dir}"')
+
+        if case_info_file is None:
+            ml.msg('Fatal errors, run did not complete  ',
+                   hint='check for first error above, log file.txt or .err file ', error=True)
+
+        ml.close()
+
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, 'completion_state.json'),
+                             dict(code_error_free=case_info_file is not None))
 
         return case_info_file
 

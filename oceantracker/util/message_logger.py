@@ -54,7 +54,7 @@ class MessageLogger(object ):
         log_file_name = si.run_info['output_file_base'] + '_log.txt'
         self.log_file_name = path.join(si.run_info.run_output_dir, log_file_name)
 
-        if si.settings.restart:
+        if si.run_info.restarting:
             shutil.copyfile(si.restart_info['log_file'],self.log_file_name)
             self.log_file = open(self.log_file_name, 'a')
             self.msg('>>>> restarting log file')

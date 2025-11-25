@@ -84,7 +84,6 @@ class _DefaultSettings(definitions._AttribDict):
         # 'debug_level =               PVC(0, int,min=0, max=10, doc_str='Gives  diferent levels of debug, in development' )
     restart_interval = PVC(None, float,
                            doc_str='Save the particle tracking state at the interval to allow restarting run', units='sec',  expert=True)
-    restart = PVC(False, bool, doc_str='Restart from a saved state, requires prior run setting restart_interval',  expert=True)
     min_dead_to_remove = PVC(100_000, int, doc_str='The minimum number of dead particles before they are removed from buffer', expert=True)
     throw_debug_error = PVC(0, int,min =0,
                              doc_str='Throw desigated error, eg =1 is mid run error to test restart',
@@ -152,6 +151,8 @@ class _RunInfo(definitions._AttribDict):
     cumulative_number_released = 0
     forecasted_number_alive = 0
     forecasted_max_number_alive = 0
+    restarting = False
+    saved_state_dir = None
 
 
 class _UseFullInfo(definitions._AttribDict):

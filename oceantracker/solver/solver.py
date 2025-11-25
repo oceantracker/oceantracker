@@ -203,7 +203,7 @@ class Solver(ParameterBaseClass):
         t0_step = perf_counter()
 
 
-        if si.settings.restart:
+        if si.run_info.restarting:
             nt1 = si.restart_info['restart_time_step']
             t1 = model_times[nt1]
             self._load_saved_state()
@@ -685,7 +685,7 @@ class Solver(ParameterBaseClass):
         if si.settings.write_tracks:
             si.core_class_roles.tracks_writer._close_file()
 
-        state_dir = path.join(si.run_info.run_output_dir, 'saved_state')
+        state_dir = si.run_info.saved_state_dir
         state = dict(run_start_time= si.run_info.start_time,
                      restart_time=time_sec,
                      restart_time_step=n_time_step,
@@ -702,8 +702,7 @@ class Solver(ParameterBaseClass):
         # save class info
         state['class_info'] = save_state_util.get_class_info(si)
 
-        if not path.isdir(state_dir):
-            mkdir(state_dir)
+        if not path.isdir(state_dir):  mkdir(state_dir)
 
         # save particle properties
         save_state_util.save_part_prop_state(state['part_prop_file'], si, n_time_step, time_sec)
@@ -717,6 +716,11 @@ class Solver(ParameterBaseClass):
 
         # write state json for restarting
         json_util.write_JSON(path.join(state_dir, 'state_info.json'),state)
+
+        # write flag file to say state save successful
+        with open(path.join(state_dir, 'state_complete.txt'), "w") as file:
+            file.write("State Save complete.\n")
+
 
     def _load_saved_state(self):
 

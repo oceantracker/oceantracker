@@ -206,8 +206,7 @@ class _BaseAgeStats(ParameterBaseClass):
 
         # copy in summed properties, to preserve references in sum_prop_data_list that is used inside numba
         for name, s in self.sum_binned_part_prop.items():
-            sn = f'sum_{name}'
-            self.sum_binned_part_prop[sn][:] = nc.read_variable(sn)
+            self.sum_binned_part_prop[name][:] = nc.read_variable(f'sum_{name}')
 
         nc.close()
         pass
