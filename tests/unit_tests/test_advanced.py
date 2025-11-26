@@ -65,7 +65,7 @@ def test_settle_in_polygon(default_advanced_tests_configuration, schism3D_releas
     ot.add_class(
         "trajectory_modifiers",
         name="SurfaceFloat",
-        class_name="oceantracker.trajectory_modifiers.settle_in_polygon.SettleInPolygon",
+        class_name="SettleInPolygon",
         polygon=schism3D_release_locations['polygons'][0],
         probability_of_settlement=0.1,
         settlement_duration=14400,
@@ -79,7 +79,7 @@ def test_surface_float(default_advanced_tests_configuration):
     ot.add_class(
         "trajectory_modifiers",
         name="SurfaceFloat",
-        class_name="oceantracker.trajectory_modifiers.surface_float.SurfaceFloat",
+        class_name="SurfaceFloat",
     )
     case_info_file = ot.run()
     assert case_info_file is not None
@@ -89,9 +89,10 @@ def test_split_particle(default_advanced_tests_configuration):
     ot = default_advanced_tests_configuration
     ot.add_class(
         "trajectory_modifiers",
-        name="SurfaceFloat",
-        class_name="oceantracker.trajectory_modifiers.split_particles.SplitParticles",
+        name="SplitParticles",
+        class_name="SplitParticles",
         interval=3600,
+        probability=0.1,
         statuses=["moving"],
     )
     case_info_file = ot.run()
