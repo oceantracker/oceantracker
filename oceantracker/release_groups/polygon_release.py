@@ -2,6 +2,7 @@ import numpy as np
 from oceantracker.util.polygon_util import InsidePolygon
 from oceantracker.release_groups.point_release import _BaseReleaseGroup
 from oceantracker.shared_info import shared_info as si
+from oceantracker.util import cord_transforms
 
 class PolygonRelease(_BaseReleaseGroup):
     '''
@@ -37,7 +38,11 @@ class PolygonRelease(_BaseReleaseGroup):
         self._add_bounding_box(params['points'])
 
         info['polygon_area'] = self.polygon.get_area()
+        # if in lon lat, then geographic_coords is true
+        geographic_coords = self.si.core_class_roles.reader.info['geographic_coords']
         ll, ur = info['bounding_box_ll_ul']
+        if geographic_coords:
+            ll, ur = cord_transforms.WGS84_to_UTM(np.array([ll,ur]))
         info['bounding_box_area'] = abs((ur[0] - ll[0]) * (ur[1] - ll[1]))
 
         if info['polygon_area'] < 10:
