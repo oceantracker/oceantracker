@@ -323,7 +323,7 @@ class Solver(ParameterBaseClass):
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
 
-        #todo replace this with  tidre waster depth done cel find
+        #todo replace this with  tide waster depth done cell find
         fgm.interp_field_at_particle_locations('tide', alive, output=part_prop['tide'].data)
         fgm.interp_field_at_particle_locations('water_depth', alive, output=part_prop['water_depth'].data)
 

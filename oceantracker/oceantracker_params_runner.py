@@ -83,7 +83,7 @@ class OceanTrackerParamsRunner(object):
         ml.msg(f'Timings: total = {total_time:5.1f} sec',tabs=2)
 
         timers=['Setup','Reading hindcast','Initial cell guess', 'RK integration',
-                        'Find horizontal cell','Find vertical cell',
+                        'Find initial horizontal cell','Find vertical cell',
                       'Interpolate fields', 'Update statistics',
                      'Update custom particle prop.']
         l = max([len(s) for s in timers])

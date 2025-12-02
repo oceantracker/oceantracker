@@ -81,7 +81,7 @@ class FindHoriCellTriangleWalk(object):
         # find nearest cell to xq
         t0 = perf_counter()
         n_cell, bc, is_inside_domain= find_initial_cell.find_hori_cellKDtree(xq, self.grid, self.KDtree, self.params['bc_walk_tol'])
-        si.block_timer('Initial cell guess', t0)
+        si.block_timer('Find initial horizontal cell', t0)
         return n_cell, bc, is_inside_domain
 
 

@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
@@ -11,8 +12,8 @@ from copy import copy, deepcopy
 # run fields nested with outer main readers grid
 
 class DevNestedFields(ParameterBaseClass):
-    ''' Core class. Builds a list of field group managers for outer and nested grids and manage
-    interactions with list of field group managers. Eg update, interpolate etc
+    ''' Core class. Builds a list of field group managers for outer and nested grids and manages
+    assignment to the different using a list of field group managers to carry out update, field interpolation etc
      First in list grid is the outer grid.
      Consistency between available hindcast variables means this code is fragile and error messages opaque.
      '''
@@ -93,6 +94,31 @@ class DevNestedFields(ParameterBaseClass):
                 ml.msg(f'Some nested grid reader files do not overlap in time with the outer grid',
                        hint='check start s and ends if each grid above, or is file mask correct?', fatal_error=True)
 
+            # build a mask of outer grid cells which may overlap this nested grid,
+            # used when checking if particle on outer grid is now inside inner grid
+            grid_outer = fgm_outer_grid.reader.grid
+            outer_grid_cells_overlapping_inner_grid = np.full((grid_outer['triangles'].shape[0],),False, dtype= bool)
+
+            # flag outer grid cells if any of its nodes are inside this nested grid
+            for m in range(3):
+                x_outer_grid =  grid_outer['x'][grid_outer['triangles'][:,m],:]
+                sel_n, part_data_n = fgm_nested.are_points_inside_domain(x_outer_grid)
+                outer_grid_cells_overlapping_inner_grid  = np.logical_or(sel_n,outer_grid_cells_overlapping_inner_grid )
+            fgm_nested.reader.grid['outer_grid_cells_overlapping_inner_grid'] = outer_grid_cells_overlapping_inner_grid
+
+            if False:
+                # check overlaping cells of inner grid
+                from matplotlib import pyplot as  plt
+                plt.triplot(grid_outer['x'][:,0],grid_outer['x'][:,1], grid_outer['triangles'], c=[.8,.8,.8], lw=.1)
+                plt.triplot(grid_outer['x'][:, 0], grid_outer['x'][:, 1],
+                            grid_outer['triangles'][outer_grid_cells_overlapping_inner_grid,:], c=[.8, 0, 0], lw=.3)
+                grid_nested = fgm_nested.reader.grid
+                plt.triplot(grid_nested['x'][:, 0], grid_nested['x'][:, 1],  grid_nested['triangles'], c=[ 0,.8, 0],lw=.1)
+                plt.show()
+
+            pass
+
+
         # settings consistency with all hindcasts
         info['has_A_Z_profile'] = info['has_A_Z_profile'] and all(checks['has_A_Z_profile'])
         info['has_bottom_stress'] = info['has_bottom_stress'] and all(checks['has_bottom_stress'])
@@ -108,7 +134,8 @@ class DevNestedFields(ParameterBaseClass):
                    crumbs='Nested reader set up ',  note=True)
             si.settings.write_dry_cell_flag = False
 
-        #todo check hindcasts over lap
+
+        #todo check out ant nested hindcasts over lap??
         pass
 
     def build_reader_fields(self):
@@ -208,37 +235,37 @@ class DevNestedFields(ParameterBaseClass):
         # update outer grid
         fgm_outer_grid = self.fgm_hydro_grids[0]
 
+        # todo make nested grid assignment faster by merging steps, requires numba kdtree find?
         on_outer_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', 0, out=self.get_partID_buffer('fgmID0'))
-
-
         fgm_outer_grid.setup_time_step(time_sec, xq, on_outer_grid)
 
         # work through inner grids
         for n, fgm in enumerate(self.fgm_hydro_grids[1:],start=1):  # loop over nested grids
 
             # find any on outer grid that are now inside this inner grid
-            # todo faster- prebuild a index to show which cells overlap with an  inner and only check if these are inside the inner grid
-
-            is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid, axis=0))
+            # reduce use of slow initial cell find, by getting outer grid  subset  in outer grid cells overlapping innner grid
+            on_outer_grid_overlapping_inner =  self._outer_overlapping_inner(fgm.reader.grid['outer_grid_cells_overlapping_inner_grid'],
+                                                                           part_prop['n_cell'].data, on_outer_grid,  self.get_partID_buffer('fgmID1') )
+            is_inside, pp = fgm.are_points_inside_domain(np.take(xq, on_outer_grid_overlapping_inner, axis=0))
+            # todo faster way than using np.take??, use indices, rather than mask?
 
             if np.any(is_inside):
                 # move those now inside outer grid and copy in values
-                s = on_outer_grid[is_inside]
+                s = on_outer_grid_overlapping_inner[is_inside]
                 part_prop['hydro_model_gridID'].set_values(n, s)  # put on inner grid
                 part_prop['n_cell'].set_values(pp['n_cell'][is_inside], s)
                 part_prop['n_cell_last_good'].set_values(pp['n_cell'][is_inside], s)
                 part_prop['bc_coords'].set_values(pp['bc_coords'][is_inside, ...], s)
-                on_outer_grid = on_outer_grid[~is_inside]  # found a grid so drop from consideration of moving to another inner grid
 
             # now update existing and those moved from outer to this inner grid
-            on_inner_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', n, out=self.get_partID_buffer('fgmID1'))
+            on_inner_grid = part_prop['hydro_model_gridID'].find_subset_where(active, 'eq', n, out=self.get_partID_buffer('fgmID2'))
 
             # update inner grid,without fixing open boundary
             fgm.setup_time_step(time_sec, xq, on_inner_grid)
 
             # find those outside  this inner grid open boundary and move to outer
             outside_inner = part_prop['status'].find_subset_where(on_inner_grid, 'eq', si.particle_status_flags.outside_open_boundary,
-                                                                  out=self.get_partID_subset_buffer('fgmID2'))
+                                                                  out=self.get_partID_subset_buffer('fgmID3'))
             if outside_inner.size > 0:
                 inside_outer, pp = fgm_outer_grid.are_points_inside_domain(np.take(xq,outside_inner,axis =0))
                 if np.any(inside_outer):
@@ -301,3 +328,16 @@ class DevNestedFields(ParameterBaseClass):
         for f in self.fgm_hydro_grids[1:]:
             d['nested_readers'].append(f.reader.info)
         return d
+
+    @staticmethod
+    @njitOT
+    def _outer_overlapping_inner(outer_grid_cells_overlapping_inner_grid,n_cell, on_outer_grid, out):
+         # check for any on the outer grid (indices=on_outer_grid) that are in that overlap the  inner grid,
+        # this reduces number which must be tested to see it they are inside an inner grid triangle
+        found_inside_inner = 0
+        for n in on_outer_grid:
+            if outer_grid_cells_overlapping_inner_grid[n_cell[n]]:
+                out[found_inside_inner] = n
+                found_inside_inner += 1
+
+        return out[:found_inside_inner]
