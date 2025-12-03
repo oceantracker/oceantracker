@@ -71,32 +71,11 @@ class OceanTrackerParamsRunner(object):
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
         ml.hori_line()
-        # write a sumary of errors etc
+        # write a summary of errors etc
 
         ml.msg(f'Finished "{"??" if  si.run_info.output_file_base is None else si.run_info.output_file_base}"'
                            + ',  started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()))
         ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
-
-
-        # performance
-        total_time = perf_counter()-  self.start_time
-        ml.msg(f'Timings: total = {total_time:5.1f} sec',tabs=2)
-
-        timers=['Setup','Reading hindcast','Initial cell guess', 'RK integration',
-                        'Find initial horizontal cell','Find vertical cell',
-                      'Interpolate fields', 'Update statistics',
-                     'Update custom particle prop.']
-        l = max([len(s) for s in timers])
-        for name in timers:
-            if name in si.block_timers:
-                t = si.block_timers[name]["time"]
-                ml.msg(f'{name + " "*(l-len(name))} {t:4.2f} s\t {100*t/total_time:4.1f}%', tabs=4)
-
-        # core physics timing
-        for name in ['resuspension','dispersion','tracks_writer', 'integrated_model']:
-            if si.core_class_roles[name] is not None:
-                t= si.core_class_roles[name].info["time_spent_updating"]
-                ml.msg(f'{name + " "*(l-len(name))} {t:4.2f} s\t {100*t/total_time:4.1f}%', tabs=4)
 
         # show any errors etc, at end as well
         ml.hori_line(f'Issues    (check above,  any errors repeated below)')
@@ -257,6 +236,7 @@ class OceanTrackerParamsRunner(object):
         si.core_class_roles.solver.solve() # do time stepping
 
         # -----------done -------------------------------
+        t0_close= perf_counter()
         si.output_files['release_groups'] = output_util.write_release_group_netcdf()  # write release groups
         ml.hori_line('Closing all classes')
         for i in si._all_class_instance_pointers_iterator(): i.close()  # close all instances, eg their files if not close etc
@@ -273,58 +253,25 @@ class OceanTrackerParamsRunner(object):
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
         ml.hori_line()
-        # write a sumary of errors etc
-
-        ml.msg(f'Finished "{"??" if si.run_info.output_file_base is None else si.run_info.output_file_base}"'
-               + ',  started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()))
-        ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
+        # write a summary of errors etc
+        ml.msg(f'Finished "{"??" if si.run_info.output_file_base is None else si.run_info.output_file_base}"')
+        si.block_timer('Close down', t0_close)
 
         # performance
         total_time = perf_counter() - self.start_time
         ml.msg(f'Timings: total = {total_time:5.1f} sec', tabs=2)
 
-        timers = ['Setup', 'Reading hindcast', 'Initial cell guess', 'RK integration',
-                  'Find horizontal cell', 'Find vertical cell',
-                  'Interpolate fields', 'Update statistics',
-                  'Update custom particle prop.']
-        l = max([len(s) for s in timers])
-        for name in timers:
+        l = max([len(s) for s in si.block_timers.keys()])
+        for name, item in si.block_timers.items():
             if name in si.block_timers:
                 t = si.block_timers[name]["time"]
-                ml.msg(f'{name + " " * (l - len(name))} {t:4.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
+                ml.msg(f'{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
 
         # core physics timing
         for name in ['resuspension', 'dispersion', 'tracks_writer', 'integrated_model']:
             if si.core_class_roles[name] is not None:
                 t = si.core_class_roles[name].info["time_spent_updating"]
-                ml.msg(f'{name + " " * (l - len(name))} {t:4.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
-
-        # show any errors etc, at end as well
-        ml.hori_line(f'Issues    (check above,  any errors repeated below)')
-        el = ml.msg_lists
-        num_errors = len(el['fatal_error']) + len(el['error'])
-        ml.msg(
-            f'{num_errors:3d} errors,  {len(el["strong_warning"]):3d} strong warnings, {len(el["warning"]):3d} warnings, {len(el["note"]):3d} notes',
-            tabs=1)
-        for v in ml.msg_lists['strong_warning']:
-            ml.msg('Strong_warning >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=1)
-
-        if num_errors > 0:
-            ml.msg(f'>>>>>>> Found {num_errors:2d} errors <<<<<<<<<<<<',
-                   hint='Look for first error above or below  or in  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
-            for v in ml.msg_lists['error']:
-                ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
-            for v in ml.msg_lists['fatal_error']:
-                ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
-            ml.msg('')
-
-        ml.hori_line(f'Finished: output in "{si.run_info.run_output_dir}"')
-
-        if case_info_file is None:
-            ml.msg('Fatal errors, run did not complete  ',
-                   hint='check for first error above, log file.txt or .err file ', error=True)
-
-        ml.close()
+                ml.msg(f'{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
 
         json_util.write_JSON(path.join(si.run_info.run_output_dir, 'completion_state.json'),
                              dict(code_error_free=case_info_file is not None))

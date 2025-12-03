@@ -261,7 +261,9 @@ class Solver(ParameterBaseClass):
             t2 = model_times[nt2]
 
             # release particles
+            tr0 = perf_counter()
             new_particle_indices = pgm.release_particles(nt2, t2)
+            si.block_timer('Releasing particles', tr0)
 
             # do stats etc updates and write tracks at new time step
             self._pre_step_bookkeeping(nt2, t2, new_particle_indices)
@@ -283,8 +285,6 @@ class Solver(ParameterBaseClass):
 
 
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
-            si.block_timer('Time stepping',t0_step)
-
             self.stop_update_timer()
 
             # warn of  high physical memory use
@@ -398,7 +398,7 @@ class Solver(ParameterBaseClass):
         # single step in particle tracking, t is time in seconds, is_moving are indcies of moving particles
         # this is done inplace directly operation on the particle properties
         # nb is buffer offset
-        t0 = perf_counter()
+
         RK_order =self.params['RK_order']
         fgm = si.core_class_roles.field_group_manager
         part_prop =  si.class_roles.particle_properties
@@ -462,12 +462,12 @@ class Solver(ParameterBaseClass):
         #  v = (v1 + 2.0 * (v2 + v3) + v4) /6
         #  x2 = x1 + v*dt
         self._euler_substep(x1, water_velocity, velocity_modifier, dt, is_moving, x2)  # set final location directly to particle x property
-        si.block_timer('RK integration', t0)
+
         pass
 
     def _euler_substep(self, xold, water_velocity, velocity_modifier, dt, active, xnew):
         part_prop = si.class_roles.particle_properties
-
+        t0 = perf_counter()
         if si.run_info.is3D_run:
             if si.settings.use_geographic_coords:
                 solver_util.euler_substep_geographic3D(part_prop['degrees_per_meter'].data,
@@ -480,6 +480,7 @@ class Solver(ParameterBaseClass):
                                                        xold, water_velocity, velocity_modifier, dt, active, xnew)
             else:
                 solver_util.euler_substep2D(xold, water_velocity, velocity_modifier, dt, active, xnew)
+        si.block_timer('RK integration', t0)
 
     def _screen_output(self, nt, time_sec,t0_model, t_step):
         ri = si.run_info

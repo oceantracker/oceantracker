@@ -19,9 +19,9 @@ def execute_notebook(notebook_path, timeout=300):
         tuple: (success: bool, error_message: str)
     """
     try:
-        with open(notebook_path) as f:
+        with open(notebook_path, encoding='utf-8') as f:
             nb = nbformat.read(f, as_version=4)
-        
+
         # Create client with working directory set to notebook's directory
         client = NotebookClient(
             nb,
