@@ -300,16 +300,8 @@ class OceanTrackerParamsRunner(object):
         # do class role lists
         for role, param_list in working_params['class_roles'].items():
             if role in ['nested_readers']: continue
-
             for params in param_list:
                 i = si.add_class(role, params=params)
-
-        # checks to enable restart,
-        # enforce update interval matches save state interval
-        if si.settings.restart_interval  is not None:
-            for role in ['particle_statistics']:
-                for name, i in si.class_roles[role].items():
-                    pass
 
         if ccr['integrated_model'] is not None:
             si.add_class('integrated_model', ccr['integrated_model'])
@@ -460,9 +452,8 @@ class OceanTrackerParamsRunner(object):
             last_time.append( start + md * life_span)
 
         # set model run start/end time allowing for back tracking
-        start_time = np.min(md * np.asarray(first_time)) * md
-
-        end_time   = np.max(md * np.asarray(last_time)) * md
+        start_time = float(np.min(md * np.asarray(first_time)) * md)
+        end_time   = float(np.max(md * np.asarray(last_time )) * md)
 
         if  not (hi_start <= start_time <= hi_end):
             si.msg_logger.msg(f'Start time = "{time_util.seconds_to_isostr(start_time)}" is outside the hindcast times',fatal_error=True, caller=self,

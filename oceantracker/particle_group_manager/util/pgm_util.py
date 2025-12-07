@@ -17,7 +17,6 @@ def _status_counts_and_kill_old_particles(age, status, IDrelease_group,max_age_f
         for m in range(status_counts.shape[1]): status_counts[n,m] = 0
 
     alive = 0
-
     # loop over active buffer
     for n in prange(num_in_buffer):
         is_active = status[n] >= status_stationary
@@ -28,6 +27,6 @@ def _status_counts_and_kill_old_particles(age, status, IDrelease_group,max_age_f
             is_active = False
 
         alive += is_active
-        status_counts[get_thread_id(),status[n] - 128] += 1
+        status_counts[get_thread_id(),int(status[n]) + 128] += 1
 
     return alive

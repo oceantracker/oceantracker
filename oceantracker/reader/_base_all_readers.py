@@ -453,20 +453,24 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         bi = self.info['buffer_info']
 
+        # find time first step in numerical step within hindcast
+        # hindcast_fraction = (time_sec - info['start_time']) / info['duration']
+        # current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
+        # current_hydro_model_step = numba_util.find_last_less_than(info['time_coord'], time_sec )
 
-        #hindcast_fraction = (time_sec - info['start_time']) / info['duration']
-        #current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
+        current_hydro_model_step = np.searchsorted(info['time_coord'], time_sec, side='left')
 
-        current_hydro_model_step = numba_util.find_last_less_than(info['time_coord'], time_sec )
-        if si.settings.backtracking:
+        if si.settings.backtracking and time_sec > self.get_time(current_hydro_model_step):
+            # round up  to the next time step if backtracking
             current_hydro_model_step += 1 # need next one if working backward
 
+        # get time at first time step
         time_hindcast = self.get_time(current_hydro_model_step)
 
         # ring buffer locations of surrounding steps
         current_buffer_steps = np.zeros((2,), dtype=np.int32)
         current_buffer_steps[0] = current_hydro_model_step % si.settings.time_buffer_size
-        current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.model_direction)) % si.settings.time_buffer_size
+        current_buffer_steps[1] = (current_hydro_model_step + int(si.run_info.backtracking )) % si.settings.time_buffer_size
 
         # sets the fraction of time step that current time is between
         # surrounding hindcast time steps
