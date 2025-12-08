@@ -454,7 +454,7 @@ class _BaseReader(ParameterBaseClass):
         bi = self.info['buffer_info']
 
         # find time first step in numerical step within hindcast
-        # version 3)  faster numpy binary search, clipped to be inside last time step
+        # version 3)  faster numpy binary search, clipped to be inside if in the last time step
         current_hydro_model_step = min(int(np.searchsorted(info['time_coord'], time_sec, side='left')), info['time_coord'].size-2)
 
         if si.settings.backtracking and time_sec > self.get_time(current_hydro_model_step):
