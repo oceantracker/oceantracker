@@ -54,14 +54,14 @@ def main(args=None):
     if not args.norun:
         case_info_file = ot.run()
     else:
-        case_info_file = test_definitions.get_case_inf_name(ot.params)
+        case_info_file = test_definitions.get_case_info_name_from_params(ot.params)
 
     test_definitions.compare_reference_run_tracks(case_info_file, args)
     test_definitions.compare_reference_run_stats(case_info_file, args)
 
     tests=dict()
     tracks = test_definitions.load_tracks(case_info_file)
-    tracks_ref = test_definitions.read_tracks(case_info_file, ref_case=True)
+    tracks_ref = test_definitions.load_tracks(case_info_file, ref_case=True)
 
     # check z fractions are in range 0-1
     z_fraction= tracks['z_fraction']

@@ -8,6 +8,7 @@ from numba.core.types import Object
 
 from oceantracker import definitions
 
+
 from copy import deepcopy
 
 class dummy():pass
@@ -27,7 +28,7 @@ def base_settings(fn,args,label=None):
     if args.variant is not None: s+=f'_{args.variant:02d}'
     if label is not None: s += f'_{label}'
     d =  dict(output_file_base=s,
-            root_output_dir=path.join(definitions.default_output_dir, 'dev_runs'),
+            root_output_dir=path.join(definitions.default_output_dir, 'dev_runs', 'latest_runs' ),
             #root_output_dir=path.join('C:\oceantracker_output', 'dev_runs'),
             time_step=600.,  # 10 min time step
             use_random_seed = True,
@@ -241,24 +242,11 @@ ax = [1591000, 1601500, 5478500, 5491000]
 
 def load_tracks(case_info_file, ref_case=False,fraction_to_read=None):
     from oceantracker.read_output.python import load_output_files
-
-    fn = case_info_file if not ref_case else case_info_file.replace('dev_runs', 'unit_test_reference_cases')
+    fn = case_info_file if not ref_case else case_info_file.replace('latest_runs', 'reference_runs')
 
     return load_output_files.load_track_data(fn, fraction_to_read=fraction_to_read)
 
-def read_tracks(case_info_file, ref_case=False,fraction_to_read=None):
-    from oceantracker.read_output.python import load_output_files
-    from oceantracker.read_output.python.read_ncdf_output_files import read_tracks_file, merge_track_files
-
-    case_info_file = case_info_file if not ref_case else case_info_file.replace('dev_runs', 'unit_test_reference_cases')
-    case_info = load_output_files.read_case_info_file(case_info_file)
-    o = case_info['output_files']
-
-    fn = path.join(o['run_output_dir'],o['tracks_writer'][0])
-    #d = read_tracks_file(fn,fraction_to_read=fraction_to_read)
-    d = merge_track_files(o['tracks_writer'],dir=o['run_output_dir'], fraction_to_read=fraction_to_read)
-    return d
-def get_case_inf_name(params):
+def get_case_info_name_from_params(params):
     return path.join(params['root_output_dir'],params['output_file_base'],params['output_file_base']+'_caseInfo.json')
 
 
@@ -269,19 +257,20 @@ YELLOW = '\033[93m'
 BLUE = '\033[94m'
 RESET = '\033[0m' # Resets to default color and style
 
+from oceantracker.read_output.python import load_output_files
+
 def compare_reference_run_tracks(case_info_file, args):
 
 
     if case_info_file is None : return
 
-
-    reference_case_info_file = case_info_file.replace('dev_runs', 'unit_test_reference_cases')
+    reference_case_info_file = case_info_file.replace('latest_runs', 'reference_runs')
     if args.reference_case:
         # rewrite reference case output
         shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)
 
-    tracks = load_tracks(case_info_file)
-    tracks_ref = load_tracks(case_info_file, ref_case=True)
+    tracks     = load_output_files.load_track_data(case_info_file)
+    tracks_ref = load_output_files.load_track_data(reference_case_info_file)
     dx = np.abs(tracks['x'] - tracks_ref['x'])
 
     # print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
@@ -303,7 +292,7 @@ def compare_reference_run_stats(case_info_file, args):
     from oceantracker.read_output.python import load_output_files
     case_info = load_output_files.read_case_info_file(case_info_file)
 
-    reference_case_info_file = case_info_file.replace('dev_runs', 'unit_test_reference_cases')
+    reference_case_info_file = case_info_file.replace('latest_runs', 'reference_runs')
     if args.reference_case:
         # rewrite reference case output
         shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)
@@ -366,7 +355,7 @@ def show_track_plot(case_info_file, args,colour_with=None):
         print('>>> Run failed no unit test plot')
         return
 
-    tracks= load_tracks(case_info_file)
+    tracks= load_output_files.load_track_data(case_info_file)
 
     movie_file1= path.join(image_dir, 'decay_movie_frame.mp4') if args.save_plots else None
 
@@ -380,5 +369,5 @@ def plot_vert_section(case_info_file, args,fraction_to_read):
     if not args.plot: return
 
     from oceantracker.plot_output.plot_tracks import plot_path_in_vertical_section
-    tracks = load_tracks(case_info_file,fraction_to_read=fraction_to_read)
+    tracks = load_output_files.load_track_data(case_info_file,fraction_to_read=fraction_to_read)
     plot_path_in_vertical_section(tracks, particleID=np.arange(0,tracks['x'].shape[1],10))
