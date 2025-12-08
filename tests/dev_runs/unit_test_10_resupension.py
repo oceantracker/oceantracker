@@ -3,12 +3,12 @@ from os import path
 from oceantracker.main import OceanTracker
 from oceantracker import  definitions
 import numpy as np
-from dev_runs import test_definitions
+import dd
 from matplotlib import  pyplot as plt
 
 def main(args):
     ot = OceanTracker()
-    ot.settings(**test_definitions.base_settings(__file__,args))
+    ot.settings(**dd.base_settings(__file__,args))
 
 
     time_step =5*60
@@ -21,7 +21,7 @@ def main(args):
 
     ot.add_class('tracks_writer',update_interval = time_step, write_dry_cell_flag=True,)
     #ot.settings(NUMBA_cache_code = True)
-    hm = test_definitions.hydro_model['demoSchism3D']
+    hm = dd.hydro_model['demoSchism3D']
     ot.add_class('reader', **hm['reader'])
 
     # add a point release
@@ -33,10 +33,10 @@ def main(args):
     ot.add_class('velocity_modifiers', class_name='TerminalVelocity', name='fall_vel',value=-0.01)
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
+    ot.add_class('particle_statistics',**dd.my_heat_map_time)
 
     # add a decaying particle property,# with exponential decay based on age
-    ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
+    ot.add_class('particle_properties', **dd.pp1) # add a new property to particle_properties role
     ot.add_class('particle_properties', name='water_speed', class_name='VectorMagnitude2D',vector_part_prop='water_velocity')
     ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay')
     ot.add_class('particle_properties', class_name='DistanceTravelled')
@@ -52,8 +52,8 @@ def main(args):
     if True:
         ot.add_class('resuspension', critical_friction_velocity=0.01, class_name='BasicResuspension')
         case_info_file2 = ot.run()
-        test_definitions.show_track_plot(case_info_file2, args)
-        test_definitions.plot_vert_section(case_info_file2,args, fraction_to_read=0.01 )
+        dd.show_track_plot(case_info_file2, args)
+        dd.plot_vert_section(case_info_file2,args, fraction_to_read=0.01 )
 
     # compare water depth at that in schism zcor
     if args.plot:
@@ -87,7 +87,7 @@ def main(args):
         plt.show()
 
     if args.plot:
-        test_definitions.plot_vert_section(case_info_file1,args, fraction_to_read=0.01)
+        dd.plot_vert_section(case_info_file1,args, fraction_to_read=0.01)
 
         from oceantracker.read_output.python import load_output_files
         tracks1 = load_output_files.load_track_data(case_info_file1, fraction_to_read=0.01)
@@ -95,7 +95,7 @@ def main(args):
         plt.show()
 
 
-    test_definitions.show_track_plot(case_info_file1, args)
+    dd.show_track_plot(case_info_file1, args)
 
 
 

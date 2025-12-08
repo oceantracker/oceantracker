@@ -1,6 +1,6 @@
 from os import path
 from oceantracker.main import OceanTracker
-import   test_definitions
+import   dd
 import numpy as np
 from oceantracker.read_output.python import load_output_files
 
@@ -12,14 +12,14 @@ def main(args):
     ci =[]
     for n, p in enumerate(['forwards', 'backwards']):
         ot = OceanTracker()
-        ot.settings(**test_definitions.base_settings(__file__,args))
+        ot.settings(**dd.base_settings(__file__,args))
 
         ot.settings(max_run_duration=  2 * 24 * 3600., use_dispersion=False,
                     backtracking=False if n == 0 else True,
                     time_step= 60,
                     output_file_base= ot.params['output_file_base'] + '_run_' + p,
                     time_buffer_size=2) # test with  tiny buffer
-        hm = test_definitions.hydro_model['demoSchism2D']
+        hm = dd.hydro_model['demoSchism2D']
         ot.add_class('reader', **hm['reader'])
         ot.add_class('tracks_writer', update_interval=60, write_dry_cell_flag=False)
 
@@ -28,7 +28,7 @@ def main(args):
             start = None
         else:
             # run backwards from end of forwards
-            tracks = test_definitions.load_tracks(ci[0])
+            tracks = dd.load_tracks(ci[0])
             points = tracks['x'][-1]
             start = tracks['time'][-1]
 

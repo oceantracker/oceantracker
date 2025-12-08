@@ -1,7 +1,7 @@
 from oceantracker.main import OceanTracker
 from oceantracker.plot_output import plot_statistics
 
-from dev_runs import test_definitions
+import dd
 
 
 # double gyre https://shaddenlab.berkeley.edu/uploads/LCS-tutorial/examples.html
@@ -22,7 +22,7 @@ def _run(args):
     match args.variant:
         case 0:
             label='demoSchism3D'
-            hm = test_definitions.hydro_model['demoSchism3D']
+            hm = dd.hydro_model['demoSchism3D']
             model_settings.update(
                 grid_size=[90, 120],
                 grid_span=[6000, 8000],
@@ -33,7 +33,7 @@ def _run(args):
         case 1:
             # double gyre https://shaddenlab.berkeley.edu/uploads/LCS-tutorial/examples.html
             label = 'doubleGyre'
-            hm = test_definitions.hydro_model['doubleGyre']
+            hm = dd.hydro_model['doubleGyre']
             model_settings.update(
                 grid_size=[200, 400],
                 grid_span=[2 - 1 / 100, 1 - 1 / 100],
@@ -43,7 +43,7 @@ def _run(args):
 
         case 2:
             label='NZnational_auck'
-            hm = test_definitions.hydro_model['NZnational']
+            hm = dd.hydro_model['NZnational']
             model_settings.update(
                 grid_size=[100, 100],
                 grid_span=[60000, 60000],
@@ -53,7 +53,7 @@ def _run(args):
             settings.update(max_run_duration=7*24*3600, time_step=3600)
         case 3:
             label='sounds'
-            hm = test_definitions.hydro_model['sounds']
+            hm = dd.hydro_model['sounds']
             model_settings.update(
                 grid_size=[100, 100],
                 grid_span=[10000, 10000],
@@ -65,7 +65,7 @@ def _run(args):
     ot = OceanTracker()
 
     ot.add_class('reader', **hm['reader'])
-    ot.settings(**test_definitions.base_settings(__file__, args, label))
+    ot.settings(**dd.base_settings(__file__, args, label))
     ot.settings(**settings)
 
     ot.add_class('integrated_model',  class_name= 'dev_LagarangianStructuresFTLE2D',

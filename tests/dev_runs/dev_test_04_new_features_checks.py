@@ -2,12 +2,12 @@ from os import path
 from oceantracker.main import OceanTracker
 from oceantracker import  definitions
 import numpy as np
-from dev_runs import test_definitions
+import dd
 from copy import deepcopy
 
 def main(args):
     ot = OceanTracker()
-    ot.settings(**test_definitions.base_settings(__file__,args))
+    ot.settings(**dd.base_settings(__file__,args))
     ot.settings(time_step=1800,
                 particle_buffer_initial_size=20000,
                 min_dead_to_remove = 100,
@@ -18,28 +18,28 @@ def main(args):
     ot.add_class('tracks_writer',update_interval = 1800, write_dry_cell_flag=False)
 
     #ot.settings(NUMBA_cache_code = True)
-    hm = test_definitions.hydro_model['demoSchism3D']
+    hm = dd.hydro_model['demoSchism3D']
     ot.add_class('reader', **hm['reader'])
 
     # add a point releases
-    ot.add_class('release_groups',**dict(test_definitions.rg3points,pulse_size=100))
+    ot.add_class('release_groups',**dict(dd.rg3points,pulse_size=100))
 
     # add a decaying particle property,# with exponential decay based on age
-    ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
+    ot.add_class('particle_properties', **dd.pp1) # add a new property to particle_properties role
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
+    ot.add_class('particle_statistics',**dd.my_heat_map_time)
 
-    ps2 = deepcopy(test_definitions.my_heat_map_time)
+    ps2 = deepcopy(dd.my_heat_map_time)
     ps2.update(name='near_bottom', near_seabed=1.,z_min=None,z_max=None)
     ot.add_class('particle_statistics', **ps2)
 
 
-    ps3 = deepcopy(test_definitions.my_heat_map_time)
+    ps3 = deepcopy(dd.my_heat_map_time)
     ps3.update(name='near_seasurface', near_seasurface=1.,z_min=None,z_max=None)
     ot.add_class('particle_statistics', **ps3)
 
-    ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time,
+    ot.add_class('particle_statistics', **dd.my_poly_stats_time,
                  polygon_list=[dict(points=hm['polygon'])])
 
     ot.add_class('resuspension', critical_friction_velocity=0.01)

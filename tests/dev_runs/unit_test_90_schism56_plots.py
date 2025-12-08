@@ -1,14 +1,14 @@
 from oceantracker.main import OceanTracker
 
-from dev_runs import test_definitions
+import dd
 
 
 def main(args):
     ot = OceanTracker()
-    ot.settings(**test_definitions.base_settings(__file__,args))
+    ot.settings(**dd.base_settings(__file__,args))
     ot.settings(time_step=240, use_A_Z_profile=True, screen_output_time_interval=240)
 
-    ot.add_class('reader', **test_definitions.reader_demo_schisim3D)
+    ot.add_class('reader', **dd.reader_demo_schisim3D)
 
     # add releasess
     poly_points = [[1597682.1237, 5489972.7479],
@@ -32,10 +32,10 @@ def main(args):
                         pulse_size= 10)
 
     # add a decaying particle property,# with exponential decay based on age
-    ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
+    ot.add_class('particle_properties', **dd.pp1) # add a new property to particle_properties role
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
+    ot.add_class('particle_statistics',**dd.my_heat_map_time)
 
     ot.add_class('dispersion', A_H= .2, A_V= 0.001)
     ot.add_class('resuspension', critical_friction_velocity=0.005)
@@ -44,7 +44,7 @@ def main(args):
 
     case_info_file = ot.run()
 
-    test_definitions.show_track_plot(case_info_file, args)
+    dd.show_track_plot(case_info_file, args)
 
     return ot.params
 

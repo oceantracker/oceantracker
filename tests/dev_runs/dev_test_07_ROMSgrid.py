@@ -1,10 +1,10 @@
 from oceantracker.main import OceanTracker
 import numpy as np
-import test_definitions
+import dd
 
 def main(args):
     ot = OceanTracker()
-    ot.settings(**test_definitions.base_settings(__file__,args))
+    ot.settings(**dd.base_settings(__file__,args))
     ot.settings(time_step=1800,
                 use_dispersion=False,
              use_A_Z_profile=False,
@@ -13,7 +13,7 @@ def main(args):
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,)
 
     #ot.settings(NUMBA_cache_code = True)
-    hm = test_definitions.hydro_model['demoROMS']
+    hm = dd.hydro_model['demoROMS']
 
     ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True)
 
@@ -36,7 +36,7 @@ def main(args):
                  grid_center=[-69.5, 43.5],
                  )
     # add a decaying particle property,# with exponential decay based on age
-    ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
+    ot.add_class('particle_properties', **dd.pp1) # add a new property to particle_properties role
     ot.add_class('particle_properties', name='water_speed', class_name='VectorMagnitude2D',vector_part_prop='water_velocity')
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
@@ -62,9 +62,9 @@ def main(args):
                                         )
     case_info_file = ot.run()
 
-    test_definitions.compare_reference_run_tracks(case_info_file, args)
+    dd.compare_reference_run_tracks(case_info_file, args)
 
-    test_definitions.show_track_plot(case_info_file, args)
+    dd.show_track_plot(case_info_file, args)
 
 
 

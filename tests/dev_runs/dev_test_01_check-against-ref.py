@@ -1,13 +1,13 @@
 from oceantracker.main import OceanTracker
 
 import numpy as np
-import test_definitions
+import dd
 
 def main(args=None):
-    args= test_definitions.check_args(args)
+    args= dd.check_args(args)
 
     ot = OceanTracker()
-    ot.settings(**test_definitions.base_settings(__file__,args))
+    ot.settings(**dd.base_settings(__file__,args))
     ot.settings(time_step=1800,
                 use_dispersion=False,
                 screen_output_time_interval=1800,
@@ -26,42 +26,42 @@ def main(args=None):
                ) # keep file small
 
     #ot.settings(NUMBA_cache_code = True)
-    hm = test_definitions.hydro_model['demoSchism3D']
+    hm = dd.hydro_model['demoSchism3D']
     ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True,)
 
     # add a point release
-    ot.add_class('release_groups',**test_definitions.rg_release_interval0)
-    ot.add_class('release_groups', **test_definitions.rg_start_in_datetime1)
+    ot.add_class('release_groups',**dd.rg_release_interval0)
+    ot.add_class('release_groups', **dd.rg_start_in_datetime1)
 
     #ot.add_class('trajectory_modifiers', class_name='oceantracker.trajectory_modifiers.surface_float.SurfaceFloat', name='surface')
 
     # add a decaying particle property,# with exponential decay based on age
-    ot.add_class('particle_properties', **test_definitions.pp1) # add a new property to particle_properties role
+    ot.add_class('particle_properties', **dd.pp1) # add a new property to particle_properties role
     ot.add_class('particle_properties',name='water_speed', class_name='VectorMagnitude2D',vector_part_prop='water_velocity')
     ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay')
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
     # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**test_definitions.my_heat_map_time)
-    ot.add_class('particle_statistics', **test_definitions.my_heat_map_age)
+    ot.add_class('particle_statistics',**dd.my_heat_map_time)
+    ot.add_class('particle_statistics', **dd.my_heat_map_age)
 
-    ot.add_class('particle_statistics', **test_definitions.my_poly_stats_time,   polygon_list=[dict(points=hm['polygon'])])
-    ot.add_class('particle_statistics', **test_definitions.my_poly_stats_age, polygon_list=[dict(points=hm['polygon'])])
+    ot.add_class('particle_statistics', **dd.my_poly_stats_time,   polygon_list=[dict(points=hm['polygon'])])
+    ot.add_class('particle_statistics', **dd.my_poly_stats_age, polygon_list=[dict(points=hm['polygon'])])
 
-    ot.add_class('particle_statistics', **test_definitions.my_heat_map3D_time)
-    ot.add_class('particle_statistics', **test_definitions.my_heat_map2D_time_runningMean)
+    ot.add_class('particle_statistics', **dd.my_heat_map3D_time)
+    ot.add_class('particle_statistics', **dd.my_heat_map2D_time_runningMean)
 
     if not args.norun:
         case_info_file = ot.run()
     else:
-        case_info_file = test_definitions.get_case_info_name_from_params(ot.params)
+        case_info_file = dd.get_case_info_name_from_params(ot.params)
 
-    test_definitions.compare_reference_run_tracks(case_info_file, args)
-    test_definitions.compare_reference_run_stats(case_info_file, args)
+    dd.compare_reference_run_tracks(case_info_file, args)
+    dd.compare_reference_run_stats(case_info_file, args)
 
     tests=dict()
-    tracks = test_definitions.load_tracks(case_info_file)
-    tracks_ref = test_definitions.load_tracks(case_info_file, ref_case=True)
+    tracks = dd.load_tracks(case_info_file)
+    tracks_ref = dd.load_tracks(case_info_file, ref_case=True)
 
     # check z fractions are in range 0-1
     z_fraction= tracks['z_fraction']
@@ -130,7 +130,7 @@ def main(args=None):
         plt.show()
 
 
-    test_definitions.show_track_plot(case_info_file, args)
+    dd.show_track_plot(case_info_file, args)
 
     return  ot.params
 
