@@ -454,15 +454,12 @@ class _BaseReader(ParameterBaseClass):
         bi = self.info['buffer_info']
 
         # find time first step in numerical step within hindcast
-        #hindcast_fraction = (time_sec - info['start_time']) / info['duration']
-        #current_hydro_model_step = int((info['total_time_steps'] - 1) * hindcast_fraction)  # global hindcast time step
-        # current_hydro_model_step = numba_util.find_last_less_than(info['time_coord'], time_sec )
-
-        current_hydro_model_step = int(np.searchsorted(info['time_coord'], time_sec, side='left'))
+        # version 3)  faster numpy binary search, clipped to be inside last time step
+        current_hydro_model_step = min(int(np.searchsorted(info['time_coord'], time_sec, side='left')), info['time_coord'].size-2)
 
         if si.settings.backtracking and time_sec > self.get_time(current_hydro_model_step):
             # round up  to the next time step if backtracking
-            current_hydro_model_step += 1 # need next one if working backward
+            current_hydro_model_step += 1 # need next one if working backwards
 
         # get time at first time step
         time_hindcast = self.get_time(current_hydro_model_step)
