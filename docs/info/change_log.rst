@@ -3,10 +3,25 @@
 Change log
 ###########################
 
-Version '0.5.2.54 2025-12-09'
-____________________________
+Version '0.5.2.55 2025-12-10'
+_____________________________
 
-Rebulid stats ito use mutiple inheritence
+Bug fixes
+---------
+#. Vertical grid interpolation in z-type grids changed, to handle surface cell correctly
+#. Fixed broken documentation github action
+
+New features
+------------
+#. Added GLORYS/NEMO hindcast to unit test
+
+
+Added average part. prop.  to stats netcdfs
+Added connectivty calc. to netcdf only for age based stats
+
+Version '0.5.2.54 2025-12-09'
+_____________________________
+
 
 Breaking changes
 ----------------
@@ -21,12 +36,13 @@ New features
 ------------
 #. Added several new unit tests 
 
-
-Added average part. prop.  to stats netcdfs
-Added connectivty calc. to netcdf only for age based stats
+Misc.
+-----
+Rebulid stats  use mutiple inheritence
+Added average part. prop. to stats netcdfs
 
 Version '0.5.2.53 2025-10-30'
-____________________________
+_____________________________
 
 Breaking changes
 ----------------

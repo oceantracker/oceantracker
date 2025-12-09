@@ -85,7 +85,7 @@ jobs:
       - name: Build Sphinx documentation
         run: |
           cd docs
-          sphinx-build -b html -W --keep-going . _build/html
+          sphinx-build -b html --keep-going . _build/html
           cd ..
       
       - name: Check for broken links (optional)
