@@ -21,6 +21,12 @@ dist/
 /dev/demos/output/
 /dev/demos/root_output_dir/
 
+# Act (GitHub Actions local runner)
+.actrc
+act-*.log
+.secrets
+bin/
+
 .idea
 .coverage
 .vscode/
