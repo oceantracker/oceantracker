@@ -66,7 +66,7 @@ class _BaseEventLogger(ParameterBaseClass):
         info['prop_to_write'] = list(set(deepcopy(params['particle_prop_to_write_list']) + addition_prop_to_write))
         info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag'] + '_' + self.params['name'] + '.nc'
 
-        self.nc = NetCDFhandler(os.path.join(si.run_info.run_output_dir, info['output_file']), 'w')
+        self.nc = NetCDFhandler(os.path.join(si.run_info.root_output_dir, info['output_file']), 'w')
 
         self.nc.create_dimension('event_dim', dim_size=None) # open dim
 

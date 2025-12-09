@@ -4,7 +4,7 @@ from copy import deepcopy
 from os import path, makedirs, remove
 import argparse
 import xarray as xr
-from oceantracker.util import class_importer_util, parameter_checking, message_logger, json_util
+from oceantracker.util import class_importer_util, parameter_checking, message_logger, json_util, time_util
 missing_int = -9999
 
 def compute_scale_and_offset_int16(data, missing_value=None):
@@ -62,6 +62,7 @@ def get_required_var_names(i,args):
     # required grid variables
     for v in ['x','y','z_interface']:  add_var('required_vars',i, params['grid_variable_map'], v)
 
+
     # required integer variables from grid
     for v in ['bottom_interface_index','is_dry_cell']:  add_var('required_int_vars', i, params['grid_variable_map'], v)
 
@@ -84,6 +85,9 @@ def get_required_var_names(i,args):
     i['time_var'] = gmap['time']
 
     i['required_vars'] = list(set(i['required_vars'])) # make list unique
+
+    if args.full: i['name'] += f'_{i["label"]}'  # tag full dir with label
+    i['reader'] = reader
     return i
 
 def _ensure_int(data):
@@ -152,6 +156,7 @@ def write_files(i, args):
     file_list = glob(path.join(i['input_dir'], '**', i['file_mask']), recursive=True)
 
     out_dir = path.join(i['output_dir'],f'{i["name"]}')
+
     if not path.exists(out_dir):
         makedirs(out_dir)
     else:
@@ -169,8 +174,10 @@ def write_files(i, args):
 
         if i['time_var'] in ds.variables:
             dims['time'] = ds[ i['time_var']].dims[0]
-            t0  = min( float(ds[i['time_var']][0]), t0)
+            t0_file =  i['reader'].decode_time(ds[i['time_var']][0]) # decode with reader to ensure its in seconds since 1970
+            t0  = min( float(t0_file), t0)
         ds.close()
+
 
     # find file with coords and get new triangulation
     if not i['structured']:
@@ -180,19 +187,24 @@ def write_files(i, args):
         i['dim_slices'][dims['cell']] = info['required_cells']
         print('compressed: unstructured grid  nodes = ', info['required_nodes'].size, 'cells', info['required_cells'].size,)
 
-    tmax = 14*24*3600 if args.full else 24*3600
+
+    tmax = 24*3600 if args.full else 24*3600
 
     for nn, file in enumerate(file_list):
 
         ds = xr.open_dataset(file, decode_times=False, decode_coords=False,decode_timedelta=False)
         if i['time_var'] in ds.variables:
             # only copy files with first tmax of first time
-            if  ds[i['time_var']].data[0]-t0 >= tmax: continue
+            file_times = i['reader'].decode_time(ds[i['time_var']]) # decode with reader to ensure its in seconds since 1970
+            if  file_times[0]-t0 >= tmax: continue
+            print(f'\t\t times  {time_util.seconds_to_isostr(file_times[0])} to {time_util.seconds_to_isostr(file_times[-1])}, timesteps= {file_times.size}')
             #  time decimate whole dataset, won't work on one time step per file
             if dims['time'] in ds.dims:
                 ds = ds.isel({dims['time']: slice(None, None, i['time_decimation'])})
 
-        print('starting file: ', path.basename(file))
+        print('starting file: ', file)
+        print('\t\t vars', list(ds.variables.keys()))
+        print('\t\t\t dims', ds.dims)
 
 
         ds_out = xr.Dataset()
@@ -215,6 +227,7 @@ def write_files(i, args):
         if 'triangulation' in grid and grid['triangulation'] in ds.variables:
             ds_out[grid['triangulation']] = xr.DataArray(info['new_triangulation'], dims=info['triangulation_dims'])
 
+
         # loop over vars
         for v in copy_vars:
             if v not in ds.variables: continue
@@ -223,10 +236,10 @@ def write_files(i, args):
             # loop over all slicing
             for dim,s  in i['dim_slices'].items():
                 if dim  in data.dims:
-
                     data= data.isel({dim:s})
 
-            if v in i['required_int_vars']: data.data = _ensure_int(data.data)
+            if v in i['required_int_vars']:
+                data.data = _ensure_int(data.data)
 
             # compress time varying floats
             if dims['time'] in  data.dims and np.issubdtype(data,np.floating):
@@ -235,14 +248,12 @@ def write_files(i, args):
                                dtype=np.int16,  zlib=True, complevel=9 )
             ds_out[v] = data.compute()
 
-
-
         fn = path.join(out_dir,   f'{i["name"]}_{nn:03d}.nc')
 
         if len(ds_out.variables) > 0:
-            print('\t writing file: ', path.basename(fn))
+            print('\t writing file: ', path.basename(fn), 'variables', list(ds_out.variables.keys()))
             ds_out.to_netcdf(fn, encoding=encoding)
-            print('\t\t done file: ', fn, list( ds.variables.keys()))
+            print('\t\t done file: ', fn,'dims', ds_out.sizes)
         pass
 
     # write release point json
@@ -281,7 +292,7 @@ def schism(args):
     #todo hgrid file?
     base = dict(structured=False, one_based=True,)
     schism3D = deepcopy(base)
-    schism3D.update( name='schism3D',  time_decimation=2,is3D=True,
+    schism3D.update( name='schism3D',  time_decimation=2,is3D=True,label='MalbroughSounds_10year',
                     axis_limits =  1.0e+06 *np.asarray([ 1.5903,    1.6026,    5.4795,    5.501]), # abel tasman
                     input_dir =r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2012',
                     file_mask= r'schism_marl201201*.nc',
@@ -290,18 +301,18 @@ def schism(args):
                           )
 
     schism2D = deepcopy(base)
-    schism2D.update( name='schism2D',  time_decimation=1, is3D=False,
+    schism2D.update( name='schism2D',  time_decimation=1, is3D=False,label='Port_Philip_bay',
                     axis_limits = [143.92515111738638, 144.20689192125877,-38.5723758591546,  -38.44437128551422], # abel tasman
                     #input_dir =r'D:\Hindcast_reader_tests\Schisim\PPB_Hydro_netCDF',
                      input_dir= r'D:\Hindcasts\Australia\2022_PortPhillipBay2020\HUY2020\schism',
-                    file_mask= r'202001010100.nc',
+                    file_mask= r'202001*.nc',
                     class_name= 'oceantracker.reader.SCHISM_reader.SCHISMreader',
                     deep_point=[144.0824017986175, -38.523889278230214, -2],
                           )
 
     schism3Dv5 = deepcopy(base)
     dx = 0.05
-    schism3Dv5.update(name='schism3D_v5', is3D=True,
+    schism3Dv5.update(name='schism3D_v5', is3D=True,label='HaurakiGulfv5',
            class_name='oceantracker.reader.SCHISM_reader_v5.SCHISMreaderV5',
            time_decimation=1,
            input_dir=r'F:\Hindcast_reader_tests\Schimsv5\HaurakiGulfv5\01',
@@ -317,12 +328,22 @@ def GLORYS(args):
     base = dict(structured=True, one_based=True,
                 class_name= 'oceantracker.reader.GLORYS_reader.GLORYSreader',)
     GLORYS3DfizedZ = deepcopy(base)
-    GLORYS3DfizedZ.update( name='Glorys3DfixedZ',  time_decimation=2,is3D=True,
-                    axis_limits =  1.0e+06 *np.asarray([ 1.5903,    1.6026,    5.4795,    5.501]), # abel tasman
-                    input_dir =r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D',
-                    file_mask= 'cmems*.nc',
-                    required_int_var=['mask'],
-                    deep_point=[1594000, 5484200, -2],
+    GLORYS3DfizedZ.update( name='Glorys3DfixedZ',  time_decimation=1,
+                           is3D=True,label='BalticSea',
+                           #label='NZregion',
+
+                    #input_dir =r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D',
+                    #file_mask='cmems*.nc',
+                    input_dir=f'D:\Hindcast_reader_tests\Glorys\BalticSea',
+                    file_mask='BAL**.nc',
+                    # slice regular grids
+                    dim_slices = dict(lat=range(400,450),
+                                      lon=range(400,450),
+                                    latitude=range(400, 450),
+                                    longitude=range(400, 450)),
+                    required_int_vars=['mask'],
+                    deep_point=[175.1, -36.3, -2],
+                    coast_point=[175.05, -36.225],
                      )
     return [GLORYS3DfizedZ]
 
@@ -336,19 +357,16 @@ if __name__ == '__main__':
     parser.add_argument('-plot', action="store_true", help="plot run")
     args = parser.parse_args()
 
-
-    test_hindcast_out_dir_default  =  path.join(path.dirname(__file__), 'hindcasts')
-
     if args.full:
-        test_hindcast_output_dir = r'F:\H_Local_drive\ParticleTracking\unit_test_full_hindcasts'
-        run_output_dir = r'D:\OceanTrackerOutput\test_hindcast_readers_full'
+        test_hindcast_output_dir = r'D:\test_hindcasts_examples_full'
+        OTrun_root_output_dir = r'D:\OceanTrackerOutput\test_hindcast_readers_full'
     else:
         test_hindcast_output_dir= path.join(path.dirname(__file__),'unit_tests','data', 'hindcasts')
-        run_output_dir = r'D:\OceanTrackerOutput\test_hindcast_readers_small'
+        OTrun_root_output_dir = r'D:\OceanTrackerOutput\test_readers_full_small'
 
 
     readers= [schism(args),GLORYS(args)]
-    readers= [schism(args)]#
+    #fTrereaders= [schism(args)]#
 
     for nr, reader in enumerate(readers):
         if args.type > -1 and args.type != nr: continue
@@ -356,15 +374,15 @@ if __name__ == '__main__':
             if args.variant > -1 and args.variant != nv: continue
 
             i = get_required_var_names(i, args)
-            i['output_dir'] = test_hindcast_output_dir
+            i['output_dir'] = test_hindcast_output_dir # where to put compressed hindcast
             if not args.write_off:
                 write_files(i, args)
 
             if args.run_off:
-                case_info_file_name= path.join(run_output_dir,i['name'],i['name']+'_caseInfo.json')
+                case_info_file_name= path.join(OTrun_root_output_dir, i['name'], i['name'] + '_caseInfo.json')
             else:
                 # test run case
-               case_info_file_name= run(i, run_output_dir,args)
+               case_info_file_name= run(i, OTrun_root_output_dir, args)
 
             if args.plot:
                 from matplotlib import pyplot as plt

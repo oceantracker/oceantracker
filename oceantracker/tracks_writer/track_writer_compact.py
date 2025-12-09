@@ -169,10 +169,10 @@ class CompactTracksWriter(_BaseWriter):
         if si.settings.write_tracks and self.params['convert']:
             t0 = perf_counter()
             si.msg_logger.msg('Converting compact track files to rectangular format (to disable set reader param convert=False)',
-                              hint = f'reading from dir {si.run_info.run_output_dir}')
+                              hint = f'reading from dir {si.run_info.root_output_dir}')
 
             for n, fn in enumerate(info['output_file']):
-                rect_file = convert_compact_file(path.join(si.run_info.run_output_dir, fn))
+                rect_file = convert_compact_file(path.join(si.run_info.root_output_dir, fn))
                 info['output_file'][n] = path.basename(rect_file)
                 si.msg_logger.progress_marker(f'Finished "{path.basename(rect_file)}"', tabs=1, start_time=t0)
             si.msg_logger.progress_marker('Conversion complete',tabs=1,start_time=t0)

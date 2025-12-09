@@ -52,7 +52,7 @@ class MessageLogger(object ):
     def set_up_files(self, si):
         # log file set up
         log_file_name = si.run_info['output_file_base'] + '_log.txt'
-        self.log_file_name = path.join(si.run_info.run_output_dir, log_file_name)
+        self.log_file_name = path.join(si.run_info.root_output_dir, log_file_name)
 
         if si.run_info.restarting:
             shutil.copyfile(si.restart_info['log_file'],self.log_file_name)
@@ -62,7 +62,7 @@ class MessageLogger(object ):
             self.log_file = open(self.log_file_name, 'w')
 
         # kill any old error file
-        error_file_name = path.join(si.run_info.run_output_dir, self.error_file_name)
+        error_file_name = path.join(si.run_info.root_output_dir, self.error_file_name)
         if path.isfile(error_file_name ):
             remove(error_file_name)
 
@@ -190,9 +190,9 @@ class MessageLogger(object ):
         self.msg(str(e))
         tb = traceback.format_exc()
         self.msg(tb)
-        if si.run_info.run_output_dir is None: return # no folder to write to
+        if si.run_info.root_output_dir is None: return # no folder to write to
 
-        error_file_name = path.join(si.run_info.run_output_dir, self.error_file_name)
+        error_file_name = path.join(si.run_info.root_output_dir, self.error_file_name)
         with open(path.normpath(error_file_name),'w') as f:
             f.write('_____ Known warnings and Errors ________________________________\n')
             for l, ml in self.msg_lists.items():
@@ -242,7 +242,7 @@ class MessageLogger(object ):
         self.log_file.close()
         # save log file
         state_log = path.join(state_dir,'log_file.txt')
-        shutil.copyfile(path.join(si.run_info.run_output_dir,si.output_files['run_log']),
+        shutil.copyfile(path.join(si.run_info.root_output_dir, si.output_files['run_log']),
                         state_log)
 
         self.log_file = open(self.log_file_name, 'a')
