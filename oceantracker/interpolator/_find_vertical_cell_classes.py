@@ -350,7 +350,7 @@ class FindVerticalCellZfixed(object):
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                     current_buffer_steps, fractional_time_steps,
                                     active, z0):
-        dz_map = z_map[1] - z_map[0]
+        dz_map_inv = 1.0/(z_map[1] - z_map[0])
         bad_z_fraction_count = 0
 
         for n in active:  # loop over active particles
@@ -380,16 +380,18 @@ class FindVerticalCellZfixed(object):
                 z_top += bc_coords[n, m] * tide[current_buffer_steps[1], nodes[m], 0, 0] * fractional_time_steps[1]
 
             zq = min(max(zq, z_bot), z_top) # clip to water depth and free surface
-            n_in_map = int((zq - z[0]) / dz_map) # number of map steps between zq and deepest fixed z in the map
+            n_in_map = int((zq - z[0])  * dz_map_inv) # number of map steps between zq and deepest fixed z in the map
 
             n_in_map = min(n_in_map,nz_map.size-1) # clip inside map
             nz = nz_map[n_in_map] # estimate of nz from map
-            # correction, rounds down, so correct if z[nz] above z
-            nz -= z[nz] > zq    # faster branch-less minus 1
+
+            # correction, rounds down, so correct if z below z[nz]
+            nz -= zq < z[nz]    # faster branch-less minus 1
 
             if nz > deepest_bottom_cell:
                 # is in a layer above sea bed layer
-                z_fraction[n] = (zq-z[nz])/(z[nz+1]-z[nz])
+                z1 = z[nz+1]  if nz < z.size-2 else z_top #  top cell needs tide not z[nz+1]
+                z_fraction[n] = (zq-z[nz])/(z1-z[nz])
                 z_fraction_water_velocity[n] = z_fraction[n]
             else:
                 # in seabed layer, is variable thickness
@@ -399,7 +401,8 @@ class FindVerticalCellZfixed(object):
                 z0p = z0 / dz # z0 as fraction of bottom layer
                 z_fraction_water_velocity[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
 
-            bad_z_fraction_count +=  not  -0.05 <  z_fraction[n] < 1.05
+
+            bad_z_fraction_count +=  not  (-0.05 <  z_fraction[n] < 1.05)
 
             # record new depth cell
             nz_cell[n] = nz

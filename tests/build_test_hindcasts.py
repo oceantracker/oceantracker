@@ -170,7 +170,8 @@ def write_files(i, args):
     # scan files for first time_dim etc
     t0= float(np.inf)
     for n, name in enumerate(file_list):
-        ds = xr.open_dataset(name, decode_times=False, decode_coords=False,decode_timedelta=False)
+        ds = xr.open_dataset(name, decode_times=False, decode_coords=False,
+                             decode_timedelta=False,mask_and_scale=False)
 
         if i['time_var'] in ds.variables:
             dims['time'] = ds[ i['time_var']].dims[0]
@@ -188,7 +189,7 @@ def write_files(i, args):
         print('compressed: unstructured grid  nodes = ', info['required_nodes'].size, 'cells', info['required_cells'].size,)
 
 
-    tmax = 24*3600 if args.full else 24*3600
+    tmax = 14*24*3600 if args.full else 24*3600
 
     for nn, file in enumerate(file_list):
 
@@ -271,18 +272,20 @@ def run(i,output_dir, args):
 
     from oceantracker.main import OceanTracker
     ot = OceanTracker()
-    ot.settings(root_output_dir=output_dir, output_file_base=file_base, time_step=10*60)
+    ot.settings(root_output_dir=output_dir, output_file_base=file_base, time_step=10*60, debug=True)
     ot.add_class('reader', input_dir=input_dir, file_mask=file_base + '*.nc')
 
     info = json_util.read_JSON(path.join(input_dir, 'info.json'))
 
-    pulse_size= 10000 if args.full else 10
+    pulse_size= 100 if args.full else 10
+    release_interval = 3600
+
     if 'deep_point' in info:
         ot.add_class('release_groups', points=info['deep_point'],
-                     release_interval=30*60, pulse_size=pulse_size, name='deep_point', )
+                     release_interval=release_interval, pulse_size=pulse_size, name='deep_point', )
     if 'coast_point' in info:
         ot.add_class('release_groups', points=info['coast_point'],
-                     release_interval=30*60, pulse_size=pulse_size, name='coast_point' )
+                     release_interval=release_interval, pulse_size=pulse_size, name='coast_point' )
     case_info_file_name= ot.run()
     return case_info_file_name
 

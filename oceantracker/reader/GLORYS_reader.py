@@ -119,14 +119,22 @@ class GLORYSreader(_BaseStructuredReader):
         # bottom cell is in data files
         ds = self.dataset
         info = self.info
-        gm = self.params['grid_variable_map']
-        grid['bottom_interface_index_grid'] = ds.read_variable(gm['bottom_interface_index']).data - self.params['one_based_indices']
+        gm =  self.params['grid_variable_map']
+        grid['bottom_interface_index_grid'] = ds.read_variable(gm['bottom_interface_index']).data
+
+        # ensure missing values are nans so missing stay missing in chaning to bootom up values
+        grid['bottom_interface_index_grid'] = grid['bottom_interface_index_grid'].astype(np.float32)
+        grid['bottom_interface_index_grid'][grid['bottom_interface_index_grid'] < 0 ]= np.nan
+        grid['bottom_interface_index_grid'] -= self.params['one_based_indices']
+
         # file cell count is top down, convert to bottom up index
-        grid['bottom_interface_index_grid'] = info['num_z_interfaces'] - grid['bottom_interface_index_grid'] # do this before making an it to capture nans
+        grid['bottom_interface_index_grid'] = info['num_z_interfaces'] - grid['bottom_interface_index_grid'] # do this before capturing nans
+
 
         # land nodes use 0
+        # if missing val present by default xarray converts to real and missing vals to nan's
         sel = np.isnan(grid['bottom_interface_index_grid'])
-        grid['bottom_interface_index_grid'][sel] = 0
+        grid['bottom_interface_index_grid'][sel] = -1
 
         grid['bottom_interface_index_grid'] =    grid['bottom_interface_index_grid'].astype(np.int32)
 
