@@ -50,40 +50,65 @@ def test_run_3D_model_performance(
     assert case_info_file is not None
 
 
-# @pytest.mark.performance
-# @pytest.mark.parametrize("particle_count", [100, 500, 1000, 5000])
-# def test_run_3D_model_scaling(
-#     base_settings,
-#     reader_demo_schisim3D,
-#     schism3D_release_locations,
-#     particle_count,
-# ):
-#     """
-#     Scaling test to measure performance with varying particle counts.
+@pytest.mark.skip(reason='performance')
+@pytest.mark.parametrize("RK_order", [1,2,4])
+def test_scaling_with_RK_order(
+    base_settings,
+    reader_schism3D,
+    schism3D_release_locations,
+    RK_order,
+):
+    """
+    Scaling test to measure performance with varying particle counts.
     
-#     Run with:
-#         pytest -m performance tests/unit_tests/test_performance.py::test_run_3D_model_scaling
-#     """
+    Run with:
+        pytest -m performance tests/unit_tests/test_performance.py::test_scaling_with_RK_order
+    """
+    ot = OceanTracker()
+    ot.settings(
+        **base_settings,
+        processors=1
+    )
+    ot.add_class("solver", RK_order=RK_order)
+    ot.add_class("reader", **reader_schism3D)
+    ot.add_class(
+        "release_groups",
+        class_name="PointRelease",
+        points=schism3D_release_locations["deep_point"],
+        release_interval=0,
+        pulse_size=100_000_000,
+    )
+    case_info_file = ot.run()
     
-#     ot = OceanTracker()
-#     ot.settings(
-#         **base_settings,
-#         regrid_z_to_uniform_sigma_levels=False,
-#         use_dispersion=True,
-#         time_step=30,
-#     )
+    assert case_info_file is not None
+
+@pytest.mark.skip(reason='performance')
+@pytest.mark.parametrize("particle_count", [100_000, 1_000_000,10_000_000,100_000_000])
+def test_run_3D_model_scaling(
+    base_settings,
+    reader_schism3D,
+    schism3D_release_locations,
+    particle_count,
+):
+    """
+    Scaling test to measure performance with varying particle counts.
     
-#     ot.add_class("reader", **reader_demo_schisim3D)
+    Run with:
+        pytest -m performance tests/unit_tests/test_performance.py::test_run_3D_model_scaling
+    """
+    ot = OceanTracker()
+    ot.settings(
+        **base_settings,
+    )
+    ot.add_class("reader", **reader_schism3D)
+    ot.add_class(
+        "release_groups",
+        name=f"scaling_test_{particle_count}",
+        class_name="PointRelease",
+        points=schism3D_release_locations["deep_point"],
+        release_interval=0,
+        pulse_size=particle_count,
+    )
+    case_info_file = ot.run()
     
-#     ot.add_class(
-#         "release_groups",
-#         name=f"scaling_test_{particle_count}",
-#         class_name="PointRelease",
-#         points=schism3D_release_locations["deep_point"],
-#         release_interval=300,
-#         pulse_size=particle_count,
-#     )
-    
-#     case_info_file = ot.run()
-    
-#     assert case_info_file is not None
+    assert case_info_file is not None
