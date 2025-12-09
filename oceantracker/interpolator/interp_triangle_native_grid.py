@@ -66,7 +66,6 @@ class  InterpTriangularGrid(_BaseInterp):
                 case vgt.Zfixed:
                     self._vert_cell_finder = _find_vertical_cell_classes.FindVerticalCellZfixed(grid, params)
 
-            self._get_vert_cell = self._vert_cell_finder.find_vertical_cell # shortcut to cell finder function
 
     def final_setup(self):
 
@@ -173,8 +172,7 @@ class  InterpTriangularGrid(_BaseInterp):
         # locate vertical cell in place
         info = self.info
         t0 = perf_counter()
-        info['bad_z_fraction_count'] = self._get_vert_cell(fields, xq, current_buffer_steps, fractional_time_steps, active)
-
+        info['bad_z_fraction_count'] = self._vert_cell_finder.find_vertical_cell(fields, xq, current_buffer_steps, fractional_time_steps, active)
         if info['bad_z_fraction_count'] > 0 :
             si.msg_logger.msg(f'Out of range vertical layer fraction calculated, number counted so far {info["bad_z_fraction_count"]}', strong_warning=True,caller = self,
             hint='issue with 3D vertical grid hindcast values? reader encountered unknown variant of hindcast vertical grid?')
