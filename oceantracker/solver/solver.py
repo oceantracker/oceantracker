@@ -35,138 +35,6 @@ class Solver(ParameterBaseClass):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc( required_props_list=['x','status', 'x_last_good', 'v_temp'])
 
-    #@profile
-    def solveV1(self):
-        # solve for data in buffer
-        info = self.info
-        ri=si.run_info
-        ml = si.msg_logger
-        part_prop = si.class_roles.particle_properties
-
-        computation_started = datetime.now()
-        # set up particle velocity working space for solver
-        pgm, fgm = si.core_class_roles.particle_group_manager, si.core_class_roles.field_group_manager
-        ri.time_steps_completed = 0
-
-        # work out time steps between writing tracks to screen, default 1 hr
-        nt_write_time_step_to_screen = max(1, int(si.settings.screen_output_time_interval/si.settings.time_step))
-
-        t0_model = perf_counter()
-        model_times = si.run_info.times
-        ml.hori_line()
-
-        # initial buffer fill
-        tr0 = perf_counter()
-        fgm.update_readers(model_times[0])
-        si.block_timer('Reading hindcast', tr0)
-
-
-        # run forwards through model time variable, which for backtracking are backwards in time
-        ml.progress_marker(f'Starting time stepping: {time_util.seconds_to_isostr(si.run_info.start_date)} to {time_util.seconds_to_isostr(si.run_info.end_date)}')
-        ml.msg(f'duration  {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}, time step=  {time_util.seconds_to_pretty_duration_string(si.settings.time_step)} ',
-                           tabs =2)
-
-        si.msg_logger.set_screen_tag('S')
-
-        # initial conditions
-        t0_step = perf_counter()
-
-
-        if si.settings.restart:
-            nt1 = si.restart_info['restart_time_step']
-            t1 = model_times[nt1]
-            self._load_saved_state()
-        else:
-            nt1 = 0
-            t1 = model_times[0]
-
-        ri.time_steps_completed = nt1
-
-        if si.settings.restart_interval is not None:
-            # dev- schedule restart saves at given interval after start of run
-            self.add_scheduler('save_state',
-                               start=si.run_info.start_time,
-                               interval=si.settings.restart_interval )
-        # run one less step as last step is initial condition for next block
-        # first step is zero or restart time step
-        for n_time_step  in range(nt1, model_times.size-1):
-
-            t0_step = perf_counter()
-            self.start_update_timer()
-            t1 = model_times[n_time_step]
-            # record info for any error dump
-            info['time_sec'] = t1
-
-            tr0 = perf_counter()
-            fgm.update_readers(t1)
-            si.block_timer('Reading hindcast', tr0)
-
-            new_particle_indices = pgm.release_particles(n_time_step, t1)
-
-            # do stats etc updates and write tracks at new time step
-            self._pre_step_bookkeeping(n_time_step, t1, new_particle_indices)
-
-            if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(n_time_step):
-                self._save_state_for_restart(n_time_step, t1)
-
-            # cull dead particles
-            # must be done after last use of "is_moving" in current time step (which refers to permanent  ID buffer which are not culled)
-            pgm.remove_dead_particles_from_memory()
-
-            # count particles of each status and count number >= stationary status
-            num_alive = pgm.status_counts_and_kill_old_particles(t1)
-
-            ri.time_steps_completed += 1
-            # print progress to screen
-            if n_time_step % nt_write_time_step_to_screen == 0:
-                self._screen_output(n_time_step, t1, t0_model, perf_counter() - t0_step)
-
-            # now modfy location after writing of moving particles
-            # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
-            is_moving = part_prop['status'].compare_all_to_a_value('eq',si.particle_status_flags.moving, out=self.get_partID_buffer('B1'))
-
-            # update particle velocity modification prior to integration
-            part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
-            for name, i in si.class_roles.velocity_modifiers.items():
-                i.timed_update(n_time_step, t1, is_moving)
-
-            # random walk dispersion is done by adding to velocity modifier prior to integration step
-            if si.settings.use_dispersion:
-                i = si.core_class_roles.dispersion
-                i.timed_update(n_time_step, t1, is_moving)
-
-            #  Main integration step
-            #--------------------------------------
-            self.do_time_step(t1, is_moving)
-            #--------------------------------------
-
-            # release particles etc at next time step
-            nt2 = n_time_step + 1
-            t2 = model_times[nt2]
-
-
-
-            # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
-            si.block_timer('Time stepping',t0_step)
-
-            self.stop_update_timer()
-
-            # warn of  high physical memory use
-            if psutil.virtual_memory().percent > 95:
-                ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
-                       hint=f'Reduce memory used by hindcast with smaller reader param. "time_buffer_size"')
-
-            if abs(t2 - ri.start_time) > ri.duration: break
-            if si.settings.throw_debug_error == 1 and nt2 >= int(0.2*model_times.size):
-                raise(Exception(f'Restart testing, throwing deliberate error at {time_util.seconds_to_isostr(t1)}'))
-
-        ri.end_time = t2
-        ri.model_end_date = t2.astype('datetime64[s]')
-        ri.model_run_duration =  ri.end_time - ri.start_time
-        ri.computation_started = computation_started
-        ri.computation_ended = datetime.now()
-        ri.computation_duration = datetime.now() -computation_started
-
     def solve(self):
         # solve for data in buffer
         info = self.info
@@ -218,7 +86,7 @@ class Solver(ParameterBaseClass):
         self._screen_output(nt1, t1, t0_model, perf_counter() - t0_step)
 
         if si.settings.restart_interval is not None:
-            # dev- schedule restart saves at given interval after start of run
+            # dev-schedule restart saves at given interval after start of run
             self.add_scheduler('save_state',
                                start=si.run_info.start_time,
                                interval=si.settings.restart_interval )
@@ -287,8 +155,8 @@ class Solver(ParameterBaseClass):
             # at this point interp is not set up for current positions, this is done in pre_step_bookeeping, and after last step
             self.stop_update_timer()
 
-            # warn of  high physical memory use
-            if psutil.virtual_memory().percent > 95:
+            # warn of  high physical memory use every 10th step as takes 8ms per call
+            if n_time_step % 10 ==0 and psutil.virtual_memory().percent > 95:
                 ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
                        hint=f'Reduce memory used by hindcast with smaller reader param. "time_buffer_size"')
 
