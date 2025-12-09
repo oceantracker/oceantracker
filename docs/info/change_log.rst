@@ -3,17 +3,24 @@
 Change log
 ###########################
 
-Version '0.5.2.54 date ???'
+Version '0.5.2.54 2025-12-09'
 ____________________________
 
 Rebulid stats ito use mutiple inheritence
 
 Breaking changes
 ----------------
-#. ??
+#. Removed "connectivity_matrix" from time timeBased GriddedStats as it had no clear interpretation. Use ageBased stats calculate connectivities.
+
+Bug fixes
+---------
+#. The span of gridded stats was slightly misaligned by half a grid cell. Output shape remains the same but the exact values will have changed slightly.
+#. Ring buffer for "backtracking" was misaligned by one model time step
 
 New features
 ------------
+#. Added several new unit tests 
+
 
 Added average part. prop.  to stats netcdfs
 Added connectivty calc. to netcdf only for age based stats
