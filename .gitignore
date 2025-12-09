@@ -1,16 +1,7 @@
-.idea
-.coverage
-
 /tests/output/
-/dev/demos/output/
-/tests/nextVer/output/
-/dev/demos/root_output_dir/
 /tests/dev_runs/output/
 /tests/dev_runs/reference_case_output/
-
-/dev/misc/output/
-/dev/dev_testing/root_output_dir/
-/dev/bug_hunting/
+/tests/profiling/results/pyinstrument/
 
 /docs/_build
 /docs/info/how_to/
@@ -24,8 +15,18 @@
 venv
 dist/
 
+/dev/misc/output/
+/dev/dev_testing/root_output_dir/
+/dev/bug_hunting/
+/dev/demos/output/
+/dev/demos/root_output_dir/
+
+.idea
+.coverage
+.vscode/
+
+
 *.code-workspace
 *.py[cod]
 *.nb[ic]
 .pypirc
-/tests/profiling/results/pyinstrument/
