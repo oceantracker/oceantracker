@@ -4,32 +4,71 @@ Features
 
 
 Main Features
-=================
+=============
 
-* Ability to calculate tracks of  millions of particles in hours in unstructured grids.
-* Reads hydrodynamic model output from Schism, FVCOM, plus support for ROMS structured grid  output.
-* Calculate particle statistics one the fly, eliminating need to store and wade though large volumes of particle track output.
+* Ability to calculate tracks large amount of particles in unstructured grids. E.g. it takes about 4 hours to simulate the the trajectory of one million particles for one year.
+* Large set of natively supported hydrodynamical models (see XX)
+* Calculate particle statistics on the fly, eliminating need to store and wade though large volumes of particle track output.
 * Flexible parameter file driven particle tracking,
 * Computational pipeline built fom given parameters, eg. add particle properties, add to modifies particle trajectories, calculates statistics etc,  to the pipe line.
-* Flexible particle releases, from multiple points or polygons.
 * Forwards and backwards in time particle tracking.
-* Run multiple cases in parallel, to reduce run time.
 * Post run plotting and animation.
-* Flexible python code, with key computational code using Numba, running at C code speeds.
+* Flexible python code, which uses Numba for to speed up computationally expensive code to C-like speeds.
 
+Supported hydrodynamical models
+===============================
+The following table shows the currently supported hydrodynamical models.
+Feel free to reach out if your model isn't on the list. 
+Reads hydrodynamic model output from Schism, FVCOM, plus support for ROMS structured grid  output.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 30 15 15 15
+
+   * - Hydrodynamic model name
+     - Description
+     - Horizontal grid type
+     - Horizontal coordinates
+     - Vertical grid type
+   * - SCHISM (Semi-implicit Cross-scale Hydroscience Integrated System Model)
+     - Schism is a multi-scale, multi-physics hydrodynamic model for simulating flows in the atmosphere, ocean, and coastal regions (Zhang et al., 2016).
+     - Unstructured triangular mesh.
+     - Geographic and Cartesian
+     - S-layer and LSC vertical grids.
+   * - Finite Volume Community Ocean Model (FVCOM)
+     - FVCOM is a prognostic, unstructured-grid, finite-volume, free-surface, 3D primitive equation coastal ocean circulation model (Chen et al 2003).
+     - Unstructured triangular mesh.
+     - Geographic and Cartesian
+     - Sigma (terrain-following) vertical coordinates.
+   * - The Regional Ocean Modelling System (ROMS)
+     - ROMS is a free-surface, terrain-following, primitive equations ocean model widely used by the scientific community for a diverse range of applications (e.g., Haidvogel et al., 2000).
+     - Arakawa C-grid (rectilinear and curvilinear)
+     - Geographic
+     - Sigma (terrain-following) vertical coordinates.
+   * - CMEMS catalogue
+     - CMEMS public catalogue for near real time and reanalysis products. Entry covers products provided on a standard Arakawa A-grid and adhering to community standards.
+     - Arakawa A-grid (rectilinear and curvilinear)
+     - Geographic
+     - Z-level (fixed depth) vertical coordinates.
+   * - Delft3D
+     - Delft3D is a modelling suite for hydrodynamics, waves and sediment transport. Classic Delft3D-FLOW uses curvilinear structured grids; Delft3D Flexible Mesh (FM) uses unstructured triangular meshes.
+     - Curvilinear structured or unstructured triangular mesh (implementation dependent)
+     - Geographic
+     - Sigma (terrain-following) or z-level depending on implementation.
 
 Useful Features
-=================
+===============
 
 * Numerics
 
-    * Fast native grid particle tracking for both S-layer,plus and Schism's LSC vertical grids
+    * Linear horizontal interpolation within triangles, and linear vertical interpolation except for velocities in the bottom cell.
     * Loglayer vertical interpolation of water velocity for particles in bottom layer, giving more realistic behaviour, eg. resuspension.
-    * Linear horizontal interpolation within triangles, and depth cell except for velocity in bottom cell.
+    * 'hotstart' for restarting interupted runs 
 
 * Particle behaviour
-    * Resuspension from the bottom based on critical friction velocity.
-    * Shoreline stranding/re-floating of particles by the tide based on dry cells.
+    * Settling on the bottom, with resuspension based on critical friction velocity.
+    * Tidal stranding and resuspension of particles by on model dry cells.
+    * Vertical velocities 
     * "InPolygon" particle property which notes which of a set of polygons they lies within. Useful for polygon based statistics and changing behaviour inside polygons.
     * Split particles, to give two child particles at given frequency and probability
 
@@ -64,26 +103,6 @@ Useful Features
 
 * Other
     * If no particles active, will freerun until some are released, allows particles to be released for one season per year, with a max age, and run will skip between years
-
-Architecture
-===============
-
-* Fully driven by parameters in JSON/YAML file or in code from dictionary
-* Highly flexible architecture enabling:
-    * user implemented approaches to core classes, core classes can be replaced via string name in parameter dictionary, eg. user spatial interpolator
-    * adding user developed:
-        * custom particle properties derived from other properties though inheritance
-        * augment particle velocity given by water_velocity read from hindcast, eg. particle fall velocity
-        * modify particle trajectories, eg. resuspension.
-
-* Automated processes to add user developed particle proprieties, velocity, trajectory modifiers, etc , to calculation and output chain. Eg  Requesting a file variable "temperature" from hindcast file by adding to the readers "field_variables" list, will automatically:
-    * create a feild of this name
-    * interpolate this field to the particle locations at each time step
-    * write this particle property to the output file along with the particle location etc.
-
-* All core and optional classes can be changed or added to list as parameter string using class_name as a string, eg optional particle distance travelled property.
-* Reduce memory requirement in 'compact_mode',  which only retains active particles, eg. those young enough to be of interest.
-* Written in python with numba package for fast in-place operations on particle properties and hindcast's fields based on set of indices arrays.
 
 
 

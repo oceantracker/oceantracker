@@ -2,7 +2,8 @@
 Tutorials
 ##########################
 
-The below show a web view of ipython notebooks which are in the folder "oceantracker/tutorials_how_to".
+The tutorials below show a web view of the ipython notebooks available in the github repository
+at `"oceantracker/tutorials_how_to" <https://github.com/oceantracker/oceantracker/tree/d1146cce848912caee7ae1c008d73809cd001b14/tutorials_how_to>`_.
 
 
 .. toctree::
