@@ -204,7 +204,7 @@ def write_files(i, args):
 
         print('starting file: ', file)
         print('\t\t vars', list(ds.variables.keys()))
-        print('\t\t\t dims', ds.dims)
+        print('\t\t\t dims', dict(ds.dims))
 
 
         ds_out = xr.Dataset()
@@ -253,8 +253,8 @@ def write_files(i, args):
         if len(ds_out.variables) > 0:
             print('\t writing file: ', path.basename(fn), 'variables', list(ds_out.variables.keys()))
             ds_out.to_netcdf(fn, encoding=encoding)
-            print('\t\t done file: ', fn,'dims', ds_out.sizes)
-        pass
+            print('\t\t done file: ', fn,'dims', dict(ds_out.sizes))
+        ds_out.close()
 
     # write release point json
     p = dict()
@@ -342,8 +342,8 @@ def GLORYS(args):
                                     latitude=range(400, 450),
                                     longitude=range(400, 450)),
                     required_int_vars=['mask'],
-                    deep_point=[175.1, -36.3, -2],
-                    coast_point=[175.05, -36.225],
+                    deep_point=[20.5,59.9,  -2],
+                    #coast_point=[175.05, -36.225],
                      )
     return [GLORYS3DfizedZ]
 
