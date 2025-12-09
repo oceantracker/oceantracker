@@ -301,8 +301,7 @@ params_list.append(s60)
 s61 = deepcopy(schsim_base_params)
 s61.update({'max_run_duration': 15*24*3600.,'output_file_base': 'demo61_concentration_test'})
 s61['write_tracks']= False
-s61['particle_concentrations']= [{'name':'outfall_conc','class_name':'oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D',
-                                                        'update_interval': 1800}]
+
 for rg in s61['release_groups']:
     rg.update({'pulse_size': 1000, 'release_interval': 3600})
 

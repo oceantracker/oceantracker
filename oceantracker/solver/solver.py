@@ -215,7 +215,6 @@ class Solver(ParameterBaseClass):
 
         # update writable class lists and stats at current time step now props are up to date
         self._update_stats(n_time_step, time_sec, alive)
-        self._update_concentrations(n_time_step, time_sec)
         self._update_events(n_time_step, time_sec)
 
         # update integrated models, eg LCS
@@ -385,14 +384,7 @@ class Solver(ParameterBaseClass):
 
         si.block_timer('Update statistics', t0)
 
-    def _update_concentrations(self,n_time_step,  time_sec):
-        # update triangle concentrations, these can optionally be done every time step, if concentrations values affect particle properties
 
-        t0 = perf_counter()
-        for name, i in si.class_roles.particle_concentrations.items():
-            i.timed_update(n_time_step, time_sec)
-
-        si.block_timer('Update concentrations', t0)
 
     def _update_events(self, n_time_step,  time_sec):
         # write events

@@ -384,7 +384,7 @@ class OceanTrackerParamsRunner(object):
 
 
         # initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
-        for role in ['particle_properties','time_varying_info','velocity_modifiers', 'trajectory_modifiers', 'particle_statistics', 'particle_concentrations', 'event_loggers']:
+        for role in ['particle_properties','time_varying_info','velocity_modifiers', 'trajectory_modifiers', 'particle_statistics', 'event_loggers']:
             for name, i in si.class_roles[role].items():
                 i.initial_setup()
 

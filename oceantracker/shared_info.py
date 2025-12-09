@@ -100,7 +100,6 @@ class _ClassRoles(definitions._AttribDict):
     velocity_modifiers = []  # user added velocity effects, eg TerminalVelocity
     trajectory_modifiers = []  # change particle paths, eg. re-suspension
     particle_statistics = []  # heat map inside polygon statistics calculated on the fly
-    particle_concentrations = []  # writes concentration of particles and other properties calculated on the fly.   files ,eg PolygonEntryExit
     nested_readers = []
     event_loggers =  [] # writes events files ,eg PolygonEntryExit
     time_varying_info = [] # particle info,eg. time,or  tide at at tide gauge, core example is particle time
