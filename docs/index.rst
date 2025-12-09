@@ -22,46 +22,18 @@ Fast particle tracking in unstructured grids
   </center>
 
 OceanTracker is a fast extendable code for offline particle tracking in unstructured grids [1]_, which also works with regular grid hydrodynamic models.
+It is primarly designed for use in coastal oceans and estuaries, where unstructured grids are commonly used to efficiently represent complex coastlines and bathymetry.
 
-OceanTracker's speed enables millions of particles to be simulated in unstructured grids. This
-significantly increases the range of particle behaviours that can be modeled and the quality of statistics
-derived from the particles. To eliminate the need to store and wade through the analysis of vast volumes of recorded particle tracks,
-the code has the ability to calculate statistics on the fly, such as heat maps and connectivity between regions.
+OceanTracker was developed to offer a computationally faster alternative to the existing models and is currently the fastest model for unstructured grids available [2]_.
+This enables users to simulate the millions of particles required for many applications on modest office computers while.
+For larger applications, OceanTracker offers on-the-fly statistics to eliminate the need to store and wade through the analysis of vast volumes of recorded particle tracks to create e.g. heat-maps or reginal connectivities.
 
 OceanTracker code is highly flexible and extendable by the user, whether run by a new user with a text file of parameters,
 or by an expert adding their specialised code for novel particle behaviours or statistics, to the computational pipe line.
 
-Code is on `github <https://github.com/oceantracker/oceantracker/>`_ , released under the MIT licence.
+Its source code is publically available on `github <https://github.com/oceantracker/oceantracker/>`_ , released under the MIT licence.
+OceanTracker is under active developement. Feel free to reach out to report issues or to suggest new features.
 
-====================
-Features
-====================
-
-* Fast and extendable offline native grid particle tracking for unstructured grids [1] and  stuctured grids.
-* Calculate the tracks of millions of particles with fast efficient computation and parallel processing.
-* User configurable settings and computational pipeline driven entirely by json or yaml text files.
-* Add user defined particle properties and behaviours from parameter text files.
-* Native grid particle tracking which preserves the vertical resolution
-      * `SCHISM <http://ccrm.vims.edu/schismweb/>` for both  Slayer and LSC vertical grids
-      * FVCOM model output, which preserves the resolution of
-      * regular native grid ROMs
-* Builds heat maps on the fly, without recording particle tracks, also inside polygon counts computed on the fly
-* Backward and forward in time particle tracking
-* Shoreline stranding of particles by the tide and resuspension from the bottom
-* 2D and 3D particle tracking, with option to run 3D as 2D
-
-
-====================
-Architecture
-====================
-
-* Implemented in Python
-* Driven by parameters in JSON or YAML file, or in code from a Python dictionary
-* "helper class" to assist new user build parameters
-* Tools to read output, plus plot animations
-* Computational pipeline built from user parameters level
-* Extendable to create novel particle behaviours, eg. vertical migration of plankton
-* Can run particle tracking cases in parallel to further improve computational speed
 
 .. image::  _static/cawthron.jpg
    :target: https://www.cawthron.org.nz/
@@ -76,25 +48,19 @@ Architecture
    info/features.rst
    info/gallery.rst
    info/installing.rst
-   info/running_ocean_tracker.rst
-   info/how_to.rst
-   info/trouble_shooting.rst
-   info/parameter_ref/parameter_ref_toc.rst
-   info/how_to/D_output_files.rst
-   info/change_log.rst
 
 
 .. warning::
 
-   This is Oceantracker version: |release|.The code its still evolving, documentation needs to be expanded and proof read. If you find bugs, have suggestions or ideas make contact!
+   OceanTracker is currently in beta release and its API may change in future releases (see :ref:`change_log` for breaking changes)
+   If you find bugs, have suggestions or ideas make contact!
 
 
 .. [1] Vennell, R., Scheel, M., Weppe, S., Knight, B. and Smeaton, M., 2021. `Fast lagrangian particle tracking in unstructured ocean model grids <https://link.springer.com/article/10.1007/s10236-020-01436-7/>`_ ,  Ocean Dynamics, 71(4), pp.423-437.
+.. [2] Vennell, R., Steidle, L., Smeaton, M., Chaput, R., and Knight, B., 2025. `OceanTracker 0.5: Fast Adaptable Lagrangian Particle Tracking in Structured and Unstructured Grids <https://eartharxiv.org/repository/view/8387/>`_ 
 
 
 .. |date| date::
-
-
 
 *Last updated:* |date|
 
