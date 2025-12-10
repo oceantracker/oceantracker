@@ -328,11 +328,7 @@ def GLORYS(args):
     GLORYS3DfizedZ = deepcopy(base)
     GLORYS3DfizedZ.update( name='Glorys3DfixedZ',  time_decimation=1,
                            is3D=True,label='BalticSea',
-                           #label='NZregion',
-
-                    #input_dir =r'D:\Hindcast_reader_tests\Glorys\glorys_seasuprge3D',
-                    #file_mask='cmems*.nc',
-                    input_dir=f'D:\Hindcast_reader_tests\Glorys\BalticSea',
+                     input_dir=f'D:\Hindcast_reader_tests\Glorys\BalticSea',
                     file_mask='BAL**.nc',
                     # slice regular grids
                     dim_slices = dict(lat=range(400,450),
@@ -352,9 +348,7 @@ def ROMS(args):
     ROMS1 = deepcopy(base)
     r,c, e = 50, 190, 50
     ROMS1.update( name='ROMS3Dsigma',  time_decimation=1,
-                           is3D=True,label='MidAtlanticBight',
-                           #label='NZregion',
-
+                    is3D=True,label='MidAtlanticBight',
                     input_dir=r'D:\Hindcast_reader_tests\ROMS_samples\ROMS_Mid_Atlantic_Bight',
                     file_mask= 'doppio_his_2017*.nc',
                     # slice regular grids, but rms has several grids!
@@ -369,7 +363,8 @@ def ROMS(args):
                                       ),
                     required_vars=['mask_psi','mask_u','mask_v','mask_rho'],
                     #deep_point=[-66,  43],
-                  deep_point=[-66.00172985389652,   44.91244933089063]
+                  deep_point=[-66.00172985389652,   44.91244933089063],
+                  points=[],
                     #coast_point=[175.05, -36.225],
                      )
     return [ROMS1]

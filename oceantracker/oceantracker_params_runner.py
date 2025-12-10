@@ -382,7 +382,6 @@ class OceanTrackerParamsRunner(object):
         if si.run_info.is3D_run and si.settings.use_resuspension:
             ccr.resuspension.initial_setup()
 
-
         # initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for role in ['particle_properties','time_varying_info','velocity_modifiers', 'trajectory_modifiers', 'particle_statistics', 'event_loggers']:
             for name, i in si.class_roles[role].items():
@@ -562,11 +561,12 @@ class OceanTrackerParamsRunner(object):
 
              'release_group_info': {},
              'scheduler_info': {},
+             'core_class_roles_info': {},
              'class_roles_info': {},
              }
 
         # sweep up any output files from al used classes
-        class_info={}
+        class_info= d['class_roles_info']
         for key, i in si.class_roles.items():
             if i is None : continue
             class_info[key] = {}
@@ -597,6 +597,7 @@ class OceanTrackerParamsRunner(object):
         d['release_group_info'] = class_info['release_groups']
 
         # core roles
+        class_info= d['core_class_roles_info']
         for key, i in si.core_class_roles.items():
             if i is None: continue
             class_info[key] = {}
@@ -632,7 +633,7 @@ class OceanTrackerParamsRunner(object):
             d['timing']['block_timings'].append(l)
         d['timing']['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
 
-        d['class_roles_info'] = class_info
+
 
         # check numba code for SIMD
         if True:

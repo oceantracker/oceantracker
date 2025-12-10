@@ -311,4 +311,8 @@ class FieldGroupManager(ParameterBaseClass):
         setup_reader._hindcast_integrity_checks(self.reader)
 
     def close(self):
+        info = self.info
+        info['reader_info'] = self.reader.info
+        info['interpolator_info'] = self.reader.interpolator.info
+        info['hori_cell_finder_info'] = self.reader.interpolator._hori_cell_finder.info
         pass
