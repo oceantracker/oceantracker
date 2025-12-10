@@ -53,18 +53,15 @@ def get_required_var_names(i,args):
 
     # get required vars for mapped variables, if in file
     for v in   ['water_velocity','tide','bottom_stress',  'water_velocity_depth_averaged', 'wind_stress',
-                'water_depth','A_Z_profile',]:
+                'water_depth','A_Z_profile']:
         add_var('required_vars',i, fmap, v)
 
     # add possible optional scalar vars
     for v in   ['water_temperature','salinity']:  add_var('optional_vars',i, fmap, v)
 
     # required grid variables
-    for v in ['x','y','z_interface']:  add_var('required_vars',i, params['grid_variable_map'], v)
+    for v in ['x','y','z_interface','bottom_interface_index','is_dry_cell']:  add_var('required_vars',i, params['grid_variable_map'], v)
 
-
-    # required integer variables from grid
-    for v in ['bottom_interface_index','is_dry_cell']:  add_var('required_int_vars', i, params['grid_variable_map'], v)
 
     # add required dimensions
     dm = params['dimension_map']
@@ -215,7 +212,7 @@ def write_files(i, args):
 
         dims = i['dims']
 
-        copy_vars = i['required_vars'] + i['required_int_vars']
+        copy_vars = i['required_vars']
         # add first optional  variable if found
         for v in i['optional_vars']:
             if v in ds.variables:
@@ -232,15 +229,12 @@ def write_files(i, args):
         # loop over vars
         for v in copy_vars:
             if v not in ds.variables: continue
-            print('\t\t compressing var=', v)
+            print('\t\t compressing var=', v, '\t\t Dims', dict( ds[v].sizes))
             data= ds[v].compute()
             # loop over all slicing
             for dim,s  in i['dim_slices'].items():
                 if dim  in data.dims:
                     data= data.isel({dim:s})
-
-            if v in i['required_int_vars']:
-                data.data = _ensure_int(data.data)
 
             # compress time varying floats
             if dims['time'] in  data.dims and np.issubdtype(data,np.floating):
@@ -254,7 +248,8 @@ def write_files(i, args):
         if len(ds_out.variables) > 0:
             print('\t writing file: ', path.basename(fn), 'variables', list(ds_out.variables.keys()))
             ds_out.to_netcdf(fn, encoding=encoding)
-            print('\t\t done file: ', fn,'dims', dict(ds_out.sizes))
+            print('\t\t done file: ', fn)
+            print('\t\t dims', dict(ds_out.sizes))
         ds_out.close()
 
     # write release point json
@@ -344,11 +339,40 @@ def GLORYS(args):
                                       lon=range(400,450),
                                     latitude=range(400, 450),
                                     longitude=range(400, 450)),
-                    required_int_vars=['mask'],
+                    required_vars=['mask'],
                     deep_point=[20.5,59.9,  -2],
                     #coast_point=[175.05, -36.225],
                      )
     return [GLORYS3DfizedZ]
+
+def ROMS(args):
+
+    base = dict(structured=True, one_based=True,
+                class_name= 'oceantracker.reader.ROMS_reader.ROMSreader',)
+    ROMS1 = deepcopy(base)
+    r,c, e = 50, 190, 50
+    ROMS1.update( name='ROMS3Dsigma',  time_decimation=1,
+                           is3D=True,label='MidAtlanticBight',
+                           #label='NZregion',
+
+                    input_dir=r'D:\Hindcast_reader_tests\ROMS_samples\ROMS_Mid_Atlantic_Bight',
+                    file_mask= 'doppio_his_2017*.nc',
+                    # slice regular grids, but rms has several grids!
+                    dim_slices = dict(eta_psi=range(r,r+e),
+                                        xi_psi=range(c,c+e),
+                                        eta_u=range(r, r + e+ 1),
+                                         xi_u=range(c, c + e ),
+                                        eta_v=range(r, r+e),
+                                        xi_v=range(c, c+e+1),
+                                        xi_rho=range(c, c+e+1),
+                                      eta_rho=range(r, r + e + 1),
+                                      ),
+                    required_vars=['mask_psi','mask_u','mask_v','mask_rho'],
+                    #deep_point=[-66,  43],
+                  deep_point=[-66.00172985389652,   44.91244933089063]
+                    #coast_point=[175.05, -36.225],
+                     )
+    return [ROMS1]
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A simple script to greet a user.")
@@ -368,7 +392,7 @@ if __name__ == '__main__':
         OTrun_root_output_dir = r'D:\OceanTrackerOutput\test_readers_full_small'
 
 
-    readers= [schism(args),GLORYS(args)]
+    readers= [schism(args),GLORYS(args),ROMS(args)]
     #fTrereaders= [schism(args)]#
 
     for nr, reader in enumerate(readers):
