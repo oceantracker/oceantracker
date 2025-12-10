@@ -78,6 +78,23 @@ def reader_schism2D():
         file_mask="*.nc",
     )
 
+
+@pytest.fixture
+def reader_GLORYS3D():
+    return dict(
+        input_dir=path.join(unittest_hindast_dir, "Glorys3DfixedZ"),
+        file_mask="*.nc",
+    )
+
+
+@pytest.fixture
+def reader_ROMS3Dsigma():
+    return dict(
+        input_dir=path.join(unittest_hindast_dir, "ROMS3Dsigma"),
+        file_mask="*.nc",
+    )
+
+
 @pytest.fixture
 def reader_demo_roms():
     return dict(
@@ -97,6 +114,7 @@ def base_settings(request, default_root_output_dir):
         use_dispersion=False,
         write_tracks=False,
         regrid_z_to_uniform_sigma_levels=False,
+        debug=True,
     )
 
 
@@ -258,6 +276,13 @@ def roms_release_locations():
             }
         ]
         )
+
+@pytest.fixture
+def GLORYS3D_release_locations():
+    return dict(
+        point=[20.5,59.9,-2],
+        deep_point=[20.5,59.9,-2],
+    )
 
 
 @pytest.fixture
