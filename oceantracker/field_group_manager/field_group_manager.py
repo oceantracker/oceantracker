@@ -34,6 +34,7 @@ class FieldGroupManager(ParameterBaseClass):
             reader_params = si.working_params['reader']
 
         self.reader, add_info = self._make_a_reader(reader_params)
+        self.interpolator = self._set_up_interpolator( self.reader)
 
         if gridID == 0:
             si.core_class_roles.reader = self.reader
@@ -60,7 +61,7 @@ class FieldGroupManager(ParameterBaseClass):
         # set up dry cell adjacency space for triangle walk
         grid['adjacency_with_dry_edges'] = grid['adjacency'].copy()  # working space to add dry cell boundaries to
 
-        self.reader.interpolator.final_setup()
+        self.interpolator.final_setup()
 
         # add tidal stranding class
         i = si.add_class('tidal_stranding', {}, crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', caller=self)
@@ -118,7 +119,7 @@ class FieldGroupManager(ParameterBaseClass):
         part_prop = si.class_roles.particle_properties
         reader = self.reader
         # find hori cell
-        sel_fix = self.reader.interpolator.find_hori_cell(xq, active)
+        sel_fix = self.interpolator.find_hori_cell(xq, active)
 
         sel_outside_open = part_prop['cell_search_status'].find_subset_where(sel_fix, 'eq', si.cell_search_status_flags.hit_open_boundary,
                                                                         out=self.get_partID_subset_buffer('B2'))
@@ -149,7 +150,7 @@ class FieldGroupManager(ParameterBaseClass):
         if reader.info['is3D']:
             # find vertical cell
             info = self.info
-            reader.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
+            self.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
             pass
 
     def _make_a_reader(self,reader_params):
@@ -200,7 +201,7 @@ class FieldGroupManager(ParameterBaseClass):
         if output is None:   output = part_prop[field_name].used_buffer() # over write current values
 
         field= self.reader.fields[field_name]
-        self.reader.interpolator.interp_field(field,info['current_buffer_steps'], info['fractional_time_steps'], output, active)
+        self.interpolator.interp_field(field,info['current_buffer_steps'], info['fractional_time_steps'], output, active)
 
     def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_coords, time_sec= None,hydro_model_gridID=None):
         # interp reader field_name at specfied locations,  not particle locations
@@ -297,7 +298,7 @@ class FieldGroupManager(ParameterBaseClass):
         return d
     def are_points_inside_domain(self,x):
         # only primary/outer grid
-        is_inside, part_data = self.reader.interpolator.are_points_inside_domain(x)
+        is_inside, part_data = self.interpolator.are_points_inside_domain(x)
         n = x.shape[0]
         part_data['hydro_model_gridID'] = np.zeros((n,), dtype=np.int8)
 
@@ -310,9 +311,19 @@ class FieldGroupManager(ParameterBaseClass):
     def hindcast_integrity(self):
         setup_reader._hindcast_integrity_checks(self.reader)
 
+    def _set_up_interpolator(self, reader):
+
+        if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
+        i = si.class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
+                                             default_classID='interpolator', caller= self,
+                                             crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
+        i.initial_setup(reader)
+        return i
+
+
     def close(self):
         info = self.info
         info['reader_info'] = self.reader.info
-        info['interpolator_info'] = self.reader.interpolator.info
-        info['hori_cell_finder_info'] = self.reader.interpolator._hori_cell_finder.info
+        info['interpolator_info'] = self.interpolator.info
+        info['hori_cell_finder_info'] = self.interpolator._hori_cell_finder.info
         pass

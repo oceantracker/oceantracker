@@ -126,8 +126,6 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         # make grid
 
-
-        self._set_up_interpolator()
         self._setup_fields()
 
         # set up ring buffer  info
@@ -389,14 +387,7 @@ class _BaseReader(ParameterBaseClass):
         return i
 
 
-    def _set_up_interpolator(self):
 
-        if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
-        i = si.class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
-                                             default_classID='interpolator', caller= self,
-                                             crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
-        i.initial_setup(self)
-        self.interpolator = i
 
     # setup and read core fields, depth, tide, water velocity
     # ----------------------------------------------------
@@ -483,7 +474,7 @@ class _BaseReader(ParameterBaseClass):
         return current_hydro_model_step, current_buffer_steps, fractional_time_steps
 
     def update(self, time_sec):
-        # check if all interpolators have the time steps they need
+        # check if all time steps in buffer
 
         if not self.are_time_steps_in_buffer(time_sec):
 

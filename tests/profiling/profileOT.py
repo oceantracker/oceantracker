@@ -100,8 +100,7 @@ def get_params(datasource=1):
     return params
 
 def run(profiler_name, params):
-
-    profile_dir = path.join(path.dirname(__file__),'results')
+    profile_dir = path.join(path.dirname(path.dirname(path.dirname(oceantracker.__file__))),'OTprofiling_results')
     test_version = 1
 
     results_file = 'PItest_%03.0f' % test_version + params['output_file_base']
@@ -135,9 +134,6 @@ if __name__ == '__main__':
 
     params = get_params(args.datasource)
 
-    # scatch_tests choices of classes
-    if args.dev:
-        params['base_case_params'].update({'interpolator': {'class_name': 'oceantracker.interpolator.scatch_tests.vertical_walk_at_particle_location_interp_triangle_native_grid.InterpTriangularNativeGrid_Slayer_and_LSCgrid'}})
 
 
     if args.test:
