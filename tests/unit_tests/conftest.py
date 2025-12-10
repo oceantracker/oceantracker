@@ -255,7 +255,7 @@ def schism3Dv5_release_locations():
 
 
 @pytest.fixture
-def roms_release_locations():
+def roms_demo_release_locations():
     """ROMS demo release locations (US East Coast, lat/lon order)"""
     return dict(
         point=[-69.5, 43.5],
@@ -276,6 +276,14 @@ def roms_release_locations():
             }
         ]
         )
+
+
+@pytest.fixture
+def roms_release_locations():
+    """ROMS demo release locations (US East Coast, lat/lon order)"""
+    return dict(
+        point=[-66.00,44.91]
+    )
 
 @pytest.fixture
 def GLORYS3D_release_locations():

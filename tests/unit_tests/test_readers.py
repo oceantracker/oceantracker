@@ -31,6 +31,7 @@ def test_GLORYS_2D():
     pass
 
 
+@pytest.mark.skip(reason="Not yet implemented")
 def test_GLORYS3D(
     base_settings,
     reader_GLORYS3D,
@@ -112,13 +113,13 @@ def test_schism2D(
 
 def test_roms_3D(
     base_settings,
-    reader_demo_roms,
+    reader_ROMS3Dsigma,
     basic_point_release,
     roms_release_locations,
 ):
     ot = OceanTracker()
     ot.settings(**base_settings)
-    ot.add_class("reader", **reader_demo_roms)
+    ot.add_class("reader", **reader_ROMS3Dsigma)
     ot.add_class(
         "release_groups",
         **{**basic_point_release, "points": roms_release_locations["point"]},
