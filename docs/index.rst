@@ -13,6 +13,16 @@
 Fast particle tracking in unstructured grids
 ****************************************************
 
+
+OceanTracker is a fast extendable code for offline particle tracking in unstructured grids [1]_, which also works with regular grid hydrodynamic models.
+It is primarly designed for use in coastal oceans on modest hardware, but handles open ocean, and HPC applications efficency as well.
+
+.. *Short cuts*: :doc:`info/about` | :doc:`info/features` | :doc:`info/gallery` 
+
+.. container:: centered-links
+
+   :doc:`info/about` | :doc:`info/features` | :doc:`info/gallery` 
+
 .. raw:: html
 
   <center>
@@ -21,33 +31,52 @@ Fast particle tracking in unstructured grids
    </video>
   </center>
 
-OceanTracker is a fast extendable code for offline particle tracking in unstructured grids [1]_, which also works with regular grid hydrodynamic models.
-It is primarly designed for use in coastal oceans and estuaries, where unstructured grids are commonly used to efficiently represent complex coastlines and bathymetry.
-
 OceanTracker was developed to offer a computationally faster alternative to the existing models and is currently the fastest model for unstructured grids available [2]_.
 This enables users to simulate the millions of particles required for many applications on modest office computers while.
 For larger applications, OceanTracker offers on-the-fly statistics to eliminate the need to store and wade through the analysis of vast volumes of recorded particle tracks to create e.g. heat-maps or reginal connectivities.
 
-OceanTracker code is highly flexible and extendable by the user, whether run by a new user with a text file of parameters,
-or by an expert adding their specialised code for novel particle behaviours or statistics, to the computational pipe line.
+OceanTracker's code is designed to be flexible and easily extendable by the user, whether run by a new user with a text file of parameters,
+or by an expert adding their specialised code for e.g. novel particle behaviours or statistics, to the computational pipe line.
 
 Its source code is publically available on `github <https://github.com/oceantracker/oceantracker/>`_ , released under the MIT licence.
 OceanTracker is under active developement. Feel free to reach out to report issues or to suggest new features.
+
+.. list-table:: 
+   :widths: 10 20 10 10 20 10 10 20 10
+   :header-rows: 0
+   :class: center
+
+   * -
+     - .. image:: _static/getting_started.png
+         :width: 120px
+         :alt: Running figure (demo)
+     -
+     -
+     - .. image:: _static/user_guide.svg
+         :width: 120px
+         :alt: Open book (docs)
+     -
+     -
+     - .. image:: _static/api.svg
+         :width: 120px
+         :alt: More (details)
+     -
+.. list-table:: 
+   :widths: 60 60 60
+   :header-rows: 0
+   :class: center
+
+   * - `Project website <https://www.cawthron.org.nz/>`_  
+         — :doc:`info/about`
+     - `Documentation <https://github.com/oceantracker/oceantracker/>`_  
+         — :doc:`info/features`
+     - `Gallery & Demos <https://example.com/gallery>`_  
+         — :doc:`info/gallery`
 
 
 .. image::  _static/cawthron.jpg
    :target: https://www.cawthron.org.nz/
    :width: 200
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Contents:
-
-   info/about.rst
-   info/features.rst
-   info/gallery.rst
-   info/installing.rst
 
 
 .. warning::
@@ -64,3 +93,14 @@ OceanTracker is under active developement. Feel free to reach out to report issu
 
 *Last updated:* |date|
 
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Contents:
+
+   info/about.rst
+   info/features.rst
+   info/gallery.rst
+   info/installing.rst
+   info/documentation.rst

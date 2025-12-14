@@ -66,6 +66,10 @@ html_theme = 'alabaster'
 
 # Add any paths that contain custom static files (such as style sheets)
 html_static_path = ['_static']
+# removes the table frame
+html_css_files = [
+    'custom.css',
+]
 
 # Custom sidebar templates
 html_sidebars = {
