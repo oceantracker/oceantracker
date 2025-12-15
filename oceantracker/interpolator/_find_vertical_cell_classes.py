@@ -39,14 +39,7 @@ class FindVerticalCellSigmaGrid(object):
     def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
         # locate vertical cell in place
         part_prop = si.class_roles.particle_properties
-        n_cell = part_prop['n_cell'].data
-        status = part_prop['status'].data
-        bc_coords = part_prop['bc_coords'].data
         grid = self.grid
-
-        nz_cell = part_prop['nz_cell'].data
-        z_fraction = part_prop['z_fraction'].data
-        z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
 
         bad_z_fraction_count = self.get_depth_cell_sigma_layers(xq,
                                     grid['triangles'],
@@ -54,23 +47,26 @@ class FindVerticalCellSigmaGrid(object):
                                     fields['tide'].data,
                                     si.settings.minimum_total_water_depth,
                                     grid['sigma_interface'], grid['sigma_nz_map'], grid['sigma_map_z'],
-                                    n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
+                                    part_prop['n_cell'].data, part_prop['status'].data,
+                                    part_prop['bc_coords'].data, part_prop['nz_cell'].data,
+                                    part_prop['z_fraction'].data, part_prop['z_fraction_water_velocity'].data,
+                                    part_prop['water_depth'].data, part_prop['tide'].data,
                                     current_buffer_steps, fractional_time_steps,
                                     active, si.settings.z0)
-
 
         return bad_z_fraction_count
 
     @staticmethod
     @njitOTparallel
-    def get_depth_cell_sigma_layers(xq, triangles, water_depth, tide, minimum_total_water_depth,
-                                    sigma, sigma_map_nz,sigma_map_z,
+    def get_depth_cell_sigma_layers(xq, triangles, water_depth_field_data, tide_field_data, minimum_total_water_depth,
+                                    sigma, sigma_map_nz, sigma_map_z,
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
+                                    water_depth,tide,
                                     current_buffer_steps, fractional_time_steps,
                                     active, z0):
         # view without redundant dim of 4D field
-        tide1 = tide[current_buffer_steps[0], :, 0, 0]
-        tide2 = tide[current_buffer_steps[1], :, 0, 0]
+        tide1 = tide_field_data[current_buffer_steps[0], :, 0, 0]
+        tide2 = tide_field_data[current_buffer_steps[1], :, 0, 0]
         frac0, frac1 = fractional_time_steps[0], fractional_time_steps[1]
         sigma_map_dz =  sigma_map_z[1] - sigma_map_z[0]
 
@@ -85,7 +81,8 @@ class FindVerticalCellSigmaGrid(object):
             # interp water depth
             z_bot = 0.
             for m in range(3):
-                z_bot -= bc_coords[n, m] * water_depth[nodes[m]]
+                z_bot -= bc_coords[n, m] * water_depth_field_data[nodes[m]]
+            water_depth[n] = z_bot
 
             # preserve status if stranded by tide
             if status[n] == status_stranded_by_tide:

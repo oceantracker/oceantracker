@@ -51,14 +51,15 @@ def time_dependent_2D_scalar_field(n_buffer, fractional_time_steps, F_out, F_dat
     for nn in nb.prange(active.size):
         n = active[nn]
         # loop over isActive particles and vector components
-        F_out[n] = 0. # zero out for summing
+        F = 0. # zero out for summing
         n_nodes = triangles[n_cell[n], :]
         bc = bc_coords[n, :]
         # loop over each node in triangle
         for m in range(3):
             # loop over vector components
-            F_out[n] += bc[m] * (fractional_time_steps[0] * F1[n_nodes[m]]
+            F += bc[m] * (fractional_time_steps[0] * F1[n_nodes[m]]
                                + fractional_time_steps[1] * F2[n_nodes[m]])
+        F_out[n] = F  # reduce array writes by using temp F variable
 
 @njitOTparallel
 def time_dependent_2D_vector_field(n_buffer, fractional_time_steps, F_out, F_data, triangles, n_cell, bc_coords, active):
@@ -103,13 +104,14 @@ def time_dependent_3D_scalar_field_data_in_all_layers(n_buffer, fractional_time_
         nz = nz_cell[n]
 
         # loop over each vertex in triangle
-        F_out[n] = 0.
+        F = 0.
         n_nodes = triangles[n_cell[n], :]
         for m in range(3):
             # add contributions from layer above and below particle, at two time steps
             temp  = (F1[n_nodes[m], nz] * zf1 + F1[n_nodes[m], nz + 1] * zf2) * fractional_time_steps[0]
             temp += (F2[n_nodes[m], nz] * zf1 + F2[n_nodes[m], nz + 1] * zf2) * fractional_time_steps[1]# second time step
-            F_out[n] += bc_coords[n, m] * temp
+            F += bc_coords[n, m] * temp
+        F_out[n] = F # reduce array writes by using temp F variable
 
 
 @njitOTparallel
@@ -140,9 +142,12 @@ def time_dependent_3D_vector_field_data_in_all_layers(n_buffer, fractional_time_
             for c in range(3):
                 # add contributions from layer above and below particle, for each spatial component at two time steps
                 # slightly faster with temp variable, as allows more LLVM optimisations?
-                temp  = (F1[node, nz, c] * zf1 + F1[node, nz + 1, c] * zf2)*frac0
-                temp += (F2[node, nz, c] * zf1 + F2[node, nz + 1, c] * zf2)*frac1 # second time step
-                F_out[n, c] += bc_coords[n, m] * temp
+                #temp  = (F1[node, nz, c] * zf1 + F1[node, nz + 1, c] * zf2)*frac0
+                #temp += (F2[node, nz, c] * zf1 + F2[node, nz + 1, c] * zf2)*frac1 # second time step
+                #F_out[n, c] += bc_coords[n, m] * temp
+                temp1 = F1[node, nz, c] * zf1 + F1[node, nz + 1, c] * zf2
+                temp2 = F2[node, nz, c] * zf1 + F2[node, nz + 1, c] * zf2  # second time step
+                F_out[n, c] += bc_coords[n, m] * (temp1 * frac0 + temp2* frac1 )
 
 @njitOTparallel
 def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps, F_data,
