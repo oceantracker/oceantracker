@@ -1,24 +1,36 @@
-
 #############
 About
 #############
 
-Lagrangian particle tracking, is an important tool in quantifying bio-physical transports in the ocean.
-Particle tracking in the unstructured grids typically used in coastal regions is computationally slow,
-limiting the number of particles and ranges of behaviours that can be modeled.
+OceanTracker is a Lagrangian particle tracking model.
+Lagrangian particle tracking models calculate the trajectories of particles as they are advected and diffused by ocean currents.
+These trajectories can then be used to quantify bio-physical transports in the ocean.
 
-OceanTracker was created to be 100s of times faster than an existing freely available particle tracker
-when using unstructured grids. More significantly, OceanTracker computational speed is simmilar to that achieved when particle tracking on a regular grid
-(`Vennell et. al. <https://link.springer.com/article/10.1007/s10236-020-01436-7/>`_)
+The Lagrangian trajectory approach is in many regards similar to the Eulerian tracer approach, but they also have many differences.
+They both represent parcels of water being advected passively by the velocity fields of the,
+This makes it possible to trace water masses, substances such as pollutants, or organisms as they are carried with the ocean currents.
+A key difference between the approaches is that the Eulerian tracer equation generally needs to be integrated 'on-line' - i.e. at the same time as the hydrodynamics are calculated -
+While the Lagrangian trajectories can also be calculated "off-line", after the fact, using the hydrodynamic model outputs.
+The 'off-line' calculation of Lagrangian trajectories is far more rapid, as they can leverage the already simulated velocity fields in order to calculate the trajectories.
+This enables a large range of studies that would be unfeasible with a tracer-based approach.
 
+While Lagrangian models have been comparatively well established for larger, but coarse, ocean or earth-system models based on structured, i.e. rectangular, grids,
+they were at the time when OceanTracker was started relatively underdeveloped for the models using unstructured grids that are frequently used in coastal oceans.
+The existing models that were able to calculate trajectories based on data from unstructured grid models were slow due to several technical reasons.
+One of these reasons was that, with the standard approaches at the time (binary-trees), finding the current cell of a particle is computationally much more expensive than the same task in a structured grid.
+
+OceanTracker was created to overcome this, and its first version was, at the time, 100s of times faster than its other existing, freely available particle tracker:
+when using unstructured grids. 
+More significantly, OceanTracker computational speed is similar to that achieved when particle tracking on a regular grid:
+(`Vennell et. al. (2021) <https://link.springer.com/article/10.1007/s10236-020-01436-7>`_).
 This makes it possible to routinely calculate the trajectories of millions of particles.
-Allowing  large number of particles allows much better estimates of dispersion and transport statistics, particularly when the probability of connection is low but the consequences are significant, e.g. the spread of invasive species.
-It also enables wider exploration of parameter sensitivity and particles’ bio-physical behaviours to provide more robust results.
+A large number of particles allows for much better estimates of dispersion and transport statistics, 
+Particularly when the probability of connection is low but the consequences are significant, e.g. the spread of invasive species.
+It also enables wider exploration of parameter sensitivity and particles' bio-physical behaviours, to provide robust results.
 
-The speed increases result largely from exploiting history and reuse within the spatial interpolation of the hydrodynamic model’s output.
-Using multiple computer cores further increased the speed to track a given number of particles.
+In its current state (2025), OceanTracker is the fastest openly available particle tracker to our knowledge (`Vennell et al. (2025) <https://eartharxiv.org/repository/view/8387/>`_).
+Yet, we would like to note that it is difficult to compare particle tracking models fairly, as there is no standardized feature set and each model tends to be tailored to a slightly different use case.
 
-The code can build heat maps on the fly and within polygon counts. This eliminates the need to record large data sets of particle tracks for post processing into heat maps. In addition to speed the internal architecture of OceanTracker makes it easy for the user to customise and extend.
-
+For an overview of its features, see :doc:`features`.
 
 
