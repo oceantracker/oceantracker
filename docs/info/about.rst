@@ -2,6 +2,9 @@
 About
 #############
 
+Overview
+--------
+
 OceanTracker is a Lagrangian particle tracking model.
 Lagrangian particle tracking models calculate the trajectories of particles as they are advected and diffused by ocean currents.
 These trajectories can then be used to quantify bio-physical transports in the ocean.
@@ -28,8 +31,17 @@ A large number of particles allows for much better estimates of dispersion and t
 Particularly when the probability of connection is low but the consequences are significant, e.g. the spread of invasive species.
 It also enables wider exploration of parameter sensitivity and particles' bio-physical behaviours, to provide robust results.
 
+Why is OceanTracker fast
+------------------------
+
 In its current state (2025), OceanTracker is the fastest openly available particle tracker to our knowledge (`Vennell et al. (2025) <https://eartharxiv.org/repository/view/8387/>`_).
-Yet, we would like to note that it is difficult to compare particle tracking models fairly, as there is no standardized feature set and each model tends to be tailored to a slightly different use case.
+Yet, comparing different particle tracking models fairly remains difficult, as there is no standardized feature set and each model tends to be tailored to a slightly different use case.
+
+While computational speed was a key design goal of OceanTracker, compromises where made between speed, steepness of the adoption curve, adaptability  and  the  complexity of its implementation code.
+For this we heavily relied on `numba <https://numba.pydata.org/>`_.
+Numba is a just-in-time compiler for Python that translates performance critical pieces of code into optimized machine code at runtime.
+This allows OceanTracker to be computationally efficient while remaining much more adaptable then if we would have relied on e.g. NumPy,
+where we would have had to rely on predefined vectorized implementations for performance critical code.
 
 For an overview of its features, see :doc:`features`.
 
