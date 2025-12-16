@@ -61,9 +61,9 @@ def main(args):
         params.update(throw_debug_error=0)
         case_info_file = run(params)
 
-    dd.compare_reference_run_tracks(case_info_file, args)
+    dd.compare_reference_tracks(case_info_file, args)
     dd.show_track_plot(case_info_file, args)
-    dd.compare_reference_run_stats(case_info_file,args)
+
     return  ot.params
 
 

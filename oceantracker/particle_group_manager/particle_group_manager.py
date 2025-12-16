@@ -195,10 +195,8 @@ class ParticleGroupManager(ParameterBaseClass):
         t0 = perf_counter()
         # first interpolate to give particle properties from reader derived  fields
         for name,i in cr.particle_properties.items():
-            if  isinstance(i, FieldParticleProperty)\
-                    and i.params['name'] not in ['tide'] \
-                    and si.core_class_roles.field_group_manager.reader.info['vert_grid_type'] in [si.vertical_grid_types.Sigma]:
-                            # above only needed a s
+            # tide and water depth update done in interpolator/vertical cell find
+            if  isinstance(i, FieldParticleProperty)  and i.params['name'] not in ['tide','water_depth']:
                 i.timed_update(n_time_step, time_sec, active)
 
         si.block_timer('Interpolate fields', t0)

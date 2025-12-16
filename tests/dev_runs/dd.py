@@ -94,6 +94,7 @@ rg_basic = dict( name='rg_basic',  # name used internal to refer to this release
          release_interval=1800,  # seconds between releasing particles
          pulse_size=5)  # how many are released each interval
 
+tracks_writer = dict(turn_on_write_particle_properties_list=['water_velocity'])
 rg_release_interval0 = dict( name='release_interval0',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
          points=[[1594000, 5484200, -2]  ],
@@ -169,7 +170,7 @@ my_heat_map_time = dict(name='my_heatmap_time',
         grid_span = [10000,10000],
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
-         particle_property_list=['a_pollutant','water_depth'],  # request a heat map for the decaying part. prop. added above
+         particle_property_list=['a_pollutant','water_depth','tide'],  # request a heat map for the decaying part. prop. added above
          #status_list=[],  # only count the particles which are moving
 
          z_min=-10.,  # only count particles at locations above z=-2m
@@ -182,7 +183,7 @@ my_heat_map_age = dict(name='my_heatmap_age',
         grid_span = [10000,10000],
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
-         particle_property_list=['a_pollutant','water_depth'],  # request a heat map for the decaying part. prop. added above
+         particle_property_list=['a_pollutant','water_depth','tide'],  # request a heat map for the decaying part. prop. added above
          #status_list=[],  # only count the particles which are moving
         age_bin_size= 2*3600,
         max_age_to_bin=24*3600,
@@ -259,8 +260,9 @@ RESET = '\033[0m' # Resets to default color and style
 
 from oceantracker.read_output.python import load_output_files
 
-def compare_reference_run_tracks(case_info_file, args):
+def compare_reference_tracks(case_info_file, args):
 
+    case_info = load_output_files.read_case_info_file(case_info_file)
 
     if case_info_file is None : return
 
@@ -271,40 +273,27 @@ def compare_reference_run_tracks(case_info_file, args):
 
     tracks     = load_output_files.load_track_data(case_info_file)
     tracks_ref = load_output_files.load_track_data(reference_case_info_file)
-    dx = np.abs(tracks['x'] - tracks_ref['x'])
 
-    # print('x diffs 3 max/ 3 mean ', np.concatenate((np.nanmax(dx, axis=1),np.nanmean(dx, axis=1)),axis=1))
+    for name in ['x','water_depth', 'tide','water_velocity','time']:
+        delta = np.abs(tracks[name] - tracks_ref[name])
+        print(f'{BLUE}{name}:{RESET} differences from reference run: ' )
+        print('\t min  ' +RED, np.nanmin(np.nanmin(delta, axis=0), axis=0), RESET, end="")
+        print('\t mean '+RED, np.nanmean(np.nanmean(delta, axis=0), axis=0), RESET, end="")
+        print('\t max  '+RED, np.nanmax(np.nanmax(delta, axis=0), axis=0), RESET)
 
-    print(f'(x,y,z) differences from reference run: "{path.basename(case_info_file).split(".")[0]}"' )
-    print('\t min  ' +RED, np.nanmin(np.nanmin(dx, axis=0), axis=0), RESET)
-    print('\t mean '+RED, np.nanmean(np.nanmean(dx, axis=0), axis=0), RESET)
-    print('\t max  '+RED, np.nanmax(np.nanmax(dx, axis=0), axis=0), RESET)
-
-    dt = tracks['time'] - tracks_ref['time']
-    print('times, \t  min/max diff ' + RED, np.nanmin(dt), np.nanmax(dt), RESET)
     if False:
         from matplotlib import  pyplot as plt
         v='status'
-        plt.plot(np.arange(dx.shape[0]),tracks[v]-tracks_ref[v] )
+        plt.plot(np.arange(delta.shape[0]),tracks[v]-tracks_ref[v] )
         plt.show(block=True)
 
-def compare_reference_run_stats(case_info_file, args):
-    from oceantracker.read_output.python import load_output_files
-    case_info = load_output_files.read_case_info_file(case_info_file)
-
-    reference_case_info_file = case_info_file.replace('latest_runs', 'reference_runs')
-    if args.reference_case:
-        # rewrite reference case output
-        shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)
-
-
     # check stats
+    print('--Stats----------------------')
     stats_params=case_info['working_params']['class_roles']['particle_statistics']
     for name, params in stats_params.items():
         if name not in case_info['output_files']['particle_statistics']: continue
         stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
-
 
         print(f'Stats  compare ref: "{name}"')
         print('\t counts, ref/new', stats_ref['count'].sum(), stats['count'].sum(),

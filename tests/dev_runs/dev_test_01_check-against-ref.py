@@ -20,7 +20,7 @@ def main(args=None):
                 )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
-                 turn_on_write_particle_properties_list=['nz_cell','z_fraction_water_velocity','z_fraction'],
+                 turn_on_write_particle_properties_list=['nz_cell','z_fraction_water_velocity','z_fraction','water_velocity'],
                time_steps_per_per_file= None if args.reference_case else 10  # dont split files ref case to test reading split files
 
                ) # keep file small
@@ -56,8 +56,8 @@ def main(args=None):
     else:
         case_info_file = dd.get_case_info_name_from_params(ot.params)
 
-    dd.compare_reference_run_tracks(case_info_file, args)
-    dd.compare_reference_run_stats(case_info_file, args)
+    dd.compare_reference_tracks(case_info_file, args)
+
 
     tests=dict()
     tracks = dd.load_tracks(case_info_file)

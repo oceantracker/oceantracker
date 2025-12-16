@@ -42,9 +42,8 @@ class FindVerticalCellSigmaGrid(object):
         grid = self.grid
 
         bad_z_fraction_count = self.get_depth_cell_sigma_layers(xq,
+                                    fields['water_depth'].data, fields['tide'].data,
                                     grid['triangles'],
-                                    fields['water_depth'].data.ravel(),
-                                    fields['tide'].data,
                                     si.settings.minimum_total_water_depth,
                                     grid['sigma_interface'], grid['sigma_nz_map'], grid['sigma_map_z'],
                                     part_prop['n_cell'].data, part_prop['status'].data,
@@ -58,15 +57,16 @@ class FindVerticalCellSigmaGrid(object):
 
     @staticmethod
     @njitOTparallel
-    def get_depth_cell_sigma_layers(xq, triangles, water_depth_field_data, tide_field_data, minimum_total_water_depth,
+    def get_depth_cell_sigma_layers(xq, water_depth_field,tide_field, triangles,  minimum_total_water_depth,
                                     sigma, sigma_map_nz, sigma_map_z,
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                     water_depth,tide,
                                     current_buffer_steps, fractional_time_steps,
                                     active, z0):
         # view without redundant dim of 4D field
-        tide1 = tide_field_data[current_buffer_steps[0], :, 0, 0]
-        tide2 = tide_field_data[current_buffer_steps[1], :, 0, 0]
+        tf1 = tide_field[current_buffer_steps[0], :, 0, 0]
+        tf2 = tide_field[current_buffer_steps[1], :, 0, 0]
+        wdf = water_depth_field[0, :, 0, 0]
         frac0, frac1 = fractional_time_steps[0], fractional_time_steps[1]
         sigma_map_dz =  sigma_map_z[1] - sigma_map_z[0]
 
@@ -74,15 +74,20 @@ class FindVerticalCellSigmaGrid(object):
 
         for nn in nb.prange(active.size):  # loop over active particles
             n = active[nn]
-            nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
-
             zq = float(xq[n, 2])
+            nodes = triangles[n_cell[n], :]
 
             # interp water depth
             z_bot = 0.
             for m in range(3):
-                z_bot -= bc_coords[n, m] * water_depth_field_data[nodes[m]]
-            water_depth[n] = z_bot
+                z_bot -= bc_coords[n, m] * wdf[nodes[m]]
+            water_depth[n]= -z_bot
+
+            # interp tide
+            z_top = 0.
+            for m in range(3):
+                z_top += bc_coords[n, m] * (tf1[nodes[m]] * frac0 + tf2[nodes[m]] * frac1)
+            tide[n] = z_top
 
             # preserve status if stranded by tide
             if status[n] == status_stranded_by_tide:
@@ -91,11 +96,6 @@ class FindVerticalCellSigmaGrid(object):
                 z_fraction[n] = 0.0
                 z_fraction_water_velocity[n] = 0.0
                 continue
-
-            # interp tide
-            z_top = 0.
-            for m in range(3):
-                z_top += bc_coords[n, m] * (tide1[nodes[m]] * frac0 + tide2[nodes[m]] * frac1)
 
             # clip z into range
             zq = min(max(zq, z_bot), z_top)
@@ -334,19 +334,28 @@ class FindVerticalCellZfixed(object):
         z_fraction = part_prop['z_fraction'].data
         z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
 
-        bad_z_fraction_count = self.get_depth_cell_fixedZ(xq, grid['triangles'], grid['bottom_interface_index'],
-                             grid['water_depth'], fields['tide'].data, grid['z'], grid['nz_map'], grid['z_map'],
+        bad_z_fraction_count = self.get_depth_cell_fixedZ(xq,
+                             fields['water_depth'].data, fields['tide'].data,
+                            grid['triangles'], grid['bottom_interface_index'],
+                              grid['z'], grid['nz_map'], grid['z_map'],
                              n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
+                                part_prop['water_depth'].data, part_prop['tide'].data,
                              current_buffer_steps, fractional_time_steps,
-                             active, si.settings.z0)
+                                 active, si.settings.z0)
         return bad_z_fraction_count
     @staticmethod
     @njitOT
-    def get_depth_cell_fixedZ(xq, triangles, bottom_interface_index,water_depth,tide,
+    def get_depth_cell_fixedZ(xq,water_depth_field,tide_field, triangles, bottom_interface_index,
                                     z, nz_map,z_map,
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
+                                    water_depth,tide,
                                     current_buffer_steps, fractional_time_steps,
                                     active, z0):
+
+        tf1 = tide_field[current_buffer_steps[0], :, 0, 0]
+        tf2 = tide_field[current_buffer_steps[1], :, 0, 0]
+        wdf = water_depth_field[0, :, 0, 0]
+
         dz_map_inv = 1.0/(z_map[1] - z_map[0])
         bad_z_fraction_count = 0
 
@@ -358,9 +367,10 @@ class FindVerticalCellZfixed(object):
             z_bot = 0.
             deepest_bottom_cell= nz_map[-1]
             for m in range(3):
-                z_bot -= bc_coords[n, m] * water_depth[nodes[m]]
+                z_bot -= bc_coords[n, m] * wdf[nodes[m]]
                 # for ragged bottom, get the deepest cell a particle could be in amongst the 3 nodes
                 deepest_bottom_cell = min(bottom_interface_index[nodes[m]],deepest_bottom_cell)
+            water_depth[n] = -z_bot
 
             # preserve status if stranded by tide
             if status[n] == status_stranded_by_tide:
@@ -373,8 +383,9 @@ class FindVerticalCellZfixed(object):
             # interp to find tide at particle location
             z_top = 0.
             for m in range(3):
-                z_top += bc_coords[n, m] * tide[current_buffer_steps[0], nodes[m], 0, 0] * fractional_time_steps[0]
-                z_top += bc_coords[n, m] * tide[current_buffer_steps[1], nodes[m], 0, 0] * fractional_time_steps[1]
+                z_top += bc_coords[n, m] * tf1[nodes[m]] * fractional_time_steps[0]
+                z_top += bc_coords[n, m] * tf2[nodes[m]] * fractional_time_steps[1]
+            tide[n] = z_top
 
             zq = min(max(zq, z_bot), z_top) # clip to water depth and free surface
             n_in_map = int((zq - z[0])  * dz_map_inv) # number of map steps between zq and deepest fixed z in the map

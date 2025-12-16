@@ -147,13 +147,19 @@ class FieldGroupManager(ParameterBaseClass):
                                                     out=self.get_partID_subset_buffer('B2'))
         self._move_back(sel)  # those still bad, eg nan etc
 
+        # update tide water depth required for 3D vert cell find, also useful in 2D
+        fields = self.reader.fields
+
         if reader.info['is3D']:
             # find vertical cell
             info = self.info
-            self.interpolator.find_vertical_cell(self.reader.fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
-            pass
+            self.interpolator.find_vertical_cell(fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
+        else:
+        # 2D run
+            self.interpolator.update_tide_waterdepth(fields,info['current_buffer_steps'], info['fractional_time_steps'],
+                                                     active)
 
-    def _make_a_reader(self,reader_params):
+    def _make_a_reader(self, reader_params):
         # build a readers
         reader = setup_reader.make_a_reader_from_params(reader_params, si.settings,  crumbs='')
         reader.initial_setup()

@@ -191,9 +191,10 @@ class Solver(ParameterBaseClass):
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
 
-        #todo replace this with  tide waster depth done cell find
-        fgm.interp_field_at_particle_locations('tide', alive, output=part_prop['tide'].data)
-        fgm.interp_field_at_particle_locations('water_depth', alive, output=part_prop['water_depth'].data)
+        #todo replace this with  tide waster depth done cell find, done for sigma grid
+        #if fgm.reader.info['vert_grid_type'] not in [si.vertical_grid_types.Sigma]:
+        #fgm.interp_field_at_particle_locations('tide', alive, output=part_prop['tide'].data)
+        #fgm.interp_field_at_particle_locations('water_depth', alive, output=part_prop['water_depth'].data)
 
         # trajectory modifiers
         for name, i in si.class_roles.trajectory_modifiers.items():
@@ -203,7 +204,6 @@ class Solver(ParameterBaseClass):
 
 
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
-
 
         # update particle properties
         pgm.update_PartProp(n_time_step, time_sec, alive)

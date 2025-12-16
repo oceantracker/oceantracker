@@ -4,6 +4,32 @@ from oceantracker.util.profiling_util import function_profiler
 from oceantracker.util.numba_util import njitOT, njitOTparallel
 import numba as nb
 
+@njitOTparallel
+def interp_tide_water_depth(n_buffer, fractional_time_steps,
+                            tide_field,water_depth_field,
+                            tide_prop,water_depth_prop,
+                            triangles, n_cell, bc_coords, active):
+    # interp core prop, tide and water depth at the same time, as needed in vert cel find
+    tf1 = tide_field[n_buffer[0], :, 0, 0]
+    tf2 = tide_field[n_buffer[1], :, 0, 0]
+    wdf = water_depth_field[0, :, 0, 0]
+
+    # loop over active particles and vector components
+    for nn in nb.prange(active.size):
+        n = active[nn]
+        nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
+        # interp water depth
+        depth = 0.
+        for m in range(3):
+            depth += bc_coords[n, m] * wdf[nodes[m]]
+        water_depth_prop[n] = depth
+
+        # interp tide
+        tide= 0.
+        for m in range(3):
+            tide += bc_coords[n, m] * (tf1[nodes[m]] * fractional_time_steps[0] + tf2[nodes[m]] * fractional_time_steps[1])
+        tide_prop[n] = tide
+
 
 @njitOTparallel
 def time_independent_2D_scalar_field(F_out, F_data, triangles, n_cell, bc_coords, active):
@@ -13,10 +39,11 @@ def time_independent_2D_scalar_field(F_out, F_data, triangles, n_cell, bc_coords
     for nn in nb.prange(active.size):
         n = active[nn]
         # loop over each node in triangle
-        F_out[n] = 0.  # zero out for summing
+        Fsum = 0.
         n_nodes = triangles[n_cell[n], :]
         for m in range(3):
-            F_out[n] += bc_coords[n, m] * F[n_nodes[m]]
+            Fsum += bc_coords[n, m] * F[n_nodes[m]]
+        F_out[n] = Fsum
 
 @njitOTparallel
 def time_independent_2D_vector_field(F_out, F_data, triangles, n_cell, bc_coords, active):
