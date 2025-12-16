@@ -633,6 +633,16 @@ class OceanTrackerParamsRunner(object):
             d['timing']['block_timings'].append(l)
         d['timing']['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
 
+        # timing summaries
+        d['timing']['summaries'] = {}
+        time_steps = len(si.run_info.times)
+        # particles_walked is the cumulative number alive that
+        # where attempted to be walked.
+        particles_walked = si.core_class_roles.field_group_manager.interpolator.info['horizontal_cell_finder_info']['particles_walked']
+        avg_num_particles_alive = particles_walked/time_steps
+        total_run_time = si.run_info.computation_duration.total_seconds()
+        tpp = total_run_time / avg_num_particles_alive
+        d['timing']['summaries']["time_per_particle_per_timestep"] = tpp
 
 
         # check numba code for SIMD

@@ -31,7 +31,6 @@ def test_GLORYS_2D():
     pass
 
 
-@pytest.mark.skip(reason="Not yet implemented")
 def test_GLORYS3D(
     base_settings,
     reader_GLORYS3D,
