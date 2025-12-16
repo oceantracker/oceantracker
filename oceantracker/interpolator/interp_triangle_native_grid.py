@@ -32,7 +32,8 @@ class  InterpTriangularGrid(_BaseInterp):
     def initial_setup(self, reader):
         super().initial_setup(reader)  # children must call this parent class to default shared_params etc
         params = self.params
-        grid = reader.grid
+        self.grid = reader.grid
+        grid = self.grid
 
         t0 = perf_counter()
         crumbs = 'Interpolator initial_setup '
@@ -123,6 +124,15 @@ class  InterpTriangularGrid(_BaseInterp):
                 si.msg_logger.msg (f' 3D time invariant fields interpolator not yet implemented for ', error=True, caller=self,
                                    hint=f'remove field "{str(fi.params["name"])}" from reader load_fields param')
         pass
+
+    def update_tide_waterdepth(self, fields, current_buffer_steps, fractional_time_steps, active):
+        part_prop = si.class_roles.particle_properties
+        grid = self.grid
+        triangle_eval_interp.interp_tide_water_depth(current_buffer_steps, fractional_time_steps,
+                                fields['tide'].data, fields['water_depth'].data,
+                                part_prop['tide'].data,part_prop['water_depth'].data,
+                                grid['triangles'],
+                                part_prop['n_cell'].data,part_prop['bc_coords'].data, active)
 
     def find_hori_cell(self,xq, active):
         # do cell walk

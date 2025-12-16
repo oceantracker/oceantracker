@@ -186,7 +186,7 @@ def write_files(i, args):
         print('compressed: unstructured grid  nodes = ', info['required_nodes'].size, 'cells', info['required_cells'].size,)
 
 
-    tmax = 14*24*3600 if args.full else 24*3600
+    tmax = 14*24*3600 if args.full and not args.dev else 24*3600
 
     for nn, file in enumerate(file_list):
 
@@ -212,13 +212,13 @@ def write_files(i, args):
 
         dims = i['dims']
 
-        copy_vars = i['required_vars']
+        copy_vars = deepcopy(i['required_vars'])
         # add first optional  variable if found
         for v in i['optional_vars']:
             if v in ds.variables:
                 copy_vars.append(v)
                 break
-
+        copy_vars = list(set(copy_vars)) # make unique
         encoding = {}
         grid = i['grid']
         # add triangulation if present
@@ -372,6 +372,7 @@ def ROMS(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="A simple script to greet a user.")
     parser.add_argument('-full',   action="store_true",  help="long demo hindcasts"    )
+    parser.add_argument('-dev', action="store_true", help="smal run of larger/full hindcasts ")
     parser.add_argument('-type', type=int, default=-1)
     parser.add_argument('-variant', type=int, default=-1)
     parser.add_argument('-run_off', action="store_true", help=" toggle run demo hindcasts off ")

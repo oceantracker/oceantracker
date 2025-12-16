@@ -11,29 +11,28 @@ import oceantracker.main
 
 from oceantracker.util.json_util import read_JSON , write_JSON
 
-def get_params(datasource=1):
+def get_params(args):
     time_step = 60  # 5min
     release_interval = 3600
     pulse_size = 20000
     calculation_interval = 3 * 3600
-    if datasource==1:
+    root_output_dir = 'D:\\OceanTrackerOutput\\OceanTrackerProfiling'
+    if args.datasource==1:
         output_file_base= 'Sounds'
         input_dir =  r'Z:\Hindcasts\UpperSouthIsland\2020_MalbroughSounds_10year_benPhD\2008'
         file_mask  = 'schism_marl200801*.nc'
-        root_output_dir = 'D:\\OceanTrackerOutput\\OceanTrackerProfiling'
 
-    elif datasource==2:
+
+    elif args.datasource==2:
         output_file_base= 'Sounds'
         input_dir =  '/hpcfreenas/hindcast/UpperSouthIsland/MarlbroughSounds_hindcast_10years_BenPhd_2019ver/'
         file_mask  = 'schism_marl200801*.nc'
         root_output_dir = '/hpcfreenas/ross/oceanTrackerOutput/profiling/'
 
-
-    elif datasource==3:
+    elif args.datasource==3:
         output_file_base= 'demo_SCHISM_3D'
-        input_dir = '../../dev/demos\\demo_hindcast'
-        file_mask  = 'demoHindcastSchism3D.nc'
-        root_output_dir = 'output'
+        input_dir = path.join(path.dirname(path.dirname(path.dirname(__file__))), 'tutorials_how_to', 'demo_hindcast','schsim3D')
+        file_mask  = 'demo_hindcast_schisim3D*.nc'
         time_step = 60  # 1min
         release_interval = 600
         pulse_size = 200
@@ -60,6 +59,8 @@ def get_params(datasource=1):
         'screen_output_time_interval':6*time_step,
          'max_run_duration': 1 *24*3600,  # 1 days
          'processors': 30,
+         'use_A_Z_profile': True,
+         #'NUMBA_fastmath' : True,
          #'NUMBA_cache_code' : True,
          'reader': {'input_dir': input_dir,
                     'file_mask': file_mask,
@@ -86,6 +87,7 @@ def get_params(datasource=1):
                                                  }],
             'particle_statistics' :[ {'name': 'statas1','class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_ageBased',
                                          'update_interval': calculation_interval, 'particle_property_list': ['water_depth'],
+                                      'release_group_centered_grids' : True,
                                          'grid_size': [220, 221],
                                         'grid_span':[10000,20000],
                                          'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.},
@@ -132,7 +134,7 @@ if __name__ == '__main__':
     parser.add_argument('-dev', action='store_true')
     args = parser.parse_args()
 
-    params = get_params(args.datasource)
+    params = get_params(args)
 
 
 
