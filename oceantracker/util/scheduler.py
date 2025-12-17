@@ -16,6 +16,28 @@ class Scheduler(object):
         md = run_info.model_direction
         dt = settings.time_step
 
+        # check if user defined model duration is excessively long (>100 years)
+        if duration is not None:
+            if duration > 100 * 365 * 24 * 3600:
+                # throw a warning
+                msg_logger.msg(
+                    f'User defined scheduler duration is very long > 100 years',
+                    hint=f'Duration given {time_util.seconds_to_pretty_duration_string(duration)}',
+                    caller=caller, crumbs=crumbs, warning=True
+                )
+            
+            # clip duration to available model duration 
+            hindcast_duration = abs(int(run_info.hindcast_end_time) - int(run_info.hindcast_start_time))
+            if duration > hindcast_duration:
+                msg_logger.msg(
+                    f'User defined scheduler duration is longer than available hindcast duration',
+                    hint=f'Duration given {time_util.seconds_to_pretty_duration_string(duration)}, '
+                         f'hindcast duration {time_util.seconds_to_pretty_duration_string(hindcast_duration)}',
+                    caller=caller, crumbs=crumbs, warning=True
+                )
+                duration = hindcast_duration
+
+
         if times is None:
             # make from start time and interval
             times, interval = self._start_end_from_interval(settings,  run_info,start, end, duration, interval)
