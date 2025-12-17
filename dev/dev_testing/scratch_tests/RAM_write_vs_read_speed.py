@@ -20,37 +20,40 @@ def read(x,sel,s):
         s += x[n]
     return s
 
-set_num_threads(64)
-reps = 100
-Ns= 10**np.arange(2,8)
-dt =np.float64
-tw= np.zeros((Ns.size,),dtype=np.float64)
-tr= np.zeros((Ns.size,),dtype=np.float64)
-tr2= np.zeros((Ns.size,),dtype=np.float64)
+alpha = [.5,1]
+for m ,threads in enumerate([ 1, 32]):
 
-colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-for nt, dt in enumerate( [np.int8,np.int32,np.float32,np.float64]):
-    x = np.ones((20,), dtype=dt)
-    s = 0 if np.issubdtype(dt , np.integer) else 0.
+    set_num_threads(threads)
+    reps = 100
+    Ns= 10**np.arange(2,8)
+    dt =np.float64
+    tw= np.zeros((Ns.size,),dtype=np.float64)
+    tr= np.zeros((Ns.size,),dtype=np.float64)
+    tr2= np.zeros((Ns.size,),dtype=np.float64)
 
-    for n, N in enumerate(Ns):
-        sel = np.sort(np.flatnonzero(np.random.rand(N) > .2))
-        for r in range(reps):
-            x = np.ones((N,), dtype=dt)
-            tr[n] += timeit(lambda: read(x,sel,s), number=1, setup=lambda: read(x,sel,s))
-            tr2[n] += timeit(lambda: read(x,sel, s), number=1, setup=lambda: read(x,sel, s))
-            tw[n] += timeit(lambda: write(x,sel), number=1,setup=lambda: write(x,sel))
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    for nt, dt in enumerate( [np.int8,np.int32,np.float32,np.float64]):
+        x = np.ones((20,), dtype=dt)
+        s = 0 if np.issubdtype(dt , np.integer) else 0.
+
+        for n, N in enumerate(Ns):
+            sel = np.sort(np.flatnonzero(np.random.rand(N) > .2))
+            for r in range(reps):
+                x = np.ones((N,), dtype=dt)
+                tr[n] += timeit(lambda: read(x,sel,s), number=1, setup=lambda: read(x,sel,s))
+                tr2[n] += timeit(lambda: read(x,sel, s), number=1, setup=lambda: read(x,sel, s))
+                tw[n] += timeit(lambda: write(x,sel), number=1,setup=lambda: write(x,sel))
 
 
-    plt.plot(Ns,1000*tr/reps,label=f'read {dt.__name__}',c=colors[nt])
-    if dt==np.float64:
-        plt.plot(Ns, 1000 * tr2 / reps, label=f'read again {dt.__name__}', linestyle=':', c=colors[nt])
-    plt.plot(Ns,1000*tw/reps,label=f'write {dt.__name__}',linestyle='--',c=colors[nt])
+        plt.plot(Ns,1000*tr/reps,label=f'read {dt.__name__}, threads{threads}',c=colors[nt], alpha = alpha[m])
+        if dt==np.float64:
+            plt.plot(Ns, 1000 * tr2 / reps, label=f'read again {dt.__name__}, threads{threads}', linestyle=':', c=colors[nt],  alpha = alpha[m])
+        plt.plot(Ns,1000*tw/reps,label=f'write {dt.__name__}, threads{threads}',linestyle='--',c=colors[nt], alpha = alpha[m])
 
 #plt.plot(plt.xlim(),plt.ylim(),c=[.8,.8,.8])
 plt.xlabel('Aray size,N')
 plt.ylabel('write/read ms per array sized N')
-plt.legend()
+plt.legend(fontsize = 8)
 plt.grid(True)
 plt.xscale('log')
 plt.yscale('log')
