@@ -5,6 +5,7 @@ Installing
 We recommend using Python environments to install OceanTracker.
 This ensures that the versions of the necessary packages are handled correctly and makes the entire process more reliable for users and developers.
 The recommended way to create these environments is by using Mamba, a fast version of Anaconda.
+Nevertheless, we use Anaconda i.e. conda for the instructions below as it is the more widely known environment manager.
 
 You can find the documentation on how to install mamba here:
 https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html
@@ -18,16 +19,16 @@ If this is your first time using OceanTracker, the easiest way to install it is 
 ::
 
     # Create a new mamba/conda environment
-    # conda create -n oceantracker
-    mamba create -n oceantracker
-    # conda activate oceantracker
-    mamba activate oceantracker
+    # mamba create -n oceantracker
+    conda create -n oceantracker
+    # mamba activate oceantracker
+    conda activate oceantracker
 
     # Install oceantracker via pip
     pip install oceantracker
 
 Note: 
-- You may need to run Conda as Admin on  Windows
+- You may need to run Conda as Admin on Windows
 - Using this method you won't have easy access to the tutorials directly. However, you can simply download them manually from github: https://github.com/oceantracker/oceantracker/tree/ed3186156d5cfe9b7b2c7c15452c7c25be5ceae9/tutorials_how_to
 
 Please reach out, either via mail or by writing a github issue, if you are running into bugs. We'd be happy to fix them.
