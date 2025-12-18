@@ -18,7 +18,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         info = self.info
         info['current_hydro_model_step']= 0
-        info['fractional_time_steps']= np.zeros((2,), dtype=np.float64)
+        info['weight_time_steps']= np.zeros((2,), dtype=np.float64)
         info['current_buffer_steps'] = np.zeros((2,), dtype=np.int32)
 
     def initial_setup(self,gridID=0,  caller=None):
@@ -115,7 +115,7 @@ class FieldGroupManager(ParameterBaseClass):
         # plus global time step locations and time ftactions od timre step and put results in interpolators step info numpy structure
         info = self.info
         grid =self.reader.grid
-        info['current_hydro_model_step'], info['current_buffer_steps'], info['fractional_time_steps'] = self.reader._time_step_and_buffer_offsets(time_sec)
+        info['current_hydro_model_step'], info['current_buffer_steps'], info['weight_time_steps'] = self.reader._time_step_and_buffer_offsets(time_sec)
         part_prop = si.class_roles.particle_properties
         reader = self.reader
         # find hori cell
@@ -153,10 +153,10 @@ class FieldGroupManager(ParameterBaseClass):
         if reader.info['is3D']:
             # find vertical cell
             info = self.info
-            self.interpolator.find_vertical_cell(fields, xq, info['current_buffer_steps'], info['fractional_time_steps'], active)
+            self.interpolator.find_vertical_cell(fields, xq, info['current_buffer_steps'], info['weight_time_steps'], active)
         else:
         # 2D run
-            self.interpolator.update_tide_waterdepth(fields,info['current_buffer_steps'], info['fractional_time_steps'],
+            self.interpolator.update_tide_waterdepth(fields,info['current_buffer_steps'], info['weight_time_steps'],
                                                      active)
 
     def _make_a_reader(self, reader_params):
@@ -207,7 +207,7 @@ class FieldGroupManager(ParameterBaseClass):
         if output is None:   output = part_prop[field_name].used_buffer() # over write current values
 
         field= self.reader.fields[field_name]
-        self.interpolator.interp_field(field,info['current_buffer_steps'], info['fractional_time_steps'], output, active)
+        self.interpolator.interp_field(field,info['current_buffer_steps'], info['weight_time_steps'], output, active)
 
     def interp_named_2D_scalar_fields_at_given_locations_and_time(self, field_name, x, n_cell,bc_coords, time_sec= None,hydro_model_gridID=None):
         # interp reader field_name at specfied locations,  not particle locations
@@ -225,8 +225,8 @@ class FieldGroupManager(ParameterBaseClass):
             triangle_eval_interp.time_independent_2D_scalar_field(output, field_instance.data,
                                             self.reader.grid['triangles'],n_cell, bc_coords, active)
         else:
-            current_hydro_model_step, current_buffer_steps, fractional_time_steps = self.reader._time_step_and_buffer_offsets(time_sec)
-            triangle_eval_interp.time_dependent_2D_scalar_field(current_buffer_steps, fractional_time_steps, output,
+            current_hydro_model_step, current_buffer_steps, weight_time_steps = self.reader._time_step_and_buffer_offsets(time_sec)
+            triangle_eval_interp.time_dependent_2D_scalar_field(current_buffer_steps, weight_time_steps, output,
                                       field_instance.data, self.reader.grid['triangles'], n_cell, bc_coords, active)
         return output
 
@@ -251,15 +251,13 @@ class FieldGroupManager(ParameterBaseClass):
         if time_sec is None:
             raise NotImplementedError("Time-independent interpolation of 3D fields is not yet implemented.")
         else:
-            current_hydro_model_step, current_buffer_steps, fractional_time_steps = (
-                self.reader._time_step_and_buffer_offsets(time_sec)
-            )
+            current_hydro_model_step, current_buffer_steps, weight_time_steps =  self.reader._time_step_and_buffer_offsets(time_sec)
             # if self.info["mode3D"] == 1:
             if True:
                 # these have spatially uniform and static map of z levels
                 triangle_eval_interp.time_dependent_3D_vector_field_data_in_all_layers(
                     n_buffer=current_buffer_steps,
-                    fractional_time_steps=fractional_time_steps,
+                    weight_time_steps=weight_time_steps,
                     F_data=self.reader.fields[field_name].data,
                     triangles=self.reader.grid["triangles"],
                     n_cell=n_cell,
@@ -273,7 +271,7 @@ class FieldGroupManager(ParameterBaseClass):
                 raise NotImplementedError("This functionality is not yet implemented.")
                 # triangle_eval_interp.time_dependent_3D_vector_field_ragged_bottom(
                 #     current_buffer_steps,
-                #     fractional_time_steps,
+                #     weight_time_steps,
                 #     F_data,
                 #     grid["triangles"],
                 #     grid["bottom_interface_index"],
@@ -291,7 +289,7 @@ class FieldGroupManager(ParameterBaseClass):
         grid = self.reader.grid
         info= self.info
         field_group_manager_util.update_dry_cell_index( grid['is_dry_cell_buffer'], grid['dry_cell_index'],
-                                                   info['current_buffer_steps'], info['fractional_time_steps'])
+                                                   info['current_buffer_steps'], info['weight_time_steps'])
 
         pass
 

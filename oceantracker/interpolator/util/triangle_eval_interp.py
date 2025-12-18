@@ -5,7 +5,7 @@ from oceantracker.util.numba_util import njitOT, njitOTparallel
 import numba as nb
 
 @njitOTparallel
-def interp_tide_water_depth(n_buffer, fractional_time_steps,
+def interp_tide_water_depth(n_buffer, weight_time_steps,
                             tide_field,water_depth_field,
                             tide_prop,water_depth_prop,
                             triangles, n_cell, bc_coords, active):
@@ -27,7 +27,7 @@ def interp_tide_water_depth(n_buffer, fractional_time_steps,
         # interp tide
         tide= 0.
         for m in range(3):
-            tide += bc_coords[n, m] * (tf1[nodes[m]] * fractional_time_steps[0] + tf2[nodes[m]] * fractional_time_steps[1])
+            tide += bc_coords[n, m] * (tf1[nodes[m]] * weight_time_steps[0] + tf2[nodes[m]] * weight_time_steps[1])
         tide_prop[n] = tide
 
 
@@ -67,7 +67,7 @@ def time_independent_2D_vector_field(F_out, F_data, triangles, n_cell, bc_coords
 
 
 @njitOTparallel
-def time_dependent_2D_scalar_field(n_buffer, fractional_time_steps, F_out, F_data, triangles, n_cell, bc_coords, active):
+def time_dependent_2D_scalar_field(n_buffer, weight_time_steps, F_out, F_data, triangles, n_cell, bc_coords, active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
     # time dependent  fields from two time slices in hindcast
     n_comp = F_data.shape[3]  # time step of data is always [node,z,comp] even in 2D
@@ -84,12 +84,12 @@ def time_dependent_2D_scalar_field(n_buffer, fractional_time_steps, F_out, F_dat
         # loop over each node in triangle
         for m in range(3):
             # loop over vector components
-            F += bc[m] * (fractional_time_steps[0] * F1[n_nodes[m]]
-                               + fractional_time_steps[1] * F2[n_nodes[m]])
+            F += bc[m] * (weight_time_steps[0] * F1[n_nodes[m]]
+                               + weight_time_steps[1] * F2[n_nodes[m]])
         F_out[n] = F  # reduce array writes by using temp F variable
 
 @njitOTparallel
-def time_dependent_2D_vector_field(n_buffer, fractional_time_steps, F_out, F_data, triangles, n_cell, bc_coords, active):
+def time_dependent_2D_vector_field(n_buffer, weight_time_steps, F_out, F_data, triangles, n_cell, bc_coords, active):
     # do interpolation in place, ie write directly to F_interp for isActive particles
     # time dependent  fields from two time slices in hindcast
 
@@ -107,13 +107,13 @@ def time_dependent_2D_vector_field(n_buffer, fractional_time_steps, F_out, F_dat
         for m in range(3):
             # loop over vector components
             for c in range(2):
-                F_out[n, c] += bc[m] * (fractional_time_steps[0] * F1[n_nodes[m], c]
-                                   + fractional_time_steps[1] * F2[n_nodes[m], c])
+                F_out[n, c] += bc[m] * (weight_time_steps[0] * F1[n_nodes[m], c]
+                                   + weight_time_steps[1] * F2[n_nodes[m], c])
 
 
 # do 3D interp evaluation
 @njitOTparallel
-def time_dependent_3D_scalar_field_data_in_all_layers(n_buffer, fractional_time_steps, F_data,
+def time_dependent_3D_scalar_field_data_in_all_layers(n_buffer, weight_time_steps, F_data,
                                                       triangles,
                                                       n_cell, bc_coords, nz_cell, z_fraction,
                                                       F_out, active):
@@ -135,14 +135,14 @@ def time_dependent_3D_scalar_field_data_in_all_layers(n_buffer, fractional_time_
         n_nodes = triangles[n_cell[n], :]
         for m in range(3):
             # add contributions from layer above and below particle, at two time steps
-            temp  = (F1[n_nodes[m], nz] * zf1 + F1[n_nodes[m], nz + 1] * zf2) * fractional_time_steps[0]
-            temp += (F2[n_nodes[m], nz] * zf1 + F2[n_nodes[m], nz + 1] * zf2) * fractional_time_steps[1]# second time step
+            temp  = (F1[n_nodes[m], nz] * zf1 + F1[n_nodes[m], nz + 1] * zf2) * weight_time_steps[0]
+            temp += (F2[n_nodes[m], nz] * zf1 + F2[n_nodes[m], nz + 1] * zf2) * weight_time_steps[1]# second time step
             F += bc_coords[n, m] * temp
         F_out[n] = F # reduce array writes by using temp F variable
 
 
 @njitOTparallel
-def time_dependent_3D_vector_field_data_in_all_layers(n_buffer, fractional_time_steps, F_data,
+def time_dependent_3D_vector_field_data_in_all_layers(n_buffer, weight_time_steps, F_data,
                                                       triangles,
                                                       n_cell, bc_coords, nz_cell, z_fraction,
                                                       F_out, active):
@@ -151,7 +151,7 @@ def time_dependent_3D_vector_field_data_in_all_layers(n_buffer, fractional_time_
     # create views to remove redundant dim at current and next time step, improves speed?
     F1 = F_data[n_buffer[0], :, :, :]
     F2 = F_data[n_buffer[1], :, :, :]
-    frac0, frac1 = fractional_time_steps[0],fractional_time_steps[1]
+    frac0, frac1 = weight_time_steps[0],weight_time_steps[1]
 
     # loop over active particles and vector components
     for nn in nb.prange(active.size):
@@ -177,7 +177,7 @@ def time_dependent_3D_vector_field_data_in_all_layers(n_buffer, fractional_time_
                 F_out[n, c] += bc_coords[n, m] * (temp1 * frac0 + temp2* frac1 )
 
 @njitOTparallel
-def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps, F_data,
+def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, weight_time_steps, F_data,
                                             triangles, bottom_interface_index,
                                             n_cell, bc_coords, nz_cell, z_fraction,
                                             F_out, active):
@@ -206,12 +206,12 @@ def time_dependent_3D_scalar_field_ragged_bottom(n_buffer, fractional_time_steps
             nz_below = max(nzb, nz)
             nz_above = max(nzb, nz + 1)
             # add contributions from layer above and below particle, for each spatial component at two time steps
-            F_out[n] += bc_coords[n, m] * (F1[n_node, nz_below] * zf1 + F1[n_node, nz_above] * zf) * fractional_time_steps[0] \
-                      + bc_coords[n, m] * (F2[n_node, nz_below] * zf1 + F2[n_node, nz_above] * zf) * fractional_time_steps[1]  # second time step
+            F_out[n] += bc_coords[n, m] * (F1[n_node, nz_below] * zf1 + F1[n_node, nz_above] * zf) * weight_time_steps[0] \
+                      + bc_coords[n, m] * (F2[n_node, nz_below] * zf1 + F2[n_node, nz_above] * zf) * weight_time_steps[1]  # second time step
 
 
 @njitOTparallel
-def time_dependent_3D_vector_field_ragged_bottom(n_buffer, fractional_time_steps, F_data,
+def time_dependent_3D_vector_field_ragged_bottom(n_buffer, weight_time_steps, F_data,
                                                  triangles, bottom_interface_index,
                                                  n_cell, bc_coords, nz_cell, z_fraction,
                                                  F_out, active):
@@ -239,8 +239,8 @@ def time_dependent_3D_vector_field_ragged_bottom(n_buffer, fractional_time_steps
             # loop over vector components
             for c in range(3):
                 # add contributions from layer above and below particle, for each spatial component at two time steps
-                F_out[n, c] +=    bc_coords[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*fractional_time_steps[0]  \
-                                + bc_coords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*fractional_time_steps[1]  # second time step
+                F_out[n, c] +=    bc_coords[n, m] * (F1[n_node, nz_below, c] * zf1 + F1[n_node, nz_above, c] * zf)*weight_time_steps[0]  \
+                                + bc_coords[n, m] * (F2[n_node, nz_below, c] * zf1 + F2[n_node, nz_above, c] * zf)*weight_time_steps[1]  # second time step
                 pass
             pass
         pass

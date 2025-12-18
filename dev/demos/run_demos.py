@@ -11,7 +11,7 @@ import make_demo_plots
 import build_and_test_demos
 import numpy as np
 from oceantracker.read_output.python import load_output_files
-from oceantracker.read_output.python.load_output_files import load_stats_data, load_concentration_data
+from oceantracker.read_output.python.load_output_files import load_stats_data
 from oceantracker.plot_output.plot_statistics import plot_heat_map, animate_heat_map
 
 two_points= [[1594500, 5483000], [1598000, 5486100]]
@@ -98,11 +98,12 @@ if __name__ == "__main__":
 
         # no plotting // cases
         else:
-            case_info_file_name =path.join('output', params['output_file_base'], params['output_file_base'] + '_caseInfo.json')
+
+            case_info_file_name =path.join(params['root_output_dir'], params['output_file_base'], params['output_file_base'] + '_caseInfo.json')
 
         if not args.plot : continue
 
-        output_file_base= output_file_base = path.join('output', params['output_file_base']) if args.plot else None
+        output_file_base= output_file_base = path.join(params['root_output_dir'], params['output_file_base']) if args.plot else None
         anim= None
         fps=15
 

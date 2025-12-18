@@ -36,3 +36,4 @@ bin/
 *.py[cod]
 *.nb[ic]
 .pypirc
+/demo_param_files/

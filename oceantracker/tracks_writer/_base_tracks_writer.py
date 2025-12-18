@@ -69,7 +69,7 @@ class _BaseWriter(ParameterBaseClass):
         info['time_steps_written_to_current_file'] = 0
         info['output_file'].append(file_name + '.nc')
 
-        self.nc = NetCDFhandler(path.join(si.run_info.root_output_dir, info['output_file'][-1]), 'w')
+        self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, info['output_file'][-1]), 'w')
         nc = self.nc
         nc.create_attribute('file_created', datetime.now().isoformat())
         self.setup_file_vars(nc)

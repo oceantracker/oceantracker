@@ -2,9 +2,12 @@
     "output_file_base": "demo70_LCS_test",
     "debug": true,
     "time_step": 600,
+    "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\demos",
     "NUMBA_cache_code": false,
     "use_A_Z_profile": false,
-    "regrid_z_to_uniform_sigma_levels": true,
+    "tracks_writer": {
+        "update_interval": 240
+    },
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast",
         "file_mask": "demo_hindcast_schisim3D_00.nc",

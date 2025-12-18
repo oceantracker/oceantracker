@@ -444,9 +444,8 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         bi = self.info['buffer_info']
 
-        # find time first step in numerical step within hindcast
-        # version 3)  faster numpy binary search, clipped to be inside if in the last time step
-        current_hydro_model_step = min(int(np.searchsorted(info['time_coord'], time_sec, side='left')), info['time_coord'].size-2)
+        # find time first step in numerical step equal to or above
+        current_hydro_model_step = numba_util.find_last_less_than(info['time_coord'], time_sec)
 
         if si.settings.backtracking and time_sec > self.get_time(current_hydro_model_step):
             # round up  to the next time step if backtracking
@@ -464,14 +463,14 @@ class _BaseReader(ParameterBaseClass):
         # surrounding hindcast time steps
         # abs makes it work when backtracking
         s = abs(time_sec - time_hindcast) / info['time_step']
-        fractional_time_steps =  np.asarray([1.0 - s, s])
+        weight_time_steps =  np.asarray([1.0 - s, s])
 
-        if np.any(np.abs(fractional_time_steps) > 1.1):
-            si.msg_logger.msg(f'unexpected error in times, fractional time steps is greater than 1 = {str(fractional_time_steps)}',
+        if np.any(np.abs(weight_time_steps) > 1.1):
+            si.msg_logger.msg(f'unexpected error in times, fractional time steps is greater than 1 = {str(weight_time_steps)}',
                               hint='Error in  decoding hindcast time? hindcast files not properly sorted in time order? or code bug?',
                               warning=True, caller = self)
 
-        return current_hydro_model_step, current_buffer_steps, fractional_time_steps
+        return current_hydro_model_step, current_buffer_steps, weight_time_steps
 
     def update(self, time_sec):
         # check if all time steps in buffer

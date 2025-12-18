@@ -57,6 +57,7 @@ particle_statistics:
   name: grid1
   particle_property_list:
   - water_depth
+  release_group_centered_grids: true
   status_list:
   - moving
   update_interval: 3600
@@ -66,7 +67,6 @@ reader:
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast
   load_fields:
   - water_temperature
-regrid_z_to_uniform_sigma_levels: true
 release_groups:
 - class_name: oceantracker.release_groups.polygon_release.PolygonRelease
   name: poly1
@@ -102,8 +102,11 @@ release_groups:
   pulse_size: 10
   release_interval: 3600
 resuspension:
-  critical_friction_velocity: 0.005
+  critical_friction_velocity: 0.0095
+root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\demos
 time_step: 120
+tracks_writer:
+  update_interval: 240
 use_A_Z_profile: false
 velocity_modifiers:
 - class_name: oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity

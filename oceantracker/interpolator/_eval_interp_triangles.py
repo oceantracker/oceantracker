@@ -34,7 +34,7 @@ class EvalInterpTriangles(object):
             raise Exception(f'Coding error, Unknown  working vertical  grid type {hi["vert_grid_type"]}')
 
     def _time_independent_2D_scalar_field(self, field_instance, current_buffer_steps,
-                                          fractional_time_steps, output, active, n_cell=None, bc=None):
+                                          weight_time_steps, output, active, n_cell=None, bc=None):
         # todo find a better way to get water depth for release points with optional args?
         part_prop = si.class_roles.particle_properties
         nc_cell = part_prop['n_cell'].data if n_cell is None else n_cell
@@ -43,30 +43,30 @@ class EvalInterpTriangles(object):
                                                               self.grid['triangles'], nc_cell, bc, active)
 
     def _time_independent_2D_vector_field(self, field_instance, current_buffer_steps,
-                                          fractional_time_steps, output, active):
+                                          weight_time_steps, output, active):
         part_prop = si.class_roles.particle_properties
         triangle_eval_interp.time_independent_2D_vector_field(output, field_instance.data,
                                                               self.grid['triangles'],
                                                               part_prop['n_cell'].data, part_prop['bc_coords'].data, active)
     def _time_dependent_2D_scalar_field(self,field_instance,current_buffer_steps,
-                                       fractional_time_steps,output, active, n_cell=None, bc=None):
+                                       weight_time_steps,output, active, n_cell=None, bc=None):
         #scalar, eg water depth
         part_prop= si.class_roles.particle_properties
         triangle_eval_interp.time_dependent_2D_scalar_field(
-                            current_buffer_steps, fractional_time_steps,output,
+                            current_buffer_steps, weight_time_steps,output,
                             field_instance.data,self.grid['triangles'],
                             part_prop['n_cell'].data,  part_prop['bc_coords'].data, active)
 
     def _time_dependent_2D_vector_field(self, field_instance, current_buffer_steps,
-                                        fractional_time_steps, output, active):
+                                        weight_time_steps, output, active):
         part_prop = si.class_roles.particle_properties
         # vector, eg 2D water velocity
-        triangle_eval_interp.time_dependent_2D_vector_field(current_buffer_steps, fractional_time_steps, output,
+        triangle_eval_interp.time_dependent_2D_vector_field(current_buffer_steps, weight_time_steps, output,
                                                             field_instance.data, self.grid['triangles'],
                                                             part_prop['n_cell'].data, part_prop['bc_coords'].data, active)
 
     def _time_dependent_3D_scalar_field(self, field_instance, current_buffer_steps,
-                                        fractional_time_steps, output, active):
+                                        weight_time_steps, output, active):
         grid = self.grid
         part_prop = si.class_roles.particle_properties
 
@@ -74,13 +74,13 @@ class EvalInterpTriangles(object):
 
         if self.info['mode3D'] == 1:
             triangle_eval_interp.time_dependent_3D_scalar_field_data_in_all_layers(
-                                        current_buffer_steps, fractional_time_steps,
+                                        current_buffer_steps, weight_time_steps,
                                                      F_data ,                                                                                 grid['triangles'],
                                                      part_prop['n_cell'].data, part_prop['bc_coords'].data, part_prop['nz_cell'].data,
                                                      part_prop['z_fraction'].data,
                                                      output, active)
         else:
-            triangle_eval_interp.time_dependent_3D_scalar_field_ragged_bottom(current_buffer_steps, fractional_time_steps, F_data,
+            triangle_eval_interp.time_dependent_3D_scalar_field_ragged_bottom(current_buffer_steps, weight_time_steps, F_data,
                                                                          grid['triangles'], grid['bottom_interface_index'],
                                                                          part_prop['n_cell'].data, part_prop['bc_coords'].data,
                                                                         part_prop['nz_cell'].data, part_prop['z_fraction'].data,
@@ -88,7 +88,7 @@ class EvalInterpTriangles(object):
 
 
     def _time_dependent_3D_vector_field(self, field_instance, current_buffer_steps,
-                                        fractional_time_steps, output, active):
+                                        weight_time_steps, output, active):
         ## water velocity is main one
         grid= self.grid
         F_data = field_instance.data
@@ -99,12 +99,12 @@ class EvalInterpTriangles(object):
 
         if self.info['mode3D'] == 1:
             # these have spatially uniform and static map of z levels
-            triangle_eval_interp.time_dependent_3D_vector_field_data_in_all_layers(current_buffer_steps, fractional_time_steps,
+            triangle_eval_interp.time_dependent_3D_vector_field_data_in_all_layers(current_buffer_steps, weight_time_steps,
                                                                 F_data, grid['triangles'], part_prop['n_cell'].data,
                                                                 part_prop['bc_coords'].data, part_prop['nz_cell'].data,
                                                                 z_fraction.data, output, active)
         else :
-            triangle_eval_interp.time_dependent_3D_vector_field_ragged_bottom(current_buffer_steps, fractional_time_steps, F_data,
+            triangle_eval_interp.time_dependent_3D_vector_field_ragged_bottom(current_buffer_steps, weight_time_steps, F_data,
                                                                               grid['triangles'], grid['bottom_interface_index'],
                                                                               part_prop['n_cell'].data, part_prop['bc_coords'].data, part_prop['nz_cell'].data, part_prop['z_fraction'].data,
                                                                               output, active)

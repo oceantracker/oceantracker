@@ -94,8 +94,7 @@ class OceanTrackerParamsRunner(object):
                 ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
             ml.msg('')
 
-        ml.hori_line(f'Finished: output in "{si.run_info.root_output_dir}"')
-
+        ml.hori_line(f'Finished: output in "{si.settings.root_output_dir}"')
 
         if case_info_file is None:
             ml.msg('Fatal errors, run did not complete  ', hint='check for first error above, log file.txt or .err file ', error=True)
@@ -109,7 +108,7 @@ class OceanTrackerParamsRunner(object):
 
         ml.close()
 
-        json_util.write_JSON(path.join(si.run_info.root_output_dir, 'completion_state.json'),
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, 'completion_state.json'),
                              dict(code_error_free=case_info_file is not None ))
 
         return case_info_file
@@ -130,10 +129,11 @@ class OceanTrackerParamsRunner(object):
         # split params in to settings, core and class role params
         si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
                                                              crumbs='Bulding working params ')
+        si.add_settings(si.working_params['settings'])
         ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults', caller=self)
         ml.msg(f'Started > "{user_given_params["output_file_base"]}"')
 
-        si.add_settings(si.working_params['settings'])  # add full settings to shared info
+
 
         # setup output dir and msg files
         si.output_files = setup_util.setup_output_dir(si.settings, crumbs='Setting up output dir')
@@ -142,7 +142,7 @@ class OceanTrackerParamsRunner(object):
         ri = si.run_info
 
         # move stuff to run info as central repository
-        ri.root_output_dir = si.output_files['run_output_dir']
+        ri.run_output_dir = si.output_files['run_output_dir']
         ri.output_file_base = si.output_files['output_file_base']
         ri.saved_state_dir = si.output_files['saved_state_dir']
 
@@ -273,7 +273,7 @@ class OceanTrackerParamsRunner(object):
                 t = si.core_class_roles[name].info["time_spent_updating"]
                 ml.msg(f'{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
 
-        json_util.write_JSON(path.join(si.run_info.root_output_dir, 'completion_state.json'),
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, 'completion_state.json'),
                              dict(code_error_free=case_info_file is not None))
 
         return case_info_file
@@ -331,7 +331,7 @@ class OceanTrackerParamsRunner(object):
 
         # write reader info to json
         d = fgm.get_reader_info()
-        json_util.write_JSON(path.join(si.run_info.root_output_dir, f'{si.run_info.output_file_base}_hindcast_info.json'), d)
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, f'{si.run_info.output_file_base}_hindcast_info.json'), d)
 
         # schedule all release groups, now run start and end are known
         ri.cumulative_number_released = np.zeros((si.run_info.times.size, ), dtype= np.int64)

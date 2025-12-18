@@ -2,9 +2,12 @@
     "output_file_base": "demo61_concentration_test",
     "debug": true,
     "time_step": 120,
+    "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\demos",
     "NUMBA_cache_code": false,
     "use_A_Z_profile": false,
-    "regrid_z_to_uniform_sigma_levels": true,
+    "tracks_writer": {
+        "update_interval": 240
+    },
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast",
         "file_mask": "demo_hindcast_schisim3D_00.nc",
@@ -150,12 +153,5 @@
         }
     ],
     "max_run_duration": 1296000.0,
-    "write_tracks": false,
-    "particle_concentrations": [
-        {
-            "name": "outfall_conc",
-            "class_name": "oceantracker.particle_concentrations.particle_concentrations.ParticleConcentrations2D",
-            "update_interval": 1800
-        }
-    ]
+    "write_tracks": false
 }

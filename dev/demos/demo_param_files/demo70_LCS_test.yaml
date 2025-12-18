@@ -30,7 +30,6 @@ reader:
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast
   load_fields:
   - water_temperature
-regrid_z_to_uniform_sigma_levels: true
 release_groups:
 - allow_release_in_dry_cells: true
   name: P1
@@ -61,5 +60,8 @@ release_groups:
   pulse_size: 10
   release_interval: 3600
   start: '2017-01-01T01:30:00'
+root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\demos
 time_step: 600
+tracks_writer:
+  update_interval: 240
 use_A_Z_profile: false

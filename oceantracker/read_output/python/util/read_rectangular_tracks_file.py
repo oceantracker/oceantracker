@@ -10,7 +10,7 @@ def read_rect_tracks_file(file_name, var_list=None, fraction_to_read=None):
         var_list = list(nc.variable_info.keys())
     else:
         # get list plus min data set
-        var_list = list(set(['x', 'time', 'status', 'x0', 'dry_cell_index'] + var_list))
+        var_list = list(set(['x', 'time', 'status', 'x0', 'dry_cell_index','ID'] + var_list))
 
     data = nc.read_variables(var_list)
     data['global_attributes'] = nc.attrs()

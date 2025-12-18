@@ -18,7 +18,7 @@ def add_release_group_names_to_netcdf(nc,si):
 def write_release_group_netcdf():
     '''Write release groups data to own file for each case '''
     fn =  si.run_info.output_file_base + '_release_groups.nc'
-    nc = NetCDFhandler(path.join(si.run_info.root_output_dir, fn), mode='w')
+    nc = NetCDFhandler(path.join(si.run_info.run_output_dir, fn), mode='w')
     nc.create_attribute('geographic_coords', int(si.settings.use_geographic_coords))
 
     # loop over release groups

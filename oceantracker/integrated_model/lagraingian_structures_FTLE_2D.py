@@ -202,7 +202,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
 
         params = self.params
         self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['output_file_tag'] + '.nc'
-        self.nc = NetCDFhandler(path.join(si.run_info.root_output_dir, self.info['output_file']), 'w')
+        self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
         nc = self. nc
         r, c = params['grid_size']
         nc.create_dimension(si.dim_names.time, None) # open time dim

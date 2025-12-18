@@ -13,7 +13,7 @@ class _BaseInterp(ParameterBaseClass):
     def initial_setup(self, grid): pass
 
     # find hori and vertical cell containing each particle
-    def find_cell(self, xq, current_buffer_steps,fractional_time_steps, active): basic_util.nopass(' must supply find_cells method')
+    def find_cell(self, xq, current_buffer_steps,weight_time_steps, active): basic_util.nopass(' must supply find_cells method')
 
     # return cell number for xq without a guess
     def initial_horizontal_cell(self, grid, xq): pass

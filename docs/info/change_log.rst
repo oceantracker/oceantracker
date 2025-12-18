@@ -3,6 +3,12 @@
 Change log
 ###########################
 
+# for next version
+
+# fractional_time_steps renames weighed_time_steps everywhere
+
+# fixed bug in fix for finding time step, this may break numerical tests
+
 Version '0.5.2.55 2025-12-10'
 _____________________________
 

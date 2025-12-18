@@ -2,7 +2,7 @@
 #---------------------------------------
 import oceantracker.main as main
 from oceantracker.util import json_util
-params = json_util.read_JSON("../demo_param_files/demo10_polygon_residence_demo.json")
+params = json_util.read_JSON("F:\H_Local_drive\ParticleTracking\oceantracker\dev\demos\build_and_test_demos.py\demo_param_files\demo10_polygon_residence_demo.json")
 
 runInfo_file_name, has_errors = main.run(params)
 

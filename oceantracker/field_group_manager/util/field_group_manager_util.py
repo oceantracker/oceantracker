@@ -5,13 +5,13 @@ dry_cell_edge = int(cell_search_status_flags.hit_dry_cell)
 
 
 @njitOT
-def update_dry_cell_index(is_dry_cell_buffer, dry_cell_index, current_buffer_steps, fractional_time_steps):
+def update_dry_cell_index(is_dry_cell_buffer, dry_cell_index, current_buffer_steps, weight_time_steps):
     # update 0-255 dry cell index, used to determine if cell dry at this time
     # uses  reader buffer locations and time step fractions within step info structure
     # vals > 127 are dry, vals <= 127 are wet
     for n in range(dry_cell_index.size):
-        val = fractional_time_steps[0] * is_dry_cell_buffer[current_buffer_steps[0], n]
-        val += fractional_time_steps[1] * is_dry_cell_buffer[current_buffer_steps[1], n]
+        val = weight_time_steps[0] * is_dry_cell_buffer[current_buffer_steps[0], n]
+        val += weight_time_steps[1] * is_dry_cell_buffer[current_buffer_steps[1], n]
         dry_cell_index[n] = int(255. * val)
 
 @njitOT

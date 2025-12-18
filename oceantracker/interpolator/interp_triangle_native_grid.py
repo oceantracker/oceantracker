@@ -40,6 +40,7 @@ class  InterpTriangularGrid(_BaseInterp):
 
         # define initial cell and find cell functions from interp class
         self._hori_cell_finder= FindHoriCellTriangleWalk(grid, params)
+        #todo remove short cut to find_initial_hori_cell_method below for simplicity?
         self.find_initial_hori_cell_method= self._hori_cell_finder.find_initial_hori_cell
         self.info['horizontal_cell_finder_info'] = self._hori_cell_finder.info
         self._get_hori_cell = self._hori_cell_finder.find_cell
@@ -92,7 +93,7 @@ class  InterpTriangularGrid(_BaseInterp):
                             longest_vertical_walk = wc[7:8])
                             )
 
-    def interp_field(self,field_instance,current_buffer_steps, fractional_time_steps,
+    def interp_field(self,field_instance,current_buffer_steps, weight_time_steps,
                                 output, active):
         ie= self._interp_evaluator
         fi = field_instance
@@ -100,35 +101,35 @@ class  InterpTriangularGrid(_BaseInterp):
         match (fi.is3D(), fi.is_time_varying(), fi.is_vector() ):
             case (False, False, False):
                 ie._time_independent_2D_scalar_field(fi,current_buffer_steps,
-                                       fractional_time_steps,output, active)
+                                       weight_time_steps,output, active)
 
             case (False, False, True):
                 ie._time_independent_2D_vector_field(fi,current_buffer_steps,
-                                       fractional_time_steps,output, active)
+                                       weight_time_steps,output, active)
 
             case (False, True, False):
                 ie._time_dependent_2D_scalar_field(fi,current_buffer_steps,
-                                       fractional_time_steps,output, active)
+                                       weight_time_steps,output, active)
             case (False, True, True):
                 ie._time_dependent_2D_vector_field(fi, current_buffer_steps,
-                                                   fractional_time_steps, output, active)
+                                                   weight_time_steps, output, active)
 
             case (True, True, False): # eg 3D scalars, eg temperature
                 ie._time_dependent_3D_scalar_field(fi, current_buffer_steps,
-                                                   fractional_time_steps, output, active)
+                                                   weight_time_steps, output, active)
 
             case (True, True, True):# eg 3D vector, eg water velocity
                 ie._time_dependent_3D_vector_field(fi, current_buffer_steps,
-                                                   fractional_time_steps, output, active)
+                                                   weight_time_steps, output, active)
             case _:
                 si.msg_logger.msg (f' 3D time invariant fields interpolator not yet implemented for ', error=True, caller=self,
                                    hint=f'remove field "{str(fi.params["name"])}" from reader load_fields param')
         pass
 
-    def update_tide_waterdepth(self, fields, current_buffer_steps, fractional_time_steps, active):
+    def update_tide_waterdepth(self, fields, current_buffer_steps, weight_time_steps, active):
         part_prop = si.class_roles.particle_properties
         grid = self.grid
-        triangle_eval_interp.interp_tide_water_depth(current_buffer_steps, fractional_time_steps,
+        triangle_eval_interp.interp_tide_water_depth(current_buffer_steps, weight_time_steps,
                                 fields['tide'].data, fields['water_depth'].data,
                                 part_prop['tide'].data,part_prop['water_depth'].data,
                                 grid['triangles'],
@@ -178,11 +179,11 @@ class  InterpTriangularGrid(_BaseInterp):
 
         return IDs_need_fixing
 
-    def find_vertical_cell(self, fields, xq, current_buffer_steps,fractional_time_steps, active):
+    def find_vertical_cell(self, fields, xq, current_buffer_steps,weight_time_steps, active):
         # locate vertical cell in place
         info = self.info
         t0 = perf_counter()
-        info['bad_z_fraction_count'] = self._vert_cell_finder.find_vertical_cell(fields, xq, current_buffer_steps, fractional_time_steps, active)
+        info['bad_z_fraction_count'] = self._vert_cell_finder.find_vertical_cell(fields, xq, current_buffer_steps, weight_time_steps, active)
         if info['bad_z_fraction_count'] > 0 :
             si.msg_logger.msg(f'Out of range vertical layer fraction calculated, number counted so far {info["bad_z_fraction_count"]}', strong_warning=True,caller = self,
             hint='issue with 3D vertical grid hindcast values? reader encountered unknown variant of hindcast vertical grid?')

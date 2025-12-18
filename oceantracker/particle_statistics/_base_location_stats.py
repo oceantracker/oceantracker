@@ -152,7 +152,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         if self.nc is None:
             info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
             info['output_file'] += f'_{info["instanceID"]:03}_{self.params["name"]}.nc'
-            file_name = path.join(si.run_info.root_output_dir, info['output_file'])
+            file_name = path.join(si.run_info.run_output_dir, info['output_file'])
             # add counting dims to file
             self.nc = self.open_output_file(file_name)
 

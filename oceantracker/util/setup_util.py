@@ -207,7 +207,9 @@ def merge_settings(settings, default_settings, msg_logger, settings_to_merge=Non
 
         if key not in settings or settings[key] is None:
             if pvc.is_required:
+                settings[key] = None
                 msg_logger.msg(f'Settings "{key}" is required.', error=True, caller=caller, crumbs=c)
+
             else:
                 settings[key] = pvc.get_default()
         elif key in all_settings:

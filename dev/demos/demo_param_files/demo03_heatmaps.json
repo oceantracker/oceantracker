@@ -75,6 +75,7 @@
             "particle_property_list": [
                 "water_depth"
             ],
+            "release_group_centered_grids": true,
             "grid_span": [
                 10000,
                 10000
