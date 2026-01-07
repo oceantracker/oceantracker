@@ -19,9 +19,9 @@ It is primarly designed for use in coastal oceans on modest hardware, but handle
 
 .. *Short cuts*: :doc:`info/about` | :doc:`info/features` | :doc:`info/gallery` 
 
-.. container:: centered-links
+.. .. container:: centered-links
 
-   :doc:`info/about` | :doc:`info/features` | :doc:`info/gallery` 
+..    :doc:`info/about` | :doc:`info/features` | :doc:`info/gallery` 
 
 .. raw:: html
 
@@ -34,12 +34,6 @@ It is primarly designed for use in coastal oceans on modest hardware, but handle
 OceanTracker was developed to offer a computationally faster alternative to the existing models and is currently the fastest model for unstructured grids available [2]_.
 This enables users to simulate the millions of particles required for many applications on modest office computers while.
 For larger applications, OceanTracker offers on-the-fly statistics to eliminate the need to store and wade through the analysis of vast volumes of recorded particle tracks to create e.g. heat-maps or reginal connectivities.
-
-OceanTracker's code is designed to be flexible and easily extendable by the user, whether run by a new user with a text file of parameters,
-or by an expert adding their specialised code for e.g. novel particle behaviours or statistics, to the computational pipe line.
-
-Its source code is publically available on `github <https://github.com/oceantracker/oceantracker/>`_ , released under the MIT licence.
-OceanTracker is under active developement. Feel free to reach out to report issues or to suggest new features.
 
 .. list-table:: 
    :widths: 10 20 10 10 20 10 10 20 10
@@ -73,6 +67,8 @@ OceanTracker is under active developement. Feel free to reach out to report issu
      - `Gallery & Demos <https://example.com/gallery>`_  
          — :doc:`info/gallery`
 
+Its source code is publically available on `github <https://github.com/oceantracker/oceantracker/>`_ , released under the MIT licence.
+OceanTracker is under active developement. Feel free to reach out to report issues or to suggest new features.
 
 .. image::  _static/cawthron.jpg
    :target: https://www.cawthron.org.nz/
@@ -99,7 +95,7 @@ OceanTracker is under active developement. Feel free to reach out to report issu
    :hidden:
    :caption: Contents:
 
-   info/about.rst
+   about_gallery/about.rst
    info/features.rst
    info/gallery.rst
    info/installing.rst
