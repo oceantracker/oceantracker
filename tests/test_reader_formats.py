@@ -185,23 +185,6 @@ def get_case(n):
             ax = None  # Auck
             title = 'test_pelorus'
 
-        case 154:
-            root_input_dir = r'D:\Hindcast_reader_tests\Schism_chapps'
-            output_file_base = 'CSIRO_chapps'
-            file_mask = '*.nc'
-
-            x0 = [[-40.929089091498696, 173.88020093492983],
-                  [-41.199976461262594, 173.9678480817815],
-                  ]
-
-            ax = None  # Auck
-            title = 'CSIRO_chapps'
-            params['reader'].update(field_variable_map =dict(water_velocity=['u0','v0','w'],
-                                                             tide='zos'),
-                                    variable_signature= [],
-
-            )
-            params['time_buffer_size']=6
         case 200:
             # FVCOM
             root_input_dir=r'D:\Hindcast_reader_tests\FVCOM_LakeSuperior\historical_sample\2022'

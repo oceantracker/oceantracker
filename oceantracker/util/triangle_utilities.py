@@ -1,5 +1,6 @@
 import numpy as np
 from numba.typed import List as NumbaList
+from numba import njit
 from oceantracker.util.polygon_util import make_anticlockwise_polygon
 from oceantracker.util import cord_transforms
 from oceantracker.util.numba_util import njitOT
@@ -7,6 +8,7 @@ from oceantracker.shared_info import shared_info as si
 
 # build node to cell map
 @njitOT
+#@njit(boundscheck=True)
 def build_node_to_triangle_map(tri, x):
     # build list  giving map from each node to list of cells which contain that node
 
