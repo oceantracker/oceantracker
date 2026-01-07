@@ -31,7 +31,7 @@ class FindVerticalCellSigmaGrid(object):
     def _make_sigma_depth_cell_search_map(self, grid):
         # add lookup map to grid
         # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
-        # the smalest sigms later thickness is at the bottom
+        # the smalest sigmas later thickness is at the bottom
 
         grid['sigma_nz_map'], grid['sigma_map_z'] = make_search_map(grid['sigma_interface'])
 

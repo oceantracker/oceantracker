@@ -40,7 +40,7 @@ class FindHoriCellTriangleWalk(object):
 
         # pre calc matric to calculate bc coords
         t0= perf_counter()
-        grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles'].data).astype(np.float64)
+        grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles']).astype(np.float64)
 
         # build triangle walk array of structures
         self.tri_walk_AOS = numpy_util.numpy_array_of_structures_from_dict(

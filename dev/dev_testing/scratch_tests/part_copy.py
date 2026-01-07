@@ -1,11 +1,12 @@
 from psutil import cpu_count
-import  os
+
 physical_cores = cpu_count(logical=False)
 import  numpy as np
-from numba import njit, get_num_threads, set_num_threads, prange, get_thread_id
+from numba import njit, set_num_threads, prange
+
 set_num_threads(physical_cores)
 from time import perf_counter
-from find_smid import asm
+from dev.dev_testing.scratch_tests.simd.find_smid import asm
 @njit(parallel=True)
 def copy1(x,out,sel):
     if x.ndim==1:
