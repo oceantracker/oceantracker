@@ -3,11 +3,23 @@
 Change log
 ###########################
 
+Version '0.5.2.57 XXXX-XX-XX'
+_____________________________
+
 # for next version
 
 # fractional_time_steps renames weighed_time_steps everywhere
 
 # fixed bug in fix for finding time step, this may break numerical tests
+
+Version '0.5.2.56 2026-01-08'
+_____________________________
+
+New features
+------------
+#. Added reader for CSRIO all Austrialia Schism model
+
+
 
 Version '0.5.2.55 2025-12-10'
 _____________________________

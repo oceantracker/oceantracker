@@ -260,6 +260,18 @@ class _BaseGrid2DStats(ParameterBaseClass):
         elif params['grid_center'] is not None:
             # use given grid center for all release groups
             info['grid_centers'] = np.tile(params['grid_center'], (len(si.class_roles.release_groups), 1))
+            # use given grid centers
+            if params['grid_centers'].shape[0] == 1:
+                # if only one use all  for all
+                params['grid_centers'] = np.tile(params['grid_center'], (len(si.class_roles.release_groups), 1))
+            else:
+                # one for each release group
+                if params['grid_centers'].shape[0] != len(si.class_roles.release_groups):
+                    si.msg_logger.msg(
+                        'Number of points in "grid_centers" param. is >1 , then it must have the same number of center points',
+                        hint=f'Number of points given = {info["grid_centers"].shape[0]}  number of release groups= {len(si.class_roles.release_groups)} ',
+                        fatal_error=True, caller=self)
+                params['grid_centers'] = params['grid_centers'].shape[0]
         else:
             si.msg_logger.msg('For gridded stats must supply a "grid_center"  or set "release_group_centered_grids=True"',
                               hint=f'Set one of these parameters for gridded stat {params["name"]}', fatal_error=True, caller=self)

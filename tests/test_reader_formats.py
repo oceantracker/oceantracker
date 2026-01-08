@@ -185,6 +185,20 @@ def get_case(n):
             ax = None  # Auck
             title = 'test_pelorus'
 
+        case 154:
+            root_input_dir = r'D:\Hindcast_reader_tests\Schism_chapps'
+            output_file_base = 'CSIRO_chapps'
+            file_mask = '*.nc'
+
+            x0 = [[144.9197509621227,-39.25418444000394],
+                  [  139.3017433775739,-14.572645655376444],
+                  ]
+
+            ax = None  # Auck
+            title = 'CSIRO_chapps'
+            params['time_buffer_size']=6
+            is3D = False
+
         case 200:
             # FVCOM
             root_input_dir=r'D:\Hindcast_reader_tests\FVCOM_LakeSuperior\historical_sample\2022'
@@ -195,6 +209,7 @@ def get_case(n):
             #reader ='oceantracker.reader.dev.dev_FVCOM_reader.FVCOM'
             max_days=30
             title = 'FVCOM test'
+
         case 300:
             #ROMS test
             root_input_dir = r'F:\Hindcast_reader_tests\ROMS_samples'
@@ -442,8 +457,7 @@ def get_case(n):
     params['release_groups'][0]['points'] = x0
 
     params['particle_statistics'] = [{ 'name' :'grid1','class_name': 'GriddedStats2D_timeBased',
-                                       'grid_center': x0[0][:2],
-                                       'grid_span' : [.1,.15] if geo_cords else [10000,10000],
+                                        'grid_span' : [.1,.15] if geo_cords else [10000,10000],
                                        'update_interval': 3600, 'particle_property_list': ['water_depth'],
                                        'status_list':['moving'], 'z_min': -2,
                                        'grid_size': [120, 121]},
