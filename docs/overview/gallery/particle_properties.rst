@@ -1,13 +1,12 @@
 
-#########################
 Particle properties
-#########################
+==========================
 
 Particle properties can easily  add to computation via parameters, eg decaying concentrations,  by listing in particle_properties parameters.
 Standard properties include, status, tide, water_depth and  particle age.
 
 Decaying particle
-====================
+--------------------------
 .. raw:: html
 
   <center>
@@ -46,8 +45,10 @@ Decaying particle property used to size and colour  particles. ``decay_time_scal
 
    </details>
 
+
 Polygon aware particles
-=============================
+--------------------------
+
 .. raw:: html
 
   <center>
@@ -93,7 +94,8 @@ Particles with additional inside polygon  property, with optional logging of pol
 
 
 Particle Status
-=====================
+--------------------------
+
 .. raw:: html
 
   <center>

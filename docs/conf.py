@@ -61,7 +61,9 @@ pygments_style = 'sphinx'
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.
-html_theme = 'alabaster'
+# html_theme = 'furo'
+html_permalinks_icon = '<span>#</span>'
+html_theme = 'sphinxawesome_theme'
 
 
 # Add any paths that contain custom static files (such as style sheets)
@@ -72,22 +74,22 @@ html_css_files = [
 ]
 
 # Custom sidebar templates
-html_sidebars = {
-    '**': [
-        'about.html',
-        'navigation.html',
-        'relations.html',
-        'searchbox.html',
-    ]
-}
+# html_sidebars = {
+#     '**': [
+#         'about.html',
+#         'navigation.html',
+#         'relations.html',
+#         'searchbox.html',
+#     ]
+# }
 
 # Theme options are theme-specific and customize the look and feel
-html_theme_options = {
-    'logo': 'ocean_tracker.png',
-    'logo_name': release,
-    'fixed_sidebar': True,
-    'show_relbar_bottom': True,
-    'github_user': 'oceantracker',
-    'github_repo': 'oceantracker',
-    'github_button': True
-}
+# html_theme_options = {
+#     'logo': 'ocean_tracker.png',
+#     'logo_name': release,
+#     'fixed_sidebar': True,
+#     'show_relbar_bottom': True,
+#     'github_user': 'oceantracker',
+#     'github_repo': 'oceantracker',
+#     'github_button': True
+# }

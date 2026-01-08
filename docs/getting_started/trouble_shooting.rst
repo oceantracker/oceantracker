@@ -49,4 +49,4 @@ When reporting an error, please:
     * ``*_caseInfo.json``, lots of useful info
     * ``*_raw_user_params.json``, the raw user supplied settings/parameters
 
-Either send them via mail, or open a `GitHub issue: <https://github.com/oceantracker/oceantracker/issues>`.
+Either send them via mail, or open a `GitHub issue: <https://github.com/oceantracker/oceantracker/issues>`_.

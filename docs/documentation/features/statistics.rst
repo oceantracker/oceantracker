@@ -1,4 +1,3 @@
-==============================
 On-the-fly particle statistics
 ==============================
 
@@ -13,12 +12,14 @@ Age-based statistics record the spacial distribution of particles for particles 
 The latter is particularly useful when a continuous release of particles is chosen to e.g. calculate a seasonally averaged connectivity between two water bodies.
 Both time- and age-based statistics can be calculated either on a rectangular horizontal grid, or for a set of polygons.
 They can also be recorded either as 3D or 2D (depth-averaged) statistics.
+Each statistic that you add to the model configuration will produce one netCDF file in the output directory,
+that you can either open with you own script or use oceantrackers output loading functions. 
 
 Overview of types of particle statistics
-========================================
+----------------------------------------
 
 Time-based statistics
----------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For time based stats, particle presence within a grid cell or polygon is checked at fixed time intervals ("update_interval").
 The total number of particles within that cell at that moment in time is then written into that corresponding statistics file.
@@ -26,42 +27,46 @@ Note however, that this does not guarantee that all particles that pass thru tha
 There is one variant of the time-based statistic (currently only implemented for gridded stats) that help avoiding that problem by offering two distinct intervals, one for "updating" i.e. checking if a particle is within a cell and one for writing.
 Particle counts are accumulated within the "write_interval".
 This allows for much higher update_intervals without increases data volume.
+Note, that this may count particles multiple times.
 Additionally, particle counts are also distinguishing between particle release location.
 
 The user can also impose a set of constraints to which particles should be counted.
 These are status (e.g. settled on bottom), water column depth, particle depth (e.g. only within 10 meters of the surface).
-For details see the API references or the formal description below.
+For details see the `API reference`_ or the formal description below.
 
 
 Age-based statistics
---------------------
-* **Unbiased statistics**: To obtain unbiased age-based statistics, particle releases should stop at least :math:`\text{age}_{\max}` before the end of the simulation run
-* **Accumulation**: Counts are accumulated across all time steps rather than reset at each output interval
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Grid-based statistics
----------------------
+Age-based statistics work similar time-based ones - i.e. particle presence within a grid cell or polygon is recoreded for each release location - but instead of recording it at fixed time interval we bin particles into age classes.
+E.g. you might calculate an yearly averaged connectivity from a source volume by continuously releasing particles from that volume.
+Binning these particles by age now allows you to visualize e.g. the dispersion clouds after 1 month.
+There is one important caveat to this.
+If your update interval is larger then your age bin size (which is recommended for most applications) you will potentially "double count" particles.
+E.g. if a particle remains within the same grid cell between update intervals it will be counted in that cell twice.
+If it moves to another cell it will be counted once in the first,  and then again in the second.
 
+Grid-based or polygon-based statistics
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Polygon-based statistics
-------------------------
-This is particularly valuable for ecological applications such as:
+Statics can be recorded either on a rectangular longitude-latitude aligned grid
+or within a set user-defined polygons.
+The grid may either be at a fixed location, or centered on each release groups.
+See `api references`_ or the `how-to's` for examples.
 
-* **Marine protected area design**: Assessing connectivity between habitat patches
-* **Larval dispersal**: Tracking larval connectivity between reef systems at different developmental stages
-* **Network analysis**: Identifying critical stepping-stone habitats in dispersal networks
 
 
 Formal descriptions
-===================
+----------------------------------------
 
 Implementation Notes
---------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The age-based counting approach differs from time-based counting in several important ways:
 
 
 Gridded Statistics 2D Time-Based: 
----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``GriddedStats2D_timeBased`` class computes time-series counts of particles within cells of a regular horizontal 2D grid.
 At each time step, particles are first filtered based on status criteria, water depth constraints, and vertical position requirements, then binned into spatial grid cells based on their horizontal coordinates.
@@ -81,7 +86,7 @@ where:
 * :math:`\text{Cell}_{i,j}` is the spatial region defined by the grid cell boundaries
 
 Gridded Statistics 2D Age-Based: 
---------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``GriddedStats2D_ageBased`` class computes age-binned histograms of particle counts within cells of a regular 2D grid.
 Unlike the time-based variant, this class accumulates counts across the entire simulation run (or specified time window), binning particles by their age rather than tracking time series.
@@ -106,7 +111,7 @@ where:
 * :math:`\text{age}_n(t)` is the particle age at time :math:`t`
 
 Polygon Statistics 2D Age-Based
--------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``PolygonStats2D_ageBased`` class computes age-binned histograms of particle counts within user-defined 2D polygons.
 This class accumulates counts across the entire simulation run (or specified time window), binning particles by their age.
@@ -133,7 +138,7 @@ where:
 
 
 Particle Selection Criteria
-----------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The selected particle set :math:`\mathcal{P}_{\text{sel}}(t)` consists of particles satisfying:
 
@@ -163,7 +168,7 @@ where :math:`z_n` is the vertical position of particle :math:`n`, :math:`\eta_n`
 
 
 Age Bin Definition
-------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A particle with age :math:`\text{age}_n(t)` belongs to age bin :math:`a` if:
 
@@ -195,7 +200,7 @@ Only particles with :math:`0 \leq a < N_{\text{bins}}` are counted, where :math:
 
 
 Grid Cell Definition
----------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A particle at position :math:`(x_n, y_n)` belongs to cell :math:`(i,j)` if its coordinates fall within the cell boundaries:
 
@@ -215,7 +220,7 @@ Note that when ``release_group_centered_grids=True``, the grid edges :math:`x_{\
 
 
 Polygon Membership
-------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A particle at position :math:`(x_n, y_n)` belongs to polygon :math:`p` if:
 
@@ -237,7 +242,7 @@ Particles with :math:`I_n^{\text{poly}} = -1` are not counted in any polygon.
 
 
 Connectivity Matrix
--------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The age-based statistics also compute a connectivity :math:`\mathcal{C}_{a,g,i,j}`,
 which represents the probability that a released particle from release group :math:`g` reaches a given grid cell :math:`(i,j)` at a given age :math:`a`.

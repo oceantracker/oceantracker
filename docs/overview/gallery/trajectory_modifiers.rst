@@ -1,12 +1,11 @@
 
-#####################
 Trajectory modifiers
-#####################
+====================
 
 Trajectory modifiers classes change the path of particles, examples from standard trajectory_modifiers classes below.
 
 Particle behaviour
-====================
+-------------------
 .. raw:: html
 
   <center>
@@ -45,7 +44,7 @@ Particles with a random fraction temporarily frozen  on a polygon shaped reef.
    </details>
 
 Resuspension
-====================
+--------------------------
 
 .. raw:: html
 

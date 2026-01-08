@@ -61,11 +61,11 @@ For larger applications, OceanTracker offers on-the-fly statistics to eliminate 
    :class: center
 
    * - `Project website <https://www.cawthron.org.nz/>`_  
-         — :doc:`info/about`
+         — :doc:`overview/about`
      - `Documentation <https://github.com/oceantracker/oceantracker/>`_  
-         — :doc:`info/features`
+         — :doc:`documentation/features`
      - `Gallery & Demos <https://example.com/gallery>`_  
-         — :doc:`info/gallery`
+         — :doc:`overview/gallery`
 
 Its source code is publically available on `github <https://github.com/oceantracker/oceantracker/>`_ , released under the MIT licence.
 OceanTracker is under active developement. Feel free to reach out to report issues or to suggest new features.
@@ -95,8 +95,6 @@ OceanTracker is under active developement. Feel free to reach out to report issu
    :hidden:
    :caption: Contents:
 
-   about_gallery/about.rst
-   info/features.rst
-   info/gallery.rst
-   info/installing.rst
-   info/documentation.rst
+   overview/overview.rst
+   getting_started/getting_started.rst
+   documentation/documentation.rst

@@ -43,6 +43,6 @@ Numba is a just-in-time compiler for Python that translates performance critical
 This allows OceanTracker to be computationally efficient while remaining much more adaptable then if we would have relied on e.g. NumPy,
 where we would have had to rely on predefined vectorized implementations for performance critical code.
 
-For an overview of its features, see :doc:`features`.
+For an overview of its features, see :doc:`features` or take a look at some examples in the :doc:`gallery`.
 
 

@@ -19,7 +19,7 @@ class RSTfileBuilder(object):
         self.lines=[]
         self.toc_dict = {}
         self.file_name = file_name + '.rst'
-        self.docs_dir= path.join(definitions.ot_root_dir,'docs','info','parameter_ref')
+        self.docs_dir= path.join(definitions.ot_root_dir,'docs','documentation','api_ref')
         self.add_lines((len(title)+1) * '#')
         self.add_lines(title)
         self.add_lines((len(title)+1)  * '#')

@@ -1,4 +1,5 @@
 Model restart and continue feature
+----------------------------------
 
 Some questions require models to be run for a long time, with either high particle counts or small time steps.
 In these cases, the model run time (wall time) can be relatively long, i.e. weeks or months.
@@ -11,7 +12,7 @@ We typically encountered three problems in such contexts:
 
 
 Model restart, i.e. 'hotstart'
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the event of a machine failure, it would be ideal to resume the simulation from where it left off.
 To this end, we have introduced a 'restart' feature that can be enabled by setting a 'restart_interval' parameter.
@@ -25,7 +26,7 @@ Contact us if you would like this feature.
 
 
 Continue the simulation
------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Another scenario is that you would like to resume a simulation that has already been run.
 This is sometimes the case when the maximum session length on a cluster or HPC machine is insufficient for the full simulation duration, or when the current simulation results raise questions about later timeframes.
@@ -38,7 +39,7 @@ Runs with time-based statistics have not yet been implemented and will fail.
 Contact us if you would like this feature.
 
 Preliminary results
--------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In some scenarios, it can be helpful to take a look at preliminary results, e.g. to validate that the model is configured correctly and does what it is intended to do, at least superficially.
 This has been drafted but not yet properly implemented, as this problem can also be solved more tediously using the 'continue' feature.
