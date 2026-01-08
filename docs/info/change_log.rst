@@ -3,6 +3,22 @@
 Change log
 ###########################
 
+Version '0.5.2.56 2026-01-08'
+_____________________________
+
+New features
+------------
+#. Added reader for CSRIO all Austrialia Schism model
+
+Version '0.5.2.55 2025-12-10'
+_____________________________
+
+Bug fixes
+---------
+#. Vertical grid interpolation in z-type grids changed, to handle surface cell correctly
+#. Fixed broken documentation github action
+
+
 Version '0.5.2.55 2025-12-10'
 _____________________________
 
