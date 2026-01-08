@@ -265,7 +265,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
                 params['grid_centers'][ngroup, :] = np.nanmean(x0[:, :2], axis=0)
         else:
             # use given grid centers
-            if info['grid_centers'].shape[0] == 1:
+            if params['grid_centers'].shape[0] == 1:
                 # if only one use all  for all
                 params['grid_centers'] = np.tile(params['grid_center'], (len(si.class_roles.release_groups), 1))
             else:
