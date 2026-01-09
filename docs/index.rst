@@ -17,55 +17,54 @@ Fast particle tracking in unstructured grids
 OceanTracker is a fast extendable code for offline particle tracking in unstructured grids [1]_, which also works with regular grid hydrodynamic models.
 It is primarly designed for use in coastal oceans on modest hardware, but handles open ocean, and HPC applications efficency as well.
 
-.. *Short cuts*: :doc:`info/about` | :doc:`info/features` | :doc:`info/gallery` 
-
-.. .. container:: centered-links
-
-..    :doc:`info/about` | :doc:`info/features` | :doc:`info/gallery` 
-
 .. raw:: html
 
   <center>
     <video width="70%" controls autoplay loop>
    <source src="./_static/demos/demo02_animation.mp4">
    </video>
+   <p style="color: #6b7280;"><em>Particles (blue) being being continuously released from green point sources and from within the green polygon. Green particles are currently stranded in dry cells (brown) due to the tide.</em></p>
   </center>
 
 OceanTracker was developed to offer a computationally faster alternative to the existing models and is currently the fastest model for unstructured grids available [2]_.
 This enables users to simulate the millions of particles required for many applications on modest office computers while.
 For larger applications, OceanTracker offers on-the-fly statistics to eliminate the need to store and wade through the analysis of vast volumes of recorded particle tracks to create e.g. heat-maps or reginal connectivities.
 
-.. list-table:: 
-   :widths: 10 20 10 10 20 10 10 20 10
-   :header-rows: 0
-   :class: center
+.. grid:: 3
+   :gutter: 3
 
-   * -
-     - .. image:: _static/getting_started.png
-         :width: 120px
-         :alt: Running figure (demo)
-     -
-     -
-     - .. image:: _static/user_guide.svg
-         :width: 120px
-         :alt: Open book (docs)
-     -
-     -
-     - .. image:: _static/api.svg
-         :width: 120px
-         :alt: More (details)
-     -
-.. list-table:: 
-   :widths: 60 60 60
-   :header-rows: 0
-   :class: center
+   .. grid-item-card:: Getting Started
+      :link: getting_started/getting_started
+      :link-type: doc
+      :text-align: center
 
-   * - `Project website <https://www.cawthron.org.nz/>`_  
-         — :doc:`overview/about`
-     - `Documentation <https://github.com/oceantracker/oceantracker/>`_  
-         — :doc:`documentation/features`
-     - `Gallery & Demos <https://example.com/gallery>`_  
-         — :doc:`overview/gallery`
+      .. image:: _static/getting_started.png
+         :width: 120px
+         :alt: Running figure
+         :align: center
+
+
+   .. grid-item-card:: Documentation
+      :link: documentation/features
+      :link-type: doc
+      :text-align: center
+
+      .. image:: _static/user_guide.svg
+         :width: 120px
+         :alt: Open book
+         :align: center
+
+
+   .. grid-item-card:: API Reference
+      :link: documentation/api_ref
+      :link-type: doc
+      :text-align: center
+
+      .. image:: _static/api.svg
+         :width: 120px
+         :alt: API details
+         :align: center
+
 
 Its source code is publically available on `github <https://github.com/oceantracker/oceantracker/>`_ , released under the MIT licence.
 OceanTracker is under active developement. Feel free to reach out to report issues or to suggest new features.

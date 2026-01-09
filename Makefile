@@ -64,7 +64,7 @@ clean-pyc:
 # 	$(MAKE) -C docs html
 
 env:
-	python installing/generate_environment_yaml.py
+	python generate_environment_yaml.py
 
 install: clean
 	pip install .

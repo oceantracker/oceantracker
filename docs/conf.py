@@ -40,6 +40,7 @@ extensions = [
     'sphinx_toolbox.collapse',
     'nbsphinx',
     'rst2pdf.pdfbuilder',
+    'sphinx_design',
 ]
 
 # Support for both .rst and .md files
@@ -84,12 +85,8 @@ html_css_files = [
 # }
 
 # Theme options are theme-specific and customize the look and feel
-# html_theme_options = {
-#     'logo': 'ocean_tracker.png',
-#     'logo_name': release,
-#     'fixed_sidebar': True,
-#     'show_relbar_bottom': True,
-#     'github_user': 'oceantracker',
-#     'github_repo': 'oceantracker',
-#     'github_button': True
-# }
+html_theme_options = {
+    'show_prev_next': True,
+    'globaltoc_collapse': False,  # Keep TOC expanded
+    'globaltoc_maxdepth': 2,      # Show 2 levels by default
+}
