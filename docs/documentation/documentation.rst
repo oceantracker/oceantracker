@@ -8,5 +8,5 @@ Complete guide to using OceanTracker.
     :maxdepth: 2
 
     features.rst
-    api_ref
+    api_ref/parameter_ref_toc.rst
     change_log.rst

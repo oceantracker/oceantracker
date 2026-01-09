@@ -6,7 +6,7 @@ The tutorials below show a web view of the ipython notebooks available in the gi
 at `"oceantracker/tutorials_how_to" <https://github.com/oceantracker/oceantracker/tree/d1146cce848912caee7ae1c008d73809cd001b14/tutorials_how_to>`_.
 
 
-.. .. toctree::
+.. toctree::
     :maxdepth: 2
 
     how_to/A_minimal_example.rst

@@ -19,9 +19,9 @@ clean:
 
 # Clean everything including generated parameter docs
 clean-all: clean
-	rm -rf info/parameter_ref/*.rst
-	rm -rf info/how_to/*.rst
-	rm -rf info/how_to/*_files
+	rm -rf documentation/api_ref/*.rst
+	rm -rf getting_started/how_to/*.rst
+	rm -rf getting_started/how_to/*_files
 
 # Build parameter reference documentation
 build-params:
@@ -37,10 +37,10 @@ convert-notebooks:
 			jupyter nbconvert "$$notebook" --to rst; \
 			base_name=$${notebook%.ipynb}; \
 			if [ -f "$${base_name}.rst" ]; then \
-				mv "$${base_name}.rst" ../docs/info/how_to/; \
+				mv "$${base_name}.rst" ../docs/getting_started/how_to; \
 			fi; \
 			if [ -d "$${base_name}_files" ]; then \
-				mv "$${base_name}_files" ../docs/info/how_to/; \
+				mv "$${base_name}_files" ../docs/getting_started/how_to; \
 			fi; \
 		fi; \
 	done
@@ -48,13 +48,6 @@ convert-notebooks:
 # Build documentation with all preprocessing steps
 build: clean clean-all build-params convert-notebooks html
 	@echo "Documentation build complete!"
-
-# Live reload for development
-# livehtml:
-# 	sphinx-autobuild "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) \
-# 		--ignore "_build/*" \
-# 		--ignore "*.pyc" \
-# 		--ignore ".git/*"
 
 # Check for broken links
 linkcheck:
