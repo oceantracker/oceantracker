@@ -19,6 +19,7 @@ In more steeply - relative to the horizontal resolution - varying coastal region
 
 .. figure:: https://www.oc.nps.edu/nom/modeling/images/z_coords.jpg
     :alt: Z-level grid diagram
+    :align: center
 
     Example of a z-level grid structure.
     Source: https://www.oc.nps.edu/nom/modeling/vertical_grids.html
@@ -29,6 +30,7 @@ The latter is often referred to as a z*-vertical-grid
 
 .. figure:: https://www.nemo-ocean.eu/doc/img210.png
     :alt: Z-level variance grid diagram
+    :align: center
 
     (a) z-coordinate in linear free-surface case; (b) z-coordinate in non-linear free surface case; (c) re-scaled height coordinate (become popular as the z*-coordinate [Adcroft and Campin, 2004]).
     Source: https://www.nemo-ocean.eu/doc/node9.html
@@ -51,6 +53,7 @@ There they may under-resolve deep regions while over-resolving shallow regions.
 
 .. figure:: https://www.oc.nps.edu/nom/modeling/images/sigma_coords.gif
     :alt: Sigma grid diagram
+    :align: center
 
     Example of a sigma grid structure.
     Source: https://www.oc.nps.edu/nom/modeling/vertical_grids.html
@@ -80,6 +83,7 @@ By reducing the number of cells in shallow regions, this approach allows for a r
 
 .. figure:: https://www.researchgate.net/profile/Chin-Wu-6/publication/268750779/figure/fig3/AS:357090615939074@1462148446261/Comparison-of-vertical-grids-along-the-transect-shown-in-Fig-1-using-a-LSC-2-with_W640.jpg
     :alt: LSC grid diagram
+    :align: center
 
     Vizualisation of an LSC grid Layout from Zhang et al. (2014)
     Source: doi.org/10.1016/j.ocemod.2014.10.003

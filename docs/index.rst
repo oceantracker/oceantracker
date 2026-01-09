@@ -9,6 +9,12 @@
 *OceanTracker*
 #########################
 
+|GitHub stars|
+
+.. |GitHub stars| image:: https://img.shields.io/github/stars/oceantracker/oceantracker?style=social
+   :target: https://github.com/oceantracker/oceantracker/
+
+
 ****************************************************
 Fast particle tracking in unstructured grids
 ****************************************************
@@ -34,7 +40,7 @@ For larger applications, OceanTracker offers on-the-fly statistics to eliminate 
    :gutter: 3
 
    .. grid-item-card:: Getting Started
-      :link: getting_started/getting_started
+      :link: getting_started/quickstart
       :link-type: doc
       :text-align: center
 
@@ -56,7 +62,7 @@ For larger applications, OceanTracker offers on-the-fly statistics to eliminate 
 
 
    .. grid-item-card:: API Reference
-      :link: documentation/api_ref
+      :link: documentation/api_ref/parameter_ref_toc
       :link-type: doc
       :text-align: center
 

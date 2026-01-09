@@ -2,11 +2,6 @@ Features
 ====================
 
 
-
-
-
-
-
 Main Features
 -------------
 
@@ -37,11 +32,10 @@ OceanTracker is primarily designed for coastal environments which is reflected i
 
 .. * Read and visualize model output quickly with .
 
-For more detailed descriptions about individual features see section below
+For more detailed descriptions about individual features see section below:
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    features/readers.rst
    features/vertical_grids.rst
