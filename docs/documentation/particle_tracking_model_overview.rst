@@ -136,4 +136,3 @@
      - Not yet parallel (as of published version)
      - *Limited documentation on scalability*
      - Relatively new package; smaller user community than established codes
----

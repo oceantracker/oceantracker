@@ -32,7 +32,7 @@ Additionally, particle counts are also distinguishing between particle release l
 
 The user can also impose a set of constraints to which particles should be counted.
 These are status (e.g. settled on bottom), water column depth, particle depth (e.g. only within 10 meters of the surface).
-For details see the `API reference`_ or the formal description below.
+For details see the :doc:`API reference </documentation/api_ref>` or the formal description below.
 
 
 Age-based statistics
