@@ -34,6 +34,7 @@ def build_node_to_triangle_map(tri, x):
             if tri_per_node[node] >= node_to_tri_map.shape[1]:
                 # add another block
                 node_to_tri_map = np.concatenate((node_to_tri_map, empty_block.copy()),axis=1)
+                #print('block add',tri_per_node[node] )
 
             # log one more triangle for this node
             node_to_tri_map[node, tri_per_node[node]-1] = nTri
