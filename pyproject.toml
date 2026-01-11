@@ -60,6 +60,7 @@ dev = [
     # docs
     "sphinx>=7.0,<9.0",
     "sphinx-toolbox>=3.3.0",
+    "sphinxawesome-theme",
     "sphinx-design",
     "nbsphinx",
     "ipython",
