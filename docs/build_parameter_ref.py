@@ -263,9 +263,7 @@ def build_param_ref():
 
     page.add_heading('Multiple classes for each role',level=2)
     page.add_lines('Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.')
-    page.add_new_toc_to_page('roles_dict', maxdepth=1, sort_body=True)
-
-    page.add_new_toc_to_page('user', maxdepth=1)
+    page.add_new_toc_to_page('user', maxdepth=1, sort_body=True)
     for key in sorted(si.class_roles.possible_values()):
         if key in ['nested_readers'] : continue
         toc = make_class_sub_pages(key)
