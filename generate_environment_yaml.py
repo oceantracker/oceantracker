@@ -9,7 +9,8 @@ import yaml
 
 def load_pyproject():
     """Load pyproject.toml file."""
-    pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+    # pyproject_path = Path(__file__).parent.parent / "pyproject.toml"
+    pyproject_path = Path(__file__).parent / "pyproject.toml"
     with open(pyproject_path, "rb") as f:
         return tomllib.load(f)
 
@@ -131,7 +132,7 @@ def main():
     dev_env = generate_dev_environment(pyproject_data)
     
     # Write files
-    root_dir = Path(__file__).parent.parent
+    root_dir = Path(__file__).parent
     write_yaml_file(base_env, root_dir / "environment.yml")
     write_yaml_file(dev_env, root_dir / "environment-dev.yml")
 

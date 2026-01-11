@@ -18,8 +18,9 @@ dependencies:
 - requests
 - build
 - twine
-- sphinx>=7.0
+- sphinx>=7.0,<9.0
 - sphinx-toolbox>=3.3.0
+- sphinx-design
 - nbsphinx
 - ipython
 - rst2pdf

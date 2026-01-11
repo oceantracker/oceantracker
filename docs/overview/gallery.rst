@@ -13,13 +13,12 @@ Gallery
 
 These demo plots and animations were created with standard postprocessing plot methods.
 
-.. toctree::
-    :maxdepth: 2
 
-    gallery/particle_properties.rst
-    gallery/trajectory_modifiers.rst
-    gallery/particle_statistics.rst
+.. include:: gallery/particle_properties.rst
 
+.. include:: gallery/trajectory_modifiers.rst
+
+.. include:: gallery/particle_statistics.rst
 
 
 

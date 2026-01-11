@@ -1,12 +1,11 @@
 
-#####################
 Trajectory modifiers
-#####################
+====================
 
 Trajectory modifiers classes change the path of particles, examples from standard trajectory_modifiers classes below.
 
 Particle behaviour
-====================
+-------------------
 .. raw:: html
 
   <center>
@@ -23,7 +22,7 @@ Particles with a random fraction temporarily frozen  on a polygon shaped reef.
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../dev/demo_param_files/demo06_reefstranding.json
+.. literalinclude:: /../dev/demo_param_files/demo06_reefstranding.json
     :language: json
     :caption:
 
@@ -36,7 +35,7 @@ Particles with a random fraction temporarily frozen  on a polygon shaped reef.
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../dev/demo_param_files/demo06_reefstranding.yaml
+.. literalinclude:: /../dev/demo_param_files/demo06_reefstranding.yaml
     :language: Yaml
     :caption:
 
@@ -45,7 +44,7 @@ Particles with a random fraction temporarily frozen  on a polygon shaped reef.
    </details>
 
 Resuspension
-====================
+--------------------------
 
 .. raw:: html
 
@@ -58,7 +57,7 @@ Particles with fall velocity and resuspension based on critical friction velocit
 
 * class  ``trajectory_modifiers.resuspension.BasicResuspension``
 
-.. image::  ../../_static/demos/demo59_crit_shear_resupension_section.jpeg
+.. image::  /_static/demos/demo59_crit_shear_resupension_section.jpeg
    :width: 95%
 
 Vertical slice showing one example of a falling particle and resuspension, with particle on bottom during low flows around low and high tides. Blue line is particle status, 10= moving, 6 = on the bottom.
@@ -68,7 +67,7 @@ Vertical slice showing one example of a falling particle and resuspension, with 
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../dev/demo_param_files/demo58_bottomBounce.json
+.. literalinclude:: /../dev/demo_param_files/demo58_bottomBounce.json
     :language: json
     :caption:
 
@@ -82,7 +81,7 @@ Vertical slice showing one example of a falling particle and resuspension, with 
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../dev/demo_param_files/demo58_bottomBounce.yaml
+.. literalinclude:: /../dev/demo_param_files/demo58_bottomBounce.yaml
     :language: Yaml
     :caption:
 
@@ -110,7 +109,7 @@ Particles with splitting in two every 6 hours and a 5% chance of dying every 6 h
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../dev/demo_param_files/demo08_particle_splitting.json
+.. literalinclude:: /../dev/demo_param_files/demo08_particle_splitting.json
     :language: json
     :caption:
 
@@ -124,7 +123,7 @@ Particles with splitting in two every 6 hours and a 5% chance of dying every 6 h
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../dev/demo_param_files/demo08_particle_splitting.yaml
+.. literalinclude:: /../dev/demo_param_files/demo08_particle_splitting.yaml
     :language: Yaml
     :caption:
 

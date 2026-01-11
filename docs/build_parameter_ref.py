@@ -1,6 +1,7 @@
 # build full parm ref from dict and classes defaults
 import os
 from os import path, mkdir, listdir
+from os.path import basename
 from glob import  glob
 import inspect
 import importlib
@@ -19,7 +20,7 @@ class RSTfileBuilder(object):
         self.lines=[]
         self.toc_dict = {}
         self.file_name = file_name + '.rst'
-        self.docs_dir= path.join(definitions.ot_root_dir,'docs','info','parameter_ref')
+        self.docs_dir= path.join(definitions.ot_root_dir,'docs','documentation','api_ref')
         self.add_lines((len(title)+1) * '#')
         self.add_lines(title)
         self.add_lines((len(title)+1)  * '#')
@@ -97,8 +98,8 @@ class RSTfileBuilder(object):
         self.toc_dict[toc_name] = self.lines[-1]
 
     def add_toc_link(self, toc_name, linked_toc):
-
-        self.toc_dict[toc_name]['body'].append(linked_toc.file_name.replace('\\', '/'))
+        base_name = basename(linked_toc.file_name).replace('\\', '/').replace('.rst', '')
+        self.toc_dict[toc_name]['body'].append(base_name)
 
     def add_params_from_dict(self,params, indent=0, expert=False):
 
@@ -225,9 +226,9 @@ def make_class_sub_pages(class_role, link_tag=''):
         toc.add_toc_link(class_role,p)
 
     # add role from last instance, as it derives from base class
-    if instance is not None:
-        toc.add_lines('**Role:** ' + (instance.docs['role'] if instance.docs['role'] is not None else ''))
-        toc.add_lines()
+    # if instance is not None:
+    #     toc.add_lines('**Role:** ' + (instance.docs['role'] if instance.docs['role'] is not None else ''))
+    #     toc.add_lines()
     toc.write()
     return toc
 
@@ -263,9 +264,7 @@ def build_param_ref():
 
     page.add_heading('Multiple classes for each role',level=2)
     page.add_lines('Can be many classes per role, each with a user given name as part of  dictionary for each role. These roles have plural names.')
-    page.add_new_toc_to_page('roles_dict', maxdepth=1, sort_body=True)
-
-    page.add_new_toc_to_page('user', maxdepth=1)
+    page.add_new_toc_to_page('user', maxdepth=1, sort_body=True)
     for key in sorted(si.class_roles.possible_values()):
         if key in ['nested_readers'] : continue
         toc = make_class_sub_pages(key)

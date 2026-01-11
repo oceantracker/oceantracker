@@ -1,10 +1,9 @@
 
-#########################
 Particle Statistics
-#########################
+====================
 
 Heat maps
-====================
+--------------------------
 
 .. raw:: html
 
@@ -30,7 +29,7 @@ along with counts of particles inside polygons
    <details>
    <summary> json parameters </summary>
 
-.. literalinclude:: ../../../dev/demo_param_files/demo03_heatmaps.json
+.. literalinclude:: /../dev/demo_param_files/demo03_heatmaps.json
     :language: json
     :caption:
 
@@ -46,7 +45,7 @@ along with counts of particles inside polygons
    <details>
    <summary> yaml parameters </summary>
 
-.. literalinclude:: ../../../dev/demo_param_files/demo03_heatmaps.yaml
+.. literalinclude:: /../dev/demo_param_files/demo03_heatmaps.yaml
     :language: Yaml
     :caption:
 

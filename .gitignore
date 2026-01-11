@@ -5,7 +5,9 @@
 
 /docs/_build
 /docs/info/how_to/
+/docs/getting_started/how_to/
 /docs/info/parameter_ref/
+/docs/documentation/api_ref/
 
 /tutorials_how_to/output/
 
