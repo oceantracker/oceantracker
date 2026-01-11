@@ -1,7 +1,7 @@
 Beginners guide
 ===================
 
-Before you start, take a look at the :doc:`about </overview/about>` and :doc:`features </documentation/features>` section to make sure that this is the right tool for the job.
+Before you start, take a look at the :doc:`about </overview/about>`,:doc:`features </documentation/features>`, and :doc:`gallery </overview/gallery>` section to make sure that this is the right tool for the job.
 If you are unfamiliar with the topic of Lagrangian particle tracker, it is probably a good idea to take a look at `this paper <https://doi.org/10.31223/X5WM6Z>`_ first.
 Here we give a brief overview of the approach and the model.
 You'll also find some studies mentioned that applied our model.

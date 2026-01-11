@@ -52,8 +52,7 @@ Grid-based or polygon-based statistics
 Statics can be recorded either on a rectangular longitude-latitude aligned grid
 or within a set user-defined polygons.
 The grid may either be at a fixed location, or centered on each release groups.
-See `api references`_ or the `how-to's` for examples.
-
+See :doc:`parameter references </documentation/api_ref>` or the `how-to's </getting_started/how_to>` for examples.
 
 
 Formal descriptions
