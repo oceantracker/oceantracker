@@ -1,6 +1,7 @@
 # build full parm ref from dict and classes defaults
 import os
 from os import path, mkdir, listdir
+from os.path import basename
 from glob import  glob
 import inspect
 import importlib
@@ -97,8 +98,8 @@ class RSTfileBuilder(object):
         self.toc_dict[toc_name] = self.lines[-1]
 
     def add_toc_link(self, toc_name, linked_toc):
-
-        self.toc_dict[toc_name]['body'].append(linked_toc.file_name.replace('\\', '/'))
+        base_name = basename(linked_toc.file_name).replace('\\', '/').replace('.rst', '')
+        self.toc_dict[toc_name]['body'].append(base_name)
 
     def add_params_from_dict(self,params, indent=0, expert=False):
 
