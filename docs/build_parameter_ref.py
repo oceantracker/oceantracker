@@ -226,9 +226,9 @@ def make_class_sub_pages(class_role, link_tag=''):
         toc.add_toc_link(class_role,p)
 
     # add role from last instance, as it derives from base class
-    if instance is not None:
-        toc.add_lines('**Role:** ' + (instance.docs['role'] if instance.docs['role'] is not None else ''))
-        toc.add_lines()
+    # if instance is not None:
+    #     toc.add_lines('**Role:** ' + (instance.docs['role'] if instance.docs['role'] is not None else ''))
+    #     toc.add_lines()
     toc.write()
     return toc
 
