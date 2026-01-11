@@ -11,7 +11,7 @@ OceanTracker is primarily designed for coastal environments which is reflected i
   Many common models are already supported out of-the-box.
   If yours isn't, feel free to reach out. We are happy to implement new ones.
   The current list includes **SCHISM**, **FVCOM**, **ROMS**, **NEMO** and **GLORYS**, **Delft3D**, and Copernicus i.e. **CMEMS**-catalog.
-  For more details see :doc:`supported hydrodynamical models </documentation//documentation/features/supported_models>`.
+  For more details see :doc:`supported hydrodynamical models </documentation/features/supported_models>`.
 
 * To enable a large set of research questions we support the following **particle behaviors** and **physical processes**:
   dispersion, settling and re-suspension from bottom based on critical shear velocities, tidal-stranding, varying buoyancies, particles splitting and culling.
@@ -22,7 +22,7 @@ OceanTracker is primarily designed for coastal environments which is reflected i
 
   - We try to keep the time low that a user has to faff with the model configuration through a **modular configuration structure**.
     For large runs, output data management can become the bottleneck.
-    We offer :doc:`on-the-fly particle statistics <documentation/features/statistics>` to avoid writing and reading large trajectory files to disk.
+    We offer :doc:`on-the-fly particle statistics </documentation/features/statistics>` to avoid writing and reading large trajectory files to disk.
     Supported hydrodynamical models are auto-detected and mapped accordingly and particle-tracking output can be quickly plotted with the included plotting routines (see [placeholder] link to the how tos).
   - **Computational efficiency** was the main focus since starting out as existing models weren't fast enough for problems we tried to tackle.
     We believe we are currently the fastest model available for unstructured grids `(Vennell et al., (2025)) <https://egusphere.copernicus.org/preprints/2025/egusphere-2025-4545/>`_.
