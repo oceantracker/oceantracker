@@ -97,7 +97,6 @@ OceanTracker is under active developement. Feel free to reach out to report issu
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
    :caption: Contents:
 
    overview/overview.rst
