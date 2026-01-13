@@ -56,7 +56,7 @@ def main(args=None):
     else:
         case_info_file = dd.get_case_info_name_from_params(ot.params)
 
-    dd.compare_reference_tracks(case_info_file, args)
+    dd.compare_reference(case_info_file, args)
 
 
     tests=dict()

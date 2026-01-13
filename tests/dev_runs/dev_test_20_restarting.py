@@ -5,6 +5,8 @@ from oceantracker.util import json_util
 from copy import deepcopy
 import time
 
+
+# need to use pool to keep memory of runs separate
 def run(params):
     from multiprocessing import Pool
     with Pool(processes=1) as pool:
@@ -29,7 +31,6 @@ def main(args):
                 use_random_seed=True,
                 use_resuspension = False,
                 restart_interval = None if args.reference_case else 3*3600,
-                throw_debug_error= 0 if args.reference_case else 1,
             )
 
 
@@ -50,18 +51,24 @@ def main(args):
                                                ))
     ot.add_class('particle_statistics', **dd.my_poly_stats_age, polygon_list=[dict(points=hm['polygon'])])
 
-    ot.add_class('tracks_writer', update_interval=1800,
+    ot.add_class('tracks_writer', update_interval=1800, **dd.tracks_writer,
                  time_steps_per_per_file=None if args.reference_case else 10)
 
     params = deepcopy(ot.params)
-    case_info_file =  run(params)
 
-    # do restart
-    if not args.reference_case:
+    if args.reference_case:
+        params.update(throw_debug_error=0)
+        case_info_file = run(params)
+    else: # do restart
+        params.update(throw_debug_error=1)
+        case_info_file = run(params)
+
+        # rerun without error
         params.update(throw_debug_error=0)
         case_info_file = run(params)
 
-    dd.compare_reference_tracks(case_info_file, args)
+
+    dd.compare_reference(case_info_file, args)
     dd.show_track_plot(case_info_file, args)
 
     return  ot.params

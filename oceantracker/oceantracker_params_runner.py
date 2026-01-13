@@ -101,10 +101,10 @@ class OceanTrackerParamsRunner(object):
 
         elif si.run_info.restarting:
             # successful run so clear saved state dir
-            if path.isdir(si.run_info.saved_state_dir):
-                ml.msg(f'Run complete: removing saved state folder {si.run_info.saved_state_dir}')
+            if path.isdir( si.output_files['saved_state_dir']):
+                ml.msg(f'Run complete: removing saved state folder { si.output_files["saved_state_dir"]}')
                 import shutil
-                shutil.rmtree(si.run_info.saved_state_dir)
+                shutil.rmtree( si.output_files['saved_state_dir'])
 
         ml.close()
 
@@ -133,36 +133,24 @@ class OceanTrackerParamsRunner(object):
         ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults', caller=self)
         ml.msg(f'Started > "{user_given_params["output_file_base"]}"')
 
-
+        ri = si.run_info
 
         # setup output dir and msg files
-        si.output_files = setup_util.setup_output_dir(si.settings, crumbs='Setting up output dir')
+        si.output_files,ri.restarting = setup_util.setup_output_dir()
+        si.saved_state_info = setup_util.setup_restart_continuation()
+        # si.output_files = setup_util.setup_output_dir(si.settings, crumbs='Setting up output dir')
 
-        # copy basic  shortcuts to run info
-        ri = si.run_info
+        # set up message loggers log file
+        si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(si)  # message logger output file setup
+        si.msg_logger.settings(max_warnings=si.settings.max_warnings)
+        ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
+               hint='see for copies of screen output and user supplied parameters, plus all other output')
 
         # move stuff to run info as central repository
         ri.run_output_dir = si.output_files['run_output_dir']
         ri.output_file_base = si.output_files['output_file_base']
-        ri.saved_state_dir = si.output_files['saved_state_dir']
-
         ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
         ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
-
-        if si.run_info.restarting:
-            # load restart info
-            fn = path.join(si.run_info.saved_state_dir, 'state_info.json')
-            if not path.isfile(fn):
-                ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
-                       fatal_error=True, hint=f'missing file  {fn}')
-            si.restart_info = json_util.read_JSON(fn)
-            ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(si.restart_info["restart_time"])}')
-
-        si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(si)  # message logger output file setup
-
-        si.msg_logger.settings(max_warnings=si.settings.max_warnings)
-        ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
-               hint='see for copies of screen output and user supplied parameters, plus all other output')
 
         # write raw params to a file
         if not si.run_info.restarting:

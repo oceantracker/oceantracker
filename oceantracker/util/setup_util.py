@@ -5,57 +5,109 @@ from datetime import datetime
 import shutil
 from os import path, makedirs, walk, unlink
 import traceback
-from oceantracker.util import json_util
+from oceantracker.util import json_util, time_util
 import  numpy as np
 from oceantracker import definitions
 from oceantracker.shared_info import  shared_info as si
 import sys
+from glob import glob
 
-def setup_output_dir(settings, crumbs='', caller=None):
-    # setus up params, opens log files/ error handling, required before message loger can be used
-    crumbs += '> setup_output_dir'
-
+def setup_output_dir():
+    # set up output folder, when root_output_dir and output_file_base are required settings
     # check output_file_base is not dir, just a test
-    if len(path.dirname(settings['output_file_base'])) > 0:
+    crumbs = 'setup_output_dir'
+    
+    if len(path.dirname(si.settings['output_file_base'])) > 0:
         si.msg_logger.msg(
-            f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{settings["output_file_base"]}"',
-            error=True,
-            hint='Use setting "root_output_dir" to designate which dir. to place output files in',
-            crumbs=crumbs, caller=caller,
-            fatal_error=True)
+            f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{si.settings["output_file_base"]}"',
+            error=True, hint='Use setting "root_output_dir" to designate which dir. to place output files in',
+            crumbs=crumbs,  fatal_error=True)
 
-    # get output files location
-    root_output_dir = path.abspath(path.normpath(settings['root_output_dir']))
-    run_output_dir = path.join(root_output_dir, settings['output_file_base'])
+    root_output_dir = path.abspath(path.normpath(si.settings['root_output_dir']))
+    run_output_dir = path.join(root_output_dir, si.settings['output_file_base'])
 
-    if settings['add_date_to_run_output_dir']:
+    if si.settings['add_date_to_run_output_dir']:
         run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
 
-    # if restable and no folder exists them make a new restart folder  existing folder and make a new dir, if not restarting
-    saved_state_dir = path.join(run_output_dir, 'saved_state')
-    si.run_info.restarting = False
+    # create basic  output file names
+    output_files = dict(root_output_dir= root_output_dir,
+                    run_output_dir= run_output_dir,
+                    output_file_base=si.settings['output_file_base'],
+                             caseInfo_file= si.settings['output_file_base'] + '_caseInfo.json',
+                    users_params_json= 'users_params_' + si.settings['output_file_base'],
+                    saved_state_dir='saved_state',
+                    completion_state_dir='completion_state',
+                    grid = [] # may be more than one grid if nested
+                    )
     if si.settings.restart_interval is not None \
-            and path.isdir(saved_state_dir)  \
-            and path.isfile(path.join(saved_state_dir,'state_complete.txt')):
-                si.run_info.restarting = True
+            and path.isdir(output_files['saved_state_dir'])  \
+            and path.isfile(path.join(output_files['saved_state_dir'],'state_complete.txt')):
+                restarting = True
+    else:
+        restarting = False
 
-    # new run if  not restarting or incomplete saved state
-    if not si.run_info.restarting:
+    # kill old run if not restarting
+    if not restarting :
         if path.isdir(run_output_dir):  shutil.rmtree(run_output_dir)
         makedirs(run_output_dir)  # make  new clean folder
 
-    # write a copy of user given parameters, to help with debugging and code support
-    fb = 'users_params_' + settings['output_file_base']
-    output_files = {'root_output_dir': root_output_dir,
-                    'run_output_dir': run_output_dir,
-                    'saved_state_dir': saved_state_dir,
-                    'output_file_base': settings['output_file_base'],
-                    'raw_output_file_base': copy(settings['output_file_base']),
-                    # this is needed for grid file so it does not get a case number in // runs
-                    'caseInfo_file': settings['output_file_base'] + '_caseInfo.json',
-                    'users_params_json': fb + '.json',
-                    }
-    return output_files
+    return output_files, restarting
+
+def setup_restart_continuation():
+
+    ml = si.msg_logger
+    crumbs = 'setup_restart_continuation'
+    saved_state_info = None
+    of = si.output_files
+
+    if si.run_info.restarting:
+        # load restart info
+        fn = path.join(of['saved_state_dir'], 'state_info.json')
+        if not path.isfile(fn):
+            ml.msg('Cannot find save_state.json to restart run, to save state rerun with  setting restart_interval',
+                   fatal_error=True, hint=f'missing file  {fn}',crumbs=crumbs )
+        saved_state_info = json_util.read_JSON(fn)
+        ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(saved_state_info["restart_time"])}')
+
+    elif si.settings.continue_from is not None:
+        # continue old run in new folder
+
+        prior_run_output_dir = path.abspath(si.settings.continue_from)
+        # find previous run
+        if not path.isdir(prior_run_output_dir):
+            ml.msg(f'Cannot find output dir of previous run to continue "{si.settings.continue_from}"',
+                            fatal_error=True, crumbs=crumbs, hint= f'Check dir in continue_from setting')
+
+        # check new run has different run_output dir
+        if path.abspath(of['run_output_dir']) == prior_run_output_dir:
+            ml.msg(f'The run continuation output cannot be written to same dir as the prevouis run "{si.settings.continue_from}"',
+                       fatal_error=True, crumbs=crumbs, hint=f'Ensure output_file_base names for prio and continued run are different')
+
+        # check if continuation state exists
+        prior_state_dir = path.join(prior_run_output_dir, of['completion_state_dir'])
+        if not path.isdir(prior_state_dir) :
+            ml.msg( f'Cannot find completion_state dir in previous run"{prior_state_dir}"',
+            fatal_error=True, crumbs=crumbs,
+            hint=f'To continue a run, previous run must have setting continuable=True')
+
+        #load state info
+        fn = path.join(prior_state_dir, 'state_info.json')
+        if not path.isfile(fn):
+            ml.msg('Cannot find save_state.json to continue the run',
+                   fatal_error=True, hint=f'missing file  {fn}',crumbs=crumbs )
+
+        # load continuation state json file
+        saved_state_info = json_util.read_JSON(fn)
+        si.run_info.continuing = True
+
+        # copy over net cdf output files from prior run, but tweak file names to match
+        #prior_case_info=  glob(path.join(prior_run_output_dir,'_caseInfo.json')
+        #json_util.read_JSON(path.join(prior_run_output_dir))
+        for fn in glob(path.join(prior_run_output_dir,'*.nc')):
+            shutil.copy2(fn, of['run_output_dir'])
+
+    return saved_state_info
+
 
 def write_raw_user_params(output_files, params,msg_logger):
     fn= output_files['output_file_base']+'_raw_user_params.json'

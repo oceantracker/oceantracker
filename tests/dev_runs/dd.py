@@ -260,7 +260,7 @@ RESET = '\033[0m' # Resets to default color and style
 
 from oceantracker.read_output.python import load_output_files
 
-def compare_reference_tracks(case_info_file, args):
+def compare_reference(case_info_file, args, last_time=False):
 
     case_info = load_output_files.read_case_info_file(case_info_file)
 
@@ -275,11 +275,21 @@ def compare_reference_tracks(case_info_file, args):
     tracks_ref = load_output_files.load_track_data(reference_case_info_file)
 
     for name in ['x','water_depth', 'tide','water_velocity','time']:
-        delta = np.abs(tracks[name] - tracks_ref[name])
-        print(f'{BLUE}{name}:{RESET} differences from reference run: ' )
+
+        ref_data = tracks_ref[name]
+        data= tracks[name]
+        if last_time and tracks[name] .shape[0]==tracks['time'].size : # only compare last time
+            data = data[-1,...][np.newaxis,...]
+            ref_data = ref_data[-1,...][np.newaxis,...]
+
+        delta = np.abs(data - ref_data)
+
+        #delta = np.abs(tracks[name] - tracks_ref[name])
+        print(f'{BLUE}{name}-comparing:  { "Last_time only" if last_time else "All times"}{RESET} differences from reference run: ' )
         print('\t min  ' +RED, np.nanmin(np.nanmin(delta, axis=0), axis=0), RESET, end="")
         print('\t mean '+RED, np.nanmean(np.nanmean(delta, axis=0), axis=0), RESET, end="")
-        print('\t max  '+RED, np.nanmax(np.nanmax(delta, axis=0), axis=0), RESET)
+        print('\t max  '+RED, np.nanmax(np.nanmax(delta, axis=0), axis=0), RESET, end="")
+        print('\t range , ref. data  min=',  np.nanmin(np.nanmin(ref_data, axis=0), axis=0),'max=',   np.nanmax(np.nanmax(ref_data, axis=0), axis=0), )
 
     if False:
         from matplotlib import  pyplot as plt

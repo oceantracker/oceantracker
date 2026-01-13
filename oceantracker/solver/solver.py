@@ -71,11 +71,12 @@ class Solver(ParameterBaseClass):
         t0_step = perf_counter()
 
 
-        if si.run_info.restarting:
-            nt1 = si.restart_info['restart_time_step']
+        if si.run_info.restarting or si.run_info.continuing:
+            nt1 = si.saved_state_info['restart_time_step']
             t1 = model_times[nt1]
             self._load_saved_state()
         else:
+            # normal start
             nt1 = 0
             t1 = model_times[0]
             new_particle_indices = pgm.release_particles(nt1,t1 )
@@ -137,7 +138,7 @@ class Solver(ParameterBaseClass):
             self._pre_step_bookkeeping(nt2, t2, new_particle_indices)
 
             if si.settings.restart_interval is not None and self.schedulers['save_state'].do_task(nt2):
-                self._save_state_for_restart(nt2, t2)
+                self._save_state(nt2, t2,  si.output_files['saved_state_dir'])
 
             # cull dead particles
             # must be done after last use of "is_moving" in current time step (which refers to permanent  ID buffer which are not culled)
@@ -163,6 +164,11 @@ class Solver(ParameterBaseClass):
             if abs(t2 - ri.start_time) > ri.duration: break
             if si.settings.throw_debug_error == 1 and nt2 >= int(0.2*model_times.size):
                 raise(Exception(f'Restart testing, throwing deliberate error at {time_util.seconds_to_isostr(t2)}'))
+
+        # save state for continuation if requested
+        if si.settings.continuable:
+            self._save_state(nt2, t2, si.output_files['completion_state_dir'])
+
 
         ri.end_time = t2
         ri.model_end_date = t2.astype('datetime64[s]')
@@ -397,7 +403,7 @@ class Solver(ParameterBaseClass):
         pass
 
 
-    def _save_state_for_restart(self, n_time_step, time_sec):
+    def _save_state(self, n_time_step, time_sec,state_dir):
 
         si.msg_logger.msg(f'save_state_for_restart at: {time_util.seconds_to_isostr(time_sec)}, time step= {n_time_step}'
                           +f', released  {si.core_class_roles.particle_group_manager.info["particles_released"]}  particles so far',
@@ -407,14 +413,14 @@ class Solver(ParameterBaseClass):
         if si.settings.write_tracks:
             si.core_class_roles.tracks_writer._close_file()
 
-        state_dir = si.run_info.saved_state_dir
+        state_dir = path.join(si.run_info.run_output_dir, state_dir)
         state = dict(run_start_time= si.run_info.start_time,
                      restart_time=time_sec,
                      restart_time_step=n_time_step,
                      run_start_date=time_util.seconds_to_isostr(si.run_info.start_time),
                      restart_date = time_util.seconds_to_isostr(time_sec),
                      particles_released= si.core_class_roles.particle_group_manager.info['particles_released'],
-                     state_dir=state_dir,
+                     state_dir=  state_dir,
                      run_output_dir= si.run_info.run_output_dir,
                      settings= si.settings.asdict(),
                      part_prop_file =path.join(state_dir, 'particle_properties.nc'),
@@ -446,7 +452,7 @@ class Solver(ParameterBaseClass):
 
     def _load_saved_state(self):
 
-        rsi = si.restart_info
+        rsi = si.saved_state_info
         class_info = rsi['class_info']
         pgm = si.core_class_roles.particle_group_manager
 

@@ -674,10 +674,8 @@ class _BaseReader(ParameterBaseClass):
         # write a netcdf of the grid from first hindcast file
 
         grid = self.grid
-        info = self.info
-        if 'grid' not in si.output_files: si.output_files['grid'] = []
 
-        f_name = si.output_files['raw_output_file_base'] + f'_grid{gridID:03d}.nc'
+        f_name = si.output_files['output_file_base'] + f'_grid{gridID:03d}.nc'
         si.output_files['grid'].append(f_name)
 
         nc = ncdf_util.NetCDFhandler(path.join(si.output_files['run_output_dir'], f_name), 'w')

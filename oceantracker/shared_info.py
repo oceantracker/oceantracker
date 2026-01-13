@@ -83,7 +83,13 @@ class _DefaultSettings(definitions._AttribDict):
         #                 doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules ' )
         # 'debug_level =               PVC(0, int,min=0, max=10, doc_str='Gives  diferent levels of debug, in development' )
     restart_interval = PVC(None, float,
-                           doc_str='Save the particle tracking state at the interval to allow restarting run', units='sec',  expert=True)
+                           doc_str='Save the particle tracking state at the interval to allow restarting run after a unexpected crash', units='sec',  expert=True)
+    continuable = PVC(False, bool,
+                           doc_str='Enable a successful  run to be continued after completion from a state saved at the end of the run, set continue_from to designate folder of run to continue ')
+
+    continue_from = PVC(None, str,
+                    doc_str='Folder of the continuable run that is to be extended, the continuation must have a different output_file_base to avoid conflicts ')
+
     min_dead_to_remove = PVC(100_000, int, doc_str='The minimum number of dead particles before they are removed from buffer', expert=True)
     throw_debug_error = PVC(0, int,min =0,
                              doc_str='Throw desigated error, eg =1 is mid run error to test restart',
@@ -151,7 +157,8 @@ class _RunInfo(definitions._AttribDict):
     forecasted_number_alive = 0
     forecasted_max_number_alive = 0
     restarting = False
-    saved_state_dir = None
+    continuing = False
+
 
 
 class _UseFullInfo(definitions._AttribDict):
@@ -185,6 +192,7 @@ class _SharedInfoClass():
     restart_info = None
     info = _UseFullInfo
     dim_names = definitions._DimensionNames()
+    output_files= dict()
 
     def __init__(self):
 

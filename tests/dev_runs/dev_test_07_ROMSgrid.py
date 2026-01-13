@@ -62,7 +62,7 @@ def main(args):
                                         )
     case_info_file = ot.run()
 
-    dd.compare_reference_tracks(case_info_file, args)
+    dd.compare_reference(case_info_file, args)
 
     dd.show_track_plot(case_info_file, args)
 

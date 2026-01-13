@@ -51,18 +51,18 @@ class MessageLogger(object ):
 
     def set_up_files(self, si):
         # log file set up
-        log_file_name = si.run_info['output_file_base'] + '_log.txt'
-        self.log_file_name = path.join(si.run_info.run_output_dir, log_file_name)
+        log_file_name = si.output_files['output_file_base'] + '_log.txt'
+        self.log_file_name = path.join(si.output_files['run_output_dir'], log_file_name)
 
         if si.run_info.restarting:
-            shutil.copyfile(si.restart_info['log_file'],self.log_file_name)
+            shutil.copyfile(si.saved_state_info['log_file'],self.log_file_name)
             self.log_file = open(self.log_file_name, 'a')
             self.msg('>>>> restarting log file')
         else:
             self.log_file = open(self.log_file_name, 'w')
 
         # kill any old error file
-        error_file_name = path.join(si.run_info.run_output_dir, self.error_file_name)
+        error_file_name = path.join(si.output_files['run_output_dir'], self.error_file_name)
         if path.isfile(error_file_name ):
             remove(error_file_name)
 
