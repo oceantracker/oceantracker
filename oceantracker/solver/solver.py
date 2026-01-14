@@ -422,8 +422,10 @@ class Solver(ParameterBaseClass):
                      particles_released= si.core_class_roles.particle_group_manager.info['particles_released'],
                      state_dir=  state_dir,
                      run_output_dir= si.run_info.run_output_dir,
+                     output_files=si.output_files,
                      settings= si.settings.asdict(),
                      part_prop_file =path.join(state_dir, 'particle_properties.nc'),
+
                      stats_files=dict(),
                      )
 

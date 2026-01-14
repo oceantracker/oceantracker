@@ -16,12 +16,14 @@ class _Object(object):  pass
 # default settings structure
 
 class _DefaultSettings(definitions._AttribDict):
-
-    root_output_dir=  PVC(None, str, is_required=True,  doc_str='base dir for all output files')
-    add_date_to_run_output_dir =  PVC(False,bool, doc_str='Append the date to the output dir. name to help in keeping output from different runs separate' )
-    output_file_base =    PVC('output_file_base', str,is_required=True,
-                doc_str= 'The start/base of all output files and name of sub-dir of "root_output_dir" where output will be written' )
+    #run_output_dir = PVC(None, str, doc_str='The directory to write output to')
+    root_output_dir=  PVC(None, str, deprecated=True,
+                          doc_str='Use of "root_output_dir" and "output_file_base" will be removed in future versions, use "run_output_dir" instead')
+    output_file_base =    PVC(None, str,deprecated=True,
+                doc_str='Use of "root_output_dir" and "output_file_base" will be removed in future versions, use "run_output_dir" instead')
     time_step = PVC(3600., float, min=0.001, units='sec',doc_str='Time step in seconds for all cases' )
+    add_date_to_run_output_dir = PVC(False, bool,
+                                     doc_str='Append the date to the output dir. name to help in keeping output from different runs separate')
     screen_output_time_interval = PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file' )
     screen_info_level = PVC(0, int, doc_str='Sets 0-10 value at which user added self.screen_info(text,level) method calls are written to the screen, = 0 for none',
                             min=0, max =10)
@@ -202,8 +204,8 @@ class _SharedInfoClass():
                                        }
         pass
     def add_settings(self, settings):
-        for key in self.settings.possible_values():
-            setattr(self.settings, key, settings[key])
+        for key, val in settings.items():
+            setattr(self.settings, key, val)
 
     def _setup(self):
         # this allows shared info to make a class importer when needed

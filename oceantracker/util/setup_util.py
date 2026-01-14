@@ -9,6 +9,7 @@ from oceantracker.util import json_util, time_util
 import  numpy as np
 from oceantracker import definitions
 from oceantracker.shared_info import  shared_info as si
+from oceantracker.util import parameter_checking
 import sys
 from glob import glob
 
@@ -100,11 +101,17 @@ def setup_restart_continuation():
         saved_state_info = json_util.read_JSON(fn)
         si.run_info.continuing = True
 
-        # copy over net cdf output files from prior run, but tweak file names to match
-        #prior_case_info=  glob(path.join(prior_run_output_dir,'_caseInfo.json')
-        #json_util.read_JSON(path.join(prior_run_output_dir))
+        # copy over files from prior run, but tweak file names to match
+
+        prior_file_base = saved_state_info['output_files']['output_file_base']
+        new_file_base =  si.settings.output_file_base
+
+        # note msg logger copies over log file
+
+        # copy netcdfs and tweak names
         for fn in glob(path.join(prior_run_output_dir,'*.nc')):
-            shutil.copy2(fn, of['run_output_dir'])
+            new_file = path.join(si.run_info.run_output_dir, path.basename(fn).replace(prior_file_base,new_file_base ))
+            shutil.copy2(fn, new_file)
 
     return saved_state_info
 
@@ -291,7 +298,7 @@ def _build_working_params(params, msg_logger, crumbs=''):
 
     if 'case_list' in params:
         ml.msg(
-            'Cases run as seperate parallel processes are no longer supported, computations are now parallelized within a single process using threads',
+            'Cases run as separate parallel processes are no longer supported, computations are now parallelized within a single process using threads',
             hint='Remove case_list argument and merge parameters with base case and computations  will automatically be run on parallel threads by default',
             fatal_error=True)
 
@@ -299,8 +306,10 @@ def _build_working_params(params, msg_logger, crumbs=''):
                                           crumbs=crumbs + ' Forming working params ')
 
     # get defaults of settings only
-    working_params['settings'] = merge_settings(working_params['settings'], si.default_settings,
-                                                           ml, crumbs=crumbs)
+    #working_params['settings'] = merge_settings(working_params['settings'], si.default_settings,  ml, crumbs=crumbs)
+
+    working_params['settings'] = parameter_checking.merge_params_with_defaults(working_params['settings'],
+                                                        si.default_settings.asdict(), ml, crumbs=crumbs +'> Settings>')
     return working_params
 
 

@@ -15,7 +15,7 @@ class CompactTracksWriter(_BaseWriter):
         self.add_default_params(
                 time_particle_chunk =  PVC(None, int, min=1,  expert=True,
                                doc_str='Chunk size for time dependent particle props, compacted into time_particle dim, default is as estimated max. particles alive'),
-                role_output_file_tag=PVC('tracks_compact', str, expert=True),
+                role_output_file_tag=PVC('tracks_compact', str, expert=True,obsolete=True),
                 convert=PVC(True, bool, expert=True,
                             doc_str='Convert compact tracks to rectangular form at end of run, for easier reading '),
                 )

@@ -37,11 +37,10 @@ class MessageLogger(object ):
 
     def reset(self):
 
-        self.msg_lists = dict(fatal_error=[],error=[],warning=[],  strong_warning=[],note=[])
+        self.msg_lists = dict(fatal_error=[],error=[],warning=[],  strong_warning=[],note=[],deprecated=[])
 
         self.log_file = None
         self.max_warnings = 25
-
 
     def settings(self, max_warnings=None):
         self.max_warnings = None if max_warnings is None else 25
@@ -54,7 +53,7 @@ class MessageLogger(object ):
         log_file_name = si.output_files['output_file_base'] + '_log.txt'
         self.log_file_name = path.join(si.output_files['run_output_dir'], log_file_name)
 
-        if si.run_info.restarting:
+        if si.run_info.restarting or si.run_info.continuing:
             shutil.copyfile(si.saved_state_info['log_file'],self.log_file_name)
             self.log_file = open(self.log_file_name, 'a')
             self.msg('>>>> restarting log file')

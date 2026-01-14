@@ -137,8 +137,11 @@ class OceanTrackerParamsRunner(object):
 
         # setup output dir and msg files
         si.output_files,ri.restarting = setup_util.setup_output_dir()
+        ri.run_output_dir = si.output_files['run_output_dir']
+        ri.output_file_base = si.output_files['output_file_base']
+
+        # setup ant restart or continuation
         si.saved_state_info = setup_util.setup_restart_continuation()
-        # si.output_files = setup_util.setup_output_dir(si.settings, crumbs='Setting up output dir')
 
         # set up message loggers log file
         si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(si)  # message logger output file setup
@@ -147,8 +150,6 @@ class OceanTrackerParamsRunner(object):
                hint='see for copies of screen output and user supplied parameters, plus all other output')
 
         # move stuff to run info as central repository
-        ri.run_output_dir = si.output_files['run_output_dir']
-        ri.output_file_base = si.output_files['output_file_base']
         ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
         ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
 
@@ -241,6 +242,10 @@ class OceanTrackerParamsRunner(object):
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
         ml.hori_line()
+
+        ## deprication warnings
+
+        
         # write a summary of errors etc
         ml.msg(f'Finished "{"??" if si.run_info.output_file_base is None else si.run_info.output_file_base}"')
         si.block_timer('Close down', t0_close)
