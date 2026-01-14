@@ -23,7 +23,8 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
     def __init__(self):
         super().__init__()
         # set up info/attributes
-        self.add_default_params({'role_output_file_tag': PVC('stats_polygon_time',str)})
+        self.add_default_params({
+        'output_file_base': PVC('stats_polygon_time',str)})
         self._add_polygon_params()
 
     def initial_setup(self):
@@ -117,7 +118,7 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
     '''
     def __init__(self):
         super().__init__()
-        self.add_default_params(role_output_file_tag= PVC('stats_polygon_age',str))
+        self.add_default_params(output_file_base= PVC('stats_polygon_age',str))
         self._add_age_params()
         self._add_polygon_params()
 

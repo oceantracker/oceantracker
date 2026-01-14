@@ -12,7 +12,6 @@ def main(args=None):
                 use_dispersion=False,
                 screen_output_time_interval=1800,
                 use_A_Z_profile=True,
-
                 particle_buffer_initial_size= 500,
                 #NUMBA_cache_code=True,
                 use_resuspension=False,

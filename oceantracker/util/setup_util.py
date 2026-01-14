@@ -18,24 +18,24 @@ def setup_output_dir():
     # check output_file_base is not dir, just a test
     crumbs = 'setup_output_dir'
     
-    if len(path.dirname(si.settings['output_file_base'])) > 0:
-        si.msg_logger.msg(
-            f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{si.settings["output_file_base"]}"',
-            error=True, hint='Use setting "root_output_dir" to designate which dir. to place output files in',
-            crumbs=crumbs,  fatal_error=True)
+    # cope with deprecated params
+    if si.settings.run_output_dir is not None:
+        run_output_dir = path.abspath(si.settings.run_output_dir)
+    else:
+        # cope with deprecated params
+        if si.settings.root_output_dir is None and si.settings.output_file_base is None:
+            si.msg_logger.msg(' settings "root_output_dir" or  "output_file_base" are not set, both are required',
+                              hint='These settings are deprecated and replaced by single setting "run_output_dir", set both if you must use them!')
 
-    root_output_dir = path.abspath(path.normpath(si.settings['root_output_dir']))
-    run_output_dir = path.join(root_output_dir, si.settings['output_file_base'])
+        run_output_dir = path.abspath(path.join(si.settings['root_output_dir'], si.settings['output_file_base']))
 
     if si.settings['add_date_to_run_output_dir']:
         run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
 
     # create basic  output file names
-    output_files = dict(root_output_dir= root_output_dir,
+    output_files = dict(
                     run_output_dir= run_output_dir,
-                    output_file_base=si.settings['output_file_base'],
-                             caseInfo_file= si.settings['output_file_base'] + '_caseInfo.json',
-                    users_params_json= 'users_params_' + si.settings['output_file_base'],
+                    caseInfo_file= 'caseInfo.json',
                     saved_state_dir='saved_state',
                     completion_state_dir='completion_state',
                     grid = [] # may be more than one grid if nested
@@ -117,9 +117,9 @@ def setup_restart_continuation():
 
 
 def write_raw_user_params(output_files, params,msg_logger):
-    fn= output_files['output_file_base']+'_raw_user_params.json'
+    fn= 'raw_user_params.json'
     output_files['raw_user_params'] = fn
-    json_util.write_JSON(path.join(output_files['run_output_dir'],  output_files['raw_user_params']),params)
+    json_util.write_JSON(path.join(output_files['run_output_dir'],  fn),params)
     msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
 
 def build_working_params(params, msg_logger, crumbs='', caller=None):

@@ -50,7 +50,7 @@ class MessageLogger(object ):
 
     def set_up_files(self, si):
         # log file set up
-        log_file_name = si.output_files['output_file_base'] + '_log.txt'
+        log_file_name = 'run_log.txt'
         self.log_file_name = path.join(si.output_files['run_output_dir'], log_file_name)
 
         if si.run_info.restarting or si.run_info.continuing:

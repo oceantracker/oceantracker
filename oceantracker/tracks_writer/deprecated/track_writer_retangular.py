@@ -18,8 +18,8 @@ class RectangularTracksWriter(_BaseWriter):
             particle_chunk =  PVC(None, int, min=1,  expert=True,
                           doc_str='Netcdf chunk size of particle dim,  default is as estimated from forecasted max. particles alive'),
             time_chunk=PVC(1, int, min=1, expert=True, doc_str='Netcdf chunk size of time dim'),
-            role_output_file_tag=PVC('tracks_rectangular', str, expert=True),
-                )
+            output_file_base=PVC('tracks_rectangular', str, doc_str='start of output file names'),
+            )
         self.nc = None
 
 

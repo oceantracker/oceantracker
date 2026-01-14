@@ -27,9 +27,9 @@ def base_settings(fn,args,label=None):
     s = path.split(fn)[-1].split('.')[0]
     if args.variant is not None: s+=f'_{args.variant:02d}'
     if label is not None: s += f'_{label}'
-    d =  dict(output_file_base=s,
-            root_output_dir=path.join(definitions.default_output_dir, 'dev_runs', 'latest_runs' ),
-            #root_output_dir=path.join('C:\oceantracker_output', 'dev_runs'),
+    d =  dict(run_output_dir=path.join(definitions.default_output_dir, 'dev_runs', 'latest_runs',s ),
+            #output_file_base=s,
+            #root_output_dir=path.join(definitions.default_output_dir, 'dev_runs', 'latest_runs' ),
             time_step=600.,  # 10 min time step
             use_random_seed = True,
             debug=True,
@@ -267,6 +267,8 @@ def compare_reference(case_info_file, args, last_time=False):
     if case_info_file is None : return
 
     reference_case_info_file = case_info_file.replace('latest_runs', 'reference_runs')
+
+
     if args.reference_case:
         # rewrite reference case output
         shutil.copytree(path.dirname(case_info_file), path.dirname(reference_case_info_file), dirs_exist_ok=True)

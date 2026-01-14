@@ -26,7 +26,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
             vertical_range= PCC([0.0, 100.0], single_cord=True, is3D=True,
                                   doc_str='Use z_min and z_max to set boundaries of 3D grid',
                                   units='meters',obsolete=True),
-            role_output_file_tag= PVC('stats_gridded_time3D', str),
+            output_file_base=PVC('stats_gridded_time_3D', str, doc_str='start of output file names'),
             )
         self.remove_default_params(['near_seabed','near_seasurface'])
     def initial_setup(self):

@@ -305,7 +305,8 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
         super().__init__()
         # set up info/attributes
         self.add_default_params(
-            role_output_file_tag= PVC('stats_gridded_age', str),)
+            output_file_base = PVC('stats_gridded_age', str, doc_str='start of output file names'),
+          )
 
         self._add_2D_grid_params()
         self._add_age_params()

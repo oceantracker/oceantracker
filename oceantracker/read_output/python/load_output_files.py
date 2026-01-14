@@ -19,11 +19,7 @@ def read_case_info_file(case_info_file_name):
 
     # make case info output dir consistent with given file name
     case_info['output_files']['run_output_dir'] = path.dirname(case_info_file_name)
-    case_info['output_files']['root_output_dir'] = path.dirname(case_info['output_files']['run_output_dir'])
 
-    # force run out dir and root output dir to match that of case_info_file name if user has data in another folder name
-    case_info['output_files']['run_output_dir']  = path.dirname(case_info_file_name)
-    case_info['output_files']['root_output_dir'] = path.dirname(case_info['output_files']['run_output_dir'])
     return case_info
 
 

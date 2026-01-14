@@ -675,7 +675,7 @@ class _BaseReader(ParameterBaseClass):
 
         grid = self.grid
 
-        f_name = si.output_files['output_file_base'] + f'_grid{gridID:03d}.nc'
+        f_name = f'grid{gridID:03d}.nc'
         si.output_files['grid'].append(f_name)
 
         nc = ncdf_util.NetCDFhandler(path.join(si.output_files['run_output_dir'], f_name), 'w')

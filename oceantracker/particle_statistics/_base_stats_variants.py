@@ -240,7 +240,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
             'grid_span': PLC(None, float, doc_str='(width-x, height-y)  of the statistics grid',
                              units='meters (dx,dy) or degrees (dlon, dlat) if geographic',
                              is_required=True),
-            'role_output_file_tag': PVC('stats_gridded_time_2D', str),
+            'output_file_base': PVC('stats_gridded_time_2D', str, doc_str='start of output file names'),
         })
         self.info['type'] = 'gridded'
 

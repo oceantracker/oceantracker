@@ -16,7 +16,7 @@ class _Object(object):  pass
 # default settings structure
 
 class _DefaultSettings(definitions._AttribDict):
-    #run_output_dir = PVC(None, str, doc_str='The directory to write output to')
+    run_output_dir = PVC(None, str, doc_str='The directory to write output to')
     root_output_dir=  PVC(None, str, deprecated=True,
                           doc_str='Use of "root_output_dir" and "output_file_base" will be removed in future versions, use "run_output_dir" instead')
     output_file_base =    PVC(None, str,deprecated=True,
@@ -204,8 +204,17 @@ class _SharedInfoClass():
                                        }
         pass
     def add_settings(self, settings):
-        for key, val in settings.items():
-            setattr(self.settings, key, val)
+        # reset settngas as a dict, without obolulte settings
+
+        for key in self.settings.possible_values():
+            if key in settings:
+                setattr(self.settings, key, settings[key])
+            else:
+                # remove obsolete params
+                delattr(self.settings, key)
+
+
+        pass
 
     def _setup(self):
         # this allows shared info to make a class importer when needed
