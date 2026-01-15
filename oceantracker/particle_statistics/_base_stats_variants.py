@@ -107,8 +107,11 @@ class _BaseAgeStats(ParameterBaseClass):
         stats_grid['age_bin_edges'] = float(si.run_info.model_direction) * np.arange(params['min_age_to_bin'], params['max_age_to_bin']+dage, dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
-            ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',
+            ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin',
                      caller=self, error=True)
+        if stats_grid['age_bin_edges'].shape[0] >10000:
+            ml.msg('Particle Stats, aged based: there are more than 10,000  age bins, may run out of memory?',
+                caller=self, strong_warning=True)
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 
