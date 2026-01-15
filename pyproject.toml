@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oceantracker"
-version = "0.5.2.56"
+version = "0.5.3.0"
 description = "Fast offline Lagrangian particle tracking in the Ocean for structured and unstructured grids"
 readme = "README.md"
 license = "MIT"

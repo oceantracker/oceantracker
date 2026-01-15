@@ -4,7 +4,7 @@
 Change log
 ###########################
 
-Version '0.5.2.57 XXXX-XX-XX'
+Version '0.5.3.00 2026-01-15'
 _____________________________
 
 Breaking changes
@@ -14,12 +14,17 @@ Breaking changes
 #. parameters "file_output_base" and "root_ouput_dir" are deprecated (replaced by "run_ouput_dir"), and do not appear in case info.json etc. OT  will still work with these old param with warnings. They will be removed in a  future version
 #. change in numerical output due to a bugfix in finding the correct time step interpolation (> instead of >=).
 
+New features
+------------
+
+#. Added "continue feature". Model runs that have been configures as "continuable" can now be continues. I.e. the model run can be extended.
+#. Reworked docs. Cleaned it up, added new description, changed theme.
 
 Bug fixes
 ---------
 
 #. fractional_time_steps renames weighed_time_steps everywhere
-#. fixed bug in fix for finding time step, this may break numerical tests
+#. fixed bug in fix for finding hindcast time step
 
 
 
