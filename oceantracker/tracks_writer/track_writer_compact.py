@@ -15,7 +15,7 @@ class CompactTracksWriter(_BaseWriter):
         self.add_default_params(
                 time_particle_chunk =  PVC(None, int, min=1,  expert=True,
                                doc_str='Chunk size for time dependent particle props, compacted into time_particle dim, default is as estimated max. particles alive'),
-                role_output_file_tag=PVC('tracks_compact', str, expert=True),
+                output_file_base =  PVC('tracks_compact', str, doc_str= 'start of output file names'),
                 convert=PVC(True, bool, expert=True,
                             doc_str='Convert compact tracks to rectangular form at end of run, for easier reading '),
                 )
@@ -169,10 +169,10 @@ class CompactTracksWriter(_BaseWriter):
         if si.settings.write_tracks and self.params['convert']:
             t0 = perf_counter()
             si.msg_logger.msg('Converting compact track files to rectangular format (to disable set reader param convert=False)',
-                              hint = f'reading from dir {si.run_info.root_output_dir}')
+                              hint = f'reading from dir {si.run_info.run_output_dir}')
 
             for n, fn in enumerate(info['output_file']):
-                rect_file = convert_compact_file(path.join(si.run_info.root_output_dir, fn))
+                rect_file = convert_compact_file(path.join(si.run_info.run_output_dir, fn))
                 info['output_file'][n] = path.basename(rect_file)
                 si.msg_logger.progress_marker(f'Finished "{path.basename(rect_file)}"', tabs=1, start_time=t0)
             si.msg_logger.progress_marker('Conversion complete',tabs=1,start_time=t0)

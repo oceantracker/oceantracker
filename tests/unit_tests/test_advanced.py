@@ -17,10 +17,14 @@ def default_advanced_tests_configuration(
     return ot
 
 
-def test_regridding(default_advanced_tests_configuration):
+def test_regridding(default_advanced_tests_configuration, reader_demo_schism3D):
     ot = default_advanced_tests_configuration
     # Override settings with regrid option
-    ot.settings(regrid_z_to_uniform_sigma_levels=True)
+    ot.add_class(
+        "reader",
+        **{**reader_demo_schism3D, "regrid_z_to_sigma_levels": True},
+    )
+    ot.settings()
     case_info_file = ot.run()
     assert case_info_file is not None
 

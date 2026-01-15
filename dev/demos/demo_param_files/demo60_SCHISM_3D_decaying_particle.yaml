@@ -13,7 +13,6 @@ reader:
   input_dir: F:\H_Local_drive\ParticleTracking\oceantracker\tutorials_how_to\demo_hindcast
   load_fields:
   - water_temperature
-regrid_z_to_uniform_sigma_levels: true
 release_groups:
 - max_age: 17280.000000000004
   name: P1
@@ -29,5 +28,8 @@ release_groups:
     - -1
   pulse_size: 1
   release_interval: 150.0
+root_output_dir: F:\H_Local_drive\ParticleTracking\oceantracker_output\demos
 time_step: 120
+tracks_writer:
+  update_interval: 240
 use_A_Z_profile: false

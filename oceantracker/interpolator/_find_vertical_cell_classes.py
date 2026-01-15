@@ -31,61 +31,63 @@ class FindVerticalCellSigmaGrid(object):
     def _make_sigma_depth_cell_search_map(self, grid):
         # add lookup map to grid
         # setup lookup nz interval map of zfraction into with equal dz for finding vertical cell
-        # the smalest sigms later thickness is at the bottom
+        # the smalest sigmas later thickness is at the bottom
 
         grid['sigma_nz_map'], grid['sigma_map_z'] = make_search_map(grid['sigma_interface'])
 
 
-    def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
+    def find_vertical_cell(self, fields, xq, current_buffer_steps, weight_time_steps, active):
         # locate vertical cell in place
         part_prop = si.class_roles.particle_properties
-        n_cell = part_prop['n_cell'].data
-        status = part_prop['status'].data
-        bc_coords = part_prop['bc_coords'].data
         grid = self.grid
 
-        nz_cell = part_prop['nz_cell'].data
-        z_fraction = part_prop['z_fraction'].data
-        z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
-
         bad_z_fraction_count = self.get_depth_cell_sigma_layers(xq,
+                                    fields['water_depth'].data, fields['tide'].data,
                                     grid['triangles'],
-                                    fields['water_depth'].data.ravel(),
-                                    fields['tide'].data,
                                     si.settings.minimum_total_water_depth,
                                     grid['sigma_interface'], grid['sigma_nz_map'], grid['sigma_map_z'],
-                                    n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
-                                    current_buffer_steps, fractional_time_steps,
+                                    part_prop['n_cell'].data, part_prop['status'].data,
+                                    part_prop['bc_coords'].data, part_prop['nz_cell'].data,
+                                    part_prop['z_fraction'].data, part_prop['z_fraction_water_velocity'].data,
+                                    part_prop['water_depth'].data, part_prop['tide'].data,
+                                    current_buffer_steps, weight_time_steps,
                                     active, si.settings.z0)
-
 
         return bad_z_fraction_count
 
     @staticmethod
     @njitOTparallel
-    def get_depth_cell_sigma_layers(xq, triangles, water_depth, tide, minimum_total_water_depth,
-                                    sigma, sigma_map_nz,sigma_map_z,
+    def get_depth_cell_sigma_layers(xq, water_depth_field,tide_field, triangles,  minimum_total_water_depth,
+                                    sigma, sigma_map_nz, sigma_map_z,
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
-                                    current_buffer_steps, fractional_time_steps,
+                                    water_depth,tide,
+                                    current_buffer_steps, weight_time_steps,
                                     active, z0):
         # view without redundant dim of 4D field
-        tide1 = tide[current_buffer_steps[0], :, 0, 0]
-        tide2 = tide[current_buffer_steps[1], :, 0, 0]
-        frac0, frac1 = fractional_time_steps[0], fractional_time_steps[1]
+        tf1 = tide_field[current_buffer_steps[0], :, 0, 0]
+        tf2 = tide_field[current_buffer_steps[1], :, 0, 0]
+        wdf = water_depth_field[0, :, 0, 0]
+        frac0, frac1 = weight_time_steps[0], weight_time_steps[1]
         sigma_map_dz =  sigma_map_z[1] - sigma_map_z[0]
 
         bad_z_fraction_count = 0
 
         for nn in nb.prange(active.size):  # loop over active particles
             n = active[nn]
-            nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
-
             zq = float(xq[n, 2])
+            nodes = triangles[n_cell[n], :]
 
             # interp water depth
             z_bot = 0.
             for m in range(3):
-                z_bot -= bc_coords[n, m] * water_depth[nodes[m]]
+                z_bot -= bc_coords[n, m] * wdf[nodes[m]]
+            water_depth[n]= -z_bot
+
+            # interp tide
+            z_top = 0.
+            for m in range(3):
+                z_top += bc_coords[n, m] * (tf1[nodes[m]] * frac0 + tf2[nodes[m]] * frac1)
+            tide[n] = z_top
 
             # preserve status if stranded by tide
             if status[n] == status_stranded_by_tide:
@@ -94,11 +96,6 @@ class FindVerticalCellSigmaGrid(object):
                 z_fraction[n] = 0.0
                 z_fraction_water_velocity[n] = 0.0
                 continue
-
-            # interp tide
-            z_top = 0.
-            for m in range(3):
-                z_top += bc_coords[n, m] * (tide1[nodes[m]] * frac0 + tide2[nodes[m]] * frac1)
 
             # clip z into range
             zq = min(max(zq, z_bot), z_top)
@@ -153,7 +150,8 @@ class FindVerticalCellSlayerLSCGrid(object):
         self.info = {}
         self.walk_counts= np.zeros((2,), dtype=np.int64)
 
-    def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
+
+    def find_vertical_cell(self, fields, xq, current_buffer_steps, weight_time_steps, active):
         part_prop = si.class_roles.particle_properties
         n_cell = part_prop['n_cell'].data
         status = part_prop['status'].data
@@ -166,7 +164,7 @@ class FindVerticalCellSlayerLSCGrid(object):
 
         bad_z_fraction_count = self.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,grid['triangles'], grid['z_interface'], grid['bottom_interface_index'],
                                                       n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
-                                                      current_buffer_steps, fractional_time_steps,
+                                                      current_buffer_steps, weight_time_steps,
                                                       self.walk_counts,
                                                       active, si.settings.z0, part_prop['tide'].data)
 
@@ -185,7 +183,7 @@ class FindVerticalCellSlayerLSCGrid(object):
     def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
                                                       triangles, z_interface, bottom_interface_index,
                                                       n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
-                                                      current_buffer_steps, fractional_time_steps,
+                                                      current_buffer_steps, weight_time_steps,
                                                       walk_counts,
                                                       active, z0,part_prop_tide):
         # find the zlayer for each node of cell containing each particle and at two time slices of hindcast  between nz_bottom and number of z levels
@@ -222,7 +220,7 @@ class FindVerticalCellSlayerLSCGrid(object):
             if status[n] == status_stranded_by_tide:
                 nz_cell[n] = deepest_bottom_cell
                 # update nodes above and below
-                z_below = _eval_z_at_nz_cell(fractional_time_steps, deepest_bottom_cell, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+                z_below = _eval_z_at_nz_cell(weight_time_steps, deepest_bottom_cell, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
                 xq[n, 2] = z_below
                 z_fraction[n] = 0.0
                 continue
@@ -235,17 +233,17 @@ class FindVerticalCellSlayerLSCGrid(object):
 
             # find z_interface above and below  current vertical cell
             nz = nz_cell[n]
-            z_below = _eval_z_at_nz_cell(fractional_time_steps, nz, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+            z_below = _eval_z_at_nz_cell(weight_time_steps, nz, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
 
             if zq >= z_below:
                 # search upwards, do nothing if z_above > zq[n] > z_below, ie current nodes are correct
-                z_above = _eval_z_at_nz_cell(fractional_time_steps, nz + 1, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+                z_above = _eval_z_at_nz_cell(weight_time_steps, nz + 1, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
 
                 while zq > z_above and nz < nz_top_cell:
                     nz += 1
                     n_vertical_steps += 1
                     z_below = z_above
-                    z_above = _eval_z_at_nz_cell(fractional_time_steps, nz + 1, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+                    z_above = _eval_z_at_nz_cell(weight_time_steps, nz + 1, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
                 # clip to free surface height
                 if zq > z_above:
                     zq = z_above
@@ -255,13 +253,13 @@ class FindVerticalCellSlayerLSCGrid(object):
                 nz = max(nz - 1, deepest_bottom_cell)  # take one step down to start
                 n_vertical_steps += 1
                 z_above = z_below
-                z_below = _eval_z_at_nz_cell(fractional_time_steps, nz, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+                z_below = _eval_z_at_nz_cell(weight_time_steps, nz, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
 
                 while zq < z_below and nz > deepest_bottom_cell:
                     nz -= 1
                     n_vertical_steps += 1
                     z_above = z_below  # retain for dz calc.
-                    z_below = _eval_z_at_nz_cell(fractional_time_steps, nz, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+                    z_below = _eval_z_at_nz_cell(weight_time_steps, nz, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
 
                 # clip to bottom
                 if zq < z_below:
@@ -307,6 +305,168 @@ class FindVerticalCellSlayerLSCGrid(object):
 
         return bad_z_fraction_count
 
+class FindVerticalCellSlayerLSCGridV1(object):
+
+    def __init__(self, grid, params):
+        self.grid, self.params = grid, params
+        self.info = {}
+        self.walk_counts= np.zeros((2,), dtype=np.int64)
+
+    def find_vertical_cell(self, fields, xq, current_buffer_steps, weight_time_steps, active):
+        part_prop = si.class_roles.particle_properties
+        n_cell = part_prop['n_cell'].data
+        status = part_prop['status'].data
+        bc_coords = part_prop['bc_coords'].data
+        grid = self.grid
+
+        nz_cell = part_prop['nz_cell'].data
+        z_fraction = part_prop['z_fraction'].data
+        z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
+
+        bad_z_fraction_count = self.get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,grid['triangles'], grid['z_interface'], grid['bottom_interface_index'],
+                                                      n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
+                                                      current_buffer_steps, weight_time_steps,
+                                                      self.walk_counts,
+                                                      active, si.settings.z0, part_prop['tide'].data)
+
+
+        if False:
+            # compare zlevel and tide
+            import matplotlib.pyplot as plt
+            plt.scatter(si.core_class_roles.field_group_manager.reader.fields['tide'].data[:,:,0,0],grid['z_interface'][:,:,-1],  c='b', s=.1)
+            plt.grid('on')
+            plt.show()
+
+        return bad_z_fraction_count
+
+    @staticmethod
+    @njitOTparallel
+    def get_depth_cell_time_varying_Slayer_or_LSCgrid(xq,
+                                                      triangles, z_interface, bottom_interface_index,
+                                                      n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
+                                                      current_buffer_steps, weight_time_steps,
+                                                      walk_counts,
+                                                      active, z0,part_prop_tide):
+        # find the zlayer for each node of cell containing each particle and at two time slices of hindcast  between nz_bottom and number of z levels
+        # nz_with_bottom is the lowest cell in grid, is 0 for slayer vertical grids, but may be > 0 for LSC grids
+        # nz_with_bottom must be time independent
+        # vertical walk to search for a particle's layer in the grid, nz_cell
+
+        def _eval_z_at_nz_cell(tf,nz_cell, z_interface1, z_interface2, nodes, nz_bottom_nodes, nz_top_cell, BCcord):
+            # eval zlevel at particle location and depth cell, return z and nodes required for evaluation
+            z = 0.
+            for m in range(3):
+                nz = max(min(nz_cell, nz_top_cell + 1), nz_bottom_nodes[m])  # move up to bottom, so not out of range
+                z += BCcord[m] * (z_interface1[nodes[m], nz] * tf[0] + z_interface2[nodes[m], nz] * tf[1])
+            return z
+
+        nz_top_cell = z_interface.shape[2] - 2
+        zl1 = z_interface[current_buffer_steps[0], ...]
+        zl2 = z_interface[current_buffer_steps[1], ...]
+        bad_z_fraction_count = 0
+
+        bottom_nz_nodes = np.zeros((3,), dtype=np.int32)
+        for nn in range(active.size):  # loop over active particles
+            n = active[nn]
+            bc = bc_coords[n, :]
+
+            nodes = triangles[n_cell[n], :]  # nodes for the particle's cell
+
+            deepest_bottom_cell = nz_top_cell
+            for m in range(3):
+                bottom_nz_nodes[m] = bottom_interface_index[nodes[m]]
+                deepest_bottom_cell = min(bottom_nz_nodes[m], deepest_bottom_cell)
+
+            # preserve status if stranded by tide
+            if status[n] == status_stranded_by_tide:
+                nz_cell[n] = deepest_bottom_cell
+                # update nodes above and below
+                z_below = _eval_z_at_nz_cell(weight_time_steps, deepest_bottom_cell, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+                xq[n, 2] = z_below
+                z_fraction[n] = 0.0
+                continue
+
+            n_vertical_steps = 0
+            zq = xq[n, 2]
+
+            # make any already on bottom active, may be flagged on bottom if found on bottom, below
+            if status[n] == status_on_bottom: status[n] = status_moving
+
+            # find z_interface above and below  current vertical cell
+            nz = nz_cell[n]
+            z_below = _eval_z_at_nz_cell(weight_time_steps, nz, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+
+            if zq >= z_below:
+                # search upwards, do nothing if z_above > zq[n] > z_below, ie current nodes are correct
+                z_above = _eval_z_at_nz_cell(weight_time_steps, nz + 1, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+
+                while zq > z_above and nz < nz_top_cell:
+                    nz += 1
+                    n_vertical_steps += 1
+                    z_below = z_above
+                    z_above = _eval_z_at_nz_cell(weight_time_steps, nz + 1, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+                # clip to free surface height
+                if zq > z_above:
+                    zq = z_above
+                    nz = nz_top_cell
+            else:
+                # search downwards, move down one step
+                nz = max(nz - 1, deepest_bottom_cell)  # take one step down to start
+                n_vertical_steps += 1
+                z_above = z_below
+                z_below = _eval_z_at_nz_cell(weight_time_steps, nz, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+
+                while zq < z_below and nz > deepest_bottom_cell:
+                    nz -= 1
+                    n_vertical_steps += 1
+                    z_above = z_below  # retain for dz calc.
+                    z_below = _eval_z_at_nz_cell(weight_time_steps, nz, zl1, zl2, nodes, bottom_nz_nodes, nz_top_cell, bc)
+
+                # clip to bottom
+                if zq < z_below:
+                    zq = z_below
+                    nz = deepest_bottom_cell
+            # nz now holds required cell
+            dz = z_above - z_below
+            # get z linear z_fraction
+            if dz < z0:
+                z_fraction[n] = 0.0
+            else:
+                z_fraction[n] = (zq - z_below) / dz
+
+            bad_z_fraction_count +=  not  -0.05 <  z_fraction[n] < 1.05
+
+            # extra work if in bottom cell
+            z_fraction_water_velocity[n] = z_fraction[n]  # flag as not in bottom layer, will become >= 0 if in layer
+            if nz == deepest_bottom_cell:
+                # set status if on the bottom set status
+                if zq < z_below + z0:
+                    status[n] = status_on_bottom
+                    zq = z_below
+
+                # get z_fraction for log layer
+                if dz < z0:
+                    z_fraction_water_velocity[n] = 0.0
+                else:
+                    # adjust z fraction so that linear interp acts like log layer
+                    z0p = z0 / dz
+                    z_fraction_water_velocity[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
+
+            # record new depth cell
+            nz_cell[n] = nz
+            xq[n, 2] = zq  # may differ if clipped into water depth range
+
+            #if abs(zq-part_prop_tide[n]) > .2 and part_prop_tide[n] !=0 and n==0:
+            #    print('xx debug vert cell find', zq, part_prop_tide[n],'below', z_below,'above', z_above)
+            #    pass
+
+            # step count stats, tidal stranded particles are not counted
+            #walk_counts[0] += n_vertical_steps
+            #walk_counts[1] = max(walk_counts[1], n_vertical_steps)  # record max number of steps
+
+        return bad_z_fraction_count
+
+
 class FindVerticalCellZfixed(object):
     # find depth cell with fized z levels everywhere with differing layer thickness's
     def __init__(self, grid, params):
@@ -326,7 +486,7 @@ class FindVerticalCellZfixed(object):
         grid['nz_map'], grid['z_map'] = make_search_map(grid['z'])
 
 
-    def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
+    def find_vertical_cell(self, fields, xq, current_buffer_steps, weight_time_steps, active):
         part_prop = si.class_roles.particle_properties
         n_cell = part_prop['n_cell'].data
         status = part_prop['status'].data
@@ -337,19 +497,28 @@ class FindVerticalCellZfixed(object):
         z_fraction = part_prop['z_fraction'].data
         z_fraction_water_velocity = part_prop['z_fraction_water_velocity'].data
 
-        bad_z_fraction_count = self.get_depth_cell_fixedZ(xq, grid['triangles'], grid['bottom_interface_index'],
-                             grid['water_depth'], fields['tide'].data, grid['z'], grid['nz_map'], grid['z_map'],
+        bad_z_fraction_count = self.get_depth_cell_fixedZ(xq,
+                             fields['water_depth'].data, fields['tide'].data,
+                            grid['triangles'], grid['bottom_interface_index'],
+                              grid['z'], grid['nz_map'], grid['z_map'],
                              n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
-                             current_buffer_steps, fractional_time_steps,
-                             active, si.settings.z0)
+                                part_prop['water_depth'].data, part_prop['tide'].data,
+                             current_buffer_steps, weight_time_steps,
+                                 active, si.settings.z0)
         return bad_z_fraction_count
     @staticmethod
     @njitOT
-    def get_depth_cell_fixedZ(xq, triangles, bottom_interface_index,water_depth,tide,
+    def get_depth_cell_fixedZ(xq,water_depth_field,tide_field, triangles, bottom_interface_index,
                                     z, nz_map,z_map,
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
-                                    current_buffer_steps, fractional_time_steps,
+                                    water_depth,tide,
+                                    current_buffer_steps, weight_time_steps,
                                     active, z0):
+
+        tf1 = tide_field[current_buffer_steps[0], :, 0, 0]
+        tf2 = tide_field[current_buffer_steps[1], :, 0, 0]
+        wdf = water_depth_field[0, :, 0, 0]
+
         dz_map_inv = 1.0/(z_map[1] - z_map[0])
         bad_z_fraction_count = 0
 
@@ -361,9 +530,10 @@ class FindVerticalCellZfixed(object):
             z_bot = 0.
             deepest_bottom_cell= nz_map[-1]
             for m in range(3):
-                z_bot -= bc_coords[n, m] * water_depth[nodes[m]]
+                z_bot -= bc_coords[n, m] * wdf[nodes[m]]
                 # for ragged bottom, get the deepest cell a particle could be in amongst the 3 nodes
                 deepest_bottom_cell = min(bottom_interface_index[nodes[m]],deepest_bottom_cell)
+            water_depth[n] = -z_bot
 
             # preserve status if stranded by tide
             if status[n] == status_stranded_by_tide:
@@ -376,8 +546,9 @@ class FindVerticalCellZfixed(object):
             # interp to find tide at particle location
             z_top = 0.
             for m in range(3):
-                z_top += bc_coords[n, m] * tide[current_buffer_steps[0], nodes[m], 0, 0] * fractional_time_steps[0]
-                z_top += bc_coords[n, m] * tide[current_buffer_steps[1], nodes[m], 0, 0] * fractional_time_steps[1]
+                z_top += bc_coords[n, m] * tf1[nodes[m]] * weight_time_steps[0]
+                z_top += bc_coords[n, m] * tf2[nodes[m]] * weight_time_steps[1]
+            tide[n] = z_top
 
             zq = min(max(zq, z_bot), z_top) # clip to water depth and free surface
             n_in_map = int((zq - z[0])  * dz_map_inv) # number of map steps between zq and deepest fixed z in the map
@@ -447,7 +618,7 @@ class dev_FindVerticalCell_LSCv2(object):
         grid['sigma_nz_map'], grid['sigma_map_z'] = make_search_map(grid['sigma_interface'])
 
 
-    def find_vertical_cell(self, fields, xq, current_buffer_steps, fractional_time_steps, active):
+    def find_vertical_cell(self, fields, xq, current_buffer_steps, weight_time_steps, active):
         # locate vertical cell in place
         part_prop = si.class_roles.particle_properties
         n_cell = part_prop['n_cell'].data
@@ -466,7 +637,7 @@ class dev_FindVerticalCell_LSCv2(object):
                                     si.settings.minimum_total_water_depth,
                                     grid['sigma_interface'], grid['sigma_nz_map'], grid['sigma_map_z'],
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
-                                    current_buffer_steps, fractional_time_steps,
+                                    current_buffer_steps, weight_time_steps,
                                     active, si.settings.z0)
         return bad_z_fraction_count
 
@@ -475,12 +646,12 @@ class dev_FindVerticalCell_LSCv2(object):
     def get_depth_cell(xq, triangles, water_depth, tide, minimum_total_water_depth,
                                     nodal_depth_fractions, nodal_sigma_map_nz,nodal_sigma_map_z,
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
-                                    current_buffer_steps, fractional_time_steps,
+                                    current_buffer_steps, weight_time_steps,
                                     active, z0):
         # view without redundant dim of 4D field
         tide1 = tide[current_buffer_steps[0], :, 0, 0]
         tide2 = tide[current_buffer_steps[1], :, 0, 0]
-        frac0, frac1 = fractional_time_steps[0], fractional_time_steps[1]
+        frac0, frac1 = weight_time_steps[0], weight_time_steps[1]
         sigma_map_dz =  sigma_map_z[1] - sigma_map_z[0]
 
         bad_z_fraction_count = 0

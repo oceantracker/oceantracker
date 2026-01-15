@@ -35,14 +35,6 @@ def _get_comparison(test):
         raise Exception('_get_comparison: invalid particle property comparison test  "' + test + '", must one of ' + str(comparison_function_map.keys()))
     return comparison_function_map[test]
 
-def setup_shared_comparison_IndexBuffer(current_particle_buffer_size, n_threads):
-    # this gives array to store intermediate results of comparioson
-    # for particle_comparisons_util._prop_compared_to_value() to use
-
-    global _shared_comparison_IndexBuffer, _number_found_in_each_thread
-    _shared_comparison_IndexBuffer = np.full((n_threads, current_particle_buffer_size), False, dtype=np.int32)
-    _number_found_in_each_thread = np.zeros((n_threads,), dtype=np.int32)
-
 
 def _compared_prop_to_value(part_prop_data, test, value, out=None):
     # return a view of indices where  part_prop (test) value, is true
@@ -62,8 +54,6 @@ def _prop_compared_to_value(part_prop_data, comparison_func, value, out):
             out[nfound] = nn
             nfound += 1
     return out[:nfound]
-
-
 
 def prop_subset_compared_to_value(active, part_prop, test, value, out):
     # return a view of  indices where  part_prop (test) value, is true for active particles

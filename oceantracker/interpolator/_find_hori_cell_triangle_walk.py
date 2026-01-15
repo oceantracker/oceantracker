@@ -40,7 +40,7 @@ class FindHoriCellTriangleWalk(object):
 
         # pre calc matric to calculate bc coords
         t0= perf_counter()
-        grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles'].data).astype(np.float64)
+        grid['bc_transform'] = triangle_interpolator_util.get_BC_transform_matrix(grid['x'].data, grid['triangles']).astype(np.float64)
 
         # build triangle walk array of structures
         self.tri_walk_AOS = numpy_util.numpy_array_of_structures_from_dict(
@@ -67,23 +67,16 @@ class FindHoriCellTriangleWalk(object):
                      initial_value=0., vector_dim=3, dtype='float32', caller=self, crumbs=crumbs)
         si.add_class('particle_properties', name='bc_coords_last_good', class_name='ManuallyUpdatedParticleProperty', write=False,
                      initial_value=0., vector_dim=3, dtype='float32', caller=self, crumbs=crumbs)
+        info = self.info
+        info['particles_walked'] = 0
+        info['number_of_triangles_walked'] = 0
 
-        self.walk_counts = np.zeros((6,), dtype=np.int64)
-        wc = self.walk_counts
-        self.info.update(particles_located_by_walking=wc[0:1],
-                         number_of_triangles_walked=wc[1:2],
-                         longest_triangle_walk=wc[2:3],
-                         nans_encountered_triangle_walk=wc[3:4],
-                         triangle_walks_retried=wc[4:5],
-                         particles_killed_after_triangle_walk_retry_failed=wc[5:6],
-                    )
     def find_initial_hori_cell(self, xq):
         # find nearest cell to xq
         t0 = perf_counter()
         n_cell, bc, is_inside_domain= find_initial_cell.find_hori_cellKDtree(xq, self.grid, self.KDtree, self.params['bc_walk_tol'])
         si.block_timer('Find initial horizontal cell', t0)
         return n_cell, bc, is_inside_domain
-
 
     def find_cell(self,xq, active):
         part_prop = si.class_roles.particle_properties
@@ -94,12 +87,13 @@ class FindHoriCellTriangleWalk(object):
 
         params = self.params
 
-        self.BCwalk(xq, self.tri_walk_AOS, grid['dry_cell_index'],
+        particles_walked, numb_walks = self.BCwalk(xq, self.tri_walk_AOS, grid['dry_cell_index'],
                                 n_cell, cell_search_status, bc_coords,
-                                self.walk_counts,
                                 params['max_search_steps'], params['bc_walk_tol'],
                                 si.settings.block_dry_cells, active)
-
+        info= self.info
+        info['particles_walked'] += particles_walked
+        info['number_of_triangles_walked'] += numb_walks
 
     def close(self):
         info= self.info
@@ -112,16 +106,18 @@ class FindHoriCellTriangleWalk(object):
     @njitOTparallel
     def BCwalk(xq, tri_walk_AOS, dry_cell_index,
                n_cell, cell_search_status, bc_coords,
-               walk_counts,
                max_triangle_walk_steps, bc_walk_tol, block_dry_cells,
                active):
         # Barycentric walk across triangles to find cells
 
         thread_buffer_index = [nb.typed.List.empty_list(nb.types.int32) for n in range(nb.get_num_threads())]
+        particles_walked = 0
+        numb_walks = 0
 
         # loop over active particles in place
         for nn in nb.prange(active.size):
             n = active[nn]
+            particles_walked +=1
             bc = bc_coords[n, :]
             cell_search_status[n] = search_ok
             if np.isnan(xq[n, 0]) or np.isnan(xq[n, 1]):
@@ -142,7 +138,7 @@ class FindHoriCellTriangleWalk(object):
                 if bc[n_min] > -bc_walk_tol and bc[n_max] < 1. + bc_walk_tol:
                     # are now inside triangle, leave particle status as is
                     break  # with current n_tri as found cell
-
+                numb_walks += 1
                 n_steps += 1
                 # move to neighbour triangle at face with smallest bc then test bc cord again
                 next_tri = tri_walk_AOS[n_tri]['adjacency'][n_min]  # n_min is the face num in  tri to move across
@@ -177,9 +173,6 @@ class FindHoriCellTriangleWalk(object):
                 n_cell[n] = n_tri
 
 
-            # walk_counts[1] += n_steps  # steps taken
-            # walk_counts[2] = max(n_steps,  walk_counts[2])  # longest walk
 
-        walk_counts[0] += active.size  # particles walked
-
+        return particles_walked, numb_walks
 

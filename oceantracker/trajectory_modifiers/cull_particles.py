@@ -46,6 +46,8 @@ class CullParticles(_BaseTrajectoryModifier):
         self.add_scheduler('culler01',  interval=params['interval'],start=params['start'], end=params['start'])
         self.statuses_to_cull= IDmapToArray(si.particle_status_flags.asdict(),params['statuses'])
 
+
+
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(required_props_list=['x', 'status'])
 
@@ -63,6 +65,7 @@ class CullParticles(_BaseTrajectoryModifier):
             part_prop =  si.class_roles.particle_properties
             culled = self.select_particles_to_cull(time_sec, active)
             part_prop['status'].set_values(si.particle_status_flags.dead, culled)
+
 
     @staticmethod
     @njitOT

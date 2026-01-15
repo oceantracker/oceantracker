@@ -9,6 +9,8 @@ from oceantracker.util import  time_util, basic_util
 
 crumb_seperator= ' >> '
 
+
+
 def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
                               caller=None, check_for_unknown_keys=True):
     # merge nested parameters with defaults,
@@ -30,7 +32,9 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
     # find which keys/params are obsolete and the remainder
     obsolute_params = [key for key, item in default_params.items() if isinstance(item, _ParameterBaseDataClassChecker) and item.obsolete]
     possible_params = [key for key, item in default_params.items() if key not in obsolute_params]
+    deprecated_params = [key for key, item in default_params.items() if isinstance(item, _ParameterBaseDataClassChecker) and item.deprecated]
 
+    pass
     # first check if any keys in base or case params are not in defaults
     # allow pass on those starting with #
     if check_for_unknown_keys:
@@ -44,6 +48,10 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
                msg_logger.msg(msg + ' is obsolete ',
                               hint=default_params[key].doc_str,
                               error=True, crumbs=crumbs, caller=caller)
+            elif key in deprecated_params:
+                msg_logger.msg(msg + ' is deprecated and will be deleted in future versions',
+                               hint=default_params[key].doc_str,
+                               strong_warning=True, crumbs=crumbs, caller=caller)
 
     # loop over non-obsolete default keys
     for key in possible_params:
@@ -72,7 +80,9 @@ def merge_params_with_defaults(params, default_params, msg_logger, crumbs= '',
 
 @dataclass
 class _ParameterBaseDataClassChecker():
+
     default: field(default=None, metadata={"required": True})
+
 
     def __post_init__(self):
         pass
@@ -107,13 +117,15 @@ _fundamental_types= {str:(str,),
                 int : (int, np.integer),
                 bool: (bool, np.bool_),
                      dict: (dict, ),
+                     None: (None,)
                 }
 
 @dataclass
 class ParamValueChecker(_ParameterBaseDataClassChecker):
     data_type: any = None  # must be second
-    expert : bool= False
+    expert: bool = False
     obsolete: bool = False
+    deprecated:bool = False
     is_required: bool = False
     doc_str : str = None
     units: str = None
@@ -166,6 +178,7 @@ class ParamValueChecker(_ParameterBaseDataClassChecker):
 class ParameterTimeChecker(_ParameterBaseDataClassChecker):
     possible_types: List =  field(default_factory=lambda: [str, float, np.datetime64,int, np.float64, np.float32])
     expert : bool= False
+    deprecated: bool = False
     obsolete: bool = False
     is_required: bool = False
     doc_str : str = None
@@ -236,6 +249,7 @@ class ParameterListChecker(ParamValueChecker):
 class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
     possible_types: List =  field(default_factory=lambda: [str, float, np.datetime64,int, np.float64, np.float32])
     expert : bool= False
+    deprecated: bool = False
     obsolete: bool = False
     is_required: bool = False
     doc_str : str = None

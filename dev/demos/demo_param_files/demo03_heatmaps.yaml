@@ -30,6 +30,7 @@ particle_statistics:
   name: gridstats1
   particle_property_list:
   - water_depth
+  release_group_centered_grids: true
   update_interval: 1800
 - class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased
   name: polystats1

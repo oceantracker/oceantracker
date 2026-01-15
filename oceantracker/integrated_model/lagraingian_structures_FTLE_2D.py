@@ -40,7 +40,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
             floating=PVC(True, bool, doc_str='Do LCS for floating partyicles, in development currently only option '),
             z_min=  PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
             z_max=  PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
-            output_file_tag=  PVC('LCS', str, doc_str='tag on output file'),
+            output_file_base=  PVC('LCS', str, doc_str='tag on output file'),
             backwards=  PVC(False, bool, doc_str='Do LCS backwards in time'),
             write_intermediate_results=  PVC(False, bool, doc_str='write intermediate arrays, x_lag, strain_matrix. Useful for checking results'),
             write_tracks=  PVC(False, bool, doc_str='Flag if "True" will write particle tracks to disk. This is off by default for LCS'),
@@ -201,8 +201,8 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
     def _open_output_file(self):
 
         params = self.params
-        self.info['output_file'] = si.run_info.output_file_base + '_' + self.params['output_file_tag'] + '.nc'
-        self.nc = NetCDFhandler(path.join(si.run_info.root_output_dir, self.info['output_file']), 'w')
+        self.info['output_file'] = self.params['output_file_tag'] + '.nc'
+        self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
         nc = self. nc
         r, c = params['grid_size']
         nc.create_dimension(si.dim_names.time, None) # open time dim

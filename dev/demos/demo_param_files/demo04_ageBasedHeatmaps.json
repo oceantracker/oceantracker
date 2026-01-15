@@ -79,6 +79,7 @@
                 220,
                 221
             ],
+            "release_group_centered_grids": true,
             "grid_span": [
                 10000,
                 10000

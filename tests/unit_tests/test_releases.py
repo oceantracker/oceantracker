@@ -31,10 +31,13 @@ def test_polygon_release_meter(
 
 def test_polygon_release_lon_lat(
     default_release_configuration,
+    reader_schism3D_v5,
     polygon_release_configuration,
     schism3Dv5_release_locations,
 ):
     ot = default_release_configuration
+    # rewriting default reader
+    ot.add_class("reader", **reader_schism3D_v5)
     ot.add_class(
         "release_groups",
         **{
@@ -94,6 +97,7 @@ def test_downstream_point_release(
 
     assert case_info_file is not None
 
+
 @pytest.mark.skip(reason="Not implemented yet")
 def test_release_at_surface():
     pass
@@ -102,4 +106,3 @@ def test_release_at_surface():
 @pytest.mark.skip(reason="Not implemented yet")
 def test_datetime_start_stop_releases():
     pass
-

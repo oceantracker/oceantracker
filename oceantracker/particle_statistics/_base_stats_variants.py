@@ -97,11 +97,9 @@ class _BaseAgeStats(ParameterBaseClass):
 
 
         # check age limits to bin particle ages into,  equal bins in given range
-        params['max_age_to_bin'] = min(params['max_age_to_bin'], si.run_info.duration)
         params['max_age_to_bin'] = max(params['age_bin_size'], params['max_age_to_bin']) # at least one bin
-
         if params['min_age_to_bin'] >=  params['max_age_to_bin']: params['min_age_to_bin'] = 0
-        age_range = params['max_age_to_bin']- params['min_age_to_bin']
+        age_range = params['max_age_to_bin'] - params['min_age_to_bin']
         if params['age_bin_size'] > age_range:  params['age_bin_size'] = age_range
 
         # set up age bin edges
@@ -109,8 +107,11 @@ class _BaseAgeStats(ParameterBaseClass):
         stats_grid['age_bin_edges'] = float(si.run_info.model_direction) * np.arange(params['min_age_to_bin'], params['max_age_to_bin']+dage, dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
-            ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',
+            ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin',
                      caller=self, error=True)
+        if stats_grid['age_bin_edges'].shape[0] >10000:
+            ml.msg('Particle Stats, aged based: there are more than 10,000  age bins, may run out of memory?',
+                caller=self, strong_warning=True)
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 
@@ -240,7 +241,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
             'grid_span': PLC(None, float, doc_str='(width-x, height-y)  of the statistics grid',
                              units='meters (dx,dy) or degrees (dlon, dlat) if geographic',
                              is_required=True),
-            'role_output_file_tag': PVC('stats_gridded_time_2D', str),
+            'output_file_base': PVC('stats_gridded_time_2D', str, doc_str='start of output file names'),
         })
         self.info['type'] = 'gridded'
 
@@ -249,41 +250,27 @@ class _BaseGrid2DStats(ParameterBaseClass):
         stats_grid = self.grid
         params = self.params
         info = self.info
-        # todo mover from info to params??
 
-        # default if no center given use release groups
-        if params['grid_center'] is None:
-            params['release_group_centered_grids'] = True
-
-        if params['release_group_centered_grids']:
-            # get centers from midrelease group
-            # loop over release groups to get bin edges
-            params['grid_centers'] = np.zeros((len(si.class_roles.release_groups), 2), dtype=np.float64)
+        if params['release_group_centered_grids']  :
+            # get centers ofeach grid as middle of each release group
+            info['grid_centers'] = np.zeros((len(si.class_roles.release_groups), 2), dtype=np.float64)
             for ngroup, name in enumerate(si.class_roles.release_groups.keys()):
                 rg = si.class_roles.release_groups[name]
                 x0 = rg.info['bounding_box_ll_ul']  # works for point and polygon releases,
-                params['grid_centers'][ngroup, :] = np.nanmean(x0[:, :2], axis=0)
+                info['grid_centers'][ngroup, :] = np.nanmean(x0[:, :2], axis=0)
+        elif params['grid_center'] is not None:
+            # use given grid center for all release groups
+            info['grid_centers'] = np.tile(params['grid_center'], (len(si.class_roles.release_groups), 1))
         else:
-            # use given grid centers
-            if params['grid_centers'].shape[0] == 1:
-                # if only one use all  for all
-                params['grid_centers'] = np.tile(params['grid_center'], (len(si.class_roles.release_groups), 1))
-            else:
-                # one for each release group
-                if params['grid_centers'].shape[0] != len(si.class_roles.release_groups):
-                    si.msg_logger.msg(
-                        'Number of points in "grid_centers" param. is >1 , then it must have the same number of center points',
-                        hint=f'Number of points given = {info["grid_centers"].shape[0]}  number of release groups= {len(si.class_roles.release_groups)} ',
-                        fatal_error=True, caller=self)
-                params['grid_centers'] = params['grid_centers'].shape[0]
+            si.msg_logger.msg('For gridded stats must supply a "grid_center"  or set "release_group_centered_grids=True"',
+                              hint=f'Set one of these parameters for gridded stat {params["name"]}', fatal_error=True, caller=self)
 
-        # ensure grid size is odd, so that center of middle cell is at grid center coods
+        # ensure grid size is odd, so that center of middle cell is at grid center coords
         grid_size = params['grid_size'][:2] + (np.asarray(params['grid_size'][:2]) % 2 == 0).astype(np.int32)
 
         # make space for coords
-        n_grids = params['grid_centers'].shape[0]  #
+        n_grids = info['grid_centers'].shape[0]  #
         s1 = [n_grids, ] + grid_size.tolist()
-        s2 = [n_grids, ] + (grid_size + 1).tolist()
         stats_grid['x_grid'] = np.zeros(s1, dtype=np.float64)
         stats_grid['y_grid'] = np.zeros(s1, dtype=np.float64)
         stats_grid['cell_area'] = np.zeros(s1, dtype=np.float64)
@@ -291,9 +278,9 @@ class _BaseGrid2DStats(ParameterBaseClass):
         stats_grid['y_bin_edges'] = np.zeros([n_grids, grid_size[0] + 1], dtype=np.float64)
 
         # grids may have release group centers, so grid coords differ by release group
-        for n_grid, p in enumerate(params['grid_centers']):
+        for n_grid, p in enumerate(info['grid_centers']):
             x_cell_edges, y_cell_edges, info['bounding_box'] = regular_grid_util.make_regular_grid(
-                                        params['grid_centers'][n_grid, :],  grid_size + 1, params['grid_span'])
+                                        info['grid_centers'][n_grid, :],  grid_size + 1, params['grid_span'])
             # get midpoints of cells
             x_grid = 0.5 * (x_cell_edges[:-1, 1:] + x_cell_edges[:-1, :-1])
             y_grid = 0.5 * (y_cell_edges[1:, :-1] + y_cell_edges[:-1, :-1])

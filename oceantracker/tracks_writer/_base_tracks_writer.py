@@ -23,7 +23,7 @@ class _BaseWriter(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
 
         self.add_default_params(
-                        role_output_file_tag =  PVC('tracks', str),
+                        output_file_base =  PVC('tracks', str, doc_str= 'start of output file names'),
                         update_interval =  PVC(3600., float, min=1, units='sec', doc_str='the time in model seconds between writes (will be rounded to model time step)'),
                         output_step_count =  PVC(None,int,min=1,  obsolete=True,  doc_str='Use tracks_writer parameter "write_time_interval", hint=the time in seconds bewteen writes'),
                         turn_on_write_particle_properties_list =  PLC(None, str,doc_str= 'Change default write param of particle properties to write to tracks file, ie  tweak write flags individually'),
@@ -57,7 +57,7 @@ class _BaseWriter(ParameterBaseClass):
 
         if self.nc is None or (self.params['time_steps_per_per_file'] is not None and  info['time_steps_written_to_current_file'] // params['time_steps_per_per_file'] > 0):
             if self.nc is not None : self._close_file()
-            fn = f'{si.run_info.output_file_base }_{params["role_output_file_tag"]}_{n_file:03d}'
+            fn = f'{params["output_file_base"]}_{n_file:03d}'
             t0 = perf_counter()
             self._open_file(fn)
             # note file opening and time to open file set up chucks and write first block
@@ -69,7 +69,7 @@ class _BaseWriter(ParameterBaseClass):
         info['time_steps_written_to_current_file'] = 0
         info['output_file'].append(file_name + '.nc')
 
-        self.nc = NetCDFhandler(path.join(si.run_info.root_output_dir, info['output_file'][-1]), 'w')
+        self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, info['output_file'][-1]), 'w')
         nc = self.nc
         nc.create_attribute('file_created', datetime.now().isoformat())
         self.setup_file_vars(nc)

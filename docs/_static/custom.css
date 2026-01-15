@@ -1,0 +1,48 @@
+/* override any table borders/frames from theme */
+.docutils table,
+.rst-content table,
+table.docutils,
+table,
+.wy-table-responsive,
+.wy-table-responsive table,
+.table {
+    border: none !important;
+    border-collapse: collapse !important;
+    box-shadow: none !important;
+    outline: none !important;
+    background-clip: padding-box !important;
+}
+.docutils table th,
+.docutils table td,
+table th,
+table td,
+.table th,
+.table td {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.centered-links {
+  text-align: center;
+}
+
+/* Make the Sphinx warning admonition use a pale yellow background */
+.admonition.warning {
+  background-color: #fff9c4; /* pale yellow */
+  border-left: 6px solid #fdd835; /* stronger yellow accent */
+  padding: 0.8em 1em;
+  border-radius: 4px;
+  color: #3b2f00;
+}
+
+/* Emphasize the admonition title text */
+.admonition.warning .title {
+  font-weight: 600;
+  color: #3b2f00;
+}
+
+/* Ensure inline icons (if theme uses them) match */
+.admonition.warning .admonition-icon,
+.admonition.warning p {
+  color: inherit;
+}

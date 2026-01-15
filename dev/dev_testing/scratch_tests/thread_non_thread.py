@@ -1,11 +1,12 @@
 from psutil import cpu_count
-import  os
+
 physical_cores = cpu_count(logical=False)
 import  numpy as np
-from numba import njit, get_num_threads, set_num_threads, prange, get_thread_id
+from numba import njit, set_num_threads, prange
+
 set_num_threads(physical_cores)
 from time import perf_counter
-from find_smid import asm
+
 
 def work(x,out,sel):
     for nn in prange(sel.size):

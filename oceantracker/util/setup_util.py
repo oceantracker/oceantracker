@@ -5,62 +5,116 @@ from datetime import datetime
 import shutil
 from os import path, makedirs, walk, unlink
 import traceback
-from oceantracker.util import json_util
+from oceantracker.util import json_util, time_util
 import  numpy as np
 from oceantracker import definitions
 from oceantracker.shared_info import  shared_info as si
+from oceantracker.util import parameter_checking
 import sys
+from glob import glob
 
-def setup_output_dir(settings, crumbs='', caller=None):
-    # setus up params, opens log files/ error handling, required before message loger can be used
-    crumbs += '> setup_output_dir'
-
+def setup_output_dir():
+    # set up output folder, when root_output_dir and output_file_base are required settings
     # check output_file_base is not dir, just a test
-    if len(path.dirname(settings['output_file_base'])) > 0:
-        si.msg_logger.msg(
-            f'The setting "output_file_base" cannot include a directory only a text label, given output_file_base ="{settings["output_file_base"]}"',
-            error=True,
-            hint='Use setting "root_output_dir" to designate which dir. to place output files in',
-            crumbs=crumbs, caller=caller,
-            fatal_error=True)
+    crumbs = 'setup_output_dir'
+    
+    # cope with deprecated params
+    if si.settings.run_output_dir is not None:
+        run_output_dir = path.abspath(si.settings.run_output_dir)
+    else:
+        # cope with deprecated params
+        if si.settings.root_output_dir is None or si.settings.output_file_base is None:
+            si.msg_logger.msg(' settings "root_output_dir" or  "output_file_base" are not set, both are required',
+                              hint='These settings are deprecated and replaced by single setting "run_output_dir", set both if you must use them!')
 
-    # get output files location
-    root_output_dir = path.abspath(path.normpath(settings['root_output_dir']))
-    run_output_dir = path.join(root_output_dir, settings['output_file_base'])
+        run_output_dir = path.abspath(path.join(si.settings['root_output_dir'], si.settings['output_file_base']))
 
-    if settings['add_date_to_run_output_dir']:
+    if si.settings['add_date_to_run_output_dir']:
         run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
 
-    # if restable and no folder exists them make a new restart folder  existing folder and make a new dir, if not restarting
-    saved_state_dir = path.join(run_output_dir, 'saved_state')
-    si.run_info.restarting = False
+    # create basic  output file names
+    output_files = dict(
+                    run_output_dir= run_output_dir,
+                    caseInfo_file= 'caseInfo.json',
+                    saved_state_dir='saved_state',
+                    completion_state_dir='completion_state',
+                    grid = [] # may be more than one grid if nested
+                    )
     if si.settings.restart_interval is not None \
-            and path.isdir(saved_state_dir)  \
-            and path.isfile(path.join(saved_state_dir,'state_complete.txt')):
-                si.run_info.restarting = True
+            and path.isdir(output_files['saved_state_dir'])  \
+            and path.isfile(path.join(output_files['saved_state_dir'],'state_complete.txt')):
+                restarting = True
+    else:
+        restarting = False
 
-    # new run if  not restarting or incomplete saved state
-    if not si.run_info.restarting:
+    # kill old run if not restarting
+    if not restarting :
         if path.isdir(run_output_dir):  shutil.rmtree(run_output_dir)
         makedirs(run_output_dir)  # make  new clean folder
 
-    # write a copy of user given parameters, to help with debugging and code support
-    fb = 'users_params_' + settings['output_file_base']
-    output_files = {'root_output_dir': root_output_dir,
-                    'run_output_dir': run_output_dir,
-                    'saved_state_dir': saved_state_dir,
-                    'output_file_base': settings['output_file_base'],
-                    'raw_output_file_base': copy(settings['output_file_base']),
-                    # this is needed for grid file so it does not get a case number in // runs
-                    'caseInfo_file': settings['output_file_base'] + '_caseInfo.json',
-                    'users_params_json': fb + '.json',
-                    }
-    return output_files
+    return output_files, restarting
+
+def setup_restart_continuation():
+
+    ml = si.msg_logger
+    crumbs = 'setup_restart_continuation'
+    saved_state_info = None
+    of = si.output_files
+
+    if si.run_info.restarting:
+        # load restart info
+        fn = path.join(of['saved_state_dir'], 'state_info.json')
+        if not path.isfile(fn):
+            ml.msg('Cannot find save_state.json to restart run, to save state rerun with  setting restart_interval',
+                   fatal_error=True, hint=f'missing file  {fn}',crumbs=crumbs )
+        saved_state_info = json_util.read_JSON(fn)
+        ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(saved_state_info["restart_time"])}')
+
+    elif si.settings.continue_from is not None:
+        # continue old run in new folder
+
+        prior_run_output_dir = path.abspath(si.settings.continue_from)
+        # find previous run
+        if not path.isdir(prior_run_output_dir):
+            ml.msg(f'Cannot find output dir of previous run to continue "{si.settings.continue_from}"',
+                            fatal_error=True, crumbs=crumbs, hint= f'Check dir in continue_from setting')
+
+        # check new run has different run_output dir
+        if path.abspath(of['run_output_dir']) == prior_run_output_dir:
+            ml.msg(f'The run continuation output cannot be written to same dir as the prevouis run "{si.settings.continue_from}"',
+                       fatal_error=True, crumbs=crumbs, hint=f'Ensure output_file_base names for prio and continued run are different')
+
+        # check if continuation state exists
+        prior_state_dir = path.join(prior_run_output_dir, of['completion_state_dir'])
+        if not path.isdir(prior_state_dir) :
+            ml.msg( f'Cannot find completion_state dir in previous run"{prior_state_dir}"',
+            fatal_error=True, crumbs=crumbs,
+            hint=f'To continue a run, previous run must have setting continuable=True')
+
+        #load state info
+        fn = path.join(prior_state_dir, 'state_info.json')
+        if not path.isfile(fn):
+            ml.msg('Cannot find save_state.json to continue the run',
+                   fatal_error=True, hint=f'missing file  {fn}',crumbs=crumbs )
+
+        # load continuation state json file
+        saved_state_info = json_util.read_JSON(fn)
+        si.run_info.continuing = True
+
+        # copy over files from prior run, but tweak file names to match
+        # note msg logger restart copies over log file
+
+        # copy netcdfs
+        for fn in glob(path.join(prior_run_output_dir,'*.nc')):
+            shutil.copy2(fn, si.run_info.run_output_dir)
+
+    return saved_state_info
+
 
 def write_raw_user_params(output_files, params,msg_logger):
-    fn= output_files['output_file_base']+'_raw_user_params.json'
+    fn= 'raw_user_params.json'
     output_files['raw_user_params'] = fn
-    json_util.write_JSON(path.join(output_files['run_output_dir'],  output_files['raw_user_params']),params)
+    json_util.write_JSON(path.join(output_files['run_output_dir'],  fn),params)
     msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
 
 def build_working_params(params, msg_logger, crumbs='', caller=None):
@@ -193,32 +247,6 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
 
 
 
-def merge_settings(settings, default_settings, msg_logger, settings_to_merge=None, crumbs='', caller=None):
-    crumbs += '> merge_settings'
-    all_settings = default_settings.possible_values()
-
-    # for base case merge all settings
-    if settings_to_merge is None:
-        settings_to_merge = all_settings
-
-    for key in settings_to_merge:
-        pvc = getattr(default_settings, key)
-        c = f'{crumbs}{key}> setting = "{key}"'
-
-        if key not in settings or settings[key] is None:
-            if pvc.is_required:
-                msg_logger.msg(f'Settings "{key}" is required.', error=True, caller=caller, crumbs=c)
-            else:
-                settings[key] = pvc.get_default()
-        elif key in all_settings:
-            settings[key] = pvc.check_value(key, settings[key], msg_logger,
-                                             crumbs= crumbs + f'> setting = "{key}"', caller=caller)
-        else:
-            msg_logger.spell_check(f'Unrecognized setting "{key}"',key, all_settings,
-                            crumbs = crumbs + f'> {key}', caller=caller)
-        pass
-    return settings
-
 def _build_working_params(params, msg_logger, crumbs=''):
     # slit params into settings, core_class_params and close_role params and merge settings
     crumbs += 'build_working_params'
@@ -237,7 +265,7 @@ def _build_working_params(params, msg_logger, crumbs=''):
 
     if 'case_list' in params:
         ml.msg(
-            'Cases run as seperate parallel processes are no longer supported, computations are now parallelized within a single process using threads',
+            'Cases run as separate parallel processes are no longer supported, computations are now parallelized within a single process using threads',
             hint='Remove case_list argument and merge parameters with base case and computations  will automatically be run on parallel threads by default',
             fatal_error=True)
 
@@ -245,8 +273,8 @@ def _build_working_params(params, msg_logger, crumbs=''):
                                           crumbs=crumbs + ' Forming working params ')
 
     # get defaults of settings only
-    working_params['settings'] = merge_settings(working_params['settings'], si.default_settings,
-                                                           ml, crumbs=crumbs)
+    working_params['settings'] = parameter_checking.merge_params_with_defaults(working_params['settings'],
+                                                        si.default_settings.asdict(), ml, crumbs=crumbs +'> Settings>')
     return working_params
 
 

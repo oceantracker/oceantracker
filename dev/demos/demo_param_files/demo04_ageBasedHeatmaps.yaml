@@ -33,6 +33,7 @@ particle_statistics:
   name: age_grid
   particle_property_list:
   - water_depth
+  release_group_centered_grids: true
   update_interval: 1800
 - age_bin_size: 3600.0
   class_name: oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased

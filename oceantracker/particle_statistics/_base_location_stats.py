@@ -25,7 +25,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 end =  PTC(None,  doc_str='Stop particle counting from this iso date-time, default is end of model run'),
                 duration =  PVC(None, float, min=0.,units='sec',
                         doc_str='How long to do counting after start time, can be used instead of "end" parameter'),
-                role_output_file_tag =            PVC('stats_base',str,doc_str='tag on output file for this class'),
+                output_file_base=PVC('stats_base', str, doc_str='start of output file names'),
                 write =                       PVC(True,bool,doc_str='Write statistcs to disk'),
                 status_list= PLC(['stationary','stranded_by_tide','on_bottom','moving'], str,
                                  doc_str='List of particle status types to count,eg  ["on_bottom","moving"], other status types will be ignored in statistcs',
@@ -150,9 +150,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         info = self.info
 
         if self.nc is None:
-            info['output_file'] = si.run_info.output_file_base + '_' + self.params['role_output_file_tag']
+            info['output_file'] = self.params['output_file_base']
             info['output_file'] += f'_{info["instanceID"]:03}_{self.params["name"]}.nc'
-            file_name = path.join(si.run_info.root_output_dir, info['output_file'])
+            file_name = path.join(si.run_info.run_output_dir, info['output_file'])
             # add counting dims to file
             self.nc = self.open_output_file(file_name)
 

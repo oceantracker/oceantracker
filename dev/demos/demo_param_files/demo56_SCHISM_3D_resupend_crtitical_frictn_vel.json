@@ -2,9 +2,12 @@
     "output_file_base": "demo56_SCHISM_3D_resupend_crtitical_frictn_vel",
     "debug": true,
     "time_step": 120,
+    "root_output_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker_output\\demos",
     "NUMBA_cache_code": false,
     "use_A_Z_profile": false,
-    "regrid_z_to_uniform_sigma_levels": true,
+    "tracks_writer": {
+        "update_interval": 240
+    },
     "reader": {
         "input_dir": "F:\\H_Local_drive\\ParticleTracking\\oceantracker\\tutorials_how_to\\demo_hindcast",
         "file_mask": "demo_hindcast_schisim3D_00.nc",
@@ -167,6 +170,7 @@
                 "moving"
             ],
             "z_min": -2,
+            "release_group_centered_grids": true,
             "grid_span": [
                 10000,
                 10000
@@ -178,7 +182,7 @@
         }
     ],
     "resuspension": {
-        "critical_friction_velocity": 0.005
+        "critical_friction_velocity": 0.0095
     },
     "velocity_modifiers": [
         {

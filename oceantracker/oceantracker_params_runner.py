@@ -94,22 +94,21 @@ class OceanTrackerParamsRunner(object):
                 ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
             ml.msg('')
 
-        ml.hori_line(f'Finished: output in "{si.run_info.root_output_dir}"')
-
+        ml.hori_line(f'Finished: output in "{si.settings.run_output_dir}"')
 
         if case_info_file is None:
             ml.msg('Fatal errors, run did not complete  ', hint='check for first error above, log file.txt or .err file ', error=True)
 
         elif si.run_info.restarting:
             # successful run so clear saved state dir
-            if path.isdir(si.run_info.saved_state_dir):
-                ml.msg(f'Run complete: removing saved state folder {si.run_info.saved_state_dir}')
+            if path.isdir( si.output_files['saved_state_dir']):
+                ml.msg(f'Run complete: removing saved state folder { si.output_files["saved_state_dir"]}')
                 import shutil
-                shutil.rmtree(si.run_info.saved_state_dir)
+                shutil.rmtree( si.output_files['saved_state_dir'])
 
         ml.close()
 
-        json_util.write_JSON(path.join(si.run_info.root_output_dir, 'completion_state.json'),
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, 'completion_state.json'),
                              dict(code_error_free=case_info_file is not None ))
 
         return case_info_file
@@ -130,39 +129,29 @@ class OceanTrackerParamsRunner(object):
         # split params in to settings, core and class role params
         si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
                                                              crumbs='Bulding working params ')
+        si.add_settings(si.working_params['settings'])
+
         ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults', caller=self)
-        ml.msg(f'Started > "{user_given_params["output_file_base"]}"')
+        ml.msg(f'Started')
 
-        si.add_settings(si.working_params['settings'])  # add full settings to shared info
-
-        # setup output dir and msg files
-        si.output_files = setup_util.setup_output_dir(si.settings, crumbs='Setting up output dir')
-
-        # copy basic  shortcuts to run info
         ri = si.run_info
 
-        # move stuff to run info as central repository
-        ri.root_output_dir = si.output_files['run_output_dir']
-        ri.output_file_base = si.output_files['output_file_base']
-        ri.saved_state_dir = si.output_files['saved_state_dir']
+        # setup output dir and msg files
+        si.output_files,ri.restarting = setup_util.setup_output_dir()
+        ri.run_output_dir = si.output_files['run_output_dir']
 
-        ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
-        ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
+        # setup ant restart or continuation
+        si.saved_state_info = setup_util.setup_restart_continuation()
 
-        if si.run_info.restarting:
-            # load restart info
-            fn = path.join(si.run_info.saved_state_dir, 'state_info.json')
-            if not path.isfile(fn):
-                ml.msg('Cannot find save state to restart run, to save state rerun with  setting restart_interval',
-                       fatal_error=True, hint=f'missing file  {fn}')
-            si.restart_info = json_util.read_JSON(fn)
-            ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(si.restart_info["restart_time"])}')
-
+        # set up message loggers log file
         si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(si)  # message logger output file setup
-
         si.msg_logger.settings(max_warnings=si.settings.max_warnings)
         ml.msg(f'Output is in dir "{si.output_files["run_output_dir"]}"',
                hint='see for copies of screen output and user supplied parameters, plus all other output')
+
+        # move stuff to run info as central repository
+        ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
+        ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
 
         # write raw params to a file
         if not si.run_info.restarting:
@@ -228,7 +217,7 @@ class OceanTrackerParamsRunner(object):
 
         # -----------run-------------------------------
         si.msg_logger.hori_line()
-        si.msg_logger.progress_marker(f'Starting "{si.run_info.output_file_base}",  duration: {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}')
+        si.msg_logger.progress_marker(f'Starting "{path.basename(si.run_info.run_output_dir)}",  duration: {time_util.seconds_to_pretty_duration_string(si.run_info.duration)}')
         si.msg_logger.msg(f'From {time_util.seconds_to_isostr(si.run_info.start_time)} to  {time_util.seconds_to_isostr(si.run_info.end_time)}', tabs=3)
         si.msg_logger.msg(f'Time step {si.settings.time_step:5.1f} sec', tabs=3)
         si.msg_logger.msg(f'using: A_Z_profile = {si.settings.use_A_Z_profile}, bottom_stress = {si.settings.use_bottom_stress}', tabs=4)
@@ -253,8 +242,12 @@ class OceanTrackerParamsRunner(object):
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
         ml.hori_line()
+
+        ## deprication warnings
+
+        
         # write a summary of errors etc
-        ml.msg(f'Finished "{"??" if si.run_info.output_file_base is None else si.run_info.output_file_base}"')
+        ml.msg(f'Finished "{"??" if si.run_info.run_output_dir is None else path.basename(si.run_info.run_output_dir)}"')
         si.block_timer('Close down', t0_close)
 
         # performance
@@ -273,7 +266,7 @@ class OceanTrackerParamsRunner(object):
                 t = si.core_class_roles[name].info["time_spent_updating"]
                 ml.msg(f'{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
 
-        json_util.write_JSON(path.join(si.run_info.root_output_dir, 'completion_state.json'),
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, 'completion_state.json'),
                              dict(code_error_free=case_info_file is not None))
 
         return case_info_file
@@ -331,7 +324,7 @@ class OceanTrackerParamsRunner(object):
 
         # write reader info to json
         d = fgm.get_reader_info()
-        json_util.write_JSON(path.join(si.run_info.root_output_dir, f'{si.run_info.output_file_base}_hindcast_info.json'), d)
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, f'hindcast_info.json'), d)
 
         # schedule all release groups, now run start and end are known
         ri.cumulative_number_released = np.zeros((si.run_info.times.size, ), dtype= np.int64)
@@ -381,7 +374,6 @@ class OceanTrackerParamsRunner(object):
 
         if si.run_info.is3D_run and si.settings.use_resuspension:
             ccr.resuspension.initial_setup()
-
 
         # initialise other user classes, which may depend on custom particle props above or reader field, not sure if order matters
         for role in ['particle_properties','time_varying_info','velocity_modifiers', 'trajectory_modifiers', 'particle_statistics', 'event_loggers']:
@@ -562,11 +554,12 @@ class OceanTrackerParamsRunner(object):
 
              'release_group_info': {},
              'scheduler_info': {},
+             'core_class_roles_info': {},
              'class_roles_info': {},
              }
 
         # sweep up any output files from al used classes
-        class_info={}
+        class_info= d['class_roles_info']
         for key, i in si.class_roles.items():
             if i is None : continue
             class_info[key] = {}
@@ -597,6 +590,7 @@ class OceanTrackerParamsRunner(object):
         d['release_group_info'] = class_info['release_groups']
 
         # core roles
+        class_info= d['core_class_roles_info']
         for key, i in si.core_class_roles.items():
             if i is None: continue
             class_info[key] = {}
@@ -632,7 +626,17 @@ class OceanTrackerParamsRunner(object):
             d['timing']['block_timings'].append(l)
         d['timing']['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
 
-        d['class_roles_info'] = class_info
+        # timing summaries
+        d['timing']['summaries'] = {}
+        time_steps = len(si.run_info.times)
+        # particles_walked is the cumulative number alive that
+        # where attempted to be walked.
+        particles_walked = si.core_class_roles.field_group_manager.interpolator.info['horizontal_cell_finder_info']['particles_walked']
+        avg_num_particles_alive = particles_walked/time_steps
+        total_run_time = si.run_info.computation_duration.total_seconds()
+        tpp = total_run_time / avg_num_particles_alive
+        d['timing']['summaries']["time_per_particle_per_timestep"] = tpp
+
 
         # check numba code for SIMD
         if True:

@@ -89,6 +89,7 @@ p3['release_groups']= [{'name': 'myP1','points': [[1596000, 5486000]], 'pulse_si
 
 p3['particle_statistics'] = [{'name':'gridstats1','class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased',
                       'update_interval': 1800, 'particle_property_list': ['water_depth'],
+                        'release_group_centered_grids':True,
                               'grid_span':[10000,10000],
                       'grid_size': [220, 221]},
                 {'name':'polystats1','class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_timeBased',
@@ -106,6 +107,7 @@ p4['particle_statistics'] = [
     { 'name':'age_grid','class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_ageBased',
              'update_interval': 1800, 'particle_property_list': ['water_depth'],
              'grid_size': [220, 221],
+                'release_group_centered_grids': True,
             'grid_span':[10000,10000],
              'min_age_to_bin': 0., 'max_age_to_bin': 3. * 24 * 3600, 'age_bin_size': 3600.},
     { 'name':'age_poly','class_name': 'oceantracker.particle_statistics.polygon_statistics.PolygonStats2D_ageBased',
@@ -193,8 +195,10 @@ params_list.append(p10)
 # case 50 schism basic
 schsim_base_params=\
 {'output_file_base' :'demo50_SCHISM_basic', 'debug': True,'time_step': 120,
+'root_output_dir': output_dir,
             'NUMBA_cache_code': False,'use_A_Z_profile' : False,
                 #'numba_caching': False,
+            'tracks_writer':{ 'update_interval': 240 },
         'reader': { #'class_name': 'oceantracker.reader.schism_reader.SCHISMreader',
                     'input_dir':  path.join(input_dir,'schsim3D'),
                              'file_mask': 'demo_hindcast_schisim3D_00.nc',
@@ -242,11 +246,11 @@ s56['release_groups']=[{'name': 'poly1','class_name': 'oceantracker.release_grou
 s56['particle_statistics']= [ {'name':'grid1',   'class_name': 'oceantracker.particle_statistics.gridded_statistics2D.GriddedStats2D_timeBased',
                       'update_interval': 3600, 'particle_property_list': ['water_depth'],
                                'status_list':['moving'],'z_min' :-2,
+                               'release_group_centered_grids': True,
                         'grid_span':[10000,10000],
                       'grid_size': [120, 121]}]
 
-
-s56['resuspension'] = {'critical_friction_velocity': .005}
+s56['resuspension'] = {'critical_friction_velocity': .0095}
 #s56['resuspension'] = {'critical_friction_velocity': 1000.}
 s56.update({'output_file_base' : 'demo56_SCHISM_3D_resupend_crtitical_frictn_vel',
             })
@@ -272,7 +276,9 @@ s58.update({'output_file_base' : 'demo58_bottomBounce', 'backtracking': False})
 s58['dispersion'].update({'A_H': 0.1, 'A_V': .005})
 bc = s58
 
-bc['velocity_modifiers']=[{'name': 'terminal_velocity','class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002,'variance': 0.0002}]
+bc['velocity_modifiers']=[{'name': 'terminal_velocity',
+                           'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002,
+                           }]
 bc['release_groups']= [{'name':'P11','pulse_size':10,'release_interval':0,
             'points': [[1593000., 5484000.+2000, -1]] ,
             'release_at_surface':True}] # only point release
@@ -281,9 +287,11 @@ params_list.append(s58)
 # schsim 3D, vertical section  with critical friction velocity, A_z_profile
 s59 = deepcopy(s58)
 s59['use_A_Z_profile'] =True
+s59['time_step'] = 60
 s59.update({'output_file_base' : 'demo59_crit_shear_resupension', 'backtracking': False})
 bc = s59
-bc['velocity_modifiers']=[{'name':'terminal_velocity','class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.002}]
+bc['velocity_modifiers']=[{'name':'terminal_velocity',
+                           'class_name' : 'oceantracker.velocity_modifiers.terminal_velocity.TerminalVelocity', 'value': -0.001}]
 s59['release_groups']=[{'name': 'P1','points': [[1594500, 5486000, -1]],  'pulse_size':1, 'release_interval':0}]
 params_list.append(s59)
 
@@ -388,8 +396,8 @@ def make_demo_python(demo_name):
     text_file = open(path.join(run_dir,'make_demo_plots.py'), 'r')
     lines = text_file.read().splitlines()
 
-
-    out += ['params = json_util.read_JSON("..\\demo_param_files\\'+ demo_name +'.json")','']
+    fn= path.join(__file__,'demo_param_files',f'{demo_name}.json')
+    out += [f'params = json_util.read_JSON("{fn}")','']
     out += ["runInfo_file_name, has_errors = main.run(params)", '']
     out +=['# output is now in output/' +demo_name,'']
 
@@ -426,7 +434,7 @@ def make_demo_python(demo_name):
 def build_demos(testrun=False):
     # make json/ymal
 
-    paramdir ='demo_param_files'
+    paramdir =path.join(path.dirname(__file__), 'demo_param_files')
     if not path.isdir(paramdir): mkdir(paramdir)
 
 
@@ -438,7 +446,6 @@ def build_demos(testrun=False):
         demo_name = params['output_file_base']
         if params['reader'] is not None:
             params['reader']['input_dir'] = input_dir
-
 
         print('building> ', demo_name)
 

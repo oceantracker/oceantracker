@@ -73,10 +73,10 @@ jobs:
               # Move generated files to docs
               base_name="${notebook%.ipynb}"
               if [ -f "${base_name}.rst" ]; then
-                mv "${base_name}.rst" ../docs/info/how_to/
+                mv "${base_name}.rst" ../docs/getting_started/how_to/
               fi
               if [ -d "${base_name}_files" ]; then
-                mv "${base_name}_files" ../docs/info/how_to/
+                mv "${base_name}_files" ../docs/getting_started/how_to/
               fi
             fi
           done

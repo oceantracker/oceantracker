@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oceantracker"
-version = "0.5.2.56"
+version = "0.5.3.0"
 description = "Fast offline Lagrangian particle tracking in the Ocean for structured and unstructured grids"
 readme = "README.md"
 license = "MIT"
@@ -58,8 +58,10 @@ dev = [
     "build",
     "twine",
     # docs
-    "sphinx>=7.0",
+    "sphinx>=7.0,<9.0",
     "sphinx-toolbox>=3.3.0",
+    "sphinxawesome-theme",
+    "sphinx-design",
     "nbsphinx",
     "ipython",
     "rst2pdf",

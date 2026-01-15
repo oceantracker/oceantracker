@@ -126,8 +126,6 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         # make grid
 
-
-        self._set_up_interpolator()
         self._setup_fields()
 
         # set up ring buffer  info
@@ -389,14 +387,7 @@ class _BaseReader(ParameterBaseClass):
         return i
 
 
-    def _set_up_interpolator(self):
 
-        if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
-        i = si.class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
-                                             default_classID='interpolator', caller= self,
-                                             crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
-        i.initial_setup(self)
-        self.interpolator = i
 
     # setup and read core fields, depth, tide, water velocity
     # ----------------------------------------------------
@@ -453,9 +444,8 @@ class _BaseReader(ParameterBaseClass):
         info = self.info
         bi = self.info['buffer_info']
 
-        # find time first step in numerical step within hindcast
-        # version 3)  faster numpy binary search, clipped to be inside if in the last time step
-        current_hydro_model_step = min(int(np.searchsorted(info['time_coord'], time_sec, side='left')), info['time_coord'].size-2)
+        # find time first step in numerical step equal to or above
+        current_hydro_model_step = numba_util.find_last_less_than(info['time_coord'], time_sec)
 
         if si.settings.backtracking and time_sec > self.get_time(current_hydro_model_step):
             # round up  to the next time step if backtracking
@@ -473,17 +463,17 @@ class _BaseReader(ParameterBaseClass):
         # surrounding hindcast time steps
         # abs makes it work when backtracking
         s = abs(time_sec - time_hindcast) / info['time_step']
-        fractional_time_steps =  np.asarray([1.0 - s, s])
+        weight_time_steps =  np.asarray([1.0 - s, s])
 
-        if np.any(np.abs(fractional_time_steps) > 1.1):
-            si.msg_logger.msg(f'unexpected error in times, fractional time steps is greater than 1 = {str(fractional_time_steps)}',
+        if np.any(np.abs(weight_time_steps) > 1.1):
+            si.msg_logger.msg(f'unexpected error in times, fractional time steps is greater than 1 = {str(weight_time_steps)}',
                               hint='Error in  decoding hindcast time? hindcast files not properly sorted in time order? or code bug?',
                               warning=True, caller = self)
 
-        return current_hydro_model_step, current_buffer_steps, fractional_time_steps
+        return current_hydro_model_step, current_buffer_steps, weight_time_steps
 
     def update(self, time_sec):
-        # check if all interpolators have the time steps they need
+        # check if all time steps in buffer
 
         if not self.are_time_steps_in_buffer(time_sec):
 
@@ -684,10 +674,8 @@ class _BaseReader(ParameterBaseClass):
         # write a netcdf of the grid from first hindcast file
 
         grid = self.grid
-        info = self.info
-        if 'grid' not in si.output_files: si.output_files['grid'] = []
 
-        f_name = si.output_files['raw_output_file_base'] + f'_grid{gridID:03d}.nc'
+        f_name = f'grid{gridID:03d}.nc'
         si.output_files['grid'].append(f_name)
 
         nc = ncdf_util.NetCDFhandler(path.join(si.output_files['run_output_dir'], f_name), 'w')

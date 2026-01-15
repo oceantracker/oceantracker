@@ -38,7 +38,7 @@ def test_gridded_statistics_2D_timeBased_runningMean(
 
 def test_gridded_statistics_2D_ageBased(
     default_stats_configuration, gridded_2D_ageBased
-    ):
+):
     ot = default_stats_configuration
     ot.add_class("particle_statistics", **gridded_2D_ageBased)
     case_info_file = ot.run()
@@ -76,24 +76,52 @@ def test_gridded_statistics_2D_schism_with_particle_prop(
 
 
 def test_polygon_statistics_2D_timeBased(
-    default_stats_configuration, polygon_stats_2D_timeBased,schism3D_release_locations
-    ):
+    default_stats_configuration, polygon_stats_2D_timeBased, schism3D_release_locations
+):
     ot = default_stats_configuration
-    ot.add_class("particle_statistics", 
-                 **{**polygon_stats_2D_timeBased,
-                    "polygon_list":schism3D_release_locations["polygons"]},
-                    )
+    ot.add_class(
+        "particle_statistics",
+        **{
+            **polygon_stats_2D_timeBased,
+            "polygon_list": schism3D_release_locations["polygons"],
+        },
+    )
     case_info_file = ot.run()
     assert case_info_file is not None
 
 
 def test_polygon_statistics_2D_ageBased(
-    default_stats_configuration, polygon_stats_2D_ageBased,schism3D_release_locations
-    ):
+    default_stats_configuration, polygon_stats_2D_ageBased, schism3D_release_locations
+):
     ot = default_stats_configuration
-    ot.add_class("particle_statistics", 
-                 **{**polygon_stats_2D_ageBased,
-                    "polygon_list":schism3D_release_locations["polygons"]},
-                    )
+    ot.add_class(
+        "particle_statistics",
+        **{
+            **polygon_stats_2D_ageBased,
+            "polygon_list": schism3D_release_locations["polygons"],
+        },
+    )
+    case_info_file = ot.run()
+    assert case_info_file is not None
+
+
+def test_grid_center(
+    default_stats_configuration,
+    gridded_2D_timeBased,
+    schism3D_release_locations,
+):
+    # **{**basic_point_release, "points": schism3D_release_locations["deep_point"]},
+    ot = default_stats_configuration
+    manually_centered_stats = {
+        **(
+            gridded_2D_timeBased
+            | {
+                "release_group_centered_grids": False,
+                "grid_center": schism3D_release_locations["point"],
+
+            }
+        )
+    }
+    ot.add_class("particle_statistics", **manually_centered_stats)
     case_info_file = ot.run()
     assert case_info_file is not None
