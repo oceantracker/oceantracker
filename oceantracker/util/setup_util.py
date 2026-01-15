@@ -102,16 +102,11 @@ def setup_restart_continuation():
         si.run_info.continuing = True
 
         # copy over files from prior run, but tweak file names to match
+        # note msg logger restart copies over log file
 
-        prior_file_base = saved_state_info['output_files']['output_file_base']
-        new_file_base =  si.settings.output_file_base
-
-        # note msg logger copies over log file
-
-        # copy netcdfs and tweak names
+        # copy netcdfs
         for fn in glob(path.join(prior_run_output_dir,'*.nc')):
-            new_file = path.join(si.run_info.run_output_dir, path.basename(fn).replace(prior_file_base,new_file_base ))
-            shutil.copy2(fn, new_file)
+            shutil.copy2(fn, si.run_info.run_output_dir)
 
     return saved_state_info
 
@@ -252,34 +247,6 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
 
 
 
-def merge_settings(settings, default_settings, msg_logger, settings_to_merge=None, crumbs='', caller=None):
-    crumbs += '> merge_settings'
-    all_settings = default_settings.possible_values()
-
-    # for base case merge all settings
-    if settings_to_merge is None:
-        settings_to_merge = all_settings
-
-    for key in settings_to_merge:
-        pvc = getattr(default_settings, key)
-        c = f'{crumbs}{key}> setting = "{key}"'
-
-        if key not in settings or settings[key] is None:
-            if pvc.is_required:
-                settings[key] = None
-                msg_logger.msg(f'Settings "{key}" is required.', error=True, caller=caller, crumbs=c)
-
-            else:
-                settings[key] = pvc.get_default()
-        elif key in all_settings:
-            settings[key] = pvc.check_value(key, settings[key], msg_logger,
-                                             crumbs= crumbs + f'> setting = "{key}"', caller=caller)
-        else:
-            msg_logger.spell_check(f'Unrecognized setting "{key}"',key, all_settings,
-                            crumbs = crumbs + f'> {key}', caller=caller)
-        pass
-    return settings
-
 def _build_working_params(params, msg_logger, crumbs=''):
     # slit params into settings, core_class_params and close_role params and merge settings
     crumbs += 'build_working_params'
@@ -306,8 +273,6 @@ def _build_working_params(params, msg_logger, crumbs=''):
                                           crumbs=crumbs + ' Forming working params ')
 
     # get defaults of settings only
-    #working_params['settings'] = merge_settings(working_params['settings'], si.default_settings,  ml, crumbs=crumbs)
-
     working_params['settings'] = parameter_checking.merge_params_with_defaults(working_params['settings'],
                                                         si.default_settings.asdict(), ml, crumbs=crumbs +'> Settings>')
     return working_params

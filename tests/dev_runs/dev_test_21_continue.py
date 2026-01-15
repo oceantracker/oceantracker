@@ -57,11 +57,13 @@ def main(args):
 
     if  args.reference_case:
         # do full run without continue
-        params.update(continuable=True, output_file_base=params['output_file_base']+'_full_run')
+        params = deepcopy(ot.params)
+        params.update(continuable=True, run_output_dir=params['run_output_dir']+'_full_run')
         case_info_file = run(params)
     else:
         # do split continuation runs
-        params.update(continuable=True, max_run_duration = 12*3600,output_file_base=params['output_file_base']+'_first_run')
+
+        params.update(continuable=True, max_run_duration = 12*3600,run_output_dir=params['run_output_dir']+'_first_run')
         case_info_file1 = run(params)
 
         # continue this run
@@ -69,7 +71,7 @@ def main(args):
         output_files = cs1['output_files']
         params = deepcopy(ot.params)
         params.update(continue_from=path.join(output_files['run_output_dir']),
-                      output_file_base=params['output_file_base'] + '_full_run')
+                    run_output_dir = params['run_output_dir'] + '_full_run')
         case_info_file = run(params)
 
 
