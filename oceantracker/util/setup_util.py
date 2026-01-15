@@ -23,7 +23,7 @@ def setup_output_dir():
         run_output_dir = path.abspath(si.settings.run_output_dir)
     else:
         # cope with deprecated params
-        if si.settings.root_output_dir is None and si.settings.output_file_base is None:
+        if si.settings.root_output_dir is None or si.settings.output_file_base is None:
             si.msg_logger.msg(' settings "root_output_dir" or  "output_file_base" are not set, both are required',
                               hint='These settings are deprecated and replaced by single setting "run_output_dir", set both if you must use them!')
 
