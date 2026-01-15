@@ -105,6 +105,10 @@ def test_schism_validation_run_small(
         compare_tracks_with_reference(
             case_info_file, reference_data_dir, test_name, create_reference=True
         )
+
+        compare_stats_with_reference(
+            case_info_file, reference_data_dir, test_name, create_reference=True
+        )
     # create_plots(case_info_file, default_plot_output_path, test_name)
     print_additional_validation_checks(case_info_file)
 
