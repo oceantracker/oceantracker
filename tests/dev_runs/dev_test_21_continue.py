@@ -44,9 +44,9 @@ def main(args):
 
     ot.add_class('particle_properties', **dd.pp1)  # add a new property to particle_properties role
 
-    #ot.add_class('particle_statistics', **dict(dd.my_heat_map_age,
-   #              update_interval=5*ot.params['time_step']   ))
-   # ot.add_class('particle_statistics', **dd.my_poly_stats_age, polygon_list=[dict(points=hm['polygon'])])
+    ot.add_class('particle_statistics', **dict(dd.my_heat_map_age,
+                 update_interval=5*ot.params['time_step']   ))
+    ot.add_class('particle_statistics', **dd.my_poly_stats_age, polygon_list=[dict(points=hm['polygon'])])
 
     ot.add_class('tracks_writer', **dd.tracks_writer,
                  update_interval=1800,

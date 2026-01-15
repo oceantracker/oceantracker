@@ -97,11 +97,9 @@ class _BaseAgeStats(ParameterBaseClass):
 
 
         # check age limits to bin particle ages into,  equal bins in given range
-        params['max_age_to_bin'] = min(params['max_age_to_bin'], si.run_info.duration)
         params['max_age_to_bin'] = max(params['age_bin_size'], params['max_age_to_bin']) # at least one bin
-
         if params['min_age_to_bin'] >=  params['max_age_to_bin']: params['min_age_to_bin'] = 0
-        age_range = params['max_age_to_bin']- params['min_age_to_bin']
+        age_range = params['max_age_to_bin'] - params['min_age_to_bin']
         if params['age_bin_size'] > age_range:  params['age_bin_size'] = age_range
 
         # set up age bin edges
