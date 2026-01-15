@@ -8,7 +8,7 @@ from oceantracker import main
 def tweak_params(params, args):
 
     # override top level shared_params in json within any given arguments
-    if args.root_output_dir: params['root_output_dir'] = args.root_output_dir
+    if args.run_output_dir: params['run_output_dir'] = args.run_output_dir
     if args.input_dir: params['reader']['input_dir'] = args.input_dir
     if args.processors: params['processors'] = args.processors
     if args.duration: params['max_run_duration'] = args.duration
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('param_file', type=str,help='json or yaml file of input parameters')
     parser.add_argument('--input_dir', type=str,  help='overrides dir for hindcast files given in param file')
-    parser.add_argument('--root_output_dir', type=str, help='overrides root output dir given in param file')
+    parser.add_argument('--run_output_dir', type=str, help='overrides root output dir given in param file')
     parser.add_argument('--processors', type=int,  help='overrides number of processors in param file')
     parser.add_argument('--duration', type=float, help='in seconds, overrides model duration in seconds of all of cases, useful in testing ')
     parser.add_argument('--cases', type=int, help='only runs  first "cases" of the case_list, useful in testing ')

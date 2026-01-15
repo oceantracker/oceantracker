@@ -12,10 +12,10 @@ def main(args=None):
                 use_dispersion=False,
                 screen_output_time_interval=1800,
                 use_A_Z_profile=True,
-
                 particle_buffer_initial_size= 500,
                 #NUMBA_cache_code=True,
                 use_resuspension=False,
+                #regrid_z_to_uniform_sigma_levels=True # obsolete param
 
                 )
 
@@ -56,7 +56,7 @@ def main(args=None):
     else:
         case_info_file = dd.get_case_info_name_from_params(ot.params)
 
-    dd.compare_reference_tracks(case_info_file, args)
+    dd.compare_reference(case_info_file, args)
 
 
     tests=dict()

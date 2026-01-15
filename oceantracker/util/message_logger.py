@@ -37,11 +37,10 @@ class MessageLogger(object ):
 
     def reset(self):
 
-        self.msg_lists = dict(fatal_error=[],error=[],warning=[],  strong_warning=[],note=[])
+        self.msg_lists = dict(fatal_error=[],error=[],warning=[],  strong_warning=[],note=[],deprecated=[])
 
         self.log_file = None
         self.max_warnings = 25
-
 
     def settings(self, max_warnings=None):
         self.max_warnings = None if max_warnings is None else 25
@@ -51,18 +50,18 @@ class MessageLogger(object ):
 
     def set_up_files(self, si):
         # log file set up
-        log_file_name = si.run_info['output_file_base'] + '_log.txt'
-        self.log_file_name = path.join(si.run_info.run_output_dir, log_file_name)
+        log_file_name = 'run_log.txt'
+        self.log_file_name = path.join(si.output_files['run_output_dir'], log_file_name)
 
-        if si.run_info.restarting:
-            shutil.copyfile(si.restart_info['log_file'],self.log_file_name)
+        if si.run_info.restarting or si.run_info.continuing:
+            shutil.copyfile(si.saved_state_info['log_file'],self.log_file_name)
             self.log_file = open(self.log_file_name, 'a')
             self.msg('>>>> restarting log file')
         else:
             self.log_file = open(self.log_file_name, 'w')
 
         # kill any old error file
-        error_file_name = path.join(si.run_info.run_output_dir, self.error_file_name)
+        error_file_name = path.join(si.output_files['run_output_dir'], self.error_file_name)
         if path.isfile(error_file_name ):
             remove(error_file_name)
 

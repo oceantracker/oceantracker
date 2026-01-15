@@ -16,12 +16,14 @@ class _Object(object):  pass
 # default settings structure
 
 class _DefaultSettings(definitions._AttribDict):
-
-    root_output_dir=  PVC(None, str, is_required=True,  doc_str='base dir for all output files')
-    add_date_to_run_output_dir =  PVC(False,bool, doc_str='Append the date to the output dir. name to help in keeping output from different runs separate' )
-    output_file_base =    PVC('output_file_base', str,is_required=True,
-                doc_str= 'The start/base of all output files and name of sub-dir of "root_output_dir" where output will be written' )
+    run_output_dir = PVC(None, str, doc_str='The directory to write output to')
+    root_output_dir=  PVC(None, str, deprecated=True,
+                          doc_str='Use of "root_output_dir" and "output_file_base" will be removed in future versions, use "run_output_dir" instead')
+    output_file_base =    PVC(None, str,deprecated=True,
+                doc_str='Use of "root_output_dir" and "output_file_base" will be removed in future versions, use "run_output_dir" instead')
     time_step = PVC(3600., float, min=0.001, units='sec',doc_str='Time step in seconds for all cases' )
+    add_date_to_run_output_dir = PVC(False, bool,
+                                     doc_str='Append the date to the output dir. name to help in keeping output from different runs separate')
     screen_output_time_interval = PVC(3600., float, doc_str='Time in seconds between writing progress to the screen/log file' )
     screen_info_level = PVC(0, int, doc_str='Sets 0-10 value at which user added self.screen_info(text,level) method calls are written to the screen, = 0 for none',
                             min=0, max =10)
@@ -83,7 +85,13 @@ class _DefaultSettings(definitions._AttribDict):
         #                 doc_str='in development- Default oceantracker profiler, writes timings of decorated methods/functions to run/case_info file use of other profilers in development and requires additional installed modules ' )
         # 'debug_level =               PVC(0, int,min=0, max=10, doc_str='Gives  diferent levels of debug, in development' )
     restart_interval = PVC(None, float,
-                           doc_str='Save the particle tracking state at the interval to allow restarting run', units='sec',  expert=True)
+                           doc_str='Save the particle tracking state at the interval to allow restarting run after a unexpected crash', units='sec',  expert=True)
+    continuable = PVC(False, bool,
+                           doc_str='Enable a successful  run to be continued after completion from a state saved at the end of the run, set continue_from to designate folder of run to continue ')
+
+    continue_from = PVC(None, str,
+                    doc_str='Folder of the continuable run that is to be extended, the continuation must have a different output_file_base to avoid conflicts ')
+
     min_dead_to_remove = PVC(100_000, int, doc_str='The minimum number of dead particles before they are removed from buffer', expert=True)
     throw_debug_error = PVC(0, int,min =0,
                              doc_str='Throw desigated error, eg =1 is mid run error to test restart',
@@ -151,7 +159,8 @@ class _RunInfo(definitions._AttribDict):
     forecasted_number_alive = 0
     forecasted_max_number_alive = 0
     restarting = False
-    saved_state_dir = None
+    continuing = False
+
 
 
 class _UseFullInfo(definitions._AttribDict):
@@ -185,6 +194,7 @@ class _SharedInfoClass():
     restart_info = None
     info = _UseFullInfo
     dim_names = definitions._DimensionNames()
+    output_files= dict()
 
     def __init__(self):
 
@@ -194,8 +204,17 @@ class _SharedInfoClass():
                                        }
         pass
     def add_settings(self, settings):
+        # reset settngas as a dict, without obolulte settings
+
         for key in self.settings.possible_values():
-            setattr(self.settings, key, settings[key])
+            if key in settings:
+                setattr(self.settings, key, settings[key])
+            else:
+                # remove obsolete params
+                delattr(self.settings, key)
+
+
+        pass
 
     def _setup(self):
         # this allows shared info to make a class importer when needed

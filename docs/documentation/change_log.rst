@@ -7,11 +7,21 @@ Change log
 Version '0.5.2.57 XXXX-XX-XX'
 _____________________________
 
-# for next version
+Breaking changes
+----------------
 
-# fractional_time_steps renames weighed_time_steps everywhere
+#. removed "file_output_base" from start of output file names to aid restarts, this may break users code that reads outputs as file name structure has changed
+#. parameters "file_output_base" and "root_ouput_dir" are deprecated (replaced by "run_ouput_dir"), and do not appear in case info.json etc. OT  will still work with these old param with warnings. They will be removed in a  future version
+#. change in numerical output due to a bugfix in finding the correct time step interpolation (> instead of >=).
 
-# fixed bug in fix for finding time step, this may break numerical tests
+
+Bug fixes
+---------
+
+#. fractional_time_steps renames weighed_time_steps everywhere
+#. fixed bug in fix for finding time step, this may break numerical tests
+
+
 
 Version '0.5.2.56 2026-01-08'
 _____________________________

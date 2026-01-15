@@ -97,11 +97,9 @@ class _BaseAgeStats(ParameterBaseClass):
 
 
         # check age limits to bin particle ages into,  equal bins in given range
-        params['max_age_to_bin'] = min(params['max_age_to_bin'], si.run_info.duration)
         params['max_age_to_bin'] = max(params['age_bin_size'], params['max_age_to_bin']) # at least one bin
-
         if params['min_age_to_bin'] >=  params['max_age_to_bin']: params['min_age_to_bin'] = 0
-        age_range = params['max_age_to_bin']- params['min_age_to_bin']
+        age_range = params['max_age_to_bin'] - params['min_age_to_bin']
         if params['age_bin_size'] > age_range:  params['age_bin_size'] = age_range
 
         # set up age bin edges
@@ -109,8 +107,11 @@ class _BaseAgeStats(ParameterBaseClass):
         stats_grid['age_bin_edges'] = float(si.run_info.model_direction) * np.arange(params['min_age_to_bin'], params['max_age_to_bin']+dage, dage)
 
         if stats_grid['age_bin_edges'].shape[0] ==0:
-            ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin, if backtracking these should be negative',
+            ml.msg('Particle Stats, aged based: no age bins, check parms min_age_to_bin < max_age_to_bin',
                      caller=self, error=True)
+        if stats_grid['age_bin_edges'].shape[0] >10000:
+            ml.msg('Particle Stats, aged based: there are more than 10,000  age bins, may run out of memory?',
+                caller=self, strong_warning=True)
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 
@@ -240,7 +241,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
             'grid_span': PLC(None, float, doc_str='(width-x, height-y)  of the statistics grid',
                              units='meters (dx,dy) or degrees (dlon, dlat) if geographic',
                              is_required=True),
-            'role_output_file_tag': PVC('stats_gridded_time_2D', str),
+            'output_file_base': PVC('stats_gridded_time_2D', str, doc_str='start of output file names'),
         })
         self.info['type'] = 'gridded'
 
