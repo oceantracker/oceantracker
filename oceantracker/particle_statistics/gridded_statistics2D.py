@@ -136,7 +136,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
     def update(self, n_time_step, time_sec, alive):
         '''Do particle count with running mean support'''
 
-        super().update(n_time_step, time_sec, alive)
+        _BaseParticleLocationStats.update(self, n_time_step, time_sec, alive)
 
         # Handle writing based on running mean configuration
         self._accumulate_for_running_mean()
