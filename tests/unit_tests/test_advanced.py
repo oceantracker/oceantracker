@@ -1,5 +1,7 @@
 from oceantracker.main import OceanTracker
+import os
 import pytest
+import json
 
 
 @pytest.fixture
@@ -121,4 +123,36 @@ def test_dont_block_dry_cells(default_advanced_tests_configuration):
     # Override settings with block_dry_cells option
     ot.settings(block_dry_cells=False)
     case_info_file = ot.run()
+    assert case_info_file is not None
+
+
+def test_continue_feature(default_advanced_tests_configuration):
+    ot_part1 = default_advanced_tests_configuration
+    # reduce runtime to half the base duration (i.e. hindcast time)
+    ot_part1.settings(
+        continuable=True,
+        max_run_duration=12 * 3600,  # 12 hours
+        run_output_dir=os.path.join(
+            ot_part1.params['run_output_dir'],
+            "test_continue_basic_part1"
+        ),
+    )
+    case_info_file = ot_part1.run()
+
+    # get path of previous run from json to point the next run to it
+    with open(case_info_file, 'r') as file:
+        case_info = json.load(file)
+    output_dir = case_info["output_files"]["run_output_dir"]
+
+
+    ot_part2 = default_advanced_tests_configuration
+    ot_part2.settings(
+        continue_from=output_dir,
+        max_run_duration=24 * 3600,
+        run_output_dir=os.path.join(
+            ot_part1.params['run_output_dir'],
+            "test_continue_basic_part2"
+        ),
+    )
+    case_info_file = ot_part2.run()
     assert case_info_file is not None
