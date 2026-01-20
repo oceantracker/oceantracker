@@ -30,6 +30,8 @@ def convert_compact_file(file_name1):
         else:
             nc1.copy_variable(name,nc2)
 
+    nc1.close()
+    nc2.close()
     return file_name2
 
 

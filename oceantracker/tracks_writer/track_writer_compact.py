@@ -3,7 +3,8 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.tracks_writer._base_tracks_writer import  _BaseWriter
 from oceantracker.util import  output_util
 from oceantracker.read_output.python.convert_compact_tracks_to_rect import convert_compact_file
-from os import path
+from os import path, remove
+from copy import copy, deepcopy
 from time import  perf_counter
 from oceantracker.shared_info import shared_info as si
 
@@ -16,8 +17,10 @@ class CompactTracksWriter(_BaseWriter):
                 time_particle_chunk =  PVC(None, int, min=1,  expert=True,
                                doc_str='Chunk size for time dependent particle props, compacted into time_particle dim, default is as estimated max. particles alive'),
                 output_file_base =  PVC('tracks_compact', str, doc_str= 'start of output file names'),
-                convert=PVC(True, bool, expert=True,
-                            doc_str='Convert compact tracks to rectangular form at end of run, for easier reading '),
+            convert=PVC(True, bool, expert=True,
+                            doc_str='Convert compact tracks to rectangular form at end of run, for easier reading ( Tracks are record in faster compact form during the run) '),
+            retain_compact_track_files=PVC(False, bool, expert=True,
+                        doc_str='Do not delete compact tracks recorded during the run after conversion to rectangular form'),
                 )
         self.nc = None
 
@@ -167,15 +170,31 @@ class CompactTracksWriter(_BaseWriter):
         super().close()
         # when all done convert compact to rectangular
         if si.settings.write_tracks and self.params['convert']:
-            t0 = perf_counter()
-            si.msg_logger.msg('Converting compact track files to rectangular format (to disable set reader param convert=False)',
-                              hint = f'reading from dir {si.run_info.run_output_dir}')
+            conversion_complete = False
+            compact_file_names = deepcopy(info['output_file'])
 
-            for n, fn in enumerate(info['output_file']):
-                rect_file = convert_compact_file(path.join(si.run_info.run_output_dir, fn))
-                info['output_file'][n] = path.basename(rect_file)
-                si.msg_logger.progress_marker(f'Finished "{path.basename(rect_file)}"', tabs=1, start_time=t0)
-            si.msg_logger.progress_marker('Conversion complete',tabs=1,start_time=t0)
+            try:
+                t0 = perf_counter()
+                si.msg_logger.msg('Converting compact track files to rectangular format (to disable set reader param convert=False)',
+                                  hint = f'reading from dir {si.run_info.run_output_dir}')
+
+                for n, fn in enumerate(compact_file_names):
+                    rect_file = convert_compact_file(path.join(si.run_info.run_output_dir, fn))
+                    info['output_file'][n] = path.basename(rect_file)
+                    si.msg_logger.progress_marker(f'Finished "{path.basename(rect_file)}"', tabs=1, start_time=t0)
+                conversion_complete = True
+                si.msg_logger.progress_marker('Conversion complete',tabs=1,start_time=t0)
+            except Exception as e:
+                si.msg_logger.msg('Conversion of track files to rectangular form failed, retaining compact files ',
+                                  hint='Out of disk space?', error=True)
+
+            # delete comapct files
+            if conversion_complete and not self.params['retain_compact_track_files']:
+                si.msg_logger.msg('Removing compact track files output after conversion')
+                for fn in compact_file_names:
+                    remove(path.join(si.run_info.run_output_dir, fn))
+
+
 
 
 

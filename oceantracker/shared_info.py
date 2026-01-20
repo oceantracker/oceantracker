@@ -160,6 +160,7 @@ class _RunInfo(definitions._AttribDict):
     forecasted_max_number_alive = 0
     restarting = False
     continuing = False
+    tag = None
 
 
 
