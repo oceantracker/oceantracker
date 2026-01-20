@@ -406,8 +406,7 @@ class Solver(ParameterBaseClass):
     def _save_state(self, n_time_step, time_sec,state_dir):
 
         si.msg_logger.msg(f'save_state_for_restart at: {time_util.seconds_to_isostr(time_sec)}, time step= {n_time_step}'
-                          +f', released  {si.core_class_roles.particle_group_manager.info["particles_released"]}  particles so far',
-                          hint='Restarting is under development and does not yet work!!!')
+                          +f', released  {si.core_class_roles.particle_group_manager.info["particles_released"]}  particles so far')
 
         # close time varying output files, eg tracks and stats files first!
         if si.settings.write_tracks:
