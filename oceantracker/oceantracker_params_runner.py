@@ -73,7 +73,7 @@ class OceanTrackerParamsRunner(object):
         ml.hori_line()
         # write a summary of errors etc
 
-        ml.msg(f'Finished "{si.run_info.tag}"'
+        ml.msg(f'Finished "{"??" if  si.run_info.output_file_base is None else si.run_info.output_file_base}"'
                            + ',  started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()))
         ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
 
@@ -94,17 +94,17 @@ class OceanTrackerParamsRunner(object):
                 ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
             ml.msg('')
 
-        if si.run_info.restarting and case_info_file is not None:
-            # successful run so clear saved state dir
-            if path.isdir( si.output_files['saved_state_dir']):
-                ml.msg(f'Removing saved state folder { si.output_files["saved_state_dir"]}')
-                import shutil
-                shutil.rmtree( si.output_files['saved_state_dir'])
+        ml.hori_line(f'Finished: output in "{si.settings.run_output_dir}"')
 
         if case_info_file is None:
             ml.msg('Fatal errors, run did not complete  ', hint='check for first error above, log file.txt or .err file ', error=True)
-        else:
-            ml.hori_line(f'Run successful:  output in "{si.settings.run_output_dir}"')
+
+        elif si.run_info.restarting:
+            # successful run so clear saved state dir
+            if path.isdir( si.output_files['saved_state_dir']):
+                ml.msg(f'Run complete: removing saved state folder { si.output_files["saved_state_dir"]}')
+                import shutil
+                shutil.rmtree( si.output_files['saved_state_dir'])
 
         ml.close()
 
@@ -139,7 +139,6 @@ class OceanTrackerParamsRunner(object):
         # setup output dir and msg files
         si.output_files,ri.restarting = setup_util.setup_output_dir()
         ri.run_output_dir = si.output_files['run_output_dir']
-        ri.tag = path.basename(ri.run_output_dir)
 
         # setup ant restart or continuation
         si.saved_state_info = setup_util.setup_restart_continuation()

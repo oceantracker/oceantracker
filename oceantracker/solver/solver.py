@@ -35,6 +35,33 @@ class Solver(ParameterBaseClass):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc( required_props_list=['x','status', 'x_last_good', 'v_temp'])
 
+        # warning in the model time step is not an integer of the hydro hindcast
+        model_dt = si.settings.time_step
+        fgm = si.core_class_roles.field_group_manager
+
+        # Get grids to check (either nested or single grid)
+        grids_to_check = enumerate(fgm) if hasattr(fgm, "fgm_hydro_grids") else [(None, fgm)]
+
+        for grid_idx, grid in grids_to_check:
+            hydro_dt = grid.reader.info['time_step']
+            grid_info = f"({grid_idx}, type: {grid.reader.__class__.__name__})" if grid_idx is not None else ""
+            
+            if hydro_dt < model_dt:
+                si.msg_logger.msg(
+                    f"Particle tracking model time step was chosen to be smaller than the hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {model_dt}s).",
+                    warning=True,
+                    tabs=0,
+                    hint="Try decreasing 'time step'",
+                )
+            if (hydro_dt / model_dt) % 1 != 0:
+                si.msg_logger.msg(
+                    f"Particle tracking model time step is NOT an integer fraction of hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {model_dt}s). This is valid but may reduce numerical accuracy slightly.",
+                    warning=True,
+                    tabs=0,
+                    hint=None,
+                )
+        
+
     def solve(self):
         # solve for data in buffer
         info = self.info
@@ -406,8 +433,7 @@ class Solver(ParameterBaseClass):
     def _save_state(self, n_time_step, time_sec,state_dir):
 
         si.msg_logger.msg(f'save_state_for_restart at: {time_util.seconds_to_isostr(time_sec)}, time step= {n_time_step}'
-                          +f', released  {si.core_class_roles.particle_group_manager.info["particles_released"]}  particles so far',
-                          hint='Restarting is under development and does not yet work!!!')
+                          +f', released  {si.core_class_roles.particle_group_manager.info["particles_released"]}  particles so far')
 
         # close time varying output files, eg tracks and stats files first!
         if si.settings.write_tracks:
