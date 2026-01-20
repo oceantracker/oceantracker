@@ -40,8 +40,9 @@ class SCHISMreaderV5(SCHISMreader):
 class SCHISMreader_CSIRO_CCAHPS(SCHISMreader):
     ''' CSIRO Austraiia national model
      https://data.csiro.au/collection/csiro:65669
+     schims but changes variable names, and uses  zero base indices and node based dry cells
      '''
-
+    development = True
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         # redefine any variable names which differ from older schism format
