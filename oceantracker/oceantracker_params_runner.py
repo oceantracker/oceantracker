@@ -39,7 +39,7 @@ class OceanTrackerParamsRunner(object):
             self._do_setup(user_given_params)
 
 
-            ml.msg(f'Starting user param. runner: "{si.run_info.output_file_base}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
+            ml.msg(f'Starting user param. runner: "{si.run_info.run_output_dir}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
             si.block_timer('Setup', t0)
 

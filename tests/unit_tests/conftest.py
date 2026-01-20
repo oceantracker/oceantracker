@@ -37,9 +37,10 @@ def show_plots_flag(request):
 
 
 @pytest.fixture
-def default_run_output_dir():
+def default_run_output_dir(request):
     """Root directory for test outputs"""
-    return path.join(path.dirname(package_dir), "oceantracker_output", "unit_tests")
+    test_name = request.node.name
+    return path.join(path.dirname(package_dir), "oceantracker_output", "unit_tests",test_name)
 
 
 @pytest.fixture
@@ -106,9 +107,7 @@ def reader_demo_roms():
 def base_settings(request, default_run_output_dir):
     """Base settings for OceanTracker tests"""
     # Get the test function name
-    func_name = request.node.name
     return dict(
-        output_file_base=func_name,
         run_output_dir=default_run_output_dir,
         time_step=1800,
         use_dispersion=False,
