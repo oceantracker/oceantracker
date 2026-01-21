@@ -311,7 +311,7 @@ def schism(args):
     schism3Dv5 = deepcopy(base)
     dx = 0.05
     schism3Dv5.update(name='schism3D_v5', is3D=True,label='HaurakiGulfv5',
-           class_name='oceantracker.reader.SCHISM_reader_v5.SCHISMreaderV5',
+           class_name='oceantracker.reader.SCHISM_reader_variants.SCHISMreaderV5',
            time_decimation=1,
            input_dir=r'F:\Hindcast_reader_tests\Schimsv5\HaurakiGulfv5\01',
             file_mask = r'*.nc',

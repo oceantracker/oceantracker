@@ -39,7 +39,7 @@ class OceanTrackerParamsRunner(object):
             self._do_setup(user_given_params)
 
 
-            ml.msg(f'Starting user param. runner: "{si.run_info.tag}" at  { time_util.iso8601_str(datetime.now())}', tabs=2)
+            ml.msg(f'Starting user param. runner at { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
             si.block_timer('Setup', t0)
 
@@ -71,8 +71,8 @@ class OceanTrackerParamsRunner(object):
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
         ml.hori_line()
-        # write a summary of errors etc
 
+        # write a summary of errors etc
         ml.msg(f'Finished "{si.run_info.tag}"'
                            + ',  started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()))
         ml.msg('Computational time = ' + str(datetime.now() - self.start_date) , tabs=3)
@@ -95,17 +95,19 @@ class OceanTrackerParamsRunner(object):
                 ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
             ml.msg('')
 
-        ml.hori_line(f'Finished: output in "{si.settings.run_output_dir}"')
+        if case_info_file is  None:
+            ml.msg('Fatal errors, run did not complete, output in "{si.settings.run_output_dir}"',
+                   hint='check for first error above, log file.txt or .err file ', error=True)
+        else:
+            # success!
+            if si.run_info.restarting:
+                # successful run so clear saved state dir
+                if path.isdir(si.output_files['saved_state_dir']):
+                    ml.msg(f'Run complete: removing saved state folder {si.output_files["saved_state_dir"]}')
+                    import shutil
+                    shutil.rmtree(si.output_files['saved_state_dir'])
 
-        if case_info_file is None:
-            ml.msg('Fatal errors, run did not complete  ', hint='check for first error above, log file.txt or .err file ', error=True)
-
-        elif si.run_info.restarting:
-            # successful run so clear saved state dir
-            if path.isdir( si.output_files['saved_state_dir']):
-                ml.msg(f'Run complete: removing saved state folder { si.output_files["saved_state_dir"]}')
-                import shutil
-                shutil.rmtree( si.output_files['saved_state_dir'])
+            ml.hori_line(f'Successful completion: output in "{si.settings.run_output_dir}"')
 
         ml.close()
 
@@ -137,6 +139,7 @@ class OceanTrackerParamsRunner(object):
         # setup output dir and msg files
         si.output_files,ri.restarting = setup_util.setup_output_dir()
         ri.run_output_dir = si.output_files['run_output_dir']
+        ri.tag = path.basename(ri.run_output_dir)
 
         # setup ant restart or continuation
         si.saved_state_info = setup_util.setup_restart_continuation()
@@ -149,7 +152,6 @@ class OceanTrackerParamsRunner(object):
 
         # move stuff to run info as central repository
         ri.model_direction = -1 if si.settings.backtracking else 1  # move key  settings to run Info
-        ri.time_of_nominal_first_occurrence = -ri.model_direction * 1.0E36
 
         # write raw params to a file
         if not si.run_info.restarting:
@@ -192,6 +194,8 @@ class OceanTrackerParamsRunner(object):
 
         self._make_all_class_instances_from_params(si.working_params)
         ##raise Exception('debug -error handing check')
+
+        # add release groups and find start and end times based on release groups
         self._add_release_groups_to_get_run_start_end(si.working_params)
 
         self._initial_setup_all_classes(si.working_params)
@@ -200,7 +204,7 @@ class OceanTrackerParamsRunner(object):
 
         self._do_run_integrity_checks()
 
-        ml.exit_if_prior_errors('Errors in setup??', caller=self)
+        ml.exit_if_prior_errors('Errors in setup?', caller=self)
 
         # check memory usage
         mem_used = psutil.Process().memory_info().vms
@@ -216,7 +220,7 @@ class OceanTrackerParamsRunner(object):
         si.msg_logger.msg(f'From {time_util.seconds_to_isostr(si.run_info.start_time)} to  {time_util.seconds_to_isostr(si.run_info.end_time)}', tabs=3)
         si.msg_logger.msg(f'Time step {si.settings.time_step:5.1f} sec', tabs=3)
         si.msg_logger.msg(f'using: A_Z_profile = {si.settings.use_A_Z_profile}, bottom_stress = {si.settings.use_bottom_stress}', tabs=4)
-
+        # solve
         si.core_class_roles.solver.solve() # do time stepping
 
         # -----------done -------------------------------
@@ -237,10 +241,9 @@ class OceanTrackerParamsRunner(object):
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
         ml.hori_line()
-
         
         # write a summary of errors etc
-        ml.msg(f'Finished "{"??" if si.run_info.run_output_dir is None else path.basename(si.run_info.run_output_dir)}"')
+        ml.msg(f'Finished "{si.run_info.tag}"')
         si.block_timer('Close down', t0_close)
 
         # performance
@@ -409,7 +412,7 @@ class OceanTrackerParamsRunner(object):
    
         if len(si.class_roles['release_groups']) == 0:
             si.msg_logger.msg('No particle "release_groups" parameters found', error=True, caller=self)
-        si.msg_logger.exit_if_prior_errors('Errors adding release groups??')
+        si.msg_logger.exit_if_prior_errors('Errors adding release groups?')
 
         # set up to start end times based on release_groups
         # set up release groups and find first release time to start model
@@ -534,9 +537,9 @@ class OceanTrackerParamsRunner(object):
              'output_files': deepcopy(si.output_files),
              'version_info':   definitions.version,
              'computer_info':  computer_info_util.get_computer_info(),
+             'performance': dict(max_memory_usedGB=si.run_info.max_memory_usedGB, block_timings=[]),
              'errors_warnings_notes': si.msg_logger.msg_lists,
              'working_params': dict(settings = si.settings.asdict() ,core_class_roles={}, class_roles={}),
-             'timing':dict(block_timings=[], function_timers= {}),
              'update_timers': {},
              'settings' : si.settings.asdict(),
              'run_info' : info,
@@ -605,7 +608,7 @@ class OceanTrackerParamsRunner(object):
 
         # add in reverse timing order
         for n in np.argsort(np.asarray(times))[::-1]:
-            d['timing']['function_timers'][keys[n]]= profiling_util.func_timings[keys[n]]
+            d['performance']['function_timers'][keys[n]]= profiling_util.func_timings[keys[n]]
 
         # block timings in time order
         b = si.block_timers
@@ -613,8 +616,8 @@ class OceanTrackerParamsRunner(object):
         order = np.argsort(times)[::-1]
         for key in [list(b.keys())[i] for i in order]:
             l = f' {100*b[key]["time"]/elapsed_time_sec:5.1f}% {key} : calls {b[key]["calls"]:4d}, {time_util.seconds_to_pretty_duration_string(b[key]["time"])}'
-            d['timing']['block_timings'].append(l)
-        d['timing']['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
+            d['performance']['block_timings'].append(l)
+        d['performance']['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
 
         # check numba code for SIMD
         if True:

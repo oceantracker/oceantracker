@@ -148,7 +148,6 @@ class _RunInfo(definitions._AttribDict):
     duration = None
     run_output_dir = None
     output_file_base = None
-    time_of_nominal_first_occurrence = None
     time_steps_completed = 0
     hindcast_start_time = None
     hindcast_end_time = None
