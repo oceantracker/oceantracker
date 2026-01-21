@@ -6,7 +6,7 @@ import numpy as np
 
 from time import  perf_counter
 from oceantracker.util.message_logger import OTerror, OTfatal_error, OTunexpected_error
-from oceantracker.util import profiling_util, get_versions_computer_info
+from oceantracker.util import profiling_util, computer_info_util
 
 from oceantracker.util import time_util, output_util, save_state_util
 
@@ -73,9 +73,10 @@ class OceanTrackerParamsRunner(object):
         ml.hori_line()
         # write a summary of errors etc
 
-        ml.msg(f'Finished "{"??" if  si.run_info.output_file_base is None else si.run_info.output_file_base}"'
+        ml.msg(f'Finished "{si.run_info.tag}"'
                            + ',  started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()))
-        ml.msg('Computational time =' + str(datetime.now() - self.start_date), tabs=3)
+        ml.msg('Computational time = ' + str(datetime.now() - self.start_date) , tabs=3)
+        ml.msg(f'Max. memory used {si.run_info.max_memory_usedGB:4.2f} GB', tabs=3)
 
         # show any errors etc, at end as well
         ml.hori_line(f'Issues    (check above,  any errors repeated below)')
@@ -107,9 +108,6 @@ class OceanTrackerParamsRunner(object):
                 shutil.rmtree( si.output_files['saved_state_dir'])
 
         ml.close()
-
-        json_util.write_JSON(path.join(si.run_info.run_output_dir, 'completion_state.json'),
-                             dict(code_error_free=case_info_file is not None ))
 
         return case_info_file
 
@@ -165,9 +163,6 @@ class OceanTrackerParamsRunner(object):
         # import all package parameter classes and build short name package tree to shared info
         # must be after numba setup as it imports al classes
         si.class_importer._build_class_tree_ans_short_name_map()
-        si.run_info.version = definitions.version
-        si.run_info.computer_info = get_versions_computer_info.get_computer_info()
-
         ml.set_screen_tag('setup')
         ml.hori_line()
         ml.msg(f' {definitions.package_fancy_name} version {definitions.version["oceantracker_version"]} ')
@@ -209,7 +204,7 @@ class OceanTrackerParamsRunner(object):
 
         # check memory usage
         mem_used = psutil.Process().memory_info().vms
-        si.run_info['memory_used_GB'] = mem_used / 10 ** 9
+        si.run_info['max_memory_usedGB'] = mem_used / 10 ** 9
 
         if mem_used > int(0.9 * psutil.virtual_memory().total):
             ml.msg(f'Oceantracker is using more than 90% of memory= {mem_used/10**9} Giga bytes, so may run slow or fail ', warning=True,
@@ -243,8 +238,6 @@ class OceanTrackerParamsRunner(object):
         ml.set_screen_tag('end')
         ml.hori_line()
 
-        ## deprication warnings
-
         
         # write a summary of errors etc
         ml.msg(f'Finished "{"??" if si.run_info.run_output_dir is None else path.basename(si.run_info.run_output_dir)}"')
@@ -265,9 +258,6 @@ class OceanTrackerParamsRunner(object):
             if si.core_class_roles[name] is not None:
                 t = si.core_class_roles[name].info["time_spent_updating"]
                 ml.msg(f'{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
-
-        json_util.write_JSON(path.join(si.run_info.run_output_dir, 'completion_state.json'),
-                             dict(code_error_free=case_info_file is not None))
 
         return case_info_file
 
@@ -542,8 +532,8 @@ class OceanTrackerParamsRunner(object):
         d = {'user_note': si.settings.user_note,
              'file_written': datetime.now().isoformat(),
              'output_files': deepcopy(si.output_files),
-             'version_info':   si.run_info.version,
-             'computer_info':  si.run_info.computer_info,
+             'version_info':   definitions.version,
+             'computer_info':  computer_info_util.get_computer_info(),
              'errors_warnings_notes': si.msg_logger.msg_lists,
              'working_params': dict(settings = si.settings.asdict() ,core_class_roles={}, class_roles={}),
              'timing':dict(block_timings=[], function_timers= {}),

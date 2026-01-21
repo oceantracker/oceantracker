@@ -184,9 +184,12 @@ class Solver(ParameterBaseClass):
             self.stop_update_timer()
 
             # warn of  high physical memory use every 10th step as takes 8ms per call
-            if n_time_step % 10 ==0 and psutil.virtual_memory().percent > 95:
-                ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
+            if n_time_step % 10 ==0:
+                mem = psutil.virtual_memory()
+                if mem.used/mem.total > 0.95:
+                    ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
                        hint=f'Reduce memory used by hindcast with smaller reader param. "time_buffer_size"')
+                ri.max_memory_usedGB = max(mem.used/10**9,ri.max_memory_usedGB)
 
             if abs(t2 - ri.start_time) > ri.duration: break
             if si.settings.throw_debug_error == 1 and nt2 >= int(0.2*model_times.size):

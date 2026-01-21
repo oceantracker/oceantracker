@@ -134,6 +134,7 @@ class _VerticalGridTypes(definitions._AttribDict):
     Zfixed = 'Zfixed'
 
 class _RunInfo(definitions._AttribDict):
+    max_memory_usedGB = 0.
     is3D_run = None
     backtracking =None
     vector_components = None
@@ -161,8 +162,6 @@ class _RunInfo(definitions._AttribDict):
     restarting = False
     continuing = False
     tag = None
-
-
 
 class _UseFullInfo(definitions._AttribDict):
     # default reader classes used by auto-detection of file type
