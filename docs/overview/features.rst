@@ -1,4 +1,4 @@
-Feature Overview
+Features
 ================
 
 OceanTracker is primarily designed for coastal environments which is reflected in the supported models and implemented physics.

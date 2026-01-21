@@ -3,7 +3,7 @@ Features
 
 
 .. * Read and visualize model output quickly with .
-For an overview see :doc:`feature overview </overview/features.rst>`.
+For an overview see :doc:`feature overview </overview/features>`.
 For more detailed descriptions about individual features see below:
 
 .. toctree::

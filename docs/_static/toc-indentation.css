@@ -1,0 +1,85 @@
+/* Increase indentation for nested TOC items on the page */
+
+/* Target the local TOC (page-specific TOC, not sidebar) */
+.contents.local ul {
+    padding-left: 0;
+}
+
+/* First level items - no extra indent */
+.contents.local > ul > li {
+    margin-left: 0;
+}
+
+/* Second level items - larger indent */
+.contents.local > ul > li > ul > li {
+    margin-left: 2.5em;
+}
+
+/* Third level items - even more indent */
+.contents.local > ul > li > ul > li > ul > li {
+    margin-left: 5em;
+}
+
+/* Fourth level items - maximum indent */
+.contents.local > ul > li > ul > li > ul > li > ul > li {
+    margin-left: 7.5em;
+}
+
+/* Alternative approach using nested ul elements */
+.contents.local ul ul {
+    padding-left: 2.5em;
+}
+
+.contents.local ul ul ul {
+    padding-left: 3em;
+}
+
+.contents.local ul ul ul ul {
+    padding-left: 3em;
+}
+
+/* For sphinx-awesome theme specific TOC structure */
+.toctree-wrapper.compound ul {
+    padding-left: 0;
+}
+
+.toctree-wrapper.compound ul ul {
+    padding-left: 3em;
+}
+
+.toctree-wrapper.compound ul ul ul {
+    padding-left: 3em;
+}
+
+/* Topic (local TOC) styling */
+div.topic ul {
+    padding-left: 0;
+}
+
+div.topic ul ul {
+    padding-left: 2em;
+}
+
+div.topic ul ul ul {
+    padding-left: 2em;
+}
+
+/* Ensure consistent indentation across different TOC types */
+nav.contents ul ul {
+    padding-left: 2em;
+}
+
+/* Add some visual breathing room between TOC levels */
+.contents.local li {
+    margin-top: 0.3em;
+    margin-bottom: 0.3em;
+}
+
+/* Make nested items slightly smaller for visual hierarchy */
+.contents.local ul ul li {
+    font-size: 0.95em;
+}
+
+.contents.local ul ul ul li {
+    font-size: 0.9em;
+}

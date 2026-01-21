@@ -7,3 +7,4 @@ Overview
 
     about.rst
     gallery.rst
+    features.rst
