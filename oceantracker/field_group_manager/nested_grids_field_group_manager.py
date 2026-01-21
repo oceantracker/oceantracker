@@ -11,7 +11,7 @@ from copy import copy, deepcopy
 
 # run fields nested with outer main readers grid
 
-class DevNestedFields(ParameterBaseClass):
+class NestedFields(ParameterBaseClass):
     ''' Core class. Builds a list of field group managers for outer and nested grids and manages
     assignment to the different using a list of field group managers to carry out update, field interpolation etc
      First in list grid is the outer grid.
