@@ -26,19 +26,19 @@
             "class_name": "PolygonRelease",
             "points": [
                 [
-                    1597682.1237,
-                    5489972.7479
+                    1597682,
+                    5489972
                 ],
                 [
-                    1598604.1667,
-                    5490275.5488
+                    1598604,
+                    5490275
                 ],
                 [
-                    1598886.4247,
-                    5489464.0424
+                    1598886,
+                    5489464
                 ],
                 [
-                    1597917.3387,
+                    1597917,
                     5489000
                 ],
                 [
@@ -46,17 +46,14 @@
                     5489000
                 ],
                 [
-                    1597682.1237,
-                    5489972.7479
+                    1597682,
+                    5489972
                 ]
             ],
             "release_interval": 7200,
             "pulse_size": 20
         }
     ],
-    "resuspension": {
-        "critical_friction_velocity": 0.005
-    },
     "velocity_modifiers": [
         {
             "name": "fall_velocity",
@@ -64,5 +61,8 @@
             "value": -0.001,
             "variance": 0.0002
         }
-    ]
+    ],
+    "resuspension": {
+        "critical_friction_velocity": 0.005
+    }
 }
