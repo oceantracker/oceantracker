@@ -473,6 +473,16 @@ class Solver(ParameterBaseClass):
 
         state['log_file'] = si.msg_logger.save_state(si,state_dir)
 
+        # save release info to allow proper restartty of releses
+        state['release_restart_info'] = dict()
+        for name, rg in si.class_roles.release_groups.items():
+            d = dict(no_end_to_release = rg.info['no_end_to_release'],
+                     started =  np.any(rg.schedulers['release'].task_flag[:n_time_step+1]) , # if any tasks done has started
+                    release_interval= rg.params['release_interval'])
+
+            d['time_next_release'] = None if d["release_interval"] ==0. else  time_sec + d["release_interval"]
+            state['release_restart_info'][name] = d
+
         # write state json for restarting
         json_util.write_JSON(path.join(state_dir, 'state_info.json'),state)
 

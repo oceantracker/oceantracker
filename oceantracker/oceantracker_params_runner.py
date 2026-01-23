@@ -285,7 +285,7 @@ class OceanTrackerParamsRunner(object):
 
         # do class role lists
         for role, param_list in working_params['class_roles'].items():
-            if role in ['nested_readers']: continue
+            if role in ['nested_readers']: continue # nested readers handled by field group manager
             for params in param_list:
                 i = si.add_class(role, params=params)
 
@@ -326,8 +326,13 @@ class OceanTrackerParamsRunner(object):
         for name, i in si.class_roles.release_groups.items():
             p = i.params
             i.initial_setup() # delayed set up
+
+            # note if there is no end point to releases
+            i.info['no_end_to_release'] = p['duration'] is None and p['end'] is None and p['release_interval'] > 0.
+
             i.add_scheduler('release',start=p['start'], end=p['end'], duration=p['duration'],
-                            interval =p['release_interval'], crumbs=f'Adding release groups scheduler # {i.info["instanceID"]} name = "{name}" >')
+                            interval =p['release_interval'],
+                            crumbs=f'Adding release groups scheduler # {i.info["instanceID"]} name = "{name}" >')
             # max_ages needed for culling operations
             i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
             max_ages.append(i.params['max_age'])
@@ -340,6 +345,7 @@ class OceanTrackerParamsRunner(object):
             nt1 = min(int(i.params['max_age']/si.settings.time_step),  si.run_info.times.size-1)
             forecasted_number_alive = cumulative_number_released.copy()
             forecasted_number_alive[nt1:] = cumulative_number_released[nt1]
+
             #none alive after time step nt2
             nt2 = min(nt1 + int(i.params['max_age'] / si.settings.time_step) +1, si.run_info.times.size)
             forecasted_number_alive[nt2:] = 0
@@ -424,11 +430,14 @@ class OceanTrackerParamsRunner(object):
         for name, rg in si.class_roles['release_groups'].items():
             rg_params = rg.params
             rg.initial_setup()
+
+
             start =  default_start if rg_params['start'] is None else  rg_params['start']
+
             end = default_end if rg_params['end'] is None else rg_params['end']
             duration = si.info.large_float if rg_params['duration'] is None else rg_params['duration']
 
-            # end time takes presence over given duration
+            # end time takes precedence over given duration
             if rg_params['end'] is not None: duration = abs(end-start)
 
             life_span = duration if rg_params['max_age'] is None else duration + rg_params['max_age']

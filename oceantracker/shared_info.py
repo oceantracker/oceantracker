@@ -77,8 +77,7 @@ class _DefaultSettings(definitions._AttribDict):
     NCDF_compression_level = PVC(0, int, min=0,max =9, expert=True,
                           doc_str='Netcdf compression of output variables, reduces output file size, but slows code ')
     particle_buffer_initial_size = PVC(10_000_000, int, min=1, expert=True,
-                   doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive'
-                                    )
+                   doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive')
 
         #  #'loops_over_hindcast =  PVC(0, int, min=0 )  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
         # profiler = PVC('oceantracker', str, possible_values=available_profile_types,
