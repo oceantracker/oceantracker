@@ -2,24 +2,27 @@ import numpy as np
 from time import perf_counter
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.numba_util import njitOT, prange, njitOTparallel
-
+from os import path
 from oceantracker.particle_properties.util import particle_operations_util
 from copy import deepcopy
 from  oceantracker.particle_group_manager.util import  pgm_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_properties._base_particle_properties import FieldParticleProperty,ManuallyUpdatedParticleProperty,CustomParticleProperty
-
+from oceantracker.util import  basic_util
 class ParticleGroupManager(ParameterBaseClass):
     '''
     holds and provides access to different types a  particle properties, eg position, field properties, custom properties
     manages particle buffers size, periodically culls dead particles
     '''
+
+
     def __init__(self):
         # set up info/attributes
         super().__init__()  # requir+ed in children to get parent defaults
 
         # set up pointer dict and lists
         self.status_flags= si.particle_status_flags
+
 
     def add_required_classes_and_settings(self):
         info = self.info

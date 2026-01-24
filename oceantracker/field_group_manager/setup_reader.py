@@ -180,7 +180,7 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
     reader_params['class_name'] = reader_class_name
     reader = si.class_importer.make_class_instance_from_params('reader', reader_params,
                 check_for_unknown_keys=True,
-                crumbs=crumbs + f'> loading detected reader = class name "{reader_class_name}"')
+                crumbs=crumbs + f'> loading detected reader')
 
     reader.dataset = dataset
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')

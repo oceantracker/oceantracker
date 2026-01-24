@@ -1,11 +1,10 @@
 from os import path, remove
-import traceback
 from time import  perf_counter
 from oceantracker.definitions import docs_base_url
 import difflib
 from time import sleep
 import inspect
-import shutil
+import shutil, traceback, inspect
 
 
 class OTerror(Exception):
@@ -111,27 +110,24 @@ class MessageLogger(object ):
         if hint is not None:
             m = self._append_message(m, 'hint: ' + hint, tabs+2)
 
-        # make crumb trail
-        if crumbs is not None and crumbs != '':
-            m =self._append_message(m, f'in: {crumbs}', tabs + 3)
-
-        if caller is not None and (error or warning) :
+        if caller is not None and (fatal_error or error or warning or strong_warning):
             if hasattr(caller,'__class__'):
-                origin=  f'Class = "{caller.__class__.__name__}" '
-                if hasattr(caller,'info'):
-                    # add internal name if not None
-                    origin += f'role="{caller.info["class_role"]}"' if 'class_role' in caller.info else ''
-                    origin +=  ' ' if 'name' not in caller.params or caller.params["name"] is None else f', name="{caller.params["name"]}"'
-                    origin += f', instance #[{caller.info["instanceID"]}]'
-                origin += f', class= "{caller.__class__.__module__}.{caller.__class__.__name__}"'
-
+                origin = f'In:  role = "{caller.role_name if hasattr(caller,"role_name") else "??"}"'
+                origin += f', class_name = "{caller.__class__.__name__}"'
+                origin += f' \t   ({caller.__class__.__module__}.{caller.__class__.__name__})'
             else:
                 origin = caller.__name__
-            m = self._append_message(m, f'caller: {origin}', tabs + 3)
+            m = self._append_message(m, f'{origin}', tabs + 3)
 
         if link is not None:
             m= self._append_message(m, 'see user documentation: ' + self.links[link], tabs + 3)
 
+        # make crumb trail
+        if crumbs is not None and crumbs != '':
+            m =self._append_message(m, f'trail: {crumbs}', tabs + 3)
+
+        if  (fatal_error or error or strong_warning):
+            m = self._append_message(m, 'Trace>>> '+ self.get_trace_back_str(tabs), tabs+6)
         pass
         # write message lines
         for l in  m.split('\n')[:-1]: # drop last \n
@@ -205,15 +201,16 @@ class MessageLogger(object ):
             f.write(str(e))
             f.write(tb)
 
-    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='', caller=None, link=None):
+    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='', caller=None, link=None,
+                    fatal_error=True):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
 
         known = list(possible_values)
         if key not in known:
             # flag if unknown
-            self.msg(msg)
+            self.msg(msg, tabs=tabs,caller=caller, error=True)
 
-            self.msg(f'Closest matches to "{key}" are :',tabs=tabs +5)
+            self.msg(f'Closest matches to "{key}" are :',tabs=tabs +3)
             o = difflib.get_close_matches(key, known, cutoff=0.5, n=4)
             if len(o) > 0:
                 for n ,t in enumerate(o):
@@ -221,21 +218,9 @@ class MessageLogger(object ):
             else:
                 self.msg(f'>> None found',tabs=tabs+7,
                          hint=f'Possible values = {str(known)}')
-            self.msg('Unknown  values', hint=hint, fatal_error=True, tabs=tabs,crumbs=crumbs,caller=caller)
-
+            self.msg('Unknown  values, look above for suggestions', hint=hint,crumbs=crumbs, tabs=tabs,caller=caller, fatal_error=True)
         pass
-    def build_stack(self):
 
-        #todo useful to print crumbs automatically?
-        stack = inspect.stack(1)
-        #stack = [l for l in stack if path.basename(l[1]) not in ['message_logger.py','main.py']]
-        stack.reverse()
-        stack = [l for l in stack if 'oceantracker' in path.dirname(l[1])]
-        msg = ''
-        for n, l in enumerate(stack[-6:-2]):
-            msg +=  f'{path.basename(l[1])}#{l[2]}-.{l[3]}()>\n\t\t'+ n*'\t'
-        self.msg('Traceback > '+ msg)
-        pass
 
     def save_state(self,si,state_dir):
         self.log_file.close()
@@ -258,3 +243,21 @@ class MessageLogger(object ):
         self.msg_lists[msg_type].append(
             dict(msg=msg, hint=hint, crumbs=crumbs, caller=str(caller))
         )
+
+    def get_trace_back_str(self,tabs):
+
+        s = inspect.stack()
+        trail = []
+        for l in list(s):
+            d = dict(file_name=l.filename, line=l.lineno,function= l.function, )
+            if 'oceantracker' in d['file_name']: trail.append(d)
+        pass
+
+        result=''
+        for  count, f in enumerate(trail[2:-2]):
+            if (count+1) % 7 == 0 :
+                result +='\n' + ((count % 7))*'\t'
+            result += f'{f["function"]}:{f["line"]} < '
+
+        return result
+

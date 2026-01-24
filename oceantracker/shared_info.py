@@ -232,6 +232,7 @@ class _SharedInfoClass():
         crumbs += f'Adding class {class_role}>'
 
         if class_role=='fields':
+            #to is this exclusion of fields needed?
             ml.msg('Cannot use si.add_class() method to add fields',
                    hint='Use add_reader_field(name,  params) or si.add_custom_field(name, params, default_classID=None)',
                    fatal_error=True)
