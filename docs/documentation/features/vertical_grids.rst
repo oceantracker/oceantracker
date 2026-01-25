@@ -81,7 +81,7 @@ I.e. in shallow waters it might only use 5 vertical layers while deeper water mi
 This introduces "degenerate cells" that are triangular (on xz projections) rather then rectangular.
 By reducing the number of cells in shallow regions, this approach allows for a reduction in computational load, especially in coastal and estuarine environments.
 
-.. figure:: https://www.researchgate.net/profile/Chin-Wu-6/publication/268750779/figure/fig3/AS:357090615939074@1462148446261/Comparison-of-vertical-grids-along-the-transect-shown-in-Fig-1-using-a-LSC-2-with_W640.jpg
+.. figure:: /_static/vertical_grid_LSC2.jpg
     :alt: LSC grid diagram
     :align: center
 
