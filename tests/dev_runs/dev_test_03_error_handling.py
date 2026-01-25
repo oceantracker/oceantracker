@@ -27,7 +27,7 @@ def main(args=None):
 
     #ot.settings(NUMBA_cache_code = True)
     hm = dd.hydro_model['demoSchism3D']
-    ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levelsx=True)
+    ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True)
 
     # add a point release
     ot.add_class('release_groups',**dd.rg_release_interval0)
@@ -51,6 +51,15 @@ def main(args=None):
     ot.add_class('particle_statistics', **dd.my_heat_map3D_time)
     ot.add_class('particle_statistics', **dd.my_heat_map2D_time_runningMean)
 
+    match args.variant:
+        case 0:
+            ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levelsx=True)
+        case 1:
+            # bad class name
+            ot.add_class('particle_properties', class_name='AgeDecayx', name='test_decay')
+        case 5:
+            # repeat add
+            ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay')
 
     case_info_file = ot.run()
 

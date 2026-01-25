@@ -73,12 +73,8 @@ class MessageLogger(object ):
     def msg(self, msg_text, note=False,
             hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,wrap=False,
             possible_values=None, warning=False,strong_warning=False,
-            error=False, fatal_error=False, exception = None,
-            traceback_str=None, dev=False):
-
-
-        if exception is not None:
-            fatal_error = True
+            error=False, fatal_error=False,
+            dev=False):
 
         if fatal_error: fatal_error = error or fatal_error
 
@@ -87,43 +83,27 @@ class MessageLogger(object ):
 
         # first line of message
         if error:
-            m = self._build_msg(msg_text,msg_tag='Error', hint=hint,add_trace=True, wrap = True)
+            m = self._build_msg(msg_text,msg_tag='Error', hint=hint,add_trace=True,caller=caller, wrap=True)
             self.msg_lists['error'].append(m)
 
         elif warning:
             if  len(self.msg_lists['warning']) > self.max_warnings: return
-            m = self._build_msg(msg_text, msg_tag='Warning', hint=hint, add_trace=True, wrap = True)
+            m = self._build_msg(msg_text, msg_tag='Warning', hint=hint, add_trace=False,caller=caller, wrap=True)
             self.msg_lists['warning'].append(m)
 
         elif strong_warning:
             if len(self.msg_lists['warning']) > self.max_warnings: return
-            m = self._build_msg(msg_text, msg_tag='Strong warning', hint=hint, add_trace=True, wrap = True)
+            m = self._build_msg(msg_text, msg_tag='Strong warning', hint=hint, add_trace=True,caller=caller, wrap=True)
             self.msg_lists['strong_warning'].append(m)
 
         elif note:
             if len(self.msg_lists['note']) > self.max_warnings: return
-            m = self._build_msg(msg_text, msg_tag='Note', hint=hint, add_trace=True, wrap = True)
+            m = self._build_msg(msg_text, msg_tag='Note', hint=hint, add_trace=False,caller=caller, wrap=True)
             self.msg_lists['note'].append(m)
 
         else:
-            m = self._build_msg(msg_text, msg_tag=None, hint=hint, add_trace=False, wrap = wrap)
+            m = self._build_msg(msg_text, msg_tag=None, hint=hint, add_trace=False, wrap=wrap)
 
-        if exception is not None:
-            pass
-            #m = self._append_message(m, 'exception >>: ' + str(exception), tabs + 2)
-
-        if traceback_str is not None:
-            #m = self._append_message(m, 'traceback >>: ' + str(traceback_str), tabs + 2)
-            pass
-
-
-        # make crumb trail
-        #if crumbs is not None and crumbs != '':
-         #   m =self._append_message(m, f'trail: {crumbs}', tabs + 3)
-
-        #if  (fatal_error or error or strong_warning):
-        #    m = self._append_message(m, 'Traceback>>> '+ get_trace_back_str(tabs), tabs+6)
-        pass
 
         # write message
         self._print_msg(m)

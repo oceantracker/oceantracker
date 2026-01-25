@@ -106,7 +106,8 @@ class OceanTrackerParamsRunner(object):
                     ml.msg(f'Run complete: removing saved state folder {si.output_files["saved_state_dir"]}')
                     import shutil
                     shutil.rmtree(si.output_files['saved_state_dir'])
-        ml.msg(f'Output in "{si.settings.run_output_dir}"', tabs=1)
+
+        ml.hori_line(f'Output in "{si.settings.run_output_dir}"')
         ml.close()
 
         return case_info_file

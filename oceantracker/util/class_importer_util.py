@@ -137,7 +137,7 @@ class ClassImporter():
             return self.short_name_class_map[short_name]['class_name']
 
         if '.' not in class_name:
-            ml.spell_check(f'Class name "{class_name}" is not a recognised short class_name',
+            ml.spell_check(f'Class name "{class_name}" is not  recognised as a short class_name',
                         class_name, self.short_name_list,
                         hint='A miss-spelt short class_name? if a user written class, class_name must be of as "module.class" import string, ie have at least one "."',
                         )
@@ -167,6 +167,7 @@ class ClassImporter():
                                             hint='A miss-spelt short class_name? or missing custom class?',
                                             )
                 raise(e)
+
     def _import_module_from_string(self, mod, c = None):
 
         # check module exists before import
@@ -177,12 +178,10 @@ class ClassImporter():
 
         try:
             m = importlib.import_module(mod)
-
             return m
         except Exception as e:
             # try a spell check
-            self.msg_logger.msg(f'Possible syntax error in module "{mod}"',fatal_error=True,
-                            exception =e, traceback_str=traceback.format_exc())
+            raise(Exception(f'Ocean tracker: Possible syntax error in module "{mod}"'))
 
     def build_short_and_full_name_maps(self, class_tree):
         # build short and full name maps to oceantracker's parameter classes
