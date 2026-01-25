@@ -76,8 +76,6 @@ class NestedFields(ParameterBaseClass):
             start_times.append(fgm_nested.info['start_time'])
             end_times.append(fgm_nested.info['end_time'])
 
-            ml.exit_if_prior_errors(f'failed to read nested reader #{n}, see above')
-
             if not fgm_nested.info['has_open_boundary']:
                 ml.msg(f'Nested grids must have open boundary nodes defined, nested grid {n} " does not',
                                   fatal_error=True, hint= 'Need reader to load open boundary nodes, eg for Schsim, set reader parameter "hgrid_file" to load open boundary nodes')

@@ -22,7 +22,6 @@ class ClassImporter():
         self.class_tree = self.scan_package_for_classes(crumbs='Package set up', caller=self)
         self.short_name_class_map, self.full_name_class_map,self.short_name_list =  self.build_short_and_full_name_maps(self.class_tree)
         ml = self.msg_logger
-        ml.exit_if_prior_errors(f'"ClassImporter" setup errors', caller=caller)
         ml.progress_marker(f'Done package set up to setup ClassImporter', start_time=t0)
     def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None, initialize=False,
                                         add_required_classes_and_settings=True, caller=None, crumbs='', merge_params=True, check_for_unknown_keys=True):

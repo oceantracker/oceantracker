@@ -2,7 +2,7 @@ from copy import  copy, deepcopy
 
 
 from oceantracker import definitions
-from oceantracker.util.message_logger import OTerror, MessageLogger
+from oceantracker.util.message_logger import OTinput_error, MessageLogger
 from oceantracker.oceantracker_params_runner import OceanTrackerParamsRunner
 from  oceantracker.shared_info import shared_info
 
@@ -93,9 +93,6 @@ class OceanTracker():
 
     def run(self):
         ot_runner= OceanTrackerParamsRunner()
-        # todo print helper message here at end??
-        msg_logger.exit_if_prior_errors('Found errors see above')
-
         case_info_file = ot_runner.run(self.params)
 
         self.has_run = True

@@ -5,7 +5,7 @@ from os import path
 import numpy as np
 
 from time import  perf_counter
-from oceantracker.util.message_logger import OTerror, OTfatal_error, OTunexpected_error
+from oceantracker.util.message_logger import OTinput_error, OTfatal_error, OTunexpected_error
 from oceantracker.util import profiling_util, computer_info_util
 
 from oceantracker.util import time_util, output_util, save_state_util
@@ -46,7 +46,7 @@ class OceanTrackerParamsRunner(object):
             # _________ do run ____________________________
             case_info_file= self._run_case()
 
-        except OTerror as e:
+        except OTinput_error as e:
             ml.msg(f'Parameters/setup has errors', hint= 'see above')
             si.msg_logger.write_error_log_file(e, si)
 
@@ -73,8 +73,8 @@ class OceanTrackerParamsRunner(object):
         ml.hori_line()
 
         # write a summary of errors etc
-        ml.msg(f'Finished "{si.run_info.tag}"'
-                           + ',  started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()))
+        ml.msg(f'Finished "{si.run_info.tag}"')
+        ml.msg('\t started: ' + str(self.start_date) + ', ended: ' + str(datetime.now()), wrap=False)
         ml.msg('Computational time = ' + str(datetime.now() - self.start_date) , tabs=3)
         ml.msg(f'Max. memory used {si.run_info.max_memory_usedGB:4.2f} GB', tabs=3)
 
@@ -90,14 +90,14 @@ class OceanTrackerParamsRunner(object):
             ml.msg(f'>>>>>>> Found {num_errors:2d} errors <<<<<<<<<<<<',
                    hint='Look for first error above or below  or in  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
             for v in ml.msg_lists['error']:
-                ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
+                ml._print_msg('\t'+ v)
             for v in ml.msg_lists['fatal_error']:
-                ml.msg('Error >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=0)
+                ml._print_msg('\t'+ v)
             ml.msg('')
 
         if case_info_file is  None:
-            ml.msg('Fatal errors, run did not complete, output in "{si.settings.run_output_dir}"',
-                   hint='check for first error above, log file.txt or .err file ', error=True)
+            ml.msg(f'>>>> Fatal errors, run did not complete',
+                   hint='check for first error above, log file.txt or .err file ')
         else:
             # success!
             if si.run_info.restarting:
@@ -106,9 +106,7 @@ class OceanTrackerParamsRunner(object):
                     ml.msg(f'Run complete: removing saved state folder {si.output_files["saved_state_dir"]}')
                     import shutil
                     shutil.rmtree(si.output_files['saved_state_dir'])
-
-            ml.hori_line(f'Successful completion: output in "{si.settings.run_output_dir}"')
-
+        ml.msg(f'Output in "{si.settings.run_output_dir}"', tabs=1)
         ml.close()
 
         return case_info_file
@@ -131,7 +129,6 @@ class OceanTrackerParamsRunner(object):
                                                              crumbs='Bulding working params ')
         si.add_settings(si.working_params['settings'])
 
-        ml.exit_if_prior_errors('Errors in merge_critical_settings_with_defaults', caller=self)
         ml.msg(f'Started')
 
         ri = si.run_info
@@ -170,8 +167,6 @@ class OceanTrackerParamsRunner(object):
         ml.msg(f' {definitions.package_fancy_name} version {definitions.version["oceantracker_version"]} ')
 
 
-        ml.exit_if_prior_errors('settings/parameters have errors')
-
         pass
 
 
@@ -185,7 +180,6 @@ class OceanTrackerParamsRunner(object):
             else:
                 si.msg_logger.msg(f'setting "add_path: : Cannot find path "{p}" to add to python package path',
                                   error=True)
-        si.msg_logger.exit_if_prior_errors('errors in "add_path" setting')
 
 
 # - -------- start set up---------------------------------------------------------------------
@@ -204,7 +198,6 @@ class OceanTrackerParamsRunner(object):
 
         self._do_run_integrity_checks()
 
-        ml.exit_if_prior_errors('Errors in setup?', caller=self)
 
         # check memory usage
         mem_used = psutil.Process().memory_info().vms
@@ -254,13 +247,13 @@ class OceanTrackerParamsRunner(object):
         for name, item in si.block_timers.items():
             if name in si.block_timers:
                 t = si.block_timers[name]["time"]
-                ml.msg(f'{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
+                ml.msg(f'\t\t{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
 
         # core physics timing
         for name in ['resuspension', 'dispersion', 'tracks_writer', 'integrated_model']:
             if si.core_class_roles[name] is not None:
                 t = si.core_class_roles[name].info["time_spent_updating"]
-                ml.msg(f'{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
+                ml.msg(f'\t\t{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
 
         return case_info_file
 
@@ -300,8 +293,6 @@ class OceanTrackerParamsRunner(object):
         # check all have required, fields, part props and grid data
         for i in si._all_class_instance_pointers_iterator():
             i.check_requirements()
-
-        si.msg_logger.exit_if_prior_errors('errors found in _do_run_integrity_checks')
 
     def _initial_setup_all_classes(self,working_params):
         # initialise all classes, order is important!
@@ -418,7 +409,6 @@ class OceanTrackerParamsRunner(object):
    
         if len(si.class_roles['release_groups']) == 0:
             si.msg_logger.msg('No particle "release_groups" parameters found', error=True, caller=self)
-        si.msg_logger.exit_if_prior_errors('Errors adding release groups?')
 
         # set up to start end times based on release_groups
         # set up release groups and find first release time to start model

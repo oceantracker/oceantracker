@@ -339,8 +339,7 @@ def _catalog_fields(reader, crumbs=None):
 
     # record field map
     info['field_info'] = reader_field_vars_map
-    # add grid variable info
-    si.msg_logger.exit_if_prior_errors('Errors matching field variables with those in the file, see above')
+
 
 def _check_input_dir(reader_params,crumbs=''):
     ml = si.msg_logger
@@ -438,7 +437,7 @@ def _check_time_consistency(reader):
         t1 = reader.info['time_coord'][sel]
         t2 = reader.info['time_coord'][sel+1]
 
-        si.msg_logger.msg('Some hindcast time steps are longer than 3 average time steps',error=True,
+        si.msg_logger.msg('Some hindcast time steps are longer than 3 average time steps',fatal_error=True,
                         hint = f'Hindcast may be missing files or othe time error, eg at {time_util. seconds_to_isostr(t1[0])} to {time_util. seconds_to_isostr(t2[0])}, see hindcast_info.json for full list of dates', warning=True)
 
         for d1,d2  in [ [time_util. seconds_to_isostr(a),time_util. seconds_to_isostr(b) ] for a,b in zip(t1,t2) ]:

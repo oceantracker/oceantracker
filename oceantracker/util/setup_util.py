@@ -166,8 +166,6 @@ def build_working_params(params, msg_logger, crumbs='', caller=None):
             msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
                            crumbs=crumbs, link='parameter_ref_toc')
 
-    msg_logger.exit_if_prior_errors('Errors in decomposing parameters into settings, and classes')
-
     return working_params
 
 def check_python_version(msg_logger):

@@ -5,17 +5,19 @@ import difflib
 from time import sleep
 import inspect
 import shutil, traceback, inspect
+from copy import deepcopy
+import textwrap
 
-
-class OTerror(Exception):
+class OTinput_error(Exception):
     def __init__(self, message='-no error message given',hint=None):
         # Call the base class constructor with the parameters it needs
         msg= 'Error >> ' + message + '\n hint= ' + hint if hint is not None else ' Look at messages above or in .err file'
-        super(OTerror, self).__init__(msg)
+        super(OTinput_error, self).__init__(msg)
 
-class OTfatal_error(OTerror): pass
-class OTunexpected_error(OTerror): pass
+class OTfatal_error(OTinput_error): pass
+class OTunexpected_error(OTinput_error): pass
 
+msg_types_template = dict(fatal_error=[],error=[],warning=[],  strong_warning=[],note=[],deprecated=[])
 class MessageLogger(object ):
     def __init__(self):
 
@@ -33,10 +35,12 @@ class MessageLogger(object ):
             self.links[l[0]]= docs_base_url + l[1]
 
         self.error_file_name = 'error_warnings.err'
+        self.line_length = 100
+        self.hang_indent=2
 
     def reset(self):
 
-        self.msg_lists = dict(fatal_error=[],error=[],warning=[],  strong_warning=[],note=[],deprecated=[])
+        self.msg_lists = deepcopy(msg_types_template)
 
         self.log_file = None
         self.max_warnings = 25
@@ -67,80 +71,68 @@ class MessageLogger(object ):
         return  log_file_name, self.error_file_name
 
     def msg(self, msg_text, note=False,
-            hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,
+            hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,wrap=False,
             possible_values=None, warning=False,strong_warning=False,
             error=False, fatal_error=False, exception = None,
             traceback_str=None, dev=False):
-        
+
+
         if exception is not None:
             fatal_error = True
-        if fatal_error: error = True
 
-        m = ''
+        if fatal_error: fatal_error = error or fatal_error
+
+        m = tabs*'\t' +''
         if dev: m +='Core developer:'
+
         # first line of message
         if error:
-            m = self._append_message(m, '>>> Error: ' + msg_text, tabs)
-            self._add_to_msg_list('error', msg_text, hint, crumbs, caller)
+            m = self._build_msg(msg_text,msg_tag='Error', hint=hint,add_trace=True, wrap = True)
+            self.msg_lists['error'].append(m)
 
         elif warning:
-            m= self._append_message(m,'>>> Warning: ' + msg_text, tabs)
             if  len(self.msg_lists['warning']) > self.max_warnings: return
-            self._add_to_msg_list('warning', msg_text, hint, crumbs, caller)
+            m = self._build_msg(msg_text, msg_tag='Warning', hint=hint, add_trace=True, wrap = True)
+            self.msg_lists['warning'].append(m)
+
         elif strong_warning:
-            m = self._append_message(m, '>>> Strong warning: ' + msg_text, tabs)
-            if len(self.msg_lists['strong_warning']) > self.max_warnings: return
-            self._add_to_msg_list('strong_warning', msg_text, hint, crumbs, caller)
+            if len(self.msg_lists['warning']) > self.max_warnings: return
+            m = self._build_msg(msg_text, msg_tag='Strong warning', hint=hint, add_trace=True, wrap = True)
+            self.msg_lists['strong_warning'].append(m)
 
         elif note:
-            m= self._append_message(m, '>>> Note: ' + msg_text, tabs)
             if len(self.msg_lists['note']) > self.max_warnings: return
-            self._add_to_msg_list('note', msg_text, hint, crumbs, caller)
+            m = self._build_msg(msg_text, msg_tag='Note', hint=hint, add_trace=True, wrap = True)
+            self.msg_lists['note'].append(m)
 
         else:
-            m = self._append_message(m, msg_text, tabs)
+            m = self._build_msg(msg_text, msg_tag=None, hint=hint, add_trace=False, wrap = wrap)
 
         if exception is not None:
-            m = self._append_message(m, 'exception >>: ' + str(exception), tabs + 2)
+            pass
+            #m = self._append_message(m, 'exception >>: ' + str(exception), tabs + 2)
 
         if traceback_str is not None:
-            m = self._append_message(m, 'traceback >>: ' + str(traceback_str), tabs + 2)
+            #m = self._append_message(m, 'traceback >>: ' + str(traceback_str), tabs + 2)
+            pass
 
-        # first line complete
-        if hint is not None:
-            m = self._append_message(m, 'hint: ' + hint, tabs+2)
-
-        if caller is not None and (fatal_error or error or warning or strong_warning):
-            if hasattr(caller,'__class__'):
-                origin = f'In:  role = "{caller.role_name if hasattr(caller,"role_name") else "??"}"'
-                origin += f', class_name = "{caller.__class__.__name__}"'
-                origin += f' \t   ({caller.__class__.__module__}.{caller.__class__.__name__})'
-            else:
-                origin = caller.__name__
-            m = self._append_message(m, f'{origin}', tabs + 3)
-
-        if link is not None:
-            m= self._append_message(m, 'see user documentation: ' + self.links[link], tabs + 3)
 
         # make crumb trail
-        if crumbs is not None and crumbs != '':
-            m =self._append_message(m, f'trail: {crumbs}', tabs + 3)
+        #if crumbs is not None and crumbs != '':
+         #   m =self._append_message(m, f'trail: {crumbs}', tabs + 3)
 
-        if  (fatal_error or error or strong_warning):
-            m = self._append_message(m, 'Trace>>> '+ self.get_trace_back_str(tabs), tabs+6)
+        #if  (fatal_error or error or strong_warning):
+        #    m = self._append_message(m, 'Traceback>>> '+ get_trace_back_str(tabs), tabs+6)
         pass
-        # write message lines
-        for l in  m.split('\n')[:-1]: # drop last \n
-            ll = self.screen_tag + ' ' + l
-            print(ll)
-            if self.log_file is not None:
-                self.log_file.write(ll + '\n')
+
+        # write message
+        self._print_msg(m)
 
         # todo add traceback to message?
         if fatal_error:
-            self._add_to_msg_list('fatal_error', msg_text, hint, crumbs, caller)
-            raise OTerror('Fatal error cannot continue')
+            raise OTinput_error('Fatal error cannot continue')
         pass
+
     def _append_message(self, m, msg, tabs):
         # append allowing  line breaks
         tab = '  '
@@ -150,21 +142,13 @@ class MessageLogger(object ):
 
     def has_errors(self): return  len(self.msg_lists['error']) > 0
 
-    def exit_if_prior_errors(self,msg, caller=None, crumbs=''):
-        if self.has_errors():
-            self.hori_line()
-            self.msg(msg + '>>> Fatal errors, can not continue', crumbs= crumbs, caller=caller)
-            self.show_all_strong_warnings_and_errors()
-            self.hori_line()
-            sleep(1) # allow time for messages to print
-            raise OTerror('Fatal error cannot continue >>> ' + msg if msg is not None else '', hint='Check above or run.err file for errors')
 
     def hori_line(self, text=None):
-        n= 70
         if text is None:
-            self.msg(n*'-')
+            self._print_msg(self.line_length *'-')
         else:
-            self.msg(f"--- {text} {(n-len(text) -5)*'-'}")
+            self.msg(f"--- {text} {(self.line_length-len(text) -5)*'-'}")
+
 
     def progress_marker(self, msg, tabs=0, start_time=None):
         tabs= tabs+1
@@ -176,8 +160,7 @@ class MessageLogger(object ):
 
     def show_all_strong_warnings_and_errors(self):
         for m in self.msg_lists['strong_warning']+ self.msg_lists['error']+ self.msg_lists['fatal_error']:
-
-            self.msg(m['msg'],hint= m['hint'],caller=m['caller'],crumbs=m['crumbs'])
+            self._print_msg(m)
 
 
     def write_error_log_file(self, e, si):
@@ -192,11 +175,7 @@ class MessageLogger(object ):
             f.write('_____ Known warnings and Errors ________________________________\n')
             for l, ml in self.msg_lists.items():
                 for m in ml:
-                    f.write( f'{l} >>> {m["msg"]} \n')
-                    f.write(f'\t\t hint  : {m["hint"]}\n')
-                    f.write(f'\t\t crumbs: {m["crumbs"]} \n')
-                    f.write(f'\t\t caller: {m["caller"]} \n')
-
+                    f.write( m)
             f.write('________Trace back_____________________________\n')
             f.write(str(e))
             f.write(tb)
@@ -204,21 +183,35 @@ class MessageLogger(object ):
     def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='', caller=None, link=None,
                     fatal_error=True):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
-
         known = list(possible_values)
-        if key not in known:
-            # flag if unknown
-            self.msg(msg, tabs=tabs,caller=caller, error=True)
+        if key in known : return
 
-            self.msg(f'Closest matches to "{key}" are :',tabs=tabs +3)
-            o = difflib.get_close_matches(key, known, cutoff=0.5, n=4)
-            if len(o) > 0:
-                for n ,t in enumerate(o):
-                    self.msg(f'{n+1}: "{t}"',tabs=tabs+7)
-            else:
-                self.msg(f'>> None found',tabs=tabs+7,
-                         hint=f'Possible values = {str(known)}')
-            self.msg('Unknown  values, look above for suggestions', hint=hint,crumbs=crumbs, tabs=tabs,caller=caller, fatal_error=True)
+        m = 'Error >>>' + msg
+        hand_indent = 2
+        off = '\n' + 2 * hand_indent * '\t'
+        if caller is not None:
+            m += off + f'{self._get_caller_info(caller)}'
+
+
+        # flag if unknown
+        m += off + f'Closest matches to "{key}" are :'
+        o = difflib.get_close_matches(key, known, cutoff=0.5, n=4)
+        if len(o) > 0:
+            for n ,t in enumerate(o):
+                m += off + hand_indent*'\t'+ f'{n+1}: "{t}"'
+        else:
+            m += off+ f'>> None found'
+            m += off + self._add_long_line(f'hint=Possible values = {str(known)}',
+                                           tabs =2 * hand_indent,
+                                           hand_indent=hand_indent)
+
+        t = self._get_trace_back_str(tabs=3)
+        m += '\n' + self._add_long_line(f'trace: {t}', tabs= 2 * hand_indent, hand_indent=hand_indent, wrap=True)
+
+        self.msg_lists['error'].append(m)
+        self._print_msg(m)
+        self._input_error()
+
         pass
 
 
@@ -239,12 +232,60 @@ class MessageLogger(object ):
             self.log_file = None
 
 
-    def _add_to_msg_list(self,msg_type,msg,hint,crumbs, caller):
-        self.msg_lists[msg_type].append(
-            dict(msg=msg, hint=hint, crumbs=crumbs, caller=str(caller))
-        )
+    # utility code
+    def _add_long_line(self,txt,tabs,wrap, hand_indent=2):
+        #add wordrap if needed
+        if not wrap: return txt
 
-    def get_trace_back_str(self,tabs):
+        if len(txt) == 0: return ''
+        w= textwrap.wrap(txt, width=self.line_length,  initial_indent=tabs*'\t', subsequent_indent=(tabs+hand_indent)*'\t', expand_tabs=False,
+                      replace_whitespace=True, fix_sentence_endings=False, break_long_words=True, drop_whitespace=True,
+                      break_on_hyphens=True)
+        m = ''
+        for l in w[:-1]: m += l + '\n'
+        m += w[-1]
+        return m
+
+
+    def _build_msg(self,msg, msg_tag=None,hint=None,add_trace=False,caller=None, wrap = False):
+
+        m = f'{msg_tag} >>> ' if msg_tag is not None else ''
+        m += self._add_long_line(msg,tabs=0, hand_indent=4, wrap= wrap)
+
+
+        if caller is not None:
+            m += self.hang_indent*'\t' + f'{self._get_caller_info(caller)}'
+
+        if hint is not None:
+            m += '\n'+ self._add_long_line(f'hint: {hint}',tabs=4, hand_indent=4,wrap = True)
+
+
+        #if link is not None:
+        #    m= self._append_message(m, 'see user documentation: ' + self.links[link], tabs + 3)
+
+        if add_trace:
+            t = self._get_trace_back_str(tabs=3)
+            m += '\n' + self._add_long_line(f'trace: {t}', tabs=6, hand_indent=2,wrap=True)
+        return m
+
+    def _print_msg(self,msg):
+        # write message lines
+        txt= f'{self.screen_tag} {msg}'
+        print(txt)
+        if self.log_file is not None:
+            self.log_file.write(txt + '\n')
+
+    def _get_caller_info(self,caller):
+        if caller is not None:
+            if hasattr(caller, '__class__'):
+                origin = f'In:  role = "{caller.role_name if hasattr(caller, "role_name") else "??"}"'
+                origin += f', class_name = "{caller.__class__.__name__}"'
+                origin += f' \t   ({caller.__class__.__module__}.{caller.__class__.__name__})'
+            else:
+                origin = caller.__name__
+            return  origin
+
+    def _get_trace_back_str(self,tabs=0):
 
         s = inspect.stack()
         trail = []
@@ -254,10 +295,22 @@ class MessageLogger(object ):
         pass
 
         result=''
-        for  count, f in enumerate(trail[2:-2]):
+        for  count, f in enumerate(trail[3:-2]):
             if (count+1) % 7 == 0 :
                 result +='\n' + ((count % 7))*'\t'
-            result += f'{f["function"]}:{f["line"]} < '
+            result += f'{f["function"]} ({f["line"]}) < '
 
         return result
+
+    def _input_error(self):
+        raise( OTinput_error('Fatal input errors cannot continue'))
+
+
+
+
+
+
+
+
+
 

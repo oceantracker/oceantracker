@@ -66,7 +66,6 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
                               hint=f'Grid center has {params["grid_center"].shape[0]} values  and grid span is size  {str(params["grid_span"].shape)}',
                              fatal_error=True, caller=self)
 
-        si.msg_logger.exit_if_prior_errors('LSC error??', caller=self)
         # set up lCS grid
         r, c = params['grid_size']
 

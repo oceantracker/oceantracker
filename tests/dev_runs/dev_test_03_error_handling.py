@@ -51,6 +51,7 @@ def main(args=None):
     ot.add_class('particle_statistics', **dd.my_heat_map3D_time)
     ot.add_class('particle_statistics', **dd.my_heat_map2D_time_runningMean)
 
+
     case_info_file = ot.run()
 
 
