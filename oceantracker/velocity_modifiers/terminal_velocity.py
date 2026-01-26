@@ -6,14 +6,19 @@ from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import shared_info as si
 
 class TerminalVelocity(_VelocityModiferBase):
-    # add terminal velocity to particle velocity  < 0 is downwards ie sinking
+    '''
+    Add a terminal velocity to particle velocity  > 0 is upwards, < 0 downwards,
+    Can set a mean terminal velocity and optionally its variance,
+    so that individual particles have a terminal velocity based on a normal distribution
+    '''
 
     def __init__(self,):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
-        self.add_default_params(value= PVC(0.,float, doc_str='Terminal velocity positive upwards, ie fall velocities are < 0 '),
+        self.add_default_params(value= PVC(0.,float, doc_str='Terminal velocity positive upwards, ie fall velocities are < 0 ', units='m/s'),
                                  mean= PVC(0., float, obsolete=True, doc_str='use "value" parameter for mean of distibution'),
-                                 variance= PVC(None, float, min=0., doc_str='variance of normal distribution of terminal velocity, used to give each particles its own terminal velocity from random normal distribution'),
+                                 variance= PVC(None, float, min=0., units='m/s',
+                                               doc_str='variance of normal distribution of terminal velocity, used to give each particles its own terminal velocity from random normal distribution'),
                                  )
 
     def add_required_classes_and_settings(self):
