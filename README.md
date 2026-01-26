@@ -20,13 +20,15 @@ OceanTracker code is highly flexible and extendable by the user, whether run by 
 parameters, or by an expert adding their specialised code for novel particle behaviours or statistics, to the computational pipe line
 
 
-[More about Ocean tracker and gallery](https://oceantracker.github.io/oceantracker/)
+[More about OceanTracker](https://oceantracker.github.io/oceantracker/)
 
-[Installing Oceantracker](https://oceantracker.github.io/oceantracker/info/installing.html)
+[Gallery](https://oceantracker.github.io/oceantracker/overview/gallery.html)
 
-[Running Oceantracker ](https://oceantracker.github.io/oceantracker/info/running_ocean_tracker.html)
+[Installing OceanTracker](https://oceantracker.github.io/oceantracker/getting_started/installing.html)
 
-[Howto tutorials](https://oceantracker.github.io/oceantracker/info/how_to.html)
+[Beginners guide](https://oceantracker.github.io/oceantracker/getting_started/quickstart.html)
+
+[Tutorials](https://oceantracker.github.io/oceantracker/getting_started/how_to.html)
 
 [1] Vennell, R.,Steidle. L.,  Scheel, M.,Chaput. R., Knight, B. and Smeaton, M, OceanTracker 0.5: Fast Adaptable Lagrangian Particle Tracking in
 Structured and Unstructured Grid, preprint, https://eartharxiv.org/repository/view/8387/ 
