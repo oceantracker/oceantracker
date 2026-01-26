@@ -33,13 +33,6 @@ def main(args=None):
     ot.add_class('release_groups',**dd.rg_release_interval0)
     ot.add_class('release_groups', **dd.rg_start_in_datetime1)
 
-    #ot.add_class('trajectory_modifiers', class_name='oceantracker.trajectory_modifiers.surface_float.SurfaceFloat', name='surface')
-
-    # add a decaying particle property,# with exponential decay based on age
-    ot.add_class('particle_properties', **dd.pp1) # add a new property to particle_properties role
-    ot.add_class('particle_properties',name='water_speed', class_name='VectorMagnitude2D',vector_part_prop='water_velocity')
-    ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay')
-    ot.add_class('particle_properties', class_name='DistanceTravelled')
 
     # add a gridded particle statistic to plot heat map
     ot.add_class('particle_statistics',**dd.my_heat_map_time)
@@ -57,9 +50,13 @@ def main(args=None):
         case 1:
             # bad class name
             ot.add_class('particle_properties', class_name='AgeDecayx', name='test_decay')
+        case 2:
+            # bad class name
+            ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay', decay_time_scale='')
+
         case 5:
             # repeat add
-            ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay')
+            ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay',decay_time_scale='')
 
     case_info_file = ot.run()
 

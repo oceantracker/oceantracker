@@ -24,16 +24,6 @@ class MessageLogger(object ):
 
         self.reset()
         self.set_screen_tag('prelim')
-
-        # build links lookup
-        link_map= [['parameter_ref_toc', 'info/parameter_ref/parameter_ref_toc.html'],
-                   ['release_groups', 'info/parameter_ref/release_groups_toc.html'],
-                   ['howto_release_groups', 'info/how_to/C_release_groups.html']
-                    ]
-        self.links={}
-        for l in link_map:
-            self.links[l[0]]= docs_base_url + l[1]
-
         self.error_file_name = 'error_warnings.err'
         self.line_length = 100
         self.hang_indent=2
@@ -75,7 +65,7 @@ class MessageLogger(object ):
             warning=False,strong_warning=False, error=False, fatal_error=False,
             dev=False):
 
-        if fatal_error: fatal_error = error or fatal_error
+        error = error or fatal_error
 
         m = tabs*'\t' +''
         if dev: m +='Core developer:'
@@ -107,9 +97,7 @@ class MessageLogger(object ):
         # write message
         self._print_msg(m)
 
-        # todo add traceback to message?
-        if fatal_error:
-            raise OTinput_error('Fatal error cannot continue')
+        if error: raise OTinput_error('Fatal error cannot continue')
         pass
 
 
@@ -173,6 +161,8 @@ class MessageLogger(object ):
                                            tabs =2 * hand_indent,
                                            hand_indent=hand_indent)
 
+        m = self._add_doc_html_link(m, caller, 2 * hand_indent)
+
         t = self._get_trace_back_str(tabs=3)
         m += '\n' + self._add_long_line(f'trace: {t}', tabs= 2 * hand_indent, hand_indent=hand_indent, wrap=True)
 
@@ -222,14 +212,12 @@ class MessageLogger(object ):
 
 
         if caller is not None:
-            m += self.hang_indent*'\t' + f'{self._get_caller_info(caller)}'
+            m += '\n'+ 2*self.hang_indent*'\t' + f'{self._get_caller_info(caller)}'
 
         if hint is not None:
             m += '\n'+ self._add_long_line(f'hint: {hint}',tabs=4, hand_indent=4,wrap = True)
 
-
-        #if link is not None:
-        #    m= self._append_message(m, 'see user documentation: ' + self.links[link], tabs + 3)
+        m = self._add_doc_html_link(m, caller, 3)
 
         if add_trace:
             t = self._get_trace_back_str(tabs=3)
@@ -252,6 +240,30 @@ class MessageLogger(object ):
             else:
                 origin = caller.__name__
             return  origin
+
+    def _add_doc_html_link(self,m, caller,tabs):
+        import requests
+        if caller is  None or not  hasattr(caller, '__class__'):  return m
+
+        role= caller.role_name if hasattr(caller, "role_name") else None
+        name =  caller.__class__.__name__
+
+        # https://oceantracker.github.io/oceantracker/documentation/api_ref/dispersion_toc.html
+        # add class link
+        url = f'{docs_base_url}/documentation/api_ref/{name}.html'
+        response = requests.get(f'{docs_base_url}/documentation/api_ref/{name}.html' )
+        if response.status_code == 200:
+            m+= '\n' + tabs*'\t' + f'Docs for "{name}": {url}'
+
+        url = f'{docs_base_url}/documentation/api_ref/{role}_toc.html'
+        response = requests.get(f'{docs_base_url}/documentation/api_ref/{name}.html')
+        if response.status_code == 200:
+            m += '\n' + tabs * '\t' + f'Other classes in role "{role}": {url}'
+
+        return m
+
+
+
 
     def _get_trace_back_str(self,tabs=0):
 

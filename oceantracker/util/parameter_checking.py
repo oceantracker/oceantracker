@@ -152,11 +152,11 @@ class ParamValueChecker(_ParameterBaseDataClassChecker):
             msg_logger.msg(f'{msg}, is not required data type, got type {type(value)}, value given =  {str(value)}',
                            hint =f'Must be one of types {_fundamental_types[self.data_type]}',
                            caller=caller, error=True)
+
         if self.possible_values is not None and value not in self.possible_values:
             msg_logger.msg(f'{msg}, unexpected value="{str(value)}"',
                            hint=f'Must be one of {str(self.possible_values)}',
                            caller=caller, error=True)
-            return None
 
         # check max/mins
         if self.data_type in [ float, int]:

@@ -31,7 +31,7 @@ version.update(
 
 
 
-docs_base_url= 'https://oceantracker.github.io/oceantracker/_build/html/'
+docs_base_url= 'https://oceantracker.github.io/oceantracker/'
 package_dir = path.dirname(__file__)
 ot_root_dir = path.dirname(package_dir)
 default_output_dir = path.join(path.dirname(ot_root_dir),'oceantracker_output')
