@@ -9,13 +9,12 @@ from oceantracker.util.ncdf_util import  NetCDFhandler
 from oceantracker.util import  output_util
 from oceantracker.util.basic_util import nopass
 from oceantracker.util.numba_util import njitOT, njitOTparallel
-from numba  import prange
-
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.shared_info import shared_info as si
+from oceantracker.util.basic_util import get_role_from_base_class_file_name
 
 class _BaseEventLogger(ParameterBaseClass):
-
+    role_name = get_role_from_base_class_file_name(__file__)
     def __init__(self):
         super().__init__()
         # set up info/attributes

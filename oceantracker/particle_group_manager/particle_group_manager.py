@@ -9,12 +9,14 @@ from  oceantracker.particle_group_manager.util import  pgm_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_properties._base_particle_properties import FieldParticleProperty,ManuallyUpdatedParticleProperty,CustomParticleProperty
 from oceantracker.util import  basic_util
+from oceantracker.util.basic_util import get_role_from_base_class_file_name
+
 class ParticleGroupManager(ParameterBaseClass):
     '''
     holds and provides access to different types a  particle properties, eg position, field properties, custom properties
     manages particle buffers size, periodically culls dead particles
     '''
-
+    role_name = get_role_from_base_class_file_name(__file__)
 
     def __init__(self):
         # set up info/attributes

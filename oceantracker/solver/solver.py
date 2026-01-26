@@ -10,10 +10,11 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
 from oceantracker.shared_info import shared_info as si
+from oceantracker.util.basic_util import get_role_from_base_class_file_name
 
 class Solver(ParameterBaseClass):
     ''' Does particle tracking solution '''
-
+    role_name = get_role_from_base_class_file_name(__file__)
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults

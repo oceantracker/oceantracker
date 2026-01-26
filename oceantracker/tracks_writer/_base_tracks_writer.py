@@ -8,11 +8,13 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from datetime import datetime
 from oceantracker.util.profiling_util import  function_profiler
 from oceantracker.shared_info import shared_info as si
+from oceantracker.util.basic_util import get_role_from_base_class_file_name
 # class to write with, outline methods needed
 # a non-writer, as all methods are None
 
 class _BaseWriter(ParameterBaseClass):
     # particle property  write modes,   used to set when to write  properties to output, as well as if to calculate at all
+    role_name = get_role_from_base_class_file_name(__file__)
     def add_required_classes_and_settings(self,**kwargs):
         # dev holds last time step written to file, to allow filling values after this when reading into rectangular form
         si.add_class('particle_properties', name='last_written_time_steps_written', class_name='ManuallyUpdatedParticleProperty',

@@ -10,9 +10,10 @@ from numba.typed import List as NumbaList
 from oceantracker.util import cord_transforms
 from oceantracker.particle_statistics.util import stats_util
 from oceantracker.shared_info import shared_info as si
+from oceantracker.util.basic_util import get_role_from_base_class_file_name
 
 class _BaseParticleLocationStats(ParameterBaseClass):
-
+    role_name = get_role_from_base_class_file_name(__file__)
 
     def __init__(self):
         # set up info/attributes

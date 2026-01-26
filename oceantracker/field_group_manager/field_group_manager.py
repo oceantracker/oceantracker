@@ -5,12 +5,13 @@ from oceantracker.field_group_manager.util import field_group_manager_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.interpolator.util import  triangle_eval_interp
 from oceantracker.field_group_manager import setup_reader
+from oceantracker.util.basic_util import get_role_from_base_class_file_name
 
 class FieldGroupManager(ParameterBaseClass):
     # class holding data in file and ability to spatially interpolate fields that it holds
     #   all the fields in a file and interpolation which belongs to the set of fields (rather than individual variable)
     # works with 2D or 3D  with appropriate interplotor
-
+    role_name = get_role_from_base_class_file_name(__file__)
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
