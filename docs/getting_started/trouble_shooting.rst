@@ -45,8 +45,8 @@ When reporting an error, please:
 
 1. Rerun the code with setting ``debug = True``, which may give more informative error messages.
 2. Add the following files to the report:
-    * ``*_log.txt``, screen log
-    * ``*_caseInfo.json``, lots of useful info
-    * ``*_raw_user_params.json``, the raw user supplied settings/parameters
+    * ``log.txt``, screen log
+    * ``caseInfo.json``, lots of useful info
+    * ``raw_user_params.json``, the raw user supplied settings/parameters
 
 Either send them via mail, or open a `GitHub issue: <https://github.com/oceantracker/oceantracker/issues>`_.

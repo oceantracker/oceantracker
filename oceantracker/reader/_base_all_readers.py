@@ -8,7 +8,7 @@ from oceantracker.util import time_util, ncdf_util, numba_util
 from datetime import datetime
 from os import path
 from time import perf_counter
-from oceantracker.util.basic_util import nopass
+from oceantracker.util.basic_util import nopass, get_role_from_base_class_file_name
 import oceantracker.reader.util.hydromodel_grid_transforms as hydromodel_grid_transforms
 from oceantracker.util.triangle_utilities import split_quad_cells
 from oceantracker.util.cord_transforms import fix_any_spanning180east
@@ -20,7 +20,7 @@ from oceantracker.reader.util import reader_util
 from oceantracker.shared_info import shared_info as si
 
 class _BaseReader(ParameterBaseClass):
-
+    role_name = get_role_from_base_class_file_name(__file__)
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
@@ -198,8 +198,7 @@ class _BaseReader(ParameterBaseClass):
                 grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
 
             # fix any spanning 179 to -179
-            fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
-                                                crumbs=f'setting up reader in dir=  {self.params["input_dir"]}')
+            fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self)
             # set up conversion of meters to degreees
             i = self._add_a_reader_field('degrees_per_meter', dict(time_varying=False, is3D=False, is_vector=True,
                               write_interp_particle_prop_to_tracks_file=False),  dummy=True)
@@ -376,7 +375,7 @@ class _BaseReader(ParameterBaseClass):
         i = si.class_importer.make_class_instance_from_params('fields', params,
                                        add_required_classes_and_settings=False,
                                         default_classID='field_reader',initialize=False,
-                                        check_for_unknown_keys=False, crumbs=f'Adding reader field "{name}"')
+                                        check_for_unknown_keys=False)
         i.initial_setup(info)
 
         # add variable info on file variables list for reader fields

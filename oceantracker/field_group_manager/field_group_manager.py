@@ -5,12 +5,13 @@ from oceantracker.field_group_manager.util import field_group_manager_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.interpolator.util import  triangle_eval_interp
 from oceantracker.field_group_manager import setup_reader
+from oceantracker.util.basic_util import get_role_from_base_class_file_name
 
 class FieldGroupManager(ParameterBaseClass):
     # class holding data in file and ability to spatially interpolate fields that it holds
     #   all the fields in a file and interpolation which belongs to the set of fields (rather than individual variable)
     # works with 2D or 3D  with appropriate interplotor
-
+    role_name = get_role_from_base_class_file_name(__file__)
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
@@ -64,7 +65,7 @@ class FieldGroupManager(ParameterBaseClass):
         self.interpolator.final_setup()
 
         # add tidal stranding class
-        i = si.add_class('tidal_stranding', {}, crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', caller=self)
+        i = si.add_class('tidal_stranding', {}, caller=self)
         self.tidal_stranding = i
 
         # write_grid
@@ -161,7 +162,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def _make_a_reader(self, reader_params):
         # build a readers
-        reader = setup_reader.make_a_reader_from_params(reader_params, si.settings,  crumbs='')
+        reader = setup_reader.make_a_reader_from_params(reader_params, si.settings)
         reader.initial_setup()
         reader.final_setup()
 
@@ -319,8 +320,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
         i = si.class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
-                                             default_classID='interpolator', caller= self,
-                                             crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
+                                             default_classID='interpolator', caller= self)
         i.initial_setup(reader)
         return i
 

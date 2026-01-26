@@ -45,6 +45,8 @@ def atLeast_Nby1(y):
     else:
         return y
 
+def get_role_from_base_class_file_name(base_class_file_name):
+    return path.basename(path.dirname(base_class_file_name))
 
 def fillvalue(dtype:str):
     '''value to fill array '''

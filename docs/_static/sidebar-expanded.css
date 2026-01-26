@@ -1,0 +1,76 @@
+/* Force the sidebar TOC to be expanded by default */
+
+/* Show all nested ul elements in the TOC */
+.toctree-l1 > ul,
+.toctree-l2 > ul,
+.toctree-l3 > ul {
+    display: block !important;
+}
+
+/* Ensure nested items are visible */
+.toctree-l2,
+.toctree-l3,
+.toctree-l4 {
+    display: list-item !important;
+}
+
+/* If the theme uses collapsible sections, keep them open */
+.sidebar-tree li.has-children > ul {
+    display: block !important;
+    max-height: none !important;
+}
+
+/* For sphinxawesome theme specifically - keep all TOC items expanded */
+aside.sidebar nav ul ul {
+    display: block !important;
+}
+
+/* Ensure the expand/collapse icon (if any) shows as expanded */
+.toctree-expand {
+    transform: rotate(90deg) !important;
+}
+
+/* Alternative selectors for different Sphinx themes */
+nav.bd-links li.toctree-l1 > ul,
+nav.bd-links li.toctree-l2 > ul {
+    display: block !important;
+}
+
+/* For sphinx-awesome theme sidebar */
+.toc-tree ul {
+    display: block !important;
+}
+
+.toc-tree li > ul {
+    display: block !important;
+}
+
+/* Force visibility of all navigation items */
+nav.sidebar-navigation ul ul {
+    display: block !important;
+    visibility: visible !important;
+    height: auto !important;
+    max-height: none !important;
+}
+
+/* Remove any hidden class that might be applied */
+.toctree-l1.hidden,
+.toctree-l2.hidden,
+.toctree-l3.hidden {
+    display: list-item !important;
+}
+
+/* Sphinx awesome theme specific overrides */
+.toctree-wrapper ul ul {
+    display: block !important;
+}
+
+/* Global TOC specific styles */
+.globaltoc ul ul {
+    display: block !important;
+}
+
+.globaltoc li.toctree-l1 > ul,
+.globaltoc li.toctree-l2 > ul {
+    display: block !important;
+}

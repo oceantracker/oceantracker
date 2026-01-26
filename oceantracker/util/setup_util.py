@@ -16,8 +16,7 @@ from glob import glob
 def setup_output_dir():
     # set up output folder, when root_output_dir and output_file_base are required settings
     # check output_file_base is not dir, just a test
-    crumbs = 'setup_output_dir'
-    
+
     # cope with deprecated params
     if si.settings.run_output_dir is not None:
         run_output_dir = path.abspath(si.settings.run_output_dir)
@@ -57,7 +56,6 @@ def setup_output_dir():
 def setup_restart_continuation():
 
     ml = si.msg_logger
-    crumbs = 'setup_restart_continuation'
     saved_state_info = None
     of = si.output_files
 
@@ -66,7 +64,7 @@ def setup_restart_continuation():
         fn = path.join(of['saved_state_dir'], 'state_info.json')
         if not path.isfile(fn):
             ml.msg('Cannot find save_state.json to restart run, to save state rerun with  setting restart_interval',
-                   fatal_error=True, hint=f'missing file  {fn}',crumbs=crumbs )
+                   fatal_error=True, hint=f'missing file  {fn}')
         saved_state_info = json_util.read_JSON(fn)
         ml.msg(f'>>>>> restarting failed run at {time_util.seconds_to_isostr(saved_state_info["restart_time"])}')
 
@@ -77,25 +75,24 @@ def setup_restart_continuation():
         # find previous run
         if not path.isdir(prior_run_output_dir):
             ml.msg(f'Cannot find output dir of previous run to continue "{si.settings.continue_from}"',
-                            fatal_error=True, crumbs=crumbs, hint= f'Check dir in continue_from setting')
+                            fatal_error=True, hint= f'Check dir in continue_from setting')
 
         # check new run has different run_output dir
         if path.abspath(of['run_output_dir']) == prior_run_output_dir:
             ml.msg(f'The run continuation output cannot be written to same dir as the prevouis run "{si.settings.continue_from}"',
-                       fatal_error=True, crumbs=crumbs, hint=f'Ensure output_file_base names for prio and continued run are different')
+                       fatal_error=True, hint=f'Ensure output_file_base names for prio and continued run are different')
 
         # check if continuation state exists
         prior_state_dir = path.join(prior_run_output_dir, of['completion_state_dir'])
         if not path.isdir(prior_state_dir) :
             ml.msg( f'Cannot find completion_state dir in previous run"{prior_state_dir}"',
-            fatal_error=True, crumbs=crumbs,
-            hint=f'To continue a run, previous run must have setting continuable=True')
+            fatal_error=True,  hint=f'To continue a run, previous run must have setting continuable=True')
 
         #load state info
         fn = path.join(prior_state_dir, 'state_info.json')
         if not path.isfile(fn):
             ml.msg('Cannot find save_state.json to continue the run',
-                   fatal_error=True, hint=f'missing file  {fn}',crumbs=crumbs )
+                   fatal_error=True, hint=f'missing file  {fn}' )
 
         # load continuation state json file
         saved_state_info = json_util.read_JSON(fn)
@@ -117,9 +114,8 @@ def write_raw_user_params(output_files, params,msg_logger):
     json_util.write_JSON(path.join(output_files['run_output_dir'],  fn),params)
     msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
 
-def build_working_params(params, msg_logger, crumbs='', caller=None):
+def build_working_params(params, msg_logger,  caller=None):
 
-    crumbs += '> decompose_params'
     working_params = dict(settings= {},
              core_class_roles = {k: None for k in si.core_class_roles.possible_values()},  # insert full list and defaults
              class_roles = {k: [] for k in si.class_roles.possible_values()},
@@ -136,13 +132,14 @@ def build_working_params(params, msg_logger, crumbs='', caller=None):
     for key, item in params.items():
         k = copy(key)
         if len(k) != len(k.strip()):
-            msg_logger.msg(f'Removing leading or trailing blanks from top level parameter key "{key}"', warning=True, crumbs=crumbs,caller=caller)
+            msg_logger.msg(f'Removing leading or trailing blanks from top level parameter key "{key}"', warning=True, caller=caller)
             k = key.strip()  # remove leading/trailing blanks
 
         if type(item) == tuple:
             # check item not a tuple
-            msg_logger.msg(f'Top level parameters must be key : value pairs of a dictionary, got a tuple for key= "{key}", value= "{str(item)}"', error=True, crumbs=crumbs,
-                   hint='is there an un-needed comma at the end of the parameter/line?, if a tuple was intentional, then use a list instead', caller=caller)
+            msg_logger.msg(f'Top level parameters must be key : value pairs of a dictionary, got a tuple for key= "{key}", value= "{str(item)}"',
+                    error=True, caller=caller,
+                   hint='is there an un-needed comma at the end of the parameter/line?, if a tuple was intentional, then use a list instead')
 
         elif key == 'reader':
             working_params['reader']= item
@@ -160,13 +157,11 @@ def build_working_params(params, msg_logger, crumbs='', caller=None):
                 msg_logger.msg(f'Params under role key "{k}" must be a list of parameter dictionaries with "class_name" and optional internal "name"'
                                +'\n Roles changed from dict type to list type in new version',
                                        hint =f'Got type {str(type(item))}, value={str(item)}' ,
-                                       crumbs=crumbs, error=True)
+                                       error=True)
             working_params['class_roles'][k] = item
         else:
             msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
-                           crumbs=crumbs, link='parameter_ref_toc')
-
-    msg_logger.exit_if_prior_errors('Errors in decomposing parameters into settings, and classes')
+                                        link='parameter_ref_toc')
 
     return working_params
 
@@ -179,13 +174,10 @@ def check_python_version(msg_logger):
         p_minor= v['python_minor_version']
         install_hint = 'Install Python 3.10 or used environment310.yml to build a Conda virtual environment named oceantracker'
         if not ( p_major > 2 and p_minor >= 9):
-            ml.msg('Oceantracker requires Python 3 , version >= 3.10  and < 3.11',
+            ml.msg('Oceantracker requires Python 3 , version >= 3.10',
                          hint=install_hint, warning=True, tabs=1)
-        if (p_major == 3 and p_minor >= 12):
-            ml.msg(f'Oceantracker is compatible with Python {p_major}{p_minor},  however not all external imported packages have been updated to be compatible with 3.12', warning=True,
-                   hint='Down grade to python 3.11 if unexplained issues in external packages')
 
-def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', caller = None):
+def config_numba_environment_and_random_seed(settings, msg_logger, caller = None):
     # set numba config via environment variables,
     # this must be done before first import of numba
 
@@ -221,7 +213,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     if 'numba' in sys.modules:
         msg_logger.msg('Numba has already been imported, some numba options may not be used (ignore SVML warning)',
                        hint='Ensure any code using Numba is imported after Oceantracker is run, eg Oceantrackers "load_output_files.py" and "read_ncdf_output_files.py"',
-                       warning=True)
+                       warning=True,caller=caller)
     else:
         environ['NUMBA_NUM_THREADS']  = str(max_threads)
 
@@ -232,6 +224,7 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
 
     msg_logger.hori_line()
     msg_logger.msg(f'Numba setup: applied settings, max threads = {max_threads}, physical cores = {physical_cores}',
+                    caller = caller ,
                     hint=f" cache code = { settings['NUMBA_cache_code']}, fastmath= {settings['NUMBA_fastmath']}")
     msg_logger.hori_line()
     # make buffer to hold indicies found by each thread
@@ -243,13 +236,14 @@ def config_numba_environment_and_random_seed(settings, msg_logger, crumbs='', ca
     if settings['use_random_seed']:
             np.random.seed(0)  # set numpy
             set_seed(0) # set numba seed which is different from numpys
-            msg_logger.msg('Using numpy.random.seed(0),seed_numba_random(0) makes results reproducible (only use for testing developments give the same results!)', warning=True)
+            msg_logger.msg('Using numpy.random.seed(0),seed_numba_random(0) makes results reproducible (only use for testing developments give the same results!)',
+             caller=caller,warning=True)
 
 
 
-def _build_working_params(params, msg_logger, crumbs=''):
+def _build_working_params(params, msg_logger):
     # slit params into settings, core_class_params and close_role params and merge settings
-    crumbs += 'build_working_params'
+
     ml = msg_logger
     if type(params) != dict:
         ml.msg('Parameters must be of type dict, ', hint=f'Got type {str(type(params))} ',
@@ -259,7 +253,7 @@ def _build_working_params(params, msg_logger, crumbs=''):
     if 'reader' not in params or len(params['reader']) < 2:
         ml.msg('Parameter "reader" is required, or missing required parameters',
                hint='Add a "reader" top level key to parameters with a dictionary containing  at least "input_dir" and "file_mask" keys and values',
-               error=True, crumbs='case_run_set_up')
+               error=True)
 
     # split apart params and case list
 
@@ -269,12 +263,11 @@ def _build_working_params(params, msg_logger, crumbs=''):
             hint='Remove case_list argument and merge parameters with base case and computations  will automatically be run on parallel threads by default',
             fatal_error=True)
 
-    working_params = build_working_params(params, msg_logger=ml,
-                                          crumbs=crumbs + ' Forming working params ')
+    working_params = build_working_params(params, msg_logger=ml)
 
     # get defaults of settings only
     working_params['settings'] = parameter_checking.merge_params_with_defaults(working_params['settings'],
-                                                        si.default_settings.asdict(), ml, crumbs=crumbs +'> Settings>')
+                                                        si.default_settings.asdict(), ml)
     return working_params
 
 

@@ -38,8 +38,6 @@ version = release
 extensions = [
     'sphinx.ext.githubpages',
     'sphinx_toolbox.collapse',
-    'nbsphinx',
-    'rst2pdf.pdfbuilder',
     'sphinx_design',
 ]
 
@@ -72,6 +70,8 @@ html_static_path = ['_static']
 # removes the table frame
 html_css_files = [
     'custom.css',
+    'sidebar-expanded.css',
+    'toc-indentation.css',
 ]
 
 # Custom sidebar templates
@@ -87,6 +87,6 @@ html_css_files = [
 # Theme options are theme-specific and customize the look and feel
 html_theme_options = {
     'show_prev_next': True,
-    'globaltoc_collapse': False,  # Keep TOC expanded
-    'globaltoc_maxdepth': 2,      # Show 2 levels by default
+    'globaltoc_collapse': False,
+    'globaltoc_maxdepth': 3,
 }

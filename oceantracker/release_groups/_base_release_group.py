@@ -6,9 +6,11 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 from numba import njit
 from oceantracker.util.numba_util import njitOT
 from oceantracker.util.basic_util import nopass
+from oceantracker.util import basic_util
 from oceantracker.shared_info import shared_info as si
 
 class _BaseReleaseGroup(ParameterBaseClass):
+
     def __init__(self):
         super().__init__() # get parent defaults
         self.add_default_params(

@@ -11,7 +11,7 @@ from copy import copy, deepcopy
 
 # run fields nested with outer main readers grid
 
-class DevNestedFields(ParameterBaseClass):
+class NestedFields(ParameterBaseClass):
     ''' Core class. Builds a list of field group managers for outer and nested grids and manages
     assignment to the different using a list of field group managers to carry out update, field interpolation etc
      First in list grid is the outer grid.
@@ -32,7 +32,7 @@ class DevNestedFields(ParameterBaseClass):
         # make outergrid field manager
         fgm_outer_grid = si.class_importer.make_class_instance_from_params('field_group_manager',
                            {}, default_classID='field_group_manager',
-                               caller= self, crumbs='adding outer hydro-grid field manager for nested grid run')
+                               caller= self)
         fgm_outer_grid.initial_setup(gridID=0,  caller=self)
         fgm_outer_grid.build_reader_fields()
 
@@ -63,7 +63,7 @@ class DevNestedFields(ParameterBaseClass):
 
             t0= perf_counter()
             fgm_nested =  si.class_importer.make_class_instance_from_params('field_group_manager', {}, default_classID='field_group_manager',
-                                                 caller=caller, crumbs=f'adding nested hydro-model field manager #{len(self.fgm_hydro_grids)}')
+                                                 caller=caller)
 
             fgm_nested.initial_setup(gridID=n+1, caller=caller)
             fgm_nested.build_reader_fields()
@@ -75,8 +75,6 @@ class DevNestedFields(ParameterBaseClass):
             self.fgm_hydro_grids.append(fgm_nested)
             start_times.append(fgm_nested.info['start_time'])
             end_times.append(fgm_nested.info['end_time'])
-
-            ml.exit_if_prior_errors(f'failed to read nested reader #{n}, see above')
 
             if not fgm_nested.info['has_open_boundary']:
                 ml.msg(f'Nested grids must have open boundary nodes defined, nested grid {n} " does not',
@@ -126,12 +124,12 @@ class DevNestedFields(ParameterBaseClass):
         if not all ([ x== info['is3D']for x in checks['is3D']]):
             ml.msg(f'Cannot mix 2D and 3D nestd grids ',
                    hint= f'For primary reader 3D ={info["is3D"]}, nested readers are 3D={str(checks["is3D"])}',
-                   crumbs='Nested reader set up', fatal_error=True, caller=self)
+                   fatal_error=True, caller=self)
 
         # dry cell flag
         if si.settings.write_dry_cell_flag:
             ml.msg(f'Cannot write dry cell flag to tracks files for nested grids, disabling dry cell writes',
-                   crumbs='Nested reader set up ',  note=True)
+                  note=True)
             si.settings.write_dry_cell_flag = False
 
 

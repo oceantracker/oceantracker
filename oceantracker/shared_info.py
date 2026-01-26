@@ -77,8 +77,7 @@ class _DefaultSettings(definitions._AttribDict):
     NCDF_compression_level = PVC(0, int, min=0,max =9, expert=True,
                           doc_str='Netcdf compression of output variables, reduces output file size, but slows code ')
     particle_buffer_initial_size = PVC(10_000_000, int, min=1, expert=True,
-                   doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive'
-                                    )
+                   doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive')
 
         #  #'loops_over_hindcast =  PVC(0, int, min=0 )  #, not implemented yet,  artifically extend run by rerun from hindcast from start, given number of times
         # profiler = PVC('oceantracker', str, possible_values=available_profile_types,
@@ -134,6 +133,7 @@ class _VerticalGridTypes(definitions._AttribDict):
     Zfixed = 'Zfixed'
 
 class _RunInfo(definitions._AttribDict):
+    max_memory_usedGB = 0.
     is3D_run = None
     backtracking =None
     vector_components = None
@@ -147,7 +147,6 @@ class _RunInfo(definitions._AttribDict):
     duration = None
     run_output_dir = None
     output_file_base = None
-    time_of_nominal_first_occurrence = None
     time_steps_completed = 0
     hindcast_start_time = None
     hindcast_end_time = None
@@ -160,8 +159,7 @@ class _RunInfo(definitions._AttribDict):
     forecasted_max_number_alive = 0
     restarting = False
     continuing = False
-
-
+    tag = None
 
 class _UseFullInfo(definitions._AttribDict):
     # default reader classes used by auto-detection of file type
@@ -227,13 +225,13 @@ class _SharedInfoClass():
             setattr(self.class_roles, role, {})
 
 
-    def add_class(self,class_role,params={}, default_classID=None,caller=None,crumbs ='', initialize=False,
+    def add_class(self,class_role,params={}, default_classID=None,caller=None, initialize=False,
                   check_for_unknown_keys=True, add_required_classes_and_settings=True,  **kwargs):
         #todo get rid in initialize????
         ml = self.msg_logger
-        crumbs += f'Adding class {class_role}>'
 
         if class_role=='fields':
+            #to is this exclusion of fields needed?
             ml.msg('Cannot use si.add_class() method to add fields',
                    hint='Use add_reader_field(name,  params) or si.add_custom_field(name, params, default_classID=None)',
                    fatal_error=True)
@@ -242,8 +240,7 @@ class _SharedInfoClass():
         if params is None: params ={}
         if type(params) != dict :
             ml.msg(f'Params must be a dictionary', hint= f'Got type {str(type(params))}',
-                        error=True, crumbs=crumbs,
-                         caller=caller)
+                        error=True, caller=caller)
             return None
 
         params= dict(params,**kwargs) # join params and kwargs
@@ -251,7 +248,7 @@ class _SharedInfoClass():
         if class_role in self.core_class_roles.possible_values():
             #core  roles
             params['name'] = None
-            i =  self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID, crumbs=crumbs,
+            i =  self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
                                           check_for_unknown_keys=check_for_unknown_keys, caller=caller, initialize=initialize)
             i.info['instanceID'] = 0
             self.core_class_roles[class_role] = i
@@ -260,7 +257,7 @@ class _SharedInfoClass():
             #other roles
             instanceID= len(self.class_roles[class_role])
             i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
-                    crumbs=crumbs, caller=caller,initialize=initialize,add_required_classes_and_settings=add_required_classes_and_settings)
+                         caller=caller,initialize=initialize,add_required_classes_and_settings=add_required_classes_and_settings)
             i.info['instanceID'] = instanceID
             if params['name'] is None:
                 # if no name in params or default param
@@ -270,7 +267,7 @@ class _SharedInfoClass():
 
         else:
             ml.msg(f'Unknown class role {class_role}', hint=f'Must be one of core_class_roles {str(self.core_class_roles.possible_values())} or other roles {str(self.class_roles.possible_values())}',
-                   error=True, crumbs=crumbs, caller=caller)
+                   error=True,  caller=caller)
             return None
 
         if i.development:

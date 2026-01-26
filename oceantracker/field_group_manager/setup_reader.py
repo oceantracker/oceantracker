@@ -9,15 +9,14 @@ from oceantracker import definitions
 from oceantracker.util import  time_util, json_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
-def make_a_reader_from_params(reader_params, settings, crumbs=''):
+def make_a_reader_from_params(reader_params, settings):
 
-    crumbs = crumbs + '>build_a_reader '
 
-    _check_input_dir(reader_params, crumbs=crumbs)
+    _check_input_dir(reader_params)
     dataset = OceanTrackerDataSet(reader_params)
 
     # detect reader format and add clas_name to params
-    reader = _detect_hydro_file_format(reader_params, dataset,  crumbs=crumbs)
+    reader = _detect_hydro_file_format(reader_params, dataset)
 
 
     # discard problematic variables
@@ -45,7 +44,7 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
 
     # sort files into time order and add info to reader builder on if 3D hindcast and mapped field
     # uses times in files containing the velocity variable
-    _time_sort_files(reader, crumbs)
+    _time_sort_files(reader)
 
 
     _make_variable_time_step_to_fileID_map(reader)
@@ -64,7 +63,7 @@ def make_a_reader_from_params(reader_params, settings, crumbs=''):
         si.msg_logger.msg(f'Coding error, dont recognise vert_grid_type grid type, got {info["vert_grid_type"]}, must be one of [None , "Slayer_or_LSC","Zlayer","Sigma"]',
                 hint=f'check reader codes  get_hindcast_info() ', error=True)
 
-    _catalog_fields(reader, crumbs=None)
+    _catalog_fields(reader)
 
     # set working vertical grid type,if remapping to sigma grids
     vgt = si.vertical_grid_types
@@ -116,16 +115,14 @@ def _standard_needed_info(reader):
     info['vert_grid_type'] = None
 
 
-def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
+def _detect_hydro_file_format(reader_params, dataset):
     # detect hindcast format and add reader class_name to params if missing
     # return reader class_name if given
     #todo show which tests passed for each reader
     ml = si.msg_logger
-    crumbs += '> detecting reader file format '
     if 'class_name' in reader_params:
         reader = si.class_importer.make_class_instance_from_params('reader',
-                                     reader_params, check_for_unknown_keys=True,
-                                     crumbs=crumbs + f'> loading given reader with class_name "{reader_params["class_name"]}"')
+                                     reader_params, check_for_unknown_keys=True)
         reader.dataset = dataset
         ml.progress_marker(f'Using given reader parameter class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
         return reader
@@ -141,8 +138,7 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
         p = deepcopy(reader_params)
         p['class_name'] = class_name
         r = si.class_importer.make_class_instance_from_params('reader',p,
-                        check_for_unknown_keys=False,
-                        crumbs=crumbs + f'> loading reader = class name "{class_name}"')
+                        check_for_unknown_keys=False)
         gmap = r.params['grid_variable_map']
         fmap= r.params['field_variable_map']
 
@@ -174,20 +170,19 @@ def _detect_hydro_file_format(reader_params, dataset, crumbs=''):
             ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 2)
         ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
                hint=f'use reader to map to names in files? found variables {list(ds_info["variables"].keys())}',
-               fatal_error=True, crumbs=crumbs)
+               fatal_error=True)
 
     # make and merge defaults for found reader
     reader_params['class_name'] = reader_class_name
     reader = si.class_importer.make_class_instance_from_params('reader', reader_params,
-                check_for_unknown_keys=True,
-                crumbs=crumbs + f'> loading detected reader = class name "{reader_class_name}"')
+                check_for_unknown_keys=True)
 
     reader.dataset = dataset
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
 
 
-def _time_sort_files(reader, crumbs):
+def _time_sort_files(reader):
     # sort variable fileIDs by time, now all files are read
     ds_info= reader.dataset.info
 
@@ -268,7 +263,7 @@ def _time_sort_files(reader, crumbs):
 
     pass
 
-def _catalog_fields(reader, crumbs=None):
+def _catalog_fields(reader):
     # categorise field variables
     params = reader.params
     info = reader.info
@@ -339,16 +334,15 @@ def _catalog_fields(reader, crumbs=None):
 
     # record field map
     info['field_info'] = reader_field_vars_map
-    # add grid variable info
-    si.msg_logger.exit_if_prior_errors('Errors matching field variables with those in the file, see above')
 
-def _check_input_dir(reader_params,crumbs=''):
+
+def _check_input_dir(reader_params):
     ml = si.msg_logger
-    crumbs = crumbs + '> check_input_dir'
+
     # check params and folders exists
     if 'input_dir' not in reader_params or 'file_mask' not in reader_params:
         ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',
-               fatal_error=True, crumbs=crumbs)
+               fatal_error=True)
     # check input dir exists
     if path.isdir(reader_params['input_dir']):
         ml.progress_marker(f'Found input dir "{reader_params["input_dir"]}"')
@@ -438,7 +432,7 @@ def _check_time_consistency(reader):
         t1 = reader.info['time_coord'][sel]
         t2 = reader.info['time_coord'][sel+1]
 
-        si.msg_logger.msg('Some hindcast time steps are longer than 3 average time steps',error=True,
+        si.msg_logger.msg('Some hindcast time steps are longer than 3 average time steps',fatal_error=True,
                         hint = f'Hindcast may be missing files or othe time error, eg at {time_util. seconds_to_isostr(t1[0])} to {time_util. seconds_to_isostr(t2[0])}, see hindcast_info.json for full list of dates', warning=True)
 
         for d1,d2  in [ [time_util. seconds_to_isostr(a),time_util. seconds_to_isostr(b) ] for a,b in zip(t1,t2) ]:

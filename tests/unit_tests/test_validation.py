@@ -6,10 +6,10 @@ import numpy as np
 from os import path, makedirs
 
 @pytest.fixture
-def default_plot_output_path(request, default_root_output_dir):
+def default_plot_output_path(request, default_run_output_dir):
     """Default output path for plots"""
     func_name = request.node.name
-    return path.join(default_root_output_dir, func_name)
+    return path.join(default_run_output_dir, func_name)
 
 @pytest.fixture
 def test_name(request):
@@ -78,12 +78,11 @@ def test_schism_validation_run_small(
 
     # Compare or create reference tracks
     if not create_reference_data_flag:
-        # check if reference data exists and throw a warning otherwise
 
+        # Compare reference tracks
         track_results = compare_tracks_with_reference(
             case_info_file, reference_data_dir, test_name, create_reference=False
         )
-
         # Assert tracks are within acceptable tolerances
         assert (
             track_results["x_max_diff"] < 1e-6
@@ -92,11 +91,10 @@ def test_schism_validation_run_small(
             abs(track_results["time_max_diff"]) < 1e-6
         ), f"Maximum time difference {abs(track_results['time_max_diff'])} exceeds tolerance"
 
-        # Compare or create reference statistics
+        # Compare reference statistics
         stats_results = compare_stats_with_reference(
             case_info_file, reference_data_dir, test_name, create_reference=False
         )
-
         # Assert statistics are within acceptable tolerances
         for key, value in stats_results.items():
             if "count" in key:

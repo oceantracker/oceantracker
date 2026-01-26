@@ -10,10 +10,11 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
 from oceantracker.shared_info import shared_info as si
+from oceantracker.util.basic_util import get_role_from_base_class_file_name
 
 class Solver(ParameterBaseClass):
     ''' Does particle tracking solution '''
-
+    role_name = get_role_from_base_class_file_name(__file__)
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults
@@ -26,14 +27,41 @@ class Solver(ParameterBaseClass):
 
     def add_required_classes_and_settings(self):
         info = self.info
-        crumbs='Solver_initial_setup >'
-        si.add_class('particle_properties', name= 'v_temp',class_name='ManuallyUpdatedParticleProperty', vector_dim= si.run_info.vector_components, write=False, crumbs=crumbs)
+        si.add_class('particle_properties', name= 'v_temp',class_name='ManuallyUpdatedParticleProperty',
+                 vector_dim= si.run_info.vector_components, write=False)
 
     def initial_setup(self):
         pass
 
     def check_requirements(self):
         self.check_class_required_fields_prop_etc( required_props_list=['x','status', 'x_last_good', 'v_temp'])
+
+        # warning in the model time step is not an integer of the hydro hindcast
+        model_dt = si.settings.time_step
+        fgm = si.core_class_roles.field_group_manager
+
+        # Get grids to check (either nested or single grid)
+        grids_to_check = enumerate(fgm) if hasattr(fgm, "fgm_hydro_grids") else [(None, fgm)]
+
+        for grid_idx, grid in grids_to_check:
+            hydro_dt = grid.reader.info['time_step']
+            grid_info = f"({grid_idx}, type: {grid.reader.__class__.__name__})" if grid_idx is not None else ""
+            
+            if hydro_dt < model_dt:
+                si.msg_logger.msg(
+                    f"Particle tracking model time step was chosen to be smaller than the hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {model_dt}s).",
+                    warning=True,
+                    tabs=0,
+                    hint="Try decreasing 'time step'",
+                )
+            if (hydro_dt / model_dt) % 1 != 0:
+                si.msg_logger.msg(
+                    f"Particle tracking model time step is NOT an integer fraction of hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {model_dt}s). This is valid but may reduce numerical accuracy slightly.",
+                    warning=True,
+                    tabs=0,
+                    hint=None,
+                )
+        
 
     def solve(self):
         # solve for data in buffer
@@ -157,9 +185,12 @@ class Solver(ParameterBaseClass):
             self.stop_update_timer()
 
             # warn of  high physical memory use every 10th step as takes 8ms per call
-            if n_time_step % 10 ==0 and psutil.virtual_memory().percent > 95:
-                ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
+            if n_time_step % 10 ==0:
+                mem = psutil.virtual_memory()
+                if mem.used/mem.total > 0.95:
+                    ml.msg(' More than 95% of memory is being used!, code may run slow as memory may be paged to disk', warning=True,
                        hint=f'Reduce memory used by hindcast with smaller reader param. "time_buffer_size"')
+                ri.max_memory_usedGB = max(mem.used/10**9,ri.max_memory_usedGB)
 
             if abs(t2 - ri.start_time) > ri.duration: break
             if si.settings.throw_debug_error == 1 and nt2 >= int(0.2*model_times.size):
@@ -406,8 +437,7 @@ class Solver(ParameterBaseClass):
     def _save_state(self, n_time_step, time_sec,state_dir):
 
         si.msg_logger.msg(f'save_state_for_restart at: {time_util.seconds_to_isostr(time_sec)}, time step= {n_time_step}'
-                          +f', released  {si.core_class_roles.particle_group_manager.info["particles_released"]}  particles so far',
-                          hint='Restarting is under development and does not yet work!!!')
+                          +f', released  {si.core_class_roles.particle_group_manager.info["particles_released"]}  particles so far')
 
         # close time varying output files, eg tracks and stats files first!
         if si.settings.write_tracks:
@@ -443,6 +473,16 @@ class Solver(ParameterBaseClass):
             state['stats_files'][name]= i.save_state(si, state_dir)
 
         state['log_file'] = si.msg_logger.save_state(si,state_dir)
+
+        # save release info to allow proper restartty of releses
+        state['release_restart_info'] = dict()
+        for name, rg in si.class_roles.release_groups.items():
+            d = dict(no_end_to_release = rg.info['no_end_to_release'],
+                     started =  np.any(rg.schedulers['release'].task_flag[:n_time_step+1]) , # if any tasks done has started
+                    release_interval= rg.params['release_interval'])
+
+            d['time_next_release'] = None if d["release_interval"] ==0. else  time_sec + d["release_interval"]
+            state['release_restart_info'][name] = d
 
         # write state json for restarting
         json_util.write_JSON(path.join(state_dir, 'state_info.json'),state)

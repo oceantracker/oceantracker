@@ -3,11 +3,12 @@ from oceantracker.util import basic_util
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.shared_info import shared_info as si
-
+from oceantracker.util.basic_util import get_role_from_base_class_file_name
 
 
 # make and access 4D fields from reader or custom fields with dims [ time,node,z, vector components]
 class _BaseField(ParameterBaseClass):
+    role_name = get_role_from_base_class_file_name(__file__)
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with given params
 

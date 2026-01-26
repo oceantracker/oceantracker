@@ -25,7 +25,6 @@ def check_args(args):
 
 def base_settings(fn,args,label=None):
     s = path.split(fn)[-1].split('.')[0]
-    if args.variant is not None: s+=f'_{args.variant:02d}'
     if label is not None: s += f'_{label}'
     d =  dict(run_output_dir=path.join(definitions.default_output_dir, 'dev_runs', 'latest_runs',s ),
             #output_file_base=s,

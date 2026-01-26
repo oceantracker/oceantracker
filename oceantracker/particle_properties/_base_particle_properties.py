@@ -8,11 +8,13 @@ from oceantracker.shared_info import shared_info as si
 from oceantracker.util.numpy_util import possible_dtypes
 
 from oceantracker.util import  basic_util
+from oceantracker.util.basic_util import get_role_from_base_class_file_name
+
 class _BaseParticleProperty(ParameterBaseClass):
     # property of each particle individually, eg x, time released etc , status
     # or non-time varying parameter eg ID,
     # properties which are maintained in memory and may be written out, eg group and particle
-
+    role_name = get_role_from_base_class_file_name(__file__)
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults

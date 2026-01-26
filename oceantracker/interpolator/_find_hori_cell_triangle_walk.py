@@ -52,21 +52,20 @@ class FindHoriCellTriangleWalk(object):
         si.msg_logger.progress_marker('Built barycentric-transform matrix', start_time=t0,tabs=0)
 
         # classes need by this class
-        crumbs = 'interpolator intitial_setup>'
         si.add_class('particle_properties', name='n_cell', class_name='ManuallyUpdatedParticleProperty', write=False, dtype='int32',
-                     initial_value=0, caller=self, crumbs=crumbs)  # start with cell number guess of zero
+                     initial_value=0, caller=self)  # start with cell number guess of zero
         si.add_class('particle_properties', name='n_cell_last_good', class_name='ManuallyUpdatedParticleProperty', write=False, dtype='int32',
-                     initial_value=0, caller=self, crumbs=crumbs)
+                     initial_value=0, caller=self)
         si.add_class('particle_properties', name='need_fixingIDs', class_name='ManuallyUpdatedParticleProperty',
                      write=False, dtype='int32',
-                     initial_value=0, caller=self, crumbs=crumbs)
+                     initial_value=0, caller=self)
         si.add_class('particle_properties', name='cell_search_status', class_name='ManuallyUpdatedParticleProperty', write=False,
-                     initial_value=si.cell_search_status_flags.ok, dtype='int8', caller=self, crumbs=crumbs)
+                     initial_value=si.cell_search_status_flags.ok, dtype='int8', caller=self)
 
         si.add_class('particle_properties', name='bc_coords', class_name='ManuallyUpdatedParticleProperty', write=False,
-                     initial_value=0., vector_dim=3, dtype='float32', caller=self, crumbs=crumbs)
+                     initial_value=0., vector_dim=3, dtype='float32', caller=self)
         si.add_class('particle_properties', name='bc_coords_last_good', class_name='ManuallyUpdatedParticleProperty', write=False,
-                     initial_value=0., vector_dim=3, dtype='float32', caller=self, crumbs=crumbs)
+                     initial_value=0., vector_dim=3, dtype='float32', caller=self)
         info = self.info
         info['particles_walked'] = 0
         info['number_of_triangles_walked'] = 0
