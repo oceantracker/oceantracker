@@ -15,6 +15,7 @@ at `"oceantracker/tutorials_how_to" <https://github.com/oceantracker/oceantracke
     how_to/D_output_files.rst
     how_to/E_run_using_parameter_dictionaries.rst
     how_to/G_onthefly_statistics.rst
+    how_to/F_hydrodynamics_and_utilities.rst
     how_to/H_add_user_written_class.rst
 
 
