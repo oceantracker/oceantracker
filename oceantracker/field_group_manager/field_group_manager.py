@@ -64,7 +64,7 @@ class FieldGroupManager(ParameterBaseClass):
         self.interpolator.final_setup()
 
         # add tidal stranding class
-        i = si.add_class('tidal_stranding', {}, crumbs=f'field Group Manager>setup_hydro_fields> tidal standing setup ', caller=self)
+        i = si.add_class('tidal_stranding', {}, caller=self)
         self.tidal_stranding = i
 
         # write_grid
@@ -161,7 +161,7 @@ class FieldGroupManager(ParameterBaseClass):
 
     def _make_a_reader(self, reader_params):
         # build a readers
-        reader = setup_reader.make_a_reader_from_params(reader_params, si.settings,  crumbs='')
+        reader = setup_reader.make_a_reader_from_params(reader_params, si.settings)
         reader.initial_setup()
         reader.final_setup()
 
@@ -319,8 +319,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         if si.working_params['core_class_roles']['interpolator'] is None: si.working_params['core_class_roles']['interpolator'] = {}
         i = si.class_importer.make_class_instance_from_params('interpolator', si.working_params['core_class_roles']['interpolator'],
-                                             default_classID='interpolator', caller= self,
-                                             crumbs=f'field Group Manager>setup_hydro_fields> interpolator class  ')
+                                             default_classID='interpolator', caller= self)
         i.initial_setup(reader)
         return i
 

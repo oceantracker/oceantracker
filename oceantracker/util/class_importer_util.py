@@ -9,8 +9,7 @@ import importlib, traceback
 from timeit import  timeit
 
 class ClassImporter():
-    def __init__(self,msg_logger, crumbs='', caller=None):
-        self.crumbs = crumbs
+    def __init__(self,msg_logger,  caller=None):
         self.msg_logger =msg_logger
         ml = msg_logger
         ml.msg(f'Starting package set up',tabs=2, caller=self)
@@ -19,24 +18,24 @@ class ClassImporter():
     def _build_class_tree_ans_short_name_map(self, caller=None):
         t0 = perf_counter()
         # build class tree of al package parameter classes, with short, long name maps
-        self.class_tree = self.scan_package_for_classes(crumbs='Package set up', caller=self)
+        self.class_tree = self.scan_package_for_classes( caller=self)
         self.short_name_class_map, self.full_name_class_map,self.short_name_list =  self.build_short_and_full_name_maps(self.class_tree)
         ml = self.msg_logger
         ml.progress_marker(f'Done package set up to setup ClassImporter', start_time=t0)
     def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None, initialize=False,
-                                        add_required_classes_and_settings=True, caller=None, crumbs='', merge_params=True, check_for_unknown_keys=True):
+                                        add_required_classes_and_settings=True, caller=None, merge_params=True, check_for_unknown_keys=True):
         ml = self.msg_logger
 
         if params is None: params = {}
         if name is not None: params['name'] = name
 
         if class_role not in self.class_tree:
-            ml.msg(f'unknown class role "{class_role}" for class named "{name}"', crumbs= crumbs + ' make_class_instance_from_params',
+            ml.msg(f'unknown class role "{class_role}" for class named "{name}"',
                                 hint= f'possible values={self.class_tree.keys()}',
                                 fatal_error=True, caller=caller)
 
         # get class name
-        params['class_name'] = self._get_class_name(class_role, params, default_classID,crumbs)
+        params['class_name'] = self._get_class_name(class_role, params, default_classID)
 
         class_obj = self._get_class_obj_from_class_name(params['class_name'])
 
@@ -48,7 +47,7 @@ class ClassImporter():
         i.info['class_role'] = class_role
 
         if merge_params:
-            i.params = merge_params_with_defaults(params, i.default_params, ml, crumbs=crumbs, check_for_unknown_keys=check_for_unknown_keys, caller=i)
+            i.params = merge_params_with_defaults(params, i.default_params, ml,  check_for_unknown_keys=check_for_unknown_keys, caller=i)
 
         # attach the current message loger to instance
         i.msg_logger = self.msg_logger
@@ -61,14 +60,14 @@ class ClassImporter():
             i.initial_setup()
         return i
 
-    def scan_package_for_classes(self, crumbs='', caller=None):
+    def scan_package_for_classes(self, caller=None):
         # scan dir for sub pacakes that have classes which are children of ParameterBaseClass
         # to set up class tree on instances of  package classes
         ml= self.msg_logger
-        crumbs += '> scan_package_for_classes '
+
         t0 = perf_counter()
         tree = dict()
-        crumbs + '> scan_package_for_classes'
+
         self.module_list=[]
 
         for _, sub_pkg_name, ispkg in pkgutil.iter_modules([definitions.package_dir]):
@@ -93,7 +92,7 @@ class ClassImporter():
                                 if class_obj.__name__ in tree[sub_pkg_name]:
                                     ml.msg(f'"{class_obj.__name__}" in module "{class_obj.__module__}" already found as "{tree[sub_pkg_name][class_obj.__name__]["class_name"]}", duplicate class names in ocean tracker pacakage?',
                                                 hint=f'{definitions.package_fancy_name} in  dir {definitions.package_dir}',
-                                                error = True,  crumbs=crumbs, caller=caller)
+                                                error = True,  caller=caller)
                                 else:
                                     tree[sub_pkg_name][class_obj.__name__] = {}
 
@@ -118,7 +117,7 @@ class ClassImporter():
         return tree
 
 
-    def _get_class_name(self,class_role, params,default_classID,crumbs):
+    def _get_class_name(self,class_role, params,default_classID):
 
         ml = self.msg_logger
 
@@ -130,7 +129,7 @@ class ClassImporter():
 
         if class_name is None:
             ml.msg(f'No class_name param for "{params["name"]}" given, and no known default class for type  "{class_role}"',
-                    fatal_error=True, crumbs=crumbs)
+                    fatal_error=True)
 
         short_name= f'{class_role}.{class_name}'
         if short_name in self.short_name_class_map:

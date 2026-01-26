@@ -176,8 +176,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
             ml.msg(f'Parameter "write_interval" ({params["write_interval"]}s) must be greater than '
                     f'"update_interval" ({params["update_interval"]}s) to enable averaging',
                     hint='Set write_interval > update_interval for running mean, or set write_interval=None for standard behavior',
-                    error=True, caller=self,
-                    crumbs=f'Particle Statistic "{params["name"]}"')
+                    error=True, caller=self)
             return
         
         # Check if write_interval is a multiple of update_interval
@@ -186,8 +185,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
             ml.msg(f'Parameter "write_interval" ({params["write_interval"]}s) is not a multiple of '
                     f'"update_interval" ({params["update_interval"]}s)',
                     hint=f'Consider using write_interval = {round(ratio) * params["update_interval"]}s for cleaner averaging',
-                    warning=True, caller=self,
-                    crumbs=f'Particle Statistic "{params["name"]}"')
+                    warning=True, caller=self)
         
         self._initialize_buffer_variables_for_running_mean()
         
@@ -201,8 +199,7 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
             
         ml.msg(f'Running mean enabled: updating every {params["update_interval"]}s, '
                 f'writing averaged values every {params["write_interval"]}s',
-                hint='Statistics will be averaged over write_interval before writing',
-                crumbs=f'Particle Statistic "{params["name"]}"')
+                hint='Statistics will be averaged over write_interval before writing')
 
     def _accumulate_for_running_mean(self):
         """Accumulate current counts for running mean calculation"""

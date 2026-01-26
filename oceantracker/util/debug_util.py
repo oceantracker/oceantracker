@@ -16,7 +16,7 @@ def plot_line(x, c='b'):
 def show():
     plt.show(block=False)
 
-def check_walk_step(grid, part_prop, active,msg_logger, tol = 1.E-2, crumbs=''):
+def check_walk_step(grid, part_prop, active,msg_logger, tol = 1.E-2):
     x= part_prop['x'].data[active,:]
     n_cell = part_prop['n_cell'].data[active]
 
@@ -25,7 +25,7 @@ def check_walk_step(grid, part_prop, active,msg_logger, tol = 1.E-2, crumbs=''):
     bc = triangle_interpolator_util.get_cell_cords_check(grid['bc_transform'],x,n_cell)
     sel =np.logical_or( np.any(bc < -tol, axis =1), np.any(bc > 1.+tol, axis =1))
     if np.any(sel):
-        msg_logger.msg(f'Cell search,  some x not in triangle for  {np.count_nonzero(sel)} of  {active.size} ,bc tolerance={tol:.2e}', crumbs=crumbs)
+        msg_logger.msg(f'Cell search,  some x not in triangle for  {np.count_nonzero(sel)} of  {active.size} ,bc tolerance={tol:.2e}')
 
     return active[sel]
 

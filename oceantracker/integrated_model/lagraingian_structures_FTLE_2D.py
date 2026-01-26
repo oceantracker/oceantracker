@@ -93,7 +93,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
         info['times']= params['start'] + si.run_info.model_direction * np.arange(0, duration - params['lags'].max() + params['release_interval'] , params['release_interval'] )
         if info['times'].size ==0:
             si.msg_logger.msg('LSC/FTLE model duration is less than largest requested lag', hint=f'Check hindcast duration, or start end parameters lags={str(params["lags"])}',
-                              crumbs='Setting up release times', caller=self,fatal_error=True)
+                              caller=self,fatal_error=True)
 
         sel = np.logical_and(info['times'] >= fgm.info['start_time'],info['times'] <= fgm.info['end_time'], )
         info['times'] =  info['times'][sel]
@@ -129,7 +129,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
             # time of lags after start of release group
             t = rg.schedulers['release'].info['start_time'] + md*params['lags']
 
-            rg.add_scheduler('LCScalculation_scheduler', times=t, caller=self, crumbs=f'Adding LCS calculation scheduler release group "{name}" ')
+            rg.add_scheduler('LCScalculation_scheduler', times=t, caller=self)
             rg.info['next_lag_to_calculate'] = 0 # counter for the lag to work on
 
             # from get grid and pulse ID from the release group name

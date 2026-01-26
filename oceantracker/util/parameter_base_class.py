@@ -79,16 +79,15 @@ class ParameterBaseClass(_RootParameterBaseClass):
         self.check_class_required_fields_prop_etc()
 
 
-    def check_class_required_fields_prop_etc(self, required_props_list=[],
-                                             requires3D=None, crumbs=''):
+    def check_class_required_fields_prop_etc(self, required_props_list=[], requires3D=None):
         for name in required_props_list:
             if name not in si.class_roles.particle_properties:
                 si.msg_logger.msg('     class ' + self.params['class_name'] + ', particle property "' + self.params['name']
                                 + '" requires particle property  "' + name + '"'
-                                + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', error=True,crumbs=crumbs)
+                                + ' to work, add to reader["field_variables"], or add to fields param list, or add to particle_properties', error=True)
 
         if requires3D and not si.run_info.is3D_run:
-                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name'] + ' can only be used with 3D hindcast ', error=True,crumbs=crumbs)
+                si.msg_logger.msg('     class ' + self.params['class_name'] + ', ' + self.params['name'] + ' can only be used with 3D hindcast ', error=True)
 
     def remove_default_params(self, name_list):
         # used to get rid if paramters of parent class which are not used by a child class
@@ -154,13 +153,13 @@ class ParameterBaseClass(_RootParameterBaseClass):
         if self.info['update_calls'] == 1: self.info['time_first_update_call'] = dt
 
     def add_scheduler(self, name_scheduler :str, start=None, end=None, duration=None,
-                                   interval =None, times=None,  caller=None, crumbs=''):
+                                   interval =None, times=None,  caller=None):
         ''' Add a scheduler object to given param_class_instance, with boolean task_flag attribute for each time step,
             which is true if  task is to be carried out.
             Rounds times interval and times to nearest time step'''
         s = Scheduler(si.settings, si.run_info, start=start, end=end, duration=duration,
                                                     interval =interval, times=times, caller=caller,
-                                                    msg_logger=si.msg_logger, crumbs=crumbs + f'> adding scheduler {name_scheduler}')
+                                                    msg_logger=si.msg_logger)
         self.schedulers[name_scheduler]  = s
         return s
 

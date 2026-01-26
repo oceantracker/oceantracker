@@ -17,7 +17,7 @@ class _BaseWriter(ParameterBaseClass):
         # dev holds last time step written to file, to allow filling values after this when reading into rectangular form
         si.add_class('particle_properties', name='last_written_time_steps_written', class_name='ManuallyUpdatedParticleProperty',
                      write=False, dtype='int32', time_varying=False,
-                     initial_value=0, caller=self, crumbs='track writer, part prop')
+                     initial_value=0, caller=self)
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required in children to get parent defaults

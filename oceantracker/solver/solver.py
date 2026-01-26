@@ -26,8 +26,8 @@ class Solver(ParameterBaseClass):
 
     def add_required_classes_and_settings(self):
         info = self.info
-        crumbs='Solver_initial_setup >'
-        si.add_class('particle_properties', name= 'v_temp',class_name='ManuallyUpdatedParticleProperty', vector_dim= si.run_info.vector_components, write=False, crumbs=crumbs)
+        si.add_class('particle_properties', name= 'v_temp',class_name='ManuallyUpdatedParticleProperty',
+                 vector_dim= si.run_info.vector_components, write=False)
 
     def initial_setup(self):
         pass

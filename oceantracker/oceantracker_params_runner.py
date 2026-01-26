@@ -84,7 +84,7 @@ class OceanTrackerParamsRunner(object):
         num_errors = len(el['fatal_error']) + len(el['error'])
         ml.msg(f'{num_errors:3d} errors,  {len(el["strong_warning"]):3d} strong warnings, {len(el["warning"]):3d} warnings, {len(el["note"]):3d} notes', tabs=1)
         for v in ml.msg_lists['strong_warning']:
-            ml.msg('Strong_warning >>>' + v['msg'], hint=v['hint'], crumbs=v['crumbs'], caller=v['caller'], tabs=1)
+            ml.msg('Strong_warning >>>' + v['msg'], hint=v['hint'], caller=v['caller'], tabs=1)
 
         if  num_errors > 0:
             ml.msg(f'>>>>>>> Found {num_errors:2d} errors <<<<<<<<<<<<',
@@ -126,8 +126,7 @@ class OceanTrackerParamsRunner(object):
 
 
         # split params in to settings, core and class role params
-        si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger,
-                                                             crumbs='Bulding working params ')
+        si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger)
         si.add_settings(si.working_params['settings'])
 
         ml.msg(f'Started')
@@ -157,7 +156,7 @@ class OceanTrackerParamsRunner(object):
 
         # setup numba before first import as its environment variable settings  have to be set before first import on Numba
         # set numba config environment variables, before any import of numba, eg by readers,
-        setup_util.config_numba_environment_and_random_seed(si.settings, ml, crumbs='main setup',
+        setup_util.config_numba_environment_and_random_seed(si.settings, ml,
                                                             caller=self)  # must be done before any numba imports
 
         # import all package parameter classes and build short name package tree to shared info
@@ -274,8 +273,7 @@ class OceanTrackerParamsRunner(object):
             i = si.add_class('resuspension', params=ccr['resuspension'])
 
         if si.settings.write_tracks:
-            si.add_class('tracks_writer', params= ccr['tracks_writer'], crumbs='making tracks writer class instance',
-                         caller=self)
+            si.add_class('tracks_writer', params= ccr['tracks_writer'], caller=self)
 
         # do class role lists
         for role, param_list in working_params['class_roles'].items():
@@ -297,7 +295,6 @@ class OceanTrackerParamsRunner(object):
 
     def _initial_setup_all_classes(self,working_params):
         # initialise all classes, order is important!
-        crumbs='initial_setup_all_classes>'
 
         t0 = perf_counter()
         settings = si.settings
@@ -323,8 +320,7 @@ class OceanTrackerParamsRunner(object):
             i.info['no_end_to_release'] = p['duration'] is None and p['end'] is None and p['release_interval'] > 0.
 
             i.add_scheduler('release',start=p['start'], end=p['end'], duration=p['duration'],
-                            interval =p['release_interval'],
-                            crumbs=f'Adding release groups scheduler # {i.info["instanceID"]} name = "{name}" >')
+                            interval =p['release_interval'])
             # max_ages needed for culling operations
             i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
             max_ages.append(i.params['max_age'])
@@ -406,8 +402,6 @@ class OceanTrackerParamsRunner(object):
 
         hi_start, hi_end = fgm.info['start_time'],fgm.info['end_time']
 
-        crumbs = 'adding release groups'
-   
         if len(si.class_roles['release_groups']) == 0:
             si.msg_logger.msg('No particle "release_groups" parameters found', error=True, caller=self)
 

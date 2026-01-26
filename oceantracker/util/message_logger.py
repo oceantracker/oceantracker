@@ -59,7 +59,7 @@ class MessageLogger(object ):
         if si.run_info.restarting or si.run_info.continuing:
             shutil.copyfile(si.saved_state_info['log_file'],self.log_file_name)
             self.log_file = open(self.log_file_name, 'a')
-            self.msg('>>>> restarting log file')
+            self._print_msg('>>>> restarting log file')
         else:
             self.log_file = open(self.log_file_name, 'w')
 
@@ -71,9 +71,8 @@ class MessageLogger(object ):
         return  log_file_name, self.error_file_name
 
     def msg(self, msg_text, note=False,
-            hint=None, tag=None, tabs=0, crumbs='', link=None,caller=None,wrap=False,
-            possible_values=None, warning=False,strong_warning=False,
-            error=False, fatal_error=False,
+            hint=None, tag=None, tabs=0, link=None,caller=None,wrap=False,
+            warning=False,strong_warning=False, error=False, fatal_error=False,
             dev=False):
 
         if fatal_error: fatal_error = error or fatal_error
@@ -113,22 +112,12 @@ class MessageLogger(object ):
             raise OTinput_error('Fatal error cannot continue')
         pass
 
-    def _append_message(self, m, msg, tabs):
-        # append allowing  line breaks
-        tab = '  '
-        for n, s in enumerate(msg.split('\n')):
-            m += (tabs + int(n > 0))*tab + s + '\n'
-        return m
-
-    def has_errors(self): return  len(self.msg_lists['error']) > 0
-
 
     def hori_line(self, text=None):
         if text is None:
             self._print_msg(self.line_length *'-')
         else:
-            self.msg(f"--- {text} {(self.line_length-len(text) -5)*'-'}")
-
+            self._print_msg(f"--- {text} {(self.line_length-len(text) -5)*'-'}")
 
     def progress_marker(self, msg, tabs=0, start_time=None):
         tabs= tabs+1
@@ -136,18 +125,17 @@ class MessageLogger(object ):
         if start_time is not None:
             msg = f'{msg},\t  {perf_counter()-start_time:1.3f} sec'
 
-        self.msg('- ' + msg, tabs=tabs)
+        self._print_msg(  tabs*'\t'+ '- ' + msg)
 
     def show_all_strong_warnings_and_errors(self):
         for m in self.msg_lists['strong_warning']+ self.msg_lists['error']+ self.msg_lists['fatal_error']:
             self._print_msg(m)
 
-
     def write_error_log_file(self, e, si):
         sleep(.5)
-        self.msg(str(e))
+        self._print_msg(str(e))
         tb = traceback.format_exc()
-        self.msg(tb)
+        self._print_msg(tb)
         if si.run_info.run_output_dir is None: return # no folder to write to
 
         error_file_name = path.join(si.run_info.run_output_dir, self.error_file_name)
@@ -160,7 +148,7 @@ class MessageLogger(object ):
             f.write(str(e))
             f.write(tb)
 
-    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, crumbs='', caller=None, link=None,
+    def spell_check(self, msg, key: str, possible_values: list,hint=None, tabs=0, caller=None, link=None,
                     fatal_error=True):
         ''' Makes suggestion by spell checking value against strings in list of possible_values'''
         known = list(possible_values)

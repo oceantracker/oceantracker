@@ -198,8 +198,7 @@ class _BaseReader(ParameterBaseClass):
                 grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
 
             # fix any spanning 179 to -179
-            fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self,
-                                                crumbs=f'setting up reader in dir=  {self.params["input_dir"]}')
+            fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self)
             # set up conversion of meters to degreees
             i = self._add_a_reader_field('degrees_per_meter', dict(time_varying=False, is3D=False, is_vector=True,
                               write_interp_particle_prop_to_tracks_file=False),  dummy=True)
@@ -376,7 +375,7 @@ class _BaseReader(ParameterBaseClass):
         i = si.class_importer.make_class_instance_from_params('fields', params,
                                        add_required_classes_and_settings=False,
                                         default_classID='field_reader',initialize=False,
-                                        check_for_unknown_keys=False, crumbs=f'Adding reader field "{name}"')
+                                        check_for_unknown_keys=False)
         i.initial_setup(info)
 
         # add variable info on file variables list for reader fields

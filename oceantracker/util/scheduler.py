@@ -9,7 +9,7 @@ class Scheduler(object):
     def __init__(self,settings, run_info,
                  start=None, end=None, duration=None,
                  interval = None, times=None,cancel_when_done=True,
-                 msg_logger=None,caller=None,crumbs=''):
+                 msg_logger=None,caller=None):
 
 
         self.cancel_when_done = cancel_when_done
@@ -23,7 +23,7 @@ class Scheduler(object):
                 msg_logger.msg(
                     f'User defined scheduler duration is very long > 100 years',
                     hint=f'Duration given {time_util.seconds_to_pretty_duration_string(duration)}',
-                    caller=caller, crumbs=crumbs, warning=True
+                    caller=caller, warning=True
                 )
             
             # clip duration to available model duration 
@@ -33,7 +33,7 @@ class Scheduler(object):
                     f'User defined scheduler duration is longer than available hindcast duration',
                     hint=f'Duration given {time_util.seconds_to_pretty_duration_string(duration)}, '
                          f'hindcast duration {time_util.seconds_to_pretty_duration_string(hindcast_duration)}',
-                    caller=caller, crumbs=crumbs, warning=True
+                    caller=caller,  warning=True
                 )
                 duration = hindcast_duration
 
@@ -88,11 +88,11 @@ class Scheduler(object):
 
         if len(self.scheduled_times) == 0:
             msg_logger.msg('No times scheduled, as outside start and end times of run, see caller below',
-                                hint=i['bounds_table'], caller=caller, error=True, crumbs=crumbs)
+                                hint=i['bounds_table'], caller=caller, error=True)
 
         if self.scheduled_times.size == 0:
             msg_logger.msg('No scheduled times within model run times',
-                                hint=i['bounds_table'], caller=caller, error=True, crumbs=crumbs)
+                                hint=i['bounds_table'], caller=caller, error=True)
 
     def _start_end_from_interval(self,settings,run_info, start,end, duration, interval):
 

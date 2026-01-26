@@ -4,7 +4,7 @@ import fiona
 from os import  path
 
 
-def ReadCoordinates(file_name, type, select_entity, msg_logger,crumbs, only_select_one=False):
+def ReadCoordinates(file_name, type, select_entity, msg_logger, only_select_one=False):
     # get given types selected groups of entity types=[;line','polygon','points']
 
     out= []
@@ -12,13 +12,12 @@ def ReadCoordinates(file_name, type, select_entity, msg_logger,crumbs, only_sele
     if not path.isfile(file_name):
         msg_logger.msg(f'cannot file {"file_name"}' ,
                hint='Check path and name',
-               fatal_error= True,
-               crumbs='Pre processing > ReadCoordinates')
+               fatal_error= True)
     try:
         d= fiona.open(file_name)
     except Exception as e:
         msg_logger.msg(f'cannot read file {file_name} ', hint='File tyype not recognised by "fiona" module',
-               fatal_error=True, crumbs='Pre processing > ReadCoordinates')
+               fatal_error=True)
 
     for item in d:
         g = item['geometry']
@@ -38,7 +37,7 @@ def ReadCoordinates(file_name, type, select_entity, msg_logger,crumbs, only_sele
     if select_entity is None:
         if only_select_one:
             msg_logger.msg(f'Can only select one entity of type from coordinates file {file_name}, must use parameter select_entities ', hint='eg.  use parameter select_entities =0',
-                           fatal_error=True, crumbs=crumbs+ 'Reading coordinates from file')
+                           fatal_error=True)
             out =out # return  all
         # get all, put merger points into single entity
         if type=='points':
@@ -48,7 +47,7 @@ def ReadCoordinates(file_name, type, select_entity, msg_logger,crumbs, only_sele
         if type(select_entity) != list: select_entity= [select_entity]
         if only_select_one and len(select_entity) > 1:
             msg_logger.msg(f'Can only select one entity of type from coordinates file {file_name}', hint='eg.  use parameter select_entities =0',
-                           fatal_error=True, crumbs=crumbs + 'Reading coordinates from file')
+                           fatal_error=True)
         out = out[select_entity]
 
     return  out

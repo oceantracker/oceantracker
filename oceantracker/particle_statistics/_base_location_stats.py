@@ -127,7 +127,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             si.msg_logger.spell_check(f'Particle property name "{name}" not recognised',
                                       name, si.class_roles.particle_properties.keys(),
                                       hint='check parameter "particle_property_list"',
-                                      crumbs=f'Particle Statistic "{self.params["name"]}" >',
                                       caller = self)
 
             if part_prop[name].is_vector():

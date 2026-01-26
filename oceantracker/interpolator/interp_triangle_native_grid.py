@@ -36,7 +36,6 @@ class  InterpTriangularGrid(_BaseInterp):
         grid = self.grid
 
         t0 = perf_counter()
-        crumbs = 'Interpolator initial_setup '
 
         # define initial cell and find cell functions from interp class
         self._hori_cell_finder= FindHoriCellTriangleWalk(grid, params)
@@ -51,11 +50,12 @@ class  InterpTriangularGrid(_BaseInterp):
             # space to record vertical cell for each particles' triangle at two timer steps  for each node in cell containing particle
             # used to do 3D time dependent interpolation
             si.add_class('particle_properties', name ='nz_cell', class_name='ManuallyUpdatedParticleProperty',write=False, dtype='int32',
-                         initial_value=0, caller=self,crumbs=crumbs) # todo  create  initial serach for vertical cell
+                         initial_value=0, caller=self) # todo  create  initial serach for vertical cell
             si.add_class('particle_properties', name ='z_fraction',class_name='ManuallyUpdatedParticleProperty',write=False, dtype='float32',
-                         initial_value=0., caller=self,crumbs=crumbs)
+                         initial_value=0., caller=self)
             si.add_class('particle_properties', name ='z_fraction_water_velocity',class_name='ManuallyUpdatedParticleProperty',write=False, dtype='float32',
-                         initial_value=0., description=' thickness of bottom layer in meters, used for log layer velocity interp in bottom layer', caller=self,crumbs=crumbs)
+                         initial_value=0.,
+                         description=' thickness of bottom layer in meters, used for log layer velocity interp in bottom layer')
 
             # set up vertical grid
             vgt= si.vertical_grid_types

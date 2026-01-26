@@ -360,8 +360,7 @@ class _BasePolygonStats(ParameterBaseClass):
         else:
             # use given polygon list
             for n, p in enumerate(params['polygon_list']):
-                p = merge_params_with_defaults(p, si.default_polygon_dict_params,
-                                               si.msg_logger, crumbs='polygon_statistics_merging polygon list')
+                p = merge_params_with_defaults(p, si.default_polygon_dict_params, si.msg_logger)
 
         if len(params['polygon_list']) == 0:
             ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,
