@@ -84,8 +84,7 @@ class OceanTrackerParamsRunner(object):
         num_errors = len(el['fatal_error']) + len(el['error'])
         ml.msg(f'{num_errors:3d} errors,  {len(el["strong_warning"]):3d} strong warnings, {len(el["warning"]):3d} warnings, {len(el["note"]):3d} notes', tabs=1)
         for v in ml.msg_lists['strong_warning']:
-            ml.msg('Strong_warning >>>' + v['msg'], hint=v['hint'], caller=v['caller'], tabs=1)
-
+            ml._print_msg('\t'+ v)
         if  num_errors > 0:
             ml.msg(f'>>>>>>> Found {num_errors:2d} errors <<<<<<<<<<<<',
                    hint='Look for first error above or below  or in  *_caseLog.txt and *_caseLog.err files, plus particle_prop_on_error.nc and and class_info_on_error.json')
