@@ -4,7 +4,31 @@
 Change log
 ###########################
 
-Version '0.5.3.00 2026-01-15'
+Version '0.5.3.1 2026-01-27'
+_____________________________
+
+Breaking changes
+----------------
+
+#. Removed adding the "output_file_base" prefix to the output files to simplify and shorten output file names
+
+Bug fixes
+---------
+
+#. Fixed GriddedStats2D_timeBased_runningMean produced incorrect output (essentially the same as GriddedStats2D_timeBased due to incorrect class inheritance)
+
+Misc.
+-----
+
+#. Added "F" tutorial to illustrate how to work with hydrodyn. data output
+#. Renamed DevNestedFields - for nested grid support - to NestedFields
+#. Reworked, and simplified screen output messenger.
+#. Added links to the documentation into screen output
+#. Fixed broken links in readme
+#. Many minor documentation and screen output changes
+
+
+Version '0.5.3.0 2026-01-15'
 _____________________________
 
 Breaking changes
