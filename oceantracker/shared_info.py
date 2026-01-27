@@ -201,15 +201,7 @@ class _SharedInfoClass():
                                        'points': PCC(None, is_required=True, doc_str='Points making up the polygon as, N by 2 or 3 list of locations where particles are released. eg for 2D ``[[25,10],[23,2],....]``, must be convertible into N by 2 or 3 numpy array')
                                        }
         pass
-    def add_settings(self, settings):
-        # reset settngas as a dict, without obolulte settings
 
-        for key in self.settings.possible_values():
-            if key in settings:
-                setattr(self.settings, key, settings[key])
-            else:
-                # remove obsolete params
-                delattr(self.settings, key)
 
 
         pass

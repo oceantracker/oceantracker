@@ -162,7 +162,7 @@ class CompactTracksWriter(_BaseWriter):
         nc.create_attribute('time_steps_written', self.info['time_steps_written_to_current_file'])
 
         # write status values to  file attribues
-        output_util.add_particle_status_values_to_netcdf(nc)
+        output_util.add_particle_status_values_to_netcdf(nc, si)
 
         super()._close_file()
     def close(self):

@@ -158,7 +158,7 @@ class MessageLogger(object ):
         else:
             m += off+ f'>> None found'
             m += off + self._add_long_line(f'hint=Possible values = {str(known)}',
-                                           tabs =2 * hand_indent,
+                                           tabs =2 * hand_indent, wrap=True,
                                            hand_indent=hand_indent)
 
         m = self._add_doc_html_link(m, caller, 2 * hand_indent)
@@ -248,7 +248,7 @@ class MessageLogger(object ):
         role= caller.role_name if hasattr(caller, "role_name") else None
         name =  caller.__class__.__name__
 
-        # https://oceantracker.github.io/oceantracker/documentation/api_ref/dispersion_toc.html
+        # example https://oceantracker.github.io/oceantracker/documentation/api_ref/dispersion_toc.html
         # add class link
         url = f'{docs_base_url}/documentation/api_ref/{name}.html'
         response = requests.get(f'{docs_base_url}/documentation/api_ref/{name}.html' )

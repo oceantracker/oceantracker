@@ -197,13 +197,16 @@ class _BaseReader(ParameterBaseClass):
                 # do conversion
                 grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
 
+            si.settings.use_geographic_coords = True # make sure is now geographic
+
             # fix any spanning 179 to -179
             fix_any_spanning180east(grid['x'], msg_logger=si.msg_logger, caller=self)
             # set up conversion of meters to degreees
-            i = self._add_a_reader_field('degrees_per_meter', dict(time_varying=False, is3D=False, is_vector=True,
-                              write_interp_particle_prop_to_tracks_file=False),  dummy=True)
+            i = self._add_a_reader_field('degrees_per_meter', dict(time_varying=False,
+                                is3D=False, is_vector=True,
+                                write_interp_particle_prop_to_tracks_file=False),  dummy=True)
             i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'][:,1],as_vector=True)
-            si.msg_logger.msg('Converted hindcast to geographic coords',note=True)
+
             pass
 
         # get bounding box
@@ -509,7 +512,7 @@ class _BaseReader(ParameterBaseClass):
         s = f' Reading {buffer_index.size:2d} time steps, '
         s += f' for hindcast time steps {nt_available[0]:02d}:{nt_available[-1]:02d}'
         s += f' into ring buffer offsets {buffer_index[0]:03}:{buffer_index[-1]:03d} '
-        s+=  f',  for run "{si.run_info.output_file_base}"'
+        s+=  f',  for run "{si.run_info.tag}"'
         si.msg_logger.progress_marker(s)
 
         # read grid time, zlevel

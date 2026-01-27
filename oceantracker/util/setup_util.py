@@ -1,4 +1,3 @@
-import importlib
 from os import  environ, path, mkdir
 from copy import copy, deepcopy
 from datetime import datetime
@@ -8,12 +7,12 @@ import traceback
 from oceantracker.util import json_util, time_util
 import  numpy as np
 from oceantracker import definitions
-from oceantracker.shared_info import  shared_info as si
+
 from oceantracker.util import parameter_checking
 import sys
 from glob import glob
 
-def setup_output_dir():
+def setup_output_dir(si):
     # set up output folder, when root_output_dir and output_file_base are required settings
     # check output_file_base is not dir, just a test
 
@@ -26,7 +25,7 @@ def setup_output_dir():
             si.msg_logger.msg(' settings "root_output_dir" or  "output_file_base" are not set, both are required',
                               hint='These settings are deprecated and replaced by single setting "run_output_dir", set both if you must use them!')
 
-        run_output_dir = path.abspath(path.join(si.settings['root_output_dir'], si.settings['output_file_base']))
+        run_output_dir = path.abspath(path.join(si.settings.root_output_dir, si.settings.output_file_base))
 
     if si.settings['add_date_to_run_output_dir']:
         run_output_dir += datetime.now().strftime("_%Y-%m-%d_%H-%M")
@@ -53,7 +52,7 @@ def setup_output_dir():
 
     return output_files, restarting
 
-def setup_restart_continuation():
+def setup_restart_continuation(si):
 
     ml = si.msg_logger
     saved_state_info = None
@@ -108,13 +107,13 @@ def setup_restart_continuation():
     return saved_state_info
 
 
-def write_raw_user_params(output_files, params,msg_logger):
+def write_raw_user_params(output_files, params,si):
     fn= 'raw_user_params.json'
     output_files['raw_user_params'] = fn
     json_util.write_JSON(path.join(output_files['run_output_dir'],  fn),params)
-    msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
+    si.msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
 
-def build_working_params(params, msg_logger,  caller=None):
+def _decompose_working_params(params, si, caller=None):
 
     working_params = dict(settings= {},
              core_class_roles = {k: None for k in si.core_class_roles.possible_values()},  # insert full list and defaults
@@ -132,12 +131,12 @@ def build_working_params(params, msg_logger,  caller=None):
     for key, item in params.items():
         k = copy(key)
         if len(k) != len(k.strip()):
-            msg_logger.msg(f'Removing leading or trailing blanks from top level parameter key "{key}"', warning=True, caller=caller)
+            si.msg_logger.msg(f'Removing leading or trailing blanks from top level parameter key "{key}"', warning=True, caller=caller)
             k = key.strip()  # remove leading/trailing blanks
 
         if type(item) == tuple:
             # check item not a tuple
-            msg_logger.msg(f'Top level parameters must be key : value pairs of a dictionary, got a tuple for key= "{key}", value= "{str(item)}"',
+            si.msg_logger.msg(f'Top level parameters must be key : value pairs of a dictionary, got a tuple for key= "{key}", value= "{str(item)}"',
                     error=True, caller=caller,
                    hint='is there an un-needed comma at the end of the parameter/line?, if a tuple was intentional, then use a list instead')
 
@@ -154,13 +153,13 @@ def build_working_params(params, msg_logger,  caller=None):
 
         elif k in role_keys:
             if type(item) != list:
-                msg_logger.msg(f'Params under role key "{k}" must be a list of parameter dictionaries with "class_name" and optional internal "name"'
+                si.msg_logger.msg(f'Params under role key "{k}" must be a list of parameter dictionaries with "class_name" and optional internal "name"'
                                +'\n Roles changed from dict type to list type in new version',
                                        hint =f'Got type {str(type(item))}, value={str(item)}' ,
                                        error=True)
             working_params['class_roles'][k] = item
         else:
-            msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
+            si.msg_logger.spell_check('Unknown setting or role as top level param./key, ignoring', key, known_top_level_keys, caller=caller,
                                         link='parameter_ref_toc')
 
     return working_params
@@ -241,10 +240,10 @@ def config_numba_environment_and_random_seed(settings, msg_logger, caller = None
 
 
 
-def _build_working_params(params, msg_logger):
+def _build_working_params(params, si):
     # slit params into settings, core_class_params and close_role params and merge settings
 
-    ml = msg_logger
+    ml = si.msg_logger
     if type(params) != dict:
         ml.msg('Parameters must be of type dict, ', hint=f'Got type {str(type(params))} ',
                fatal_error=True)
@@ -263,7 +262,7 @@ def _build_working_params(params, msg_logger):
             hint='Remove case_list argument and merge parameters with base case and computations  will automatically be run on parallel threads by default',
             fatal_error=True)
 
-    working_params = build_working_params(params, msg_logger=ml)
+    working_params = _decompose_working_params(params, si)
 
     # get defaults of settings only
     working_params['settings'] = parameter_checking.merge_params_with_defaults(working_params['settings'],

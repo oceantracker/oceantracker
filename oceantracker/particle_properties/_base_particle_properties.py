@@ -166,5 +166,6 @@ class FieldParticleProperty(_BaseParticleProperty):
 
 class CustomParticleProperty(_BaseParticleProperty):
     def update(self, n_time_step, time_sec, active): nopass('CustomParticleProperty error must have an update method')
+
 class ManuallyUpdatedParticleProperty(_BaseParticleProperty):
     def update(self, n_time_step, time_sec, active): pass

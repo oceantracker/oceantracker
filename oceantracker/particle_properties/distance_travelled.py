@@ -29,6 +29,8 @@ class DistanceTravelled(CustomParticleProperty):
         part_prop = si.class_roles.particle_properties
 
         if si.settings.use_geographic_coords:
+            si.msg_logger.msg('DistanceTravelled not yet working for geographic grids', error=True,
+                          hint='check with developers')
             self.distance_from_lon_lat( part_prop['x_last_good'].data,
                                         part_prop['x'].data,
                                         part_prop['degrees_per_meter'].data,

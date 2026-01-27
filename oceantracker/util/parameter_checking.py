@@ -28,8 +28,8 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None, 
         return params
 
     # find which keys/params are obsolete and the remainder
-    obsolute_params = [key for key, item in default_params.items() if isinstance(item, _ParameterBaseDataClassChecker) and item.obsolete]
-    possible_params = [key for key, item in default_params.items() if key not in obsolute_params]
+    obsolete_params = [key for key, item in default_params.items() if isinstance(item, _ParameterBaseDataClassChecker) and item.obsolete]
+    possible_params = [key for key, item in default_params.items() if key not in obsolete_params]
     deprecated_params = [key for key, item in default_params.items() if isinstance(item, _ParameterBaseDataClassChecker) and item.deprecated]
 
     pass
@@ -41,10 +41,11 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None, 
             if  key not in default_params:
                 # get possible values without obsolete params
                 msg_logger.spell_check(msg + ' is not recognised', key,possible_params,caller=caller)
-            elif key in obsolute_params:
+            elif key in obsolete_params:
                msg_logger.msg(msg + ' is obsolete ',
                               hint=default_params[key].doc_str,
                               error=True, caller=caller)
+               params['key'] = None
             elif key in deprecated_params:
                 msg_logger.msg(msg + ' is deprecated and will be deleted in future versions',
                                hint=default_params[key].doc_str,

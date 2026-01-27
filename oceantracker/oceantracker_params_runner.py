@@ -4,6 +4,16 @@ from copy import deepcopy, copy
 from os import path
 import numpy as np
 
+
+# import shared info, but force a fresh import to avoid contamination between runs of shared variable
+# must be done before other ot imports
+import importlib
+import oceantracker.shared_info
+importlib.reload(oceantracker.shared_info)
+# now import si from shared info for use here and same for any subsequent modules using si
+from oceantracker.shared_info import shared_info as si
+
+
 from time import  perf_counter
 from oceantracker.util.message_logger import OTinput_error, OTfatal_error, OTunexpected_error
 from oceantracker.util import profiling_util, computer_info_util
@@ -14,7 +24,9 @@ from oceantracker.util import json_util, setup_util
 from datetime import datetime
 import traceback
 from oceantracker import definitions
-from oceantracker.shared_info import shared_info as si
+
+
+
 
 
 # note do not import numba here as its environment  setting must ve done first, import done below
@@ -106,7 +118,7 @@ class OceanTrackerParamsRunner(object):
                     import shutil
                     shutil.rmtree(si.output_files['saved_state_dir'])
 
-        ml.hori_line(f'Output in "{si.settings.run_output_dir}"')
+            ml.hori_line(f'Output in "{si.run_info.run_output_dir}"')
         ml.close()
 
         return case_info_file
@@ -125,20 +137,26 @@ class OceanTrackerParamsRunner(object):
 
 
         # split params in to settings, core and class role params
-        si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si.msg_logger)
-        si.add_settings(si.working_params['settings'])
+        si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si)
+
+        # overwrite si.setting detafault values with actual ones
+        for key in  si.settings.possible_values():
+            if key in  si.working_params['settings']:
+                setattr(si.settings, key, si.working_params['settings'][key])
+            else:
+                setattr(si.settings, key, None) # obsolete keys are None
 
         ml.msg(f'Started')
 
         ri = si.run_info
 
         # setup output dir and msg files
-        si.output_files,ri.restarting = setup_util.setup_output_dir()
+        si.output_files,ri.restarting = setup_util.setup_output_dir(si)
         ri.run_output_dir = si.output_files['run_output_dir']
         ri.tag = path.basename(ri.run_output_dir)
 
         # setup ant restart or continuation
-        si.saved_state_info = setup_util.setup_restart_continuation()
+        si.saved_state_info = setup_util.setup_restart_continuation(si)
 
         # set up message loggers log file
         si.output_files['run_log'], si.output_files['run_error_file'] = ml.set_up_files(si)  # message logger output file setup
@@ -151,7 +169,7 @@ class OceanTrackerParamsRunner(object):
 
         # write raw params to a file
         if not si.run_info.restarting:
-            setup_util.write_raw_user_params(si.output_files, user_given_params, ml)
+            setup_util.write_raw_user_params(si.output_files, user_given_params, si)
 
         # setup numba before first import as its environment variable settings  have to be set before first import on Numba
         # set numba config environment variables, before any import of numba, eg by readers,
@@ -217,7 +235,7 @@ class OceanTrackerParamsRunner(object):
 
         # -----------done -------------------------------
         t0_close= perf_counter()
-        si.output_files['release_groups'] = output_util.write_release_group_netcdf()  # write release groups
+        si.output_files['release_groups'] = output_util.write_release_group_netcdf(si)  # write release groups
         ml.hori_line('Closing all classes')
         for i in si._all_class_instance_pointers_iterator(): i.close()  # close all instances, eg their files if not close etc
 

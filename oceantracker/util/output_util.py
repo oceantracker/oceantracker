@@ -2,9 +2,8 @@
 import numpy as np
 from oceantracker.util.ncdf_util import NetCDFhandler
 from os import path
-from oceantracker.shared_info import shared_info as si
 
-def add_particle_status_values_to_netcdf(nc):
+def add_particle_status_values_to_netcdf(nc, si):
     # write status values to file as attributes
     for key, val in si.particle_status_flags.items():
         nc.create_attribute('status_' + key, int(val))
@@ -15,7 +14,7 @@ def add_release_group_names_to_netcdf(nc,si):
                       description='names of each release group in release_group dim, may have trailing blanks')
 
 
-def write_release_group_netcdf():
+def write_release_group_netcdf(si):
     '''Write release groups data to own file for each case '''
     fn =  'release_groups.nc'
     nc = NetCDFhandler(path.join(si.run_info.run_output_dir, fn), mode='w')
