@@ -294,10 +294,6 @@ class FieldGroupManager(ParameterBaseClass):
 
         pass
 
-    def screen_info(self):
-        info = self.info
-        s = f':H{info["current_hydro_model_step"]:04d}b{info["current_buffer_steps"][0]:02d}-{info["current_buffer_steps"][1]:02d}'
-        return s
     def get_reader_info(self):
         d= dict(reader=self.reader.info)
         return d

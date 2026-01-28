@@ -391,9 +391,6 @@ class Solver(ParameterBaseClass):
         fraction_done= abs((time_sec - ri.start_time) / ri.duration)
         s = f'{nt:04d}'
         s += f': {100* fraction_done:02.0f}%'
-
-        s += fgm.screen_info()
-
         t = abs(time_sec - ri.start_time)
         s += ' Day ' + ('-' if si.settings.backtracking else '+')
         s += time_util.day_hms(t)

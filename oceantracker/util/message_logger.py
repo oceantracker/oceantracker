@@ -143,7 +143,7 @@ class MessageLogger(object ):
         if key in known : return
 
         m = 'Error >>>' + msg
-        hand_indent = 2
+        hand_indent = self.hang_indent
         off = '\n' + 2 * hand_indent * '\t'
         if caller is not None:
             m += off + f'{self._get_caller_info(caller)}'
@@ -164,7 +164,7 @@ class MessageLogger(object ):
         m = self._add_doc_html_link(m, caller, 2 * hand_indent)
 
         t = self._get_trace_back_str(tabs=3)
-        m += '\n' + self._add_long_line(f'trace: {t}', tabs= 2 * hand_indent, hand_indent=hand_indent, wrap=True)
+        m += '\n' + self._add_long_line(f'trace: {t}', tabs= hand_indent,  wrap=True)
 
         self.msg_lists['error'].append(m)
         self._print_msg(m)
@@ -208,20 +208,21 @@ class MessageLogger(object ):
     def _build_msg(self,msg, msg_tag=None,hint=None,add_trace=False,caller=None, wrap = False):
 
         m = f'{msg_tag} >>> ' if msg_tag is not None else ''
-        m += self._add_long_line(msg,tabs=0, hand_indent=4, wrap= wrap)
+        m += self._add_long_line(msg,tabs=0, hand_indent=3*self.hang_indent, wrap= wrap)
 
 
         if caller is not None:
             m += '\n'+ 2*self.hang_indent*'\t' + f'{self._get_caller_info(caller)}'
 
         if hint is not None:
-            m += '\n'+ self._add_long_line(f'hint: {hint}',tabs=4, hand_indent=4,wrap = True)
+            m += '\n'+ self._add_long_line(f'hint: {hint}',tabs=2*self.hang_indent,
+                                           hand_indent=self.hang_indent,wrap = True)
 
         m = self._add_doc_html_link(m, caller, 3)
 
         if add_trace:
             t = self._get_trace_back_str(tabs=3)
-            m += '\n' + self._add_long_line(f'trace: {t}', tabs=6, hand_indent=2,wrap=True)
+            m += '\n' + self._add_long_line(f'trace: {t}', tabs=2*self.hang_indent,wrap=True)
         return m
 
     def _print_msg(self,msg):
@@ -261,8 +262,6 @@ class MessageLogger(object ):
             m += '\n' + tabs * '\t' + f'Other classes in role "{role}": {url}'
 
         return m
-
-
 
 
     def _get_trace_back_str(self,tabs=0):

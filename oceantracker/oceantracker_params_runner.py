@@ -104,7 +104,7 @@ class OceanTrackerParamsRunner(object):
                 ml._print_msg('\t'+ v)
             for v in ml.msg_lists['fatal_error']:
                 ml._print_msg('\t'+ v)
-            ml.msg('')
+            ml.hori_line()
 
         if case_info_file is  None:
             ml.msg(f'>>>> Fatal errors, run did not complete',
@@ -118,7 +118,8 @@ class OceanTrackerParamsRunner(object):
                     import shutil
                     shutil.rmtree(si.output_files['saved_state_dir'])
 
-            ml.hori_line(f'Output in "{si.run_info.run_output_dir}"')
+            ml.msg(f'Output in "{si.run_info.run_output_dir}"')
+        ml.hori_line()
         ml.close()
 
         return case_info_file

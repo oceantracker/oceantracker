@@ -317,10 +317,6 @@ class NestedFields(ParameterBaseClass):
             sel = part_prop['hydro_model_gridID'].find_subset_where(alive, 'eq', n, out=self.get_partID_subset_buffer('gridID'))  # those on this grid
             fgm.tidal_stranding.update(fgm.reader.grid, time_sec, sel)
 
-    def screen_info(self):
-        # only for outer grid
-        return self.fgm_hydro_grids[0].screen_info()
-
     def get_reader_info(self):
         d = dict(reader=self.fgm_hydro_grids[0].reader.info, nested_readers=[])
         for f in self.fgm_hydro_grids[1:]:
