@@ -35,7 +35,7 @@ def build_grid_from_params(params,caller, center=None):
     # use deprecated params if given
     if params['grid_size'] != []:
         params['rows'], params['cols'] = params['grid_size'][0], params['grid_size'][1]
-        if len(params['grid_size']) == 3: params['layers'] = params['grid_size']
+        if len(params['grid_size']) == 3: params['layers'] = params['grid_size'][2]
     if params['grid_span'] != []:
         params['span_x'], params['span_y'] = params['grid_span'][0], params['grid_span'][1]
 
