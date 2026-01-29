@@ -243,6 +243,8 @@ class _BaseGrid2DStats(ParameterBaseClass):
                              is_required=True),
             'output_file_base': PVC('stats_gridded_time_2D', str, doc_str='start of output file names'),
         })
+        regular_grid_util.add_grid_default_params(self.default_params)
+
         self.info['type'] = 'gridded'
 
     def _create_grid_variables(self):
@@ -252,7 +254,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
         info = self.info
 
         if params['release_group_centered_grids']  :
-            # get centers ofeach grid as middle of each release group
+            # get centers of each grid as middle of each release group
             info['grid_centers'] = np.zeros((len(si.class_roles.release_groups), 2), dtype=np.float64)
             for ngroup, name in enumerate(si.class_roles.release_groups.keys()):
                 rg = si.class_roles.release_groups[name]
@@ -263,55 +265,48 @@ class _BaseGrid2DStats(ParameterBaseClass):
             info['grid_centers'] = np.tile(params['grid_center'], (len(si.class_roles.release_groups), 1))
         else:
             si.msg_logger.msg('For gridded stats must supply a "grid_center"  or set "release_group_centered_grids=True"',
-                              hint=f'Set one of these parameters for gridded stat {params["name"]}', fatal_error=True, caller=self)
-
-        # ensure grid size is odd, so that center of middle cell is at grid center coords
-        grid_size = params['grid_size'][:2] + (np.asarray(params['grid_size'][:2]) % 2 == 0).astype(np.int32)
+                        hint=f'Set one of these parameters for gridded stat {params["name"]}', fatal_error=True, caller=self)
 
         # make space for coords
-        n_grids = info['grid_centers'].shape[0]  #
-        s1 = [n_grids, ] + grid_size.tolist()
-        stats_grid['x_grid'] = np.zeros(s1, dtype=np.float64)
-        stats_grid['y_grid'] = np.zeros(s1, dtype=np.float64)
-        stats_grid['cell_area'] = np.zeros(s1, dtype=np.float64)
-        stats_grid['x_bin_edges'] = np.zeros([n_grids, grid_size[1] + 1], dtype=np.float64)
-        stats_grid['y_bin_edges'] = np.zeros([n_grids, grid_size[0] + 1], dtype=np.float64)
+        # dummy call build grid to check for deprecated params, eg get new params rows, cols , span_x, span_y
+        regular_grid_util.build_grid_from_params(params, self, center=info['grid_centers'][0])
+
+        n_grids = info['grid_centers'].shape[0]
+        stats_grid['cell_area'] = np.zeros((n_grids,params['rows'],params['cols']), dtype=np.float64)
+        stats_grid['x_bin_edges'] = np.zeros([n_grids, params['cols'] ], dtype=np.float64)
+        stats_grid['y_bin_edges'] = np.zeros([n_grids, params['rows'] ], dtype=np.float64)
+        stats_grid['x'] = np.zeros([n_grids, params['cols']-1], dtype=np.float64)
+        stats_grid['y'] = np.zeros([n_grids, params['rows']-1], dtype=np.float64)
+        stats_grid['x_grid'] = np.zeros([n_grids, params['rows'] - 1, params['cols'] - 1], dtype=np.float64)
+        stats_grid['y_grid'] = np.zeros(stats_grid['x_grid'].shape, dtype=np.float64)
+        stats_grid['cell_area'] = np.zeros(stats_grid['x_grid'].shape, dtype=np.float64)
 
         # grids may have release group centers, so grid coords differ by release group
         for n_grid, p in enumerate(info['grid_centers']):
-            x_cell_edges, y_cell_edges, info['bounding_box'] = regular_grid_util.make_regular_grid(
-                                        info['grid_centers'][n_grid, :],  grid_size + 1, params['grid_span'])
-            # get midpoints of cells
-            x_grid = 0.5 * (x_cell_edges[:-1, 1:] + x_cell_edges[:-1, :-1])
-            y_grid = 0.5 * (y_cell_edges[1:, :-1] + y_cell_edges[:-1, :-1])
+            x_cell_edges, y_cell_edges, info['bounding_box'] = regular_grid_util.build_grid_from_params(
+                                                                            params,self,center=p)
+            x_cell_edges,y_cell_edges = x_cell_edges[0, :],y_cell_edges[:, 0] # all the same so take one col or row
+            stats_grid['x_bin_edges'][n_grid, ...] = x_cell_edges
+            stats_grid['y_bin_edges'][n_grid, ...] = y_cell_edges
 
-            stats_grid['x_bin_edges'][n_grid, ...] = x_cell_edges[0, :]
-            stats_grid['y_bin_edges'][n_grid, ...] = y_cell_edges[:, 0]
-
-            stats_grid['x_grid'][n_grid, ...] = x_grid
-            stats_grid['y_grid'][n_grid, ...] = y_grid
-
-            if False:
-                # check grid points
-                from matplotlib import pyplot as plt
-                plt.scatter(x_cell_edges, y_cell_edges, color='r')
-                plt.scatter(stats_grid['x_grid'][n_grid, ...], stats_grid['y_grid'][n_grid, ...], color='g')
-                plt.show(block=True)
+            # non-meshed versions of grid centers
+            stats_grid['x'][n_grid,...]  = 0.5 * (x_cell_edges[1:] + x_cell_edges[:-1])
+            stats_grid['y'][n_grid, ...] = 0.5 * (y_cell_edges[1:] + y_cell_edges[:-1])
+            # get full grid of coords
+            stats_grid['x_grid'][n_grid,...],stats_grid['x_grid'][n_grid,...]\
+                                = np.meshgrid( stats_grid['x'][n_grid,...], stats_grid['y'][n_grid,...])
 
             # get cell area im meters even if in geographic coords
-            x, y = x_cell_edges.copy(), y_cell_edges.copy()
-
+            # all grids have same cell sizes, but cell area varies across grid if in geographic coords
+            x, y = stats_grid['x_bin_edges'][n_grid,...], stats_grid['y_bin_edges'][n_grid,...]
+            x,y = np.meshgrid(x, y)
             if si.settings.use_geographic_coords:
                 x, y = cord_transforms.local_grid_deg_to_meters(x, y, x[0, 0], y[0, 0])
-            stats_grid['cell_area'][n_grid, :, :] = (x[:-1, 1:] - x[:-1, :-1]) * (y[1:, :-1] - y[:-1:, :-1])
+            stats_grid['cell_area'][n_grid,...] = (x[ 1:, 1:] - x[ :-1, :-1]) * (y[ 1:, 1:] - y[:-1, :-1])
 
-        # non meshed versions
-        stats_grid['x'] = stats_grid['x_grid'][:, 0, :]
-        stats_grid['y'] = stats_grid['y_grid'][:, :, 0]
-
-        # spacings the same for all release group grids, in meters  degrees
-        stats_grid['grid_spacings'] = np.asarray([x[1, 1] - x[0, 0], y[1, 1] - y[0, 0]])
-        params['grid_size'][:2] = grid_size
+        # spacings the same for all cells and release group grids, whether in meters or degrees
+        stats_grid['grid_spacings'] = np.asarray([stats_grid['x_bin_edges'][0, 1] - stats_grid['x_bin_edges'][0, 0],
+                                                  stats_grid['y_bin_edges'][0, 1] - stats_grid['y_bin_edges'][0, 0]])
         pass
 
 

@@ -120,6 +120,7 @@ class OceanTrackerParamsRunner(object):
 
             ml.msg(f'Output in "{si.run_info.run_output_dir}"')
         ml.hori_line()
+        ml.msg('')
         ml.close()
 
         return case_info_file

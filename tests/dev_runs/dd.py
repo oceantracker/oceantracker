@@ -161,12 +161,13 @@ pp1= dict(name='a_pollutant',  # must have a user given name
          # the below are optional settings/parameters
          initial_value=1000,  # value of property when released
          decay_time_scale=7200.)
-
+grid_size= [122, 132]
+grid_span = [10000,10000]
 my_heat_map_time = dict(name='my_heatmap_time',
          class_name='GriddedStats2D_timeBased',
          # the below are optional settings/parameters
-         grid_size=[120, 130],  # number of rows, cols cells in the heat map
-        grid_span = [10000,10000],
+         grid_size=grid_size,  # number of rows, cols cells in the heat map
+        grid_span = grid_span,
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
          particle_property_list=['a_pollutant','water_depth','tide'],  # request a heat map for the decaying part. prop. added above
@@ -178,8 +179,10 @@ my_heat_map_time = dict(name='my_heatmap_time',
 my_heat_map_age = dict(name='my_heatmap_age',
          class_name='GriddedStats2D_ageBased',
          # the below are optional settings/parameters
-         grid_size=[120, 130],  # number of east and north cells in the heat map
-        grid_span = [10000,10000],
+        rows=grid_size[0],
+        cols=grid_size[1],
+        span_x =grid_span[0],
+        span_y =grid_span[1],
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
          particle_property_list=['a_pollutant','water_depth','tide'],  # request a heat map for the decaying part. prop. added above
@@ -206,8 +209,11 @@ my_poly_stats_age = dict(class_name='PolygonStats2D_ageBased',
 
 my_heat_map3D_time = dict(name='my_heatmap3D_time',
             class_name = "GriddedStats3D_timeBased",
-            grid_size = [120, 130, 5],
-            grid_span = [10000, 10000],
+            rows=grid_size[0],
+            cols=grid_size[1],
+            layers = 5,
+            span_x=grid_span[0],
+            span_y=grid_span[1],
             particle_property_list=['a_pollutant', 'water_depth'],
             release_group_centered_grids = True,
             update_interval = 3600,
@@ -218,7 +224,8 @@ my_heat_map3D_time = dict(name='my_heatmap3D_time',
 my_heat_map2D_time_runningMean = dict(
             name = "my_heat_map2D_time_runningMean",
             class_name = "GriddedStats2D_timeBased_runningMean",
-            grid_size = [120, 130],
+            rows=grid_size[0],
+            cols=grid_size[1],
             grid_span = [10000, 10000],
             write_interval = 7200 * 3,
             release_group_centered_grids = True,

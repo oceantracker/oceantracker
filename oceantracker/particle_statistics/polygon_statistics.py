@@ -1,8 +1,7 @@
 import numpy as np
 import oceantracker.particle_statistics.gridded_statistics2D as gridded_statistics2D
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC,merge_params_with_defaults
-from oceantracker.util.parameter_base_class import   ParameterBaseClass
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.numba_util import njitOT, prange, njitOTparallel
 from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
 from oceantracker.particle_statistics._base_stats_variants import _BaseTimeStats, _BaseAgeStats, _BasePolygonStats

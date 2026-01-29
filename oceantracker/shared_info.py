@@ -239,7 +239,7 @@ class _SharedInfoClass():
 
         if class_role in self.core_class_roles.possible_values():
             #core  roles
-            params['name'] = None
+            params['name'] = class_role
             i =  self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
                                           check_for_unknown_keys=check_for_unknown_keys, caller=caller, initialize=initialize)
             i.info['instanceID'] = 0
@@ -248,12 +248,14 @@ class _SharedInfoClass():
         elif class_role in self.class_roles.possible_values():
             #other roles
             instanceID= len(self.class_roles[class_role])
+            if 'name' not in params or params['name'] is None:
+                # if no name in params or default param
+                params['name'] = f'{class_role}_{instanceID:04d}'
+
             i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
                          caller=caller,initialize=initialize,add_required_classes_and_settings=add_required_classes_and_settings)
             i.info['instanceID'] = instanceID
-            if params['name'] is None:
-                # if no name in params or default param
-                params['name'] = f'{class_role}_{instanceID:04d}'
+
 
             self.class_roles[class_role][params['name']] = i
 

@@ -87,12 +87,11 @@ class MessageLogger(object ):
 
         elif note:
             if len(self.msg_lists['note']) > self.max_warnings: return
-            m = self._build_msg(msg_text, msg_tag='Note', hint=hint, add_trace=False,caller=caller, wrap=True)
+            m = self._build_msg(msg_text, msg_tag='Note', hint=hint, add_trace=False, wrap=True)
             self.msg_lists['note'].append(m)
 
         else:
             m = self._build_msg(msg_text, msg_tag=None, hint=hint, add_trace=False, wrap=wrap)
-
 
         # write message
         self._print_msg(m)
@@ -145,8 +144,8 @@ class MessageLogger(object ):
         m = 'Error >>>' + msg
         hand_indent = self.hang_indent
         off = '\n' + 2 * hand_indent * '\t'
-        if caller is not None:
-            m += off + f'{self._get_caller_info(caller)}'
+
+        m = self._add_caller_info(m, caller,2 * hand_indent)
 
 
         # flag if unknown
@@ -211,8 +210,7 @@ class MessageLogger(object ):
         m += self._add_long_line(msg,tabs=0, hand_indent=3*self.hang_indent, wrap= wrap)
 
 
-        if caller is not None:
-            m += '\n'+ 2*self.hang_indent*'\t' + f'{self._get_caller_info(caller)}'
+        m = self._add_caller_info(m, caller,3)
 
         if hint is not None:
             m += '\n'+ self._add_long_line(f'hint: {hint}',tabs=2*self.hang_indent,
@@ -232,15 +230,19 @@ class MessageLogger(object ):
         if self.log_file is not None:
             self.log_file.write(txt + '\n')
 
-    def _get_caller_info(self,caller):
-        if caller is not None:
-            if hasattr(caller, '__class__'):
-                origin = f'In:  role = "{caller.role_name if hasattr(caller, "role_name") else "??"}"'
-                origin += f', class_name = "{caller.__class__.__name__}"'
-                origin += f' \t   ({caller.__class__.__module__}.{caller.__class__.__name__})'
-            else:
-                origin = caller.__name__
-            return  origin
+    def _add_caller_info(self,m, caller,tabs):
+
+        if caller is  None: return  m
+        off = '\n' + tabs*'\t'
+        if not hasattr(caller, '__class__'):
+            return off+ caller.__name__
+
+        l =  f'In: "{caller.params["name"] if  hasattr(caller, "params") and "name" in caller.params else ""}":'
+        l+=  f'  role = {caller.role_name if hasattr(caller, "role_name") else "??"}'
+        m += off + l + f', class_name = {caller.__class__.__name__}'
+        m += off +  self.hang_indent*'\t'+ f'({caller.__class__.__module__}.{caller.__class__.__name__})'
+
+        return  m
 
     def _add_doc_html_link(self,m, caller,tabs):
         import requests

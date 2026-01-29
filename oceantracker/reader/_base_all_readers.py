@@ -667,8 +667,8 @@ class _BaseReader(ParameterBaseClass):
         islatlong=  (np.nanmax(x)- np.nanmin(x) < 360) or (np.nanmax(x)- np.nanmin(x) < 360)
 
         if islatlong:
-            si.msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so using a native  (lon, lat ) a grid, all input coords  should be be lon lat ', note=True,
-                              caller = self)
+            si.msg_logger.msg('Reader auto-detected lon-lat grid, as grid span  < 360, so using a native  (lon, lat ) a grid, all input coords  should be be lon lat ',
+                                note=True, caller = self)
 
         return islatlong
 
