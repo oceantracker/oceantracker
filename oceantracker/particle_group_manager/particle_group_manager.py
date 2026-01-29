@@ -244,7 +244,7 @@ class ParticleGroupManager(ParameterBaseClass):
         nDead = si.run_info.particle_counts['current_status_counts']['dead']
 
         # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
-        if nDead > si.settings.min_dead_to_remove and nDead >= 0.20 * si.run_info.particles_in_buffer:
+        if nDead > si.settings.min_dead_to_remove and nDead >= 0.25 * si.run_info.particles_in_buffer:
                 # if too many dead then delete from memory
                 part_prop = si.class_roles.particle_properties
                 t0 = perf_counter()
