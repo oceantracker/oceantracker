@@ -35,7 +35,7 @@ class FindHoriCellTriangleWalk(object):
         self.grid, self.params= grid, params
         self.info={}
 
-        # tree for initial serach
+        # tree for initial search
         self.KDtree = cKDTree(grid['x'])
 
         # pre calc matric to calculate bc coords
@@ -70,6 +70,7 @@ class FindHoriCellTriangleWalk(object):
         info['particles_walked'] = 0
         info['number_of_triangles_walked'] = 0
 
+
     def find_initial_hori_cell(self, xq):
         # find nearest cell to xq
         t0 = perf_counter()
@@ -90,9 +91,8 @@ class FindHoriCellTriangleWalk(object):
                                 n_cell, cell_search_status, bc_coords,
                                 params['max_search_steps'], params['bc_walk_tol'],
                                 si.settings.block_dry_cells, active)
-        info= self.info
-        info['particles_walked'] += particles_walked
-        info['number_of_triangles_walked'] += numb_walks
+
+        return dict(particles_walked= particles_walked,numb_walks=numb_walks )
 
     def close(self):
         info= self.info

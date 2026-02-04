@@ -153,6 +153,7 @@ class _RunInfo(definitions._AttribDict):
     has_A_Z_profile = None
     has_bottom_stress = None
     particle_counts = {}
+    cell_finder_stats = {}
     particles_in_buffer = 0
     cumulative_number_released = 0
     forecasted_number_alive = 0
@@ -298,6 +299,15 @@ class _SharedInfoClass():
             b[name] = dict(time=0.,calls=0)
         b[name]['time'] += perf_counter()-t0
         b[name]['calls'] += 1
+
+    def _accumulate_cell_finder_stats_in_runinfo(self, new_counts :dict):
+        # acumuate counts of particle numbers walk, bad etc
+        c = self.run_info.cell_finder_stats
+        for key, val in new_counts.items():
+            if key not in c: c[key] = 0 # add new count accumulator
+            c[key] += val
+
+
 
 
 
