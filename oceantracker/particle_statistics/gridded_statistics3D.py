@@ -83,9 +83,8 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
 
-        stats_util._count_all_alive_time(part_prop['status'].data,
-                                         part_prop['IDrelease_group'].data,
-                                         self.count_all_alive_particles, alive)
+        self.count_all_alive(alive)
+
         self._do_counts_and_summing_numba(
                             part_prop['IDrelease_group'].data,
                             part_prop['x'].data,

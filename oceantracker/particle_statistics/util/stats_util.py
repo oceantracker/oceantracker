@@ -14,7 +14,6 @@ def _count_all_alive_time(status,  release_group, count_all_alive, alive):
 
     for nn in range(alive.size):
         n = alive[nn]
-    #for n in range(status.size):
         count_all_alive[release_group[n]] += status[n] >= stationary_status
     pass
 
@@ -29,6 +28,7 @@ def _count_all_alive_age_bins(status,  release_group, age, age_bin_edges, count_
         na = int(np.floor((age[n] - age_bin_edges[0]) / da))
         if 0 <= na < (age_bin_edges.size - 1):
             count_all_alive[na, release_group[n]] += status[n] >= stationary_status
+
 
 @njitOT
 def _sel_status_waterdepth(status, x, water_depth, statuses_to_count_map,  water_depth_range, num_in_buffer, out):

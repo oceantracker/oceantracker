@@ -72,8 +72,8 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
         p_x       = part_prop['x'].used_buffer()
 
         stats_grid = self.grid
-        stats_util._count_all_alive_time(part_prop['status'].used_buffer(), part_prop['IDrelease_group'].data,
-                                         self.count_all_alive_particles, alive)
+        self.count_all_alive(alive)
+
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
         inside_poly_prop.update(n_time_step,time_sec,sel)

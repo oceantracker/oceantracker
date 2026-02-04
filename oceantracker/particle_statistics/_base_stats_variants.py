@@ -33,6 +33,11 @@ class _BaseTimeStats(ParameterBaseClass):
                 nc.create_variable('sum_' + p,dim_names, dtype= np.float64, description= f'sum of particle property {p} inside bin')
                 nc.create_variable(p, dim_names, dtype=np.float32, description=f'Average particle property {p} inside cell  = sum prop/counts_inside')
 
+    def count_all_alive(self,alive):
+        part_prop = si.class_roles.particle_properties
+        stats_util._count_all_alive_time(part_prop['status'].used_buffer(), part_prop['IDrelease_group'].data,
+                                         self.count_all_alive_particles, alive)
+
     def _write_common_time_varying_stats(self, time_sec):
         # write nth step in file
         n_write = self.nWrites
@@ -95,7 +100,6 @@ class _BaseAgeStats(ParameterBaseClass):
         ml = si.msg_logger
         stats_grid = self.grid
 
-
         # check age limits to bin particle ages into,  equal bins in given range
         params['max_age_to_bin'] = max(params['age_bin_size'], params['max_age_to_bin']) # at least one bin
         if params['min_age_to_bin'] >=  params['max_age_to_bin']: params['min_age_to_bin'] = 0
@@ -129,6 +133,7 @@ class _BaseAgeStats(ParameterBaseClass):
 
         self._add_age_bins_to_file(nc)
         counts_released_age_binned = self._add_age_binned_release_counts_to_file(nc)
+
 
         # add connectives, works for both polygon and grid stats, using s to reshape
         s = list(counts_inside_age_bins.shape[:2]) + (counts_inside_age_bins.ndim - counts_released_age_binned.ndim) * [1]
@@ -293,7 +298,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
             stats_grid['x'][n_grid,...]  = 0.5 * (x_cell_edges[1:] + x_cell_edges[:-1])
             stats_grid['y'][n_grid, ...] = 0.5 * (y_cell_edges[1:] + y_cell_edges[:-1])
             # get full grid of coords
-            stats_grid['x_grid'][n_grid,...],stats_grid['x_grid'][n_grid,...]\
+            stats_grid['x_grid'][n_grid,...],stats_grid['y_grid'][n_grid,...]\
                                 = np.meshgrid( stats_grid['x'][n_grid,...], stats_grid['y'][n_grid,...])
 
             # get cell area im meters even if in geographic coords
