@@ -191,6 +191,7 @@ class  InterpTriangularGrid(_BaseInterp):
         # locate vertical cell in place
         info = self.info
         t0 = perf_counter()
+        #todo ad to runifo cell walk  stats
         info['bad_z_fraction_count'] = self._vert_cell_finder.find_vertical_cell(fields, xq, current_buffer_steps, weight_time_steps, active)
         if info['bad_z_fraction_count'] > 0 :
             si.msg_logger.msg(f'Out of range vertical layer fraction calculated, number counted so far {info["bad_z_fraction_count"]}', strong_warning=True,caller = self,

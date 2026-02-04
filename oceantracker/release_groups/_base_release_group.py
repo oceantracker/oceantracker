@@ -62,6 +62,11 @@ class _BaseReleaseGroup(ParameterBaseClass):
         ]
         info['depth_range'] = np.asarray( info['depth_range'])
 
+    def final_setup(self):
+        # array to hold release count each time step
+        info = self.info
+        info['number_released_each_time_step'] = np.zeros((si.run_info.times.size,), dtype = np.int64)
+
      # optional filter on release points
     def user_release_point_filter(self, release_part_prop, time_sec= None):
         # user can create filter if points to keep from given points release points

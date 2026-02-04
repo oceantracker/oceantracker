@@ -106,6 +106,7 @@ class ParticleGroupManager(ParameterBaseClass):
                 rg.start_update_timer()
                 release_part_prop = rg.get_release_locations(time_sec)
                 index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
+                rg.info['number_released_each_time_step'][n_time_step] += index.size # record number released
                 new_buffer_index = np.concatenate((new_buffer_index,index), dtype=np.int32)
                 rg.stop_update_timer()
 
