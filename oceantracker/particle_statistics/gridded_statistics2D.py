@@ -69,7 +69,7 @@ class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLoc
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
 
-        self.count_all_alive(alive)
+        self.count_all_currently_alive(alive)
 
         # set up pointers to particle properties
         release_groupID = part_prop['IDrelease_group'].used_buffer()
@@ -336,10 +336,8 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
         release_groupID = part_prop['IDrelease_group'].used_buffer()
-        stats_util._count_all_alive_age_bins(part_prop['status'].data,
-                            part_prop['IDrelease_group'].data,
-                            part_prop['age'].data,  stats_grid['age_bin_edges'],
-                            self.count_all_alive_particles, alive)
+
+        self.count_all_alive_by_age(alive)
 
         self._update_release_counts()
 

@@ -7,27 +7,6 @@ stationary_status = int(si.particle_status_flags.stationary)
 status_unknown= int(si.particle_status_flags.unknown)
 
 def get_dim_names(dims_dict): return [key for key in dims_dict.keys()]
-@njitOT
-def _count_all_alive_time(status,  release_group, count_all_alive, alive):
-
-    count_all_alive[:]  = 0.
-
-    for nn in range(alive.size):
-        n = alive[nn]
-        count_all_alive[release_group[n]] += status[n] >= stationary_status
-    pass
-
-
-@njitOT
-def _count_all_alive_age_bins(status,  release_group, age, age_bin_edges, count_all_alive, alive):
-
-    da = age_bin_edges[1] - age_bin_edges[0]
-
-    for nn in range(alive.size):
-        n = alive[nn]
-        na = int(np.floor((age[n] - age_bin_edges[0]) / da))
-        if 0 <= na < (age_bin_edges.size - 1):
-            count_all_alive[na, release_group[n]] += status[n] >= stationary_status
 
 
 @njitOT

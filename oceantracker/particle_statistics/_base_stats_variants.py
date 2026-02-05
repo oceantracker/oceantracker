@@ -11,6 +11,11 @@ from oceantracker.particle_statistics.util import stats_util
 
 import numpy  as np
 from oceantracker.shared_info import shared_info as si
+from oceantracker.util.numba_util import njitOT
+
+# compile this constant into numba cod
+stationary_status = int(si.particle_status_flags.stationary)
+status_unknown= int(si.particle_status_flags.unknown)
 
 
 class _BaseTimeStats(ParameterBaseClass):
@@ -33,10 +38,19 @@ class _BaseTimeStats(ParameterBaseClass):
                 nc.create_variable('sum_' + p,dim_names, dtype= np.float64, description= f'sum of particle property {p} inside bin')
                 nc.create_variable(p, dim_names, dtype=np.float32, description=f'Average particle property {p} inside cell  = sum prop/counts_inside')
 
-    def count_all_alive(self,alive):
+    def count_all_currently_alive(self, alive):
         part_prop = si.class_roles.particle_properties
-        stats_util._count_all_alive_time(part_prop['status'].used_buffer(), part_prop['IDrelease_group'].data,
+        self._count_all_alive_time(part_prop['status'].used_buffer(), part_prop['IDrelease_group'].data,
                                          self.count_all_alive_particles, alive)
+    @staticmethod
+    @njitOT
+    def _count_all_alive_time(status, release_group, count_all_alive, alive):
+        count_all_alive[:] = 0.
+
+        for nn in range(alive.size):
+            n = alive[nn]
+            count_all_alive[release_group[n]] += status[n] >= stationary_status
+        pass
 
     def _write_common_time_varying_stats(self, time_sec):
         # write nth step in file
@@ -118,6 +132,27 @@ class _BaseAgeStats(ParameterBaseClass):
                 caller=self, strong_warning=True)
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
+
+
+    def count_all_alive_by_age(self, alive):
+        part_prop = si.class_roles.particle_properties
+        stats_grid = self.grid
+        release_groupID = part_prop['IDrelease_group'].used_buffer()
+        self._count_all_alive_age_bins(part_prop['status'].data,
+                            part_prop['IDrelease_group'].data,
+                            part_prop['age'].data,  stats_grid['age_bin_edges'],
+                            self.count_all_alive_particles, alive)
+
+    @staticmethod
+    @njitOT
+    def _count_all_alive_age_bins(status, release_group, age, age_bin_edges, count_all_alive, alive):
+        da = age_bin_edges[1] - age_bin_edges[0]
+
+        for nn in range(alive.size):
+            n = alive[nn]
+            na = int(np.floor((age[n] - age_bin_edges[0]) / da))
+            if 0 <= na < (age_bin_edges.size - 1):
+                count_all_alive[na, release_group[n]] += status[n] >= stationary_status
 
     def info_to_write_on_file_close(self, nc):
         # write variables whole

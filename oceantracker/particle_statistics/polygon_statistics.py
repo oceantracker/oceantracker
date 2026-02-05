@@ -72,7 +72,7 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
         p_x       = part_prop['x'].used_buffer()
 
         stats_grid = self.grid
-        self.count_all_alive(alive)
+        self.count_all_currently_alive(alive)
 
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
@@ -160,16 +160,12 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
 
         self._update_release_counts()
 
-
         # set up pointers to particle properties, only point to those in buffer as no need to look at those beyond buffer
         release_groupID   = part_prop['IDrelease_group'].used_buffer()
         p_x         = part_prop['x'].used_buffer()
         p_age       = part_prop['age'].used_buffer()
 
-        stats_util._count_all_alive_age_bins(part_prop['status'].data,
-                                             part_prop['IDrelease_group'].data,
-                                             part_prop['age'].data, stats_grid['age_bin_edges'],
-                                             self.count_all_alive_particles, alive)
+        self.count_all_alive_by_age(alive)
 
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]

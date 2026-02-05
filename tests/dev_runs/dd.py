@@ -293,11 +293,24 @@ def compare_reference(case_info_file, args, last_time=False):
         delta = np.abs(data - ref_data)
 
         #delta = np.abs(tracks[name] - tracks_ref[name])
-        print(f'{BLUE}{name}-comparing:  { "Last_time only" if last_time else "All times"}{RESET} differences from reference run: ' )
-        print('\t min  ' +RED, np.nanmin(np.nanmin(delta, axis=0), axis=0), RESET, end="")
-        print('\t mean '+RED, np.nanmean(np.nanmean(delta, axis=0), axis=0), RESET, end="")
-        print('\t max  '+RED, np.nanmax(np.nanmax(delta, axis=0), axis=0), RESET, end="")
+        print(_hl(f'{name}-comparing:  { "Last_time only" if last_time else "All times"}', c= BLUE),
+                  'differences from reference run: ')
+        print('\t min  ' , _hl(np.nanmin(np.nanmin(delta, axis=0), axis=0)), end="")
+        print('\t mean ', _hl(np.nanmean(np.nanmean(delta, axis=0), axis=0)), end="")
+        print('\t max  ', _hl(np.nanmax(np.nanmax(delta, axis=0), axis=0)), end="")
         print('\t range , ref. data  min=',  np.nanmin(np.nanmin(ref_data, axis=0), axis=0),'max=',   np.nanmax(np.nanmax(ref_data, axis=0), axis=0), )
+
+    if tracks['x'].shape[2] == 3:
+        # 3D cases
+        tests=dict()
+
+        # check z fractions are in range 0-1
+        z_fraction= tracks['z_fraction']
+        sel = np.logical_or(z_fraction < -.01, z_fraction > 1.01)
+        print(_hl('zfraction out of range, all=', c=BLUE), _hl( np.count_nonzero(sel)))
+        z_fraction_water_velocity= tracks['z_fraction_water_velocity']
+        sel = np.logical_or(z_fraction_water_velocity < -.01,  z_fraction_water_velocity > 1.01)
+        print(_hl('zfraction out of range,  water_velocity=', c=BLUE), _hl(np.count_nonzero(sel)))
 
     if False:
         from matplotlib import  pyplot as plt
@@ -313,15 +326,15 @@ def compare_reference(case_info_file, args, last_time=False):
         stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
 
-        print(f'Stats  compare ref: "{name}"')
+        print( _hl(f'Stats  compare ref: "{name}"', c = BLUE))
         print('\t counts, ref/new', stats_ref['count'].sum(), stats['count'].sum(),
-              '\t\t\t max diff counts-ref run counts =' +RED,np.max(np.abs(stats['count'] - stats_ref['count'])), RESET)
+              '\t\t\t max diff counts-ref run  counts =',_hl(np.max(np.abs(stats['count'] - stats_ref['count']))))
         print('\t count all alive, ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
-             'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
-                     '\t max diff counts-ref run counts =' +RED ,np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])), RESET)
+                'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
+                '\t max diff counts-ref run counts ='  , _hl(np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles']))))
 
         if 'x_grid' in stats_ref:
-            print('\t grid differences , x_grid/y_grid diff. ', (stats['x_grid']-  stats_ref['x_grid']).max(), (stats['y_grid']-  stats_ref['y_grid']).max())
+            print('\t grid differences , x_grid/y_grid diff. ', _hl((stats['x_grid']-  stats_ref['x_grid']).max()),_hl((stats['y_grid']-  stats_ref['y_grid']).max()))
             print('\t grid lower left , x_grid/y_grid diff. ', stats['x_grid'][0,0,0] - stats_ref['x_grid'][0, 0,0],  stats['y_grid'][0,0,0] - stats_ref['y_grid'][0, 0,0])
             print('\t grid upper right left , x_grid/y_grid diff. ', stats['x_grid'][0, -1, -1] - stats_ref['x_grid'][0, -1, -1] ,
                   stats['y_grid'][0,-1, -1]  - stats_ref['y_grid'][0,-1, -1] )
@@ -334,7 +347,7 @@ def compare_reference(case_info_file, args, last_time=False):
             c  = stats['connectivity_matrix']
             c_ref= c_ref[np.isfinite(c_ref)]
             c = c[np.isfinite(c)]
-            print( '\t connectives > 1.01 ref='+RED  , (c_ref > 1.001).sum(),RESET+ 'run ='+RED, (c> 1.001).sum(), RESET+ ' counts',
+            print( '\t connectives > 1.01 ref=' ,_hl((c_ref > 1.001).sum()),'run =', _hl( (c> 1.001).sum()),  ' counts',
                   'ref range =', c_ref.min(),'-', c_ref.max(), 'run range =', c_ref.min(),'-', c_ref.max())
             pass
         if 'particle_property_list' in params:
@@ -350,11 +363,16 @@ def compare_reference(case_info_file, args, last_time=False):
                 try:
                     print(f'\t Property  "{prop_name}"', 'max mag. ref/new',
                       np.nanmax(np.abs(stats_ref[prop_name])),np.nanmax(np.abs(stats[prop_name])),
-                      ', max diff ='+RED  , np.max(dc[np.isfinite(dc)]), RESET)
+                      ', max diff =',_hl(np.max(dc[np.isfinite(dc)])))
                 except Exception as e:
                     raise(f'debug: Property  "{prop_name}"')
 
     pass
+
+def _hl(s:str, c= RED):
+    if type(s) is not str : s= str(s)
+    return  c +s + RESET
+
 def show_track_plot(case_info_file, args,colour_with=None):
     from oceantracker.plot_output import plot_tracks
     if not args.plot : return
