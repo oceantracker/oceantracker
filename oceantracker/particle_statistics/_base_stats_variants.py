@@ -14,9 +14,7 @@ from oceantracker.shared_info import shared_info as si
 from oceantracker.util.numba_util import njitOT
 
 # compile this constant into numba cod
-stationary_status = int(si.particle_status_flags.stationary)
-status_unknown= int(si.particle_status_flags.unknown)
-
+status_outside_open_boundary = int(si.particle_status_flags.outside_open_boundary)
 
 class _BaseTimeStats(ParameterBaseClass):
 
@@ -49,7 +47,7 @@ class _BaseTimeStats(ParameterBaseClass):
 
         for nn in range(alive.size):
             n = alive[nn]
-            count_all_alive[release_group[n]] += status[n] >= stationary_status
+            count_all_alive[release_group[n]] += status[n] >= status_outside_open_boundary
         pass
 
     def _write_common_time_varying_stats(self, time_sec):
@@ -152,7 +150,7 @@ class _BaseAgeStats(ParameterBaseClass):
             n = alive[nn]
             na = int(np.floor((age[n] - age_bin_edges[0]) / da))
             if 0 <= na < (age_bin_edges.size - 1):
-                count_all_alive[na, release_group[n]] += status[n] >= stationary_status
+                count_all_alive[na, release_group[n]] += status[n] >= status_outside_open_boundary
 
     def info_to_write_on_file_close(self, nc):
         # write variables whole

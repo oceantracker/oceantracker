@@ -223,7 +223,7 @@ class Solver(ParameterBaseClass):
         ri.current_model_time = time_sec
 
         # some may now have status dead so update
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.outside_open_boundary, out=self.get_partID_buffer('B1'))
 
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
@@ -237,7 +237,7 @@ class Solver(ParameterBaseClass):
         for name, i in si.class_roles.trajectory_modifiers.items():
             i.timed_update(n_time_step, time_sec, alive)
 
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.outside_open_boundary, out=self.get_partID_buffer('B1'))
 
 
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)

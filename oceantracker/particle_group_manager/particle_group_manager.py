@@ -87,7 +87,8 @@ class ParticleGroupManager(ParameterBaseClass):
         info['particles_released'] = 0
 
         info['current_particle_buffer_size'] = si.settings.particle_buffer_initial_size
-        self.status_count_array_per_thread= np.zeros((si.settings.processors, 256), np.int32) # array to insert status counts for a
+        self.status_count_array_per_thread= np.zeros((si.settings.processors, si.particle_status_flags.moving-si.particle_status_flags.notReleased+1),
+                                                                                        np.int64) # array to insert status counts for a
 
         info['current_status_counts'] = {}
         for name, val,  in si.particle_status_flags.items():
@@ -106,7 +107,8 @@ class ParticleGroupManager(ParameterBaseClass):
                 rg.start_update_timer()
                 release_part_prop = rg.get_release_locations(time_sec)
                 index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
-                rg.info['number_released_each_time_step'][n_time_step] += index.size # record number released
+                # todo implement number_released_each_time_step?
+                #rg.info['number_released_each_time_step'][n_time_step] += index.size # record number released
                 new_buffer_index = np.concatenate((new_buffer_index,index), dtype=np.int32)
                 rg.stop_update_timer()
 
@@ -232,7 +234,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # transfer stats counts from array to run_info dict
         for key, val in si.particle_status_flags.items():
-            pc['current_status_counts'][key] = self.status_count_array_per_thread[:, 128 + val].sum(axis=0)
+            pc['current_status_counts'][key] = self.status_count_array_per_thread[:, val - si.particle_status_flags.notReleased].sum(axis=0)
 
         return num_alive
 

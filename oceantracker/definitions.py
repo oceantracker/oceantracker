@@ -100,7 +100,6 @@ class _AttribDict():
 
 ''' Particle status flags mapped to integer values '''
 class _ParticleStatusFlags(_AttribDict):
-    unknown : int = -20
     notReleased : int = -10
     dead : int = -5
     outside_domain: int = -2

@@ -9,7 +9,6 @@ from oceantracker.particle_statistics._base_location_stats import _BaseParticleL
 from oceantracker.particle_statistics._base_stats_variants import  _BaseTimeStats, _BaseGrid2DStats
 from oceantracker.shared_info import shared_info as si
 
-stationary_status = int(si.particle_status_flags.stationary)  # compile this constant into numba code
 from oceantracker.particle_statistics.util import  stats_util
 from oceantracker.particle_statistics._base_stats_variants import  _BaseAgeStats
 

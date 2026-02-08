@@ -65,7 +65,8 @@ class _BaseReleaseGroup(ParameterBaseClass):
     def final_setup(self):
         # array to hold release count each time step
         info = self.info
-        info['number_released_each_time_step'] = np.zeros((si.run_info.times.size,), dtype = np.int64)
+        # todo implement number_released_each_time_step?
+        #info['number_released_each_time_step'] = np.zeros((si.run_info.times.size,), dtype = np.int64)
 
      # optional filter on release points
     def user_release_point_filter(self, release_part_prop, time_sec= None):

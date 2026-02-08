@@ -3,8 +3,7 @@ from oceantracker.util.numba_util import njitOT
 from oceantracker.shared_info import shared_info as si
 
 # compile this constant into numba cod
-stationary_status = int(si.particle_status_flags.stationary)
-status_unknown= int(si.particle_status_flags.unknown)
+status_notReleased= int(si.particle_status_flags.notReleased)
 
 def get_dim_names(dims_dict): return [key for key in dims_dict.keys()]
 
@@ -13,10 +12,9 @@ def get_dim_names(dims_dict): return [key for key in dims_dict.keys()]
 def _sel_status_waterdepth(status, x, water_depth, statuses_to_count_map,  water_depth_range, num_in_buffer, out):
     n_found = 0
     for n in range(num_in_buffer):
-        if statuses_to_count_map[status[n]-status_unknown] and water_depth_range[0] <= water_depth[n] <= water_depth_range[1]:
+        if statuses_to_count_map[status[n]-status_notReleased] and water_depth_range[0] <= water_depth[n] <= water_depth_range[1]:
             out[n_found] = n
             n_found += 1
-
     return out[:n_found]
 
 @njitOT

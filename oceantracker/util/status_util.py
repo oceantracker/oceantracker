@@ -9,10 +9,10 @@ def build_select_status_map(status_list):
         # selct those >=0 if not list given
         status_list = si.particle_status_flags.possible_values()
 
-    a = np.full((si.particle_status_flags.moving - si.particle_status_flags.unknown +1,),
+    a = np.full((si.particle_status_flags.moving - si.particle_status_flags.notReleased +1,),
                 False,dtype=bool)
 
     status_dict = si.particle_status_flags.asdict()
     for s in status_list:
-        a[status_dict[s]-si.particle_status_flags.unknown]= True
+        a[status_dict[s]-si.particle_status_flags.notReleased]= True
     return a
