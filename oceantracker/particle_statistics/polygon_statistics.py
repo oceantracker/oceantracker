@@ -157,9 +157,6 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
 
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
-
-        self._update_release_counts()
-
         # set up pointers to particle properties, only point to those in buffer as no need to look at those beyond buffer
         release_groupID   = part_prop['IDrelease_group'].used_buffer()
         p_x         = part_prop['x'].used_buffer()

@@ -1,5 +1,5 @@
 from os import path
-
+from copy import copy
 import numba
 
 from oceantracker.util.parameter_base_class import ParameterBaseClass
@@ -165,17 +165,17 @@ class _BaseAgeStats(ParameterBaseClass):
                           description='counts of  all alive particles, not just those selected to be counted')
 
         self._add_age_bins_to_file(nc)
-        counts_released_age_binned = self._add_age_binned_release_counts_to_file(nc)
-
 
         # add connectives, works for both polygon and grid stats, using s to reshape
-        s = list(counts_inside_age_bins.shape[:2]) + (counts_inside_age_bins.ndim - counts_released_age_binned.ndim) * [1]
+        s = list(counts_inside_age_bins.shape[:2]) \
+                    + (counts_inside_age_bins.ndim - self.count_all_alive_particles.ndim) * [ 1]
         with np.errstate(divide='ignore', invalid='ignore'):
-            connectivity_matrix = counts_inside_age_bins / counts_released_age_binned.reshape(s)
+            connectivity_matrix = counts_inside_age_bins / self.count_all_alive_particles.reshape(s)
+
         connectivity_matrix[~np.isfinite(connectivity_matrix)] = np.nan
 
         nc.write_variable('connectivity_matrix', connectivity_matrix, dim_names,
-                          description='Age binned connectivity of each polygon as fraction =counts_inside/ counts_released_age_binned, ie includes dead and those outside open boundaries ')
+                          description='Age binned connectivity of each polygon as fraction =counts_inside/ counts_all_alive (includes thoise  outside open boundaries )')
 
         # particle property sums
         for key, item in self.sum_binned_part_prop.items():
@@ -203,27 +203,7 @@ class _BaseAgeStats(ParameterBaseClass):
         self.number_released_so_far= np.zeros((n_updates, n_release), dtype=np.int64)
         pass
 
-    def _update_release_counts(self):
-        nt = self.update_count
-        for nrg, (name, i) in  enumerate(si.class_roles.release_groups.items()):
-            self.number_released_so_far[nt, nrg] = i.info['number_released']
 
-    def _add_age_binned_release_counts_to_file(self,nc):
-        stats_grid = self.grid
-        dn = si.dim_names
-        n_times = self.update_count
-        times =  self.schedulers['count_scheduler'].scheduled_times[:n_times]
-        nc.write_variable('time_of_count',times, [dn.time], units='sec', description='times counts made for age stats')
-
-        number_released_to_date=  self.number_released_so_far[:n_times, :]
-        nc.write_variable('number_released_to_date',  number_released_to_date, [dn.time, dn.release_group],
-                            description='total number released since start of run at counting times for  each release group')
-
-        # age bin all released particles
-        counts_released_age_binned= self._age_binned_release_counts(times, number_released_to_date, stats_grid['age_bin_edges'])
-        nc.write_variable('counts_released', counts_released_age_binned, [dn.age_bin, dn.release_group],
-                                description='all particles released in age bins for each release group')
-        return  counts_released_age_binned
 
     def save_state(self, si, state_dir):
         fn = path.join(state_dir,f'stats_state_{self.params["name"]}.nc')
