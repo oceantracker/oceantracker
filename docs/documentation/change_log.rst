@@ -4,6 +4,16 @@
 Change log
 ###########################
 
+Version '0.5.3.2 2026-02-09'
+_____________________________
+
+Hotfix
+------
+
+#. Fixed "download_hindcast_data_for_tutorials" to now correctly deal with git lfs files
+
+
+
 Version '0.5.3.1 2026-01-27'
 _____________________________
 
