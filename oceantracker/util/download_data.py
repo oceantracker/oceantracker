@@ -2,6 +2,8 @@ import os
 import requests
 from pathlib import Path
 
+import re
+
 def download_hindcast_data_for_tutorials(data_path="./demo_hindcast"):
     """
     Download the tutorials from the GitHub repository if they do not exist locally.
@@ -19,13 +21,51 @@ def download_hindcast_data_for_tutorials(data_path="./demo_hindcast"):
 
 def download_data_from_github(repo_url, local_path, directory_path=""):
     """
-    Download a directory from a GitHub repository.
+    Download a directory from a GitHub repository, handling Git LFS files.
     
     Args:
         repo_url (str): GitHub repository URL (e.g., "https://github.com/user/repo")
         local_path (str): Local path where to save the files
         directory_path (str): Specific directory in repo to download (e.g., "data" or "src/data")
     """
+    def _is_lfs_pointer(content):
+        """Check if content is a Git LFS pointer file"""
+        try:
+            text = content.decode('utf-8')
+            # LFS pointer files start with "version https://git-lfs.github.com/spec/v1"
+            return text.startswith('version https://git-lfs.github.com/spec/v1')
+        except:
+            return False
+    
+    def _parse_lfs_pointer(content):
+        """Parse LFS pointer to extract OID"""
+        try:
+            text = content.decode('utf-8')
+            # Extract the SHA256 OID from the pointer
+            match = re.search(r'oid sha256:([a-f0-9]{64})', text)
+            if match:
+                return match.group(1)
+        except:
+            pass
+        return None
+    
+    def _download_lfs_file(repo_url, directory_path, filename, oid):
+        """Download actual LFS file from GitHub's media endpoint"""
+        parts = repo_url.rstrip('/').split('/')
+        owner = parts[-2]
+        repo = parts[-1]
+        
+        # Construct the LFS media URL
+        file_path = f"{directory_path}/{filename}" if directory_path else filename
+        lfs_url = f"https://media.githubusercontent.com/media/{owner}/{repo}/main/{file_path}"
+        
+        try:
+            response = requests.get(lfs_url)
+            response.raise_for_status()
+            return response.content
+        except requests.exceptions.RequestException as e:
+            return None
+    
     def _collect_all_files(repo_url, directory_path=""):
         """Recursively collect all files to get total count and size"""
         parts = repo_url.rstrip('/').split('/')
@@ -52,7 +92,7 @@ def download_data_from_github(repo_url, local_path, directory_path=""):
         return files
     
     def _download_files_with_progress(repo_url, local_path, directory_path="", file_counter=None, all_files=None):
-        """Download files with progress tracking"""
+        """Download files with progress tracking, handling LFS files"""
         if file_counter is None:
             file_counter = {'count': 0}
         if all_files is None:
@@ -92,9 +132,24 @@ def download_data_from_github(repo_url, local_path, directory_path=""):
                     # Download file
                     file_response = requests.get(item['download_url'])
                     file_response.raise_for_status()
+                    file_content = file_response.content
                     
+                    # Check if this is an LFS pointer file
+                    if _is_lfs_pointer(file_content):
+                        oid = _parse_lfs_pointer(file_content)
+                        if oid:
+                            # Update progress to show LFS detection
+                            lfs_progress_str = f"Downloading file: {file_counter['count']}/{total_files} - {downloaded_size/(1024*1024):.1f}MB/{total_size/(1024*1024):.1f}MB - Current file: {item['name']} (LFS detected, fetching actual content...)"
+                            print(f"\r{lfs_progress_str}", end="", flush=True)
+                            
+                            lfs_content = _download_lfs_file(repo_url, directory_path, item['name'], oid)
+                            if lfs_content is not None:
+                                file_content = lfs_content
+                                current_file_size = len(lfs_content)
+                    
+                    # Write file to disk
                     with open(item_path, 'wb') as f:
-                        f.write(file_response.content)
+                        f.write(file_content)
                     
                     downloaded_size += current_file_size
                     
