@@ -300,7 +300,7 @@ def compare_reference(case_info_file, args, last_time=False):
         print('\t max  ', _hl(np.nanmax(np.nanmax(delta, axis=0), axis=0)), end="")
         print('\t range , ref. data  min=',  np.nanmin(np.nanmin(ref_data, axis=0), axis=0),'max=',   np.nanmax(np.nanmax(ref_data, axis=0), axis=0), )
 
-    if tracks['x'].shape[2] == 3:
+    if 'z_fraction' in tracks and tracks['x'].shape[2] == 3 :
         # 3D cases
         tests=dict()
 

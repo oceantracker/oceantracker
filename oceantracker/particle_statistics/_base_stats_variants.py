@@ -195,14 +195,6 @@ class _BaseAgeStats(ParameterBaseClass):
         nc.write_variable('age_bin_edges', stats_grid['age_bin_edges'], [si.dim_names.age_bin_edges],units='sec',
                                         description='edges of stats. age bins')
 
-    # setup and record number released for global counts of all released particles
-    def _setup_release_counts(self):
-
-        n_release = len(si.class_roles.release_groups)
-        n_updates = self.schedulers['count_scheduler'].scheduled_times.size
-        self.number_released_so_far= np.zeros((n_updates, n_release), dtype=np.int64)
-        pass
-
 
 
     def save_state(self, si, state_dir):
@@ -219,10 +211,6 @@ class _BaseAgeStats(ParameterBaseClass):
         self.counts_inside_age_bins = nc.read_variable('count')
         self.count_all_alive_particles = nc.read_variable('count_all_alive_particles')
 
-        # insert number released so far
-        c = nc.read_variable('number_released_to_date')
-        self.number_released_so_far[:c.shape[0], :] = c
-
         # copy in summed properties, to preserve references in sum_prop_data_list that is used inside numba
         for name, s in self.sum_binned_part_prop.items():
             self.sum_binned_part_prop[name][:] = nc.read_variable(f'sum_{name}')
@@ -231,18 +219,6 @@ class _BaseAgeStats(ParameterBaseClass):
         pass
     pass
 
-    @staticmethod
-    @numba.njit
-    def _age_binned_release_counts(times, number_released_to_date, age_bin_edges):
-        age_binned_counts = np.zeros((age_bin_edges.size-1,number_released_to_date.shape[1]), dtype=np.int64)
-        for nt, time in enumerate(times):
-            age = time - times[0]
-            na = stats_util._get_age_bin(age, age_bin_edges)  # time is age at this time step
-            if 0 <= na < (age_bin_edges.shape[0] - 1):
-                for nrg in range(number_released_to_date.shape[1]):
-                    age_binned_counts[na, nrg] += number_released_to_date[nt, nrg]
-
-        return age_binned_counts
 
 class _BaseGrid2DStats(ParameterBaseClass):
 

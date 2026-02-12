@@ -133,7 +133,7 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
                        dm.polygons:  len(self.params['polygon_list'])}
 
         self.create_count_variables(info['count_dims'],'age')
-        self._setup_release_counts()
+
         self.set_up_part_prop_lists()
 
 

@@ -319,8 +319,6 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                             dm.grid_col_x: self.grid['x_grid'].shape[2]}
 
         self.create_count_variables(info['count_dims'],'age')
-        self._setup_release_counts()
-
         self.set_up_part_prop_lists()
 
     def open_output_file(self,file_name):

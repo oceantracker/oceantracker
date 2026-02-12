@@ -199,6 +199,9 @@ class Solver(ParameterBaseClass):
         # save state for continuation if requested
         if si.settings.continuable:
             self._save_state(nt2, t2, si.output_files['completion_state_dir'])
+            # easier to retain compact files for continuations
+            # and reconvert on each continuation #todo make smarter?
+            si.core_class_roles.tracks_writer.params['retain_compact_track_files'] = True
 
 
         ri.end_time = t2
