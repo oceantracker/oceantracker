@@ -32,7 +32,6 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
         info = self.info
         self._create_polygon_variables_part_prop()
 
-
         dm = si.dim_names
         info['count_dims']= {dm.time: None,
                        dm.release_group:len(si.class_roles.release_groups),
@@ -66,7 +65,6 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
         g = self.grid
 
         # update time stats  recorded
-
         # set up pointers to particle properties
         release_groupID = part_prop['IDrelease_group'].used_buffer()
         p_x       = part_prop['x'].used_buffer()

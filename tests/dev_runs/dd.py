@@ -339,14 +339,14 @@ def compare_reference(case_info_file, args, last_time=False):
             print('\t grid upper right left , x_grid/y_grid diff. ', stats['x_grid'][0, -1, -1] - stats_ref['x_grid'][0, -1, -1] ,
                   stats['y_grid'][0,-1, -1]  - stats_ref['y_grid'][0,-1, -1] )
 
-            if 'connectivity_matrix' in stats_ref:
-                c_ref = stats_ref['connectivity_matrix']
-                c  = stats['connectivity_matrix']
-                c_ref= c_ref[np.isfinite(c_ref)]
-                c = c[np.isfinite(c)]
-                print( '\t connectives > 1.01 ref=' ,_hl((c_ref > 1.001).sum()),'run =', _hl( (c> 1.001).sum()),  ' counts',
-                      'ref range =', c_ref.min(),'-', c_ref.max(), 'run range =', c_ref.min(),'-', c_ref.max())
-            pass
+        if 'connectivity_matrix' in stats_ref:
+            c_ref = stats_ref['connectivity_matrix']
+            c  = stats['connectivity_matrix']
+            c_ref= c_ref[np.isfinite(c_ref)]
+            c = c[np.isfinite(c)]
+            print( '\t connectives > 1.01 ref=' ,_hl((c_ref > 1.001).sum()),'run =', _hl( (c> 1.001).sum()),  ' counts',
+                  'ref range =', c_ref.min(),'-', c_ref.max(), 'run range =', c_ref.min(),'-', c_ref.max())
+        pass
         if 'particle_property_list' in params:
             for prop_name in params['particle_property_list']:
                 if prop_name not in stats_ref: continue
