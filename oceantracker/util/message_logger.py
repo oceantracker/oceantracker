@@ -214,7 +214,7 @@ class MessageLogger(object ):
         m = self._add_caller_info(m, caller,3)
 
         if hint is not None:
-            m += '\n'+ self._add_long_line(f'Hint: {hint}',tabs=4*self.hang_indent,wrap = True)
+            m += '\n'+ self._add_long_line(f'Hint: {hint}',tabs=2*self.hang_indent,wrap = True)
 
         m = self._add_doc_html_link(m, caller, 3)
 

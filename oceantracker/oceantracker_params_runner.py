@@ -157,7 +157,7 @@ class OceanTrackerParamsRunner(object):
         ri.run_output_dir = si.output_files['run_output_dir']
         ri.tag = path.basename(ri.run_output_dir)
 
-        # setup ant restart or continuation
+        # setup any restart or continuation
         si.saved_state_info = setup_util.setup_restart_continuation(si)
 
         # set up message loggers log file
@@ -420,6 +420,9 @@ class OceanTrackerParamsRunner(object):
         fgm= si.core_class_roles.field_group_manager
 
         hi_start, hi_end = fgm.info['start_time'],fgm.info['end_time']
+        # if restarting use original start time as hindast  start time
+        if si.run_info.continuing or si.run_info.restarting:
+            hi_start = si.saved_state_info['run_start_time']
 
         if len(si.class_roles['release_groups']) == 0:
             si.msg_logger.msg('No particle "release_groups" parameters found', error=True, caller=self)
@@ -429,13 +432,12 @@ class OceanTrackerParamsRunner(object):
         first_time = []
         last_time = []
         default_start = hi_end   if si.settings.backtracking else hi_start
+
         default_end   = hi_start if si.settings.backtracking else hi_end
 
         for name, rg in si.class_roles['release_groups'].items():
             rg_params = rg.params
             rg.initial_setup()
-
-
             start =  default_start if rg_params['start'] is None else  rg_params['start']
 
             end = default_end if rg_params['end'] is None else rg_params['end']
@@ -451,13 +453,17 @@ class OceanTrackerParamsRunner(object):
 
         # set model run start/end time allowing for back tracking
         start_time = float(np.min(md * np.asarray(first_time)) * md)
-        end_time   = float(np.max(md * np.asarray(last_time )) * md)
+
+        # force use original start time as model nominal start time
+        if si.run_info.continuing or si.run_info.restarting:
+            start_time = si.saved_state_info['restart_time']
 
         if  not (hi_start <= start_time <= hi_end):
             si.msg_logger.msg(f'Start time = "{time_util.seconds_to_isostr(start_time)}" is outside the hindcast times',fatal_error=True, caller=self,
                               hint =f'Hindcast is {time_util.seconds_to_isostr(hi_start)} to {time_util.seconds_to_isostr(hi_end)}')
 
         # clip end time to be within hincast
+        end_time   = float(np.max(md * np.asarray(last_time )) * md)
         end_time = max(end_time, hi_start) if si.settings.backtracking else min(end_time, hi_end)
 
         # get duration clipped by max duration

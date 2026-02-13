@@ -98,15 +98,13 @@ class Solver(ParameterBaseClass):
         # initial conditions
         t0_step = perf_counter()
 
+        nt1 = 0
+        t1 = model_times[0]
 
         if si.run_info.restarting or si.run_info.continuing:
-            nt1 = si.saved_state_info['restart_time_step']
-            t1 = model_times[nt1]
             self._load_saved_state()
         else:
             # normal start
-            nt1 = 0
-            t1 = model_times[0]
             new_particle_indices = pgm.release_particles(nt1,t1 )
             self._pre_step_bookkeeping(nt1, t1, new_particle_indices)
 
@@ -473,16 +471,6 @@ class Solver(ParameterBaseClass):
             state['stats_files'][name]= i.save_state(si, state_dir)
 
         state['log_file'] = si.msg_logger.save_state(si,state_dir)
-
-        # save release info to allow proper restartty of releses
-        state['release_restart_info'] = dict()
-        for name, rg in si.class_roles.release_groups.items():
-            d = dict(no_end_to_release = rg.info['no_end_to_release'],
-                     started =  np.any(rg.schedulers['release'].task_flag[:n_time_step+1]) , # if any tasks done has started
-                    release_interval= rg.params['release_interval'])
-
-            d['time_next_release'] = None if d["release_interval"] ==0. else  time_sec + d["release_interval"]
-            state['release_restart_info'][name] = d
 
         # write state json for restarting
         json_util.write_JSON(path.join(state_dir, 'state_info.json'),state)
