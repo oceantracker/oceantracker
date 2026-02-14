@@ -442,7 +442,7 @@ class Solver(ParameterBaseClass):
             si.core_class_roles.tracks_writer._close_file()
 
         state_dir = path.join(si.run_info.run_output_dir, state_dir)
-        state = dict(run_start_time= si.run_info.start_time,
+        state = dict(
                      restart_time=time_sec,
                      restart_time_step=n_time_step,
                      run_start_date=time_util.seconds_to_isostr(si.run_info.start_time),
@@ -456,7 +456,11 @@ class Solver(ParameterBaseClass):
 
                      stats_files=dict(),
                      )
-
+        # record run time of very first run
+        if si.run_info.continuing or si.run_info.restarting:
+            state['first_run_start_time'] = si.saved_state_info['first_run_start_time']
+        else:
+            state['first_run_start_time']= si.run_info.start_time   # first run
         # save class info
         state['class_info'] = save_state_util.get_class_info(si)
 

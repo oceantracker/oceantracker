@@ -84,7 +84,7 @@ def setup_restart_continuation(si):
         # check if continuation state exists
         prior_state_dir = path.join(prior_run_output_dir, of['completion_state_dir'])
         if not path.isdir(prior_state_dir) :
-            ml.msg( f'Cannot find completion_state dir in previous run"{prior_state_dir}"',
+            ml.msg( f'Cannot find "completion_state" dir in previous run"{prior_state_dir}"',
             fatal_error=True,  hint=f'To continue a run, previous run must have setting continuable=True')
 
         #load state info

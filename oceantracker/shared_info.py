@@ -190,7 +190,6 @@ class _SharedInfoClass():
     msg_logger = MessageLogger()
     block_timers={}
     class_importer = class_importer_util.ClassImporter(msg_logger)
-    restart_info = None
     info = _UseFullInfo
     dim_names = definitions._DimensionNames()
     output_files= dict()

@@ -175,7 +175,7 @@ class ParticleGroupManager(ParameterBaseClass):
         n_chunks = max(1,int(np.ceil(num_particles/si.settings.particle_buffer_initial_size)))
         info['current_particle_buffer_size'] = n_chunks*si.settings.particle_buffer_initial_size
         num_in_buffer = si.run_info.particles_in_buffer
-        si.msg_logger.msg(f'Expandind particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles')
+        si.msg_logger.msg(f'Expanding particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles')
         # copy property data
         for key, i in part_prop.items():
             #debug_util.print_referers(i.data,tag=key)

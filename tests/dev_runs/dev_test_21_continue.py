@@ -64,15 +64,24 @@ def main(args):
         params.update(continuable=True, run_output_dir=params['run_output_dir']+'_full_run')
         case_info_file = run(params)
     else:
-        # do split continuation runs
-
+        # do first continuation run
         params.update(continuable=True, run_output_dir=params['run_output_dir']+'_first_run')
         params['reader'].update(input_dir=path.join(hindcast_root, 'first_run'), )
         case_info_file1 = run(params)
 
-        # continue this run
+        # continue this run (1)
         cs1 = json_util.read_JSON(case_info_file1)
         output_files = cs1['output_files']
+        params = deepcopy(ot.params)
+        params.update(continue_from=path.join(output_files['run_output_dir']),
+                      continuable=True,
+                    run_output_dir = params['run_output_dir'] + '_second_run',)
+        params['reader'].update(   input_dir = path.join(hindcast_root,'second_run'), )
+        case_info_file2 = run(params)
+
+        # continue this run (2)
+        cs2 = json_util.read_JSON(case_info_file2)
+        output_files = cs2['output_files']
         params = deepcopy(ot.params)
         params.update(continue_from=path.join(output_files['run_output_dir']),
                     run_output_dir = params['run_output_dir'] + '_full_run',)
