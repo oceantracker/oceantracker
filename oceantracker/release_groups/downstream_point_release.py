@@ -18,6 +18,10 @@ class DownstreamPointRelease(PointRelease):
     def __init__(self):
         # set up info/attributes
         super().__init__()
+        
+        ml = si.msg_logger
+        ml.msg('Downstream Point Release used the surface velocity only for the time being',warning=True)
+       
         self.add_default_params(
             {
                 "downstream_distance": PVC(
@@ -32,19 +36,6 @@ class DownstreamPointRelease(PointRelease):
         info = self.info
         info["release_type"] = "downstream_point"
 
-    # from _base_release_group.py:
-    # def get_release_locations(self, time_sec):
-    #     info = self.info
-    #     release_info= self.get_hori_release_locations(time_sec)
-
-    #     if si.run_info.is3D_run:
-    #         self._add_vertical_release(release_info)
-
-    #     info['pulseID'] += 1
-    #     info['number_released'] += release_info['x'].shape[0]  # count number released in this group
-
-    #     return release_info
-    
     def get_release_locations(self, time_sec):
         """
         Overrides default method to first find normal horizontal release location
@@ -55,8 +46,6 @@ class DownstreamPointRelease(PointRelease):
         release_info= self.get_hori_release_locations(time_sec)
 
         if si.run_info.is3D_run:
-            ml = si.msg_logger
-            ml.msg('Downstream Point Release used the surface velocity only for the time being',warning=True)
             release_info = self._add_vertical_release(release_info)
 
         release_info = self.move_hori_release_locations_downstream(release_info, time_sec, self.params['downstream_distance'])
@@ -67,9 +56,6 @@ class DownstreamPointRelease(PointRelease):
         # release_info = self._retain_release_locations(release_info, use_points)
         # <<<<<<<<< copy from _apply_dry_cell_[...] in _base_release_group.py
         
-
-        
-
         info['pulseID'] += 1
         info['number_released'] += release_info['x'].shape[0]  # count number released in this group
 
@@ -95,8 +81,8 @@ class DownstreamPointRelease(PointRelease):
        
         # if no z coord is provided, we use the surface value
         # depth averaged would proabably be better but more complex to implement
-        nz_cell = np.full((release_info['x'].shape[0]),-1,dtype=np.int32)
-        z_fraction = np.zeros((release_info['x'].shape[0]),dtype=np.float32)
+        nz_cell = np.full((release_info['x'].shape[0]),-2,dtype=np.int32)
+        z_fraction = np.ones((release_info['x'].shape[0]),dtype=np.float32)
 
         release_info['water_velocity'] = (
             fgm.interp_named_3D_vector_fields_at_given_locations_and_time(
