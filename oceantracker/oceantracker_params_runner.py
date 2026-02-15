@@ -339,7 +339,7 @@ class OceanTrackerParamsRunner(object):
             i.info['no_end_to_release'] = p['duration'] is None and p['end'] is None and p['release_interval'] > 0.
 
             i.add_scheduler('release',start=p['start'], end=p['end'], duration=p['duration'],
-                            interval =p['release_interval'])
+                            interval =p['release_interval'], caller=i)
             # max_ages needed for culling operations
             i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
             max_ages.append(i.params['max_age'])

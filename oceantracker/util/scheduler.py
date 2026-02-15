@@ -6,7 +6,7 @@ class Scheduler(object):
     # rounds starts, times and intervals to model time steps,
     # uses times given, otherwise start and interval
     # all times in seconds
-    def __init__(self,si,
+    def __init__(self,si,name_scheduler,
                  start=None, end=None, duration=None,
                  interval = None, times=None,cancel_when_done=True,
                  msg_logger=None,caller=None):
@@ -15,6 +15,7 @@ class Scheduler(object):
         settings = si.settings
 
         self.cancel_when_done = cancel_when_done
+        self.name = name_scheduler
         md = run_info.model_direction
         dt = settings.time_step
 
@@ -44,6 +45,14 @@ class Scheduler(object):
             times = run_info.start_time + np.round(n) * dt
             times = md* np.sort(md*times) # ensure they are in right order for backwards/forwards
             interval = None
+
+
+        # check if any are scheduled, before trimming to allow for earlier actions of a continuation
+        if times.size==0:
+            msg_logger.msg( f'No actions are set for scheduler "{name_scheduler}"',
+                hint=f'Time span of hindcast mismatched with start and end times of scheduler? Run continuation with actions starting in a future run?',
+                caller=caller, strong_warning=True )
+
 
         # trim to fit inside the run
         sel = np.logical_and(times * md >= run_info.start_time * md, times * md <= run_info.end_time * md)

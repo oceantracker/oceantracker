@@ -78,7 +78,7 @@ def setup_restart_continuation(si):
 
         # check new run has different run_output dir
         if path.abspath(of['run_output_dir']) == prior_run_output_dir:
-            ml.msg(f'The run continuation output cannot be written to same dir as the prevouis run "{si.settings.continue_from}"',
+            ml.msg(f'The run continuation output cannot be written to same dir as the previous run "{si.settings.continue_from}"',
                        fatal_error=True, hint=f'Ensure output_file_base names for prio and continued run are different')
 
         # check if continuation state exists

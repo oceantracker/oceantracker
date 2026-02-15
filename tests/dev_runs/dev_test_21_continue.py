@@ -89,7 +89,7 @@ def main(args):
         case_info_file = run(params)
 
 
-    dd.compare_reference(case_info_file, args, last_time=True)
+    dd.compare_reference(case_info_file, args, last_time=False)
     dd.show_track_plot(case_info_file, args)
 
     return  ot.params
