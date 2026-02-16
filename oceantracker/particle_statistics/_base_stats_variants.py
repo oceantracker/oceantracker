@@ -267,11 +267,11 @@ class _BaseGrid2DStats(ParameterBaseClass):
 
         n_grids = info['grid_centers'].shape[0]
         stats_grid['cell_area'] = np.zeros((n_grids,params['rows'],params['cols']), dtype=np.float64)
-        stats_grid['x_bin_edges'] = np.zeros([n_grids, params['cols'] ], dtype=np.float64)
-        stats_grid['y_bin_edges'] = np.zeros([n_grids, params['rows'] ], dtype=np.float64)
-        stats_grid['x'] = np.zeros([n_grids, params['cols']-1], dtype=np.float64)
-        stats_grid['y'] = np.zeros([n_grids, params['rows']-1], dtype=np.float64)
-        stats_grid['x_grid'] = np.zeros([n_grids, params['rows'] - 1, params['cols'] - 1], dtype=np.float64)
+        stats_grid['x_bin_edges'] = np.zeros([n_grids, params['cols']+1], dtype=np.float64)
+        stats_grid['y_bin_edges'] = np.zeros([n_grids, params['rows']+1], dtype=np.float64)
+        stats_grid['x'] = np.zeros([n_grids, params['cols']], dtype=np.float64)
+        stats_grid['y'] = np.zeros([n_grids, params['rows']], dtype=np.float64)
+        stats_grid['x_grid'] = np.zeros([n_grids, params['rows'], params['cols']], dtype=np.float64)
         stats_grid['y_grid'] = np.zeros(stats_grid['x_grid'].shape, dtype=np.float64)
         stats_grid['cell_area'] = np.zeros(stats_grid['x_grid'].shape, dtype=np.float64)
 

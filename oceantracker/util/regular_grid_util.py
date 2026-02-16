@@ -50,8 +50,8 @@ def build_grid_from_params(params,caller, center=None):
         ml.msg('Using meters grid but but param span_x or span_y  < 360 ', strong_warning=True,caller=caller,
                hint='very small grid or mistakenly using spans in degrees , should be in meters?')
 
-    base_x =  np.linspace(-params['span_x'] / 2., params['span_x'] / 2., params['cols']).reshape(-1, 1)
-    base_y =  np.linspace(-params['span_y'] / 2., params['span_y'] / 2., params['rows']).reshape(-1, 1)
+    base_x =  np.linspace(-params['span_x'] / 2., params['span_x'] / 2., params['cols']+1).reshape(-1, 1)
+    base_y =  np.linspace(-params['span_y'] / 2., params['span_y'] / 2., params['rows']+1).reshape(-1, 1)
     xi, yi = np.meshgrid(center[0]+base_x, center[1]+ base_y)
 
     return xi, yi, get_bounding_box(xi, yi)
