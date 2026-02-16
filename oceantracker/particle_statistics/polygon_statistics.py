@@ -1,8 +1,7 @@
 import numpy as np
 import oceantracker.particle_statistics.gridded_statistics2D as gridded_statistics2D
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC,merge_params_with_defaults
-from oceantracker.util.parameter_base_class import   ParameterBaseClass
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.util.numba_util import njitOT, prange, njitOTparallel
 from oceantracker.util.output_util import  add_polygon_list_to_group_netcdf
 from oceantracker.particle_statistics._base_stats_variants import _BaseTimeStats, _BaseAgeStats, _BasePolygonStats
@@ -32,7 +31,6 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
         super().initial_setup()
         info = self.info
         self._create_polygon_variables_part_prop()
-
 
         dm = si.dim_names
         info['count_dims']= {dm.time: None,
@@ -67,14 +65,13 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
         g = self.grid
 
         # update time stats  recorded
-
         # set up pointers to particle properties
         release_groupID = part_prop['IDrelease_group'].used_buffer()
         p_x       = part_prop['x'].used_buffer()
 
         stats_grid = self.grid
-        stats_util._count_all_alive_time(part_prop['status'].used_buffer(), part_prop['IDrelease_group'].data,
-                                         self.count_all_alive_particles, alive)
+        self.count_all_currently_alive(alive)
+
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
         inside_poly_prop.update(n_time_step,time_sec,sel)
@@ -134,7 +131,7 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
                        dm.polygons:  len(self.params['polygon_list'])}
 
         self.create_count_variables(info['count_dims'],'age')
-        self._setup_release_counts()
+
         self.set_up_part_prop_lists()
 
 
@@ -158,19 +155,12 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
 
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
-
-        self._update_release_counts()
-
-
         # set up pointers to particle properties, only point to those in buffer as no need to look at those beyond buffer
         release_groupID   = part_prop['IDrelease_group'].used_buffer()
         p_x         = part_prop['x'].used_buffer()
         p_age       = part_prop['age'].used_buffer()
 
-        stats_util._count_all_alive_age_bins(part_prop['status'].data,
-                                             part_prop['IDrelease_group'].data,
-                                             part_prop['age'].data, stats_grid['age_bin_edges'],
-                                             self.count_all_alive_particles, alive)
+        self.count_all_alive_by_age(alive)
 
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]

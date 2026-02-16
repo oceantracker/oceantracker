@@ -1,5 +1,5 @@
 from os import path
-
+from copy import copy
 import numba
 
 from oceantracker.util.parameter_base_class import ParameterBaseClass
@@ -11,7 +11,10 @@ from oceantracker.particle_statistics.util import stats_util
 
 import numpy  as np
 from oceantracker.shared_info import shared_info as si
+from oceantracker.util.numba_util import njitOT
 
+# compile this constant into numba cod
+status_outside_open_boundary = int(si.particle_status_flags.outside_open_boundary)
 
 class _BaseTimeStats(ParameterBaseClass):
 
@@ -32,6 +35,20 @@ class _BaseTimeStats(ParameterBaseClass):
             for p in params['particle_property_list']:
                 nc.create_variable('sum_' + p,dim_names, dtype= np.float64, description= f'sum of particle property {p} inside bin')
                 nc.create_variable(p, dim_names, dtype=np.float32, description=f'Average particle property {p} inside cell  = sum prop/counts_inside')
+
+    def count_all_currently_alive(self, alive):
+        part_prop = si.class_roles.particle_properties
+        self._count_all_alive_time(part_prop['status'].used_buffer(), part_prop['IDrelease_group'].data,
+                                         self.count_all_alive_particles, alive)
+    @staticmethod
+    @njitOT
+    def _count_all_alive_time(status, release_group, count_all_alive, alive):
+        count_all_alive[:] = 0.
+
+        for nn in range(alive.size):
+            n = alive[nn]
+            count_all_alive[release_group[n]] += status[n] >= status_outside_open_boundary
+        pass
 
     def _write_common_time_varying_stats(self, time_sec):
         # write nth step in file
@@ -95,7 +112,6 @@ class _BaseAgeStats(ParameterBaseClass):
         ml = si.msg_logger
         stats_grid = self.grid
 
-
         # check age limits to bin particle ages into,  equal bins in given range
         params['max_age_to_bin'] = max(params['age_bin_size'], params['max_age_to_bin']) # at least one bin
         if params['min_age_to_bin'] >=  params['max_age_to_bin']: params['min_age_to_bin'] = 0
@@ -115,6 +131,27 @@ class _BaseAgeStats(ParameterBaseClass):
 
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 
+
+    def count_all_alive_by_age(self, alive):
+        part_prop = si.class_roles.particle_properties
+        stats_grid = self.grid
+        release_groupID = part_prop['IDrelease_group'].used_buffer()
+        self._count_all_alive_age_bins(part_prop['status'].data,
+                            part_prop['IDrelease_group'].data,
+                            part_prop['age'].data,  stats_grid['age_bin_edges'],
+                            self.count_all_alive_particles, alive)
+
+    @staticmethod
+    @njitOT
+    def _count_all_alive_age_bins(status, release_group, age, age_bin_edges, count_all_alive, alive):
+        da = age_bin_edges[1] - age_bin_edges[0]
+
+        for nn in range(alive.size):
+            n = alive[nn]
+            na = int(np.floor((age[n] - age_bin_edges[0]) / da))
+            if 0 <= na < (age_bin_edges.size - 1):
+                count_all_alive[na, release_group[n]] += status[n] >= status_outside_open_boundary
+
     def info_to_write_on_file_close(self, nc):
         # write variables whole
         stats_grid = self.grid
@@ -128,16 +165,17 @@ class _BaseAgeStats(ParameterBaseClass):
                           description='counts of  all alive particles, not just those selected to be counted')
 
         self._add_age_bins_to_file(nc)
-        counts_released_age_binned = self._add_age_binned_release_counts_to_file(nc)
 
         # add connectives, works for both polygon and grid stats, using s to reshape
-        s = list(counts_inside_age_bins.shape[:2]) + (counts_inside_age_bins.ndim - counts_released_age_binned.ndim) * [1]
+        s = list(counts_inside_age_bins.shape[:2]) \
+                    + (counts_inside_age_bins.ndim - self.count_all_alive_particles.ndim) * [ 1]
         with np.errstate(divide='ignore', invalid='ignore'):
-            connectivity_matrix = counts_inside_age_bins / counts_released_age_binned.reshape(s)
+            connectivity_matrix = counts_inside_age_bins / self.count_all_alive_particles.reshape(s)
+
         connectivity_matrix[~np.isfinite(connectivity_matrix)] = np.nan
 
         nc.write_variable('connectivity_matrix', connectivity_matrix, dim_names,
-                          description='Age binned connectivity of each polygon as fraction =counts_inside/ counts_released_age_binned, ie includes dead and those outside open boundaries ')
+                          description='Age binned connectivity of each polygon as fraction =counts_inside/ counts_all_alive (includes thoise  outside open boundaries )')
 
         # particle property sums
         for key, item in self.sum_binned_part_prop.items():
@@ -157,35 +195,7 @@ class _BaseAgeStats(ParameterBaseClass):
         nc.write_variable('age_bin_edges', stats_grid['age_bin_edges'], [si.dim_names.age_bin_edges],units='sec',
                                         description='edges of stats. age bins')
 
-    # setup and record number released for global counts of all released particles
-    def _setup_release_counts(self):
 
-        n_release = len(si.class_roles.release_groups)
-        n_updates = self.schedulers['count_scheduler'].scheduled_times.size
-        self.number_released_so_far= np.zeros((n_updates, n_release), dtype=np.int64)
-        pass
-
-    def _update_release_counts(self):
-        nt = self.update_count
-        for nrg, (name, i) in  enumerate(si.class_roles.release_groups.items()):
-            self.number_released_so_far[nt, nrg] = i.info['number_released']
-
-    def _add_age_binned_release_counts_to_file(self,nc):
-        stats_grid = self.grid
-        dn = si.dim_names
-        n_times = self.update_count
-        times =  self.schedulers['count_scheduler'].scheduled_times[:n_times]
-        nc.write_variable('time_of_count',times, [dn.time], units='sec', description='times counts made for age stats')
-
-        number_released_to_date=  self.number_released_so_far[:n_times, :]
-        nc.write_variable('number_released_to_date',  number_released_to_date, [dn.time, dn.release_group],
-                            description='total number released since start of run at counting times for  each release group')
-
-        # age bin all released particles
-        counts_released_age_binned= self._age_binned_release_counts(times, number_released_to_date, stats_grid['age_bin_edges'])
-        nc.write_variable('counts_released', counts_released_age_binned, [dn.age_bin, dn.release_group],
-                                description='all particles released in age bins for each release group')
-        return  counts_released_age_binned
 
     def save_state(self, si, state_dir):
         fn = path.join(state_dir,f'stats_state_{self.params["name"]}.nc')
@@ -201,10 +211,6 @@ class _BaseAgeStats(ParameterBaseClass):
         self.counts_inside_age_bins = nc.read_variable('count')
         self.count_all_alive_particles = nc.read_variable('count_all_alive_particles')
 
-        # insert number released so far
-        c = nc.read_variable('number_released_to_date')
-        self.number_released_so_far[:c.shape[0], :] = c
-
         # copy in summed properties, to preserve references in sum_prop_data_list that is used inside numba
         for name, s in self.sum_binned_part_prop.items():
             self.sum_binned_part_prop[name][:] = nc.read_variable(f'sum_{name}')
@@ -213,18 +219,6 @@ class _BaseAgeStats(ParameterBaseClass):
         pass
     pass
 
-    @staticmethod
-    @numba.njit
-    def _age_binned_release_counts(times, number_released_to_date, age_bin_edges):
-        age_binned_counts = np.zeros((age_bin_edges.size-1,number_released_to_date.shape[1]), dtype=np.int64)
-        for nt, time in enumerate(times):
-            age = time - times[0]
-            na = stats_util._get_age_bin(age, age_bin_edges)  # time is age at this time step
-            if 0 <= na < (age_bin_edges.shape[0] - 1):
-                for nrg in range(number_released_to_date.shape[1]):
-                    age_binned_counts[na, nrg] += number_released_to_date[nt, nrg]
-
-        return age_binned_counts
 
 class _BaseGrid2DStats(ParameterBaseClass):
 
@@ -243,6 +237,8 @@ class _BaseGrid2DStats(ParameterBaseClass):
                              is_required=True),
             'output_file_base': PVC('stats_gridded_time_2D', str, doc_str='start of output file names'),
         })
+        regular_grid_util.add_grid_default_params(self.default_params)
+
         self.info['type'] = 'gridded'
 
     def _create_grid_variables(self):
@@ -252,7 +248,7 @@ class _BaseGrid2DStats(ParameterBaseClass):
         info = self.info
 
         if params['release_group_centered_grids']  :
-            # get centers ofeach grid as middle of each release group
+            # get centers of each grid as middle of each release group
             info['grid_centers'] = np.zeros((len(si.class_roles.release_groups), 2), dtype=np.float64)
             for ngroup, name in enumerate(si.class_roles.release_groups.keys()):
                 rg = si.class_roles.release_groups[name]
@@ -263,55 +259,48 @@ class _BaseGrid2DStats(ParameterBaseClass):
             info['grid_centers'] = np.tile(params['grid_center'], (len(si.class_roles.release_groups), 1))
         else:
             si.msg_logger.msg('For gridded stats must supply a "grid_center"  or set "release_group_centered_grids=True"',
-                              hint=f'Set one of these parameters for gridded stat {params["name"]}', fatal_error=True, caller=self)
-
-        # ensure grid size is odd, so that center of middle cell is at grid center coords
-        grid_size = params['grid_size'][:2] + (np.asarray(params['grid_size'][:2]) % 2 == 0).astype(np.int32)
+                        hint=f'Set one of these parameters for gridded stat {params["name"]}', fatal_error=True, caller=self)
 
         # make space for coords
-        n_grids = info['grid_centers'].shape[0]  #
-        s1 = [n_grids, ] + grid_size.tolist()
-        stats_grid['x_grid'] = np.zeros(s1, dtype=np.float64)
-        stats_grid['y_grid'] = np.zeros(s1, dtype=np.float64)
-        stats_grid['cell_area'] = np.zeros(s1, dtype=np.float64)
-        stats_grid['x_bin_edges'] = np.zeros([n_grids, grid_size[1] + 1], dtype=np.float64)
-        stats_grid['y_bin_edges'] = np.zeros([n_grids, grid_size[0] + 1], dtype=np.float64)
+        # dummy call build grid to check for deprecated params, eg get new params rows, cols , span_x, span_y
+        regular_grid_util.build_grid_from_params(params, self, center=info['grid_centers'][0])
+
+        n_grids = info['grid_centers'].shape[0]
+        stats_grid['cell_area'] = np.zeros((n_grids,params['rows'],params['cols']), dtype=np.float64)
+        stats_grid['x_bin_edges'] = np.zeros([n_grids, params['cols']+1], dtype=np.float64)
+        stats_grid['y_bin_edges'] = np.zeros([n_grids, params['rows']+1], dtype=np.float64)
+        stats_grid['x'] = np.zeros([n_grids, params['cols']], dtype=np.float64)
+        stats_grid['y'] = np.zeros([n_grids, params['rows']], dtype=np.float64)
+        stats_grid['x_grid'] = np.zeros([n_grids, params['rows'], params['cols']], dtype=np.float64)
+        stats_grid['y_grid'] = np.zeros(stats_grid['x_grid'].shape, dtype=np.float64)
+        stats_grid['cell_area'] = np.zeros(stats_grid['x_grid'].shape, dtype=np.float64)
 
         # grids may have release group centers, so grid coords differ by release group
         for n_grid, p in enumerate(info['grid_centers']):
-            x_cell_edges, y_cell_edges, info['bounding_box'] = regular_grid_util.make_regular_grid(
-                                        info['grid_centers'][n_grid, :],  grid_size + 1, params['grid_span'])
-            # get midpoints of cells
-            x_grid = 0.5 * (x_cell_edges[:-1, 1:] + x_cell_edges[:-1, :-1])
-            y_grid = 0.5 * (y_cell_edges[1:, :-1] + y_cell_edges[:-1, :-1])
+            x_cell_edges, y_cell_edges, info['bounding_box'] = regular_grid_util.build_grid_from_params(
+                                                                            params,self,center=p)
+            x_cell_edges,y_cell_edges = x_cell_edges[0, :],y_cell_edges[:, 0] # all the same so take one col or row
+            stats_grid['x_bin_edges'][n_grid, ...] = x_cell_edges
+            stats_grid['y_bin_edges'][n_grid, ...] = y_cell_edges
 
-            stats_grid['x_bin_edges'][n_grid, ...] = x_cell_edges[0, :]
-            stats_grid['y_bin_edges'][n_grid, ...] = y_cell_edges[:, 0]
-
-            stats_grid['x_grid'][n_grid, ...] = x_grid
-            stats_grid['y_grid'][n_grid, ...] = y_grid
-
-            if False:
-                # check grid points
-                from matplotlib import pyplot as plt
-                plt.scatter(x_cell_edges, y_cell_edges, color='r')
-                plt.scatter(stats_grid['x_grid'][n_grid, ...], stats_grid['y_grid'][n_grid, ...], color='g')
-                plt.show(block=True)
+            # non-meshed versions of grid centers
+            stats_grid['x'][n_grid,...]  = 0.5 * (x_cell_edges[1:] + x_cell_edges[:-1])
+            stats_grid['y'][n_grid, ...] = 0.5 * (y_cell_edges[1:] + y_cell_edges[:-1])
+            # get full grid of coords
+            stats_grid['x_grid'][n_grid,...],stats_grid['y_grid'][n_grid,...]\
+                                = np.meshgrid( stats_grid['x'][n_grid,...], stats_grid['y'][n_grid,...])
 
             # get cell area im meters even if in geographic coords
-            x, y = x_cell_edges.copy(), y_cell_edges.copy()
-
+            # all grids have same cell sizes, but cell area varies across grid if in geographic coords
+            x, y = stats_grid['x_bin_edges'][n_grid,...], stats_grid['y_bin_edges'][n_grid,...]
+            x,y = np.meshgrid(x, y)
             if si.settings.use_geographic_coords:
                 x, y = cord_transforms.local_grid_deg_to_meters(x, y, x[0, 0], y[0, 0])
-            stats_grid['cell_area'][n_grid, :, :] = (x[:-1, 1:] - x[:-1, :-1]) * (y[1:, :-1] - y[:-1:, :-1])
+            stats_grid['cell_area'][n_grid,...] = (x[ 1:, 1:] - x[ :-1, :-1]) * (y[ 1:, 1:] - y[:-1, :-1])
 
-        # non meshed versions
-        stats_grid['x'] = stats_grid['x_grid'][:, 0, :]
-        stats_grid['y'] = stats_grid['y_grid'][:, :, 0]
-
-        # spacings the same for all release group grids, in meters  degrees
-        stats_grid['grid_spacings'] = np.asarray([x[1, 1] - x[0, 0], y[1, 1] - y[0, 0]])
-        params['grid_size'][:2] = grid_size
+        # spacings the same for all cells and release group grids, whether in meters or degrees
+        stats_grid['grid_spacings'] = np.asarray([stats_grid['x_bin_edges'][0, 1] - stats_grid['x_bin_edges'][0, 0],
+                                                  stats_grid['y_bin_edges'][0, 1] - stats_grid['y_bin_edges'][0, 0]])
         pass
 
 

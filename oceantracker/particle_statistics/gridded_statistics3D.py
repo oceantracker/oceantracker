@@ -5,6 +5,7 @@ from oceantracker.util.parameter_checking import ParameterListChecker as PLC, Pa
 from oceantracker.shared_info import shared_info as si
 from oceantracker.particle_statistics.gridded_statistics2D import GriddedStats2D_timeBased
 from oceantracker.particle_statistics.util import stats_util
+from oceantracker.util import regular_grid_util
 
 class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
     # class to hold counts of particles inside 3D grid cells
@@ -14,10 +15,10 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()
+        regular_grid_util.add_grid_default_params(self.default_params,is3D=True)
+
         # add 3D specific parameters
         self.add_default_params(
-            grid_size= PLC([101, 99,5], int, fixed_len=3, min=1, max=10 ** 5,
-                             doc_str='number of (rows, columns, layers) in grid, where rows is y size, cols x size, values should be odd, so will be rounded up to next '),
             z_min = PVC(None, float, doc_str='Bottom of 3D counting grid', is_required=True,
                         units='meters above mean water at  z=0, so is < 0 at depth'),
             z_max = PVC(None, float, doc_str='Top of 3D counting grid',is_required=True,
@@ -69,7 +70,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         
         # Set up vertical grid
         # Make vertical bin edges
-        vsize = params['grid_size'][2]
+        vsize = params['layers']
         stats_grid['z_bin_edges'] = np.linspace(params['z_min'], params['z_max'], vsize + 1)
         dz = float((params['z_max']- params['z_min'] ) / vsize)
 
@@ -82,9 +83,8 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
 
-        stats_util._count_all_alive_time(part_prop['status'].data,
-                                         part_prop['IDrelease_group'].data,
-                                         self.count_all_alive_particles, alive)
+        self.count_all_currently_alive(alive)
+
         self._do_counts_and_summing_numba(
                             part_prop['IDrelease_group'].data,
                             part_prop['x'].data,

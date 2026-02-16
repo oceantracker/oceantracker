@@ -39,8 +39,6 @@ def get_class_info(si ):
         return d
 
 
-
-
 def save_settings_class_params(file_name, si):
     # recorded current state of all  class info
     d = dict(settings=si.settings.asdict(),

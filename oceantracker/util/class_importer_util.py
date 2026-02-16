@@ -45,7 +45,6 @@ class ClassImporter():
         i = class_obj() # make instance
 
         i.info['class_role'] = class_role
-
         if merge_params:
             i.params = merge_params_with_defaults(params, i.default_params, ml,  check_for_unknown_keys=check_for_unknown_keys, caller=i)
 

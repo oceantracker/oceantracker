@@ -9,7 +9,6 @@ from oceantracker.particle_statistics._base_location_stats import _BaseParticleL
 from oceantracker.particle_statistics._base_stats_variants import  _BaseTimeStats, _BaseGrid2DStats
 from oceantracker.shared_info import shared_info as si
 
-stationary_status = int(si.particle_status_flags.stationary)  # compile this constant into numba code
 from oceantracker.particle_statistics.util import  stats_util
 from oceantracker.particle_statistics._base_stats_variants import  _BaseAgeStats
 
@@ -69,8 +68,7 @@ class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLoc
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
 
-        stats_util._count_all_alive_time(part_prop['status'].data, part_prop['IDrelease_group'].data,
-                                         self.count_all_alive_particles, alive)
+        self.count_all_currently_alive(alive)
 
         # set up pointers to particle properties
         release_groupID = part_prop['IDrelease_group'].used_buffer()
@@ -321,8 +319,6 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                             dm.grid_col_x: self.grid['x_grid'].shape[2]}
 
         self.create_count_variables(info['count_dims'],'age')
-        self._setup_release_counts()
-
         self.set_up_part_prop_lists()
 
     def open_output_file(self,file_name):
@@ -337,12 +333,8 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
         release_groupID = part_prop['IDrelease_group'].used_buffer()
-        stats_util._count_all_alive_age_bins(part_prop['status'].data,
-                            part_prop['IDrelease_group'].data,
-                            part_prop['age'].data,  stats_grid['age_bin_edges'],
-                            self.count_all_alive_particles, alive)
 
-        self._update_release_counts()
+        self.count_all_alive_by_age(alive)
 
         p_x = part_prop['x'].used_buffer()
         p_age = part_prop['age'].used_buffer()

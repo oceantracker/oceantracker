@@ -98,15 +98,13 @@ class Solver(ParameterBaseClass):
         # initial conditions
         t0_step = perf_counter()
 
+        nt1 = 0
+        t1 = model_times[0]
 
         if si.run_info.restarting or si.run_info.continuing:
-            nt1 = si.saved_state_info['restart_time_step']
-            t1 = model_times[nt1]
             self._load_saved_state()
         else:
             # normal start
-            nt1 = 0
-            t1 = model_times[0]
             new_particle_indices = pgm.release_particles(nt1,t1 )
             self._pre_step_bookkeeping(nt1, t1, new_particle_indices)
 
@@ -199,6 +197,10 @@ class Solver(ParameterBaseClass):
         # save state for continuation if requested
         if si.settings.continuable:
             self._save_state(nt2, t2, si.output_files['completion_state_dir'])
+            # easier to retain compact files for continuations
+            # and reconvert on each continuation #todo make smarter?
+            if si.settings.write_tracks:
+                si.core_class_roles.tracks_writer.params['retain_compact_track_files'] = True
 
 
         ri.end_time = t2
@@ -223,7 +225,7 @@ class Solver(ParameterBaseClass):
         ri.current_model_time = time_sec
 
         # some may now have status dead so update
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.outside_open_boundary, out=self.get_partID_buffer('B1'))
 
         # setup_interp_time_step, cell etc
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
@@ -237,7 +239,7 @@ class Solver(ParameterBaseClass):
         for name, i in si.class_roles.trajectory_modifiers.items():
             i.timed_update(n_time_step, time_sec, alive)
 
-        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.stationary, out=self.get_partID_buffer('B1'))
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.outside_open_boundary, out=self.get_partID_buffer('B1'))
 
 
         fgm.setup_time_step(time_sec, part_prop['x'].data, alive)
@@ -441,7 +443,7 @@ class Solver(ParameterBaseClass):
             si.core_class_roles.tracks_writer._close_file()
 
         state_dir = path.join(si.run_info.run_output_dir, state_dir)
-        state = dict(run_start_time= si.run_info.start_time,
+        state = dict(
                      restart_time=time_sec,
                      restart_time_step=n_time_step,
                      run_start_date=time_util.seconds_to_isostr(si.run_info.start_time),
@@ -455,7 +457,11 @@ class Solver(ParameterBaseClass):
 
                      stats_files=dict(),
                      )
-
+        # record run time of very first run
+        if si.run_info.continuing or si.run_info.restarting:
+            state['first_run_start_time'] = si.saved_state_info['first_run_start_time']
+        else:
+            state['first_run_start_time']= si.run_info.start_time   # first run
         # save class info
         state['class_info'] = save_state_util.get_class_info(si)
 
@@ -470,16 +476,6 @@ class Solver(ParameterBaseClass):
             state['stats_files'][name]= i.save_state(si, state_dir)
 
         state['log_file'] = si.msg_logger.save_state(si,state_dir)
-
-        # save release info to allow proper restartty of releses
-        state['release_restart_info'] = dict()
-        for name, rg in si.class_roles.release_groups.items():
-            d = dict(no_end_to_release = rg.info['no_end_to_release'],
-                     started =  np.any(rg.schedulers['release'].task_flag[:n_time_step+1]) , # if any tasks done has started
-                    release_interval= rg.params['release_interval'])
-
-            d['time_next_release'] = None if d["release_interval"] ==0. else  time_sec + d["release_interval"]
-            state['release_restart_info'][name] = d
 
         # write state json for restarting
         json_util.write_JSON(path.join(state_dir, 'state_info.json'),state)

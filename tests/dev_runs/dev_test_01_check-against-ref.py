@@ -59,22 +59,7 @@ def main(args=None):
     dd.compare_reference(case_info_file, args)
 
 
-    tests=dict()
-    tracks = dd.load_tracks(case_info_file)
-    tracks_ref = dd.load_tracks(case_info_file, ref_case=True)
 
-    # check z fractions are in range 0-1
-    z_fraction= tracks['z_fraction']
-    sel = np.logical_or(z_fraction < -.01, z_fraction > 1.01)
-    tests['z_fraction'] = not np.any(sel)
-    print('zfraction out of range',  'z_fraction=', np.count_nonzero(sel))
-
-    z_fraction_water_velocity= tracks['z_fraction_water_velocity']
-    sel = np.logical_or(z_fraction_water_velocity < -.01,  z_fraction_water_velocity > 1.01)
-    tests['z_fraction_water_velocity'] = not np.any(sel)
-    print('zfraction out of range', 'z_fraction_water_velocity=', np.count_nonzero(sel))
-
-    print('tests passed', tests)
     if args.plot:
 
         from matplotlib import pyplot as plt

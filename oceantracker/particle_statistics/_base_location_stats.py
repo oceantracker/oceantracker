@@ -5,7 +5,6 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from os import  path
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParameterTimeChecker as PTC
-from oceantracker.util.parameter_checking import  merge_params_with_defaults
 from numba.typed import List as NumbaList
 from oceantracker.util import cord_transforms
 from oceantracker.particle_statistics.util import stats_util

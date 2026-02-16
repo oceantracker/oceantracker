@@ -6,15 +6,22 @@ class Scheduler(object):
     # rounds starts, times and intervals to model time steps,
     # uses times given, otherwise start and interval
     # all times in seconds
-    def __init__(self,settings, run_info,
+    def __init__(self,si,name_scheduler,
                  start=None, end=None, duration=None,
                  interval = None, times=None,cancel_when_done=True,
                  msg_logger=None,caller=None):
 
+        run_info = si.run_info
+        settings = si.settings
 
         self.cancel_when_done = cancel_when_done
+        self.name = name_scheduler
         md = run_info.model_direction
         dt = settings.time_step
+
+        default_start = run_info.start_time # default is model start time
+        if run_info.continuing or run_info.restarting:
+            start = si.saved_state_info['first_run_start_time'] # force scheduler to use  start time of first/original run
 
         # check if user defined model duration is excessively long (>100 years)
         if duration is not None:
@@ -23,30 +30,29 @@ class Scheduler(object):
                 msg_logger.msg(
                     f'User defined scheduler duration is very long > 100 years',
                     hint=f'Duration given {time_util.seconds_to_pretty_duration_string(duration)}',
-                    caller=caller, warning=True
+                    caller=caller, strong_warning=True
                 )
-            
-            # clip duration to available model duration 
-            hindcast_duration = abs(int(run_info.hindcast_end_time) - int(run_info.hindcast_start_time))
-            if duration > hindcast_duration:
-                msg_logger.msg(
-                    f'User defined scheduler duration is longer than available hindcast duration',
-                    hint=f'Duration given {time_util.seconds_to_pretty_duration_string(duration)}, '
-                         f'hindcast duration {time_util.seconds_to_pretty_duration_string(hindcast_duration)}',
-                    caller=caller,  warning=True
-                )
-                duration = hindcast_duration
 
+            # clip duration to available model duration, end allows for backtracking
+            duration = abs(run_info.end_time - default_start)
 
         if times is None:
             # make from start time and interval
-            times, interval = self._start_end_from_interval(settings,  run_info,start, end, duration, interval)
+            times, interval = self._start_end_from_interval(si, start, end, duration, interval,default_start)
         else:
             # use times given, but round
             n = (times - run_info.start_time)/dt
             times = run_info.start_time + np.round(n) * dt
             times = md* np.sort(md*times) # ensure they are in right order for backwards/forwards
             interval = None
+
+
+        # check if any are scheduled, before trimming to allow for earlier actions of a continuation
+        if times.size==0:
+            msg_logger.msg( f'No actions are set for scheduler "{name_scheduler}"',
+                hint=f'Time span of hindcast mismatched with start and end times of scheduler? Run continuation with actions starting in a future run?',
+                caller=caller, strong_warning=True )
+
 
         # trim to fit inside the run
         sel = np.logical_and(times * md >= run_info.start_time * md, times * md <= run_info.end_time * md)
@@ -94,31 +100,33 @@ class Scheduler(object):
             msg_logger.msg('No scheduled times within model run times',
                                 hint=i['bounds_table'], caller=caller, error=True)
 
-    def _start_end_from_interval(self,settings,run_info, start,end, duration, interval):
+    def _start_end_from_interval(self, si, start,end, duration, interval,default_start):
+
+        run_info = si.run_info
+        settings = si.settings
 
         md = run_info.model_direction
         dt = settings.time_step
 
         if start is None:
-            start = run_info.hindcast_start_time if run_info.start_time is None else run_info.start_time
+            start = default_start # note: default start is start of first run if continuing/restarting
+
         else:
             # use given start rounded to time step
             n = (start - run_info.start_time) / dt  # number of model steps since the start
             start = run_info.start_time + round(n) *  dt
 
-        if end is not None:
-            # use end time instead to give duration
+        # get duration
+        if  end is None and duration is None:
+            duration =abs(float(start - run_info.end_time))
+        elif end is not  None:
+            # use end time instead to give duration, takes precedence over duration if both given
             duration = abs(end - start)
+        else:
+            duration = duration
 
-        elif duration is None:
-            # duration is start to
-            duration = abs(run_info.end_time-start)
-
-        #trim within max duration
+        #trim within global max duration setting
         duration = min(settings.max_run_duration, duration)
-
-        # adjust end time to fit duration
-        end = start + md * duration
 
         if interval is None:
             interval=  dt
@@ -128,12 +136,11 @@ class Scheduler(object):
         else:
             interval = 0.
 
-        duration = abs(start-end)
         if interval ==0:
             # only one event
             times =np.asarray([start])
         else:
-            times = start + md * np.arange(0,duration+settings.time_step,interval)
+            times = start + md * np.arange(0, duration+settings.time_step,interval)
 
         return  times, interval
 

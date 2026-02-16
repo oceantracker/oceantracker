@@ -5,11 +5,11 @@ import pytest
 import numpy as np
 from os import path, makedirs
 
-@pytest.fixture
-def default_plot_output_path(request, default_run_output_dir):
-    """Default output path for plots"""
-    func_name = request.node.name
-    return path.join(default_run_output_dir, func_name)
+# @pytest.fixture
+# def default_plot_output_path(request, default_run_output_dir):
+#     """Default output path for plots"""
+#     func_name = request.node.name
+#     return path.join(default_run_output_dir, func_name)
 
 @pytest.fixture
 def test_name(request):
@@ -32,7 +32,7 @@ def test_schism_validation_run_small(
     polygon_stats_timeBased_waterDepth,
     reference_data_dir,
     test_name,
-    default_plot_output_path,
+    # default_plot_output_path,
     create_reference_data_flag,
 ):
     ot = OceanTracker()

@@ -120,6 +120,7 @@ class OceanTrackerParamsRunner(object):
 
             ml.msg(f'Output in "{si.run_info.run_output_dir}"')
         ml.hori_line()
+        ml.msg('')
         ml.close()
 
         return case_info_file
@@ -156,7 +157,7 @@ class OceanTrackerParamsRunner(object):
         ri.run_output_dir = si.output_files['run_output_dir']
         ri.tag = path.basename(ri.run_output_dir)
 
-        # setup ant restart or continuation
+        # setup any restart or continuation
         si.saved_state_info = setup_util.setup_restart_continuation(si)
 
         # set up message loggers log file
@@ -338,7 +339,7 @@ class OceanTrackerParamsRunner(object):
             i.info['no_end_to_release'] = p['duration'] is None and p['end'] is None and p['release_interval'] > 0.
 
             i.add_scheduler('release',start=p['start'], end=p['end'], duration=p['duration'],
-                            interval =p['release_interval'])
+                            interval =p['release_interval'], caller=i)
             # max_ages needed for culling operations
             i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
             max_ages.append(i.params['max_age'])
@@ -420,6 +421,10 @@ class OceanTrackerParamsRunner(object):
 
         hi_start, hi_end = fgm.info['start_time'],fgm.info['end_time']
 
+        if si.run_info.continuing or si.run_info.restarting:
+            # if restarting use original start time as hindcast  start time
+            hi_start = si.saved_state_info['first_run_start_time']
+
         if len(si.class_roles['release_groups']) == 0:
             si.msg_logger.msg('No particle "release_groups" parameters found', error=True, caller=self)
 
@@ -430,40 +435,44 @@ class OceanTrackerParamsRunner(object):
         default_start = hi_end   if si.settings.backtracking else hi_start
         default_end   = hi_start if si.settings.backtracking else hi_end
 
+        # get start and end  times from release groups
         for name, rg in si.class_roles['release_groups'].items():
             rg_params = rg.params
             rg.initial_setup()
-
-
             start =  default_start if rg_params['start'] is None else  rg_params['start']
 
-            end = default_end if rg_params['end'] is None else rg_params['end']
-            duration = si.info.large_float if rg_params['duration'] is None else rg_params['duration']
-
-            # end time takes precedence over given duration
-            if rg_params['end'] is not None: duration = abs(end-start)
+            if rg_params['end'] is None and rg_params['duration'] is None:
+                duration = np.abs( default_end-start)
+            elif rg_params['end'] is not None:
+                # param end take precedence over duration param
+                duration =  np.abs( rg_params['end']-start)
+            else:
+                duration =  rg_params['duration']
 
             life_span = duration if rg_params['max_age'] is None else duration + rg_params['max_age']
-
             first_time.append(start)
             last_time.append( start + md * life_span)
 
         # set model run start/end time allowing for back tracking
         start_time = float(np.min(md * np.asarray(first_time)) * md)
-        end_time   = float(np.max(md * np.asarray(last_time )) * md)
+
+        # force use of restarting time
+        if si.run_info.continuing or si.run_info.restarting:
+            start_time = si.saved_state_info['restart_time']
 
         if  not (hi_start <= start_time <= hi_end):
             si.msg_logger.msg(f'Start time = "{time_util.seconds_to_isostr(start_time)}" is outside the hindcast times',fatal_error=True, caller=self,
                               hint =f'Hindcast is {time_util.seconds_to_isostr(hi_start)} to {time_util.seconds_to_isostr(hi_end)}')
 
-        # clip end time to be within hincast
+        # clip end time to be within hindcast
+        end_time   = float(np.max(md * np.asarray(last_time )) * md)
         end_time = max(end_time, hi_start) if si.settings.backtracking else min(end_time, hi_end)
 
         # get duration clipped by max duration
         duration =  abs(end_time-start_time)
-        if si.settings.max_run_duration is not None:  duration = min(si.settings.max_run_duration,duration)
 
-        end_time = start_time + md * duration
+        # overide run duration with user setting if given
+        if si.settings.max_run_duration is not None:  duration = min(si.settings.max_run_duration,duration)
 
         # record info in run
         ri.start_time = start_time
