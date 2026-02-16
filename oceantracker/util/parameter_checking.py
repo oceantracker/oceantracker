@@ -217,6 +217,9 @@ class ParameterListChecker(ParamValueChecker):
         msg = f'Parameter "{key}"'
         pass
 
+        # make arrays lists
+        if isinstance(values, np.ndarray): values=values.tolist()
+
         if type(values) != list:
             msg_logger.msg(f'{msg}, must be  of type list',
                            hint=f'got type={str(type(values))}', caller=caller, error=True)

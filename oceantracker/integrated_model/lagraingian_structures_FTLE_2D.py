@@ -5,7 +5,7 @@ from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.integrated_model._base_model import  _BaseIntegratedModel
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, ParameterCoordsChecker as PCC, ParameterTimeChecker as PTC
 #from oceantracker.util.parameter_checking import ParameterListCheckerV2 as PLC2
-from oceantracker.util import time_util
+from oceantracker.util import regular_grid_util
 from copy import  deepcopy
 from oceantracker.shared_info import shared_info as si
 
@@ -21,6 +21,8 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
     def __init__(self):
         # set up info/attributes
         super().__init__()
+        regular_grid_util.add_grid_default_params(self.default_params, grid_center_required=True)
+        self.remove_default_params(['grid_center']) # need more than one center
         self.add_default_params(
             start=  PTC(None, doc_str='start date of LSC releases, Must be an ISO date as string eg. "2017-01-01T00:30:00" '),
             end=  PTC(None, doc_str=' end date of LSC releases. Model should run max(lags) beyond this send date to calculate LSC for last pulse of grid release.  Must be an ISO date as string eg. "2017-01-01T00:30:00"'),
@@ -29,14 +31,9 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
             lags=  PLC(None, float, units='sec',min=1,min_len=1,
                         is_required=True,
                         doc_str='List of one or more times after each pulse is released to calculate LCS.'),
-            grid_size=  PLC([100, 99],int, fixed_len=2,  min=1, max=10 ** 5,
-                                            doc_str='number of rows and columns in grid'),
-            grid_center=  PCC(None, one_or_more_points=True, is3D=False,is_required=True,
-                               doc_str='center of one or more LCS grid centers  or (lon, lat) if hydromodel in geographic coords., should be [x,y] or [[x1,y1],[x1,y1],...] for multiple grids, which may have different spans, but all must have same number of rows and columns ',
-                              units='meters or decimal degrees'),
-            grid_span=  PCC(None, one_or_more_points=True, min=.0001, is3D=False, is_required=True,
-                             doc_str='(width, height)  of the grid release (dx,dy) , should be single [dx,dy] or [[dx1,dy1],[dx1,dy1],...] with one pair for each grid center',
-                                        units='meters or degrees( dlon,dlat)'),
+            grid_center=PCC(None, one_or_more_points=True, is3D=False, is_required=True,
+                            doc_str='center of one or more LCS grid centers  or (lon, lat) if hydromodel in geographic coords., should be [x,y] or [[x1,y1],[x1,y1],...] for multiple grids, which may have different spans, but all must have same number of rows and columns ',
+                            units='meters or decimal degrees'),
             floating=PVC(True, bool, doc_str='Do LCS for floating partyicles, in development currently only option '),
             z_min=  PVC(None, float, doc_str=' Only allow particles to be above this vertical position', units='meters above mean water level, so is < 0 at depth'),
             z_max=  PVC(None, float, doc_str=' Only allow particles to be below this vertical position', units='meters above mean water level, so is < 0 at depth'),
@@ -44,7 +41,6 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
             backwards=  PVC(False, bool, doc_str='Do LCS backwards in time'),
             write_intermediate_results=  PVC(False, bool, doc_str='write intermediate arrays, x_lag, strain_matrix. Useful for checking results'),
             write_tracks=  PVC(False, bool, doc_str='Flag if "True" will write particle tracks to disk. This is off by default for LCS'),
-
         )
     def add_required_classes_and_settings(self):
         info = self.info
@@ -60,22 +56,18 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
         # clear existing releases
         si.class_roles.release_groups={} # not use with other releases
 
-        # checks on params
-        if params['grid_center'].shape[0] != params['grid_span'].shape[0]:
-            si.msg_logger.msg('Grid span must be list of size [2] or be N pairs of sizes, one gor each grid center',
-                              hint=f'Grid center has {params["grid_center"].shape[0]} values  and grid span is size  {str(params["grid_span"].shape)}',
-                             fatal_error=True, caller=self)
 
         # set up lCS grid
         r, c = params['grid_size']
 
         # set up release grid is padded by one all around
-        release_params = dict(class_name='oceantracker.release_groups.grid_release.GridRelease',
-                              pulse_size=1,
-                              z_min=params['z_min'], z_max=params['z_max'],
-                              grid_size= [r+2, c+2],
-                              max_age = params['lags'][-1],  # run each to largest lag
-                              release_interval=0. )
+        release_params = dict(class_name='GridRelease',
+                                pulse_size=1,
+                                z_min=params['z_min'], z_max=params['z_max'],
+                                rows=r+1, cols= c+1,
+                                span_x=params['span_x'], span_y=params['span_y'],
+                                max_age = params['lags'][-1],  # run each to largest lag
+                                release_interval=0. )
         # if 3D sort out depth range and always resuspend
         if si.run_info.is3D_run:
             if params['floating']:
@@ -102,7 +94,6 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
         for n_grid in range(params['grid_center'].shape[0]):
             rp = deepcopy(release_params)
             rp['grid_center'] = params['grid_center'][n_grid]
-            rp['grid_span'] = params['grid_span'][n_grid]
 
             for n_pulse in range(info['times'].size):
                 rp['start'] = info['times'][n_pulse]
@@ -121,6 +112,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
         # set up space to hold release grids
         self.x_release_grids = np.full((params['grid_center'].shape[0], r+2, c+2, 2), np.nan, dtype=np.float64)
         self.x_LSC_grid = np.full((params['grid_center'].shape[0], r , c , 2), np.nan, dtype=np.float64)
+
         # add lag schedular
         time = []
         md = si.run_info.model_direction
@@ -200,7 +192,7 @@ class dev_LagarangianStructuresFTLE2D(_BaseIntegratedModel):
     def _open_output_file(self):
 
         params = self.params
-        self.info['output_file'] = self.params['output_file_tag'] + '.nc'
+        self.info['output_file'] = params['output_file_base'] + '.nc'
         self.nc = NetCDFhandler(path.join(si.run_info.run_output_dir, self.info['output_file']), 'w')
         nc = self. nc
         r, c = params['grid_size']
