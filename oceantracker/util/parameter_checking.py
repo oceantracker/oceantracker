@@ -31,9 +31,22 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None, 
     possible_params = [key for key, item in default_params.items() if key not in obsolete_params]
     deprecated_params = [key for key, item in default_params.items() if isinstance(item, _ParameterBaseDataClassChecker) and item.deprecated]
 
-    # put temporily name into caller before checking so it appears in error messages
+    # put temporarily name into caller before checking so it appears in error messages
     if 'name' in params:
         caller.params['name'] = params[ 'name']
+
+    # check if any keys in base or case params are not in defaults
+    for key in list(given_params.keys()):
+        msg = f'Parameter "{key}"'
+        if  check_for_unknown_keys and key not in default_params:
+            # get possible values without obsolete params
+            msg_logger.spell_check(msg + ' is not recognised', key,possible_params,caller=caller)
+        elif key in obsolete_params:
+           msg_logger.msg(msg + ' is obsolete ',  hint=default_params[key].doc_str, error=True, caller=caller)
+           params['key'] = None
+        elif key in deprecated_params:
+            msg_logger.msg(msg + ' is deprecated and will be deleted in future versions',
+                           hint=default_params[key].doc_str, strong_warning=True, caller=caller)
 
     # loop over non-obsolete default keys
     for key in possible_params:
@@ -57,23 +70,9 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None, 
             msg_logger.msg(f'{msg},merge_params_with_defaults items in default dictionary can be ParamDictValueChecker, ParameterListChecker, or a nested param dict',
                           error = True, caller=caller)
 
-        if key in deprecated_params:
-            msg_logger.msg(msg + ' is deprecated and will be deleted in future versions',
-                           hint=default_params[key].doc_str, strong_warning=True, caller=caller)
 
-    # check if any keys in base or case params are not in defaults
-    # allow pass on those starting with #
-    if check_for_unknown_keys:
-        for key in list(given_params.keys()):
-            msg = f'Parameter "{key}"'
-            if  key not in default_params:
-                # get possible values without obsolete params
-                msg_logger.spell_check(msg + ' is not recognised', key,possible_params,caller=caller)
-            elif key in obsolete_params:
-               msg_logger.msg(msg + ' is obsolete ',
-                              hint=default_params[key].doc_str,
-                              error=True, caller=caller)
-               params['key'] = None
+
+
     return params
 
 @dataclass
@@ -212,6 +211,7 @@ class ParameterListChecker(ParamValueChecker):
 
     def get_default(self):
         return [] if self.default is None else self.default
+
     def check_value(self,key, values, msg_logger, caller):
         # check out elements of list
         msg = f'Parameter "{key}"'

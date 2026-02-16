@@ -34,10 +34,10 @@ def build_grid_from_params(params,caller, center=None):
     if center is   None: center= params['grid_center']  # allow center param to be overridden ( eg gridded stats)
 
     # use deprecated params if given
-    if params['grid_size'] != []:
+    if len(params['grid_size']) > 0:
         params['rows'], params['cols'] = params['grid_size'][0], params['grid_size'][1]
         if len(params['grid_size']) == 3: params['layers'] = params['grid_size'][2]
-    if params['grid_span'] != []:
+    if len(params['grid_span']) > 0:
         params['span_x'], params['span_y'] = params['grid_span'][0], params['grid_span'][1]
 
 
@@ -56,14 +56,6 @@ def build_grid_from_params(params,caller, center=None):
     xi, yi = np.meshgrid(center[0]+base_x, center[1]+ base_y)
 
     return xi, yi, get_bounding_box(xi, yi)
-
-def make_regular_grid(xy_center,grid_size,grid_span):
-    # regular grid, where columns are x, rows are y
-    base_x = xy_center[0] + np.linspace(-grid_span[0] / 2., grid_span[0] / 2., grid_size[1]).reshape(-1, 1)
-    base_y = xy_center[1] + np.linspace(-grid_span[1] / 2., grid_span[1] / 2., grid_size[0]).reshape(-1, 1)
-    xi, yi= np.meshgrid(base_x,base_y)
-
-    return xi, yi, get_bounding_box(xi,yi )
 
 def get_bounding_box(x_grid,y_grid):
     bounding_box_ll_ul = np.asarray([[x_grid[0, 0], y_grid[0, 0]], [x_grid[0, -1], y_grid[-1, 0]]], dtype=np.float64)
