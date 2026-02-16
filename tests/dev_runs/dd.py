@@ -135,13 +135,15 @@ my_polygon_release = dict(name='my_polygon_release',  # name used internal to re
                           release_interval=3600, pulse_size=50,
                           )
 
-rg3= dict(name='my_grid_release',  # name used internal to refer to this release
-        class_name='GridRelease',  # class to use
-        start='2017-01-01T02:30:00',
-        grid_center=[1592000, 5489200],  # location of grid centre
-        grid_span=[500, 1000],  # size of grid in meters
-        grid_size=[3, 4],  # rows and columns in grid
-        release_interval=1800, pulse_size=2,
+rg_grid= dict(name='my_grid_release',  # name used internal to refer to this release
+          class_name='GridRelease',  # class to use
+          start='2017-01-01T02:30:00',
+          grid_center=[1595000, 5491000],  # location of grid centre
+          rows=3,
+          cols=4,
+          span_x=3000,
+          span_y=2000,
+        release_interval=3600, pulse_size=2,
         z_min=-2, z_max=-0.5)  # release at random depth between these values
 
 rg1point= dict(name='one points',
@@ -155,6 +157,8 @@ rg3points= dict(name='three points',
                      [1598000, 5486100, -1]],
              release_interval=1800,
              pulse_size=10)
+
+
 
 pp1= dict(name='a_pollutant',  # must have a user given name
          class_name='oceantracker.particle_properties.age_decay.AgeDecay',  # class_role is resuspension

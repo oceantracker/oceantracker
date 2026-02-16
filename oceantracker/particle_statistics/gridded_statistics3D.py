@@ -15,7 +15,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
     def __init__(self):
         # set up info/attributes
         super().__init__()
-        regular_grid_util.add_grid_default_params(self.default_params,is3D=True)
+        regular_grid_util.add_grid_default_params(self.default_params,is3D=True, grid_center_required=False)
 
         # add 3D specific parameters
         self.add_default_params(
@@ -30,6 +30,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
             output_file_base=PVC('stats_gridded_time_3D', str, doc_str='start of output file names'),
             )
         self.remove_default_params(['near_seabed','near_seasurface'])
+
     def initial_setup(self):
         # set up regular grid for  stats
         super().initial_setup()

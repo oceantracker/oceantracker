@@ -2,7 +2,7 @@ import numpy  as np
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParamValueChecker as PVC, ParameterListChecker as PLC
 from oceantracker.shared_info import shared_info as si
 
-def add_grid_default_params(default_params,is3D=False):
+def add_grid_default_params(default_params,is3D=False,grid_center_required=True):
 
     default_params.update(
         rows = PVC(100, int,  min=1, max=10 ** 5,
@@ -13,7 +13,7 @@ def add_grid_default_params(default_params,is3D=False):
                     units='Units metres or degrees if hindcast is geographic coords'),
         span_y = PVC(100000., float, doc_str='Grid span  in y direction',
                    units='Metres or degrees if hindcast in geographic coords'),
-        grid_center= PCC(None, single_cord=True, is3D=False,
+        grid_center= PCC(None, single_cord=True, is3D=False,is_required=grid_center_required,
                            doc_str='center of the statistics grid as (x,y), must be given if not using  release_group_centered_grids',
                            units='Metres or degrees if hindcast in geographic coords'),
         grid_size= PLC(None, int, fixed_len=2, min=1, max=10 ** 5, deprecated=True,
@@ -21,6 +21,7 @@ def add_grid_default_params(default_params,is3D=False):
         grid_span=PLC(None, float, units='meters (dx,dy)', deprecated=True,
                       doc_str='(width-x, height-y)  of grid, (deprecated: use span_x and span_y params)'),
         )
+
     if is3D:
         default_params.update(layers = PVC(10, int, min=1, max=10 ** 5, doc_str='number of layers in 3D grid'),
         grid_size=PLC(None, int, fixed_len=3, min=1, max=10 ** 5, deprecated=True,
