@@ -17,9 +17,9 @@ def add_grid_default_params(default_params,is3D=False,grid_center_required=True)
                            doc_str='center of the statistics grid as (x,y), must be given if not using  release_group_centered_grids',
                            units='Metres or degrees if hindcast in geographic coords'),
         grid_size= PLC(None, int, fixed_len=2, min=1, max=10 ** 5, deprecated=True,
-                    doc_str='number of (rows, columns) in grid, (deprecated: use parameters rows=??,cols=?? )'),
+                    doc_str='deprecated: use parameters rows=??,cols=?? '),
         grid_span=PLC(None, float, units='meters (dx,dy)', deprecated=True,
-                      doc_str='(width-x, height-y)  of grid, (deprecated: use span_x and span_y params)'),
+                      doc_str='deprecated: use span_x=? and span_y=? params)'),
         )
 
     if is3D:

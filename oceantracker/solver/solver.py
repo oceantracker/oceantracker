@@ -41,26 +41,20 @@ class Solver(ParameterBaseClass):
         fgm = si.core_class_roles.field_group_manager
 
         # Get grids to check (either nested or single grid)
-        grids_to_check = enumerate(fgm) if hasattr(fgm, "fgm_hydro_grids") else [(None, fgm)]
+        grids_to_check = enumerate(fgm.fgm_hydro_grids) if hasattr(fgm, "fgm_hydro_grids") else [(0, fgm)]
 
         for grid_idx, grid in grids_to_check:
             hydro_dt = grid.reader.info['time_step']
-            grid_info = f"({grid_idx}, type: {grid.reader.__class__.__name__})" if grid_idx is not None else ""
+            grid_info = f"({grid_idx}, type: {grid.reader.__class__.__name__})"
             
-            if hydro_dt < model_dt:
+            if model_dt > hydro_dt :
                 si.msg_logger.msg(
-                    f"Particle tracking model time step was chosen to be smaller than the hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {model_dt}s).",
-                    warning=True,
-                    tabs=0,
-                    hint="Try decreasing 'time step'",
-                )
+                    f"Particle tracking model time step was chosen to be larger than the hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {model_dt}s).",
+                    warning=True,tabs=0, hint="Try decreasing 'time step'", )
             if (hydro_dt / model_dt) % 1 != 0:
                 si.msg_logger.msg(
                     f"Particle tracking model time step is NOT an integer fraction of hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {model_dt}s). This is valid but may reduce numerical accuracy slightly.",
-                    warning=True,
-                    tabs=0,
-                    hint=None,
-                )
+                    warning=True,  tabs=0, hint=None,)
         
 
     def solve(self):

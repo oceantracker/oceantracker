@@ -28,7 +28,9 @@ class ClassImporter():
         ml = self.msg_logger
 
         if params is None: params = {}
-        if name is not None: params['name'] = name
+
+        # use given name, over param['name'] value
+        if name is not None:  params['name'] = name
 
         if class_role not in self.class_tree:
             ml.msg(f'unknown class role "{class_role}" for class named "{name}"',
@@ -46,8 +48,11 @@ class ClassImporter():
         i = class_obj() # make instance
 
         i.info['class_role'] = class_role
+        # set name now as needed so name appears in messages via caller, those missing a name are readers,interpolator and fgm's
+        i.params['name'] = params['name'] if 'name' in params else ''
+
         if merge_params:
-            i.params = merge_params_with_defaults(params, i.default_params, ml,  check_for_unknown_keys=check_for_unknown_keys, caller=i)
+            i.params = merge_params_with_defaults(params, i.default_params, ml, caller=i,  check_for_unknown_keys=check_for_unknown_keys)
 
         # attach the current message loger to instance
         i.msg_logger = self.msg_logger

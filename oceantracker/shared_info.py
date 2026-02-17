@@ -256,7 +256,6 @@ class _SharedInfoClass():
                          caller=caller,initialize=initialize,add_required_classes_and_settings=add_required_classes_and_settings)
             i.info['instanceID'] = instanceID
 
-
             self.class_roles[class_role][params['name']] = i
 
         else:
