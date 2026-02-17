@@ -5,6 +5,8 @@ from os import path, makedirs, remove
 import argparse
 import xarray as xr
 from oceantracker.util import class_importer_util, parameter_checking, message_logger, json_util, time_util
+from oceantracker.main import OceanTracker
+
 missing_int = -9999
 
 def compute_scale_and_offset_int16(data, missing_value=None):
@@ -263,7 +265,7 @@ def run(i,output_dir, args):
     file_base = i['name']
     input_dir = path.join(i['output_dir'],file_base)
 
-    from oceantracker.main import OceanTracker
+
     ot = OceanTracker()
     ot.settings(root_output_dir=output_dir, output_file_base=file_base, time_step=10*60, debug=True)
     ot.add_class('reader', input_dir=input_dir, file_mask=file_base + '*.nc')
