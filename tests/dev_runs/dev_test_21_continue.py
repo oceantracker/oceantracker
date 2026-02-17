@@ -34,9 +34,12 @@ def main(args):
                 use_resuspension = False,
             )
 
+    hindcast_root = r'D:\hincasts_dev_tests\continuation_tests'
 
-    hm = dd.hydro_model['demoSchism3D']
-    ot.add_class('reader', **hm['reader'])
+    hm = dd.hydro_model['demoSchism2D']
+    ot.add_class('reader', **dict(hm['reader'],
+                                input_dir = path.join(hindcast_root,'ref_run'),
+                               file_mask = 'NZfinite*.nc'   ))
 
     # add a point release
     ot.add_class('release_groups',**dict(dd.rg_release_interval0,
@@ -61,21 +64,32 @@ def main(args):
         params.update(continuable=True, run_output_dir=params['run_output_dir']+'_full_run')
         case_info_file = run(params)
     else:
-        # do split continuation runs
-
-        params.update(continuable=True, max_run_duration = 12*3600,run_output_dir=params['run_output_dir']+'_first_run')
+        # do first continuation run
+        params.update(continuable=True, run_output_dir=params['run_output_dir']+'_first_run')
+        params['reader'].update(input_dir=path.join(hindcast_root, 'first_run'), )
         case_info_file1 = run(params)
 
-        # continue this run
+        # continue this run (1)
         cs1 = json_util.read_JSON(case_info_file1)
         output_files = cs1['output_files']
         params = deepcopy(ot.params)
         params.update(continue_from=path.join(output_files['run_output_dir']),
-                    run_output_dir = params['run_output_dir'] + '_full_run')
+                      continuable=True,
+                    run_output_dir = params['run_output_dir'] + '_second_run',)
+        params['reader'].update(   input_dir = path.join(hindcast_root,'second_run'), )
+        case_info_file2 = run(params)
+
+        # continue this run (2)
+        cs2 = json_util.read_JSON(case_info_file2)
+        output_files = cs2['output_files']
+        params = deepcopy(ot.params)
+        params.update(continue_from=path.join(output_files['run_output_dir']),
+                    run_output_dir = params['run_output_dir'] + '_full_run',)
+        params['reader'].update(   input_dir = path.join(hindcast_root,'completion_run'), )
         case_info_file = run(params)
 
 
-    dd.compare_reference(case_info_file, args, last_time=True)
+    dd.compare_reference(case_info_file, args, last_time=False)
     dd.show_track_plot(case_info_file, args)
 
     return  ot.params

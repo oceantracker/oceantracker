@@ -1,5 +1,5 @@
 from oceantracker.particle_statistics._base_location_stats import _BaseParticleLocationStats
-from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterCoordsChecker as PCC, merge_params_with_defaults
+from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterCoordsChecker as PCC
 from copy import  deepcopy
 from oceantracker.particle_statistics.util import stats_util
 from oceantracker.util.numba_util import njitOT, njitOTparallel, prange

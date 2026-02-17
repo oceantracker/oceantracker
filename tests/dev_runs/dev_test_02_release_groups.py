@@ -30,8 +30,8 @@ def main(args=None):
     ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True,)
 
     # add a point release
-    ot.add_class('release_groups',**dd.rg_release_interval0)
-    ot.add_class('release_groups', **dd.rg_start_in_datetime1)
+    ot.add_class('release_groups',**dd.rg1point)
+    ot.add_class('release_groups', **dd.rg_grid)
 
     #ot.add_class('trajectory_modifiers', class_name='oceantracker.trajectory_modifiers.surface_float.SurfaceFloat', name='surface')
 
@@ -41,15 +41,6 @@ def main(args=None):
     ot.add_class('particle_properties', class_name='AgeDecay', name='test_decay')
     ot.add_class('particle_properties', class_name='DistanceTravelled')
 
-    # add a gridded particle statistic to plot heat map
-    ot.add_class('particle_statistics',**dd.my_heat_map_time)
-    ot.add_class('particle_statistics', **dd.my_heat_map_age)
-
-    ot.add_class('particle_statistics', **dd.my_poly_stats_time,   polygon_list=[dict(points=hm['polygon'])])
-    ot.add_class('particle_statistics', **dd.my_poly_stats_age, polygon_list=[dict(points=hm['polygon'])])
-
-    ot.add_class('particle_statistics', **dd.my_heat_map3D_time)
-    ot.add_class('particle_statistics', **dd.my_heat_map2D_time_runningMean)
 
     if not args.norun:
         case_info_file = ot.run()
@@ -58,9 +49,9 @@ def main(args=None):
 
     dd.compare_reference(case_info_file, args)
 
+    dd.show_track_plot(case_info_file, args)
 
-
-    if args.plot:
+    if False:
 
         from matplotlib import pyplot as plt
 

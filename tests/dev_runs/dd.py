@@ -135,13 +135,15 @@ my_polygon_release = dict(name='my_polygon_release',  # name used internal to re
                           release_interval=3600, pulse_size=50,
                           )
 
-rg3= dict(name='my_grid_release',  # name used internal to refer to this release
-        class_name='GridRelease',  # class to use
-        start='2017-01-01T02:30:00',
-        grid_center=[1592000, 5489200],  # location of grid centre
-        grid_span=[500, 1000],  # size of grid in meters
-        grid_size=[3, 4],  # rows and columns in grid
-        release_interval=1800, pulse_size=2,
+rg_grid= dict(name='my_grid_release',  # name used internal to refer to this release
+          class_name='GridRelease',  # class to use
+          start='2017-01-01T02:30:00',
+          grid_center=[1595000, 5491000],  # location of grid centre
+          rows=3,
+          cols=4,
+          span_x=3000,
+          span_y=2000,
+        release_interval=3600, pulse_size=2,
         z_min=-2, z_max=-0.5)  # release at random depth between these values
 
 rg1point= dict(name='one points',
@@ -156,17 +158,20 @@ rg3points= dict(name='three points',
              release_interval=1800,
              pulse_size=10)
 
+
+
 pp1= dict(name='a_pollutant',  # must have a user given name
          class_name='oceantracker.particle_properties.age_decay.AgeDecay',  # class_role is resuspension
          # the below are optional settings/parameters
          initial_value=1000,  # value of property when released
          decay_time_scale=7200.)
-
+grid_size= [122, 132]
+grid_span = [10000,10000]
 my_heat_map_time = dict(name='my_heatmap_time',
          class_name='GriddedStats2D_timeBased',
          # the below are optional settings/parameters
-         grid_size=[120, 130],  # number of rows, cols cells in the heat map
-        grid_span = [10000,10000],
+         grid_size=grid_size,  # number of rows, cols cells in the heat map
+        grid_span = grid_span,
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
          particle_property_list=['a_pollutant','water_depth','tide'],  # request a heat map for the decaying part. prop. added above
@@ -178,8 +183,10 @@ my_heat_map_time = dict(name='my_heatmap_time',
 my_heat_map_age = dict(name='my_heatmap_age',
          class_name='GriddedStats2D_ageBased',
          # the below are optional settings/parameters
-         grid_size=[120, 130],  # number of east and north cells in the heat map
-        grid_span = [10000,10000],
+        rows=grid_size[0],
+        cols=grid_size[1],
+        span_x =grid_span[0],
+        span_y =grid_span[1],
          release_group_centered_grids=True,  # center a grid around each release group
          update_interval=7200,  # time interval in sec, between doing particle statists counts
          particle_property_list=['a_pollutant','water_depth','tide'],  # request a heat map for the decaying part. prop. added above
@@ -206,8 +213,11 @@ my_poly_stats_age = dict(class_name='PolygonStats2D_ageBased',
 
 my_heat_map3D_time = dict(name='my_heatmap3D_time',
             class_name = "GriddedStats3D_timeBased",
-            grid_size = [120, 130, 5],
-            grid_span = [10000, 10000],
+            rows=grid_size[0],
+            cols=grid_size[1],
+            layers = 5,
+            span_x=grid_span[0],
+            span_y=grid_span[1],
             particle_property_list=['a_pollutant', 'water_depth'],
             release_group_centered_grids = True,
             update_interval = 3600,
@@ -218,7 +228,8 @@ my_heat_map3D_time = dict(name='my_heatmap3D_time',
 my_heat_map2D_time_runningMean = dict(
             name = "my_heat_map2D_time_runningMean",
             class_name = "GriddedStats2D_timeBased_runningMean",
-            grid_size = [120, 130],
+            rows=grid_size[0],
+            cols=grid_size[1],
             grid_span = [10000, 10000],
             write_interval = 7200 * 3,
             release_group_centered_grids = True,
@@ -286,11 +297,24 @@ def compare_reference(case_info_file, args, last_time=False):
         delta = np.abs(data - ref_data)
 
         #delta = np.abs(tracks[name] - tracks_ref[name])
-        print(f'{BLUE}{name}-comparing:  { "Last_time only" if last_time else "All times"}{RESET} differences from reference run: ' )
-        print('\t min  ' +RED, np.nanmin(np.nanmin(delta, axis=0), axis=0), RESET, end="")
-        print('\t mean '+RED, np.nanmean(np.nanmean(delta, axis=0), axis=0), RESET, end="")
-        print('\t max  '+RED, np.nanmax(np.nanmax(delta, axis=0), axis=0), RESET, end="")
+        print(_hl(f'{name}-comparing:  { "Last_time only" if last_time else "All times"}', c= BLUE),
+                  'differences from reference run: ')
+        print('\t min  ' , _hl(np.nanmin(np.nanmin(delta, axis=0), axis=0)), end="")
+        print('\t mean ', _hl(np.nanmean(np.nanmean(delta, axis=0), axis=0)), end="")
+        print('\t max  ', _hl(np.nanmax(np.nanmax(delta, axis=0), axis=0)), end="")
         print('\t range , ref. data  min=',  np.nanmin(np.nanmin(ref_data, axis=0), axis=0),'max=',   np.nanmax(np.nanmax(ref_data, axis=0), axis=0), )
+
+    if 'z_fraction' in tracks and tracks['x'].shape[2] == 3 :
+        # 3D cases
+        tests=dict()
+
+        # check z fractions are in range 0-1
+        z_fraction= tracks['z_fraction']
+        sel = np.logical_or(z_fraction < -.01, z_fraction > 1.01)
+        print(_hl('zfraction out of range, all=', c=BLUE), _hl( np.count_nonzero(sel)))
+        z_fraction_water_velocity= tracks['z_fraction_water_velocity']
+        sel = np.logical_or(z_fraction_water_velocity < -.01,  z_fraction_water_velocity > 1.01)
+        print(_hl('zfraction out of range,  water_velocity=', c=BLUE), _hl(np.count_nonzero(sel)))
 
     if False:
         from matplotlib import  pyplot as plt
@@ -306,30 +330,27 @@ def compare_reference(case_info_file, args, last_time=False):
         stats_ref= load_output_files.load_stats_data(reference_case_info_file, name=name)
         stats= load_output_files.load_stats_data(case_info_file, name=name)
 
-        print(f'Stats  compare ref: "{name}"')
+        print( _hl(f'Stats  compare ref: "{name}"', c = BLUE))
         print('\t counts, ref/new', stats_ref['count'].sum(), stats['count'].sum(),
-              '\t\t\t max diff counts-ref run counts =' +RED,np.max(np.abs(stats['count'] - stats_ref['count'])), RESET)
+              '\t\t\t max diff counts-ref run  counts =',_hl(np.max(np.abs(stats['count'] - stats_ref['count']))))
         print('\t count all alive, ref/new', stats_ref['count_all_alive_particles'].sum(), stats['count_all_alive_particles'].sum(),
-             'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
-                     '\t max diff counts-ref run counts =' +RED ,np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles'])), RESET)
+                'last time/age step', stats_ref['count_all_alive_particles'][-1,:].sum(), stats['count_all_alive_particles'][-1,:].sum(),
+                '\t max diff counts-ref run counts ='  , _hl(np.max(np.abs(stats['count_all_alive_particles'] - stats_ref['count_all_alive_particles']))))
 
         if 'x_grid' in stats_ref:
-            print('\t grid differences , x_grid/y_grid diff. ', (stats['x_grid']-  stats_ref['x_grid']).max(), (stats['y_grid']-  stats_ref['y_grid']).max())
+            print('\t grid differences , x_grid/y_grid diff. ', _hl((stats['x_grid']-  stats_ref['x_grid']).max()),_hl((stats['y_grid']-  stats_ref['y_grid']).max()))
             print('\t grid lower left , x_grid/y_grid diff. ', stats['x_grid'][0,0,0] - stats_ref['x_grid'][0, 0,0],  stats['y_grid'][0,0,0] - stats_ref['y_grid'][0, 0,0])
             print('\t grid upper right left , x_grid/y_grid diff. ', stats['x_grid'][0, -1, -1] - stats_ref['x_grid'][0, -1, -1] ,
                   stats['y_grid'][0,-1, -1]  - stats_ref['y_grid'][0,-1, -1] )
 
-        if  'counts_released' in stats_ref:
-            print('\t counts_released, ref/new', stats_ref['counts_released'].sum(), stats['counts_released'].sum(),
-               '\t max diff counts-ref run counts =', np.max(np.abs(stats['counts_released'] - stats_ref['counts_released'])))
-
+        if 'connectivity_matrix' in stats_ref:
             c_ref = stats_ref['connectivity_matrix']
             c  = stats['connectivity_matrix']
             c_ref= c_ref[np.isfinite(c_ref)]
             c = c[np.isfinite(c)]
-            print( '\t connectives > 1.01 ref='+RED  , (c_ref > 1.001).sum(),RESET+ 'run ='+RED, (c> 1.001).sum(), RESET+ ' counts',
+            print( '\t connectives > 1.01 ref=' ,_hl((c_ref > 1.001).sum()),'run =', _hl( (c> 1.001).sum()),  ' counts',
                   'ref range =', c_ref.min(),'-', c_ref.max(), 'run range =', c_ref.min(),'-', c_ref.max())
-            pass
+        pass
         if 'particle_property_list' in params:
             for prop_name in params['particle_property_list']:
                 if prop_name not in stats_ref: continue
@@ -343,11 +364,16 @@ def compare_reference(case_info_file, args, last_time=False):
                 try:
                     print(f'\t Property  "{prop_name}"', 'max mag. ref/new',
                       np.nanmax(np.abs(stats_ref[prop_name])),np.nanmax(np.abs(stats[prop_name])),
-                      ', max diff ='+RED  , np.max(dc[np.isfinite(dc)]), RESET)
+                      ', max diff =',_hl(np.max(dc[np.isfinite(dc)])))
                 except Exception as e:
                     raise(f'debug: Property  "{prop_name}"')
 
     pass
+
+def _hl(s:str, c= RED):
+    if type(s) is not str : s= str(s)
+    return  c +s + RESET
+
 def show_track_plot(case_info_file, args,colour_with=None):
     from oceantracker.plot_output import plot_tracks
     if not args.plot : return

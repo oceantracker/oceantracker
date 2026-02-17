@@ -141,22 +141,28 @@ class  InterpTriangularGrid(_BaseInterp):
         info = self.info
         part_prop = si.class_roles.particle_properties
 
-        self._get_hori_cell(xq, active)
+        # find hori. cell
+        d = self._get_hori_cell(xq, active)
+        si._accumulate_cell_finder_stats_in_runinfo(d) # add to walk counts to rubn info
 
         # try to fix any failed walks
+        #todo add to cell_finder_stats
+
         IDs_need_fixing =part_prop['cell_search_status'].compare_all_to_a_value('lt', si.cell_search_status_flags.ok,
                                                                            out=self.get_partID_buffer('B1'))
         # retry any failed walks, ie too long
-        sel_failed_walk = part_prop['cell_search_status'].data[IDs_need_fixing] == si.cell_search_status_flags.failed
+        IDs_failed_walk = part_prop['cell_search_status'].find_subset_where(active, 'eq',
+                                            si.cell_search_status_flags.failed, out=self.get_partID_buffer('B2'))
+        triangle_walks_retried = IDs_failed_walk.size
+        triangle_walks_fixed = 0
 
-        if np.any(sel_failed_walk):
-            IDs_failed_walk = IDs_need_fixing[sel_failed_walk]
-            info['triangle_walks_retried'] += IDs_failed_walk.size
+        if IDs_failed_walk.size > 0:
 
             n_cell, bc, is_inside_domain = self.find_initial_hori_cell_method(xq[IDs_failed_walk,...])
             fixed = is_inside_domain
             part_prop['n_cell'].set_values(n_cell[fixed], IDs_failed_walk[fixed])
             part_prop['bc_coords'].set_values(bc[fixed,:], IDs_failed_walk[fixed])
+            triangle_walks_fixed += np.count_nonzero(fixed)
 
             # recheck for repeated failures of failed searched, which must be outside domain if not found by intial serarch
             if np.any(~fixed):
@@ -175,6 +181,8 @@ class  InterpTriangularGrid(_BaseInterp):
                 # kill particles
                 part_prop['status'].set_values(si.particle_status_flags.dead, sel2)
 
+        si._accumulate_cell_finder_stats_in_runinfo(dict(triangle_walks_retried=triangle_walks_retried,
+                                                         triangle_walks_fixed=triangle_walks_fixed))
         si.block_timer('Find horizontal cell', t0)
 
         return IDs_need_fixing
@@ -183,6 +191,7 @@ class  InterpTriangularGrid(_BaseInterp):
         # locate vertical cell in place
         info = self.info
         t0 = perf_counter()
+        #todo ad to runifo cell walk  stats
         info['bad_z_fraction_count'] = self._vert_cell_finder.find_vertical_cell(fields, xq, current_buffer_steps, weight_time_steps, active)
         if info['bad_z_fraction_count'] > 0 :
             si.msg_logger.msg(f'Out of range vertical layer fraction calculated, number counted so far {info["bad_z_fraction_count"]}', strong_warning=True,caller = self,

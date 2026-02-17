@@ -87,7 +87,8 @@ class ParticleGroupManager(ParameterBaseClass):
         info['particles_released'] = 0
 
         info['current_particle_buffer_size'] = si.settings.particle_buffer_initial_size
-        self.status_count_array_per_thread= np.zeros((si.settings.processors, 256), np.int32) # array to insert status counts for a
+        self.status_count_array_per_thread= np.zeros((si.settings.processors, si.particle_status_flags.moving-si.particle_status_flags.notReleased+1),
+                                                                                        np.int64) # array to insert status counts for a
 
         info['current_status_counts'] = {}
         for name, val,  in si.particle_status_flags.items():
@@ -106,6 +107,8 @@ class ParticleGroupManager(ParameterBaseClass):
                 rg.start_update_timer()
                 release_part_prop = rg.get_release_locations(time_sec)
                 index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
+                # todo implement number_released_each_time_step?
+                #rg.info['number_released_each_time_step'][n_time_step] += index.size # record number released
                 new_buffer_index = np.concatenate((new_buffer_index,index), dtype=np.int32)
                 rg.stop_update_timer()
 
@@ -166,12 +169,13 @@ class ParticleGroupManager(ParameterBaseClass):
 
     def _expand_particle_buffers(self,num_particles):
         info = self.info
+        t0 = perf_counter()
         part_prop = si.class_roles.particle_properties
         # get number of chunks required rounded up
         n_chunks = max(1,int(np.ceil(num_particles/si.settings.particle_buffer_initial_size)))
         info['current_particle_buffer_size'] = n_chunks*si.settings.particle_buffer_initial_size
         num_in_buffer = si.run_info.particles_in_buffer
-
+        si.msg_logger.msg(f'Expanding particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles')
         # copy property data
         for key, i in part_prop.items():
             #debug_util.print_referers(i.data,tag=key)
@@ -182,8 +186,9 @@ class ParticleGroupManager(ParameterBaseClass):
             np.copyto(new_data[:num_in_buffer, ...], old_data[:num_in_buffer, ...])
             i.data = new_data
             i.info['data_shape'] = i.data.shape # record new shape for debugging
+        si.msg_logger.progress_marker('Completed expansion', start_time=t0)
 
-        si.msg_logger.msg(f'Expanded particle property and index buffers to hold = {info["current_particle_buffer_size"]:4,d} particles', tabs=1)
+
 
     def update_PartProp(self,n_time_step, time_sec, active):
         # updates particle properties which can be updated automatically. ie those derive from reader fields or custom prop. using .update() method
@@ -229,7 +234,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         # transfer stats counts from array to run_info dict
         for key, val in si.particle_status_flags.items():
-            pc['current_status_counts'][key] = self.status_count_array_per_thread[:, 128 + val].sum(axis=0)
+            pc['current_status_counts'][key] = self.status_count_array_per_thread[:, val - si.particle_status_flags.notReleased].sum(axis=0)
 
         return num_alive
 
@@ -242,9 +247,10 @@ class ParticleGroupManager(ParameterBaseClass):
         nDead = si.run_info.particle_counts['current_status_counts']['dead']
 
         # kill if fraction of buffer are dead or > 20% active particles are, only if buffer at least 25% full
-        if nDead > si.settings.min_dead_to_remove and nDead >= 0.20 * si.run_info.particles_in_buffer:
+        if nDead > si.settings.min_dead_to_remove and nDead >= 0.25 * si.run_info.particles_in_buffer:
                 # if too many dead then delete from memory
                 part_prop = si.class_roles.particle_properties
+                t0 = perf_counter()
                 ID_alive = part_prop['status'].compare_all_to_a_value('gt', si.particle_status_flags.dead, out=self.get_partID_buffer('B1'))
                 nDead = si.run_info.particles_in_buffer-ID_alive.size # update nDead as particle counts are from start of time step, removal at the end
                 dead_frac=100*nDead/si.run_info.particles_in_buffer
@@ -259,6 +265,7 @@ class ParticleGroupManager(ParameterBaseClass):
                 part_prop['status'].set_values(si.particle_status_flags.notReleased, notReleased)
 
                 si.run_info.particles_in_buffer = ID_alive.size # record new number in buffer
+                si.msg_logger.progress_marker('Completed removal', start_time=t0)
     @staticmethod
     @njitOT
     def _pack_particle_buffer(data, cull):

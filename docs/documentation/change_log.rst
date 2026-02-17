@@ -4,6 +4,42 @@
 Change log
 ###########################
 
+Version '0.5.3.3 2026-02-17'
+_____________________________
+
+Breaking changes
+----------------
+
+#. The input parameter structure for gridded stats has been reworked.
+   The parameters "grid_span" and "grid_size" have been deprecated and been replaced
+   with "span_x","span_y", "rows", "cols" to avoid ambiguity and make it consistent 
+   between geographic coordinates i.e. longitude & latitude and projections with
+   coordinates in meter.
+   "span_x" is being split into "cols", "span_y" into "rows".
+   Both span_x and span_y are in the unit of the underlying grid (e.g. degree or meter),
+   and we no longer enforce an odd number of rows and columns.
+
+#. The connectivity calculation has been reverted to use "count_all" as a denominator instead of the "count_released".
+   We will attempt to provide an somewhat more extensive discussion of different "connectivity" definitions in the future
+   and provide a set of options to chose from.
+
+Bug fixes
+---------
+
+#. The number of released particles that been written into the stats output has been incorrect,
+   causing connectivity values to be wrong (presumably since '0.5.2.55 2025-12-10')
+#. Fixed an error in downstream releases where the horizontal surface velocities velocities where incorrectly calculated.
+   
+
+Features
+--------
+
+#. "Continue"-feature that enables time-chunking runs now handles incomplete hindcasts.
+   E.g. each time chunk requires only the hindcast for that time window.
+   However the "overlapping" model time step needs to be availble both to the continuable and the continued model run
+
+
+
 Version '0.5.3.2 2026-02-09'
 _____________________________
 

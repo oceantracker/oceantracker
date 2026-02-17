@@ -22,6 +22,7 @@ class ClassImporter():
         self.short_name_class_map, self.full_name_class_map,self.short_name_list =  self.build_short_and_full_name_maps(self.class_tree)
         ml = self.msg_logger
         ml.progress_marker(f'Done package set up to setup ClassImporter', start_time=t0)
+
     def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None, initialize=False,
                                         add_required_classes_and_settings=True, caller=None, merge_params=True, check_for_unknown_keys=True):
         ml = self.msg_logger
@@ -45,7 +46,6 @@ class ClassImporter():
         i = class_obj() # make instance
 
         i.info['class_role'] = class_role
-
         if merge_params:
             i.params = merge_params_with_defaults(params, i.default_params, ml,  check_for_unknown_keys=check_for_unknown_keys, caller=i)
 

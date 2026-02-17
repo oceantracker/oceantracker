@@ -153,6 +153,7 @@ class _RunInfo(definitions._AttribDict):
     has_A_Z_profile = None
     has_bottom_stress = None
     particle_counts = {}
+    cell_finder_stats = {}
     particles_in_buffer = 0
     cumulative_number_released = 0
     forecasted_number_alive = 0
@@ -189,7 +190,6 @@ class _SharedInfoClass():
     msg_logger = MessageLogger()
     block_timers={}
     class_importer = class_importer_util.ClassImporter(msg_logger)
-    restart_info = None
     info = _UseFullInfo
     dim_names = definitions._DimensionNames()
     output_files= dict()
@@ -239,7 +239,7 @@ class _SharedInfoClass():
 
         if class_role in self.core_class_roles.possible_values():
             #core  roles
-            params['name'] = None
+            params['name'] = class_role
             i =  self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
                                           check_for_unknown_keys=check_for_unknown_keys, caller=caller, initialize=initialize)
             i.info['instanceID'] = 0
@@ -248,12 +248,14 @@ class _SharedInfoClass():
         elif class_role in self.class_roles.possible_values():
             #other roles
             instanceID= len(self.class_roles[class_role])
+            if 'name' not in params or params['name'] is None:
+                # if no name in params or default param
+                params['name'] = f'{class_role}_{instanceID:04d}'
+
             i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
                          caller=caller,initialize=initialize,add_required_classes_and_settings=add_required_classes_and_settings)
             i.info['instanceID'] = instanceID
-            if params['name'] is None:
-                # if no name in params or default param
-                params['name'] = f'{class_role}_{instanceID:04d}'
+
 
             self.class_roles[class_role][params['name']] = i
 
@@ -296,6 +298,15 @@ class _SharedInfoClass():
             b[name] = dict(time=0.,calls=0)
         b[name]['time'] += perf_counter()-t0
         b[name]['calls'] += 1
+
+    def _accumulate_cell_finder_stats_in_runinfo(self, new_counts :dict):
+        # acumuate counts of particle numbers walk, bad etc
+        c = self.run_info.cell_finder_stats
+        for key, val in new_counts.items():
+            if key not in c: c[key] = 0 # add new count accumulator
+            c[key] += val
+
+
 
 
 

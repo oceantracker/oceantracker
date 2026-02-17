@@ -1,6 +1,6 @@
 from  oceantracker.util import basic_util
 import numpy as np
-import traceback
+from os import path
 from time import perf_counter
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.shared_info import shared_info as si
@@ -157,7 +157,7 @@ class ParameterBaseClass(_RootParameterBaseClass):
         ''' Add a scheduler object to given param_class_instance, with boolean task_flag attribute for each time step,
             which is true if  task is to be carried out.
             Rounds times interval and times to nearest time step'''
-        s = Scheduler(si.settings, si.run_info, start=start, end=end, duration=duration,
+        s = Scheduler(si,name_scheduler, start=start, end=end, duration=duration,
                                                     interval =interval, times=times, caller=caller,
                                                     msg_logger=si.msg_logger)
         self.schedulers[name_scheduler]  = s
@@ -166,4 +166,5 @@ class ParameterBaseClass(_RootParameterBaseClass):
     def screen_info(self,text:str = '',level:int = 5):
         if level >= si.settings.screen_info_level:
             si.msg_logger.msg('info: ' + text,tabs=1)
+
 
