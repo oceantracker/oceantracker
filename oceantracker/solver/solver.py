@@ -49,12 +49,18 @@ class Solver(ParameterBaseClass):
             
             if model_dt > hydro_dt :
                 si.msg_logger.msg(
-                    f"Particle tracking model time step was chosen to be larger than the hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {model_dt}s).",
-                    warning=True,tabs=0, hint="Try decreasing 'time step'", )
-            if (hydro_dt / model_dt) % 1 != 0:
+                    f"Particle tracking model time step was chosen to be larger than the hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {int(model_dt)}s).",
+                    warning=True,
+                    tabs=0,
+                    
+                )
+            if (int(hydro_dt) / int(model_dt)) % 1 != 0:
                 si.msg_logger.msg(
-                    f"Particle tracking model time step is NOT an integer fraction of hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {model_dt}s). This is valid but may reduce numerical accuracy slightly.",
-                    warning=True,  tabs=0, hint=None,)
+                    f"Particle tracking model time step is NOT an integer fraction of hydrodynamical model {grid_info} time step (hydro dt: {int(hydro_dt)}s, model dt: {int(model_dt)}s). This is valid but may reduce numerical accuracy slightly.",
+                    warning=True,
+                    tabs=0,
+                    hint=None,
+                )
         
 
     def solve(self):
