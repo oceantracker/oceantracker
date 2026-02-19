@@ -2,7 +2,7 @@ from oceantracker.shared_info import shared_info as si
 import numpy as np
 from oceantracker.util import  time_util
 class Scheduler(object):
-    # set up event shedule based on times since 1/1/1970
+    # set up event schedule based on times since 1/1/1970
     # rounds starts, times and intervals to model time steps,
     # uses times given, otherwise start and interval
     # all times in seconds
@@ -45,7 +45,6 @@ class Scheduler(object):
             times = run_info.start_time + np.round(n) * dt
             times = md* np.sort(md*times) # ensure they are in right order for backwards/forwards
             interval = None
-
 
         # check if any are scheduled, before trimming to allow for earlier actions of a continuation
         if times.size==0:

@@ -557,6 +557,7 @@ class OceanTrackerParamsRunner(object):
              'file_written': datetime.now().isoformat(),
              'output_files': deepcopy(si.output_files),
              'version_info':   definitions.version,
+             'git_commit_hash': computer_info_util.get_git_commit(),
              'computer_info':  computer_info_util.get_computer_info(),
              'performance': dict(max_memory_usedGB=si.run_info.max_memory_usedGB, block_timings=[]),
              'errors_warnings_notes': si.msg_logger.msg_lists,

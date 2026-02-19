@@ -24,3 +24,12 @@ def get_computer_info():
         d={'OS': s}
 
     return d
+
+def get_git_commit():
+
+    try:
+        # Run the git command to get the full commit hash
+        commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
+        return commit_hash
+    except Exception as e:
+        return "Unknown"
