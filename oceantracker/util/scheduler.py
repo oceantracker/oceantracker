@@ -47,11 +47,11 @@ class Scheduler(object):
             interval = None
 
         # check if any are scheduled, before trimming to allow for earlier actions of a continuation
+        #todo add table of starts ends ?
         if times.size==0:
             msg_logger.msg( f'No actions are set for scheduler "{name_scheduler}"',
                 hint=f'Time span of hindcast mismatched with start and end times of scheduler? Run continuation with actions starting in a future run?',
-                caller=caller, strong_warning=True )
-
+                caller=caller, strong_warning=True)
 
         # trim to fit inside the run
         sel = np.logical_and(times * md >= run_info.start_time * md, times * md <= run_info.end_time * md)
@@ -91,13 +91,9 @@ class Scheduler(object):
         b += f'{10*" "}interval = {i["interval"]}, backtracking={settings.backtracking}'
         i['bounds_table']= b
 
-        if len(self.scheduled_times) == 0:
-            msg_logger.msg('No times scheduled, as outside start and end times of run, see caller below',
-                                hint=i['bounds_table'], caller=caller, error=True)
-
         if self.scheduled_times.size == 0:
             msg_logger.msg('No scheduled times within model run times',
-                                hint=i['bounds_table'], caller=caller, error=True)
+                                hint=i['bounds_table'], caller=caller, strong_warning=True)
 
     def _start_end_from_interval(self, si, start,end, duration, interval,default_start):
 
