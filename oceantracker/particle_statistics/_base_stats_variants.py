@@ -205,8 +205,9 @@ class _BaseAgeStats(ParameterBaseClass):
         return fn
 
     def restart(self, state_info):
-        file_name = state_info['stats_files'][self.params['name']]
-        nc = NetCDFhandler(file_name, mode='r')
+        # open "saved state" stats file
+        saved_state_file_name = state_info['stats_files'][self.params['name']]
+        nc = NetCDFhandler(saved_state_file_name, mode='r')
 
         self.counts_inside_age_bins = nc.read_variable('count')
         self.count_all_alive_particles = nc.read_variable('count_all_alive_particles')
@@ -216,8 +217,12 @@ class _BaseAgeStats(ParameterBaseClass):
             self.sum_binned_part_prop[name][:] = nc.read_variable(f'sum_{name}')
 
         nc.close()
-        pass
-    pass
+
+        # reopen the output file
+        output_stats_file_name = path.join(si.run_info.run_output_dir,state_info['stats_files'][self.params['name']].split('/')[-1])
+        nc = NetCDFhandler(output_stats_file_name, 'w')
+
+        self.nc = nc
 
 
 class _BaseGrid2DStats(ParameterBaseClass):
