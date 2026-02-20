@@ -19,32 +19,79 @@ class Scheduler(object):
         md = run_info.model_direction
         dt = settings.time_step
 
-        default_start = run_info.start_time # default is model start time
-        if run_info.continuing or run_info.restarting:
-            start = si.saved_state_info['first_run_start_time'] # force scheduler to use  start time of first/original run
+        # The following is a bit more complicated because the scheduler needs to handle
+        # cases correctly where we are running backward in time and or continue a 
+        # previous run
 
-        # check if user defined model duration is excessively long (>100 years)
-        if duration is not None:
-            if duration > 100 * 365 * 24 * 3600:
-                # throw a warning
-                msg_logger.msg(
-                    f'User defined scheduler duration is very long > 100 years',
-                    hint=f'Duration given {time_util.seconds_to_pretty_duration_string(duration)}',
-                    caller=caller, strong_warning=True
-                )
+        # To define the "earliest possible start" which differs for non-continued and continued runs
+        if (run_info.continuing or run_info.restarting) and (start is None):
+            # force scheduler to use start time of first/original run
+            earliest_possible_start = si.saved_state_info['first_run_start_time'] 
+        else: 
+            # if it isn't a continuation/restart, 
+            # then use given model start
+            earliest_possible_start = run_info.start_time
 
-            # clip duration to available model duration, end allows for backtracking
-            duration = abs(run_info.end_time - default_start)
-
-        if times is None:
-            # make from start time and interval
-            times, interval = self._start_end_from_interval(si, start, end, duration, interval,default_start)
-        else:
-            # use times given, but round
+        # Next we calculate the moments in time in which an operation is schedule
+        if times is not None:
+            # if they are manually defined, we just round them and are good to go
             n = (times - run_info.start_time)/dt
             times = run_info.start_time + np.round(n) * dt
-            times = md* np.sort(md*times) # ensure they are in right order for backwards/forwards
-            interval = None
+            # and ensure they are in the right order for backwards/forwards
+            times = md* np.sort(md*times) 
+        else:
+            # else we need to calculate them
+            # by first getting the correct start time
+            if start is None:
+                # if it is not defined, we assume the user wants to start from 
+                # the beginning of the model run
+                start = earliest_possible_start
+            else:
+                # else we use their manually defined start
+                start = start
+
+            # next we need to figure out the end
+            if end is not None:
+                # if they defined it we just use it
+                end = end
+            elif duration is not None:
+                # otherwise, we check if they defined a max duration, and use it to
+                # calculate the end
+                if duration > 100 * 365 * 24 * 3600:
+                    # but first we double check that their value is not non-sensical
+                    # (this should maybe go into the parameter checker?)
+                    # check if user defined model duration is excessively long (>100 years)
+                    # as it creates hard to interpret problems for the user otherwise if they
+                    # i.e. accidentally used the wrong time unit
+                    msg_logger.msg(
+                        f'User defined scheduler duration is very long {duration/365/24/3600:.1f} > 100 years',
+                        hint=f'Duration given {time_util.seconds_to_pretty_duration_string(duration)}',
+                        caller=caller, strong_warning=True
+                    )
+                end = start + duration*md
+            else: 
+                # if neither end or duration is defined we assume that the user wants it
+                # to happen for the full duration of the run
+                end = run_info.end_time
+            
+            # 
+            duration = np.abs(start - end)
+            # trim within global max duration setting
+            duration = min(settings.max_run_duration, duration)
+
+            if interval is None:
+                # if there is no interval provided, we assume it should happen on every
+                # time step
+                interval = dt
+            elif interval > 0.:
+                # if it is provieded (and non zero), we round interval to time step, but not less than one per time step
+                interval=  max(round(interval/dt)*dt, dt)
+
+            if interval == 0:
+                # if the interval is zero, we assume it should only happen once, at the very start
+                times =np.asarray([start])
+            else:
+                times = start + md * np.arange(0, duration+settings.time_step,interval)
 
         # check if any are scheduled, before trimming to allow for earlier actions of a continuation
         #todo add table of starts ends ?
@@ -53,7 +100,7 @@ class Scheduler(object):
                 hint=f'Time span of hindcast mismatched with start and end times of scheduler? Run continuation with actions starting in a future run?',
                 caller=caller, strong_warning=True)
 
-        # trim to fit inside the run
+        # trim both before start and after
         sel = np.logical_and(times * md >= run_info.start_time * md, times * md <= run_info.end_time * md)
         self.scheduled_times = times[sel]
 
@@ -94,50 +141,7 @@ class Scheduler(object):
         if self.scheduled_times.size == 0:
             msg_logger.msg('No scheduled times within model run times',
                                 hint=i['bounds_table'], caller=caller, strong_warning=True)
-
-    def _start_end_from_interval(self, si, start,end, duration, interval,default_start):
-
-        run_info = si.run_info
-        settings = si.settings
-
-        md = run_info.model_direction
-        dt = settings.time_step
-
-        if start is None:
-            start = default_start # note: default start is start of first run if continuing/restarting
-
-        else:
-            # use given start rounded to time step
-            n = (start - run_info.start_time) / dt  # number of model steps since the start
-            start = run_info.start_time + round(n) *  dt
-
-        # get duration
-        if  end is None and duration is None:
-            duration =abs(float(start - run_info.end_time))
-        elif end is not  None:
-            # use end time instead to give duration, takes precedence over duration if both given
-            duration = abs(end - start)
-        else:
-            duration = duration
-
-        #trim within global max duration setting
-        duration = min(settings.max_run_duration, duration)
-
-        if interval is None:
-            interval=  dt
-        elif interval > 0.:
-            # round interval to time step, but not less than one per time step
-            interval=  max(round(interval/dt)*dt, dt)
-        else:
-            interval = 0.
-
-        if interval ==0:
-            # only one event
-            times =np.asarray([start])
-        else:
-            times = start + md * np.arange(0, duration+settings.time_step,interval)
-
-        return  times, interval
+            
 
     def do_task(self, n_time_step):
         # check if task flag is set
