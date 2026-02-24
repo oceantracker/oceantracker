@@ -245,8 +245,10 @@ class OceanTrackerParamsRunner(object):
         # flag if some release groups did not release
         for name, i in si.class_roles.release_groups.items():
             if i.info['number_released'] == 0:
-                ml.msg(f'No particles were released by release_group named= "{name}"', error=True,
-                       caller=i, hint='Release point/polygon or grid may be outside domain and or in permanently dry cells?, mismatch of release coords and hindcast, betweem meters and GPS? )')
+                ml.msg(f'No particles were released by release_group named= "{name}"', 
+                       strong_warning=True,
+                       caller=i,
+                       hint='Release point/polygon or grid may be outside domain and or in permanently dry cells?, mismatch of release coords and hindcast, betweem meters and GPS? )')
 
         case_info_file = self._get_case_run_info(self.start_date, self.start_time)
 
@@ -557,6 +559,7 @@ class OceanTrackerParamsRunner(object):
              'file_written': datetime.now().isoformat(),
              'output_files': deepcopy(si.output_files),
              'version_info':   definitions.version,
+             'git_commit_hash': computer_info_util.get_git_commit(),
              'computer_info':  computer_info_util.get_computer_info(),
              'performance': dict(max_memory_usedGB=si.run_info.max_memory_usedGB, block_timings=[]),
              'errors_warnings_notes': si.msg_logger.msg_lists,

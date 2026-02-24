@@ -9,7 +9,7 @@ from oceantracker import definitions
 from oceantracker.util import  time_util, json_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
-def make_a_reader_from_params(reader_params, settings):
+def make_a_reader_from_params(reader_params):
 
 
     _check_input_dir(reader_params)

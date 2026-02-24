@@ -5,6 +5,8 @@ from os import path, makedirs, remove
 import argparse
 import xarray as xr
 from oceantracker.util import class_importer_util, parameter_checking, message_logger, json_util, time_util
+from oceantracker.main import OceanTracker
+
 missing_int = -9999
 
 def compute_scale_and_offset_int16(data, missing_value=None):
@@ -186,15 +188,13 @@ def write_files(i, args):
         print('compressed: unstructured grid  nodes = ', info['required_nodes'].size, 'cells', info['required_cells'].size,)
 
 
-    tmax = 14*24*3600 if args.full and not args.dev else 24*3600
-
     for nn, file in enumerate(file_list):
 
         ds = xr.open_dataset(file, decode_times=False, decode_coords=False,decode_timedelta=False)
         if i['time_var'] in ds.variables:
             # only copy files with first tmax of first time
             file_times = i['reader'].decode_time(ds[i['time_var']]) # decode with reader to ensure its in seconds since 1970
-            if  file_times[0]-t0 >= tmax: continue
+            if  file_times[0]-t0 >= i['tmax']: continue
             print(f'\t\t times  {time_util.seconds_to_isostr(file_times[0])} to {time_util.seconds_to_isostr(file_times[-1])}, timesteps= {file_times.size}')
             #  time decimate whole dataset, won't work on one time step per file
             if dims['time'] in ds.dims:
@@ -265,7 +265,7 @@ def run(i,output_dir, args):
     file_base = i['name']
     input_dir = path.join(i['output_dir'],file_base)
 
-    from oceantracker.main import OceanTracker
+
     ot = OceanTracker()
     ot.settings(root_output_dir=output_dir, output_file_base=file_base, time_step=10*60, debug=True)
     ot.add_class('reader', input_dir=input_dir, file_mask=file_base + '*.nc')
@@ -296,6 +296,7 @@ def schism(args):
                     file_mask= r'schism_marl201201*.nc',
                     class_name= 'oceantracker.reader.SCHISM_reader.SCHISMreader',
                     deep_point=[1594000, 5484200, -2],
+                     tmax= 3*24*3600
                           )
 
     schism2D = deepcopy(base)
@@ -390,6 +391,7 @@ if __name__ == '__main__':
 
     readers= [schism(args),GLORYS(args),ROMS(args)]
     #fTrereaders= [schism(args)]#
+    tmax = 14 * 24 * 3600 if args.full and not args.dev else 24 * 3600
 
     for nr, reader in enumerate(readers):
         if args.type > -1 and args.type != nr: continue
@@ -398,6 +400,8 @@ if __name__ == '__main__':
 
             i = get_required_var_names(i, args)
             i['output_dir'] = test_hindcast_output_dir # where to put compressed hindcast
+            if 'tmax' not in i or args.full: i['tmax'] = tmax # use default max time, schisim3D has longer run
+
             if not args.write_off:
                 write_files(i, args)
 

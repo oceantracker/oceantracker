@@ -4,6 +4,20 @@
 Change log
 ###########################
 
+Version '0.5.3.4 2026-02-25'
+_____________________________
+
+Bug fixes
+---------
+
+#. Continuing runs with partial hindcast incorrectly truncated releases causing releases only to happen in the first partial run
+#. Continuing runs did not correctly reopen stats files during restart causing runs to fail
+
+Tests
+-----
+#. Added partial hindcasts for unit tests and the corresponding "run"-tests
+   
+
 Version '0.5.3.3 2026-02-17'
 _____________________________
 

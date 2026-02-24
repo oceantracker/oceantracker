@@ -257,11 +257,12 @@ class MessageLogger(object ):
         response = requests.get(f'{docs_base_url}/documentation/api_ref/{name}.html' )
         if response.status_code == 200:
             m+= '\n' + tabs*'\t' + f'Docs for "{name}": {url}'
-
-        url = f'{docs_base_url}/documentation/api_ref/{role}_toc.html'
-        response = requests.get(f'{docs_base_url}/documentation/api_ref/{name}.html')
-        if response.status_code == 200:
-            m += '\n' + tabs * '\t' + f'Other classes in role "{role}": {url}'
+        if False:
+        # other classes in role
+            url = f'{docs_base_url}/documentation/api_ref/{role}_toc.html'
+            response = requests.get(f'{docs_base_url}/documentation/api_ref/{name}.html')
+            if response.status_code == 200:
+                m += '\n' + tabs * '\t' + f'Other classes in role "{role}": {url}'
 
         return m
 

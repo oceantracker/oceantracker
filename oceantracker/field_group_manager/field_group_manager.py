@@ -156,13 +156,13 @@ class FieldGroupManager(ParameterBaseClass):
             info = self.info
             self.interpolator.find_vertical_cell(fields, xq, info['current_buffer_steps'], info['weight_time_steps'], active)
         else:
-        # 2D run
+            # 2D run
             self.interpolator.update_tide_waterdepth(fields,info['current_buffer_steps'], info['weight_time_steps'],
                                                      active)
 
     def _make_a_reader(self, reader_params):
         # build a readers
-        reader = setup_reader.make_a_reader_from_params(reader_params, si.settings)
+        reader = setup_reader.make_a_reader_from_params(reader_params)
         reader.initial_setup()
         reader.final_setup()
 
