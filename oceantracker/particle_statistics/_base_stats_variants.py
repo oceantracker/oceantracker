@@ -218,11 +218,11 @@ class _BaseAgeStats(ParameterBaseClass):
 
         nc.close()
 
-        # reopen the output file
-        output_stats_file_name = path.join(si.run_info.run_output_dir,state_info['stats_files'][self.params['name']].split('/')[-1])
-        nc = NetCDFhandler(output_stats_file_name, 'w')
+        # # reopen the output file
+        # output_stats_file_name = path.join(si.run_info.run_output_dir,state_info['stats_files'][self.params['name']].split('/')[-1])
+        # nc = NetCDFhandler(output_stats_file_name, 'w')
 
-        self.nc = nc
+        self.open_file_if_needed()
 
 
 class _BaseGrid2DStats(ParameterBaseClass):
