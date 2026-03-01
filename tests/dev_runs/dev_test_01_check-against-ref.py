@@ -27,7 +27,8 @@ def main(args=None):
 
     #ot.settings(NUMBA_cache_code = True)
     hm = dd.hydro_model['demoSchism3D']
-    ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True,)
+    ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True,
+                 )
 
     # add a point release
     ot.add_class('release_groups',**dd.rg_release_interval0)

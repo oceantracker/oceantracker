@@ -94,7 +94,7 @@ if __name__ == '__main__':
     out_dir = path.dirname(__file__)
     nz0=22
     nt_step=2
-    n_files=0
+    n_files=4
 
     out_file_2D =[]
     # find sub domain
@@ -107,6 +107,8 @@ if __name__ == '__main__':
                                    'SCHISM_hgrid_edge_x', 'SCHISM_hgrid_edge_y', 'SCHISM_hgrid_face_x', 'SCHISM_hgrid_face_y'])
         x,y = ds_in['SCHISM_hgrid_node_x'].compute().data, ds_in['SCHISM_hgrid_node_y'].compute().data
         tri = ds_in['SCHISM_hgrid_face_nodes'].compute().data.astype(np.int32)
+        ds_in['my_extra_field'] = ds_in['temp'].copy()
+        # add a optioan field
 
         # find  triangles in sub-domain
         x_tri= np.mean(x[tri[:,:3]-1],axis=1)
@@ -148,7 +150,7 @@ if __name__ == '__main__':
     # read and plot
     print('reading',out_file3D)
     r = NetCDFhandler(out_file3D)
-    var = r.read_variables(r.all_var_names())
+    var = r.read_variables(r.var_names())
     x, y =var['SCHISM_hgrid_node_x'],var['SCHISM_hgrid_node_y']
 
     plt.scatter(x, y, c='k',zorder=0,s=6)
