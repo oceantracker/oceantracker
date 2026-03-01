@@ -11,7 +11,7 @@ crumb_seperator= ' >> '
 
 
 
-def merge_params_with_defaults(params, default_params, msg_logger, caller=None, check_for_unknown_keys=True):
+def merge_params_with_defaults(params, default_params, msg_logger, caller=None):
     # merge nested parameters with defaults,
      # default dict. items must be one of 3 types
     # 1)  ParamDictValueChecker class instance
@@ -33,6 +33,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None, 
 
     # loop over non-obsolete default keys
     for key in possible_params:
+        if key.startswith('control_key'): continue # ignore these keys here
         item = default_params[key]
         msg =f'Parameter "{key}"'
         if key not in params: params[key] = None  # add Noe /not given if not present
@@ -42,8 +43,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None, 
 
         elif type(item) == dict:
             # nested param dict
-            params[key] = merge_params_with_defaults(params[key], item,   msg_logger,
-            check_for_unknown_keys=check_for_unknown_keys)
+            params[key] = merge_params_with_defaults(params[key], item,   msg_logger)
 
         elif type(item) == list:
             # a nested list of  param dict
@@ -54,17 +54,18 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None, 
                           error = True, caller=caller)
 
     # check if any keys in base or case params are not in defaults
-    for key in list(given_params.keys()):
-        msg = f'Parameter "{key}"'
-        if  check_for_unknown_keys and key not in default_params:
-            # get possible values without obsolete params
-            msg_logger.spell_check(msg + ' is not recognised', key,possible_params,caller=caller)
-        elif key in obsolete_params:
-           msg_logger.msg(msg + ' is obsolete ',  hint=default_params[key].doc_str, error=True, caller=caller)
-           params['key'] = None
-        elif key in deprecated_params:
-            msg_logger.msg(msg + ' is deprecated and will be deleted in future versions',
-                           hint=default_params[key].doc_str, strong_warning=True, caller=caller)
+    if 'control_key_allow_unknown_keys' in params and params['control_key_allow_unknown_keys']:
+        for key in list(given_params.keys()):
+            msg = f'Parameter "{key}"'
+            if  key not in default_params:
+                # get possible values without obsolete params
+                msg_logger.spell_check(msg + ' is not recognised', key,possible_params,caller=caller)
+            elif key in obsolete_params:
+               msg_logger.msg(msg + ' is obsolete ',  hint=default_params[key].doc_str, error=True, caller=caller)
+               params['key'] = None
+            elif key in deprecated_params:
+                msg_logger.msg(msg + ' is deprecated and will be deleted in future versions',
+                               hint=default_params[key].doc_str, strong_warning=True, caller=caller)
 
     return params
 

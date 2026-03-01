@@ -218,7 +218,7 @@ class _SharedInfoClass():
 
 
     def add_class(self,class_role,params={}, default_classID=None,caller=None, initialize=False,
-                  check_for_unknown_keys=True, add_required_classes_and_settings=True,  **kwargs):
+                  add_required_classes_and_settings=True,  **kwargs):
         #todo get rid in initialize????
         ml = self.msg_logger
 
@@ -241,7 +241,7 @@ class _SharedInfoClass():
             #core  roles
             params['name'] = class_role
             i =  self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
-                                          check_for_unknown_keys=check_for_unknown_keys, caller=caller, initialize=initialize)
+                                          caller=caller, initialize=initialize)
             i.info['instanceID'] = 0
             self.core_class_roles[class_role] = i
 
