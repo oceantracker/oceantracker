@@ -16,7 +16,6 @@ def main(args=None):
                 #NUMBA_cache_code=True,
                 use_resuspension=False,
                 #regrid_z_to_uniform_sigma_levels=True # obsolete param
-
                 )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
