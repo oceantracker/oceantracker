@@ -149,7 +149,12 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
             # allow max_cycles_to_find_release_points cycles to find points
             count += 1
-            if count > params["max_cycles_to_find_release_points"]: break
+            if count >= params["max_cycles_to_find_release_points"]: break
+
+        if count >= params["max_cycles_to_find_release_points"]:
+            si.msg_logger.msg(f'Number of cycles to find points inside  release polygon exceeds maximum of {params["max_cycles_to_find_release_points"]}, ',
+                hint= 'May have long skinny polygon within bounding box?, try increasing polygon release param. "max_cycles_to_find_release_points"',
+                caller=self, strong_warning=True)
 
         # trim initial locations, cell  etc to required number or points
         n_required = min(release_info['x'].shape[0], n_required)
