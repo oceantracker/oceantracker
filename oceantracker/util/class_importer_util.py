@@ -24,7 +24,7 @@ class ClassImporter():
         ml.progress_marker(f'Done package set up to setup ClassImporter', start_time=t0)
 
     def make_class_instance_from_params(self, class_role, params, name = None, default_classID=None, initialize=False,
-                                        add_required_classes_and_settings=True, caller=None, merge_params=True, check_for_unknown_keys=True):
+                                        add_required_classes_and_settings=True, caller=None, merge_params=True):
         ml = self.msg_logger
 
         if params is None: params = {}
@@ -52,7 +52,7 @@ class ClassImporter():
         i.params['name'] = params['name'] if 'name' in params else ''
 
         if merge_params:
-            i.params = merge_params_with_defaults(params, i.default_params, ml, caller=i,  check_for_unknown_keys=check_for_unknown_keys)
+            i.params = merge_params_with_defaults(params, i.default_params, ml, caller=i)
 
         # attach the current message loger to instance
         i.msg_logger = self.msg_logger

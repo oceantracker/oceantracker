@@ -157,8 +157,7 @@ class MessageLogger(object ):
         else:
             m += off+ f'>> None found'
             m += off + self._add_long_line(f'hint=Possible values = {str(known)}',
-                                           tabs =2 * hand_indent, wrap=True,
-                                           hand_indent=hand_indent)
+                                           tabs =2 * hand_indent, wrap=True )
 
         m = self._add_doc_html_link(m, caller, 2 * hand_indent)
 

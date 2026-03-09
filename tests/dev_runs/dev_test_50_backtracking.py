@@ -17,7 +17,7 @@ def main(args):
         ot.settings(max_run_duration=  2 * 24 * 3600., use_dispersion=False,
                     backtracking=False if n == 0 else True,
                     time_step= 60,
-                    output_file_base= ot.params['output_file_base'] + '_run_' + p,
+                    run_output_dir = ot.params['run_output_dir'] + '_run_' + p,
                     time_buffer_size=2) # test with  tiny buffer
         hm = dd.hydro_model['demoSchism2D']
         ot.add_class('reader', **hm['reader'])

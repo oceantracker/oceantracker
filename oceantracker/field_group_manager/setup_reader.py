@@ -121,8 +121,7 @@ def _detect_hydro_file_format(reader_params, dataset):
     #todo show which tests passed for each reader
     ml = si.msg_logger
     if 'class_name' in reader_params:
-        reader = si.class_importer.make_class_instance_from_params('reader',
-                                     reader_params, check_for_unknown_keys=True)
+        reader = si.class_importer.make_class_instance_from_params('reader', reader_params)
         reader.dataset = dataset
         ml.progress_marker(f'Using given reader parameter class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
         return reader
@@ -137,8 +136,7 @@ def _detect_hydro_file_format(reader_params, dataset):
         # first check if essential variables are in the file
         p = deepcopy(reader_params)
         p['class_name'] = class_name
-        r = si.class_importer.make_class_instance_from_params('reader',p,
-                        check_for_unknown_keys=False)
+        r = si.class_importer.make_class_instance_from_params('reader',p)
         gmap = r.params['grid_variable_map']
         fmap= r.params['field_variable_map']
 
@@ -174,8 +172,7 @@ def _detect_hydro_file_format(reader_params, dataset):
 
     # make and merge defaults for found reader
     reader_params['class_name'] = reader_class_name
-    reader = si.class_importer.make_class_instance_from_params('reader', reader_params,
-                check_for_unknown_keys=True)
+    reader = si.class_importer.make_class_instance_from_params('reader', reader_params)
 
     reader.dataset = dataset
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')

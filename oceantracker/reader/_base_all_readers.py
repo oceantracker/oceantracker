@@ -37,12 +37,12 @@ class _BaseReader(ParameterBaseClass):
             max_numb_files_to_load= PVC(10 ** 7, int, min=1,
                                         doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run'),
             variable_signature = PLC(None, str, doc_str='Variable names used to test if file is this format', is_required=True),
-            grid_variable_map= dict(
+            grid_variable_map= dict(control_key_allow_unknown_keys=True,
                             time=PVC('time', str, doc_str='Name of time variable in hindcast',is_required=True),
                             x=PVC(None, str, doc_str='x location of nodes', is_required=True),
                             y=PVC(None, str, doc_str='y location of nodes', is_required=True),
                             ),
-            field_variable_map= dict(
+            field_variable_map= dict(control_key_allow_unknown_keys=True,
                             water_depth=PVC(None, str, doc_str='maps standard internal field name to file variable name',
                                 ),
                 water_velocity=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
@@ -377,8 +377,7 @@ class _BaseReader(ParameterBaseClass):
 
         i = si.class_importer.make_class_instance_from_params('fields', params,
                                        add_required_classes_and_settings=False,
-                                        default_classID='field_reader',initialize=False,
-                                        check_for_unknown_keys=False)
+                                        default_classID='field_reader',initialize=False)
         i.initial_setup(info)
 
         # add variable info on file variables list for reader fields

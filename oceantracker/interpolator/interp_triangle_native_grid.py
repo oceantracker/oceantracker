@@ -194,8 +194,11 @@ class  InterpTriangularGrid(_BaseInterp):
         #todo ad to runifo cell walk  stats
         info['bad_z_fraction_count'] = self._vert_cell_finder.find_vertical_cell(fields, xq, current_buffer_steps, weight_time_steps, active)
         if info['bad_z_fraction_count'] > 0 :
-            si.msg_logger.msg(f'Out of range vertical layer fraction calculated, number counted so far {info["bad_z_fraction_count"]}', strong_warning=True,caller = self,
-            hint='issue with 3D vertical grid hindcast values? reader encountered unknown variant of hindcast vertical grid?')
+            zf= si.class_roles.particle_properties['z_fraction'].used_buffer()
+            si.msg_logger.msg(f'Out of range vertical layer fraction calculated, number counted so far {info["bad_z_fraction_count"]}' \
+                              + f', Should be 0. to 1.0, max and min values {zf.min():6.5f} / {zf.max():6.5f} ',
+                            strong_warning=True,caller = self,
+                                hint='issue with 3D vertical grid hindcast values? reader encountered unknown variant of hindcast vertical grid?')
 
         si.block_timer('Find vertical cell', t0)
 
