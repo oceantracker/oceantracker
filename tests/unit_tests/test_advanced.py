@@ -113,8 +113,8 @@ def test_cull_particles(default_advanced_tests_configuration):
         "trajectory_modifiers",
         class_name="CullParticles",
         probability=1.0,
-        interval=3600,
-        statuses=["stranded_by_tide", "on_bottom"],
+        interval=7200,
+        statuses=["moving"],
     )
     case_info_file = ot.run()
     assert case_info_file is not None
