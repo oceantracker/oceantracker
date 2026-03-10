@@ -4,6 +4,7 @@ from oceantracker.shared_info import shared_info as si
 
 
 # status counting, of finding moving or stationary
+status_not_released = int(si.particle_status_flags.notReleased)
 status_outside_open_boundary = int(si.particle_status_flags.outside_open_boundary)
 status_dead = int(si.particle_status_flags.dead)
 status_moving = int(si.particle_status_flags.moving)
@@ -28,6 +29,6 @@ def _status_counts_and_kill_old_particles(age, status, IDrelease_group,max_age_f
             is_active = False
 
         alive += is_active
-        status_count_array_per_thread[get_thread_id(),int(status[n]) - status_outside_open_boundary] += 1
+        status_count_array_per_thread[get_thread_id(),int(status[n]) - status_not_released] += 1
 
     return alive
