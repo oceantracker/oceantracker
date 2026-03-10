@@ -100,6 +100,7 @@ class DownstreamPointRelease(PointRelease):
 
         # Normalize to get unit downstream vectors
         norm = np.linalg.norm(horiz_velocity, axis=1, keepdims=True)
-        downstream_vector = np.divide(horiz_velocity, norm, where=norm != 0)
+        downstream_vector = np.zeros_like(horiz_velocity)
+        np.divide(horiz_velocity, norm, out=downstream_vector, where=norm != 0)
 
         return downstream_vector
