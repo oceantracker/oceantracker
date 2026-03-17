@@ -2,6 +2,8 @@
 # most require dict returned by readOutputFiles.read_runCaseInfo as input,
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import colors, cm
+
 from oceantracker.util.triangle_utilities import convert_face_to_nodal_values
 import oceantracker.plot_output.plot_utilities as plot_utilities
 
@@ -14,7 +16,7 @@ def animate_heat_map(stats_data, release_group_name:str =None, var:str= 'count',
 
     def draw_frame(nt):
 
-        x,y, z = _get_stats_data(nt, stats_data, var, release_group_name, logscale, zmin=caxis[0])
+        x,y, z = _get_stats_data(nt, stats_data, var, release_group_name, zmin=caxis[0])
         pc.set_array(z)
         pc.set_clim(caxis[0],caxis[1])
         if 'time' in stats_data:
@@ -30,7 +32,7 @@ def animate_heat_map(stats_data, release_group_name:str =None, var:str= 'count',
     zmin = np.nanmin(stats_data[var])
     zmax = np.nanmax(stats_data[var])
 
-    x, y, z  = _get_stats_data(-1, stats_data, var, release_group_name, logscale, zmin=vmin)
+    x, y, z  = _get_stats_data(-1, stats_data, var, release_group_name, zmin=vmin)
     caxis = [zmin if vmin is None else vmin, zmax if vmax is None else vmax]
 
     if not back_ground_depth:
@@ -116,21 +118,32 @@ def plot_heat_map(stats_data,  release_group_name:str = None, nt=-1, axis_lims=N
     #todo repace var with data_to_plot=, as in other ploting code
 
 
-    x,y, z = _get_stats_data(nt, stats_data, var,  release_group_name,   logscale)
+    x,y, z = _get_stats_data(nt, stats_data, var,  release_group_name)
 
     fig = plt.gcf()
     ax  = plt.gca()
 
-    pc = ax.pcolormesh(x, y, z, shading='gouraud', cmap=cmap, zorder=2)
+    if logscale:
+        norm = colors.LogNorm(vmin=vmin, vmax=vmax)
+    else:
+        norm = colors.Normalize(vmin=vmin, vmax=vmax)
+
+    pc = ax.pcolormesh(x, y, z, shading='gouraud', cmap=cmap, zorder=2,
+                           norm=norm )
+
     if axis_lims is None:    axis_lims=[x[0],x[-1],y[0],y[-1]] # set axis limits to those of the grid
 
     plot_utilities.draw_base_map(stats_data['grid'], ax=ax, axis_lims=axis_lims, show_grid=show_grid, title=title, credit=credit,
                                  axis_labels=axis_labels,
                                  back_ground_depth=back_ground_depth, back_ground_color_map=back_ground_color_map)
 
-    pc.set_clim(vmin, vmax)
     if colour_bar:
-        plt.colorbar(pc, ax=ax)
+        sm = cm.ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_array([])  # Needed for empty mappable
+        cax = ax.inset_axes([.89, 0.1, .035, .8], transform=ax.transAxes, )
+        cax.set_zorder(9)
+        plt.colorbar(sm, cax=cax)
+
 
     plot_utilities.plot_release_points_and_polygons(stats_data, release_group_name=release_group_name, ax=ax)
 
@@ -198,7 +211,7 @@ def plot_LCS(LCS_data, n_grid=0, n_lag=-1, n_time_step=None, axis_lims=None, cre
 
 
 
-def _get_stats_data(nt, d, var, release_group_name, logscale, zmin=None):
+def _get_stats_data(nt, d, var, release_group_name, zmin=None):
     # get count or variable patch Nan in zero counts
     # sum/average over all or 1 release group dim
     # nt is time step or age bin
@@ -218,9 +231,6 @@ def _get_stats_data(nt, d, var, release_group_name, logscale, zmin=None):
     z[z < zmin] = np.nan
     z[count == 0] = np.nan
 
-    if logscale:
-        with np.errstate(all='ignore'):
-            z = np.log10(z)
     return x, y, z
 
 

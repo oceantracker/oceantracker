@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import colors, animation
+from matplotlib import colors, animation, cm
 from oceantracker.plot_output import plot_utilities
 
 from oceantracker.plot_output.plot_utilities import save_animation
@@ -39,7 +39,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
                       single_time_step=None,axis_labels=False,
                       polygon_list_to_plot = None, min_status=0,
                       back_ground_depth=True, back_ground_color_map = None, credit=None, heading= None,
-                      size_using_data= None,  part_color_map=None,
+                      size_using_data= None,  part_color_map=None,colour_bar=False,
                       vmin=None, vmax=None, aspect_ratio=None,show_release_points=True,
                       release_group_name=None, show_dry_cells = False, show=True):
     def draw_frame(nt):
@@ -132,6 +132,15 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
     plot_utilities.show_particleNumbers(track_data['x'].shape[1])
     fig.tight_layout()
 
+    if colour_bar and colour_using_data is not None:
+            norm = colors.Normalize(vmin=vmin, vmax=vmax)
+            sm = cm.ScalarMappable(cmap=cmap, norm=norm)
+            sm.set_array([])  # Needed for empty mappable
+            cax = ax.inset_axes([.89, 0.1,.035, .8], transform= ax.transAxes,)
+            cax.set_zorder(9)
+            plt.colorbar(sm,  cax=cax)
+
+
     if single_time_step is None:
         out = animation.FuncAnimation(fig, draw_frame, frames=num_frames, interval=interval, blit=True)
         plot_utilities.animation_output(out, movie_file, fps=fps, dpi=dpi, show=show)
@@ -139,6 +148,7 @@ def animate_particles(track_data, axis_lims=None, colour_using_data= None, show_
         draw_frame(single_time_step)
         plot_file_name = movie_file.split('.')[0] + '.png'
         out = plot_utilities.show_output(plot_file_name=plot_file_name)
+        out = plt.gcf()
     return out
 
 

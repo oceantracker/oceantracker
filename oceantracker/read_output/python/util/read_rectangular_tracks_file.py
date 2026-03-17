@@ -38,6 +38,7 @@ def merge_rect_track_files(file_list,  var_list=None,fraction_to_read=None):
         d1 = read_rect_tracks_file(fn, var_list=var_list)
         ID = d1['ID']
         sel = np.flatnonzero(ID >= 0)
+
         for name in d1['variables'].keys():
 
             v = d1['variables'][name]
@@ -59,5 +60,7 @@ def merge_rect_track_files(file_list,  var_list=None,fraction_to_read=None):
 
             elif 'time_dim' in v['dims']:
                 result[name][r[0]:r[1], ...] = v['data']
+
+
 
     return result
