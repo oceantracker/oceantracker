@@ -68,35 +68,49 @@ class GLORYSreader(_BaseStructuredReader):
         else:
             info['vert_grid_type'] = None
 
-        # get num nodes in each field, but glorys has either lat or latitude as dims
+        # F-corner grid has one fewer node in each horizontal direction than the T-grid
         dims = info['dims']
-        # nodes = rows* cols
-        info['num_nodes'] = dims['lat' if 'lat' in dims else 'latitude'] * dims['lon' if 'lon' in dims else 'longitude']
+        info['num_nodes'] = (dims['lat' if 'lat' in dims else 'latitude'] - 1) * (dims['lon' if 'lon' in dims else 'longitude'] - 1)
 
 
     def read_horizontal_grid_coords(self, grid):
         ds = self.dataset
         gm = self.params['grid_variable_map']
-        # record useful grid info
-        grid['lon'] =  ds.read_variable(gm['x']).data
-        grid['lat'] =  ds.read_variable(gm['y']).data
+        lon1d = ds.read_variable(gm['x']).data
+        lat1d = ds.read_variable(gm['y']).data
 
-        # make a full grid coords
-        nlat, nlon= grid['lat'].size, grid['lon'].size
-        grid['lon'] = np.repeat(grid['lon'].reshape( 1,-1), nlat, axis= 0)
-        grid['lat'] = np.repeat(grid['lat'].reshape(-1, 1), nlon, axis =1)
+        # Store T-grid sizes for use in read_file_var_as_4D_nodal_values
+        grid['_nlat_t'] = lat1d.size
+        grid['_nlon_t'] = lon1d.size
 
-        grid['x'] =  np.stack((grid['lon'].ravel(),grid['lat'].ravel()),  axis=1)
+        # F-corner positions: midpoint between each pair of adjacent T-centres.
+        # GLORYS provides data at cell centres (T-points); OceanTracker needs
+        # nodal (corner) values.  The F-grid has one fewer point per dimension.
+        lon_c = ((lon1d[:-1] + lon1d[1:]) / 2.0).astype(np.float32)
+        lat_c = ((lat1d[:-1] + lat1d[1:]) / 2.0).astype(np.float32)
+
+        nlat_c, nlon_c = lat_c.size, lon_c.size
+        grid['lon'] = np.repeat(lon_c.reshape(1, -1), nlat_c, axis=0)
+        grid['lat'] = np.repeat(lat_c.reshape(-1, 1), nlon_c, axis=1)
+        grid['x']   = np.stack((grid['lon'].ravel(), grid['lat'].ravel()), axis=1)
 
 
     def build_hori_grid(self, grid):
 
         ds = self.dataset
         if 'mask' in self.info['variables']:
-            grid['water_3D_mask'] = ds.read_variable('mask').data == 1 # water grid
-            grid['water_3D_mask'] = np.transpose(grid['water_3D_mask'],(1,2,0)) # put z last
-            grid['water_3D_mask'] = np.flip(grid['water_3D_mask'], axis=2) # mask 0 layer is
-            grid['land_mask'] = ~grid['water_3D_mask'][:, :, -1]  # uppermost mask is the land
+            water_t = ds.read_variable('mask').data == 1  # (nz, N_lat, N_lon), True = water
+            water_t = np.transpose(water_t, (1, 2, 0))   # → (N_lat, N_lon, nz)
+            water_t = np.flip(water_t, axis=2)
+
+            # Convert 3-D mask to F-corner grid: a corner is wet at depth nz if
+            # at least one of its 4 surrounding T-cells is wet at that depth.
+            grid['water_3D_mask'] = (water_t[:-1, :-1, :] | water_t[1:, :-1, :] |
+                                     water_t[:-1, 1:, :]  | water_t[1:, 1:, :])
+
+            # Land mask on F-grid: corner is land only if all 4 surrounding
+            # surface T-cells are land.
+            grid['land_mask'] = ~grid['water_3D_mask'][:, :, -1]
         else:
             pass
 
@@ -120,24 +134,27 @@ class GLORYSreader(_BaseStructuredReader):
         ds = self.dataset
         info = self.info
         gm =  self.params['grid_variable_map']
-        grid['bottom_interface_index_grid'] = ds.read_variable(gm['bottom_interface_index']).data
+        b = ds.read_variable(gm['bottom_interface_index']).data
 
-        # ensure missing values are nans so missing stay missing in chaning to bootom up values
-        grid['bottom_interface_index_grid'] = grid['bottom_interface_index_grid'].astype(np.float32)
-        grid['bottom_interface_index_grid'][grid['bottom_interface_index_grid'] < 0 ]= np.nan
-        grid['bottom_interface_index_grid'] -= self.params['one_based_indices']
+        # ensure missing values are nans so missing stay missing in changing to bottom up values
+        b = b.astype(np.float32)
+        b[b < 0] = np.nan
+
+        # T-centre → F-corner: take the minimum (shallowest) valid bottom index
+        # among the 4 surrounding T-cells so we never extrapolate below any neighbour.
+        b_stack = np.stack([b[:-1, :-1], b[1:, :-1], b[:-1, 1:], b[1:, 1:]], axis=0)
+        b = np.nanmin(b_stack, axis=0)  # (N_lat-1, N_lon-1)
+
+        b -= self.params['one_based_indices']
 
         # file cell count is top down, convert to bottom up index
-        grid['bottom_interface_index_grid'] = info['num_z_interfaces'] - grid['bottom_interface_index_grid'] # do this before capturing nans
+        b = info['num_z_interfaces'] - b
 
+        # land corners use -1
+        sel = np.isnan(b)
+        b[sel] = -1
 
-        # land nodes use 0
-        # if missing val present by default xarray converts to real and missing vals to nan's
-        sel = np.isnan(grid['bottom_interface_index_grid'])
-        grid['bottom_interface_index_grid'][sel] = -1
-
-        grid['bottom_interface_index_grid'] =    grid['bottom_interface_index_grid'].astype(np.int32)
-
+        grid['bottom_interface_index_grid'] = b.astype(np.int32)
         return grid['bottom_interface_index_grid'].ravel()
 
     def read_file_var_as_4D_nodal_values(self,var_name, var_info,  nt=None):
@@ -167,8 +184,20 @@ class GLORYSreader(_BaseStructuredReader):
             # add dummy z dim
             data = data[..., np.newaxis]
 
-        # data is now shaped as (time, row, col, depth)
-        # now flatten (time,rows, col, depth)  to  (time,nodes, depth)
+        # data is now shaped as (time, N_lat, N_lon, depth)
+        # T-centre → F-corner: NaN-safe 4-point average over the 4 surrounding T-cells.
+        # Reduces each horizontal dimension by 1: → (time, N_lat-1, N_lon-1, depth)
+        d00 = data[:, :-1, :-1, :]
+        d01 = data[:, :-1, 1:,  :]
+        d10 = data[:, 1:,  :-1, :]
+        d11 = data[:, 1:,  1:,  :]
+        valid = (np.isfinite(d00) + np.isfinite(d01) +
+                 np.isfinite(d10) + np.isfinite(d11)).astype(np.float32)
+        data = np.where(valid > 0,
+                        np.nansum(np.stack([d00, d01, d10, d11], axis=0), axis=0) / valid,
+                        np.nan).astype(np.float32)
+
+        # now flatten (time, N_lat-1, N_lon-1, depth) to (time, nodes, depth)
         s = data.shape
         data = data.reshape((s[0], s[1] * s[2], s[3])) # this should match flatten in "C" order
 
