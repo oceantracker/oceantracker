@@ -124,10 +124,52 @@ class GLORYSreader(_BaseStructuredReader):
 
             grid['water_3D_mask'] = water_fine
             grid['land_mask'] = ~water_fine[:, :, -1]
+
+            # Additionally mask any fine-grid node whose water_depth (deptho) would be NaN.
+            # The mask variable and deptho can be inconsistent at the coast, so some nodes
+            # pass the mask filter but have no valid depth.  Treat those as land too.
+            depth_var = self.params['field_variable_map']['water_depth']
+            if depth_var in self.info['variables']:
+                deptho_t = ds.read_variable(depth_var).data.astype(np.float32)  # (N_lat, N_lon)
+                depth_valid_t = np.isfinite(deptho_t)  # True = has valid depth
+
+                # A fine-grid node has valid depth if ANY contributing T-cell has valid depth
+                # (same OR logic as water_fine above)
+                depth_valid_fine = np.zeros((2 * N_lat - 1, 2 * N_lon - 1), dtype=bool)
+                depth_valid_fine[0::2, 0::2] = depth_valid_t
+                depth_valid_fine[0::2, 1::2] = depth_valid_t[:, :-1] | depth_valid_t[:, 1:]
+                depth_valid_fine[1::2, 0::2] = depth_valid_t[:-1, :] | depth_valid_t[1:, :]
+                depth_valid_fine[1::2, 1::2] = (depth_valid_t[:-1, :-1] | depth_valid_t[:-1, 1:] |
+                                                 depth_valid_t[1:,  :-1] | depth_valid_t[1:,  1:])
+
+                grid['land_mask'] |= ~depth_valid_fine
         else:
             pass
 
         super().build_hori_grid(grid)
+
+    def read_triangles(self, grid):
+        # Build the fine-grid node numbering (same as the base helper)
+        mask = grid['land_mask']
+        rows = np.arange(mask.shape[0])
+        cols = np.arange(mask.shape[1])
+        grid['grid_node_numbers'] = cols.size * rows.reshape((-1, 1)) + cols.reshape((1, -1))
+
+        n1 = grid['grid_node_numbers'][:-1, :-1]
+        n2 = grid['grid_node_numbers'][:-1, 1:]
+        n3 = grid['grid_node_numbers'][1:,  1:]
+        n4 = grid['grid_node_numbers'][1:,  :-1]
+        quad_cells = np.stack(
+            (n1.flatten('C'), n2.flatten('C'), n3.flatten('C'), n4.flatten('C'))
+        ).T
+
+        # Strict filter: only keep quads where ALL 4 nodes are water.
+        # The base-class filter (<3 land nodes) allows mixed quads, which after
+        # split_quad_cells produce one valid and one all-NaN triangle ("single triangle").
+        # Requiring 0 land nodes ensures both split triangles are always kept/dropped together.
+        mask_flat = mask.flatten('C')
+        sel = np.sum(mask_flat[quad_cells], axis=1) == 0
+        grid['triangles'] = quad_cells[sel, :]
 
 
     def build_vertical_grid(self):
