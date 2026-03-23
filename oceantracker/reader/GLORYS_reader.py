@@ -68,30 +68,36 @@ class GLORYSreader(_BaseStructuredReader):
         else:
             info['vert_grid_type'] = None
 
-        # F-corner grid has one fewer node in each horizontal direction than the T-grid
+        # Fine grid has (2N-1)×(2M-1) nodes: T-centres + edge midpoints + corners
         dims = info['dims']
-        info['num_nodes'] = (dims['lat' if 'lat' in dims else 'latitude'] - 1) * (dims['lon' if 'lon' in dims else 'longitude'] - 1)
+        N_lat = dims['lat' if 'lat' in dims else 'latitude']
+        N_lon = dims['lon' if 'lon' in dims else 'longitude']
+        info['num_nodes'] = (2 * N_lat - 1) * (2 * N_lon - 1)
 
 
     def read_horizontal_grid_coords(self, grid):
         ds = self.dataset
         gm = self.params['grid_variable_map']
-        lon1d = ds.read_variable(gm['x']).data
-        lat1d = ds.read_variable(gm['y']).data
+        lon1d = ds.read_variable(gm['x']).data.astype(np.float32)
+        lat1d = ds.read_variable(gm['y']).data.astype(np.float32)
 
-        # Store T-grid sizes for use in read_file_var_as_4D_nodal_values
+        # Store original T-grid sizes (used in read_file_var_as_4D_nodal_values)
         grid['_nlat_t'] = lat1d.size
         grid['_nlon_t'] = lon1d.size
 
-        # F-corner positions: midpoint between each pair of adjacent T-centres.
-        # GLORYS provides data at cell centres (T-points); OceanTracker needs
-        # nodal (corner) values.  The F-grid has one fewer point per dimension.
-        lon_c = ((lon1d[:-1] + lon1d[1:]) / 2.0).astype(np.float32)
-        lat_c = ((lat1d[:-1] + lat1d[1:]) / 2.0).astype(np.float32)
+        # Build interleaved fine 1-D coordinate arrays of length (2N-1):
+        #   even indices → original T-point positions
+        #   odd  indices → midpoints between adjacent T-points
+        lon_fine = np.empty(2 * lon1d.size - 1, dtype=np.float32)
+        lat_fine = np.empty(2 * lat1d.size - 1, dtype=np.float32)
+        lon_fine[0::2] = lon1d
+        lon_fine[1::2] = (lon1d[:-1] + lon1d[1:]) / 2.0
+        lat_fine[0::2] = lat1d
+        lat_fine[1::2] = (lat1d[:-1] + lat1d[1:]) / 2.0
 
-        nlat_c, nlon_c = lat_c.size, lon_c.size
-        grid['lon'] = np.repeat(lon_c.reshape(1, -1), nlat_c, axis=0)
-        grid['lat'] = np.repeat(lat_c.reshape(-1, 1), nlon_c, axis=1)
+        nlat_f, nlon_f = lat_fine.size, lon_fine.size
+        grid['lon'] = np.repeat(lon_fine.reshape(1, -1), nlat_f, axis=0)
+        grid['lat'] = np.repeat(lat_fine.reshape(-1, 1), nlon_f, axis=1)
         grid['x']   = np.stack((grid['lon'].ravel(), grid['lat'].ravel()), axis=1)
 
 
@@ -99,18 +105,25 @@ class GLORYSreader(_BaseStructuredReader):
 
         ds = self.dataset
         if 'mask' in self.info['variables']:
-            water_t = ds.read_variable('mask').data == 1  # (nz, N_lat, N_lon), True = water
-            water_t = np.transpose(water_t, (1, 2, 0))   # → (N_lat, N_lon, nz)
+            water_t = ds.read_variable('mask').data == 1   # (nz, N_lat, N_lon)
+            water_t = np.transpose(water_t, (1, 2, 0))    # → (N_lat, N_lon, nz)
             water_t = np.flip(water_t, axis=2)
 
-            # Convert 3-D mask to F-corner grid: a corner is wet at depth nz if
-            # at least one of its 4 surrounding T-cells is wet at that depth.
-            grid['water_3D_mask'] = (water_t[:-1, :-1, :] | water_t[1:, :-1, :] |
-                                     water_t[:-1, 1:, :]  | water_t[1:, 1:, :])
+            N_lat, N_lon, nz = water_t.shape
+            water_fine = np.zeros((2 * N_lat - 1, 2 * N_lon - 1, nz), dtype=bool)
 
-            # Land mask on F-grid: corner is land only if all 4 surrounding
-            # surface T-cells are land.
-            grid['land_mask'] = ~grid['water_3D_mask'][:, :, -1]
+            # T-points: direct
+            water_fine[0::2, 0::2, :] = water_t
+            # Horizontal edge midpoints: wet if either H-neighbour is wet
+            water_fine[0::2, 1::2, :] = water_t[:, :-1, :] | water_t[:, 1:, :]
+            # Vertical edge midpoints: wet if either V-neighbour is wet
+            water_fine[1::2, 0::2, :] = water_t[:-1, :, :] | water_t[1:, :, :]
+            # Corner F-points: wet if any of the 4 surrounding T-cells is wet
+            water_fine[1::2, 1::2, :] = (water_t[:-1, :-1, :] | water_t[1:, :-1, :] |
+                                          water_t[:-1, 1:, :]  | water_t[1:, 1:, :])
+
+            grid['water_3D_mask'] = water_fine
+            grid['land_mask'] = ~water_fine[:, :, -1]
         else:
             pass
 
@@ -133,28 +146,31 @@ class GLORYSreader(_BaseStructuredReader):
         # bottom cell is in data files
         ds = self.dataset
         info = self.info
-        gm =  self.params['grid_variable_map']
-        b = ds.read_variable(gm['bottom_interface_index']).data
+        gm = self.params['grid_variable_map']
+        b = ds.read_variable(gm['bottom_interface_index']).data  # (N_lat, N_lon)
 
-        # ensure missing values are nans so missing stay missing in changing to bottom up values
         b = b.astype(np.float32)
-        b[b < 0] = np.nan
+        b[b < 0] = np.nan   # land cells → NaN
 
-        # T-centre → F-corner: take the minimum (shallowest) valid bottom index
-        # among the 4 surrounding T-cells so we never extrapolate below any neighbour.
-        b_stack = np.stack([b[:-1, :-1], b[1:, :-1], b[:-1, 1:], b[1:, 1:]], axis=0)
-        b = np.nanmin(b_stack, axis=0)  # (N_lat-1, N_lon-1)
+        N_lat, N_lon = b.shape
+        b_fine = np.full((2 * N_lat - 1, 2 * N_lon - 1), np.nan, dtype=np.float32)
 
-        b -= self.params['one_based_indices']
+        # T-points: direct values
+        b_fine[0::2, 0::2] = b
+        # Horizontal edge midpoints: shallowest of 2 H-neighbours (np.fmin ignores NaN)
+        b_fine[0::2, 1::2] = np.fmin(b[:, :-1], b[:, 1:])
+        # Vertical edge midpoints: shallowest of 2 V-neighbours
+        b_fine[1::2, 0::2] = np.fmin(b[:-1, :], b[1:, :])
+        # Corner F-points: shallowest of 4 surrounding T-cells
+        b_fine[1::2, 1::2] = np.fmin(np.fmin(b[:-1, :-1], b[:-1, 1:]),
+                                      np.fmin(b[1:,  :-1], b[1:,  1:]))
 
-        # file cell count is top down, convert to bottom up index
-        b = info['num_z_interfaces'] - b
+        b_fine -= self.params['one_based_indices']
+        b_fine = info['num_z_interfaces'] - b_fine  # top-down → bottom-up index
 
-        # land corners use -1
-        sel = np.isnan(b)
-        b[sel] = -1
+        b_fine[np.isnan(b_fine)] = -1   # land nodes
 
-        grid['bottom_interface_index_grid'] = b.astype(np.int32)
+        grid['bottom_interface_index_grid'] = b_fine.astype(np.int32)
         return grid['bottom_interface_index_grid'].ravel()
 
     def read_file_var_as_4D_nodal_values(self,var_name, var_info,  nt=None):
@@ -185,19 +201,39 @@ class GLORYSreader(_BaseStructuredReader):
             data = data[..., np.newaxis]
 
         # data is now shaped as (time, N_lat, N_lon, depth)
-        # T-centre → F-corner: NaN-safe 4-point average over the 4 surrounding T-cells.
-        # Reduces each horizontal dimension by 1: → (time, N_lat-1, N_lon-1, depth)
-        d00 = data[:, :-1, :-1, :]
-        d01 = data[:, :-1, 1:,  :]
-        d10 = data[:, 1:,  :-1, :]
-        d11 = data[:, 1:,  1:,  :]
-        valid = (np.isfinite(d00) + np.isfinite(d01) +
-                 np.isfinite(d10) + np.isfinite(d11)).astype(np.float32)
-        data = np.where(valid > 0,
-                        np.nansum(np.stack([d00, d01, d10, d11], axis=0), axis=0) / valid,
-                        np.nan).astype(np.float32)
+        # Expand T-grid to fine (2N_lat-1, 2N_lon-1) grid using 9-point stencil:
+        #   (even, even) = T-point          → direct value
+        #   (even, odd)  = H-edge midpoint  → NaN-safe mean of 2 H-neighbours
+        #   (odd,  even) = V-edge midpoint  → NaN-safe mean of 2 V-neighbours
+        #   (odd,  odd)  = corner F-point   → NaN-safe mean of 4 surrounding T-cells
+        nt, N_lat, N_lon, nz = data.shape
+        data_fine = np.full((nt, 2 * N_lat - 1, 2 * N_lon - 1, nz), np.nan, dtype=np.float32)
 
-        # now flatten (time, N_lat-1, N_lon-1, depth) to (time, nodes, depth)
+        # T-points
+        data_fine[:, 0::2, 0::2, :] = data
+
+        # Horizontal edge midpoints
+        d_l, d_r = data[:, :, :-1, :], data[:, :, 1:, :]
+        v_h = np.isfinite(d_l).astype(np.float32) + np.isfinite(d_r).astype(np.float32)
+        data_fine[:, 0::2, 1::2, :] = np.where(
+            v_h > 0, np.nansum(np.stack([d_l, d_r], axis=0), axis=0) / v_h, np.nan)
+
+        # Vertical edge midpoints
+        d_b, d_t = data[:, :-1, :, :], data[:, 1:, :, :]
+        v_v = np.isfinite(d_b).astype(np.float32) + np.isfinite(d_t).astype(np.float32)
+        data_fine[:, 1::2, 0::2, :] = np.where(
+            v_v > 0, np.nansum(np.stack([d_b, d_t], axis=0), axis=0) / v_v, np.nan)
+
+        # Corner F-points
+        d00, d01 = data[:, :-1, :-1, :], data[:, :-1, 1:, :]
+        d10, d11 = data[:, 1:,  :-1, :], data[:, 1:,  1:, :]
+        v_c = sum(np.isfinite(x).astype(np.float32) for x in [d00, d01, d10, d11])
+        data_fine[:, 1::2, 1::2, :] = np.where(
+            v_c > 0, np.nansum(np.stack([d00, d01, d10, d11], axis=0), axis=0) / v_c, np.nan)
+
+        data = data_fine
+
+        # flatten (time, 2N_lat-1, 2N_lon-1, depth) → (time, nodes, depth)
         s = data.shape
         data = data.reshape((s[0], s[1] * s[2], s[3])) # this should match flatten in "C" order
 
