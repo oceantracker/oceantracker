@@ -4,6 +4,31 @@
 Change log
 ###########################
 
+Note: All changes that are either input or model output in any way are labeled as "breaking changes",
+      excluding bug-fixes
+
+Version '0.5.3.5 2026-03-24'
+____________________________
+
+Breaking changes
+----------------
+
+#. Reworked GLORYS/NEMO/CMEMS-reader.
+   The previous implementation used the same triangulation method as the ROMs reader did,
+   which made use of "masked" coastal cells.
+   This effectively results coastal triangles to be effectively disabled as velocities were interpolated with nan's,
+   causing particles within these triangles to not move.
+   The new triangulation now follows the coastline as described by the "land_mask" exactly resulting in particles moving as expected.
+
+
+Bug fixes
+---------
+
+#. Status counts (e.g. how many particles are currently "stranded_by_tide" were off,
+   causing both the screen output to be incorrect 
+   and stopped the "buffer clean" that was triggered by large number of dead particles to work.
+
+
 Version '0.5.3.4 2026-02-25'
 _____________________________
 

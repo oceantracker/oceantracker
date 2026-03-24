@@ -16,7 +16,6 @@ def main(args=None):
                 #NUMBA_cache_code=True,
                 use_resuspension=False,
                 #regrid_z_to_uniform_sigma_levels=True # obsolete param
-
                 )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
@@ -27,7 +26,9 @@ def main(args=None):
 
     #ot.settings(NUMBA_cache_code = True)
     hm = dd.hydro_model['demoSchism3D']
-    ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True,)
+    ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True,
+                 field_variable_map=dict(my_field='temp'),load_fields=['my_field']
+                 )
 
     # add a point release
     ot.add_class('release_groups',**dd.rg_release_interval0)
