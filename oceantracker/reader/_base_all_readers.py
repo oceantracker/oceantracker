@@ -207,8 +207,6 @@ class _BaseReader(ParameterBaseClass):
                                 write_interp_particle_prop_to_tracks_file=False),  dummy=True)
             i.data[0, :, 0, :] = cord_transforms.get_degrees_per_meter(grid['x'][:,1],as_vector=True)
 
-            pass
-
         # get bounding box
         bounds =np.asarray( [grid['x'].min(axis=0), grid['x'].max(axis=0)])
         b = f'{np.array2string(bounds[0], precision=3, floatmode="fixed")} to {np.array2string(bounds[1], precision=3, floatmode="fixed")}'
