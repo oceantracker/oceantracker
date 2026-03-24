@@ -317,3 +317,159 @@ class GLORYSreader(_BaseStructuredReader):
                         deepest_cell[r, c] = nz
                         break
         return deepest_cell
+
+
+class GLORYSreaderCorners(GLORYSreader):
+    """
+    Simplified GLORYS reader using only the 4 corner (F-point) nodes per T-cell.
+
+    Each GLORYS rectangle becomes exactly 2 triangles (vs 8 in GLORYSreader).
+    Node positions are midpoints between adjacent T-centres; values are NaN-safe
+    4-point averages of the 4 surrounding T-cells.
+
+    Grid: (N_lat-1) × (N_lon-1) corner nodes.
+    Triangles: strict filter — only quads where all 4 corners are water.
+    read_triangles is inherited from GLORYSreader unchanged (uses land_mask.shape).
+    """
+
+    def add_hindcast_info(self):
+        super().add_hindcast_info()   # handles mask check, z-grid, vertical type
+        dims = self.info['dims']
+        N_lat = dims['lat' if 'lat' in dims else 'latitude']
+        N_lon = dims['lon' if 'lon' in dims else 'longitude']
+        self.info['num_nodes'] = (N_lat - 1) * (N_lon - 1)
+
+    def read_horizontal_grid_coords(self, grid):
+        ds = self.dataset
+        gm = self.params['grid_variable_map']
+        lon1d = ds.read_variable(gm['x']).data.astype(np.float32)
+        lat1d = ds.read_variable(gm['y']).data.astype(np.float32)
+
+        grid['_nlat_t'] = lat1d.size
+        grid['_nlon_t'] = lon1d.size
+
+        # F-corner positions: midpoint between each pair of adjacent T-centres
+        lon_c = ((lon1d[:-1] + lon1d[1:]) / 2.0).astype(np.float32)
+        lat_c = ((lat1d[:-1] + lat1d[1:]) / 2.0).astype(np.float32)
+
+        nlat_c, nlon_c = lat_c.size, lon_c.size
+        grid['lon'] = np.repeat(lon_c.reshape(1, -1), nlat_c, axis=0)
+        grid['lat'] = np.repeat(lat_c.reshape(-1, 1), nlon_c, axis=1)
+        grid['x']   = np.stack((grid['lon'].ravel(), grid['lat'].ravel()), axis=1)
+
+    def build_hori_grid(self, grid):
+        ds = self.dataset
+        if 'mask' in self.info['variables']:
+            water_t = ds.read_variable('mask').data == 1   # (nz, N_lat, N_lon)
+            water_t = np.transpose(water_t, (1, 2, 0))    # → (N_lat, N_lon, nz)
+            water_t = np.flip(water_t, axis=2)
+
+            N_lat, N_lon, nz = water_t.shape
+
+            # F-corner: wet if ANY of the 4 surrounding T-cells is wet
+            water_corners = (water_t[:-1, :-1, :] | water_t[1:, :-1, :] |
+                              water_t[:-1, 1:,  :] | water_t[1:, 1:,  :])   # (N_lat-1, N_lon-1, nz)
+
+            grid['water_3D_mask'] = water_corners
+            grid['land_mask'] = ~water_corners[:, :, -1]
+
+            # Store T-grid surface land mask so read_triangles can check the
+            # underlying T-cell: a quad surrounded by water corners but sitting
+            # on a masked T-cell must also be dropped.
+            land_mask_t = ~water_t[:, :, -1]   # (N_lat, N_lon)
+
+            # Mask corners where deptho would be NaN (same OR logic)
+            depth_var = self.params['field_variable_map']['water_depth']
+            if depth_var in self.info['variables']:
+                deptho_t = ds.read_variable(depth_var).data.astype(np.float32)
+                depth_valid_t = np.isfinite(deptho_t)
+                depth_valid_corners = (depth_valid_t[:-1, :-1] | depth_valid_t[:-1, 1:] |
+                                       depth_valid_t[1:,  :-1] | depth_valid_t[1:,  1:])
+                grid['land_mask'] |= ~depth_valid_corners
+                land_mask_t |= ~depth_valid_t  # NaN-depth T-cells are also land
+
+            grid['_land_mask_t'] = land_mask_t
+        else:
+            pass
+
+        # Skip GLORYSreader.build_hori_grid (9-point logic) — go straight to base reader
+        super(GLORYSreader, self).build_hori_grid(grid)
+
+    def read_triangles(self, grid):
+        mask = grid['land_mask']   # (N_lat-1, N_lon-1) F-corner grid
+        rows = np.arange(mask.shape[0])
+        cols = np.arange(mask.shape[1])
+        grid['grid_node_numbers'] = cols.size * rows.reshape((-1, 1)) + cols.reshape((1, -1))
+
+        n1 = grid['grid_node_numbers'][:-1, :-1]
+        n2 = grid['grid_node_numbers'][:-1, 1:]
+        n3 = grid['grid_node_numbers'][1:,  1:]
+        n4 = grid['grid_node_numbers'][1:,  :-1]
+        quad_cells = np.stack(
+            (n1.flatten('C'), n2.flatten('C'), n3.flatten('C'), n4.flatten('C'))
+        ).T
+
+        # Filter 1 (inherited logic): all 4 F-corner nodes must be water
+        mask_flat = mask.flatten('C')
+        sel = np.sum(mask_flat[quad_cells], axis=1) == 0
+
+        # Filter 2: the T-cell that this quad sits on top of must also be water.
+        # The F-grid quad at row-major index (qi, qj) corresponds to T-cell (qi+1, qj+1)
+        # because F[fi,fj] = avg of T[fi,fj], T[fi,fj+1], T[fi+1,fj], T[fi+1,fj+1],
+        # so the quad F[fi,fj]–F[fi,fj+1]–F[fi+1,fj+1]–F[fi+1,fj] encloses T[fi+1, fj+1].
+        sel &= ~grid['_land_mask_t'][1:-1, 1:-1].flatten('C')
+
+        grid['triangles'] = quad_cells[sel, :]
+
+    def read_bottom_interface_index(self, grid):
+        ds = self.dataset
+        info = self.info
+        gm = self.params['grid_variable_map']
+        b = ds.read_variable(gm['bottom_interface_index']).data  # (N_lat, N_lon)
+
+        b = b.astype(np.float32)
+        b[b < 0] = np.nan
+
+        # Pure F-corner: shallowest of 4 surrounding T-cells
+        b_corners = np.fmin(np.fmin(b[:-1, :-1], b[:-1, 1:]),
+                            np.fmin(b[1:,  :-1], b[1:,  1:]))   # (N_lat-1, N_lon-1)
+
+        b_corners -= self.params['one_based_indices']
+        b_corners = info['num_z_interfaces'] - b_corners   # top-down → bottom-up
+
+        b_corners[np.isnan(b_corners)] = -1
+
+        grid['bottom_interface_index_grid'] = b_corners.astype(np.int32)
+        return grid['bottom_interface_index_grid'].ravel()
+
+    def read_file_var_as_4D_nodal_values(self, var_name, var_info, nt=None):
+        ds = self.dataset
+        info = self.info
+
+        data = ds.read_variable(var_name, nt=nt)
+        data_dims = data.dims
+        data = data.data
+
+        if info['time_dim'] not in data_dims:
+            data = data[np.newaxis, ...]
+
+        if any(x in info['all_z_dims'] for x in data_dims):
+            data = np.transpose(data, (0, 2, 3, 1))   # → (time, N_lat, N_lon, depth)
+            data = np.flip(data, axis=3)
+        else:
+            data = data[..., np.newaxis]
+
+        # data is (time, N_lat, N_lon, depth)
+        # Pure t_to_f: NaN-safe 4-point average → (time, N_lat-1, N_lon-1, depth)
+        d00, d01 = data[:, :-1, :-1, :], data[:, :-1, 1:, :]
+        d10, d11 = data[:, 1:,  :-1, :], data[:, 1:,  1:, :]
+        valid = (np.isfinite(d00) + np.isfinite(d01) +
+                 np.isfinite(d10) + np.isfinite(d11)).astype(np.float32)
+        data = np.where(valid > 0,
+                        np.nansum(np.stack([d00, d01, d10, d11], axis=0), axis=0) / valid,
+                        np.nan).astype(np.float32)
+
+        s = data.shape
+        data = data.reshape((s[0], s[1] * s[2], s[3]))   # flatten to (time, nodes, depth)
+        data = data[..., np.newaxis]                       # add component axis
+        return data
