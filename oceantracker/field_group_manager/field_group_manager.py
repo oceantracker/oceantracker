@@ -1,11 +1,12 @@
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 import numpy as np
-from time import perf_counter
+from os import path
 from oceantracker.field_group_manager.util import field_group_manager_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.interpolator.util import  triangle_eval_interp
 from oceantracker.field_group_manager import setup_reader
 from oceantracker.util.basic_util import get_role_from_base_class_file_name
+from oceantracker.util import json_util
 
 class FieldGroupManager(ParameterBaseClass):
     # class holding data in file and ability to spatially interpolate fields that it holds
@@ -70,7 +71,8 @@ class FieldGroupManager(ParameterBaseClass):
 
         # write_grid
         self.reader.write_grid(info['gridID'])
-
+        # write catalog
+        json_util.write_JSON(path.join(si.run_info.run_output_dir,f'hindcast_catalog{info["gridID"]:03d}'), self.reader.data_set.info)
         pass
         if si.settings.display_grid_at_start:
             from matplotlib import pyplot as plt
