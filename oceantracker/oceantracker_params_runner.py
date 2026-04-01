@@ -325,10 +325,6 @@ class OceanTrackerParamsRunner(object):
         fgm.add_part_prop_from_fields_plus_book_keeping()  # todo move back to make instances
         si.msg_logger.progress_marker('Starting initial setup of all classes')
 
-        # write reader info to json
-        d = fgm.get_reader_info()
-        json_util.write_JSON(path.join(si.run_info.run_output_dir, f'hindcast_info.json'), d)
-
         # schedule all release groups, now run start and end are known
         ri.cumulative_number_released = np.zeros((si.run_info.times.size, ), dtype= np.int64)
         ri.forecasted_number_alive = ri.cumulative_number_released.copy()

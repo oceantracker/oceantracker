@@ -295,9 +295,6 @@ class FieldGroupManager(ParameterBaseClass):
                                                    info['current_buffer_steps'], info['weight_time_steps'])
         pass
 
-    def get_reader_info(self):
-        d= dict(reader=self.reader.info)
-        return d
 
     def are_points_inside_domain(self,x):
         # only primary/outer grid
