@@ -203,7 +203,7 @@ class ParticleGroupManager(ParameterBaseClass):
                                                    part_prop['time_released'].used_buffer(), active, scale= -1.)
 
         t0 = perf_counter()
-        # first interpolate to give particle properties from reader derived  fields
+        # first interpolate to give particle properties from reader derived fields
         for name,i in cr.particle_properties.items():
             if isinstance(i, FieldParticleProperty):
                 i.timed_update(n_time_step, time_sec, active)
