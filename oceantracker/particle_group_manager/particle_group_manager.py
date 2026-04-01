@@ -205,9 +205,14 @@ class ParticleGroupManager(ParameterBaseClass):
         t0 = perf_counter()
         # first interpolate to give particle properties from reader derived  fields
         for name,i in cr.particle_properties.items():
-            i.timed_update(n_time_step, time_sec, active)
+            if isinstance(i, FieldParticleProperty):
+                i.timed_update(n_time_step, time_sec, active)
 
         si.block_timer('Interpolate fields', t0)
+
+        # NOTE classes based on ManuallyUpdatedParticleProperty are ignored here,
+        # as other classes/code call their upadte when needed
+        # eg classes with schedular only call up date of a ManuallyUpdatedParticleProperty when they need it to compute ot write
 
         t0 = perf_counter()
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update

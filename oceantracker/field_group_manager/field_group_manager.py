@@ -72,7 +72,7 @@ class FieldGroupManager(ParameterBaseClass):
         # write_grid
         self.reader.write_grid(info['gridID'])
         # write catalog
-        json_util.write_JSON(path.join(si.run_info.run_output_dir,f'hindcast_catalog{info["gridID"]:03d}'), self.reader.data_set.info)
+        json_util.write_JSON(path.join(si.run_info.run_output_dir,f'hindcast_catalog{info["gridID"]:03d}'), self.reader.dataset.info)
         pass
         if si.settings.display_grid_at_start:
             from matplotlib import pyplot as plt

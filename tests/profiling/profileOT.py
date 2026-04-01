@@ -108,7 +108,7 @@ def run(profiler_name, params):
     results_file = 'PItest_%03.0f' % test_version + params['output_file_base']
     full_ouput_dir = path.join(params['root_output_dir'], params['output_file_base'])
 
-    case_info_file = path.join(full_ouput_dir, params['output_file_base'] + '_caseInfo.json')
+    case_info_file = path.join(full_ouput_dir,'caseInfo.json')
 
     oceantracker.main.run(params)
 
