@@ -293,12 +293,12 @@ class FieldGroupManager(ParameterBaseClass):
         info= self.info
         field_group_manager_util.update_dry_cell_index( grid['is_dry_cell_buffer'], grid['dry_cell_index'],
                                                    info['current_buffer_steps'], info['weight_time_steps'])
-
         pass
 
     def get_reader_info(self):
         d= dict(reader=self.reader.info)
         return d
+
     def are_points_inside_domain(self,x):
         # only primary/outer grid
         is_inside, part_data = self.interpolator.are_points_inside_domain(x)
