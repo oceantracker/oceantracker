@@ -251,6 +251,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.do_counts(n_time_step, time_sec, sel, alive)
         self.update_count += 1
 
+        return sel  # return this so child update() methods  can act on those particles which are counted
+
 
 
     def info_to_write_on_file_close(self,nc) :

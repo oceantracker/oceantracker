@@ -23,6 +23,9 @@ class OceanTrackerDataSet(object):
             si.msg_logger.msg(f'No files found in input_dir, or its sub-dirs matching mask "{mask}"',
                               hint=f'searching with "gob" mask "{mask}"', fatal_error=True)
 
+        si.msg_logger.progress_marker(f'Building hindcast catalog of files in dir and sub-dirs of "{reader_params["input_dir"]}"')
+        si.msg_logger.progress_marker(f'Found  {len(file_list)} files', tabs = 1)
+
         self.info = dict(input_dir= reader_params['input_dir'], file_mask=reader_params['file_mask'],
                         variables={}, files=[], dims={}, attributes={})
         info = self.info
