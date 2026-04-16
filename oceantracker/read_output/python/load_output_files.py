@@ -84,9 +84,18 @@ def load_grid(case_info_file_name, gridID=0):
 
     return d
 
-def load_stats_data(case_info_file_name, name = None,nt=None):
-    # load gridded or polygon stas file using runcase_info, the output of  load_runcase_info()
+def load_stats_data(case_info_file_name, name=None, nt=None):
+    '''Load a particle statistics file using the case info file.
 
+    Parameters
+    ----------
+    case_info_file_name : str
+        Path to the case info JSON file produced by OceanTracker.
+    name : str, optional
+        Name of the particle_statistics instance to load. Defaults to the first one.
+    nt : optional
+        Time-step selection.
+    '''
     case_info = read_case_info_file(case_info_file_name)
     name = _get_role_dict_name(case_info, 'particle_statistics', name)
     stat_nc_file_name = _get_role_dict_file_name(case_info, 'particle_statistics', name)

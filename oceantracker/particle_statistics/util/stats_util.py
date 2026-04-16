@@ -50,3 +50,13 @@ def _sel_z_near_seasurface(x, tide, dz, sel, out):
 @njitOT
 def _get_age_bin(age, age_bin_edges):
     return  int(np.floor((age - age_bin_edges[0]) / (age_bin_edges[1]- age_bin_edges[0])))
+
+@njitOT
+def _sel_below_max_count(counting_events, max_count, sel, out):
+    # Select particles from sel where counting_events[n] < max_count
+    n_found = 0
+    for n in sel:
+        if counting_events[n] < max_count:
+            out[n_found] = n
+            n_found += 1
+    return out[:n_found]

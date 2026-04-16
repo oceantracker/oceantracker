@@ -435,3 +435,40 @@ def polygon_stats_timeBased_waterDepth():
         update_interval=3600,
         particle_property_list=["water_depth"],
     )
+
+
+@pytest.fixture
+def polygon_stats_2D_timeBased_all_released():
+    """Time-based polygon stats using all_released denominator for connectivity tests"""
+    return dict(
+        name="my_poly_stats_time_allrel",
+        class_name="PolygonStats2D_timeBased",
+        update_interval=3600,
+        status_list=["moving", "on_bottom", "stranded_by_tide", "stationary"],
+        connectivity_denominator='all_released',
+    )
+
+
+@pytest.fixture
+def polygon_stats_2D_ageBased_all_released():
+    """Age-based polygon stats using all_released denominator for connectivity tests"""
+    return dict(
+        name="my_poly_stats_age_allrel",
+        class_name="PolygonStats2D_ageBased",
+        update_interval=3600,
+        max_age_to_bin=24 * 3600,
+        age_bin_size=3600,
+        status_list=["moving", "on_bottom", "stranded_by_tide", "stationary"],
+        connectivity_denominator='all_released',
+    )
+
+
+@pytest.fixture
+def single_pulse_point_release():
+    """Single-pulse release for controlled property tests"""
+    return dict(
+        name="single_pulse",
+        class_name="PointRelease",
+        release_interval=0,
+        pulse_size=10,
+    )

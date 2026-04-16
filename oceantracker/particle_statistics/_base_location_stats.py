@@ -8,6 +8,7 @@ from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, 
 from numba.typed import List as NumbaList
 from oceantracker.util import cord_transforms
 from oceantracker.particle_statistics.util import stats_util
+from oceantracker.particle_properties.util import particle_comparisons_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.util.basic_util import get_role_from_base_class_file_name
 
@@ -38,6 +39,22 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 water_depth_min =  PVC(None, float, min=0.,doc_str='Count only those particles in water depths greater than this value'),
                 water_depth_max =  PVC(None, float,min=0., doc_str='Count only those particles in water depths less than this value'),
                 particle_property_list = PLC(None, str, make_list_unique=True, doc_str='Create statistics for these named particle properties, list = ["water_depth"], for average of water depth at particle locations inside the counted regions') ,
+
+                max_count_per_particle=PVC(None, int, min=1,
+                    doc_str='Maximum number of times each particle can be counted by this stats instance. Default None = unlimited. '
+                            'See also kill_when_max_counted.'),
+                kill_when_max_counted=PVC(True, bool,
+                    doc_str='When max_count_per_particle is set: True (default) = set particle status to dead once max count is reached; '
+                            'False = exclude the particle from future counting in this stats instance but leave it alive.'),
+                counting_probability=PVC(1.0, float, min=0., max=1.,
+                    doc_str='Probability [0,1] that an eligible particle is counted at each update interval. '
+                            'E.g. 0.1 gives a ~10%% chance of counting per update, useful for settlement probability.'),
+                connectivity_denominator=PVC('all_alive', str,
+                    possible_values=['all_alive', 'all_released'],
+                    doc_str='Denominator used to compute connectivity_matrix written to the output file. '
+                            '"all_alive" (default): divide by count_all_alive_particles (particles alive at each time step / age bin). '
+                            '"all_released": divide by count_all_released_age_bins (age-based) or num_released (time-based), '
+                            'i.e. total unique particles released — useful for settlement-probability-style connectivity.'),
 
                 #coords_in_lat_lon_order =  PVC(False, bool,
                 #    doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
@@ -82,6 +99,15 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         self.set_z_range_for_counts()
 
         self.add_scheduler('count_scheduler', start=params['start'], end=params['end'], duration=params['duration'], interval=params['update_interval'], caller=self)
+
+        # Set up per-instance particle property to track how many times each particle has been counted
+        if params['max_count_per_particle'] is not None:
+            prop_name = f'_stats_counting_events_{self.info["instanceID"]:03d}'
+            si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty',
+                         name=prop_name, dtype='int32', initial_value=0, write=False, initialize=True)
+            self.info['counting_events_prop'] = prop_name
+        else:
+            self.info['counting_events_prop'] = None
 
         pass
 
@@ -204,6 +230,45 @@ class _BaseParticleLocationStats(ParameterBaseClass):
     def select_particles_to_count(self, sel): # dummy method
         return sel
 
+    def _apply_counting_filters(self, sel):
+        '''Apply max_count_per_particle (exclude-only mode) and counting_probability filters.
+        Called after select_particles_to_count() in update().
+        Note: when kill_when_max_counted=True, exclusion is handled by the particles dying,
+        so no filter is needed here for that mode.'''
+        params = self.params
+        part_prop = si.class_roles.particle_properties
+
+        # Exclude particles that have reached their max count (non-kill mode only)
+        if params['max_count_per_particle'] is not None and not params['kill_when_max_counted']:
+            counting_events = part_prop[self.info['counting_events_prop']].data
+            sel = stats_util._sel_below_max_count(
+                counting_events, params['max_count_per_particle'], sel,
+                self.get_partID_buffer('counting_max_sel'))
+
+        # Randomly sub-sample the eligible particles by counting_probability
+        if params['counting_probability'] < 1.0:
+            sel = particle_comparisons_util.random_selection(
+                sel, params['counting_probability'],
+                self.get_partID_buffer('prob_sel'))
+
+        return sel
+
+    def _post_counting_update(self, sel):
+        '''Increment counting_events for particles in sel, then kill those that reached max count.
+        Note: counting_events is incremented for all particles passed to do_counts (those selected
+        and passing the probability filter), not only those that fell inside a spatial bin.'''
+        params = self.params
+        if params['max_count_per_particle'] is None or sel.size == 0:
+            return
+        part_prop = si.class_roles.particle_properties
+        counting_events = part_prop[self.info['counting_events_prop']].data
+        counting_events[sel] += 1
+
+        if params['kill_when_max_counted']:
+            maxed_mask = counting_events[sel] >= params['max_count_per_particle']
+            if maxed_mask.any():
+                part_prop['status'].set_values(si.particle_status_flags.dead, sel[maxed_mask])
+
     def sel_depth_range(self,sel):
         # find subset of sel that meet depth range requirements
         part_prop = si.class_roles.particle_properties
@@ -241,6 +306,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             sel = self.sel_depth_range(sel)
         # users override this method  to further sub-select those to count
         sel = self.select_particles_to_count(sel)
+        # apply internal counting filters: max_count_per_particle (exclude mode) and counting_probability
+        sel = self._apply_counting_filters(sel)
 
         #update prop list data, as buffer may have expanded
         # todo , do this only when part buffer expansion occurs as array changes, add expanf bffer to all clases??
@@ -249,6 +316,8 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.prop_data_list[n]= part_prop[name].data
 
         self.do_counts(n_time_step, time_sec, sel, alive)
+        # increment counting_events and optionally kill particles that have reached max count
+        self._post_counting_update(sel)
         self.update_count += 1
 
         return sel  # return this so child update() methods  can act on those particles which are counted
@@ -301,6 +370,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             use_dims = dim_sizes
             self.counts_inside_age_bins = np.full(use_dims, 0, np.int64)
             self.count_all_alive_particles = np.full(use_dims[:2], 0, np.int64)
+            self.count_all_released_age_bins = np.full(use_dims[:2], 0, np.int64)
 
         if 'particle_property_list' in params:
             for p in params['particle_property_list']:

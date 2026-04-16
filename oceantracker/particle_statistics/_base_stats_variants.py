@@ -27,9 +27,12 @@ class _BaseTimeStats(ParameterBaseClass):
         dim_names =  stats_util.get_dim_names(dims)
         nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64,
                            compression_level=si.settings.NCDF_compression_level,
-                           description='counts of all alive particles everywhere')
+                           description='counts of all alive particles everywhere (included outside open-boundary particles)')
         nc.create_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in spatial bins at given times, for each release group')
+        nc.create_variable('connectivity_matrix', dim_names, np.float32,
+                           compression_level=si.settings.NCDF_compression_level,
+                           description='Connectivity: count / denominator (see connectivity_denominator parameter)')
 
         if 'particle_property_list' in params:
             for p in params['particle_property_list']:
@@ -68,6 +71,20 @@ class _BaseTimeStats(ParameterBaseClass):
 
         fh['count'][n_write, ...] = self.counts_inside_time_slice[:, ...]
         fh['count_all_alive_particles'][n_write, ...] = self.count_all_alive_particles[:, ...]
+
+        # compute and write connectivity_matrix using the chosen denominator
+        params = self.params
+        if params['connectivity_denominator'] == 'all_released':
+            denominator = num_released  # (n_groups,) — num released so far
+        else:
+            denominator = self.count_all_alive_particles  # (n_groups,)
+
+        count = self.counts_inside_time_slice  # shape (n_groups, ...)
+        s = list(count.shape[:1]) + (count.ndim - 1) * [1]
+        with np.errstate(divide='ignore', invalid='ignore'):
+            connectivity = count / denominator.reshape(s)
+        connectivity[~np.isfinite(connectivity)] = np.nan
+        fh['connectivity_matrix'][n_write, ...] = connectivity
 
         for key, item in self.sum_binned_part_prop.items():
             fh['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
@@ -132,14 +149,15 @@ class _BaseAgeStats(ParameterBaseClass):
         stats_grid['age_bins'] = 0.5 * (stats_grid['age_bin_edges'][1:] + stats_grid['age_bin_edges'][:-1])  # ages at middle of bins
 
 
-    def count_all_alive_by_age(self, alive):
+
+    def count_all_alive_by_age(self, alive, time_sec):
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
-        release_groupID = part_prop['IDrelease_group'].used_buffer()
         self._count_all_alive_age_bins(part_prop['status'].data,
                             part_prop['IDrelease_group'].data,
                             part_prop['age'].data,  stats_grid['age_bin_edges'],
                             self.count_all_alive_particles, alive)
+        self._compute_released_age_demographics(time_sec)
 
     @staticmethod
     @njitOT
@@ -152,6 +170,41 @@ class _BaseAgeStats(ParameterBaseClass):
             if 0 <= na < (age_bin_edges.size - 1):
                 count_all_alive[na, release_group[n]] += status[n] >= status_outside_open_boundary
 
+    def _compute_released_age_demographics(self, time_sec):
+        """Accumulate, from release group pulse history, the count of particles currently
+        in each age bin into count_all_released_age_bins.
+
+        Mirrors _count_all_alive_age_bins exactly — each call adds the instantaneous
+        demographic snapshot (each pulse placed in its single current age bin) to the
+        running total, so the result is directly comparable to count_all_alive_particles.
+        """
+        age_bin_edges = self.grid['age_bin_edges']
+        count = self.count_all_released_age_bins
+        # NOTE: do NOT zero count — accumulate across calls like count_all_alive_particles
+
+        for nrg, rg in enumerate(si.class_roles.release_groups.values()):
+            times = rg.info['pulse_release_times']
+            if len(times) == 0:
+                continue
+            self._accumulate_pulse_demographics(
+                np.asarray(times, dtype=np.float64),
+                np.asarray(rg.info['pulse_counts'], dtype=np.int64),
+                time_sec, age_bin_edges, count, nrg)
+
+    @staticmethod
+    @njitOT
+    def _accumulate_pulse_demographics(pulse_times, pulse_counts, time_sec, age_bin_edges, count, nrg):
+        # For each pulse, compute its current age bin and add its count to that bin only.
+        # Mirrors the per-particle logic in _count_all_alive_age_bins but for all
+        # released particles (alive + dead), derived from the pulse release schedule.
+        da = age_bin_edges[1] - age_bin_edges[0]
+        n_age_bins = age_bin_edges.size - 1
+        for i in range(pulse_times.size):
+            age = time_sec - pulse_times[i]
+            na = int(np.floor((age - age_bin_edges[0]) / da))
+            if 0 <= na < n_age_bins:
+                count[na, nrg] += pulse_counts[i]
+
     def info_to_write_on_file_close(self, nc):
         # write variables whole
         stats_grid = self.grid
@@ -159,23 +212,34 @@ class _BaseAgeStats(ParameterBaseClass):
 
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
         nc.write_variable('count', counts_inside_age_bins, dim_names,
-                          description='counts of particles in each stats polygon at given ages, for each release group')
+                          description='counts of particles in each stats bin at given ages, for each release group')
 
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],
-                          description='counts of  all alive particles, not just those selected to be counted')
+                          description='cumulative counts of alive particles per age bin and release group '
+                                      '(includes those at open boundaries, excludes dead/outside-domain)')
+
+        nc.write_variable('count_all_released_age_bins', self.count_all_released_age_bins, dim_names[:2],
+                          description='unique count of released particles that have entered each age bin '
+                                      '(including dead; each particle counted once per bin via age-bin transition detection)')
+
+        # Compute and write connectivity_matrix using the chosen denominator
+        params = self.params
+        if params['connectivity_denominator'] == 'all_released':
+            denominator = self.count_all_released_age_bins
+            denom_desc = 'count_all_released_age_bins'
+        else:
+            denominator = self.count_all_alive_particles
+            denom_desc = 'count_all_alive_particles'
+
+        s = list(counts_inside_age_bins.shape[:2]) + (counts_inside_age_bins.ndim - 2) * [1]
+        with np.errstate(divide='ignore', invalid='ignore'):
+            connectivity_matrix = counts_inside_age_bins / denominator.reshape(s)
+        connectivity_matrix[~np.isfinite(connectivity_matrix)] = np.nan
+        nc.write_variable('connectivity_matrix', connectivity_matrix, dim_names,
+                          description=f'Connectivity: count / {denom_desc}',
+                          dtype=np.float32)
 
         self._add_age_bins_to_file(nc)
-
-        # add connectives, works for both polygon and grid stats, using s to reshape
-        s = list(counts_inside_age_bins.shape[:2]) \
-                    + (counts_inside_age_bins.ndim - self.count_all_alive_particles.ndim) * [ 1]
-        with np.errstate(divide='ignore', invalid='ignore'):
-            connectivity_matrix = counts_inside_age_bins / self.count_all_alive_particles.reshape(s)
-
-        connectivity_matrix[~np.isfinite(connectivity_matrix)] = np.nan
-
-        nc.write_variable('connectivity_matrix', connectivity_matrix, dim_names,
-                          description='Age binned connectivity of each polygon as fraction =counts_inside/ counts_all_alive (includes thoise  outside open boundaries )')
 
         # particle property sums
         for key, item in self.sum_binned_part_prop.items():
@@ -211,6 +275,7 @@ class _BaseAgeStats(ParameterBaseClass):
 
         self.counts_inside_age_bins = nc.read_variable('count')
         self.count_all_alive_particles = nc.read_variable('count_all_alive_particles')
+        self.count_all_released_age_bins = nc.read_variable('count_all_released_age_bins')
 
         # copy in summed properties, to preserve references in sum_prop_data_list that is used inside numba
         for name, s in self.sum_binned_part_prop.items():

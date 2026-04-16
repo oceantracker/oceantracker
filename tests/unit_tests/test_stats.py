@@ -1,4 +1,5 @@
 from oceantracker.main import OceanTracker
+from oceantracker.read_output.python import load_output_files
 import pytest
 
 
@@ -43,6 +44,10 @@ def test_gridded_statistics_2D_ageBased(
     ot.add_class("particle_statistics", **gridded_2D_ageBased)
     case_info_file = ot.run()
     assert case_info_file is not None
+
+    stats = load_output_files.load_stats_data(case_info_file, name=gridded_2D_ageBased["name"])
+    assert "count_all_released_age_bins" in stats, "count_all_released_age_bins missing from age-based stats output"
+    assert stats["count_all_released_age_bins"].sum() > 0, "count_all_released_age_bins is all zeros — demographic computation produced no output"
 
 
 def test_gridded_statistics_3D_timeBased(
@@ -103,6 +108,10 @@ def test_polygon_statistics_2D_ageBased(
     )
     case_info_file = ot.run()
     assert case_info_file is not None
+
+    stats = load_output_files.load_stats_data(case_info_file, name=polygon_stats_2D_ageBased["name"])
+    assert "count_all_released_age_bins" in stats, "count_all_released_age_bins missing from age-based stats output"
+    assert stats["count_all_released_age_bins"].sum() > 0, "count_all_released_age_bins is all zeros — demographic computation produced no output"
 
 
 def test_grid_center(

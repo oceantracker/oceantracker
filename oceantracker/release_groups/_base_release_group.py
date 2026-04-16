@@ -53,6 +53,8 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info['number_released'] = 0  # count of particles released in this group
         info['pulseID'] = 0
         info['total_number_required'] = 0
+        info['pulse_release_times'] = []  # release time (sec) of each pulse
+        info['pulse_counts'] = []         # number of particles in each pulse
 
     def initial_setup(self):
         params=self.params
@@ -111,7 +113,12 @@ class _BaseReleaseGroup(ParameterBaseClass):
             self._add_vertical_release(release_info)
 
         info['pulseID'] += 1
-        info['number_released'] += release_info['x'].shape[0]  # count number released in this group
+        n_released = release_info['x'].shape[0]
+        info['number_released'] += n_released
+
+        if n_released > 0:
+            info['pulse_release_times'].append(time_sec)
+            info['pulse_counts'].append(n_released)
 
         return release_info
 
