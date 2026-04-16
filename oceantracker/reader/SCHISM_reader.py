@@ -65,7 +65,7 @@ class SCHISMreader(_BaseUnstructuredReader):
         super().initial_setup()
         # use schism min water depth if in file
         if 'minimum_depth' in self.info['variables']:
-            si.settings.minimum_total_water_depth = max( float(self.dataset.read_variable('minimum_depth')), .01)
+            si.settings.minimum_total_water_depth = max( float(np.asarray(self.dataset.read_variable('minimum_depth')).flat[0]), .01)
     def add_hindcast_info(self):
         params = self.params
         info = self. info
