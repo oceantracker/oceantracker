@@ -8,13 +8,12 @@ class Scheduler(object):
     # all times in seconds
     def __init__(self,si,name_scheduler,
                  start=None, end=None, duration=None,
-                 interval = None, times=None,cancel_when_done=True,
+                 interval = None, times=None,
                  msg_logger=None,caller=None):
 
         run_info = si.run_info
         settings = si.settings
 
-        self.cancel_when_done = cancel_when_done
         self.name = name_scheduler
         md = run_info.model_direction
         dt = settings.time_step
@@ -129,8 +128,7 @@ class Scheduler(object):
                         start_date=time_util.seconds_to_isostr(start),
                         end_date=time_util.seconds_to_isostr(end),
                         number_scheduled_times = self.scheduled_times.size,
-                        cancel_when_done=cancel_when_done,
-                        )
+                           )
         i = self.info
         b = f'{12*" "} Scheduler{15*" "}Hindcast{14*" "}Run\n'
         b += f'Start- {i["start_date"]} | {time_util.seconds_to_isostr(run_info.hindcast_start_time)} | {time_util.seconds_to_isostr(run_info.times[0])}  \n'
@@ -146,19 +144,8 @@ class Scheduler(object):
     def do_task(self, n_time_step):
         # check if task flag is set
         do_it = self.task_flag[n_time_step]
-
-        if self.cancel_when_done and do_it:
-            # ensure task is not repeated by another operation at the same time step
-            self.task_flag[n_time_step] = False
         return do_it
 
-    def cancel_task(self, n_time_step):
-        # check if task flag is set
-         self.task_flag[n_time_step] = False
-
-    def see_task_flag(self, n_time_step):
-        # returns if task is happening  without any cancellation of task when done
-        return  self.task_flag[n_time_step]
 
     def is_active(self, n_time_step):
         # check if task is between start and end from active_flag is set

@@ -117,6 +117,7 @@ class Solver(ParameterBaseClass):
             self.add_scheduler('save_state',
                                start=si.run_info.start_time,
                                interval=si.settings.restart_interval )
+
         # run one less step as last step is initial condition for next block
         # first step is zero or restart time step
         for n_time_step  in range(nt1, model_times.size-1):
@@ -426,6 +427,8 @@ class Solver(ParameterBaseClass):
             i.timed_update(n_time_step,time_sec)
 
         si.block_timer('Update event loggers', t0)
+
+
 
     def close(self):
         pass

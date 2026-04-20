@@ -340,6 +340,7 @@ class OceanTrackerParamsRunner(object):
                             interval =p['release_interval'], caller=i)
             # max_ages needed for culling operations
             i.params['max_age'] = si.info.large_float if i.params['max_age'] is None else i.params['max_age']
+            i.params['max_age'] = np.round((i.params['max_age'] / si.settings.time_step)) * si.settings.time_step # round max age to time steps
             max_ages.append(i.params['max_age'])
 
             # find total released to date at each time step
