@@ -55,6 +55,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                             '"all_alive" (default): divide by count_all_alive_particles (particles alive at each time step / age bin). '
                             '"all_released": divide by count_all_released_age_bins (age-based) or num_released (time-based), '
                             'i.e. total unique particles released — useful for settlement-probability-style connectivity.'),
+                write_connectivity=PVC(True, bool,
+                    doc_str='Write connectivity_matrix to the output file. '
+                            'Set to False to reduce file size when connectivity is not needed.'),
 
                 #coords_in_lat_lon_order =  PVC(False, bool,
                 #    doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),

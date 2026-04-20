@@ -30,9 +30,10 @@ class _BaseTimeStats(ParameterBaseClass):
                            description='counts of all alive particles everywhere (included outside open-boundary particles)')
         nc.create_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in spatial bins at given times, for each release group')
-        nc.create_variable('connectivity_matrix', dim_names, np.float32,
-                           compression_level=si.settings.NCDF_compression_level,
-                           description='Connectivity: count / denominator (see connectivity_denominator parameter)')
+        if self.params['write_connectivity']:
+            nc.create_variable('connectivity_matrix', dim_names, np.float32,
+                               compression_level=si.settings.NCDF_compression_level,
+                               description='Connectivity: count / denominator (see connectivity_denominator parameter)')
 
         if 'particle_property_list' in params:
             for p in params['particle_property_list']:
@@ -74,17 +75,18 @@ class _BaseTimeStats(ParameterBaseClass):
 
         # compute and write connectivity_matrix using the chosen denominator
         params = self.params
-        if params['connectivity_denominator'] == 'all_released':
-            denominator = num_released  # (n_groups,) — num released so far
-        else:
-            denominator = self.count_all_alive_particles  # (n_groups,)
+        if params['write_connectivity']:
+            if params['connectivity_denominator'] == 'all_released':
+                denominator = num_released  # (n_groups,) — num released so far
+            else:
+                denominator = self.count_all_alive_particles  # (n_groups,)
 
-        count = self.counts_inside_time_slice  # shape (n_groups, ...)
-        s = list(count.shape[:1]) + (count.ndim - 1) * [1]
-        with np.errstate(divide='ignore', invalid='ignore'):
-            connectivity = count / denominator.reshape(s)
-        connectivity[~np.isfinite(connectivity)] = np.nan
-        fh['connectivity_matrix'][n_write, ...] = connectivity
+            count = self.counts_inside_time_slice  # shape (n_groups, ...)
+            s = list(count.shape[:1]) + (count.ndim - 1) * [1]
+            with np.errstate(divide='ignore', invalid='ignore'):
+                connectivity = count / denominator.reshape(s)
+            connectivity[~np.isfinite(connectivity)] = np.nan
+            fh['connectivity_matrix'][n_write, ...] = connectivity
 
         for key, item in self.sum_binned_part_prop.items():
             fh['sum_' + key][n_write, ...] = item[:]  # write sums  working in original view
@@ -224,20 +226,21 @@ class _BaseAgeStats(ParameterBaseClass):
 
         # Compute and write connectivity_matrix using the chosen denominator
         params = self.params
-        if params['connectivity_denominator'] == 'all_released':
-            denominator = self.count_all_released_age_bins
-            denom_desc = 'count_all_released_age_bins'
-        else:
-            denominator = self.count_all_alive_particles
-            denom_desc = 'count_all_alive_particles'
+        if params['write_connectivity']:
+            if params['connectivity_denominator'] == 'all_released':
+                denominator = self.count_all_released_age_bins
+                denom_desc = 'count_all_released_age_bins'
+            else:
+                denominator = self.count_all_alive_particles
+                denom_desc = 'count_all_alive_particles'
 
-        s = list(counts_inside_age_bins.shape[:2]) + (counts_inside_age_bins.ndim - 2) * [1]
-        with np.errstate(divide='ignore', invalid='ignore'):
-            connectivity_matrix = counts_inside_age_bins / denominator.reshape(s)
-        connectivity_matrix[~np.isfinite(connectivity_matrix)] = np.nan
-        nc.write_variable('connectivity_matrix', connectivity_matrix, dim_names,
-                          description=f'Connectivity: count / {denom_desc}',
-                          dtype=np.float32)
+            s = list(counts_inside_age_bins.shape[:2]) + (counts_inside_age_bins.ndim - 2) * [1]
+            with np.errstate(divide='ignore', invalid='ignore'):
+                connectivity_matrix = counts_inside_age_bins / denominator.reshape(s)
+            connectivity_matrix[~np.isfinite(connectivity_matrix)] = np.nan
+            nc.write_variable('connectivity_matrix', connectivity_matrix, dim_names,
+                              description=f'Connectivity: count / {denom_desc}',
+                              dtype=np.float32)
 
         self._add_age_bins_to_file(nc)
 
