@@ -252,21 +252,19 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
         self.n_updates_in_interval = 0
 
 
-    def _create_common_time_varying_stats(self,nc):
-        # replacing the output variables with floats
-        # the running mean values aren't strictly int anymore
+    def _create_count_variables(self, nc):
+        # running mean values aren't integers, so use float32 instead of int64
         params = self.params
-        dims =  self.info['count_dims']
-        dim_names =  stats_util.get_dim_names(dims)
+        dims = self.info['count_dims']
+        dim_names = stats_util.get_dim_names(dims)
         nc.create_variable('count_all_alive_particles', dim_names[:2], np.float32,
                            compression_level=si.settings.NCDF_compression_level,
                            description='counts of all alive particles everywhere (included outside open-boundary particles)')
         nc.create_variable('count', dim_names, np.float32, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in spatial bins at given times, for each release group')
-
         if 'particle_property_list' in params:
             for p in params['particle_property_list']:
-                nc.create_variable('sum_' + p,dim_names, dtype= np.float32, description= f'sum of particle property {p} inside bin')
+                nc.create_variable('sum_' + p, dim_names, dtype=np.float32, description=f'sum of particle property {p} inside bin')
                 nc.create_variable(p, dim_names, dtype=np.float32, description=f'Average particle property {p} inside cell  = sum prop/counts_inside')
 
     # def open_output_file(self, file_name):

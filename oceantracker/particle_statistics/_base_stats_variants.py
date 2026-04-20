@@ -21,24 +21,30 @@ class _BaseTimeStats(ParameterBaseClass):
     def _add_time_params(self):
         self.add_default_params( )
 
-    def _create_common_time_varying_stats(self,nc):
+    def _create_common_time_varying_stats(self, nc):
+        self._create_count_variables(nc)
+        self._create_connectivity_variable(nc)
+
+    def _create_count_variables(self, nc):
         params = self.params
-        dims =  self.info['count_dims']
-        dim_names =  stats_util.get_dim_names(dims)
+        dims = self.info['count_dims']
+        dim_names = stats_util.get_dim_names(dims)
         nc.create_variable('count_all_alive_particles', dim_names[:2], np.int64,
                            compression_level=si.settings.NCDF_compression_level,
                            description='counts of all alive particles everywhere (included outside open-boundary particles)')
         nc.create_variable('count', dim_names, np.int64, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in spatial bins at given times, for each release group')
+        if 'particle_property_list' in params:
+            for p in params['particle_property_list']:
+                nc.create_variable('sum_' + p, dim_names, dtype=np.float64, description=f'sum of particle property {p} inside bin')
+                nc.create_variable(p, dim_names, dtype=np.float32, description=f'Average particle property {p} inside cell  = sum prop/counts_inside')
+
+    def _create_connectivity_variable(self, nc):
         if self.params['write_connectivity']:
+            dim_names = stats_util.get_dim_names(self.info['count_dims'])
             nc.create_variable('connectivity_matrix', dim_names, np.float32,
                                compression_level=si.settings.NCDF_compression_level,
                                description='Connectivity: count / denominator (see connectivity_denominator parameter)')
-
-        if 'particle_property_list' in params:
-            for p in params['particle_property_list']:
-                nc.create_variable('sum_' + p,dim_names, dtype= np.float64, description= f'sum of particle property {p} inside bin')
-                nc.create_variable(p, dim_names, dtype=np.float32, description=f'Average particle property {p} inside cell  = sum prop/counts_inside')
 
     def count_all_currently_alive(self, alive):
         part_prop = si.class_roles.particle_properties
