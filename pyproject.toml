@@ -97,3 +97,7 @@ testpaths = [
 python_files = [
     "test*.py",
 ]
+markers = [
+    "performance_basic: standard benchmark, run with: pytest -n0 -m performance_basic",
+    "performance_extended: slow extended benchmarks (scaling, RK order, parallelization), run with: pytest -n0 -m performance_extended",
+]
