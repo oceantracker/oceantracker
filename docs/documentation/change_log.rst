@@ -7,6 +7,48 @@ Change log
 Note: All changes that are either input or model output in any way are labeled as "breaking changes",
       excluding bug-fixes
 
+
+Version '0.5.3.6 2026-04-20'
+____________________________
+
+Features
+--------
+
+#. In the context of the connectivity rework:
+
+   #. Re-added the automatic calculation of time-based connectivity back in.
+
+   #. Changed the default behavior for writing the connectivity to disk. 
+      Previously we only wrote the counts "counts" and "all alive" to disk, while the connectivity was calculated on-the-fly while loading the stats.
+      Now we also write the connectivity to disk during model runtime to make the connectivity more accessible to users that prefer to not user OT post-processing tooling.
+      However, this effectively doubles the file size.
+      Hence, we added a parameter to disable writing the connectivity to disk ("write_connectivity")
+
+   #. Added three new features to the connectivity (see "tutorials_how_to/I_connectivity"):
+
+      #. The option to select between "all alive" or "all released" as the normalizing denominator ("connectivity_denominator") of the connectivity.
+      
+      #. Added the option to specify how often a particle shall be counted ("max_count_per_particle")
+         and whether the particle should be removed from the simulation after counting ("kill_when_max_counted")
+
+      #. Added the option to add a counting probability ("counting_probability").
+   
+#. Statics `update` methods now returns the indices of counted particles.
+   This enables children-classes' `update` methods to act on counted particles.
+
+#. Added performance tests into the release pipeline that are written to "tests/performance_results/history.json"
+
+Bug fixes
+---------
+
+#. Fixed an issue with the SCHISM reader breaking when using numpy > 2.0
+
+Misc.
+-----
+
+#.  replaced hincast_info.json with hindcast_catalog.json in preparation to a hindcasts cataloge caching functionality
+
+
 Version '0.5.3.5 2026-03-24'
 ____________________________
 
