@@ -8,7 +8,7 @@ Heat maps
 .. raw:: html
 
   <center>
-    <video width="95%" controls autoplay loop src="../../_static/demos/demo03_heatmaps.mp4">
+    <video width="95%" controls autoplay loop src="../_static/demos/demo03_heatmaps.mp4">
    </video>
   </center>
 
