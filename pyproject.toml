@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "oceantracker"
-version = "0.5.3.5"
+version = "0.5.3.6"
 description = "Fast offline Lagrangian particle tracking in the Ocean for structured and unstructured grids"
 readme = "README.md"
 license = "MIT"
@@ -96,4 +96,8 @@ testpaths = [
 ]
 python_files = [
     "test*.py",
+]
+markers = [
+    "performance_basic: standard benchmark, run with: pytest -n0 -m performance_basic",
+    "performance_extended: slow extended benchmarks (scaling, RK order, parallelization), run with: pytest -n0 -m performance_extended",
 ]

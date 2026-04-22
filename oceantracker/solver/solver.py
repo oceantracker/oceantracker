@@ -217,8 +217,6 @@ class Solver(ParameterBaseClass):
         pgm = si.core_class_roles.particle_group_manager
         fgm = si.core_class_roles.field_group_manager
 
-
-
         ri = si.run_info
         ri.current_model_date = time_util.seconds_to_datetime64(time_sec)
         ri.current_model_time_step = n_time_step

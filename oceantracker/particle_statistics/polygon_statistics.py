@@ -103,15 +103,13 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
 
 class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLocationStats):
     '''
-    Counts particles inside  given polygons as a histogram  binned by particle age, useful in tracking ages class of larave
+    Counts particles inside  given polygons as a histogram  binned by particle age, useful in tracking ages class of larvae.
     The particles counted can be subsetted by status, water depth etc, default is all alive particles not outside open boundaries.
     Alive particles have  stationary, no_bottom, stranded or moving status
-     Output in netcdf file split into release groups and age bins for the entire run ( or user give start to end times)  has at least
-        -counts of particles in the requested subset
-        -counts of all alive particles inside the domain, whether in the subset or not
-        -counts_released_age of all release particles in age bin histogram, incudes those which are outside the domain have died etc.t
-        - connectivity_matrix,  the probability of a released particle being inside each grid cell. that is
-            the connectivity = counts/counts_released_age
+     Output in netcdf file split into release groups and age bins for the entire run ( or user given start to end times)  has at least
+        - counts of particles in the requested subset
+        - counts of all alive particles inside the domain, whether in the subset or not
+        - counts of all released particles inside the domain, whether in the subset or not
     '''
     def __init__(self):
         super().__init__()
@@ -134,23 +132,6 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
 
         self.set_up_part_prop_lists()
 
-
-    def _create_file_binned_variables(self, nc):
-
-        # set up space for requested particle properties
-        dims= (self.grid['age_bins'].shape[0], len(si.class_roles.release_groups), len(self.params['polygon_list']))
-        # working count space, row are (y,x)
-        self.counts_inside_age_bins = np.full(dims, 0, np.int64)
-        # counts in each age bin, whether inside polygon or not
-        self.count_all_particles = np.full(dims[:-1] , 0, np.int64)
-        self.count_all_alive_particles = np.full(dims[:-1], 0, np.int64)
-
-        for p_name in self.params['particle_property_list']:
-            if p_name in si.class_roles.particle_properties:
-                self.sum_binned_part_prop[p_name] = np.full(dims, 0.)  # zero for  summing
-            else:
-                si.msg_logger.msg('Part Prop "' + p_name + '" not a particle property, ignored and no stats calculated', warning=True)
-
     def do_counts(self,n_time_step, time_sec, sel, alive):
 
         part_prop = si.class_roles.particle_properties
@@ -160,7 +141,7 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
         p_x         = part_prop['x'].used_buffer()
         p_age       = part_prop['age'].used_buffer()
 
-        self.count_all_alive_by_age(alive)
+        self.count_all_alive_by_age(alive, time_sec)
 
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]

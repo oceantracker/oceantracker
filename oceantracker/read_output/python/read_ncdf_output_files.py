@@ -50,7 +50,15 @@ def merge_track_files(file_list, dir=None, var_list=None,fraction_to_read=None):
 
 
 def read_stats_file(file_name, nt=None):
-    # read stats files
+    '''Read a particle statistics NetCDF file and return a dict of variables.
+
+    Parameters
+    ----------
+    file_name : str
+        Path to the stats NetCDF file.
+    nt : optional
+        Time-step selection passed to nc.read_variables().
+    '''
     nc = NetCDFhandler(file_name, mode='r')
     d = dict(global_attributes = nc.attrs())  # read all  global attibutes
     d['dimensions'] = nc.dims()

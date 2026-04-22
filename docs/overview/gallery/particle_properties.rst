@@ -10,7 +10,7 @@ Decaying particle
 .. raw:: html
 
   <center>
-    <video width="95%" controls muted autoplay loop src="../../_static/demos/demo60_SCHISM_3D_decaying_particle.mp4">
+    <video width="95%" controls muted autoplay loop src="../_static/demos/demo60_SCHISM_3D_decaying_particle.mp4">
    </video>
   </center>
 
@@ -52,7 +52,7 @@ Polygon aware particles
 .. raw:: html
 
   <center>
-    <video width="95%" controls autoplay loop src="../../_static/demos/demo07_inside_polygon_events.mp4">
+    <video width="95%" controls autoplay loop src="../_static/demos/demo07_inside_polygon_events.mp4">
    </video>
   </center>
 
@@ -99,7 +99,7 @@ Particle Status
 .. raw:: html
 
   <center>
-    <video width="95%" controls autoplay loop src="../../_static/demos/demo56_SCHISM_3D_resupend_crtitical_friction_vel_status.mp4">
+    <video width="95%" controls autoplay loop src="../_static/demos/demo56_SCHISM_3D_resupend_crtitical_friction_vel_status.mp4">
    </video>
   </center>
 

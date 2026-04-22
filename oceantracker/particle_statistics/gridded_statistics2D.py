@@ -252,21 +252,19 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
         self.n_updates_in_interval = 0
 
 
-    def _create_common_time_varying_stats(self,nc):
-        # replaceing the output variables with floats 
-        # the running mean values aren't strictly int anymore
+    def _create_count_variables(self, nc):
+        # running mean values aren't integers, so use float32 instead of int64
         params = self.params
-        dims =  self.info['count_dims']
-        dim_names =  stats_util.get_dim_names(dims)
+        dims = self.info['count_dims']
+        dim_names = stats_util.get_dim_names(dims)
         nc.create_variable('count_all_alive_particles', dim_names[:2], np.float32,
                            compression_level=si.settings.NCDF_compression_level,
-                           description='counts of all alive particles everywhere')
+                           description='counts of all alive particles everywhere (included outside open-boundary particles)')
         nc.create_variable('count', dim_names, np.float32, compression_level=si.settings.NCDF_compression_level,
                            description='counts of particles in spatial bins at given times, for each release group')
-
         if 'particle_property_list' in params:
             for p in params['particle_property_list']:
-                nc.create_variable('sum_' + p,dim_names, dtype= np.float32, description= f'sum of particle property {p} inside bin')
+                nc.create_variable('sum_' + p, dim_names, dtype=np.float32, description=f'sum of particle property {p} inside bin')
                 nc.create_variable(p, dim_names, dtype=np.float32, description=f'Average particle property {p} inside cell  = sum prop/counts_inside')
 
     # def open_output_file(self, file_name):
@@ -280,16 +278,14 @@ class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
 class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocationStats):
 
     '''
-    Counts particles inside  cells of a regular grid as a histogram  binned by particle age, useful in tracking ages class of larave 
-    Grid is centered at given location, or optionally at the midpoint of each release group
+    Counts particles inside cells of a regular grid as a histogram binned by particle age, useful in tracking age classes of larvae.
+    Grid is centered at given location, or optionally at the midpoint of each release group.
     The particles counted can be subsetted by status, water depth etc, default is all alive particles not outside open boundaries.
-    Alive particles have  stationary, no_bottom, stranded or moving status
-     Output in netcdf file split into release groups and age bis for the entire run ( or user give start to end times)  has at least
-        -counts of particles in the requested subset
-        -counts of all alive particles inside the domain, whether in the subset or not
-        -counts_released_age of all release particles in age bin histogram, incudes those which are outside the domain have died etc.t
-        - connectivity_matrix,  the probability of a released particle being inside each grid cell. that is
-            the connectivity = counts/counts_released_age
+    Alive particles have stationary, on_bottom, stranded or moving status.
+    Output in netcdf file split into release groups and age bins for the entire run (or user-given start to end times) has at least:
+        - counts of particles in the requested subset
+        - counts of all alive particles inside the domain, whether in the subset or not
+        - counts of all released particles inside the domain, whether in the subset or not
     '''
     # bins all particles across all times into age bins,
     # does grid stats  based on age, but must keep whole stats grid in memory so ages can bw binned
@@ -334,7 +330,7 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
         stats_grid = self.grid
         release_groupID = part_prop['IDrelease_group'].used_buffer()
 
-        self.count_all_alive_by_age(alive)
+        self.count_all_alive_by_age(alive, time_sec)
 
         p_x = part_prop['x'].used_buffer()
         p_age = part_prop['age'].used_buffer()

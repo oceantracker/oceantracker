@@ -341,9 +341,7 @@ def _check_input_dir(reader_params):
         ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',
                fatal_error=True)
     # check input dir exists
-    if path.isdir(reader_params['input_dir']):
-        ml.progress_marker(f'Found input dir "{reader_params["input_dir"]}"')
-    else:
+    if not path.isdir(reader_params['input_dir']):
         ml.msg(f'Could not find input dir "{reader_params["input_dir"]}"',
                hint='Check reader parameter "input_dir"', fatal_error=True)
 
