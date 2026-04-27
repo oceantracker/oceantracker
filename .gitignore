@@ -2,6 +2,7 @@
 /tests/dev_runs/output/
 /tests/dev_runs/reference_case_output/
 /tests/profiling/results/pyinstrument/
+.coverage
 
 /docs/_build
 /docs/info/how_to/
@@ -23,19 +24,21 @@ dist/
 /dev/demos/output/
 /dev/demos/root_output_dir/
 
+/demo_param_files/
+
 # Act (GitHub Actions local runner)
 .actrc
 act-*.log
 .secrets
 bin/
 
+# Editor
 .idea
-.coverage
 .vscode/
-
-
 *.code-workspace
+
 *.py[cod]
 *.nb[ic]
 .pypirc
-/demo_param_files/
+
+*.png

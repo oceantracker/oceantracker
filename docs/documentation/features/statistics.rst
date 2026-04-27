@@ -58,13 +58,7 @@ See :doc:`parameter references </documentation/api_ref>` or the `how-to's </gett
 Formal descriptions
 ----------------------------------------
 
-Implementation Notes
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The age-based counting approach differs from time-based counting in several important ways:
-
-
-Gridded Statistics 2D Time-Based: 
+Gridded Statistics 2D Time-Based:
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``GriddedStats2D_timeBased`` class computes time-series counts of particles within cells of a regular horizontal 2D grid.
@@ -108,6 +102,28 @@ where:
 * :math:`\text{B}_a` is the age bin (i.e. range) for bin :math:`a`
 * :math:`x_n(t)` and :math:`y_n(t)` are the particle position at time :math:`t`
 * :math:`\text{age}_n(t)` is the particle age at time :math:`t`
+
+Polygon Statistics 2D Time-Based:
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ``PolygonStats2D_timeBased`` class computes time-series counts of particles within user-defined 2D polygons.
+At each update time, particles are filtered based on selection criteria and then assigned to polygons via the
+``InsidePolygonsNonOverlapping2D`` particle property.
+
+The count in polygon :math:`p` for release group :math:`g` at time :math:`t` is given by:
+
+.. math::
+
+   c_{t,g,p} = \sum_{n \in \mathcal{P}_{\text{sel}}(t)} \mathbb{1}_{\{n \in \text{R}_g\}} \cdot \mathbb{1}_{\{(x_n, y_n) \in \text{Polygon}_p\}}
+
+where:
+
+* :math:`c_{t,g,p}` is the count in polygon :math:`p` for release group :math:`g` at time :math:`t`
+* :math:`\mathcal{P}_{\text{sel}}(t)` is the set of selected particles at time :math:`t` satisfying the selection criteria
+* :math:`\text{R}_g` denotes particles belonging to release group :math:`g`
+* :math:`\mathbb{1}_{\{\cdot\}}` is the indicator function returning 1 if the condition is true, 0 otherwise
+* :math:`\text{Polygon}_p` is the spatial region defined by the vertices of polygon :math:`p`
+
 
 Polygon Statistics 2D Age-Based
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -244,7 +260,7 @@ Connectivity Matrix
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The age-based statistics also compute a connectivity :math:`\mathcal{C}_{a,g,i,j}`,
-which represents the probability that a released particle from release group :math:`g` reaches a given grid cell :math:`(i,j)` at a given age :math:`a`.
+which represents the probability that a released (or alive, if so chosen) particle from release group :math:`g` reaches a given grid cell :math:`(i,j)` at a given age :math:`a`.
 
 .. math::
 
@@ -255,13 +271,17 @@ where:
 * :math:`C_{a,g,i,j}` is the particle count
 * :math:`N_{a,g}^{\text{released}}` is the total number of particles released from group :math:`g` that existed at age :math:`a`
 
-The released particle count in age bins is computed by age-binning the total releases at each counting time:
+The released particle count in age bins accumulates, at each update time :math:`t`, the count of every release pulse whose current age falls in each bin:
 
 .. math::
 
-   N_{a,g}^{\text{released}} = \sum_{t \in \mathcal{T}} \mathbb{1}_{\{\text{age}(t) \in \text{B}_a\}} \cdot N_g^{\text{released}}(t)
+   N_{a,g}^{\text{released}} = \sum_{t \in \mathcal{T}} \sum_{i \in \mathcal{I}_g} N_{g,i} \cdot \mathbb{1}_{\{t - T_i \in \text{B}_a\}}
 
-where :math:`N_g^{\text{released}}(t)` is the cumulative number of particles released from group :math:`g` up to time :math:`t`, and :math:`\text{age}(t) = t - t_0` is the time elapsed since the start of counting.
+where:
 
+* :math:`\mathcal{I}_g` is the set of release pulses belonging to group :math:`g`
+* :math:`N_{g,i}` is the number of particles released in pulse :math:`i`
+* :math:`T_i` is the release time of pulse :math:`i`
+* :math:`t - T_i` is the age of particles from pulse :math:`i` at update time :math:`t`
 
-Note, that the connectivity matrix includes particles that died or exited the domain.
+This counts the total number of particle–timestep samples where a particle from group :math:`g` (alive or dead) was in age bin :math:`a`, and is directly comparable to the numerator :math:`c_{a,g,i,j}` which accumulates the same way.
