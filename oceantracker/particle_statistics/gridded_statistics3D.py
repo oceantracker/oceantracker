@@ -51,7 +51,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
 
         dm = si.dim_names
         info['count_dims']= {dm.time: None,
-                            dm.release_group:len(si.class_roles.release_groups),
+                            dm.release_group: len(si.class_roles.release_groups),
                             dm.grid_row_y: self.grid['x_grid'].shape[1],
                             dm.grid_col_x: self.grid['x_grid'].shape[2],
                             dm.z: stats_grid['z'].shape[1]}
@@ -150,9 +150,9 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
             if (0 <= r < y_edges.shape[1] - 1 and
                     0 <= c < x_edges.shape[1] - 1 and
                     0 <= k < z_edges.shape[1] - 1):
-                count[ng, k, r, c] += 1
+                count[ng, r, c, k] += 1
                 for m in range(len(prop_list)):
-                    sum_prop_list[m][ng, k, r, c] += prop_list[m][n]
+                    sum_prop_list[m][ng, r, c, k] += prop_list[m][n]
 
     @staticmethod
     @njitOT
@@ -177,9 +177,9 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
             if (0 <= r < y_edges.shape[1] - 1 and
                     0 <= c < x_edges.shape[1] - 1 and
                     0 <= k < z_edges.shape[1] - 1):
-                count[ng, k, r, c] += 1
+                count[ng, r, c, k] += 1
                 for m in range(len(prop_list)):
-                    sum_prop_list[m][ng, k, r, c] += prop_list[m][n]
+                    sum_prop_list[m][ng, r, c, k] += prop_list[m][n]
 
     @staticmethod
     @njitOT
@@ -204,9 +204,9 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
             if (0 <= r < y_edges.shape[1] - 1 and
                     0 <= c < x_edges.shape[1] - 1 and
                     0 <= k < z_edges.shape[1] - 1):
-                count[ng, k, r, c] += 1
+                count[ng, r, c, k] += 1
                 for m in range(len(prop_list)):
-                    sum_prop_list[m][ng, k, r, c] += prop_list[m][n]
+                    sum_prop_list[m][ng, r, c, k] += prop_list[m][n]
 
     def info_to_write_on_file_close(self, nc):
 
@@ -219,9 +219,9 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         # Write z grid info
         nc.write_variable('z', stats_grid['z'], [dim_names[1], dim_names[4]], units='m', description='Mid point of vertical grid cell')
 
-        # Write grid cell volume
+        # Write grid cell volume (shape: n_groups, n_y, n_x)
         nc.write_variable('grid_cell_volume', stats_grid['cell_volume'],
-                          dim_names[1:4],units='m^3',
+                          dim_names[1:4], units='m^3',
                           description='Volume of each 3D grid cell')
 
     def sel_depth_range(self, sel):
