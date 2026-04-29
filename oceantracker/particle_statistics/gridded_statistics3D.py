@@ -54,7 +54,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                             dm.release_group:len(si.class_roles.release_groups),
                             dm.grid_row_y: self.grid['x_grid'].shape[1],
                             dm.grid_col_x: self.grid['x_grid'].shape[2],
-                            dm.z: stats_grid['z'].size}
+                            dm.z: stats_grid['z'].shape[1]}
 
         self.create_count_variables(info['count_dims'],'time')
         self.set_up_part_prop_lists()
@@ -217,7 +217,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
 
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
         # Write z grid info
-        nc.write_variable('z', stats_grid['z'], [dim_names[4]], units='m', description='Mid point of vertical grid cell')
+        nc.write_variable('z', stats_grid['z'], [dim_names[1], dim_names[4]], units='m', description='Mid point of vertical grid cell')
 
         # Write grid cell volume
         nc.write_variable('grid_cell_volume', stats_grid['cell_volume'],
