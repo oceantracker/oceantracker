@@ -156,6 +156,13 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
 
         is_dry_cell_buffer[buffer_index,:]=  mean_water_depth < si.settings.minimum_total_water_depth
 
+        # replace NaN tide (hindcast provides no value = dry node) with bed + 5 cm
+        # so dry-cell detection and particle tide interpolation never see NaN
+        bed = -fields['water_depth'].data[0, :, 0, 0]  # (n_nodes,)
+        for nb in buffer_index:
+            nan_nodes = np.isnan(fields['tide'].data[nb, :, 0, 0])
+            fields['tide'].data[nb, nan_nodes, 0, 0] = bed[nan_nodes] + 0.05
+
         reader_util.set_dry_cell_flag_from_tide(grid['triangles'],  fields['tide'].data, fields['water_depth'].data,
                                                 si.settings.minimum_total_water_depth, is_dry_cell_buffer, buffer_index)
         pass
@@ -310,6 +317,11 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
             grid['quad_cells_per_node'],
             grid['edge_val_weights'])
 
+        # replace NaN tide (dry nodes) with bed + 5 cm so z_interface top is always valid
+        bed = -water_depth[0, :, 0]  # (n_nodes,)
+        nan_nodes = np.isnan(tide[:, :, 0])
+        tide[:, :, 0] = np.where(nan_nodes, bed[np.newaxis, :] + 0.05, tide[:, :, 0])
+
         # get interfacial values
         data = np.full((nt.size,) + grid['z_interface' ].shape[1:],np.nan, dtype=np.float32 ) # todo faster make a buffer
         self.find_z_interface_from_layer_values(grid['z_layer_LSC' ],water_depth,
@@ -344,7 +356,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                 for nz in range(bottom_layer_index[n], zlayer_nodes.shape[2]-1):
                     z_interface[nt,n,nz+1] = 0.5*(zlayer_nodes[nt,n,nz] + zlayer_nodes[nt,n,nz+1] )
 
-                z_interface[nt, n, -1 ]  = tide[nt,n, 0]
-                z_interface[nt, n, bottom_layer_index[n]] = -water_depth[0, n, 0]
-
-        pass
+                bed = -water_depth[0, n, 0]
+                z_interface[nt, n, -1] = tide[nt,n, 0]
+                z_interface[nt, n, bottom_layer_index[n]] = bed
+                
