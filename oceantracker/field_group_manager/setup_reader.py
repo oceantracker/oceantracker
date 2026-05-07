@@ -163,9 +163,9 @@ def _detect_hydro_file_format(reader_params, dataset):
 
 
     if reader_class_name is None:
-        ml.msg(f' In detecting file format, not all tests against known file format variables were passed', error=True)
+        ml.msg(f' In detecting file format, not all tests against known file format variables were passed')
         for name, vals in tests.items():
-            ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 2)
+            ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 3)
         ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
                hint=f'use reader to map to names in files? found variables {list(ds_info["variables"].keys())}',
                fatal_error=True)

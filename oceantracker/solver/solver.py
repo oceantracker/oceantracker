@@ -137,9 +137,11 @@ class Solver(ParameterBaseClass):
             is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.moving,  out=self.get_partID_buffer('B1'))
 
             # update particle velocity modification prior to integration
+            t0v= perf_counter()
             part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
             for name, i in si.class_roles.velocity_modifiers.items():
                 i.timed_update(n_time_step, t1, is_moving)
+            si.block_timer('Velocity modifiers', t0v)
 
             # dispersion is done by random walk
             # by adding to velocity modifier prior to integration step
@@ -235,8 +237,10 @@ class Solver(ParameterBaseClass):
         #fgm.interp_field_at_particle_locations('water_depth', alive, output=part_prop['water_depth'].data)
 
         # trajectory modifiers
+        t0 = perf_counter()
         for name, i in si.class_roles.trajectory_modifiers.items():
             i.timed_update(n_time_step, time_sec, alive)
+        si.block_timer('Trajectory modifiers', t0)
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.outside_open_boundary, out=self.get_partID_buffer('B1'))
 

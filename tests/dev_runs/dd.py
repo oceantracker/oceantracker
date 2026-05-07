@@ -316,6 +316,7 @@ def compare_reference(case_info_file, args, last_time=False):
         sel = np.logical_or(z_fraction_water_velocity < -.01,  z_fraction_water_velocity > 1.01)
         print(_hl('zfraction out of range,  water_velocity=', c=BLUE), _hl(np.count_nonzero(sel)))
 
+
     if False:
         from matplotlib import  pyplot as plt
         v='status'
@@ -368,6 +369,8 @@ def compare_reference(case_info_file, args, last_time=False):
                 except Exception as e:
                     raise(f'debug: Property  "{prop_name}"')
 
+    for name, params in case_info['working_params']['class_roles']['event_loggers'].items():
+        e = load_output_files.load_events_file(case_info_file, name=params['name'])
     pass
 
 def _hl(s:str, c= RED):

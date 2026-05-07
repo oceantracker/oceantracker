@@ -83,9 +83,10 @@ class Scheduler(object):
                 # time step
                 interval = dt
             elif interval > 0.:
-                # if it is provieded (and non zero), we round interval to time step, but not less than one per time step
+                # if it is provideed (and non-zero), we round interval to time step, but not less than one per time step
                 interval=  max(round(interval/dt)*dt, dt)
 
+            # set up times variable
             if interval == 0:
                 # if the interval is zero, we assume it should only happen once, at the very start
                 times =np.asarray([start])

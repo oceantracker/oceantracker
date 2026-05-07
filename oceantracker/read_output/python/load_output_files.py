@@ -145,8 +145,11 @@ def _get_role_dict_file_name(caseinfo, class_dict, name=None):
     return path.join(o['run_output_dir'],o[class_dict][name])
 
 # ubder dev
-def dev_load_events_file(case_info_file_name, name=None):
+def load_events_file(case_info_file_name, name=None):
     # load  flat events
     #todo finish
     case_info = read_case_info_file(case_info_file_name)
-    nc_file_name = _get_role_dict_file_name(case_info, 'event_loggers', name)
+    file_name = _get_role_dict_file_name(case_info, 'event_loggers', name)
+
+    d = read_ncdf_output_files.dev_read_event_file(file_name)
+    return d

@@ -41,6 +41,28 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
         # set up output file to also write event polygon property
         self.set_up_output_file(['event_polygon'] )
 
+    def write_events(self,IDs_event_began, IDs_event_ended):
+        # prop to write is list of particle prop to write beyond the standard ones, e.g.  ID of polygon each particle is inside, to note which polygon event is associated with
+
+        part_prop= si.class_roles.particle_properties
+
+        time = si.class_roles.time_varying_info['time'].get_values()
+
+        for event_flag, IDs in zip([1,-1], [IDs_event_began, IDs_event_ended]):
+
+            if IDs.shape[0]== 0 : continue
+
+            file_index = self.time_steps_written + np.arange(IDs.shape[0])
+            self.nc.file_handle.variables['event_flag'][file_index] = np.full_like(file_index, event_flag, dtype=np.int8)
+            self.nc.file_handle.variables['time'][file_index] = np.full_like(file_index, time)
+
+            # write part prop at time of event
+            for prop_name in self.info['prop_to_write']:
+                values = part_prop[prop_name].get_values(IDs)
+                self.nc.file_handle.variables[prop_name][file_index, ...] = values
+
+            self.time_steps_written += file_index.shape[0]
+
     def update(self,n_time_step, time_sec):
         part_prop = si.class_roles.particle_properties
         event_polygon = part_prop['event_polygon']
