@@ -54,10 +54,10 @@ def check_if_point_inside_triangle_connected_to_node(x, node, node_to_tri_map,tr
             n_tri = node_to_tri_map[nn, m]
             n_min, n_max= _get_single_BC_cord_numba(x[n, :2], BCtransform[n_tri, :, :], bc[n,:])
             if bc[n,n_min] > -bc_walk_tol and bc[n, n_max] < 1. + bc_walk_tol:
-                # found triangle
+                # found triangle; stop so bc[n, :] stays consistent with n_cell[n]
                 n_cell[n] = n_tri
                 is_inside_domain[n]= True
-                continue
+                break
     return is_inside_domain, n_cell, bc
 
 @njitOT
