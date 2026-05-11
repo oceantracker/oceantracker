@@ -21,6 +21,9 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
     def add_required_classes_and_settings(self):
         super().add_required_classes_and_settings()
         info = self.info
+        si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty',
+                     name='event_has_started_boolean', initial_value=False, dtype='bool', write=False)
+
         si.add_class('particle_properties', class_name='ManuallyUpdatedParticleProperty', name='event_polygon', initial_value=-1, dtype='int16')
         si.add_class('particle_properties', name='current_polygon_for_event_logging',
                      class_name='oceantracker.particle_properties.inside_polygons.InsidePolygonsNonOverlapping2D',

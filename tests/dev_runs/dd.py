@@ -65,6 +65,8 @@ hydro_model = dict(demoSchism3D=dict(reader= reader_demo_schisim3D,
                             x0=[[1594000, 5484200] ],
                             polygon=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
                                     [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
+                            polygon_around_point = (np.asarray([[1594000, 5484200]]) +
+                                                 np.asarray([[-500,-500], [500,-500 ], [500,500 ], [-500,500 ]])) ,
                             ),
                 demoROMS=dict(reader= reader_demo_ROMS,
                             axis_lims=None,

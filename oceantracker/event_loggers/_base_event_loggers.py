@@ -25,8 +25,6 @@ class _BaseEventLogger(ParameterBaseClass):
 
     def update(self, n_time_step, time_sec, active=None): nopass()
 
-    def check_requirements(self):
-        self.check_class_required_fields_prop_etc(required_props_list=['event_has_started_boolean'])
 
     def add_required_classes_and_settings(self):
         info = self.info

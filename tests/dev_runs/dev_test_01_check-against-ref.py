@@ -52,7 +52,8 @@ def main(args=None):
     ot.add_class('particle_statistics', **dd.my_heat_map3D_time)
     ot.add_class('particle_statistics', **dd.my_heat_map2D_time_runningMean)
 
-    ot.add_class('event_loggers', class_name='LogPolygonEntryAndExit',name='poly_entry_exit', polygon_list=[dict(points=hm['polygon'])])
+    ot.add_class('event_loggers', class_name='LogPolygonEntryAndExit',name='poly_entry_exit',
+                                polygon_list=[dict(points=hm['polygon_around_point'])])
 
     if not args.norun:
         case_info_file = ot.run()
