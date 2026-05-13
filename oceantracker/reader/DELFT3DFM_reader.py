@@ -77,7 +77,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
 
         # tweak variations in dims and variable names
         # water depth
-        o = ['mesh2d_node_z','mesh2d_bldepth']
+        o = ['mesh2d_bldepth','mesh2d_node_z']
         t = list(set(list(filevars.keys())).intersection(o)) # see if any of o in file vars
         if len(t) > 0:
             fvm['water_depth'] = t[0]
@@ -296,8 +296,8 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
     def setup_water_depth_field(self):
         file_vars = self.dataset.info['variables']
         i = self._add_a_reader_field('water_depth')
-        i.data = -self.read_field_data('water_depth', i)
-        if 'mesh2d_node_z' in file_vars:
+        i.data = self.read_field_data('water_depth', i)
+        if 'mesh2d_node_z' in self.info['field_info']['water_depth']['file_vars_info']:
           i.data = -i.data
 
     def setup_tide_field(self):

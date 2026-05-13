@@ -118,6 +118,10 @@ class Solver(ParameterBaseClass):
                                start=si.run_info.start_time,
                                interval=si.settings.restart_interval )
 
+        if model_times.size < 2:
+            ml.msg('model running for less that 2 time steps times ='+ str(time_util.seconds_to_isostr(model_times)), error=True,
+                   hint='Check  on release starts,end, duration or max duration setting, relative to times in hindcast given above in log file ')
+
         # run one less step as last step is initial condition for next block
         # first step is zero or restart time step
         for n_time_step  in range(nt1, model_times.size-1):
