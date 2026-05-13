@@ -73,10 +73,17 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         gm = params['grid_variable_map']
         info = self.info
         dims = info['dims']
+        filevars = ds_info['variables']
 
         # tweak variations in dims and variable names
-
-        if fvm['water_depth'] not in  ds_info['variables']:  fvm['water_depth'] =  'mesh2d_waterdepth'
+        # water depth
+        o = ['mesh2d_node_z','mesh2d_bldepth']
+        t= set(list(filevars.keys())).intersection(o)
+        if len(t) > 0:
+            fvm['water_depth'] =t[0]
+        else:
+            si.msg_logger.msg('Cannot find water_depth variable in hindcast files',error=True,
+                              hint= f'File must contain one of variables {str(o)} ')
 
         if info['is3D']:
             # sort out z dim and vertical grid size
@@ -287,8 +294,12 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         return data
 
     def setup_water_depth_field(self):
+        file_vars = self.dataset.info['variables']
         i = self._add_a_reader_field('water_depth')
-        i.data = -self.read_field_data('water_depth', i) # water depth i var s z < 0
+        i.data = -self.read_field_data('water_depth', i)
+        if 'mesh2d_node_z' in file_vars:
+          i.data = -i.data
+
 
 
     def read_z_interface(self, nt):
