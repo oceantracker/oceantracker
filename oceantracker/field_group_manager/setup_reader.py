@@ -123,14 +123,14 @@ def _detect_hydro_file_format(reader_params, dataset):
         readers_to_check = dict(user_named_reader=reader_params[ 'class_name'] )
     else:
         # look for reader amongst known readers
-        readers_to_check = definitions.known_readers.items()
+        readers_to_check = definitions.known_readers
 
     reader_class_name = None
     is_format = False
     tests = {}  # set of tests to pass
     ds_info = dataset.info
     file_vars = ds_info['variables']
-    for name, class_name in readers_to_check:
+    for name, class_name in readers_to_check.items():
         # first check if essential variables are in the file
         p = deepcopy(reader_params)
         p['class_name'] = class_name
