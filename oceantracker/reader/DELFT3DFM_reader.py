@@ -78,9 +78,9 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         # tweak variations in dims and variable names
         # water depth
         o = ['mesh2d_node_z','mesh2d_bldepth']
-        t= set(list(filevars.keys())).intersection(o)
+        t = list(set(list(filevars.keys())).intersection(o)) # see if any of o in file vars
         if len(t) > 0:
-            fvm['water_depth'] =t[0]
+            fvm['water_depth'] = t[0]
         else:
             si.msg_logger.msg('Cannot find water_depth variable in hindcast files',error=True,
                               hint= f'File must contain one of variables {str(o)} ')
