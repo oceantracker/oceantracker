@@ -56,6 +56,7 @@ def get_case(n):
     params= default_params()
     show_grid = False
     geo_cords= False
+
   
 
     match n:
@@ -264,6 +265,7 @@ def get_case(n):
             output_file_base = 'DELF3D-FM-z-layer'
             title = 'DELF3D-FM test-z-layer'
             is3D = True
+            geo_cords = True
 
         case 401:
             # DELFT FM exmouth
@@ -302,7 +304,7 @@ def get_case(n):
             # Grenvelingen
             root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\Grenvelingen'
 
-            x0=[  [ 59584.69931634, 424424.59040316],
+            x0=[  [59584.69931634, 424424.59040316],
                   [57706., 421967.24984360463],
                     ]
             file_mask = 'Grevelingen-FM_*_map.nc'
@@ -457,6 +459,7 @@ def get_case(n):
     params['release_groups'][0]['points'] = x0
 
     params['particle_statistics'] = [{ 'name' :'grid1','class_name': 'GriddedStats2D_timeBased',
+                                       'release_group_centered_grids': True,
                                         'grid_span' : [.1,.15] if geo_cords else [10000,10000],
                                        'update_interval': 3600, 'particle_property_list': ['water_depth'],
                                        'status_list':['moving'], 'z_min': -2,

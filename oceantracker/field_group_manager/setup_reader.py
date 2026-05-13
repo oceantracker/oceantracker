@@ -92,6 +92,7 @@ def make_a_reader_from_params(reader_params):
     info['geographic_coords'] = reader.detect_lonlat_grid()
     info['time_buffer_size'] = si.settings.time_buffer_size
 
+
     return reader
 
 def _standard_needed_info(reader):

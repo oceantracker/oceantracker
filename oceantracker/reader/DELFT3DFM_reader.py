@@ -39,11 +39,11 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                         time=PVC('time', str, doc_str='name of time dimension in files'),
                         node=PVC('mesh2d_nNodes', str, doc_str='name of node  dimension in files'),
 
-                        all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers'], str, doc_str='All z dims, used to identify  3D variables'),
+                        all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers','nmesh2d_layer'], str, doc_str='All z dims, used to identify  3D variables'),
                          ),
             field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
                         'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
-                        'water_depth': PVC('mesh2d_bldepth', str, doc_str='maps standard internal field name to file variable name'),
+                        'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
                         'water_temperature': PVC('mesh2d_tem1', str, doc_str='maps standard internal field name to file variable name'),
                         'salinity': PVC('mesh2d_sa1', str, doc_str='maps standard internal field name to file variable name'),
                         'wind_stress': PLC(None, str, doc_str='maps standard internal field name to file variable name'),
@@ -74,7 +74,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         info = self.info
         dims = info['dims']
 
-        # tweak varaitions in dims and variable names
+        # tweak variations in dims and variable names
 
         if fvm['water_depth'] not in  ds_info['variables']:  fvm['water_depth'] =  'mesh2d_waterdepth'
 
@@ -288,7 +288,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
 
     def setup_water_depth_field(self):
         i = self._add_a_reader_field('water_depth')
-        i.data = self.read_field_data('water_depth', i)
+        i.data = -self.read_field_data('water_depth', i) # water depth i var s z < 0
 
 
     def read_z_interface(self, nt):

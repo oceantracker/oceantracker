@@ -16,12 +16,6 @@ class _BaseUnstructuredReader(_BaseReader):
     # ---------------------------------------------------------
 
 
-    def read_water_depth(self, grid):
-        ds = self.dataset
-        gm = self.params['grid_variable_map']
-        water_depth = ds.read_data(gm['water_depth'])
-        return water_depth
-
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations
         ds = self.dataset
