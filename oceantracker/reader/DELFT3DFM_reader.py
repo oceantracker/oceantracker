@@ -300,7 +300,9 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         if 'mesh2d_node_z' in file_vars:
           i.data = -i.data
 
-
+    def setup_tide_field(self):
+        i = super().setup_tide_field()
+        return i
 
     def read_z_interface(self, nt):
         params = self.params
