@@ -72,6 +72,7 @@ class _BaseReader(ParameterBaseClass):
         self.si = si
 
 
+
     # Below are required  methods for any new reader
     # ---------------------------------------------------------
 

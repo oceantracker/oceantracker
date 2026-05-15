@@ -82,3 +82,10 @@ def IDmapToArray(IDmap:dict, select_keys:list=None):
         IDs[n] = IDmap[key]
 
     return IDs
+
+
+def find_first_of_list_within_list(lfind,lcheck):
+    # find first str in list "lfind" in list "lcheck", of keys of lcheck if dict
+    if type(lcheck) ==dict: lfind= list(lcheck.keys())
+    t = list(set(lcheck).intersection(lfind))
+    return None if len(t)==0 else t[0]

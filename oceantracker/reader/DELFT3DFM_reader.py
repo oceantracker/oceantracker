@@ -2,7 +2,7 @@ from numba.core.cgutils import false_bit
 
 from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
-from  oceantracker.util import time_util, numpy_util
+from  oceantracker.util import time_util, numpy_util, basic_util
 import numpy as np
 from oceantracker.util.triangle_utilities import split_quad_cells
 from oceantracker.reader.util import  reader_util
@@ -39,7 +39,8 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                         time=PVC('time', str, doc_str='name of time dimension in files'),
                         node=PVC('mesh2d_nNodes', str, doc_str='name of node  dimension in files'),
 
-                        all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers','nmesh2d_layer'], str, doc_str='All z dims, used to identify  3D variables'),
+                        #all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables'),
+                        all_z_dims=PLC(['mesh2d_nInterfaces', 'mesh2d_nLayers', 'nmesh2d_layer'], str,  doc_str='All z dims, used to identify  3D variables'),
                          ),
             field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
                         'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
@@ -53,6 +54,10 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                                                 doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
                             )
+        # options for some variables/dims ser as None above
+        #fvo= self.file_var_options
+        #fvo['dims']=dict(all_z_dims =['mesh2d_nInterfaces', 'mesh2d_nLayers', 'nmesh2d_layer'] )
+        #fvo['fields'] = dict(water_depth=['mesh2d_bldepth','mesh2d_node_z'])
 
     def initial_setup(self):
         params = self.params
@@ -78,10 +83,10 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         # tweak variations in dims and variable names
         # water depth
         o = ['mesh2d_bldepth','mesh2d_node_z']
-        t = list(set(list(filevars.keys())).intersection(o)) # see if any of o in file vars
-        if len(t) > 0:
-            fvm['water_depth'] = t[0]
-        else:
+        t = basic_util.find_first_of_list_within_list(o,filevars)
+
+        #t = list(set(list(filevars.keys())).intersection(o)) # see if any of o in file vars
+        if t is None:
             si.msg_logger.msg('Cannot find water_depth variable in hindcast files',error=True,
                               hint= f'File must contain one of variables {str(o)} ')
 

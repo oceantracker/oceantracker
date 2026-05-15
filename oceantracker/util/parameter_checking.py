@@ -313,6 +313,12 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
 
         return value
 
+# specilsed checkser for hindcast variable maps
+class ParamterMapWithAlternatives(object):
+
+    def __init__(self,alternastives, ):
+        pass
+
 # todo add ListOfParameterDictionaries case for polygon lists etc
 
 

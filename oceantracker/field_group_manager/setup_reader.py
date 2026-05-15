@@ -6,7 +6,7 @@ from glob import  glob
 
 from oceantracker.shared_info import shared_info as si
 from oceantracker import definitions
-from oceantracker.util import  time_util, json_util
+from oceantracker.util import  time_util, json_util,basic_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 
 def make_a_reader_from_params(reader_params):
@@ -154,6 +154,8 @@ def _detect_hydro_file_format(reader_params, dataset):
     # make and merge defaults for found reader
     reader_params['class_name'] = reader_class_name
     reader, is_format = _import_reader(reader_params, dataset)
+
+    hindcast_variable_integrity_checks(reader)
 
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
@@ -361,27 +363,25 @@ def _make_variable_time_step_to_fileID_map(reader):
         pass
     pass
 
+def hindcast_variable_integrity_checks(reader):
+    # use readers map checker to find which ones are in the file
+    ds = reader.dataset
 
-def _hindcast_integrity_checks(reader):
-    # todo , not ey used, put call in fgm final setup after all classes set up?
-    params = reader.params
-    info = reader.info
-    file_vars = info['variables']
+    params= reader.params
     ml = si.msg_logger
-    vars =[]
+    return
 
-    # check needed fields  are present
-    for name, i in reader.fields.items():
-        if 'file_vars_info' not in i.info: continue  # only do reader fiields
-        for var_name in i.info['file_vars_info'].keys():
-            vars.append(var_name)
-            if var_name not in file_vars:
-                ml.msg(f'Reader field {name}, file variable{var_name} is not in hindcast files', caller=reader, fatal_error=True)
+    for mt, map_type in zip(['dims'], ['dimension_map']):
+
+        for key, val in params[map_type].items():
+            if val is not None:
+                continue # already have a default or user given value  for var
+
+            params[map_type][key] = var_opt[mt][key]
 
 
 
-        pass
-    ml.progress_marker('passed hindcast integrity checks', caller = reader)
+    ml.progress_marker(f'passed hindcast integrity checks {reader.params["class_name"]}')
     return
 
 
