@@ -1,7 +1,7 @@
 [
   {
     "timestamp": "2026-04-20T23:44:10.944479",
-    "version": "0.5.3.5",
+    "version": "0.5.3.6",
     "git_hash": "ed800987",
     "test_name": "tests/unit_tests/test_performance.py::test_run_3D_model_performance",
     "machine": {
@@ -31,6 +31,42 @@
       "   0.0% Update statistics : calls 8521, 0 days 0 hrs 0 min 0 sec",
       "   0.0% Update event loggers : calls 8521, 0 days 0 hrs 0 min 0 sec",
       "--- Total time 0 days 1 hrs 49 min 20 sec"
+    ]
+  },
+  {
+    "timestamp": "2026-05-18T01:01:27.805724",
+    "version": "0.5.3.7",
+    "git_hash": "ac465b20",
+    "test_name": "tests/unit_tests/test_performance.py::test_run_3D_model_performance",
+    "machine": {
+      "name": "laurins-arch-desktop",
+      "processor": "",
+      "cpus_physical": 32,
+      "cpus_logical": 64,
+      "freq_mhz": 4.550859999999992,
+      "memory_gb": 134.924120064
+    },
+    "particle_count": 1000000,
+    "n_timesteps": 8520,
+    "elapsed_sec": 6401.464116722345,
+    "particles_per_sec": 156.21426313829224,
+    "time_per_particle_per_timestep": 7.513455536059091e-07,
+    "memory_gb": 10.139226112,
+    "block_timings": [
+      "  32.1% Find vertical cell : calls 51123, 0 days 0 hrs 34 min 15 sec",
+      "  23.0% Find horizontal cell : calls 51123, 0 days 0 hrs 24 min 30 sec",
+      "  10.2% Interpolate fields : calls 8522, 0 days 0 hrs 10 min 56 sec",
+      "   2.1% RK integration : calls 34080, 0 days 0 hrs 2 min 15 sec",
+      "   0.2% Velocity modifiers : calls 8520, 0 days 0 hrs 0 min 16 sec",
+      "   0.0% Reading hindcast : calls 8521, 0 days 0 hrs 0 min 2 sec",
+      "   0.0% Setup : calls    1, 0 days 0 hrs 0 min 1 sec",
+      "   0.0% Find initial horizontal cell : calls    2, 0 days 0 hrs 0 min 1 sec",
+      "   0.0% Releasing particles : calls 8520, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Update custom particle prop. : calls 8522, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Trajectory modifiers : calls 8521, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Update statistics : calls 8521, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Update event loggers : calls 8521, 0 days 0 hrs 0 min 0 sec",
+      "--- Total time 0 days 1 hrs 46 min 41 sec"
     ]
   }
 ]
