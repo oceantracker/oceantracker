@@ -39,14 +39,15 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                         bottom_interface_index= PVC(None, str),
                         is_dry_cell=PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                             ),
+            all_z_dims=PLC(['mesh2d_nInterfaces', 'mesh2d_nLayers','nmesh2d_layer', 'nmesh2d_interface'], str,
+                           doc_str='All z dims, used to identify  3D variables'),
             dimension_map=dict(
                         z = PVC('mesh2d_nInterfaces', str, doc_str='z dim for interfaces'),
                         time=PVC('time', str, doc_str='name of time dimension in files'),
                         node=PVC('mesh2d_nNodes', str, doc_str='name of node  dimension in files'),
 
                         #all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables'),
-                        all_z_dims=PLC(['mesh2d_nInterfaces', 'mesh2d_nLayers', 'nmesh2d_layer'], str,
-                                            doc_str='All z dims, used to identify  3D variables'),
+
                          ),
             field_variable_map= {#'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
                                  'water_velocity': PLMAC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1']),
@@ -94,16 +95,14 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
             if info['z_dim'] not in dims: dims['mesh2d_nInterfaces'] = dims['mesh2d_nLayers'] + 1
             info['z_dim'] = dm['z']
 
-            info['all_z_dims'] = dm['all_z_dims']
             # 2 variants of fixed z layer dimension names
+            #todo use alteratives checker to resolve z_dim, and z_layer_dim
             if 'mesh2d_nInterfaces' in dims:
                 info['z_dim'] = 'mesh2d_nInterfaces'
                 info['layer_dim'] = 'mesh2d_nLayers'
-                info['all_z_dims'] = ['mesh2d_nInterfaces','mesh2d_nLayers']
             else:
                 info['z_dim'] = 'nmesh2d_interface'
                 info['layer_dim'] = 'nmesh2d_layer'
-                info['all_z_dims'] = ['nmesh2d_interface','nmesh2d_layer']
 
             info['num_z_interfaces'] = dims[info['z_dim']]
 
@@ -269,7 +268,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         if info['time_dim'] not in var_info['dims']: data = data[np.newaxis, ...]
 
         # add z dim if needed
-        if all(x not in var_info['dims'] for x in info['all_z_dims']): data = data[..., np.newaxis]
+        if all(x not in var_info['dims'] for x in params['all_z_dims']): data = data[..., np.newaxis]
 
         # some variables at nodes, some at edge mid points ( eg u,v,w)
         if info['cell_dim'] in var_info['dims']:

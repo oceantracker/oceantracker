@@ -22,9 +22,10 @@ class _BaseGenericReader(_BaseReader):
                                y = PVC(None, str, is_required=True),
                                z= PVC(None, str,doc_str=' name of z variable, or sigma grid variable'),
                                sigma= PVC(None, str,doc_str=' name of sigma, 0-1 vetical grid variable') ),
+            all_z_dims=PVC([], str, doc_str='name of all vertical dimensions'),
             dimension_map = dict(  time =PVC('time', str, is_required=True),
                             z = PVC(None, str,doc_str='name of dim for vertical layer boundaries'),
-                            all_z_dims=PVC([], str, doc_str='name of all vertical dimensions'),
+
                             vector2D = PVC(None, str),
                             vector3D = PVC(None, str),
                                   ),
@@ -50,7 +51,6 @@ class _BaseGenericReader(_BaseReader):
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
             info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
             info['vert_grid_type'] = params['vertical_grid_type']
 
         pass

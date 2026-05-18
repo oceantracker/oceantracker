@@ -62,7 +62,6 @@ class FVCOMreader(_BaseUnstructuredReader):
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
             info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
             info['vert_grid_type'] = si.vertical_grid_types.Slayer
 
         info['node_dim'] = params['dimension_map']['node']

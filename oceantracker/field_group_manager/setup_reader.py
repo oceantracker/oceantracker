@@ -112,7 +112,6 @@ def _standard_needed_info(reader):
     # set default z dim info to that for 2D, add_hindcast_info changes them for  3D
     info['z_dim'] = None
     info['num_z_interfaces'] = 1
-    info['all_z_dims'] = []
     info['vert_grid_type'] = None
 
 
@@ -290,7 +289,7 @@ def _catalog_fields(reader):
         if v1 not in file_vars: continue
 
         field_params = dict(time_varying=file_vars[v1]['time_varying'],
-                            is3D=any(x in info['all_z_dims'] for x in file_vars[v1]['dims']),  )
+                            is3D=any(x in params['all_z_dims'] for x in file_vars[v1]['dims']),  )
         field_params['zlevels'] = info['num_z_interfaces'] if field_params['is3D'] else 1
 
         # work out if variable is a vector field

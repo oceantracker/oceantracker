@@ -32,9 +32,9 @@ class GLORYSreader(_BaseStructuredReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
+            all_z_dims=PLC(['depth'], str, doc_str='All z dims used to identify  3D variables'),
             dimension_map= dict(
                         z=PVC('depth', str, doc_str='name of dimensions for z layer boundaries '),
-                        all_z_dims=PLC(['depth'], str, doc_str='All z dims used to identify  3D variables'),
                         row=PVC('lat', str, doc_str='row dim of grid'),
                         col=PVC('lon', str, doc_str='column dim of grid'),
 
@@ -75,7 +75,6 @@ class GLORYSreader(_BaseStructuredReader):
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
             info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
             if 'deptho_lev' in info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Zfixed
             else:
@@ -209,7 +208,7 @@ class GLORYSreader(_BaseStructuredReader):
     def read_file_var_as_4D_nodal_values(self, var_name, var_info, nt=None):
         ds = self.dataset
         info = self.info
-
+        params=self.params
         data = ds.read_variable(var_name, nt=nt)
         data_dims = data.dims
         data = data.data
@@ -217,7 +216,7 @@ class GLORYSreader(_BaseStructuredReader):
         if info['time_dim'] not in data_dims:
             data = data[np.newaxis, ...]
 
-        if any(x in info['all_z_dims'] for x in data_dims):
+        if any(x in params['all_z_dims'] for x in data_dims):
             data = np.transpose(data, (0, 2, 3, 1))   # → (time, N_lat, N_lon, depth)
             data = np.flip(data, axis=3)
         else:
@@ -423,6 +422,7 @@ class GLORYSreaderSubgrid(GLORYSreader):
         ml = si.msg_logger
         ds = self.dataset
         info = self.info
+        params = self.params
 
         dm = self.params['dimension_map']
         grid = self.grid
@@ -435,7 +435,7 @@ class GLORYSreaderSubgrid(GLORYSreader):
         # add dummy time dim if none
         if info['time_dim'] not in data_dims: data = data[np.newaxis, ...]
 
-        if any(x in info['all_z_dims'] for x in data_dims):
+        if any(x in params['all_z_dims'] for x in data_dims):
             data = np.transpose(data,(0,2,3,1))# move z to end
             # cell zero is at top, put at bottom
             data = np.flip(data, axis=3) # flip z
@@ -494,9 +494,10 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
+            all_z_dims=PLC(['depth'], str, doc_str='All z dims used to identify  3D variables'),
             dimension_map= dict(
                         z=PVC('depth', str, doc_str='name of dimensions for z layer boundaries '),
-                        all_z_dims=PLC(['depth'], str, doc_str='All z dims used to identify  3D variables'),
+
                         row=PVC('lat', str, doc_str='row dim of grid'),
                         col=PVC('lon', str, doc_str='column dim of grid'),
 
@@ -532,7 +533,6 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
             info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
             if 'deptho_lev' in info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Zfixed
             else:
@@ -619,6 +619,7 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
         ml = si.msg_logger
         ds = self.dataset
         info = self.info
+        params = self.params
 
         dm = self.params['dimension_map']
         grid = self.grid
@@ -631,7 +632,7 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
         # add dummy time dim if none
         if info['time_dim'] not in data_dims: data = data[np.newaxis, ...]
 
-        if any(x in info['all_z_dims'] for x in data_dims):
+        if any(x in params['all_z_dims'] for x in data_dims):
             data = np.transpose(data,(0,2,3,1))# move z to end
             # cell zero is at top, put at bottom
             data = np.flip(data, axis=3) # flip z

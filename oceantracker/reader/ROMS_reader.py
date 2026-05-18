@@ -53,8 +53,9 @@ class ROMSreader(_BaseStructuredReader):
                                     time=PVC('ocean_time', str, doc_str='Name of time variable in hindcast'),
                                     x=PVC('lon_psi', str, doc_str='psi grid variable used for  particle tracking'),
                                     y=PVC('lat_psi', str, doc_str='psi grid variable used for  particle tracking')),
+                all_z_dims=PLC(['s_w', 's_rho'], str, doc_str='All z dims used to identify  3D variables'),
                 dimension_map=dict(  z=PVC('s_w', str, doc_str='name of dimension for z layer boundaries '),
-                            all_z_dims=PLC(['s_w','s_rho'], str, doc_str='All z dims used to identify  3D variables'),
+
                              row=PVC('eta_psi', str, doc_str='row dim of psi grid'),
                             col=PVC('xi_psi', str, doc_str='column dim of psi grid'),
                                       ),
@@ -76,7 +77,6 @@ class ROMSreader(_BaseStructuredReader):
             # sort out z dim and vertical grid size
             info['z_dim'] = dm['z']
             info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
             info['vert_grid_type'] = si.vertical_grid_types.Sigma  # Slayer uses zero bottom cell, so treated the dame
 
         dims = info['dims']

@@ -58,11 +58,12 @@ class _BaseReader(ParameterBaseClass):
                 water_velocity=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
                 water_velocity_depth_averaged=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
                             ),
+            all_z_dims = PLC(None, str, doc_str='All z dims, used to identify  3D variables', is_required=True),
             dimension_map= dict(
                             vector2D=PVC(None, str, doc_str='name of dimension names for 2D vectors'),
                             vector3D=PVC(None, str, doc_str='name of dimension names for 3D vectors'),
                             z=PVC( None, str, doc_str='name of dimensions for z layer boundaries '),
-                            all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables', is_required=True),
+
                             ),
 
         field_variables= PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
@@ -154,9 +155,10 @@ class _BaseReader(ParameterBaseClass):
     def detect_vel_var_and_if_3D(self, dataset):
         # work out if vel or depth aver. vel is present and if these are 2D
         # hindcast is 3D if velocity has any z dim
-        fvm = self.params['field_variable_map']
-        gvm = self.params['grid_variable_map']
-        dm = self.params['dimension_map']
+        params= self.params
+        fvm = params['field_variable_map']
+        gvm = params['grid_variable_map']
+        dm = params['dimension_map']
         file_vars = dataset.info['variables']
 
         if fvm['water_velocity'][0] in file_vars:
@@ -167,7 +169,7 @@ class _BaseReader(ParameterBaseClass):
             vel_vars=None
         # see if vel has any z dimensions
         if vel_vars is not None:
-            is3D = any([d in file_vars[vel_vars[0]]['dims'] for d in dm['all_z_dims']])
+            is3D = any([d in file_vars[vel_vars[0]]['dims'] for d in params['all_z_dims']])
         else:
             is3D= False
         return vel_vars, is3D
