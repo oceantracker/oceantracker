@@ -57,7 +57,6 @@ class GLORYSreader(_BaseStructuredReader):
                                    #'water_velocity_depth_averaged': PLC(['dahv'], str, fixed_len=2,
                                    #                                     doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
-            variable_signature= PLC(['time','latitude', 'uo','vo'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
                         )
 
@@ -515,7 +514,6 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
                                    'water_temperature': PVC('thetao', str, doc_str='maps standard internal field name to file variable name'),
                                    'salinity': PVC('so', str, doc_str='maps standard internal field name to file variable name'),
                                    },
-            variable_signature= PLC(['time','latitude', 'uo','vo'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
                         )
 

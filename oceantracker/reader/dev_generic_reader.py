@@ -36,7 +36,7 @@ class _BaseGenericReader(_BaseReader):
            vertical_grid_type=PVC(None,str, doc_str='use to offset times to required times zone', is_required=True, possible_values=si.vertical_grid_types.possible_values()),
              isodate_of_hindcast_time_zero = PTC(None, doc_str='use to offset times to required times zone', is_required=True),
              )
-        self.remove_default_params(['variable_signature'])
+
 
     def add_hindcast_info(self):
         params = self.params

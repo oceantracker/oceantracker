@@ -67,31 +67,31 @@ class MessageLogger(object ):
 
         error = error or fatal_error
 
-        m = tabs*'\t' +''
+
         if dev: m +='Core developer:'
 
         # first line of message
         if error:
-            m = self._build_msg(msg_text,msg_tag='Error', hint=hint,add_trace=True,caller=caller, wrap=True)
+            m = self._build_msg(msg_text,msg_tag='Error', hint=hint,add_trace=True,caller=caller, wrap=True,tabs=tabs)
             self.msg_lists['error'].append(m)
 
         elif warning:
             if  len(self.msg_lists['warning']) > self.max_warnings: return
-            m = self._build_msg(msg_text, msg_tag='Warning', hint=hint, add_trace=False,caller=caller, wrap=True)
+            m = self._build_msg(msg_text, msg_tag='Warning', hint=hint, add_trace=False,caller=caller, wrap=True,tabs=tabs)
             self.msg_lists['warning'].append(m)
 
         elif strong_warning:
             if len(self.msg_lists['warning']) > self.max_warnings: return
-            m = self._build_msg(msg_text, msg_tag='Strong warning', hint=hint, add_trace=True,caller=caller, wrap=True)
+            m = self._build_msg(msg_text, msg_tag='Strong warning', hint=hint, add_trace=True,caller=caller, wrap=True,tabs=tabs)
             self.msg_lists['strong_warning'].append(m)
 
         elif note:
             if len(self.msg_lists['note']) > self.max_warnings: return
-            m = self._build_msg(msg_text, msg_tag='Note', hint=hint, add_trace=False, wrap=True)
+            m = self._build_msg(msg_text, msg_tag='Note', hint=hint, add_trace=False, wrap=True,tabs=tabs)
             self.msg_lists['note'].append(m)
 
         else:
-            m = self._build_msg(msg_text, msg_tag=None, hint=hint, add_trace=False, wrap=wrap)
+            m = self._build_msg(msg_text, msg_tag=None, hint=hint, add_trace=False, wrap=wrap,tabs=tabs)
 
         # write message
         self._print_msg(m)
@@ -204,9 +204,10 @@ class MessageLogger(object ):
         return m
 
 
-    def _build_msg(self,msg, msg_tag=None,hint=None,add_trace=False,caller=None, wrap = False):
+    def _build_msg(self,msg, msg_tag=None,hint=None,add_trace=False,caller=None, wrap = False,tabs=0):
 
-        m = f'{msg_tag} >>> ' if msg_tag is not None else ''
+        m = tabs * '\t' + ''
+        m += f'{msg_tag} >>> ' if msg_tag is not None else ''
         m += self._add_long_line(msg,tabs=0, wrap= wrap)
 
 

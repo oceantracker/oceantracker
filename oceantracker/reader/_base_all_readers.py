@@ -46,7 +46,6 @@ class _BaseReader(ParameterBaseClass):
             EPSG_code= PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
             max_numb_files_to_load= PVC(10 ** 7, int, min=1,
                                         doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run'),
-            variable_signature = PLC(None, str, doc_str='Variable names used to test if file is this format', is_required=True),
             grid_variable_map= dict(control_key_allow_unknown_keys=True,
                             time=PVC('time', str, doc_str='Name of time variable in hindcast',is_required=True),
                             x=PVC(None, str, doc_str='x location of nodes', is_required=True),
@@ -173,21 +172,6 @@ class _BaseReader(ParameterBaseClass):
         else:
             is3D= False
         return vel_vars, is3D
-
-    def check_signature(self, dataset):
-        # check if required var preset
-        fvm = self.params['field_variable_map']
-        gvm = self.params['grid_variable_map']
-        dm = self.params['dimension_map']
-        file_vars = dataset.info['variables']
-        vel_var = fvm['water_velocity']
-        signature_tests = {( 'velocity' if vel_var is  None else vel_var[0]): (vel_var is not None ) and vel_var[0]  in file_vars}
-        # check if other variables in the signature are present
-        for s in self.params['variable_signature'] + [gvm['time'], gvm['x']]:
-            signature_tests[s] = s in dataset.info['variables']
-        self.info['signature_tests'] = signature_tests
-
-        return all([item for key,item, in signature_tests.items()]) # check all tests past
 
     def _build_hori_and_vert_grids(self, ):
         params = self.params

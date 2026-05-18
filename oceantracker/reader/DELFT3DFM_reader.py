@@ -20,7 +20,6 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         regrid_z_to_sigma_levels=PVC(False, bool,
                        doc_str='much faster 3D runs by re-griding hydo-model fields for S-layer or LSC vertical grids (eg. SCHISM),  into uniform sigma levels on read based on sigma most curve z_interface profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS'),
 
-        variable_signature=PLC(['mesh2d_face_nodes'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(True, bool, doc_str='DELFT 3D has indices starting at 1 not zero'),
             load_fields = PLC(['water_depth'], str, doc_str='always load tide and water depth, for dry cells id 2D'),
             grid_variable_map= dict( time= PVC('time', str),
@@ -45,9 +44,6 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                         z = PVC('mesh2d_nInterfaces', str, doc_str='z dim for interfaces'),
                         time=PVC('time', str, doc_str='name of time dimension in files'),
                         node=PVC('mesh2d_nNodes', str, doc_str='name of node  dimension in files'),
-
-                        #all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables'),
-
                          ),
             field_variable_map= {#'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
                                  'water_velocity': PLMAC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1']),

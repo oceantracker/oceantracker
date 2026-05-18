@@ -128,7 +128,6 @@ def _detect_hydro_file_format(reader_params, dataset):
         # look for reader amongst known readers
         readers_to_check = definitions.known_readers
 
-    tests = {}  # set of tests to pass
     ds_info = dataset.info
     readers=[]
     is_format = []
@@ -137,7 +136,6 @@ def _detect_hydro_file_format(reader_params, dataset):
         p = deepcopy(reader_params)
         p['class_name'] = class_name
         r, isf =  _import_reader(p, dataset)
-        tests[name] = r.info['signature_tests']
 
         # break if all testes passed as found reader
         readers.append(r)
@@ -146,16 +144,23 @@ def _detect_hydro_file_format(reader_params, dataset):
 
     if not any(is_format):
         ml.msg(f' In detecting file format, not all tests against known file format variables were passed')
-        for name, vals in tests.items():
-            ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 3)
+        for r in readers:
+            report = r.info['hindcast_integrity_report']
+            ml.msg(f'Has required variables/dims for format "{report["class_name"]}" ', tabs= 3)
+            req= report['required']
+            ml.msg('Field variables: '+ ", ".join([f"{k}={v}" for k, v in req['fields'].items()]), tabs=4)
+            ml.msg('Grid variables: ' + ", ".join([f"{k}={v}" for k, v in req['grid'].items()]), tabs=4)
+            ml.msg('Dimensions    : ' + ", ".join([f"{k}={v}" for k, v in req['dims'].items()]), tabs=4)
+
         ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
-               hint=f'use reader to map to names in files? found variables {list(ds_info["variables"].keys())}',
-               fatal_error=True)
+                 )
+        ml.msg(f'Found variables {list(ds_info["variables"].keys())}', tabs=3)
+        ml.msg(f'Found dimensions {list(ds_info["dims"].keys())}',tabs=3)
+        ml.msg(f'Check file variable/dims., ' , hint='Adjust reader field/grid/dims maps to match file variables/dims',
+               error = True)
 
     # make and merge defaults for found reader
     reader = readers[is_format.index(True)]
-
-    hindcast_variable_integrity_report(reader)
 
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
@@ -170,8 +175,7 @@ def _import_reader(reader_params, dataset):
         vel_vars, reader.info['is3D'] =  reader.detect_vel_var_and_if_3D(dataset)
         if vel_vars is not None:
             reader_params['field_variable_map']['water_velocity'] = vel_vars
-
-    is_format= reader.check_signature(dataset)
+    reader.info['hindcast_integrity_report'] = report
     return reader,report['is_format']
 
 def _time_sort_files(reader):
@@ -372,9 +376,7 @@ def hindcast_variable_integrity_report(reader):
     params= reader.params
     ml = si.msg_logger
 
-    report=dict(is_format=False, passed_checks=True,
-                has_signature= all([ v in ds.info['variables'] for v in reader.params['variable_signature']]),
-                class_name = reader.params['class_name'],)
+    report=dict(is_format=False, class_name = reader.params['class_name'],)
     for map_type in ['grid_variable_map','field_variable_map','dimension_map']:
         if map_type not in report: report[map_type] = dict(
                                                            has_var = dict(),alternatives = dict())
@@ -403,12 +405,14 @@ def hindcast_variable_integrity_report(reader):
             report[map_type]['alternatives'][key] = dp[key].alternatives
 
     # check ir required variables present
-    has_grid = all([report['grid_variable_map']['has_var'][key] for key in params['required_grid_variables']])
-    has_fields = all([report['field_variable_map']['has_var'][key] for key in params['required_feilds']])
-    has_vel  = report['field_variable_map']['has_var']['water_velocity'] or report['field_variable_map']['has_var']['water_velocity_depth_averaged']
-    has_dims = all([report['dimension_map']['has_var'][key] for key in params['required_dimensions']])
-    report['is_format'] = all([has_grid, has_fields, has_vel, has_dims])
-
+    req = dict()
+    req['fields'] =   {key: report['field_variable_map']['has_var'][key] for key in params['required_feilds']}
+    req['fields']['water_velocity'] =  (report['field_variable_map']['has_var']['water_velocity']
+                                                    or report['field_variable_map']['has_var']['water_velocity_depth_averaged'])
+    req['grid'] = {key: report['grid_variable_map']['has_var'][key] for key in params['required_grid_variables']}
+    req['dims'] = {key: report['dimension_map']['has_var'][key] for key in params['required_dimensions']}
+    report['is_format'] = all([all(req['fields'].values()), all(req['grid'].values()), all(req['dims'].values())])
+    report['required'] = req
     return report
 
 def _check_time_consistency(reader):
