@@ -1,5 +1,6 @@
 # utils for particle tracking
 import numpy as np
+import inspect
 from time import sleep
 from os import path
 from pathlib import Path as pathlib_Path
@@ -84,8 +85,4 @@ def IDmapToArray(IDmap:dict, select_keys:list=None):
     return IDs
 
 
-def find_first_of_list_within_list(lfind,lcheck):
-    # find first str in list "lfind" in list "lcheck", of keys of lcheck if dict
-    if type(lcheck) ==dict: lfind= list(lcheck.keys())
-    t = list(set(lcheck).intersection(lfind))
-    return None if len(t)==0 else t[0]
+

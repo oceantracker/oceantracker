@@ -2,6 +2,8 @@ from numba.core.cgutils import false_bit
 
 from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import  ParameterMapAlternativesChecker as PMAC
+from oceantracker.util.parameter_checking import  ParameterListMapAlternativesChecker as PLMAC
 from  oceantracker.util import time_util, numpy_util, basic_util
 import numpy as np
 from oceantracker.util.triangle_utilities import split_quad_cells
@@ -27,8 +29,11 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                         x_cell=PVC('mesh2d_face_x', str, doc_str='x location of cell centers'),
                         y_cell=PVC('mesh2d_face_y', str, doc_str='y location of cell center'),
                         z= PVC('mesh2d_interface_z', str,doc_str='Layer edges depths'),
+
                         z_layer_fixed=PVC('mesh2d_layer_z', str, doc_str='Mid layer z for fixed z grid'),
+
                         z_layer_LSC =PVC('mesh2d_flowelem_zcc', str),
+
                         triangles= PVC('mesh2d_face_nodes', str),
                         quad_face_nodes=PVC('mesh2d_face_nodes', str),
                         bottom_interface_index= PVC(None, str),
@@ -40,11 +45,14 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                         node=PVC('mesh2d_nNodes', str, doc_str='name of node  dimension in files'),
 
                         #all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables'),
-                        all_z_dims=PLC(['mesh2d_nInterfaces', 'mesh2d_nLayers', 'nmesh2d_layer'], str,  doc_str='All z dims, used to identify  3D variables'),
+                        all_z_dims=PLC(['mesh2d_nInterfaces', 'mesh2d_nLayers', 'nmesh2d_layer'], str,
+                                            doc_str='All z dims, used to identify  3D variables'),
                          ),
-            field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
-                        'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
-                        'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
+            field_variable_map= {#'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
+                                 'water_velocity': PLMAC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1']),
+                        'tide': PMAC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
+                        # 'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
+                        'water_depth': PMAC(['mesh2d_bldepth','mesh2d_node_z'],   doc_str='maps standard internal field name to file variable name'),
                         'water_temperature': PVC('mesh2d_tem1', str, doc_str='maps standard internal field name to file variable name'),
                         'salinity': PVC('mesh2d_sa1', str, doc_str='maps standard internal field name to file variable name'),
                         'wind_stress': PLC(None, str, doc_str='maps standard internal field name to file variable name'),
@@ -81,15 +89,6 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         filevars = ds_info['variables']
 
         # tweak variations in dims and variable names
-        # water depth
-        o = ['mesh2d_bldepth','mesh2d_node_z']
-        t = basic_util.find_first_of_list_within_list(o,filevars)
-
-        #t = list(set(list(filevars.keys())).intersection(o)) # see if any of o in file vars
-        if t is None:
-            si.msg_logger.msg('Cannot find water_depth variable in hindcast files',error=True,
-                              hint= f'File must contain one of variables {str(o)} ')
-
         if info['is3D']:
             # sort out z dim and vertical grid size
             if info['z_dim'] not in dims: dims['mesh2d_nInterfaces'] = dims['mesh2d_nLayers'] + 1

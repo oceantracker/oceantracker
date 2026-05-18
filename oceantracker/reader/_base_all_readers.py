@@ -6,6 +6,7 @@ from pyarrow.types import is_float32
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
+
 from oceantracker.fields.reader_field import  ReaderField
 from oceantracker.util import time_util, ncdf_util, numba_util
 from datetime import datetime
@@ -35,6 +36,12 @@ class _BaseReader(ParameterBaseClass):
             load_fields= PLC(None, str,
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                make_list_unique=True),
+            required_feilds=PLC(['water_depth'], str,
+                                doc_str='List of internal variables that must be in the hindcast (water_velocity is deal with separately)'),
+            required_grid_variables=PLC(['time', 'x', 'y'], str,
+                                doc_str='List of internal variables that must be in the hindcast'),
+            required_dimensions=PLC([], str,    doc_str='List of internal dimension_map names that must be in the hindcast'),
+
             one_based_indices= PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
             EPSG_code= PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
             max_numb_files_to_load= PVC(10 ** 7, int, min=1,
@@ -57,7 +64,9 @@ class _BaseReader(ParameterBaseClass):
                             z=PVC( None, str, doc_str='name of dimensions for z layer boundaries '),
                             all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables', is_required=True),
                             ),
+
         field_variables= PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
+
         drop_variables= PLC(None, str, expert=True, doc_str='List of problematic file variable names to ignore, eg non-critcal variables not present in all files/all times', make_list_unique=True),
         regrid_z_to_sigma_levels = PVC(True, bool,
                 doc_str='much faster 3D runs by re-griding hydo-model fields for S-layer or LSC vertical grids (eg. SCHISM),  into uniform sigma levels on read based on sigma most curve z_interface profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS')

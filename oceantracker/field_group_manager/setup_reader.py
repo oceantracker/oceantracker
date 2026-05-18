@@ -4,23 +4,26 @@ from copy import copy, deepcopy
 from os import path
 from glob import  glob
 
+from numba.core.typing import signature
+
 from oceantracker.shared_info import shared_info as si
 from oceantracker import definitions
 from oceantracker.util import  time_util, json_util,basic_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
+from oceantracker.util.parameter_checking import ParameterMapAlternativesChecker, ParameterListMapAlternativesChecker
+from oceantracker.util.parameter_checking import ParamValueChecker, ParameterListChecker
+def make_a_reader_from_params(users_reader_params):
 
-def make_a_reader_from_params(reader_params):
 
-
-    _check_input_dir(reader_params)
-    dataset = OceanTrackerDataSet(reader_params)
+    _check_input_dir(users_reader_params)
+    dataset = OceanTrackerDataSet(users_reader_params)
 
     # detect reader format and add clas_name to params
-    reader = _detect_hydro_file_format(reader_params, dataset)
-
+    reader = _detect_hydro_file_format(users_reader_params, dataset)
+    reader_params = reader.params # params may have changed
 
     # discard problematic variables
-    for file_var in reader.params['drop_variables']:
+    for file_var in reader_params['drop_variables']:
         if file_var in reader.dataset.info['variables']:
             del reader.dataset.info['variables'][file_var]
         else:
@@ -126,24 +129,23 @@ def _detect_hydro_file_format(reader_params, dataset):
         # look for reader amongst known readers
         readers_to_check = definitions.known_readers
 
-    reader_class_name = None
-    is_format = False
     tests = {}  # set of tests to pass
     ds_info = dataset.info
-    file_vars = ds_info['variables']
+    readers=[]
+    is_format = []
     for name, class_name in readers_to_check.items():
         # first check if essential variables are in the file
         p = deepcopy(reader_params)
         p['class_name'] = class_name
-        r, is_format =  _import_reader(p, dataset)
+        r, isf =  _import_reader(p, dataset)
         tests[name] = r.info['signature_tests']
 
         # break if all testes passed as found reader
-        if is_format:
-            reader_class_name = class_name
-            break
+        readers.append(r)
+        is_format.append(isf)
+        if isf:  break
 
-    if reader_class_name is None or not is_format:
+    if not any(is_format):
         ml.msg(f' In detecting file format, not all tests against known file format variables were passed')
         for name, vals in tests.items():
             ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 3)
@@ -152,10 +154,9 @@ def _detect_hydro_file_format(reader_params, dataset):
                fatal_error=True)
 
     # make and merge defaults for found reader
-    reader_params['class_name'] = reader_class_name
-    reader, is_format = _import_reader(reader_params, dataset)
+    reader = readers[is_format.index(True)]
 
-    hindcast_variable_integrity_checks(reader)
+    hindcast_variable_integrity_report(reader)
 
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
@@ -163,14 +164,16 @@ def _detect_hydro_file_format(reader_params, dataset):
 def _import_reader(reader_params, dataset):
     reader = si.class_importer.make_class_instance_from_params('reader', reader_params)
     reader.dataset = dataset
+    report = hindcast_variable_integrity_report(reader)
+
     # ensure vel params are correct
-    vel_vars, reader.info['is3D'] =  reader.detect_vel_var_and_if_3D(dataset)
-    if vel_vars is not None:
-        reader_params['field_variable_map']['water_velocity'] = vel_vars
-        reader.params['field_variable_map']['water_velocity'] = vel_vars
+    if report['is_format'] and 'water_velocity' in reader.params['field_variable_map']:
+        vel_vars, reader.info['is3D'] =  reader.detect_vel_var_and_if_3D(dataset)
+        if vel_vars is not None:
+            reader_params['field_variable_map']['water_velocity'] = vel_vars
 
     is_format= reader.check_signature(dataset)
-    return reader,is_format
+    return reader,report['is_format']
 
 def _time_sort_files(reader):
     # sort variable fileIDs by time, now all files are read
@@ -363,27 +366,51 @@ def _make_variable_time_step_to_fileID_map(reader):
         pass
     pass
 
-def hindcast_variable_integrity_checks(reader):
+def hindcast_variable_integrity_report(reader):
     # use readers map checker to find which ones are in the file
     ds = reader.dataset
-
+    file_vars = ds.info['variables']
     params= reader.params
     ml = si.msg_logger
-    return
 
-    for mt, map_type in zip(['dims'], ['dimension_map']):
+    report=dict(is_format=False, passed_checks=True,
+                has_signature= all([ v in ds.info['variables'] for v in reader.params['variable_signature']]),
+                class_name = reader.params['class_name'],)
+    for map_type in ['grid_variable_map','field_variable_map','dimension_map']:
+        if map_type not in report: report[map_type] = dict(
+                                                           has_var = dict(),alternatives = dict())
+        p = params[map_type]
+        dp = reader.default_params[map_type]
 
-        for key, val in params[map_type].items():
-            if val is not None:
-                continue # already have a default or user given value  for var
+        for key, val in dp.items():
+            if key.startswith('control_key'): continue
+            if not isinstance(val,(ParameterMapAlternativesChecker,ParameterMapAlternativesChecker)) :
+                # legacy variable maps with PCC and PLC, check if variable/param value  (or first if list of variables) in the file
 
-            params[map_type][key] = var_opt[mt][key]
+                if map_type =='dimension_map' and type(p[key]) != list:
+                    report[map_type]['has_var'][key] = p[key] in ds.info['dims']
+                elif type(val) == ParamValueChecker:
+                    report[map_type]['has_var'][key]= p[key] in file_vars
+                elif type(val) == ParameterListChecker:
+                    report[map_type]['has_var'][key] = (p[key][0] in file_vars) if len(p[key]) >0 else False
+                continue
 
+            # new alternatives mappings
+            if p[key] is None: # no user value given
+                # choose from alternatives
+                p[key] = dp[key].choose_alternative(ds.info['variables']) # already have a default or user given value  for var
 
+            report[map_type]['has_var'][key] = p[key] is not None
+            report[map_type]['alternatives'][key] = dp[key].alternatives
 
-    ml.progress_marker(f'passed hindcast integrity checks {reader.params["class_name"]}')
-    return
+    # check ir required variables present
+    has_grid = all([report['grid_variable_map']['has_var'][key] for key in params['required_grid_variables']])
+    has_fields = all([report['field_variable_map']['has_var'][key] for key in params['required_feilds']])
+    has_vel  = report['field_variable_map']['has_var']['water_velocity'] or report['field_variable_map']['has_var']['water_velocity_depth_averaged']
+    has_dims = all([report['dimension_map']['has_var'][key] for key in params['required_dimensions']])
+    report['is_format'] = all([has_grid, has_fields, has_vel, has_dims])
 
+    return report
 
 def _check_time_consistency(reader):
     # check all variables have same time_step_to_fileID_map, and save one version of it

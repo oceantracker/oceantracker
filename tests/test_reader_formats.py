@@ -342,20 +342,35 @@ def get_case(n):
             is3D = True
             show_grid = True
             time_step = 10 * 60
-        case 420:
-            # AREM_perth, mixed fixed z and sigma vert grid
-            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\AREM_perth'
+
+        case 412:
+            # DELFT 2D Perth_ashmore_reef_camille
+            x0 = [[510630, 8639600]]
+
+            output_file_base = 'Delft3D_Perth_ashmore_reef_camille'
+            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\Perth_ashmore_reef_camille'
+            file_mask = 'FlowFM_map.nc'  # hydrodynamic file name
+
+            title = 'Delft3D\Perth_ashmore_reef_camille'
+            is3D = False
+            show_grid = True
+            time_step = 10 * 60
+
+        case 413:
+            # AREM_perth, raphael mixed fixed z and sigma vert grid, LSC?
+            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\AREM_perth_raphael'
 
             x0 = [[136.8448876148498, -34.437943839048],
                   [135.86483495818868, -36.55882205292946],
                   [138.07902799731195, -34.96816339251836],
                   [139.20427364014512, -36.12404201908376]]
             file_mask = 'AREM*.nc'
-            output_file_base = 'AREM_perth'
-            title = 'AREM_perthi'
+            output_file_base = 'Delft3D_AREM_perth_raphael'
+            title = 'Delft3D_AREM_perth_raphael'
             is3D = True
             show_grid = True
             time_step = 10 * 60
+            geo_cords = True
 
         case   1100:
             # batic sea GLORYS
