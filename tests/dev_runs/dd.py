@@ -65,6 +65,8 @@ hydro_model = dict(demoSchism3D=dict(reader= reader_demo_schisim3D,
                             x0=[[1594000, 5484200] ],
                             polygon=[[1597682., 5486972], [1598604, 5487275], [1598886, 5486464],
                                     [1597917., 5484000], [1597300, 5484000], [1597682, 5486972]],
+                            polygon_around_point = (np.asarray([[1594000, 5484200]]) +
+                                                 np.asarray([[-500,-500], [500,-500 ], [500,500 ], [-500,500 ]])) ,
                             ),
                 demoROMS=dict(reader= reader_demo_ROMS,
                             axis_lims=None,
@@ -316,6 +318,7 @@ def compare_reference(case_info_file, args, last_time=False):
         sel = np.logical_or(z_fraction_water_velocity < -.01,  z_fraction_water_velocity > 1.01)
         print(_hl('zfraction out of range,  water_velocity=', c=BLUE), _hl(np.count_nonzero(sel)))
 
+
     if False:
         from matplotlib import  pyplot as plt
         v='status'
@@ -368,6 +371,8 @@ def compare_reference(case_info_file, args, last_time=False):
                 except Exception as e:
                     raise(f'debug: Property  "{prop_name}"')
 
+    for name, params in case_info['working_params']['class_roles']['event_loggers'].items():
+        e = load_output_files.load_events_file(case_info_file, name=params['name'])
     pass
 
 def _hl(s:str, c= RED):

@@ -192,7 +192,9 @@ def read_grid_outline_file(file_name):
 def dev_read_event_file(file_name):
     #todo finish event reader
     nc = NetCDFhandler(file_name, 'r')
+    d = nc.read_variables(nc.var_names())
     nc.close()
+    return d
 
 def read_release_groups_info(file_name):
     nc = NetCDFhandler(file_name,mode='r')

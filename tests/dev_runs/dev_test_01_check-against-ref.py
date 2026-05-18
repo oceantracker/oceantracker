@@ -52,6 +52,9 @@ def main(args=None):
     ot.add_class('particle_statistics', **dd.my_heat_map3D_time)
     ot.add_class('particle_statistics', **dd.my_heat_map2D_time_runningMean)
 
+    ot.add_class('event_loggers', class_name='LogPolygonEntryAndExit',name='poly_entry_exit',
+                                polygon_list=[dict(points=hm['polygon_around_point'])])
+
     if not args.norun:
         case_info_file = ot.run()
     else:
@@ -62,58 +65,8 @@ def main(args=None):
 
 
     if args.plot:
+        dd.show_track_plot(case_info_file,  args=args)
 
-        from matplotlib import pyplot as plt
-
-        n_pulse= 0
-        n_release= 0
-
-        sel = np.logical_and(tracks['IDpulse'] == n_pulse, tracks['IDrelease_group'] == n_release)
-
-        x = tracks['x'][:, sel,:]
-
-        sel_ref = np.logical_and(tracks_ref['IDpulse'] == n_pulse, tracks_ref['IDrelease_group'] == n_release)
-        x_ref =  tracks_ref['x'][:,sel_ref,:]
-
-        x0 = x[0,:].T
-        time = (tracks_ref['time']- tracks_ref['time'][0]) / 3600 / 24
-
-        plt.plot(x_ref[:, :, 0], x_ref[:, :, 1], c='g')
-        plt.plot(x[:,:, 0], x[:,:, 1], c='r')
-        plt.title('tracks')
-        plt.show()
-
-        plt.plot(time, x_ref[:,:, 0]-x0[0], c='g')
-        plt.plot(time, x[:, :,0]-x0[0], c='r')
-        plt.title('x-east')
-        plt.show()
-
-
-        fig, axs = plt.subplots(4,1)
-
-        ax= axs[0]
-        ax.plot(time, tracks_ref['status'][:, sel_ref], c='g')
-        ax.plot(time, tracks['status'][:, sel],'--', c='r')
-        ax.set_title('status')
-
-        ax = axs[1]
-        ax.plot(time, tracks_ref['nz_cell'][:, sel_ref], c='g')
-        ax.plot(time, tracks['nz_cell'][:, sel], '--', c='r')
-        ax.set_title('nz_cell')
-
-        ax = axs[2]
-        ax.plot(time, tracks_ref['z_fraction_water_velocity'][:, sel_ref], c='g')
-        ax.plot(time, tracks['z_fraction_water_velocity'][:, sel],'--', c='r')
-        ax.set_title('z_fraction_water_velocity')
-
-        ax = axs[3]
-        ax.plot(time, tracks_ref['tide'][:, sel_ref],'--', c='g')
-        ax.plot(time, tracks['tide'][:, sel],'--', c='r')
-        ax.plot(time, x_ref[:, :, 2], c='g')
-        ax.plot(time, x[:, :, 2], c='r')
-        ax.set_title('z')
-
-        plt.show()
 
 
     dd.show_track_plot(case_info_file, args)

@@ -39,11 +39,11 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                         time=PVC('time', str, doc_str='name of time dimension in files'),
                         node=PVC('mesh2d_nNodes', str, doc_str='name of node  dimension in files'),
 
-                        all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers'], str, doc_str='All z dims, used to identify  3D variables'),
+                        all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers','nmesh2d_layer'], str, doc_str='All z dims, used to identify  3D variables'),
                          ),
             field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
                         'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
-                        'water_depth': PVC('mesh2d_bldepth', str, doc_str='maps standard internal field name to file variable name'),
+                        'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
                         'water_temperature': PVC('mesh2d_tem1', str, doc_str='maps standard internal field name to file variable name'),
                         'salinity': PVC('mesh2d_sa1', str, doc_str='maps standard internal field name to file variable name'),
                         'wind_stress': PLC(None, str, doc_str='maps standard internal field name to file variable name'),
@@ -73,10 +73,17 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         gm = params['grid_variable_map']
         info = self.info
         dims = info['dims']
+        filevars = ds_info['variables']
 
-        # tweak varaitions in dims and variable names
-
-        if fvm['water_depth'] not in  ds_info['variables']:  fvm['water_depth'] =  'mesh2d_waterdepth'
+        # tweak variations in dims and variable names
+        # water depth
+        o = ['mesh2d_bldepth','mesh2d_node_z']
+        t = list(set(list(filevars.keys())).intersection(o)) # see if any of o in file vars
+        if len(t) > 0:
+            fvm['water_depth'] = t[0]
+        else:
+            si.msg_logger.msg('Cannot find water_depth variable in hindcast files',error=True,
+                              hint= f'File must contain one of variables {str(o)} ')
 
         if info['is3D']:
             # sort out z dim and vertical grid size
@@ -155,6 +162,13 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         mean_water_depth = np.nanmean(fields['water_depth'].data[0,:,0,0][grid['triangles']],axis=1)
 
         is_dry_cell_buffer[buffer_index,:]=  mean_water_depth < si.settings.minimum_total_water_depth
+
+        # replace NaN tide (hindcast provides no value = dry node) with bed + 5 cm
+        # so dry-cell detection and particle tide interpolation never see NaN
+        bed = -fields['water_depth'].data[0, :, 0, 0]  # (n_nodes,)
+        for nb in buffer_index:
+            nan_nodes = np.isnan(fields['tide'].data[nb, :, 0, 0])
+            fields['tide'].data[nb, nan_nodes, 0, 0] = bed[nan_nodes] + 0.05
 
         reader_util.set_dry_cell_flag_from_tide(grid['triangles'],  fields['tide'].data, fields['water_depth'].data,
                                                 si.settings.minimum_total_water_depth, is_dry_cell_buffer, buffer_index)
@@ -280,9 +294,15 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         return data
 
     def setup_water_depth_field(self):
+        file_vars = self.dataset.info['variables']
         i = self._add_a_reader_field('water_depth')
         i.data = self.read_field_data('water_depth', i)
+        if 'mesh2d_node_z' in self.info['field_info']['water_depth']['file_vars_info']:
+          i.data = -i.data
 
+    def setup_tide_field(self):
+        i = super().setup_tide_field()
+        return i
 
     def read_z_interface(self, nt):
         params = self.params
@@ -309,6 +329,11 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
             grid['node_to_quad_cell_map'],
             grid['quad_cells_per_node'],
             grid['edge_val_weights'])
+
+        # replace NaN tide (dry nodes) with bed + 5 cm so z_interface top is always valid
+        bed = -water_depth[0, :, 0]  # (n_nodes,)
+        nan_nodes = np.isnan(tide[:, :, 0])
+        tide[:, :, 0] = np.where(nan_nodes, bed[np.newaxis, :] + 0.05, tide[:, :, 0])
 
         # get interfacial values
         data = np.full((nt.size,) + grid['z_interface' ].shape[1:],np.nan, dtype=np.float32 ) # todo faster make a buffer
@@ -344,7 +369,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                 for nz in range(bottom_layer_index[n], zlayer_nodes.shape[2]-1):
                     z_interface[nt,n,nz+1] = 0.5*(zlayer_nodes[nt,n,nz] + zlayer_nodes[nt,n,nz+1] )
 
-                z_interface[nt, n, -1 ]  = tide[nt,n, 0]
-                z_interface[nt, n, bottom_layer_index[n]] = -water_depth[0, n, 0]
-
-        pass
+                bed = -water_depth[0, n, 0]
+                z_interface[nt, n, -1] = tide[nt,n, 0]
+                z_interface[nt, n, bottom_layer_index[n]] = bed
+                

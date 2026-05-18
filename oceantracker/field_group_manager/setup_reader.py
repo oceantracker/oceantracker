@@ -92,6 +92,7 @@ def make_a_reader_from_params(reader_params):
     info['geographic_coords'] = reader.detect_lonlat_grid()
     info['time_buffer_size'] = si.settings.time_buffer_size
 
+
     return reader
 
 def _standard_needed_info(reader):
@@ -104,9 +105,6 @@ def _standard_needed_info(reader):
     fvm = params['field_variable_map']
     gm = params['grid_variable_map']
 
-    # hindcast is 3D if velocity has any z dim
-    v_name = fvm['water_velocity'][0]
-    info['is3D'] =  any([ d in file_vars[v_name]['dims'] for d in dm['all_z_dims']])
 
     # set default z dim info to that for 2D, add_hindcast_info changes them for  3D
     info['z_dim'] = None
@@ -120,64 +118,57 @@ def _detect_hydro_file_format(reader_params, dataset):
     # return reader class_name if given
     #todo show which tests passed for each reader
     ml = si.msg_logger
+
     if 'class_name' in reader_params:
-        reader = si.class_importer.make_class_instance_from_params('reader', reader_params)
-        reader.dataset = dataset
-        ml.progress_marker(f'Using given reader parameter class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
-        return reader
+        ml.progress_marker(f'Using given reader parameter class_name = "{reader_params["class_name"]}"')
+        readers_to_check = dict(user_named_reader=reader_params[ 'class_name'] )
+    else:
+        # look for reader amongst known readers
+        readers_to_check = definitions.known_readers
 
-    # look for reader amongst known readers
     reader_class_name = None
-
-    tests ={} # set of tests to pass
+    is_format = False
+    tests = {}  # set of tests to pass
     ds_info = dataset.info
     file_vars = ds_info['variables']
-    for name, class_name in definitions.known_readers.items():
+    for name, class_name in readers_to_check.items():
         # first check if essential variables are in the file
         p = deepcopy(reader_params)
         p['class_name'] = class_name
-        r = si.class_importer.make_class_instance_from_params('reader',p)
-        gmap = r.params['grid_variable_map']
-        fmap= r.params['field_variable_map']
+        r, is_format =  _import_reader(p, dataset)
+        tests[name] = r.info['signature_tests']
 
-        # do basic tests for format for time, x and velocity
-        p = True
-        if fmap['water_velocity'][0] in file_vars:
-            vel_var = fmap['water_velocity'][0]
-        elif  fmap['water_velocity_depth_averaged'][0] in  file_vars:
-            vel_var = fmap['water_velocity_depth_averaged'][0]
-        else:
-            # neither in file
-            vel_var = 'velocity'
-            p=False
-        t = { vel_var: p}
-        # check if other variables in the signature are present
-        for s in r.params['variable_signature'] + [gmap['time'], gmap['x']]:
-            t[s] = s in ds_info['variables']
-
-        tests[name] = t
         # break if all testes passed as found reader
-        if all(t.values()):
+        if is_format:
             reader_class_name = class_name
             break
 
-
-    if reader_class_name is None:
-        ml.msg(f' In detecting file format, not all tests against known file format variables were passed', error=True)
+    if reader_class_name is None or not is_format:
+        ml.msg(f' In detecting file format, not all tests against known file format variables were passed')
         for name, vals in tests.items():
-            ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 2)
+            ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 3)
         ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
                hint=f'use reader to map to names in files? found variables {list(ds_info["variables"].keys())}',
                fatal_error=True)
 
     # make and merge defaults for found reader
     reader_params['class_name'] = reader_class_name
-    reader = si.class_importer.make_class_instance_from_params('reader', reader_params)
+    reader, is_format = _import_reader(reader_params, dataset)
 
-    reader.dataset = dataset
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
 
+def _import_reader(reader_params, dataset):
+    reader = si.class_importer.make_class_instance_from_params('reader', reader_params)
+    reader.dataset = dataset
+    # ensure vel params are correct
+    vel_vars, reader.info['is3D'] =  reader.detect_vel_var_and_if_3D(dataset)
+    if vel_vars is not None:
+        reader_params['field_variable_map']['water_velocity'] = vel_vars
+        reader.params['field_variable_map']['water_velocity'] = vel_vars
+
+    is_format= reader.check_signature(dataset)
+    return reader,is_format
 
 def _time_sort_files(reader):
     # sort variable fileIDs by time, now all files are read

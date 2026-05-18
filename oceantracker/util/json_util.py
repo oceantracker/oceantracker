@@ -1,24 +1,11 @@
 from  copy import deepcopy, copy
 import numpy as np
-import json
+import json, math
 from os import path
 from datetime import datetime,date, timedelta
 import traceback
 
-def write_JSON(file_name,d, indent=4):
-    # aviod changing given file name
-    if '.json' in file_name.lower():
-        fn = file_name
-    else:
-        fn=file_name+'.json'
-    try:
-        with open(fn, mode='w') as fp:
-            json.dump(d, fp, indent=indent,allow_nan=True, cls=MyEncoder)
 
-    except Exception as e:
-        print('Error>>  Failed to write json file ="' + file_name +'"')
-        raise(e)
-    pass
 
 def read_JSON(file_name):
     # avoid changing given file name
@@ -36,11 +23,14 @@ def read_JSON(file_name):
     return d
 
 
+
 #Store as JSON a numpy.ndarray or any nested-list composition.
 class MyEncoder(json.JSONEncoder):
 
+    #def encode(self, obj,*args, **kwargs):
     def default(self, obj):
-
+        pass
+        #print('xx',str(obj))
         try :
             # first numpy types
             if isinstance(obj, np.ndarray):
@@ -97,7 +87,6 @@ class MyEncoder(json.JSONEncoder):
                 return int(obj)
 
 
-
             elif type(obj) == timedelta:
                 return str(obj)
 
@@ -111,7 +100,20 @@ class MyEncoder(json.JSONEncoder):
             print(' JSON encode error- oceantracker ignoring object type ' + str(type(obj)) + ' value=' + str(obj))
             return f'Bad json value, unencodable type {str(type(obj))}  values= {str(obj)}'
 
+def write_JSON(file_name,d, indent=4):
+    # aviod changing given file name
+    if '.json' in file_name.lower():
+        fn = file_name
+    else:
+        fn=file_name+'.json'
+    try:
+        with open(fn, mode='w') as fp:
+            json.dump(d, fp, cls=MyEncoder, indent=indent)
 
+    except Exception as e:
+        print('Error>>  Failed to write json file ="' + file_name +'"')
+        raise(e)
+    pass
 
 # geojson polygons
 #todo make reader to/from internal polygon format
@@ -151,3 +153,29 @@ def writegeojson(f,polygonlist):
         features.append(f)
     #with open('data\oceanum_grid_outline.geojson','w') as f:
     #    geojson.dump(geometries,f)
+
+class TestEncoder(json.JSONEncoder):
+    def default(self, obj):
+        # Define how to handle specific non-serializable types
+        pass
+        if isinstance(obj, set):
+            return list(obj)
+        # Fallback to the base class implementation for other types
+        return super().default(obj)
+if __name__ == "__main__":
+    out_dir= r'F:\H_Local_drive\ParticleTracking\oceantracker_output\scratch'
+
+
+
+
+
+    data = {"name": "Alice", "tags": ["python", "json"]}
+
+    # Use the 'cls' parameter to pass the custom encoder class
+    with open(path.join(out_dir,"data.json"), "w") as f:
+        json.dump(data, f, cls=TestEncoder, indent=4)
+
+    d = dict(a=np.nan)
+    write_JSON(path.join(out_dir,'nan_test.json'),d)
+    pass
+

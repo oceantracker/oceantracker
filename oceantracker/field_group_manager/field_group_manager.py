@@ -36,6 +36,9 @@ class FieldGroupManager(ParameterBaseClass):
             reader_params = si.working_params['reader']
 
         self.reader, add_info = self._make_a_reader(reader_params)
+        # write catalog
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, f'hindcast_catalog{info["gridID"]:03d}'),
+                             self.reader.dataset.info)
         self.interpolator = self._set_up_interpolator( self.reader)
 
         if gridID == 0:
@@ -71,8 +74,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         # write_grid
         self.reader.write_grid(info['gridID'])
-        # write catalog
-        json_util.write_JSON(path.join(si.run_info.run_output_dir,f'hindcast_catalog{info["gridID"]:03d}'), self.reader.dataset.info)
+
         pass
         if si.settings.display_grid_at_start:
             from matplotlib import pyplot as plt
@@ -165,6 +167,7 @@ class FieldGroupManager(ParameterBaseClass):
     def _make_a_reader(self, reader_params):
         # build a readers
         reader = setup_reader.make_a_reader_from_params(reader_params)
+
         reader.initial_setup()
         reader.final_setup()
 

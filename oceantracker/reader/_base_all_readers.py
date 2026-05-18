@@ -1,5 +1,6 @@
 import numpy as np
 from copy import deepcopy
+
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
@@ -138,9 +139,45 @@ class _BaseReader(ParameterBaseClass):
 
     def final_setup(self):      pass
 
+    def detect_vel_var_and_if_3D(self, dataset):
+        # work out if vel or depth aver. vel is present and if these are 2D
+        # hindcast is 3D if velocity has any z dim
+        fvm = self.params['field_variable_map']
+        gvm = self.params['grid_variable_map']
+        dm = self.params['dimension_map']
+        file_vars = dataset.info['variables']
+
+        if fvm['water_velocity'][0] in file_vars:
+            vel_vars = fvm['water_velocity']
+        elif fvm['water_velocity_depth_averaged'][0] in file_vars:
+            vel_vars =fvm['water_velocity_depth_averaged']
+        else:
+            vel_vars=None
+        # see if vel has any z dimensions
+        if vel_vars is not None:
+            is3D = any([d in file_vars[vel_vars[0]]['dims'] for d in dm['all_z_dims']])
+        else:
+            is3D= False
+        return vel_vars, is3D
+
+    def check_signature(self, dataset):
+        # check if required var preset
+        fvm = self.params['field_variable_map']
+        gvm = self.params['grid_variable_map']
+        dm = self.params['dimension_map']
+        file_vars = dataset.info['variables']
+        vel_var = fvm['water_velocity']
+        signature_tests = {( 'velocity' if vel_var is  None else vel_var[0]): (vel_var is not None ) and vel_var[0]  in file_vars}
+        # check if other variables in the signature are present
+        for s in self.params['variable_signature'] + [gvm['time'], gvm['x']]:
+            signature_tests[s] = s in dataset.info['variables']
+        self.info['signature_tests'] = signature_tests
+
+        return all([item for key,item, in signature_tests.items()]) # check all tests past
+
     def _build_hori_and_vert_grids(self, ):
         params = self.params
-        grid= self.grid
+        grid = self.grid
         info = self.info
         self.build_hori_grid(grid)
         self._construct_hori_grid_variables()
@@ -578,6 +615,8 @@ class _BaseReader(ParameterBaseClass):
         if si.run_info.is3D_run and self.info['read_zlevels']:
             # read zlevel if native vertical grid of types Slayer or LSC
             grid['z_interface'][buffer_index,...] =  self.read_z_interface(nt)
+
+
 
 
     def decode_time(self,time):
