@@ -82,7 +82,7 @@ class SCHISMreader(_BaseUnstructuredReader):
                                                                         else si.vertical_grid_types.Slayer
 
         info['node_dim'] = params['dimension_map']['node']
-        info['num_nodes'] = info['dims'][info['node_dim']]
+        info['num_nodes'] = info['dims'][dm['node']]
 
 
     def read_z_interface(self, nt):

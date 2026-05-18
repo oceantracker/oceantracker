@@ -257,7 +257,7 @@ def get_case(n):
             show_grid = True
         case 400:
             # DELFT FM, fixed z
-            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\DELF3DFM_silawasi'
+            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\DELF3DFM-fix-z-silawasi'
             x0= [[-0.4876992148036644, 129.18935660697986],
                  [-2.788645108730445, 123.88768495956097]]
             x0 = np.flip(np.asarray(x0),axis=1)
@@ -316,7 +316,7 @@ def get_case(n):
 
         case 410:
             # circular  quay, sigma
-            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\CirQuay'
+            root_input_dir = r'F:\Hindcast_reader_tests\Delft3D\DELFT3D-sigma-circularkey'
 
             x0= [[337172.6806029637, 6252142.38595879],
                  [339878.96782871, 6255122.768058079]]
@@ -330,7 +330,7 @@ def get_case(n):
 
         case 411:
             # DELFT FM hananui, sigma
-            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\Stantech_hananui_delft3DFM_test1\Version_2'
+            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\Deft3d-sigma-Stantech_hananui\Version_2'
 
             x0 = [[-46.76850063886385, 168.1665833416483],
                   [-46.6651360690957, 168.5548344059933],
@@ -342,13 +342,14 @@ def get_case(n):
             is3D = True
             show_grid = True
             time_step = 10 * 60
+            geo_cords = True
 
         case 412:
             # DELFT 2D Perth_ashmore_reef_camille
             x0 = [[510630, 8639600]]
 
             output_file_base = 'Delft3D_Perth_ashmore_reef_camille'
-            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\Perth_ashmore_reef_camille'
+            root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\DEFT3D-2D-ashmore_reef_camille'
             file_mask = 'FlowFM_map.nc'  # hydrodynamic file name
 
             title = 'Delft3D\Perth_ashmore_reef_camille'

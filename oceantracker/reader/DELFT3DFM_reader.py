@@ -41,9 +41,9 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
             all_z_dims=PLC(['mesh2d_nInterfaces', 'mesh2d_nLayers','nmesh2d_layer', 'nmesh2d_interface'], str,
                            doc_str='All z dims, used to identify  3D variables'),
             dimension_map=dict(
-                        z = PVC('mesh2d_nInterfaces', str, doc_str='z dim for interfaces'),
+                        z = PMAC([ 'mesh2d_nInterfaces','nmesh2d_interface'], doc_str='z dim for interfaces'),
                         time=PVC('time', str, doc_str='name of time dimension in files'),
-                        node=PVC('mesh2d_nNodes', str, doc_str='name of node  dimension in files'),
+                        node=PMAC(['mesh2d_nNodes','mesh2d_nNodes'], doc_str='name of node  dimension in files'),
                          ),
             field_variable_map= {#'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
                                  'water_velocity': PLMAC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1']),
@@ -88,11 +88,15 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         # tweak variations in dims and variable names
         if info['is3D']:
             # sort out z dim and vertical grid size
-            if info['z_dim'] not in dims: dims['mesh2d_nInterfaces'] = dims['mesh2d_nLayers'] + 1
+            if dm['z'] is None and 'mesh2d_nLayers' in dims:
+                # LSC may have no 'z' dim value ??? add missing info
+                dims['mesh2d_nInterfaces'] = dims['mesh2d_nLayers'] + 1
+                dm['z'] = 'mesh2d_nInterfaces'
+
             info['z_dim'] = dm['z']
 
             # 2 variants of fixed z layer dimension names
-            #todo use alteratives checker to resolve z_dim, and z_layer_dim
+            #todo use alteratives checker to resolve z_dim, and z_layer_dim [ 'mesh2d_nInterfaces',''nmesh2d_interface']
             if 'mesh2d_nInterfaces' in dims:
                 info['z_dim'] = 'mesh2d_nInterfaces'
                 info['layer_dim'] = 'mesh2d_nLayers'
@@ -121,10 +125,10 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                 si.msg_logger.msg('Cannot determine vertical grid type',caller=self, fatal_error=True,
                                   hint='Delft3D FM file needs variables "mesh2d_layer_sigma" and  "mesh2d_interface_sigma" if sigma grid, or "mesh2d_layer_z" and "mesh2d_interface_z" if fixed z level grid')
         # get num nodes in each field
-        # is the number of nodes = uniques nodes in the quad mesh
-        info['node_dim'] = 'mesh2d_nNodes' if 'mesh2d_nNodes' in dims else 'nmesh2d_node'
 
-        info['num_nodes'] =  dims[info['node_dim']]
+        info['node_dim'] = dm['node']
+
+        info['num_nodes'] =  dims[dm['node']]
         info['cell_dim'] = 'mesh2d_nFaces' if 'mesh2d_nFaces' in dims else 'nmesh2d_face'
 
 

@@ -395,11 +395,11 @@ def hindcast_variable_integrity_report(reader):
                 elif type(val) == ParameterListChecker:
                     report[map_type]['has_var'][key] = (p[key][0] in file_vars) if len(p[key]) >0 else False
                 continue
-
             # new alternatives mappings
             if p[key] is None: # no user value given
                 # choose from alternatives
-                p[key] = dp[key].choose_alternative(ds.info['variables']) # already have a default or user given value  for var
+                available = ds.info['dims'] if map_type == 'dimension_map' else ds.info['variables']
+                p[key] = dp[key].choose_alternative(available) # already have a default or user given value  for var
 
             report[map_type]['has_var'][key] = p[key] is not None
             report[map_type]['alternatives'][key] = dp[key].alternatives
