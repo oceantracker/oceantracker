@@ -49,8 +49,7 @@ class _BaseGenericReader(_BaseReader):
         info['is3D'] = gm['z'] is not None
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             info['vert_grid_type'] = params['vertical_grid_type']
 
         pass
@@ -97,8 +96,7 @@ class GenericUnstructuredReader(_BaseGenericReader, _BaseUnstructuredReader):
 
         super().add_hindcast_info() # gert base class info
 
-        info['node_dim'] = params['dimension_map']['node']
-        info['num_nodes'] = info['dims'][info['node_dim']]
+        info['num_nodes'] = info['dims'][params['dimension_map']['node']]
 
     def read_triangles(self, grid):
         # read nodes in triangles (N by 3) or mix of triangles and quad cells as  (N by 4)

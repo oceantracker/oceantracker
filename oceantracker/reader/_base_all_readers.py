@@ -723,16 +723,17 @@ class _BaseReader(ParameterBaseClass):
         for nt, val in self.si.node_types.items():
             nc.create_attribute(f'node_typeID_{nt}', val)
 
-
+        dm = si.dim_names
+        dm.triangle
         nc.write_variable('x', grid['x'], ('node_dim', 'vector2D'))
-        nc.write_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
-        nc.write_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
-        nc.write_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'), description='number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(si.cell_search_status_flags))
-        nc.write_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
-        nc.write_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
+        nc.write_variable('triangles', grid['triangles'], (dm.triangle, 'vertex'))
+        nc.write_variable('triangle_area', grid['triangle_area'], (dm.triangle,))
+        nc.write_variable('adjacency', grid['adjacency'], (dm.triangle, 'vertex'), description='number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(si.cell_search_status_flags))
+        nc.write_variable('node_type', grid['node_type'], (dm.node,), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
+        nc.write_variable('is_boundary_triangle', grid['is_boundary_triangle'], (dm.triangle,))
         nc.write_variable('node_to_tri_map', grid['node_to_tri_map'], ('node_dim', 'max_nodes_per_tri'))
         nc.write_variable('tri_per_node', grid['tri_per_node'], ('node_dim',))
-        nc.write_variable('bc_transform', grid['bc_transform'], ('triangle_dim', 'bc_transform_rows', 'bc_transform_cols'))
+        nc.write_variable('bc_transform', grid['bc_transform'], (dm.triangle, 'bc_transform_rows', 'bc_transform_cols'))
 
         if 'water_depth' in self.fields:
             nc.write_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))

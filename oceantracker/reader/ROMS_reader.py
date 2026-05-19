@@ -72,8 +72,7 @@ class ROMSreader(_BaseStructuredReader):
 
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             info['vert_grid_type'] = si.vertical_grid_types.Sigma  # Slayer uses zero bottom cell, so treated the dame
 
         dims = info['dims']

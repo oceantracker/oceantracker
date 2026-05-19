@@ -110,7 +110,6 @@ def _standard_needed_info(reader):
 
 
     # set default z dim info to that for 2D, add_hindcast_info changes them for  3D
-    info['z_dim'] = None
     info['num_z_interfaces'] = 1
     info['vert_grid_type'] = None
 

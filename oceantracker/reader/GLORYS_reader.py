@@ -1,6 +1,8 @@
 from oceantracker.reader._base_structured_reader import  _BaseStructuredReader
 from oceantracker.reader.util import reader_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import  ParameterMapAlternativesChecker as PMAC
+from oceantracker.util.parameter_checking import  ParameterListMapAlternativesChecker as PLMAC
 import  oceantracker.util.time_util as time_util
 import numpy as np
 from datetime import  datetime
@@ -35,9 +37,8 @@ class GLORYSreader(_BaseStructuredReader):
             all_z_dims=PLC(['depth'], str, doc_str='All z dims used to identify  3D variables'),
             dimension_map= dict(
                         z=PVC('depth', str, doc_str='name of dimensions for z layer boundaries '),
-                        row=PVC('lat', str, doc_str='row dim of grid'),
-                        col=PVC('lon', str, doc_str='column dim of grid'),
-
+                        row=PMAC(['lat','latitude'], doc_str='row dim of grid'),
+                        col=PMAC(['lon','longitude'], doc_str='column dim of grid'),
                         ),
             grid_variable_map= dict(
                         time=PVC('time', str, doc_str='Name of time variable in hindcast'),
@@ -72,8 +73,7 @@ class GLORYSreader(_BaseStructuredReader):
                               caller = self, error=True, fatal_error=True)
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             if 'deptho_lev' in info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Zfixed
             else:
@@ -529,8 +529,7 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
                               caller = self, error=True, fatal_error=True)
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             if 'deptho_lev' in info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Zfixed
             else:

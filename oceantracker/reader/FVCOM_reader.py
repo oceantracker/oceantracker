@@ -58,12 +58,10 @@ class FVCOMreader(_BaseUnstructuredReader):
 
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             info['vert_grid_type'] = si.vertical_grid_types.Slayer
 
-        info['node_dim'] = params['dimension_map']['node']
-        info['num_nodes'] = info['dims'][info['node_dim']]
+        info['num_nodes'] = info['dims'][dm['node']]
 
 
     def build_vertical_grid(self):

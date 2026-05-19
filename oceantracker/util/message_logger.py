@@ -81,7 +81,7 @@ class MessageLogger(object ):
             self.msg_lists['warning'].append(m)
 
         elif strong_warning:
-            if len(self.msg_lists['warning']) > self.max_warnings: return
+            if len(self.msg_lists['strong_warning']) > self.max_warnings: return
             m = self._build_msg(msg_text, msg_tag='Strong warning', hint=hint, add_trace=True,caller=caller, wrap=True,tabs=tabs)
             self.msg_lists['strong_warning'].append(m)
 

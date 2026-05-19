@@ -76,12 +76,10 @@ class SCHISMreader(_BaseUnstructuredReader):
 
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             info['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_interface_index'] in info['variables'] \
                                                                         else si.vertical_grid_types.Slayer
 
-        info['node_dim'] = params['dimension_map']['node']
         info['num_nodes'] = info['dims'][dm['node']]
 
 
