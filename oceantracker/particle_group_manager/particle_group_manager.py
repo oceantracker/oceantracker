@@ -208,7 +208,6 @@ class ParticleGroupManager(ParameterBaseClass):
         for name,i in cr.particle_properties.items():
             if isinstance(i, FieldParticleProperty):
                 i.timed_update(n_time_step, time_sec, active)
-
         si.block_timer('Interpolate fields', t0)
 
         # NOTE classes based on ManuallyUpdatedParticleProperty are ignored here,

@@ -107,11 +107,11 @@ def setup_restart_continuation(si):
     return saved_state_info
 
 
-def write_raw_user_params(output_files, params,si):
-    fn= 'raw_user_params.json'
-    output_files['raw_user_params'] = fn
+def write_params_raw_user(output_files, params,si):
+    fn= 'params_raw_user_.json'
+    output_files['params_raw_user'] = fn
     json_util.write_JSON(path.join(output_files['run_output_dir'],  fn),params)
-    si.msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
+    si.msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["params_raw_user"]}"',  tabs=2, note=True)
 
 def _decompose_working_params(params, si, caller=None):
 
