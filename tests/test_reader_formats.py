@@ -139,7 +139,7 @@ def get_case(n):
             title = 'test_ Hauarki'
 
         case 153:
-            root_input_dir = r'Z:\Hindcasts\UpperSouthIsland\2024_pelorus_schism\downloaded\2017\01'
+            root_input_dir = r'Z:\Hindcasts\UpperSouthIsland\2024_pelorus_schism\downloaded\2017'
             output_file_base = 'test_pelorus'
             file_mask = 'Pel*.nc'
 
@@ -151,7 +151,7 @@ def get_case(n):
             title = 'test_pelorus'
 
         case 154:
-            root_input_dir = r'D:\Hindcast_reader_tests\Schism_chapps'
+            root_input_dir = r'D:\Hindcast_reader_tests\Schimsv5\Schism_CSIRO_all_Aust_chapps'
             output_file_base = 'CSIRO_chapps'
             file_mask = '*.nc'
 
@@ -163,6 +163,7 @@ def get_case(n):
             title = 'CSIRO_chapps'
             params['time_buffer_size']=6
             is3D = False
+            geo_cords=True
 
         case 200:
             # FVCOM
@@ -346,8 +347,7 @@ def get_case(n):
             x0 = [ [58.36351222050503, 21.7318678553635],
                 [55.54839701166633, 16.870008930959628],
                    ]
-            x0=np.asarray(x0)
-            x0[:,:2] = np.flip(x0[:,:2], axis=1)
+            x0= np.flip(np.asarray(x0), axis=1)
             # x0[:,0] += -90. + 360 # todo hack to get ross sea right acros date line in utm transform
 
             file_mask = '*.nc'

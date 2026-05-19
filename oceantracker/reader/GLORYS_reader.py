@@ -84,8 +84,8 @@ class GLORYSreader(_BaseStructuredReader):
 
         # corner-point grid: (N_lat-1) × (N_lon-1) nodes
         dims = info['dims']
-        N_lat = dims['lat' if 'lat' in dims else 'latitude']
-        N_lon = dims['lon' if 'lon' in dims else 'longitude']
+        N_lat = dims[dm['row']]
+        N_lon = dims[dm['col']]
         info['num_nodes'] = (N_lat - 1) * (N_lon - 1)
 
     def read_horizontal_grid_coords(self, grid):
