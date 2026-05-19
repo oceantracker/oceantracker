@@ -1,6 +1,8 @@
 from oceantracker.reader._base_structured_reader import  _BaseStructuredReader
 from oceantracker.reader.util import reader_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import  ParameterMapAlternativesChecker as PMAC
+from oceantracker.util.parameter_checking import  ParameterListMapAlternativesChecker as PLMAC
 import  oceantracker.util.time_util as time_util
 import numpy as np
 from datetime import  datetime
@@ -32,12 +34,11 @@ class GLORYSreader(_BaseStructuredReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
+            all_z_dims=PLC(['depth'], str, doc_str='All z dims used to identify  3D variables'),
             dimension_map= dict(
                         z=PVC('depth', str, doc_str='name of dimensions for z layer boundaries '),
-                        all_z_dims=PLC(['depth'], str, doc_str='All z dims used to identify  3D variables'),
-                        row=PVC('lat', str, doc_str='row dim of grid'),
-                        col=PVC('lon', str, doc_str='column dim of grid'),
-
+                        row=PMAC(['lat','latitude'], doc_str='row dim of grid'),
+                        col=PMAC(['lon','longitude'], doc_str='column dim of grid'),
                         ),
             grid_variable_map= dict(
                         time=PVC('time', str, doc_str='Name of time variable in hindcast'),
@@ -57,7 +58,6 @@ class GLORYSreader(_BaseStructuredReader):
                                    #'water_velocity_depth_averaged': PLC(['dahv'], str, fixed_len=2,
                                    #                                     doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
-            variable_signature= PLC(['time','latitude', 'uo','vo'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
                         )
 
@@ -73,9 +73,7 @@ class GLORYSreader(_BaseStructuredReader):
                               caller = self, error=True, fatal_error=True)
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             if 'deptho_lev' in info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Zfixed
             else:
@@ -86,8 +84,8 @@ class GLORYSreader(_BaseStructuredReader):
 
         # corner-point grid: (N_lat-1) × (N_lon-1) nodes
         dims = info['dims']
-        N_lat = dims['lat' if 'lat' in dims else 'latitude']
-        N_lon = dims['lon' if 'lon' in dims else 'longitude']
+        N_lat = dims[dm['row']]
+        N_lon = dims[dm['col']]
         info['num_nodes'] = (N_lat - 1) * (N_lon - 1)
 
     def read_horizontal_grid_coords(self, grid):
@@ -209,7 +207,7 @@ class GLORYSreader(_BaseStructuredReader):
     def read_file_var_as_4D_nodal_values(self, var_name, var_info, nt=None):
         ds = self.dataset
         info = self.info
-
+        params=self.params
         data = ds.read_variable(var_name, nt=nt)
         data_dims = data.dims
         data = data.data
@@ -217,7 +215,7 @@ class GLORYSreader(_BaseStructuredReader):
         if info['time_dim'] not in data_dims:
             data = data[np.newaxis, ...]
 
-        if any(x in info['all_z_dims'] for x in data_dims):
+        if any(x in params['all_z_dims'] for x in data_dims):
             data = np.transpose(data, (0, 2, 3, 1))   # → (time, N_lat, N_lon, depth)
             data = np.flip(data, axis=3)
         else:
@@ -423,6 +421,7 @@ class GLORYSreaderSubgrid(GLORYSreader):
         ml = si.msg_logger
         ds = self.dataset
         info = self.info
+        params = self.params
 
         dm = self.params['dimension_map']
         grid = self.grid
@@ -435,7 +434,7 @@ class GLORYSreaderSubgrid(GLORYSreader):
         # add dummy time dim if none
         if info['time_dim'] not in data_dims: data = data[np.newaxis, ...]
 
-        if any(x in info['all_z_dims'] for x in data_dims):
+        if any(x in params['all_z_dims'] for x in data_dims):
             data = np.transpose(data,(0,2,3,1))# move z to end
             # cell zero is at top, put at bottom
             data = np.flip(data, axis=3) # flip z
@@ -494,9 +493,10 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
+            all_z_dims=PLC(['depth'], str, doc_str='All z dims used to identify  3D variables'),
             dimension_map= dict(
                         z=PVC('depth', str, doc_str='name of dimensions for z layer boundaries '),
-                        all_z_dims=PLC(['depth'], str, doc_str='All z dims used to identify  3D variables'),
+
                         row=PVC('lat', str, doc_str='row dim of grid'),
                         col=PVC('lon', str, doc_str='column dim of grid'),
 
@@ -514,7 +514,6 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
                                    'water_temperature': PVC('thetao', str, doc_str='maps standard internal field name to file variable name'),
                                    'salinity': PVC('so', str, doc_str='maps standard internal field name to file variable name'),
                                    },
-            variable_signature= PLC(['time','latitude', 'uo','vo'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
                         )
 
@@ -530,9 +529,7 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
                               caller = self, error=True, fatal_error=True)
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             if 'deptho_lev' in info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Zfixed
             else:
@@ -619,6 +616,7 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
         ml = si.msg_logger
         ds = self.dataset
         info = self.info
+        params = self.params
 
         dm = self.params['dimension_map']
         grid = self.grid
@@ -631,7 +629,7 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
         # add dummy time dim if none
         if info['time_dim'] not in data_dims: data = data[np.newaxis, ...]
 
-        if any(x in info['all_z_dims'] for x in data_dims):
+        if any(x in params['all_z_dims'] for x in data_dims):
             data = np.transpose(data,(0,2,3,1))# move z to end
             # cell zero is at top, put at bottom
             data = np.flip(data, axis=3) # flip z

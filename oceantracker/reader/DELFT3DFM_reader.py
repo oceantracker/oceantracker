@@ -2,7 +2,9 @@ from numba.core.cgutils import false_bit
 
 from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
-from  oceantracker.util import time_util, numpy_util
+from oceantracker.util.parameter_checking import  ParameterMapAlternativesChecker as PMAC
+from oceantracker.util.parameter_checking import  ParameterListMapAlternativesChecker as PLMAC
+from  oceantracker.util import time_util, numpy_util, basic_util
 import numpy as np
 from oceantracker.util.triangle_utilities import split_quad_cells
 from oceantracker.reader.util import  reader_util
@@ -18,7 +20,6 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         regrid_z_to_sigma_levels=PVC(False, bool,
                        doc_str='much faster 3D runs by re-griding hydo-model fields for S-layer or LSC vertical grids (eg. SCHISM),  into uniform sigma levels on read based on sigma most curve z_interface profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS'),
 
-        variable_signature=PLC(['mesh2d_face_nodes'], str, doc_str='Variable names used to test if file is this format'),
             one_based_indices = PVC(True, bool, doc_str='DELFT 3D has indices starting at 1 not zero'),
             load_fields = PLC(['water_depth'], str, doc_str='always load tide and water depth, for dry cells id 2D'),
             grid_variable_map= dict( time= PVC('time', str),
@@ -27,23 +28,29 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                         x_cell=PVC('mesh2d_face_x', str, doc_str='x location of cell centers'),
                         y_cell=PVC('mesh2d_face_y', str, doc_str='y location of cell center'),
                         z= PVC('mesh2d_interface_z', str,doc_str='Layer edges depths'),
+
                         z_layer_fixed=PVC('mesh2d_layer_z', str, doc_str='Mid layer z for fixed z grid'),
+
                         z_layer_LSC =PVC('mesh2d_flowelem_zcc', str),
+
                         triangles= PVC('mesh2d_face_nodes', str),
                         quad_face_nodes=PVC('mesh2d_face_nodes', str),
                         bottom_interface_index= PVC(None, str),
                         is_dry_cell=PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                             ),
+            all_z_dims=PLC(['mesh2d_nInterfaces', 'mesh2d_nLayers','nmesh2d_layer', 'nmesh2d_interface'], str,
+                           doc_str='All z dims, used to identify  3D variables'),
             dimension_map=dict(
-                        z = PVC('mesh2d_nInterfaces', str, doc_str='z dim for interfaces'),
+                        z = PMAC([ 'mesh2d_nInterfaces','nmesh2d_interface'], doc_str='z dim for interfaces'),
+                        z_layer=PMAC(['mesh2d_nLayers', 'nmesh2d_layer'], doc_str='z dim for layers between interfaces'),
                         time=PVC('time', str, doc_str='name of time dimension in files'),
-                        node=PVC('mesh2d_nNodes', str, doc_str='name of node  dimension in files'),
-
-                        all_z_dims=PLC(['mesh2d_nInterfaces','mesh2d_nLayers','nmesh2d_layer'], str, doc_str='All z dims, used to identify  3D variables'),
+                        node=PMAC(['mesh2d_nNodes','mesh2d_nNodes','nmesh2d_node'], doc_str='name of node  dimension in files'),
                          ),
-            field_variable_map= {'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
-                        'tide': PVC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
-                        'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
+            field_variable_map= {#'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
+                                 'water_velocity': PLMAC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1']),
+                        'tide': PMAC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
+                        # 'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
+                        'water_depth': PMAC(['mesh2d_bldepth','mesh2d_node_z'],   doc_str='maps standard internal field name to file variable name'),
                         'water_temperature': PVC('mesh2d_tem1', str, doc_str='maps standard internal field name to file variable name'),
                         'salinity': PVC('mesh2d_sa1', str, doc_str='maps standard internal field name to file variable name'),
                         'wind_stress': PLC(None, str, doc_str='maps standard internal field name to file variable name'),
@@ -53,6 +60,10 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                                                 doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
                             )
+        # options for some variables/dims ser as None above
+        #fvo= self.file_var_options
+        #fvo['dims']=dict(all_z_dims =['mesh2d_nInterfaces', 'mesh2d_nLayers', 'nmesh2d_layer'] )
+        #fvo['fields'] = dict(water_depth=['mesh2d_bldepth','mesh2d_node_z'])
 
     def initial_setup(self):
         params = self.params
@@ -76,32 +87,16 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         filevars = ds_info['variables']
 
         # tweak variations in dims and variable names
-        # water depth
-        o = ['mesh2d_bldepth','mesh2d_node_z']
-        t = list(set(list(filevars.keys())).intersection(o)) # see if any of o in file vars
-        if len(t) > 0:
-            fvm['water_depth'] = t[0]
-        else:
-            si.msg_logger.msg('Cannot find water_depth variable in hindcast files',error=True,
-                              hint= f'File must contain one of variables {str(o)} ')
-
         if info['is3D']:
             # sort out z dim and vertical grid size
-            if info['z_dim'] not in dims: dims['mesh2d_nInterfaces'] = dims['mesh2d_nLayers'] + 1
-            info['z_dim'] = dm['z']
 
-            info['all_z_dims'] = dm['all_z_dims']
-            # 2 variants of fixed z layer dimension names
-            if 'mesh2d_nInterfaces' in dims:
-                info['z_dim'] = 'mesh2d_nInterfaces'
-                info['layer_dim'] = 'mesh2d_nLayers'
-                info['all_z_dims'] = ['mesh2d_nInterfaces','mesh2d_nLayers']
-            else:
-                info['z_dim'] = 'nmesh2d_interface'
-                info['layer_dim'] = 'nmesh2d_layer'
-                info['all_z_dims'] = ['nmesh2d_interface','nmesh2d_layer']
+            # LSC grid may not have interface dim
+            if dm['z'] is None and 'mesh2d_nLayers' in dims:
+                # LSC may have no 'z' dim value ??? add missing info
+                dims['mesh2d_nInterfaces'] = dims['mesh2d_nLayers'] + 1
+                dm['z'] = 'mesh2d_nInterfaces'
 
-            info['num_z_interfaces'] = dims[info['z_dim']]
+            info['num_z_interfaces'] = dims[dm['z']]
 
             if 'mesh2d_layer_sigma' in ds_info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Sigma
@@ -122,10 +117,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
                 si.msg_logger.msg('Cannot determine vertical grid type',caller=self, fatal_error=True,
                                   hint='Delft3D FM file needs variables "mesh2d_layer_sigma" and  "mesh2d_interface_sigma" if sigma grid, or "mesh2d_layer_z" and "mesh2d_interface_z" if fixed z level grid')
         # get num nodes in each field
-        # is the number of nodes = uniques nodes in the quad mesh
-        info['node_dim'] = 'mesh2d_nNodes' if 'mesh2d_nNodes' in dims else 'nmesh2d_node'
-
-        info['num_nodes'] =  dims[info['node_dim']]
+        info['num_nodes'] =  dims[dm['node']]
         info['cell_dim'] = 'mesh2d_nFaces' if 'mesh2d_nFaces' in dims else 'nmesh2d_face'
 
 
@@ -257,6 +249,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         ds = self.dataset
         grid = self.grid
         params = self.params
+        dm = params['dimension_map']
         info = self.info
 
         data = ds.read_variable(var_name, nt=nt).data
@@ -265,7 +258,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         if info['time_dim'] not in var_info['dims']: data = data[np.newaxis, ...]
 
         # add z dim if needed
-        if all(x not in var_info['dims'] for x in info['all_z_dims']): data = data[..., np.newaxis]
+        if all(x not in var_info['dims'] for x in params['all_z_dims']): data = data[..., np.newaxis]
 
         # some variables at nodes, some at edge mid points ( eg u,v,w)
         if info['cell_dim'] in var_info['dims']:
@@ -273,7 +266,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
             data = hg_trans.get_nodal_values_from_weighted_cell_values(
                                         data, grid['node_to_quad_cell_map'], grid['quad_cells_per_node'], grid['edge_val_weights'])
 
-        if var_info['is3D'] and info['layer_dim'] in var_info['dims']:
+        if var_info['is3D'] and dm['z_layer'] in var_info['dims']:
             if info['vert_grid_type'] == si.vertical_grid_types.Zfixed :
                 #  interp fixed z layer values to interfaces, must be done after nodal values
                 data = hg_trans.convert_3Dfield_fixed_z_layer_to_fixed_z_interface(

@@ -13,11 +13,12 @@ class SCHISMreader(_BaseUnstructuredReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
+            'all_z_dims': PLC(['nSCHISM_vgrid_layers'], str, doc_str='All z dims, used to identify  3D variables'),
             'dimension_map': dict(
                         node=PVC('nSCHISM_hgrid_node', str, doc_str='name of nodes dimension in files'),
                         cell=PVC('nSCHISM_hgrid_face', str, doc_str='name of cell dimension in files'),
                         z=PVC('nSCHISM_vgrid_layers', str, doc_str='name of dimensions for z layer boundaries '),
-                        all_z_dims=PLC(['nSCHISM_vgrid_layers'], str, doc_str='All z dims, used to identify  3D variables'),
+
                         vector2D=PVC('two', str, doc_str='name of dimension names for 2D vectors'),
                         vector3D=PVC(None, str),
                                 ),
@@ -42,7 +43,6 @@ class SCHISMreader(_BaseUnstructuredReader):
                                                 doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'one_based_indices': PVC(True, bool, doc_str='Schism has indices starting at 1 not zero'),
-            'variable_signature': PLC(['elev','depth','wetdry_elem'], str, doc_str='Variable names used to test if file is this format'),
             'hgrid_file_name': PVC(None, str),
              })
 
@@ -76,14 +76,11 @@ class SCHISMreader(_BaseUnstructuredReader):
 
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             info['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_interface_index'] in info['variables'] \
                                                                         else si.vertical_grid_types.Slayer
 
-        info['node_dim'] = params['dimension_map']['node']
-        info['num_nodes'] = info['dims'][info['node_dim']]
+        info['num_nodes'] = info['dims'][dm['node']]
 
 
     def read_z_interface(self, nt):

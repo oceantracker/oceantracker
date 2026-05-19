@@ -121,6 +121,8 @@ class OceanTrackerParamsRunner(object):
             ml.msg(f'Output in "{si.run_info.run_output_dir}"')
         ml.hori_line()
         ml.msg('')
+
+        self._write_params_as_executed(si.output_files)
         ml.close()
 
         return case_info_file
@@ -171,7 +173,7 @@ class OceanTrackerParamsRunner(object):
 
         # write raw params to a file
         if not si.run_info.restarting:
-            setup_util.write_raw_user_params(si.output_files, user_given_params, si)
+            setup_util.write_params_raw_user(si.output_files, user_given_params, si)
 
         # setup numba before first import as its environment variable settings  have to be set before first import on Numba
         # set numba config environment variables, before any import of numba, eg by readers,
@@ -649,6 +651,22 @@ class OceanTrackerParamsRunner(object):
         json_util.write_JSON(case_info_file, d)
         return case_info_file
 
+    def _write_params_as_executed(self,output_files):
+        fn = 'params_as_executed.json'
+        output_files['params_as_executed'] = fn
+        d= dict(settings=si.settings.asdict(),
+            core_class_roles= {key:item.params for key, item in
+                               si.core_class_roles.items()  if item is not None},
+            class_class_roles=dict()
+                )
+        for role, val in si.class_roles.items():
+            d['class_class_roles'][role] = dict()
+            for name, item in val.items():
+                d['class_class_roles'][role][name] = None if item is None else item.params
+
+        json_util.write_JSON(path.join(output_files['run_output_dir'], fn), d)
+        si.msg_logger.msg(f'To help with debugging, parameters as use during in run  are in "{output_files["params_as_executed"]}"',
+                          tabs=2, note=True)
 
 
 
