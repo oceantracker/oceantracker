@@ -1,8 +1,6 @@
 import numpy as np
 from copy import deepcopy
 
-from pyarrow.types import is_float32
-
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC

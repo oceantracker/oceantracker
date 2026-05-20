@@ -4,8 +4,29 @@
 Change log
 ###########################
 
-Note: All changes that are either input or model output in any way are labeled as "breaking changes",
-      excluding bug-fixes
+Note: All commits that change either model in- or output in any way are labeled as "breaking changes", excluding bug-fixes
+
+
+Version '0.5.3.7 2026-05-18'
+____________________________
+
+Bug fixes
+---------
+
+#. Fixed issues in Delft3D reader:
+
+   #. Fixed DELFT3DFM reader not working in 2D mode
+   #. Fixed water depth calculation.
+   #. Improved handling of dry nodes: NaN tidal values (which the hindcast uses to
+      indicate dry nodes) are now replaced with bed elevation + 5 cm so that dry-cell
+      detection and tidal interpolation never encounter NaN values.
+   #. Improved water depth variable detection to handle naming differences across
+      DELFT3DFM versions (now checks for both ``mesh2d_bldepth`` and ``mesh2d_node_z``;
+      sign is corrected automatically depending on which variable is present).
+   #. Added ``nmesh2d_layer`` to the list of recognised z-dimension names so that 3D
+      hindcasts using that dimension are correctly identified.
+
+#. Fixed a inaccuracy in calculating the Barycentric coordinates of particles at release if the kd-tree guess was incorrect
 
 
 Version '0.5.3.6 2026-04-20'
