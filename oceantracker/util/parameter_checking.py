@@ -36,7 +36,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None):
         if key.startswith('control_key'): continue # ignore these keys here
         item = default_params[key]
         msg =f'Parameter "{key}"'
-        if key not in params: params[key] = None  # add Noe /not given if not present
+        if key not in params: params[key] = None  # add None /not given if not present
 
         if isinstance(item,(_ParameterBaseDataClassChecker,ParameterMapAlternativesChecker)):
             params[key] = item.get_value(key, params[key], msg_logger, caller)

@@ -3,6 +3,7 @@ from os import path
 
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import  ParameterMapAlternativesChecker as PMAC, ParameterListMapAlternativesChecker as PLMAC
 import numpy as np
 from oceantracker.shared_info import shared_info as si
 from oceantracker.reader.util import reader_util
@@ -23,15 +24,15 @@ class SCHISMreader(_BaseUnstructuredReader):
                         vector3D=PVC(None, str),
                                 ),
              'grid_variable_map': dict(
-                        time=PVC('time', str, doc_str='Name of time variable in hindcast'),
-                        x = PVC('SCHISM_hgrid_node_x', str, doc_str='x location of nodes'),
-                        y = PVC('SCHISM_hgrid_node_y', str, doc_str='y location of nodes'),
+                        time=PMAC(['time'],  doc_str='Name of time variable in hindcast'),
+                        x = PMAC('SCHISM_hgrid_node_x', doc_str='x location of nodes'),
+                        y = PMAC('SCHISM_hgrid_node_y', doc_str='y location of nodes'),
                         z_interface=PVC('zcor', str),
                         triangles =PVC('SCHISM_hgrid_face_nodes', str),
                         bottom_interface_index =PVC('node_bottom_index', str),
                         is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                         ),
-            'field_variable_map': {'water_velocity': PLC(['hvel', 'vertical_velocity'], str),
+            'field_variable_map': {'water_velocity': PLMAC(['hvel', 'vertical_velocity']),
                                 'tide': PVC('elev', str,doc_str='maps standard internal field name to file variable name'),
                                 'water_depth': PVC('depth', str, doc_str='maps standard internal field name to file variable name'),
                                 'water_temperature': PVC('temp', str,doc_str='maps standard internal field name to file variable name'),

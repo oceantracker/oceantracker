@@ -26,8 +26,14 @@ def main(args=None):
 
     #ot.settings(NUMBA_cache_code = True)
     hm = dd.hydro_model['demoSchism3D']
+
     ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True,
-                 field_variable_map=dict(my_field='temp'),load_fields=['my_field']
+                 # test mapping with user give maps to existing variables
+                 field_variable_map=dict(my_field='temp',
+                                         water_velocity=['hvel', 'vertical_velocity'], ),
+                 load_fields=['my_field'],  # request load user field
+                 grid_variable_map=dict(x='SCHISM_hgrid_node_x',
+                                        x_not_used='SCHISM_hgrid_node_x')
                  )
 
     # add a point release
