@@ -16,21 +16,19 @@ class SCHISMreader(_BaseUnstructuredReader):
         self.add_default_params({
             'all_z_dims': PLC(['nSCHISM_vgrid_layers'], str, doc_str='All z dims, used to identify  3D variables'),
             'dimension_map': dict(
-                        node=PVC('nSCHISM_hgrid_node', str, doc_str='name of nodes dimension in files'),
-                        cell=PVC('nSCHISM_hgrid_face', str, doc_str='name of cell dimension in files'),
-                        z=PVC('nSCHISM_vgrid_layers', str, doc_str='name of dimensions for z layer boundaries '),
-
-                        vector2D=PVC('two', str, doc_str='name of dimension names for 2D vectors'),
-                        vector3D=PVC(None, str),
-                                ),
+                        node=PMAC('nSCHISM_hgrid_node',  doc_str='name of nodes dimension in files'),
+                        cell=PMAC('nSCHISM_hgrid_face',  doc_str='name of cell dimension in files'),
+                        z=PMAC('nSCHISM_vgrid_layers',  doc_str='name of dimensions for z layer boundaries '),
+                        vector2D=PMAC('two',  doc_str='name of dimension names for 2D vectors'),
+                         ),
              'grid_variable_map': dict(
                         time=PMAC(['time'],  doc_str='Name of time variable in hindcast'),
                         x = PMAC('SCHISM_hgrid_node_x', doc_str='x location of nodes'),
                         y = PMAC('SCHISM_hgrid_node_y', doc_str='y location of nodes'),
-                        z_interface=PVC('zcor', str),
-                        triangles =PVC('SCHISM_hgrid_face_nodes', str),
-                        bottom_interface_index =PVC('node_bottom_index', str),
-                        is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
+                        z_interface=PMAC('zcor'),
+                        triangles =PMAC('SCHISM_hgrid_face_nodes'),
+                        bottom_interface_index =PMAC('node_bottom_index'),
+                        is_dry_cell = PMAC('wetdry_elem',  doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                         ),
             'field_variable_map': {'water_velocity': PLMAC(['hvel', 'vertical_velocity']),
                                 'tide': PVC('elev', str,doc_str='maps standard internal field name to file variable name'),
