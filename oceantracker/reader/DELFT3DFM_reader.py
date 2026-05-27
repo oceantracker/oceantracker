@@ -120,7 +120,6 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         info['num_nodes'] =  dims[dm['node']]
         info['cell_dim'] = 'mesh2d_nFaces' if 'mesh2d_nFaces' in dims else 'nmesh2d_face'
 
-
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations
         ds = self.dataset
