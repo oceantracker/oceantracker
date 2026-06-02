@@ -94,6 +94,25 @@ def reader_schism2D():
 
 
 @pytest.fixture
+def reader_schism3D_variable_remap():
+    return dict(
+        class_name='SCHISMreader',
+        input_dir=path.join(unittest_hindast_dir, "schism3D"),
+        file_mask="*.nc",
+        field_variable_map=dict(
+            my_field='temp',
+            water_velocity=['hvel', 'vertical_velocity'],
+        ),
+        load_fields=['my_field'],
+        grid_variable_map=dict(
+            x='SCHISM_hgrid_node_x',
+            x_not_used='SCHISM_hgrid_node_x',
+        ),
+        dimension_map=dict(node='nSCHISM_hgrid_node'),
+    )
+
+
+@pytest.fixture
 def reader_GLORYS3D():
     return dict(
         input_dir=path.join(unittest_hindast_dir, "Glorys3DfixedZ"),
