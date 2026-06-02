@@ -24,7 +24,6 @@ class ROMSreaderMoanaProjectNZ( ROMSreader):
                                     y=PVC('lat_psi', str)),
                 all_z_dims=PLC(['s_w', 's_rho'], str, doc_str='All z dims used to identify  3D variables'),
                 dimension_map=dict(  z=PVC('s_w', str, doc_str='name of dimensions for z layer boundaries '),
-
                              row=PVC('eta_psi', str, doc_str='row dim of grid'),
                             col=PVC('xi_psi', str, doc_str='column dim of grid'),
                                       ),

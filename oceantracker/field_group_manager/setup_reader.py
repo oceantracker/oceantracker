@@ -144,12 +144,14 @@ def _detect_hydro_file_format(reader_params, dataset):
     if not any(is_format):
         ml.msg(f' In detecting file format, not all tests against known file format variables were passed')
         for r in readers:
+            params= r.params
+            fvm, gvm,dm = params['field_variable_map'], params['grid_variable_map'], params['dimension_map']
             report = r.info['hindcast_integrity_report']
             ml.msg(f'Has required variables/dims for format "{report["class_name"]}" ', tabs= 3)
             req= report['required']
-            ml.msg('Field variables: '+ ", ".join([f"{k}={v}" for k, v in req['fields'].items()]), tabs=4)
-            ml.msg('Grid variables: ' + ", ".join([f"{k}={v}" for k, v in req['grid'].items()]), tabs=4)
-            ml.msg('Dimensions    : ' + ", ".join([f"{k}={v}" for k, v in req['dims'].items()]), tabs=4)
+            ml.msg('Field variables: '+ ", ".join([f"{k} (mapped to  {fvm[k]})={v}" for k, v in req['fields'].items()]), tabs=4)
+            ml.msg('Grid variables: ' + ", ".join([f"{k} (mapped to  {gvm[k]})={v}" for k, v in req['grid'].items()]), tabs=4)
+            ml.msg('Dimensions    : ' + ", ".join([f"{k} (mapped to  {dm[k]})={v}" for k, v in req['dims'].items()]), tabs=4)
 
         ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
                  )
@@ -377,22 +379,22 @@ def hindcast_variable_integrity_report(reader):
 
     report=dict(is_format=False, class_name = reader.params['class_name'],)
     for map_type in ['grid_variable_map','field_variable_map','dimension_map']:
-        if map_type not in report: report[map_type] = dict(
-                                                           has_var = dict(),alternatives = dict())
+        if map_type not in report: report[map_type] = dict( in_file = dict(),alternatives = dict())
         p = params[map_type]
         dp = reader.default_params[map_type]
 
         for key, val in dp.items():
             if key.startswith('control_key'): continue
-            if not isinstance(val,(ParameterMapAlternativesChecker,ParameterMapAlternativesChecker)) :
-                # legacy variable maps with PCC and PLC, check if variable/param value  (or first if list of variables) in the file
+            file_names = ds.info['dims'] if map_type == 'dimension_map' else file_vars
 
+            if not isinstance(val,(ParameterMapAlternativesChecker,ParameterListMapAlternativesChecker)) :
+                # legacy variable maps with PCC and PLC, check if variable/param value  (or first if list of variables) in the file
                 if map_type =='dimension_map' and type(p[key]) != list:
-                    report[map_type]['has_var'][key] = p[key] in ds.info['dims']
+                    report[map_type]['in_file'][key] = p[key] in file_names
                 elif type(val) == ParamValueChecker:
-                    report[map_type]['has_var'][key]= p[key] in file_vars
+                    report[map_type]['in_file'][key]= p[key] in file_names
                 elif type(val) == ParameterListChecker:
-                    report[map_type]['has_var'][key] = (p[key][0] in file_vars) if len(p[key]) >0 else False
+                    report[map_type]['in_file'][key] = (p[key][0] in file_names) if len(p[key]) >0 else False
                 continue
             # new alternatives mappings
             if p[key] is None: # no user value given
@@ -400,16 +402,20 @@ def hindcast_variable_integrity_report(reader):
                 available = ds.info['dims'] if map_type == 'dimension_map' else ds.info['variables']
                 p[key] = dp[key].choose_alternative(available) # already have a default or user given value  for var
 
-            report[map_type]['has_var'][key] = p[key] is not None
+            if type(val) == ParameterMapAlternativesChecker:
+                report[map_type]['in_file'][key] = p[key] in file_names
+            elif type(val) == ParameterListMapAlternativesChecker:
+                report[map_type]['in_file'][key] = (p[key][0] in file_names) if len(p[key]) > 0 else False
+
             report[map_type]['alternatives'][key] = dp[key].alternatives
 
     # check ir required variables present
     req = dict()
-    req['fields'] =   {key: report['field_variable_map']['has_var'][key] for key in params['required_feilds']}
-    req['fields']['water_velocity'] =  (report['field_variable_map']['has_var']['water_velocity']
-                                                    or report['field_variable_map']['has_var']['water_velocity_depth_averaged'])
-    req['grid'] = {key: report['grid_variable_map']['has_var'][key] for key in params['required_grid_variables']}
-    req['dims'] = {key: report['dimension_map']['has_var'][key] for key in params['required_dimensions']}
+    req['fields'] =   {key: report['field_variable_map']['in_file'][key] for key in params['required_feilds']}
+    req['fields']['water_velocity'] =  (report['field_variable_map']['in_file']['water_velocity']
+                                                    or report['field_variable_map']['in_file']['water_velocity_depth_averaged'])
+    req['grid'] = {key: report['grid_variable_map']['in_file'][key] for key in params['required_grid_variables']}
+    req['dims'] = {key: report['dimension_map']['in_file'][key] for key in params['required_dimensions']}
     report['is_format'] = all([all(req['fields'].values()), all(req['grid'].values()), all(req['dims'].values())])
     report['required'] = req
     return report

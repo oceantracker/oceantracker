@@ -36,7 +36,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None):
         if key.startswith('control_key'): continue # ignore these keys here
         item = default_params[key]
         msg =f'Parameter "{key}"'
-        if key not in params: params[key] = None  # add Noe /not given if not present
+        if key not in params: params[key] = None  # add None /not given if not present
 
         if isinstance(item,(_ParameterBaseDataClassChecker,ParameterMapAlternativesChecker)):
             params[key] = item.get_value(key, params[key], msg_logger, caller)
@@ -329,12 +329,11 @@ class ParameterMapAlternativesChecker(object):
         self.data_type = data_type
         self.doc_str = doc_str
 
-    def check_value(self, key, values, msg_logger, caller):
-        if type(values) != list: values = [values]
-        for v in values:
-            if type(v) == self.data_type: continue
+    def check_value(self, key, value, msg_logger, caller):
+        if type(value) != self.data_type:
             msg_logger.msg(f'Parameter {key} must be type {self.data_type}, got vale {str(v)} of type {str(type(v))}', caller=caller, error = True,
-                           hint=f'Given key values are,  {key} = {str(values)}')
+                       hint=f'Given key values are,  {key} = {str(value)}')
+        return value
 
     def get_value(self, key, user_param, msg_logger, caller):
 
@@ -343,6 +342,7 @@ class ParameterMapAlternativesChecker(object):
             return None
         else:
             # check the user given value
+
             return self.check_value(key, user_param, msg_logger, caller)
 
 
@@ -383,11 +383,11 @@ class ParameterListMapAlternativesChecker(ParameterMapAlternativesChecker):
                            error=True,
                            hint=f'Given key values are,  {key} = {str(values)}')
         # check all have required data type
-        for item in values:
-            for v in item:
-                if type(v) == self.data_type: continue
-                msg_logger.msg(f'Parameter {key} must be type {self.data_type}, got type {str(type(v))}', caller=caller, error = True,
-                               hint=f'Given key values are,  {key} = {str(values)}')
+        for v in values:
+            if type(v) == self.data_type: continue
+            msg_logger.msg(f'Parameter {key} must be type {self.data_type}, got type {str(type(v))}', caller=caller, error = True,
+                           hint=f'Given key values are,  {key} = {str(values)}')
+        return values
 
     def choose_alternative(self, available):
         if type(available) == dict: available = list(available.keys())
