@@ -22,9 +22,9 @@ class FVCOMreader(_BaseUnstructuredReader):
         #  update parent defaults with above
         super().__init__()  # required in children to get parent defaults
         self.add_default_params(
+                all_z_dims=PLC(['siglay', 'siglev'], str, doc_str='All z dims, used to identify  3D variables'),
                 dimension_map=dict(
                         node=PVC('node', str, doc_str='Dim oNumber of nodes in triangular grid ie unique triangle vertex node numbers'),
-                        all_z_dims=PLC( ['siglay', 'siglev'], str, doc_str='All z dims, used to identify  3D variables'),
                         z=PVC('siglev', str, doc_str='name of dimensions for z layer boundaries '),
                         ),
                 field_variable_map= dict(
@@ -46,8 +46,6 @@ class FVCOMreader(_BaseUnstructuredReader):
                         bottom_interface_index =PVC('node_bottom_index', str),
                         is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                         ),
-                variable_signature = PLC(['u', 'v', 'zeta'], str,
-                                      doc_str='Variable names used to test if file is this format'),
                 )
 
     def add_hindcast_info(self):
@@ -60,13 +58,10 @@ class FVCOMreader(_BaseUnstructuredReader):
 
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             info['vert_grid_type'] = si.vertical_grid_types.Slayer
 
-        info['node_dim'] = params['dimension_map']['node']
-        info['num_nodes'] = info['dims'][info['node_dim']]
+        info['num_nodes'] = info['dims'][dm['node']]
 
 
     def build_vertical_grid(self):

@@ -36,9 +36,9 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None):
         if key.startswith('control_key'): continue # ignore these keys here
         item = default_params[key]
         msg =f'Parameter "{key}"'
-        if key not in params: params[key] = None  # add Noe /not given if not present
+        if key not in params: params[key] = None  # add None /not given if not present
 
-        if isinstance(item,_ParameterBaseDataClassChecker):
+        if isinstance(item,(_ParameterBaseDataClassChecker,ParameterMapAlternativesChecker)):
             params[key] = item.get_value(key, params[key], msg_logger, caller)
 
         elif type(item) == dict:
@@ -314,10 +314,90 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
         return value
 
 # specilsed checkser for hindcast variable maps
-class ParamterMapWithAlternatives(object):
+class ParameterMapAlternativesChecker(object):
+    # checks maps, if no user value given seeks map amonst avaible alternatives
+    # used in  field, dimension and grid  maps to hindcast file variables
+    # reqruires manual/external of class  code to check against alteratices
+    # if user value/map given, then this is assues this is correct and does not look at alternatives
+    def __init__(self,alternatives,data_type=str, doc_str :str =None):
 
-    def __init__(self,alternastives, ):
-        pass
+        if type(alternatives) == data_type:
+            # if not a list by datatype then convert  to list
+            alternatives=[alternatives]
+
+        self.alternatives=alternatives
+        self.data_type = data_type
+        self.doc_str = doc_str
+
+    def check_value(self, key, value, msg_logger, caller):
+        if type(value) != self.data_type:
+            msg_logger.msg(f'Parameter {key} must be type {self.data_type}, got vale {str(v)} of type {str(type(v))}', caller=caller, error = True,
+                       hint=f'Given key values are,  {key} = {str(value)}')
+        return value
+
+    def get_value(self, key, user_param, msg_logger, caller):
+
+        if user_param is None:
+            # if no user value/map given, then return None as a flag to look at alternatives
+            return None
+        else:
+            # check the user given value
+
+            return self.check_value(key, user_param, msg_logger, caller)
+
+
+    def choose_alternative(self,available):
+        if type(available) == dict: available = list(available.keys())
+
+        for a in self.alternatives:
+              if a in available:
+                return a
+        return  None
+
+class ParameterListMapAlternativesChecker(ParameterMapAlternativesChecker):
+
+    def __init__(self,alternatives,data_type=str, doc_str :str =None):
+
+        if type(alternatives) != list:
+            basic_util.CodingError(f'ParameterListMapAlternativesChecker: map must be a list or strings or lists of strings got=   {str(alternatives)} in {self}')
+
+        for n  in range(len(alternatives)):
+            if type(alternatives[n]) != list: alternatives[n]=[alternatives[n]]
+
+        self.alternatives=alternatives
+        self.data_type = data_type
+        self.doc_str = doc_str
+
+    def get_value(self, key, user_param, msg_logger, caller):
+
+        if user_param is None:
+            # if no user value/map given, then return None as a flag to look at alternative
+            return None
+        else:
+            # check the user given value
+            return self.check_value(key, user_param, msg_logger, caller)
+
+    def check_value(self, key, values, msg_logger, caller):
+        if type(values) != list:
+            msg_logger.msg(f'Parameter {key} must be type list, got type {str(type(values))}', caller=caller,
+                           error=True,
+                           hint=f'Given key values are,  {key} = {str(values)}')
+        # check all have required data type
+        for v in values:
+            if type(v) == self.data_type: continue
+            msg_logger.msg(f'Parameter {key} must be type {self.data_type}, got type {str(type(v))}', caller=caller, error = True,
+                           hint=f'Given key values are,  {key} = {str(values)}')
+        return values
+
+    def choose_alternative(self, available):
+        if type(available) == dict: available = list(available.keys())
+        result = []
+        for a1 in self.alternatives:
+            for a in a1:
+                result.append(a if a in available else None)
+
+        return result
+
 
 # todo add ListOfParameterDictionaries case for polygon lists etc
 

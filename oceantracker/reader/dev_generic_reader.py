@@ -22,9 +22,10 @@ class _BaseGenericReader(_BaseReader):
                                y = PVC(None, str, is_required=True),
                                z= PVC(None, str,doc_str=' name of z variable, or sigma grid variable'),
                                sigma= PVC(None, str,doc_str=' name of sigma, 0-1 vetical grid variable') ),
+            all_z_dims=PVC([], str, doc_str='name of all vertical dimensions'),
             dimension_map = dict(  time =PVC('time', str, is_required=True),
                             z = PVC(None, str,doc_str='name of dim for vertical layer boundaries'),
-                            all_z_dims=PVC([], str, doc_str='name of all vertical dimensions'),
+
                             vector2D = PVC(None, str),
                             vector3D = PVC(None, str),
                                   ),
@@ -35,7 +36,7 @@ class _BaseGenericReader(_BaseReader):
            vertical_grid_type=PVC(None,str, doc_str='use to offset times to required times zone', is_required=True, possible_values=si.vertical_grid_types.possible_values()),
              isodate_of_hindcast_time_zero = PTC(None, doc_str='use to offset times to required times zone', is_required=True),
              )
-        self.remove_default_params(['variable_signature'])
+
 
     def add_hindcast_info(self):
         params = self.params
@@ -48,9 +49,7 @@ class _BaseGenericReader(_BaseReader):
         info['is3D'] = gm['z'] is not None
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             info['vert_grid_type'] = params['vertical_grid_type']
 
         pass
@@ -97,8 +96,7 @@ class GenericUnstructuredReader(_BaseGenericReader, _BaseUnstructuredReader):
 
         super().add_hindcast_info() # gert base class info
 
-        info['node_dim'] = params['dimension_map']['node']
-        info['num_nodes'] = info['dims'][info['node_dim']]
+        info['num_nodes'] = info['dims'][params['dimension_map']['node']]
 
     def read_triangles(self, grid):
         # read nodes in triangles (N by 3) or mix of triangles and quad cells as  (N by 4)

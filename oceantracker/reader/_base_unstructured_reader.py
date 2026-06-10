@@ -9,6 +9,7 @@ class _BaseUnstructuredReader(_BaseReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
+            required_dimensions=PLC(['node'], str, doc_str='List of internal dimension_map names that must be in the hindcast'),
             dimension_map=dict(node=PVC(None, str, doc_str='Nodes in grid', is_required=True)),
         )  # list of normal required dimensions
 

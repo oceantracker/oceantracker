@@ -4,23 +4,26 @@ from copy import copy, deepcopy
 from os import path
 from glob import  glob
 
+from numba.core.typing import signature
+
 from oceantracker.shared_info import shared_info as si
 from oceantracker import definitions
 from oceantracker.util import  time_util, json_util,basic_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
+from oceantracker.util.parameter_checking import ParameterMapAlternativesChecker, ParameterListMapAlternativesChecker
+from oceantracker.util.parameter_checking import ParamValueChecker, ParameterListChecker
+def make_a_reader_from_params(users_reader_params):
 
-def make_a_reader_from_params(reader_params):
 
-
-    _check_input_dir(reader_params)
-    dataset = OceanTrackerDataSet(reader_params)
+    _check_input_dir(users_reader_params)
+    dataset = OceanTrackerDataSet(users_reader_params)
 
     # detect reader format and add clas_name to params
-    reader = _detect_hydro_file_format(reader_params, dataset)
-
+    reader = _detect_hydro_file_format(users_reader_params, dataset)
+    reader_params = reader.params # params may have changed
 
     # discard problematic variables
-    for file_var in reader.params['drop_variables']:
+    for file_var in reader_params['drop_variables']:
         if file_var in reader.dataset.info['variables']:
             del reader.dataset.info['variables'][file_var]
         else:
@@ -107,9 +110,7 @@ def _standard_needed_info(reader):
 
 
     # set default z dim info to that for 2D, add_hindcast_info changes them for  3D
-    info['z_dim'] = None
     info['num_z_interfaces'] = 1
-    info['all_z_dims'] = []
     info['vert_grid_type'] = None
 
 
@@ -126,36 +127,41 @@ def _detect_hydro_file_format(reader_params, dataset):
         # look for reader amongst known readers
         readers_to_check = definitions.known_readers
 
-    reader_class_name = None
-    is_format = False
-    tests = {}  # set of tests to pass
     ds_info = dataset.info
-    file_vars = ds_info['variables']
+    readers=[]
+    is_format = []
     for name, class_name in readers_to_check.items():
         # first check if essential variables are in the file
         p = deepcopy(reader_params)
         p['class_name'] = class_name
-        r, is_format =  _import_reader(p, dataset)
-        tests[name] = r.info['signature_tests']
+        r, isf =  _import_reader(p, dataset)
 
         # break if all testes passed as found reader
-        if is_format:
-            reader_class_name = class_name
-            break
+        readers.append(r)
+        is_format.append(isf)
+        if isf:  break
 
-    if reader_class_name is None or not is_format:
+    if not any(is_format):
         ml.msg(f' In detecting file format, not all tests against known file format variables were passed')
-        for name, vals in tests.items():
-            ml.msg(f' Format "{name}" , required variables detected {str(vals)} ', tabs= 3)
+        for r in readers:
+            params= r.params
+            fvm, gvm,dm = params['field_variable_map'], params['grid_variable_map'], params['dimension_map']
+            report = r.info['hindcast_integrity_report']
+            ml.msg(f'Has required variables/dims for format "{report["class_name"]}" ', tabs= 3)
+            req= report['required']
+            ml.msg('Field variables: '+ ", ".join([f"{k} (mapped to  {fvm[k]})={v}" for k, v in req['fields'].items()]), tabs=4)
+            ml.msg('Grid variables: ' + ", ".join([f"{k} (mapped to  {gvm[k]})={v}" for k, v in req['grid'].items()]), tabs=4)
+            ml.msg('Dimensions    : ' + ", ".join([f"{k} (mapped to  {dm[k]})={v}" for k, v in req['dims'].items()]), tabs=4)
+
         ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
-               hint=f'use reader to map to names in files? found variables {list(ds_info["variables"].keys())}',
-               fatal_error=True)
+                 )
+        ml.msg(f'Found variables {list(ds_info["variables"].keys())}', tabs=3)
+        ml.msg(f'Found dimensions {list(ds_info["dims"].keys())}',tabs=3)
+        ml.msg(f'Check file variable/dims., ' , hint='Adjust reader field/grid/dims maps to match file variables/dims',
+               error = True)
 
     # make and merge defaults for found reader
-    reader_params['class_name'] = reader_class_name
-    reader, is_format = _import_reader(reader_params, dataset)
-
-    hindcast_variable_integrity_checks(reader)
+    reader = readers[is_format.index(True)]
 
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
@@ -163,14 +169,15 @@ def _detect_hydro_file_format(reader_params, dataset):
 def _import_reader(reader_params, dataset):
     reader = si.class_importer.make_class_instance_from_params('reader', reader_params)
     reader.dataset = dataset
-    # ensure vel params are correct
-    vel_vars, reader.info['is3D'] =  reader.detect_vel_var_and_if_3D(dataset)
-    if vel_vars is not None:
-        reader_params['field_variable_map']['water_velocity'] = vel_vars
-        reader.params['field_variable_map']['water_velocity'] = vel_vars
+    report = hindcast_variable_integrity_report(reader)
 
-    is_format= reader.check_signature(dataset)
-    return reader,is_format
+    # ensure vel params are correct
+    if report['is_format'] and 'water_velocity' in reader.params['field_variable_map']:
+        vel_vars, reader.info['is3D'] =  reader.detect_vel_var_and_if_3D(dataset)
+        if vel_vars is not None:
+            reader_params['field_variable_map']['water_velocity'] = vel_vars
+    reader.info['hindcast_integrity_report'] = report
+    return reader,report['is_format']
 
 def _time_sort_files(reader):
     # sort variable fileIDs by time, now all files are read
@@ -287,7 +294,7 @@ def _catalog_fields(reader):
         if v1 not in file_vars: continue
 
         field_params = dict(time_varying=file_vars[v1]['time_varying'],
-                            is3D=any(x in info['all_z_dims'] for x in file_vars[v1]['dims']),  )
+                            is3D=any(x in params['all_z_dims'] for x in file_vars[v1]['dims']),  )
         field_params['zlevels'] = info['num_z_interfaces'] if field_params['is3D'] else 1
 
         # work out if variable is a vector field
@@ -363,27 +370,55 @@ def _make_variable_time_step_to_fileID_map(reader):
         pass
     pass
 
-def hindcast_variable_integrity_checks(reader):
+def hindcast_variable_integrity_report(reader):
     # use readers map checker to find which ones are in the file
     ds = reader.dataset
-
+    file_vars = ds.info['variables']
     params= reader.params
     ml = si.msg_logger
-    return
 
-    for mt, map_type in zip(['dims'], ['dimension_map']):
+    report=dict(is_format=False, class_name = reader.params['class_name'],)
+    for map_type in ['grid_variable_map','field_variable_map','dimension_map']:
+        if map_type not in report: report[map_type] = dict( in_file = dict(),alternatives = dict())
+        p = params[map_type]
+        dp = reader.default_params[map_type]
 
-        for key, val in params[map_type].items():
-            if val is not None:
-                continue # already have a default or user given value  for var
+        for key, val in dp.items():
+            if key.startswith('control_key'): continue
+            file_names = ds.info['dims'] if map_type == 'dimension_map' else file_vars
 
-            params[map_type][key] = var_opt[mt][key]
+            if not isinstance(val,(ParameterMapAlternativesChecker,ParameterListMapAlternativesChecker)) :
+                # legacy variable maps with PCC and PLC, check if variable/param value  (or first if list of variables) in the file
+                if map_type =='dimension_map' and type(p[key]) != list:
+                    report[map_type]['in_file'][key] = p[key] in file_names
+                elif type(val) == ParamValueChecker:
+                    report[map_type]['in_file'][key]= p[key] in file_names
+                elif type(val) == ParameterListChecker:
+                    report[map_type]['in_file'][key] = (p[key][0] in file_names) if len(p[key]) >0 else False
+                continue
+            # new alternatives mappings
+            if p[key] is None: # no user value given
+                # choose from alternatives
+                available = ds.info['dims'] if map_type == 'dimension_map' else ds.info['variables']
+                p[key] = dp[key].choose_alternative(available) # already have a default or user given value  for var
 
+            if type(val) == ParameterMapAlternativesChecker:
+                report[map_type]['in_file'][key] = p[key] in file_names
+            elif type(val) == ParameterListMapAlternativesChecker:
+                report[map_type]['in_file'][key] = (p[key][0] in file_names) if len(p[key]) > 0 else False
 
+            report[map_type]['alternatives'][key] = dp[key].alternatives
 
-    ml.progress_marker(f'passed hindcast integrity checks {reader.params["class_name"]}')
-    return
-
+    # check ir required variables present
+    req = dict()
+    req['fields'] =   {key: report['field_variable_map']['in_file'][key] for key in params['required_feilds']}
+    req['fields']['water_velocity'] =  (report['field_variable_map']['in_file']['water_velocity']
+                                                    or report['field_variable_map']['in_file']['water_velocity_depth_averaged'])
+    req['grid'] = {key: report['grid_variable_map']['in_file'][key] for key in params['required_grid_variables']}
+    req['dims'] = {key: report['dimension_map']['in_file'][key] for key in params['required_dimensions']}
+    report['is_format'] = all([all(req['fields'].values()), all(req['grid'].values()), all(req['dims'].values())])
+    report['required'] = req
+    return report
 
 def _check_time_consistency(reader):
     # check all variables have same time_step_to_fileID_map, and save one version of it
