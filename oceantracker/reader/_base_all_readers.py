@@ -28,7 +28,7 @@ class _BaseReader(ParameterBaseClass):
         self.add_default_params(
             input_dir= PVC(None, str, is_required=True),
             file_mask= PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
-            geographic_coords= PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
+            geographic_coords= PVC(None, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
                                      expert=True),
             time_buffer_size= PVC(24, int, min=2, doc_str='This reader parameter has be removed,  now a top level setting , use  setting "time_buffer_size"', obsolete=True),
             load_fields= PLC(None, str,
@@ -694,7 +694,12 @@ class _BaseReader(ParameterBaseClass):
         return nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
     def detect_lonlat_grid(self):
-        x = self.dataset.read_variable(self.params['grid_variable_map']['x']).data
+        params = self.params
+
+        # user set geographic_coords flag
+        if params['geographic_coords'] is not None: return params['geographic_coords']
+
+        x = self.dataset.read_variable(params['grid_variable_map']['x']).data
         # look at range to see if too small to be meters grid
         islatlong=  (np.nanmax(x)- np.nanmin(x) < 360) or (np.nanmax(x)- np.nanmin(x) < 360)
 

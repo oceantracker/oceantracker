@@ -24,6 +24,7 @@ class FVCOMreader(_BaseUnstructuredReader):
         self.add_default_params(
                 all_z_dims=PLC(['siglay', 'siglev'], str, doc_str='All z dims, used to identify  3D variables'),
                 dimension_map=dict(
+
                         node=PVC('node', str, doc_str='Dim oNumber of nodes in triangular grid ie unique triangle vertex node numbers'),
                         z=PVC('siglev', str, doc_str='name of dimensions for z layer boundaries '),
                         ),
@@ -39,8 +40,14 @@ class FVCOMreader(_BaseUnstructuredReader):
                         ),
                 grid_variable_map= dict(
                         time=PVC('time', str, doc_str='Name of time variable in hindcast'),
-                        x = PVC('lon', str, doc_str='x location of nodes'),
-                        y = PVC('lat', str, doc_str='y location of nodes'),
+                        x=PVC('x', str, doc_str='x location of nodes, metres grid'),
+                        y=PVC('y', str, doc_str='y location of nodes, metres grid'),
+                        x_center=PVC('xc', str, doc_str='x location of cell centers, metres grid'),
+                        y_center=PVC('yc', str, doc_str='y location of cell centers, metres grid'),
+                        lon=PVC('lon', str, doc_str='x location of nodes, geographic grid'),
+                        lat=PVC('lat', str, doc_str='y location of nodes, geographic grid'),
+                        lon_center=PVC('lonc', str, doc_str='x location of cell centers, geographic grid'),
+                        lat_center=PVC('latc', str, doc_str='y location of cell centers, geographic grid'),
                         z_interface=PVC('zcor', str),
                         triangles =PVC('SCHISM_hgrid_face_nodes', str),
                         bottom_interface_index =PVC('node_bottom_index', str),
@@ -83,36 +90,55 @@ class FVCOMreader(_BaseUnstructuredReader):
         super().build_vertical_grid()
 
 
-    def set_up_uniform_sigma(self, grid):
-        # for use in Slayer vertical grids
-        # get profile with the smallest bottom layer  tickness as basis for first sigma layer
-        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['z_interface_fractions'],
-                                                                                              grid['bottom_interface_index'])
-
-        # use layer fractions from this node to give layer fractions everywhere
-        # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
-        nz_bottom = grid['bottom_interface_index'][node_thinest_bot_layer]
-
-        # stretch sigma out to same number of depth cells,
-        # needed for LSC grid if node_min profile is not full number of cells
-        zf_model = grid['z_interface_fractions'][node_thinest_bot_layer, nz_bottom:]
-        nz = grid['z_interface_fractions'].shape[1]
-        nz_fractions = nz - nz_bottom
-        grid['sigma_interface'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
 
 
+    def detect_lonlat_grid(self):
+        ds = self.dataset
+        a= ds.info['attributes'] # global attributes
+        params= self.params
+        ml = si.msg_logger
+
+        # user set geographic_coords
+        if params['geographic_coords'] is not None: return params['geographic_coords']
+        # otherwise detect coord type
+        if 'CoordinateSystem' not in a:
+            ml.msg('Could not find FVCOM global attribute  "CoordinateSystem" used to auto detect coordinate system type',
+                   hint='Try manually setting reader param geographic_coords=  True/False ', error=True)
+
+        if  a['CoordinateSystem'] == 'Cartesian':
+            return False
+        elif a['CoordinateSystem'] == 'GeoReferenced':
+            return True
+        else:
+            ml.msg('To auto detect geographic coords FVCOM global attribute  "CoordinateSystem" must be either "GeoReferenced" or "Cartesian" ',
+                hint='Try manually setting reader param geographic_coords=  True/False ', error=True)
 
     def read_horizontal_grid_coords(self, grid):
         # reader nodal locations
         ds = self.dataset
         gm = self.params['grid_variable_map']
+        info = self.info
 
-        x = ds.read_variable(gm['x']).data
-        y = ds.read_variable(gm['y']).data
+        # FVCOM has both x,y and lat, lon, but one has values the other zeros
+
+        if info['geographic_coords']:
+            #  lat, lon
+            x = ds.read_variable(gm['lon']).data
+            y = ds.read_variable(gm['lat']).data
+            xc = ds.read_variable(gm['lon_center']).data
+            yc = ds.read_variable(gm['lat_center']).data
+
+        else:
+            # meters grid
+            x = ds.read_variable(gm['x']).data
+            y = ds.read_variable(gm['y']).data
+            xc = ds.read_variable(gm['x_center']).data
+            yc = ds.read_variable(gm['y_center']).data
+
         grid['x']  = np.stack((x, y), axis=1).astype(np.float64)
 
-        grid['x_center'] = np.stack((ds.read_variable('lonc').data,
-                                     ds.read_variable('latc').data), axis=1).astype(np.float64)
+        grid['x_center'] = np.stack((xc,yc), axis=1).astype(np.float64)
+        pass
 
 
     def read_triangles(self, grid):
@@ -181,5 +207,23 @@ class FVCOMreader(_BaseUnstructuredReader):
         data = data[:, :, :, np.newaxis]
 
         return data
+
+    def set_up_uniform_sigma(self, grid):
+        # for use in Slayer vertical grids
+        # get profile with the smallest bottom layer  tickness as basis for first sigma layer
+        node_thinest_bot_layer = hydromodel_grid_transforms.find_node_with_smallest_bot_layer(grid['z_interface_fractions'],
+                                                                                              grid['bottom_interface_index'])
+
+        # use layer fractions from this node to give layer fractions everywhere
+        # in LSC grid this requires stretching a bit to give same number max numb. of depth cells
+        nz_bottom = grid['bottom_interface_index'][node_thinest_bot_layer]
+
+        # stretch sigma out to same number of depth cells,
+        # needed for LSC grid if node_min profile is not full number of cells
+        zf_model = grid['z_interface_fractions'][node_thinest_bot_layer, nz_bottom:]
+        nz = grid['z_interface_fractions'].shape[1]
+        nz_fractions = nz - nz_bottom
+        grid['sigma_interface'] = np.interp(np.arange(nz) / (nz-1), np.arange(nz_fractions) / (nz_fractions-1), zf_model)
+
 
 
