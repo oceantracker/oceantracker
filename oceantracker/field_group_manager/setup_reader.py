@@ -12,8 +12,9 @@ from oceantracker.util import  time_util, json_util,basic_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 from oceantracker.util.parameter_checking import ParameterMapAlternativesChecker, ParameterListMapAlternativesChecker
 from oceantracker.util.parameter_checking import ParamValueChecker, ParameterListChecker
-def make_a_reader_from_params(users_reader_params):
 
+
+def make_a_reader_from_params(users_reader_params):
 
     _check_input_dir(users_reader_params)
     dataset = OceanTrackerDataSet(users_reader_params)

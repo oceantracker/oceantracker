@@ -665,8 +665,6 @@ class OceanTrackerParamsRunner(object):
                 d['class_class_roles'][role][name] = None if item is None else item.params
 
         json_util.write_JSON(path.join(output_files['run_output_dir'], fn), d)
-        si.msg_logger.msg(f'To help with debugging, parameters as use during in run  are in "{output_files["params_as_executed"]}"',
-                          tabs=2, note=True)
 
 
 

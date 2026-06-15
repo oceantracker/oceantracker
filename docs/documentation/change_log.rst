@@ -7,6 +7,27 @@ Change log
 Note: All commits that change either model in- or output in any way are labeled as "breaking changes", excluding bug-fixes
 
 
+Version '0.5.3.8 2026-xx-xx'
+____________________________
+
+Bug fixes
+---------
+
+#. Fixed Delft3D-FM reader failing in 2D mode due to ambiguous variable selection when looking up the water depth field.
+
+Misc.
+-----
+
+#. Improved hindcast file validation and reader configuration.
+   The hindcast reader now provides clearer diagnostics when required variables are missing.
+   Simplifies reader setup by replacing internal info variables with explicit parameters
+   Introduces a ParameterMapAlternativesChecker framework for validating user-supplied file mapping parameters.
+
+Tests
+-----
+#. Added a reader test for variable remapping in schism
+
+
 Version '0.5.3.7 2026-05-18'
 ____________________________
 
@@ -27,24 +48,6 @@ Bug fixes
       hindcasts using that dimension are correctly identified.
 
 #. Fixed a inaccuracy in calculating the Barycentric coordinates of particles at release if the kd-tree guess was incorrect
-
-
-
-Version '0.5.3.7 2026-xx-xx'
-____________________________
-
-Bug fixes
----------
-
-#. Fixed Delft3D-FM reader failing in 2D mode due to ambiguous variable selection when looking up the water depth field.
-
-Misc.
------
-
-#. Improved hindcast file validation and reader configuration.
-   The hindcast reader now provides clearer diagnostics when required variables are missing.
-   Simplifies reader setup by replacing internal info variables with explicit parameters
-   Introduces a ParameterMapAlternativesChecker framework for validating user-supplied file mapping parameters.
 
 
 Version '0.5.3.6 2026-04-20'

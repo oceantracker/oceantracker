@@ -79,7 +79,7 @@ class FieldGroupManager(ParameterBaseClass):
         if si.settings.display_grid_at_start:
             from matplotlib import pyplot as plt
             from oceantracker.plot_output.plot_utilities import display_grid
-            display_grid(grid, 1)
+            display_grid(grid, 3)
             plt.show()
 
     def add_reader_field(self,name, params):

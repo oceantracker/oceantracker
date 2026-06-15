@@ -57,6 +57,7 @@ def get_case(n):
     show_grid = False
     geo_cords= False
 
+
   
 
     match n:
@@ -167,7 +168,7 @@ def get_case(n):
 
         case 200:
             # FVCOM
-            root_input_dir=r'D:\Hindcast_reader_tests\FVCOM_LakeSuperior\historical_sample\2022'
+            root_input_dir=r'D:\Hindcast_reader_tests\FVCOM\LakeSuperior\historical_sample\2022'
             x0 = [[47.540046778478064, 360-87.64392022390314]]
             x0 = np.flip(np.asarray(x0), axis=1)
             file_mask = 'nos.lsofs.fields.n000*.nc'
@@ -176,6 +177,28 @@ def get_case(n):
             max_days=30
             title = 'FVCOM test'
             geo_cords=True
+        case 201:
+            # FVCOM
+            root_input_dir = r'D:\Hindcast_reader_tests\FVCOM\Dagens_Norway_Marcus'
+            x0 = [315283,6542132]
+            file_mask = 'FVCOM.nc'
+            output_file_base = 'FVCOM_Dagens_Norway_Marcus'
+
+            max_days = 30
+            title = 'FVCOM_Dagens_Norway_Marcus'
+            geo_cords = False
+        case 202:
+            # FVCOM
+            root_input_dir = r'D:\Hindcast_reader_tests\FVCOM\Norway_example'
+            x0 = [[610457.0167590725, 7776882.151875901],
+                  [710311.4661038306, 7762934.682539682],
+                  [657955.3494203629, 7745585.391414141]]
+            file_mask = 'AkvaplanNiva_sample_lonlat_fixed.nc'
+            output_file_base = 'AkvaplanNiva_sample_lonlat_fixed'
+
+            max_days = 30
+            title = 'FVCOM Norway test'
+            geo_cords = False
 
         case 300:
             #ROMS test
@@ -456,8 +479,7 @@ def get_case(n):
                                      ]
 
     params.update(user_note=title,output_file_base=output_file_base,
-
-                  max_run_duration= max_days*24*3600, time_step= time_step, use_open_boundary=use_open_boundary )
+                    max_run_duration= max_days*24*3600, time_step= time_step, use_open_boundary=use_open_boundary )
     params['reader'].update(input_dir=root_input_dir, regrid_z_to_sigma_levels = not args.nativez,
                             file_mask=file_mask,
                             class_name=reader)
@@ -503,7 +525,7 @@ if __name__ == '__main__':
 
     test_groups=dict( schism=[100,121,141,152,153,154],
                       ROMS=[300,301,302],
-                      fvcom= [200],
+                      fvcom= [200, 201,202],
                         delft3d=[400,401,404,410,411,412,413],
                         glorys=[1101,1102])
     test_groups['all'] = [item for sublist in test_groups.values() for item in sublist]
@@ -516,13 +538,12 @@ if __name__ == '__main__':
 
     for n in tests:
         params, plot_opt= get_case(n)
-        params['display_grid_at_start'] = True # ti use giput to get cords
         params.update( root_output_dir = root_output_dir,
 
                     dev_debug_plots = args.debug_plots,
                     use_A_Z_profile = False,
                     debug=True,
-                       display_grid_at_start=args.gridplot,
+                       display_grid_at_start=args.gridplot, #  use giput to get cords
                     #NUMBA_cache_code=True
                     #display_grid_at_start=True
                        )

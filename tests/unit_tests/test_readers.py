@@ -75,6 +75,26 @@ def test_schism3D(
     assert case_info_file is not None
 
 
+def test_schism3D_variable_remap(
+    base_settings,
+    reader_schism3D_variable_remap,
+    basic_point_release,
+    schism3D_release_locations,
+):
+    """Test SCHISM reader with user-defined field, grid, and dimension variable remapping"""
+
+    ot = OceanTracker()
+    ot.settings(**base_settings)
+    ot.add_class("reader", **reader_schism3D_variable_remap)
+    ot.add_class(
+        "release_groups",
+        **{**basic_point_release, "points": schism3D_release_locations["point"]},
+    )
+    case_info_file = ot.run()
+
+    assert case_info_file is not None
+
+
 def test_schism3D_v5(
     base_settings,
     reader_schism3D_v5,
