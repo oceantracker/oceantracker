@@ -43,7 +43,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 max_count_per_particle=PVC(None, int, min=1,
                     doc_str='Maximum number of times each particle can be counted by this stats instance. Default None = unlimited. '
                             'See also kill_when_max_counted.'),
-                kill_when_max_counted=PVC(True, bool,
+                kill_when_max_counted=PVC(False, bool,
                     doc_str='When max_count_per_particle is set: True (default) = set particle status to dead once max count is reached; '
                             'False = exclude the particle from future counting in this stats instance but leave it alive.'),
                 counting_probability=PVC(1.0, float, min=0., max=1.,
