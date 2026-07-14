@@ -22,8 +22,10 @@ from oceantracker.util import time_util, output_util, save_state_util
 
 from oceantracker.util import json_util, setup_util
 from datetime import datetime
-import traceback
+
 from oceantracker import definitions
+import cProfile, pstats, io
+
 
 
 
@@ -40,9 +42,11 @@ class OceanTrackerParamsRunner(object):
     def run(self, user_given_params):
         self.start_date = datetime.now()
         self.start_time = perf_counter()
+        profiler = None
         case_info_file = None
         ml = si.msg_logger
         err_hint = 'check for first error above or in log file.txt or .err file '
+
 
         try:
             t0 = perf_counter()
@@ -54,6 +58,11 @@ class OceanTrackerParamsRunner(object):
             ml.msg(f'Starting user param. runner at { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
             si.block_timer('Setup', t0)
+
+            if si.settings.cProfile:
+                ml.msg('Activated cProfiler', hint='Profiling may slow code', warning=True)
+                profiler = cProfile.Profile()
+                profiler.enable()
 
             # _________ do run ____________________________
             case_info_file= self._run_case()
@@ -123,6 +132,18 @@ class OceanTrackerParamsRunner(object):
         ml.msg('')
 
         self._write_params_as_executed(si.output_files)
+
+        # write profiler file
+        if si.settings.cProfile and profiler is not None:
+            profile_file_name = path.join(si.run_info.run_output_dir,'cProfile_results.txt')
+            ml.progress_marker(f'Saving cProfiler results to file: {profile_file_name}')
+            ml.hori_line()
+            profiler.disable()
+            with open(profile_file_name, "w") as f:
+                stats = pstats.Stats(profiler, stream=f) # Pass the stream to pstats
+                stats.sort_stats("tottime")  # sort by time inside functions
+                stats.print_stats()  # Write the formatted profile table into the stream
+
         ml.close()
 
         return case_info_file
