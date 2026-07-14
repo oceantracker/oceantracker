@@ -22,6 +22,9 @@ Misc.
    The hindcast reader now provides clearer diagnostics when required variables are missing.
    Simplifies reader setup by replacing internal info variables with explicit parameters
    Introduces a ParameterMapAlternativesChecker framework for validating user-supplied file mapping parameters.
+#. The release date is now stamped into the package at build time (via ``generate_build_info.py``) and shown at startup, replacing the previous PyPI lookup which reported upload time and required network access. Installs from a source checkout show a "dev build, commit <hash>" line instead.
+#. Pip-installed copies without a git repository no longer print ``fatal: not a git repository`` on every import.
+#. Fixed version parsing crashing on import for standard three-part version numbers (e.g. ``0.6.0``)
 
 Tests
 -----
