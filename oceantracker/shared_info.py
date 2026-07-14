@@ -71,11 +71,12 @@ class _DefaultSettings(definitions._AttribDict):
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     use_resuspension = PVC(True, bool,
                 doc_str='Allow particles to resuspend')
+    cProfile =  PVC(False, bool,  doc_str='Use cProfile to debug code performance and write results to output dir. Only use for debugging as profiling slows code execution')
     processors= PVC(None, int, min=1,
                  doc_str='Maximum number of threads to use in parallelization, default = number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')
 
     NCDF_compression_level = PVC(0, int, min=0,max =9, expert=True,
-                          doc_str='Netcdf compression of output variables, reduces output file size, but slows code ')
+                          doc_str='Netcdf compression of output variables, reduces output file size, but slows code')
     particle_buffer_initial_size = PVC(10_000_000, int, min=1, expert=True,
                    doc_str='Initial particle property memory buffer size, and amount increased by when they are full, default is estimated max particles alive')
 

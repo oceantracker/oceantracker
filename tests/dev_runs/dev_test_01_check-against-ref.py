@@ -15,6 +15,7 @@ def main(args=None):
                 particle_buffer_initial_size= 500,
                 #NUMBA_cache_code=True,
                 use_resuspension=False,
+                cProfile=True,
                 #regrid_z_to_uniform_sigma_levels=True # obsolete param
                 )
 
