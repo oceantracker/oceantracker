@@ -63,9 +63,9 @@ def add_values_to(x1, values, active, scale=1.0):
             n = active[nn]
             x1[n] += values[nn] * scale
     else:
-        for nn in range(active.size):
+        for nn in prange(active.size):
             n = active[nn]
-            for m in prange(x1.shape[1]):
+            for m in range(x1.shape[1]):
                 x1[n, m ] += values[nn, m] * scale
 
 @njitOTparallel
