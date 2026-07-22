@@ -273,7 +273,7 @@ class OceanTrackerParamsRunner(object):
                        caller=i,
                        hint='Release point/polygon or grid may be outside domain and or in permanently dry cells?, mismatch of release coords and hindcast, betweem meters and GPS? )')
 
-        case_info_file = self._get_case_run_info(self.start_date, self.start_time)
+        case_info_file = self._write_case_info_file(self.start_date, self.start_time)
 
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
@@ -564,7 +564,7 @@ class OceanTrackerParamsRunner(object):
     # ____________________________
 
 
-    def _get_case_run_info(self, d0, t0):
+    def _write_case_info_file(self, d0, t0):
         pgm= si.core_class_roles.particle_group_manager
         info = {}
         ml = si.msg_logger
@@ -588,7 +588,6 @@ class OceanTrackerParamsRunner(object):
              'settings' : si.settings.asdict(),
              'run_info' : info,
              'particle_status_flags': si.particle_status_flags.asdict(),
-
              'release_group_info': {},
              'scheduler_info': {},
              'core_class_roles_info': {},
@@ -613,6 +612,7 @@ class OceanTrackerParamsRunner(object):
                                                      )
                 d['output_files'][key][key2]= i2.info['output_file'] if 'output_file' in i2.info else None
                 if hasattr(i2,'scheduler_info'):
+                    #todo move scheduler to seperate json file?
                     d['scheduler_info'][key][key2] = i2.scheduler_info
 
                 # full parameters
@@ -638,6 +638,7 @@ class OceanTrackerParamsRunner(object):
                                                  update_calls= i.info['update_calls'],
                                                  time_first_update_call= i.info['time_first_update_call'] )
             if hasattr(i, 'scheduler_info'):
+                # todo move scheduler to seperate json file?
                 d['scheduler_info'][key]= i.scheduler_info
 
             d['working_params']['core_class_roles'][key] = i.params
@@ -671,6 +672,10 @@ class OceanTrackerParamsRunner(object):
         case_info_file = path.join(si.output_files[ 'run_output_dir'],si.output_files['caseInfo_file'])
         json_util.write_JSON(case_info_file, d)
         return case_info_file
+
+    def _write_scheduler_info_file(self):
+        # todo  complete?
+        pass
 
     def _write_params_as_executed(self,output_files):
         fn = 'params_as_executed.json'
