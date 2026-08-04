@@ -200,18 +200,21 @@ def read_release_groups_info(file_name):
     nc = NetCDFhandler(file_name,mode='r')
     d= dict()
 
-
     for name in nc.var_names():
         data = nc.read_variable(name)
         attr = nc.var_attrs(name)
-        rg_name= attr['release_group_name']
+        if 'release_group_name' in attr:
+            rg_name= attr['release_group_name']
 
-        # extract info
-        d[rg_name] = attr
-        if 'geographic_coords' in nc.attrs():
-            d[rg_name]['geographic_coords'] = bool(nc.attr('geographic_coords'))
-        if 'points' in name:
-            d[rg_name]['points'] = data
+            # extract info
+            d[rg_name] = attr
+            if 'geographic_coords' in nc.attrs():
+                d[rg_name]['geographic_coords'] = bool(nc.attr('geographic_coords'))
+            if 'points' in name:
+                d[rg_name]['points'] = data
+        else:
+            # copy data if not release group of points
+            d[name] = data
 
         pass
     nc.close()

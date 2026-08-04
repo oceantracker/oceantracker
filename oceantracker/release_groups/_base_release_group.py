@@ -50,11 +50,8 @@ class _BaseReleaseGroup(ParameterBaseClass):
         self.role_doc('Release particles at 1 or more given locations. A pulse_size of particles are released every release_interval. All these particles have ID properties for their release_group and the pulese they were released in.')
 
         info = self.info
-        info['number_released'] = 0  # count of particles released in this group
-        info['pulseID'] = 0
-        info['total_number_required'] = 0
-        info['pulse_release_times'] = []  # release time (sec) of each pulse
-        info['pulse_counts'] = []         # number of particles in each pulse
+
+
 
     def initial_setup(self):
         params=self.params
@@ -65,11 +62,20 @@ class _BaseReleaseGroup(ParameterBaseClass):
         ]
         info['depth_range'] = np.asarray( info['depth_range'])
 
+        # record particle counts
+        info['number_released'] = 0  # count of particles released in this group
+        # count of particles released in this group each time step
+        info['pulseID'] = 0 # number of pulses so far
+        info['total_number_required'] = 0
+
+
+
+
     def final_setup(self):
         # array to hold release count each time step
         info = self.info
-        # todo implement number_released_each_time_step?
-        #info['number_released_each_time_step'] = np.zeros((si.run_info.times.size,), dtype = np.int64)
+        # actual number release to be written to release info file
+        self.number_released_each_time_step = np.zeros((si.run_info.times.size,), np.int32)
 
      # optional filter on release points
     def user_release_point_filter(self, release_part_prop, time_sec= None):
@@ -105,7 +111,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
 
         return release_info
 
-    def get_release_locations(self, time_sec):
+    def get_release_locations(self,n_time_step, time_sec):
         info = self.info
         release_info= self.get_hori_release_locations(time_sec)
 
@@ -115,11 +121,7 @@ class _BaseReleaseGroup(ParameterBaseClass):
         info['pulseID'] += 1
         n_released = release_info['x'].shape[0]
         info['number_released'] += n_released
-
-        if n_released > 0:
-            info['pulse_release_times'].append(time_sec)
-            info['pulse_counts'].append(n_released)
-
+        self.number_released_each_time_step[n_time_step] = n_released
         return release_info
 
     # needs to be overridden , put on no pass when all release types use it

@@ -158,14 +158,14 @@ class _BaseAgeStats(ParameterBaseClass):
 
 
 
-    def count_all_alive_by_age(self, alive, time_sec):
+    def count_all_alive_by_age(self,n_time_step,time_sec, alive ):
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
         self._count_all_alive_age_bins(part_prop['status'].data,
                             part_prop['IDrelease_group'].data,
                             part_prop['age'].data,  stats_grid['age_bin_edges'],
                             self.count_all_alive_particles, alive)
-        self._compute_released_age_demographics(time_sec)
+        self._compute_released_age_demographics(n_time_step, time_sec)
 
     @staticmethod
     @njitOT
@@ -178,7 +178,7 @@ class _BaseAgeStats(ParameterBaseClass):
             if 0 <= na < (age_bin_edges.size - 1):
                 count_all_alive[na, release_group[n]] += status[n] >= status_outside_open_boundary
 
-    def _compute_released_age_demographics(self, time_sec):
+    def _compute_released_age_demographics(self,n_time_step, time_sec):
         """Accumulate, from release group pulse history, the count of particles currently
         in each age bin into count_all_released_age_bins.
 
@@ -186,32 +186,29 @@ class _BaseAgeStats(ParameterBaseClass):
         demographic snapshot (each pulse placed in its single current age bin) to the
         running total, so the result is directly comparable to count_all_alive_particles.
         """
-        age_bin_edges = self.grid['age_bin_edges']
-        count = self.count_all_released_age_bins
+
         # NOTE: do NOT zero count — accumulate across calls like count_all_alive_particles
 
         for nrg, rg in enumerate(si.class_roles.release_groups.values()):
-            times = rg.info['pulse_release_times']
-            if len(times) == 0:
-                continue
-            self._accumulate_pulse_demographics(
-                np.asarray(times, dtype=np.float64),
-                np.asarray(rg.info['pulse_counts'], dtype=np.int64),
-                time_sec, age_bin_edges, count, nrg)
+            self._accumulate_pulse_demographics(n_time_step,
+                si.run_info.times,
+                rg.number_released_each_time_step,
+                time_sec, self.grid['age_bin_edges'], self.count_all_released_age_bins, nrg)
 
     @staticmethod
     @njitOT
-    def _accumulate_pulse_demographics(pulse_times, pulse_counts, time_sec, age_bin_edges, count, nrg):
+    def _accumulate_pulse_demographics(n_time_step,time, number_released_each_time_step, time_sec, age_bin_edges, count, nrg):
         # For each pulse, compute its current age bin and add its count to that bin only.
         # Mirrors the per-particle logic in _count_all_alive_age_bins but for all
         # released particles (alive + dead), derived from the pulse release schedule.
         da = age_bin_edges[1] - age_bin_edges[0]
         n_age_bins = age_bin_edges.size - 1
-        for i in range(pulse_times.size):
-            age = time_sec - pulse_times[i]
+        for i in range(n_time_step):
+            if number_released_each_time_step[i] == 0: continue
+            age = time_sec - time[i]
             na = int(np.floor((age - age_bin_edges[0]) / da))
             if 0 <= na < n_age_bins:
-                count[na, nrg] += pulse_counts[i]
+                count[na, nrg] += number_released_each_time_step[i]
 
     def info_to_write_on_file_close(self, nc):
         # write variables whole
