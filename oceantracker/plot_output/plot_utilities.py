@@ -136,7 +136,7 @@ def plot_release_points_and_polygons(d, release_group_name:str = None, ax = plt.
     
     if release_group_name is None :
         # plot all release groups
-        rgs = d['particle_release_groups']
+        rgs = { name: rg for name, rg in d['particle_release_groups'].items() if 'points' in rg}
     else:
         # dict of one named release group
         rgs = {release_group_name:d['particle_release_groups'][release_group_name] }

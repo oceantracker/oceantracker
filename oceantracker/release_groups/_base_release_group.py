@@ -75,7 +75,9 @@ class _BaseReleaseGroup(ParameterBaseClass):
         # array to hold release count each time step
         info = self.info
         # actual number release to be written to release info file
-        self.number_released_each_time_step = np.zeros((si.run_info.times.size,), np.int32)
+        n_pulses = self.schedulers['release'].task_flag.sum()
+        self.number_released_each_pulse = np.zeros((n_pulses,), np.int32)
+        self.time_each_pulse_released = np.zeros((n_pulses,), np.float64)
 
      # optional filter on release points
     def user_release_point_filter(self, release_part_prop, time_sec= None):
@@ -118,10 +120,14 @@ class _BaseReleaseGroup(ParameterBaseClass):
         if si.run_info.is3D_run:
             self._add_vertical_release(release_info)
 
-        info['pulseID'] += 1
+
         n_released = release_info['x'].shape[0]
         info['number_released'] += n_released
-        self.number_released_each_time_step[n_time_step] = n_released
+        n_pulse = info['pulseID']
+        self.number_released_each_pulse[n_pulse] = n_released
+        self.time_each_pulse_released[n_pulse] = time_sec
+        info['pulseID'] += 1
+
         return release_info
 
     # needs to be overridden , put on no pass when all release types use it

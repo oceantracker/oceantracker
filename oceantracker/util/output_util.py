@@ -55,17 +55,6 @@ def write_release_group_netcdf(si):
         nc.write_variable(v_name, points, dims, units='meters or decimal deg. as  (lon, lat)',
                           description='release locations, not outside grid', attributes=attr)
 
-    # write table of releases
-    number_released_each_time_step = np.zeros((si.run_info.times.size, len(si.class_roles.release_groups)))
-    dn = si.dim_names
-
-    for n, rg in enumerate(si.class_roles.release_groups.values()):
-        number_released_each_time_step[:,n] = rg.number_released_each_time_step
-
-    nc.write_variable('time', si.run_info.times, [dn.time,], units='sec',
-                      description='times of particle tracking time steps')
-    nc.write_variable('number_released_each_time_step', number_released_each_time_step, [dn.time,dn.release_group],
-                      description='number of particles  released by each release group at each particle tracking time step')
     nc.close()
     return fn
 
