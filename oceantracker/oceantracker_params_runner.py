@@ -678,14 +678,14 @@ class OceanTrackerParamsRunner(object):
         ml.progress_marker(f'Saving cProfiler results to file: {profile_file_name}')
         ml.hori_line()
         profiler.disable()
-
+        # write files with different sort
         with open(profile_file_name+"_tottime.txt", "w") as f:
             stats = pstats.Stats(profiler, stream=f)  # Pass the stream to pstats
-            stats.sort_stats("tottime").print_stats()  # sort by time inside functions
+            stats.sort_stats("tottime").print_stats()
 
         with open(profile_file_name +"_cumtime.txt", "w") as f:
             stats = pstats.Stats(profiler, stream=f)  # Pass the stream to pstats
-            stats.sort_stats("cumtime").print_stats()  # sort by time inside functions
+            stats.sort_stats("cumtime").print_stats()
 
     def _write_params_as_executed(self,output_files):
         fn = 'params_as_executed.json'
