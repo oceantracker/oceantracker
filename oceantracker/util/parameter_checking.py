@@ -190,7 +190,7 @@ class ParameterTimeChecker(_ParameterBaseDataClassChecker):
 
         except Exception as e:
                 msg_logger.msg( f'{msg }, failed to convert to date got value = "{str(value)}", type = "{str(type(value))}"',caller= caller,
-                                hint=f'Must be {self.units}', error=True)
+                                hint=f'Must be {self.units}', error=True, exception=e)
         pass
 
 @dataclass
@@ -265,7 +265,7 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
             value = np.asarray(value)
         except Exception as e:
             msg_logger.msg(f'{msg}, coordinates must be numpy array or a list convertible to a numpy array ',
-                           hint = f'got values {str(value)}',caller = caller, error=True)
+                           hint = f'got values {str(value)}',caller = caller, error=True, exception=e)
 
 
         # now have an array
