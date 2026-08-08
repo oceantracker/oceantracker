@@ -81,7 +81,7 @@ class OceanTrackerParamsRunner(object):
 
         except OSError as e:
             # path may already exist, but if not through other error, exit
-            si.msg_logger.msg(f'Failed to make run output dir or invalid file name', hint=err_hint, error=True )
+            si.msg_logger.msg(f'Failed to make run output dir or invalid file name', hint=err_hint, error=True)
             si.msg_logger.write_error_log_file(e,si)
 
         except Exception as e:
@@ -690,7 +690,8 @@ class OceanTrackerParamsRunner(object):
             for name, item in val.items():
                 d['class_class_roles'][role][name] = None if item is None else item.params
 
-        json_util.write_JSON(path.join(output_files['run_output_dir'], fn), d)
+        if si.run_info.run_output_dir is not None:
+            json_util.write_JSON(path.join(output_files['run_output_dir'], fn), d)
 
 
 

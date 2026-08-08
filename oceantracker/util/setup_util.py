@@ -4,6 +4,9 @@ from datetime import datetime
 import shutil
 from os import path, makedirs, walk, unlink
 import traceback
+
+from exceptiongroup import catch
+
 from oceantracker.util import json_util, time_util
 import  numpy as np
 from oceantracker import definitions
@@ -47,8 +50,14 @@ def setup_output_dir(si):
 
     # kill old run if not restarting
     if not restarting :
-        if path.isdir(run_output_dir):  shutil.rmtree(run_output_dir)
-        makedirs(run_output_dir)  # make  new clean folder
+        try:
+            if path.isdir(run_output_dir):  shutil.rmtree(run_output_dir)
+            makedirs(run_output_dir)  # make  new clean folder
+        except Exception as e:
+            si.msg_logger.msg(f'Failed to create run output dir, or delete old run dir ', error=True,
+                              hint= f'Given dir = "{run_output_dir}"', exception=e)
+
+
 
     return output_files, restarting
 

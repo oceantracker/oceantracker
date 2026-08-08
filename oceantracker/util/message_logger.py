@@ -62,17 +62,18 @@ class MessageLogger(object ):
 
     def msg(self, msg_text, note=False,
             hint=None, tag=None, tabs=0, link=None,caller=None,wrap=False,
-            warning=False,strong_warning=False, error=False, fatal_error=False,
+            warning=False,strong_warning=False, error=False, fatal_error=False,exception=None,
             dev=False):
 
         error = error or fatal_error
 
 
-        if dev: m +='Core developer:'
+        if dev: msg_text ='Core developer issue:' + msg_text
 
         # first line of message
         if error:
             m = self._build_msg(msg_text,msg_tag='Error', hint=hint,add_trace=True,caller=caller, wrap=True,tabs=tabs)
+            if exception is not None:  m = self._build_msg('Error >>>> ', hint=str(exception))
             self.msg_lists['error'].append(m)
 
         elif warning:
@@ -95,10 +96,7 @@ class MessageLogger(object ):
 
         # write message
         self._print_msg(m)
-
-        if error: raise OTinput_error('Fatal error cannot continue')
-        pass
-
+        if error:  raise OTinput_error('Fatal error cannot continue, check first error above')
 
     def hori_line(self, text=None):
         if text is None:

@@ -69,8 +69,10 @@ def main(args=None):
     else:
         case_info_file = dd.get_case_info_name_from_params(ot.params)
 
+    if case_info_file is None:
+        print('run failed')
+        exit(-1)
     dd.compare_reference(case_info_file, args)
-
 
 
     if args.plot:
