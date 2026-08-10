@@ -675,7 +675,7 @@ class OceanTrackerParamsRunner(object):
     def _write_cprofile_results(self,profiler):
         ml = si.msg_logger
         profile_file_name = path.join(si.run_info.run_output_dir, 'cProfile_results')
-        ml.progress_marker(f'Saving cProfiler results to file: {profile_file_name}')
+        ml.progress_marker(f'Saving cProfiler results to file: {profile_file_name} *.txt')
         ml.hori_line()
         profiler.disable()
         # write files with different sort
