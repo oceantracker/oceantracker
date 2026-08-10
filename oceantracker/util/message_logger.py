@@ -243,6 +243,9 @@ class MessageLogger(object ):
         return  m
 
     def _add_doc_html_link(self,m, caller,tabs):
+
+        return m
+        #todo find work around that does not require testing if docs url exists, and fall foul of institutional firewalls
         import requests
         if caller is  None or not  hasattr(caller, '__class__'):  return m
 
