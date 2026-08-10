@@ -36,7 +36,7 @@ class MessageLogger(object ):
         self.max_warnings = 25
 
     def settings(self, max_warnings=None):
-        self.max_warnings = None if max_warnings is None else 25
+        if max_warnings is not None: self.max_warnings = max_warnings
     def set_screen_tag(self, screen_tag:str): self.screen_tag = screen_tag + ':'
 
     def set_max_warnings(self, n:int): self.max_warnings = n
