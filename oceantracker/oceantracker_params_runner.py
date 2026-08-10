@@ -687,6 +687,10 @@ class OceanTrackerParamsRunner(object):
             stats = pstats.Stats(profiler, stream=f)  # Pass the stream to pstats
             stats.sort_stats("cumtime").print_stats()
 
+        with open(profile_file_name + "_calls.txt", "w") as f:
+            stats = pstats.Stats(profiler, stream=f)  # Pass the stream to pstats
+            stats.sort_stats("calls").print_stats()
+
     def _write_params_as_executed(self,output_files):
         fn = 'params_as_executed.json'
         output_files['params_as_executed'] = fn
