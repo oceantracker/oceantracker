@@ -70,6 +70,7 @@ known_readers = dict(
                 GLORYS =  'oceantracker.reader.GLORYS_reader.GLORYSreader',
                 DELFT3D_FM =  'oceantracker.reader.DELFT3DFM_reader.DELFT3DFMreader',
                 FVCOMreader =  'oceantracker.reader.FVCOM_reader.FVCOMreader',
+                SHYFEM =  'oceantracker.reader.SHYFEM_reader.SHYFEMreader',
                 # known variants of readers
                 ROMSmoanaProject = 'oceantracker.reader.ROMS_reader_variants.ROMSreaderMoanaProjectNZ',
                 SCHISM_CSIRO_CCHAPS =  'oceantracker.reader.SCHISM_reader_variants.SCHISMreader_CSIRO_CCAHPS',
