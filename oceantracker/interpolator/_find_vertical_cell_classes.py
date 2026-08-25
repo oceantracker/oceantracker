@@ -504,7 +504,7 @@ class FindVerticalCellZfixed(object):
                              n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                 part_prop['water_depth'].data, part_prop['tide'].data,
                              current_buffer_steps, weight_time_steps,
-                                 active, si.settings.z0)
+                                 active, si.settings.z0, si.settings.minimum_total_water_depth)
         return bad_z_fraction_count
     @staticmethod
     @njitOT
@@ -513,7 +513,7 @@ class FindVerticalCellZfixed(object):
                                     n_cell, status, bc_coords, nz_cell, z_fraction, z_fraction_water_velocity,
                                     water_depth,tide,
                                     current_buffer_steps, weight_time_steps,
-                                    active, z0):
+                                    active, z0, min_water_depth):
 
         tf1 = tide_field[current_buffer_steps[0], :, 0, 0]
         tf2 = tide_field[current_buffer_steps[1], :, 0, 0]
@@ -567,7 +567,8 @@ class FindVerticalCellZfixed(object):
             else:
                 # in seabed layer, is variable thickness
                 nz = deepest_bottom_cell
-                dz = z[nz + 1] - z_bot # bottom layer thickness
+                z1 = z[nz + 1] if nz < z.size - 2 else z_top  # top cell needs tide not z[nz+1]
+                dz = max(z1 - z_bot, min_water_depth) # bottom layer thickness, never dry
                 z_fraction[n] = (zq -z_bot) / dz
                 z0p = z0 / dz # z0 as fraction of bottom layer
                 z_fraction_water_velocity[n] = (np.log(z_fraction[n] + z0p) - np.log(z0p)) / (np.log(1. + z0p) - np.log(z0p))
