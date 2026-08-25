@@ -62,7 +62,7 @@ def draw_base_map(grid, ax=plt.gca(), axis_lims=None, back_ground_depth=True,
     if title is not None:  ax.set_title(title)
     if text1 is not None:  text_norm(.4, .1, text1, fontsize=8)
     add_credit(credit)
-    add_map_scale_bar(axis_lims, ax=ax)
+    add_map_scale_bar(axis_lims, ax=ax, geographic_coords=bool(grid.get('geographic_coords_used', False)))
     return ax
 
 def display_grid(grid, ginput=0, axis_lims=None):
@@ -195,18 +195,33 @@ def add_heading(txt):
     if txt is not None:
         text_norm(.025, .95, txt, fontsize=6)
 
-def add_map_scale_bar(axis_lims, ax=plt.gca(),x_size_fraction=10 ):
-    dx= axis_lims[1]- axis_lims[0]
-    ds = np.power(10, max(np.floor(np.log10(dx / x_size_fraction)),1))
-    lab = '%1.0f m' % ds if ds < 1000 else  '%1.0f km' % (ds/1000)
+def add_map_scale_bar(axis_lims, ax=plt.gca(), x_size_fraction=10, geographic_coords=False):
+    # add a scale bar labelled as a distance, roughly 1/x_size_fraction of the map width
+    # axis units are meters, unless geographic_coords, when they are degrees
+    dx = axis_lims[1] - axis_lims[0]
+
+    if geographic_coords:
+        # bar is drawn in degrees of longitude but must be labelled as a distance,
+        # so convert using the length of a degree of longitude at the middle of the map
+        meters_per_axis_unit = 111320. * np.cos(np.deg2rad((axis_lims[2] + axis_lims[3]) / 2.))
+    else:
+        meters_per_axis_unit = 1.
+
+    span = dx * meters_per_axis_unit  # map width in meters
+    if not np.isfinite(span) or span <= 0.: return
+
+    ds = np.power(10., np.floor(np.log10(span / x_size_fraction)))  # round down to a power of ten
+    lab = '%1.0f m' % ds if ds < 1000 else '%1.0f km' % (ds / 1000)
+
     fontprops = font_manager.FontProperties(size=8)
     scalebar = AnchoredSizeBar(ax.transData,
-                               ds, lab,
+                               ds / meters_per_axis_unit,  # back into axis units
+                               lab,
                                'lower center',
                                pad=0.2,
                                color='black',
                                frameon=False,
-                               size_vertical = .005,
+                               size_vertical = 0.,
                                label_top=False,
                                fontproperties=fontprops)
 
