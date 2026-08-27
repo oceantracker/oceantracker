@@ -141,7 +141,7 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
         p_x         = part_prop['x'].used_buffer()
         p_age       = part_prop['age'].used_buffer()
 
-        self.count_all_alive_by_age(alive, time_sec)
+        self.count_all_alive_by_age(n_time_step,time_sec, alive)
 
         # manual update which polygon particles are inside
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]

@@ -36,7 +36,7 @@ class DownstreamPointRelease(PointRelease):
         info = self.info
         info["release_type"] = "downstream_point"
 
-    def get_release_locations(self, time_sec):
+    def get_release_locations(self,n_time_step, time_sec):
         """
         Overrides default method to first find normal horizontal release location
         and vertical location, then adjust horizontal location to be downstream

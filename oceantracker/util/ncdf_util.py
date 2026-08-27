@@ -76,10 +76,7 @@ class NetCDFhandler(object):
             data= self.file_handle.variables[name][:]   # read whole variable
         else:
             data = self.file_handle.variables[name][sel, ...] # selection from first dimension
-
-        out = np.asarray((data))
-
-        return out
+        return data
 
     def read_variables(self, var_list=None, required_var=[], output=None, sel=None):
         # read a list of variables into a dictionary, if output is a dictionary its add to that one

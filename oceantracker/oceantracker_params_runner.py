@@ -135,14 +135,9 @@ class OceanTrackerParamsRunner(object):
 
         # write profiler file
         if si.settings.cProfile and profiler is not None:
-            profile_file_name = path.join(si.run_info.run_output_dir,'cProfile_results.txt')
-            ml.progress_marker(f'Saving cProfiler results to file: {profile_file_name}')
-            ml.hori_line()
-            profiler.disable()
-            with open(profile_file_name, "w") as f:
-                stats = pstats.Stats(profiler, stream=f) # Pass the stream to pstats
-                stats.sort_stats("tottime")  # sort by time inside functions
-                stats.print_stats()  # Write the formatted profile table into the stream
+            self._write_cprofile_results(profiler)
+
+
 
         ml.close()
 
@@ -676,6 +671,25 @@ class OceanTrackerParamsRunner(object):
     def _write_scheduler_info_file(self):
         # todo  complete?
         pass
+
+    def _write_cprofile_results(self,profiler):
+        ml = si.msg_logger
+        profile_file_name = path.join(si.run_info.run_output_dir, 'cProfile_results')
+        ml.progress_marker(f'Saving cProfiler results to file: {profile_file_name} *.txt')
+        ml.hori_line()
+        profiler.disable()
+        # write files with different sort
+        with open(profile_file_name+"_tottime.txt", "w") as f:
+            stats = pstats.Stats(profiler, stream=f)  # Pass the stream to pstats
+            stats.sort_stats("tottime").print_stats()
+
+        with open(profile_file_name +"_cumtime.txt", "w") as f:
+            stats = pstats.Stats(profiler, stream=f)  # Pass the stream to pstats
+            stats.sort_stats("cumtime").print_stats()
+
+        with open(profile_file_name + "_calls.txt", "w") as f:
+            stats = pstats.Stats(profiler, stream=f)  # Pass the stream to pstats
+            stats.sort_stats("calls").print_stats()
 
     def _write_params_as_executed(self,output_files):
         fn = 'params_as_executed.json'

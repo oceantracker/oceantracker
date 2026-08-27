@@ -20,6 +20,7 @@ def write_release_group_netcdf(si):
     nc = NetCDFhandler(path.join(si.run_info.run_output_dir, fn), mode='w')
     nc.create_attribute('geographic_coords', int(si.settings.use_geographic_coords))
 
+
     # loop over release groups
     for name, rg in si.class_roles.release_groups.items():
 
