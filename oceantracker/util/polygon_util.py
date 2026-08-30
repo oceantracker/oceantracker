@@ -123,25 +123,10 @@ class InsidePolygon(object):
         #   if geographic_coords must be small ie a couple of degrees in longtitude geographically small
         # ie inside one UTM zone
 
-        xy=self.points
-        if self.geographic_coords:
-            xy =  cord_transforms.WGS84_to_UTM(xy, in_lat_lon_order=False)
 
-        x,y = xy[:,0], xy[:,1]
-        return self._get_area_numba(x,y)
+        return polygon_area(self.points, geographic_coords=self.geographic_coords)
 
-    @staticmethod
-    @njitOT
-    def _get_area_numba(x,y):
-        n = len(x)
-        area = 0.0
-        for i in range(n):
-            j = (i + 1) % n
-            area += x[i] * y[j]
-            area -= x[j] * y[i]
 
-        area = abs(area) / 2.0
-        return area
 
     @staticmethod
     @njitOT
@@ -176,6 +161,27 @@ class InsidePolygon(object):
                 n_inside += 1
 
         return out[:n_inside]
+
+def polygon_area(xy, geographic_coords=False):
+    # approx area of  closed polygon, by planimeter method?
+    #   if geographic_coords (long,lat)  must be small ie a couple of degrees in longtitude geographically small
+    # ie inside one UTM zone
+
+    if geographic_coords:
+        xy =  cord_transforms.WGS84_to_UTM(xy, in_lat_lon_order=False)
+    return _polygon_area_numba(xy[:,0], xy[:,1])
+
+@njitOT
+def _polygon_area_numba(x,y):
+    n = len(x)
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += x[i] * y[j]
+        area -= x[j] * y[i]
+
+    area = abs(area) / 2.0
+    return area
 
 
 def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):

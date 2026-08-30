@@ -34,7 +34,6 @@ class SCHISMreaderV5(SCHISMreader):
                                    },
             dimension_map = {'time': PVC('time', str),
                             },
-            variable_signature= PLC(['depth','elevation', 'dryFlagElement'], str, doc_str='Variable names used to test if file is this format'),
                         )
 
 class SCHISMreader_CSIRO_CCAHPS(SCHISMreader):
@@ -64,7 +63,6 @@ class SCHISMreader_CSIRO_CCAHPS(SCHISMreader):
                                 },
             dimension_map={'time': PVC('time', str),
                            },
-            variable_signature=PLC(['depth', 'zos','wetdry_node'], str, doc_str='Variable names used to test if file is this format'),
         )
 
     def read_triangles(self, grid):

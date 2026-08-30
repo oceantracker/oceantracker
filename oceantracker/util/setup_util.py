@@ -4,6 +4,9 @@ from datetime import datetime
 import shutil
 from os import path, makedirs, walk, unlink
 import traceback
+
+from exceptiongroup import catch
+
 from oceantracker.util import json_util, time_util
 import  numpy as np
 from oceantracker import definitions
@@ -47,8 +50,14 @@ def setup_output_dir(si):
 
     # kill old run if not restarting
     if not restarting :
-        if path.isdir(run_output_dir):  shutil.rmtree(run_output_dir)
-        makedirs(run_output_dir)  # make  new clean folder
+        try:
+            if path.isdir(run_output_dir):  shutil.rmtree(run_output_dir)
+            makedirs(run_output_dir)  # make  new clean folder
+        except Exception as e:
+            si.msg_logger.msg(f'Failed to create run output dir, or delete old run dir ', error=True,
+                              hint= f'Given dir = "{run_output_dir}"', exception=e)
+
+
 
     return output_files, restarting
 
@@ -107,11 +116,11 @@ def setup_restart_continuation(si):
     return saved_state_info
 
 
-def write_raw_user_params(output_files, params,si):
-    fn= 'raw_user_params.json'
-    output_files['raw_user_params'] = fn
+def write_params_raw_user(output_files, params,si):
+    fn= 'params_raw_user_.json'
+    output_files['params_raw_user'] = fn
     json_util.write_JSON(path.join(output_files['run_output_dir'],  fn),params)
-    si.msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["raw_user_params"]}"',  tabs=2, note=True)
+    si.msg_logger.msg(f'to help with debugging, parameters as given by user  are in "{output_files["params_raw_user"]}"',  tabs=2, note=True)
 
 def _decompose_working_params(params, si, caller=None):
 

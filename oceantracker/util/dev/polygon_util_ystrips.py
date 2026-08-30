@@ -146,18 +146,7 @@ class InsidePolygon(object):
         x,y = xy[:,0], xy[:,1]
         return self._get_area_numba(x,y)
 
-    @staticmethod
-    @njitOT
-    def _get_area_numba(x,y):
-        n = len(x)
-        area = 0.0
-        for i in range(n):
-            j = (i + 1) % n
-            area += x[i] * y[j]
-            area -= x[j] * y[i]
 
-        area = abs(area) / 2.0
-        return area
 
     @staticmethod
     @njitOT
@@ -224,6 +213,20 @@ class InsidePolygon(object):
                 n_inside += 1
 
         return inside_IDs[:n_inside]
+
+
+
+@njitOT
+def _get_area_numba(x,y):
+    n = len(x)
+    area = 0.0
+    for i in range(n):
+        j = (i + 1) % n
+        area += x[i] * y[j]
+        area -= x[j] * y[i]
+
+    area = abs(area) / 2.0
+    return area
 
 def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
     msg=[]

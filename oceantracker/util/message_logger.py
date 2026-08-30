@@ -36,7 +36,7 @@ class MessageLogger(object ):
         self.max_warnings = 25
 
     def settings(self, max_warnings=None):
-        self.max_warnings = None if max_warnings is None else 25
+        if max_warnings is not None: self.max_warnings = max_warnings
     def set_screen_tag(self, screen_tag:str): self.screen_tag = screen_tag + ':'
 
     def set_max_warnings(self, n:int): self.max_warnings = n
@@ -62,43 +62,41 @@ class MessageLogger(object ):
 
     def msg(self, msg_text, note=False,
             hint=None, tag=None, tabs=0, link=None,caller=None,wrap=False,
-            warning=False,strong_warning=False, error=False, fatal_error=False,
+            warning=False,strong_warning=False, error=False, fatal_error=False,exception=None,
             dev=False):
 
         error = error or fatal_error
 
-        m = tabs*'\t' +''
-        if dev: m +='Core developer:'
+
+        if dev: msg_text ='Core developer issue:' + msg_text
 
         # first line of message
         if error:
-            m = self._build_msg(msg_text,msg_tag='Error', hint=hint,add_trace=True,caller=caller, wrap=True)
+            m = self._build_msg(msg_text,msg_tag='Error', hint=hint,add_trace=True,caller=caller, wrap=True,tabs=tabs)
+            if exception is not None:  m = self._build_msg('Error >>>> ', hint=str(exception))
             self.msg_lists['error'].append(m)
 
         elif warning:
             if  len(self.msg_lists['warning']) > self.max_warnings: return
-            m = self._build_msg(msg_text, msg_tag='Warning', hint=hint, add_trace=False,caller=caller, wrap=True)
+            m = self._build_msg(msg_text, msg_tag='Warning', hint=hint, add_trace=False,caller=caller, wrap=True,tabs=tabs)
             self.msg_lists['warning'].append(m)
 
         elif strong_warning:
-            if len(self.msg_lists['warning']) > self.max_warnings: return
-            m = self._build_msg(msg_text, msg_tag='Strong warning', hint=hint, add_trace=True,caller=caller, wrap=True)
+            if len(self.msg_lists['strong_warning']) > self.max_warnings: return
+            m = self._build_msg(msg_text, msg_tag='Strong warning', hint=hint, add_trace=True,caller=caller, wrap=True,tabs=tabs)
             self.msg_lists['strong_warning'].append(m)
 
         elif note:
             if len(self.msg_lists['note']) > self.max_warnings: return
-            m = self._build_msg(msg_text, msg_tag='Note', hint=hint, add_trace=False, wrap=True)
+            m = self._build_msg(msg_text, msg_tag='Note', hint=hint, add_trace=False, wrap=True,tabs=tabs)
             self.msg_lists['note'].append(m)
 
         else:
-            m = self._build_msg(msg_text, msg_tag=None, hint=hint, add_trace=False, wrap=wrap)
+            m = self._build_msg(msg_text, msg_tag=None, hint=hint, add_trace=False, wrap=wrap,tabs=tabs)
 
         # write message
         self._print_msg(m)
-
-        if error: raise OTinput_error('Fatal error cannot continue')
-        pass
-
+        if error:  raise OTinput_error('Fatal error cannot continue, check first error above')
 
     def hori_line(self, text=None):
         if text is None:
@@ -204,9 +202,10 @@ class MessageLogger(object ):
         return m
 
 
-    def _build_msg(self,msg, msg_tag=None,hint=None,add_trace=False,caller=None, wrap = False):
+    def _build_msg(self,msg, msg_tag=None,hint=None,add_trace=False,caller=None, wrap = False,tabs=0):
 
-        m = f'{msg_tag} >>> ' if msg_tag is not None else ''
+        m = tabs * '\t' + ''
+        m += f'{msg_tag} >>> ' if msg_tag is not None else ''
         m += self._add_long_line(msg,tabs=0, wrap= wrap)
 
 
@@ -244,6 +243,9 @@ class MessageLogger(object ):
         return  m
 
     def _add_doc_html_link(self,m, caller,tabs):
+
+        return m
+        #todo find work around that does not require testing if docs url exists, and fall foul of institutional firewalls
         import requests
         if caller is  None or not  hasattr(caller, '__class__'):  return m
 

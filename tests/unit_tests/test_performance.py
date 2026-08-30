@@ -38,6 +38,46 @@ def test_run_3D_model_performance(
     assert case_info_file is not None
 
 
+@pytest.mark.performance_basic
+def test_run_3D_model_with_tracks_and_stats_performance(
+    base_settings,
+    reader_schism3D,
+    schism3D_release_locations,
+    gridded_2D_timeBased,
+    gridded_2D_ageBased,
+    record_performance,
+):
+    """Benchmark with tracks and time/age-based gridded stats enabled (RK4, 1M particles, 1 processor).
+
+    Writing tracks and computing stats adds overhead beyond the bare
+    particle-tracking baseline in test_run_3D_model_performance.
+    """
+    ot = OceanTracker()
+    ot.settings(
+        **{**(base_settings | _PERF_SETTINGS), "write_tracks": True}, processors=1
+    )
+    ot.add_class("reader", **reader_schism3D)
+    ot.add_class(
+        "release_groups",
+        name="default_perf",
+        class_name="PointRelease",
+        points=schism3D_release_locations["deep_point"],
+        release_interval=0,
+        pulse_size=_FIXED_PARTICLES,
+    )
+    ot.add_class(
+        "particle_statistics",
+        **{**gridded_2D_timeBased, "name": "perf_time_stats", "update_interval": 900},
+    )
+    ot.add_class(
+        "particle_statistics",
+        **{**gridded_2D_ageBased, "name": "perf_age_stats", "update_interval": 900},
+    )
+    case_info_file = ot.run()
+    record_performance(case_info_file)
+    assert case_info_file is not None
+
+
 # ---------------------------------------------------------------------------
 # Extended benchmarks — run with: pytest -n0 -m extended
 # ---------------------------------------------------------------------------

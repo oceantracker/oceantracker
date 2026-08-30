@@ -106,7 +106,7 @@ class ParticleGroupManager(ParameterBaseClass):
         for name, rg in si.class_roles.release_groups.items():
             if rg.schedulers['release'].do_task(n_time_step):
                 rg.start_update_timer()
-                release_part_prop = rg.get_release_locations(time_sec)
+                release_part_prop = rg.get_release_locations(n_time_step, time_sec)
                 index = self.release_a_particle_group_pulse(release_part_prop, time_sec)
                 # todo implement number_released_each_time_step?
                 #rg.info['number_released_each_time_step'][n_time_step] += index.size # record number released
@@ -208,7 +208,6 @@ class ParticleGroupManager(ParameterBaseClass):
         for name,i in cr.particle_properties.items():
             if isinstance(i, FieldParticleProperty):
                 i.timed_update(n_time_step, time_sec, active)
-
         si.block_timer('Interpolate fields', t0)
 
         # NOTE classes based on ManuallyUpdatedParticleProperty are ignored here,

@@ -15,6 +15,7 @@ def main(args=None):
                 particle_buffer_initial_size= 500,
                 #NUMBA_cache_code=True,
                 use_resuspension=False,
+                cProfile=True,
                 #regrid_z_to_uniform_sigma_levels=True # obsolete param
                 )
 
@@ -26,8 +27,16 @@ def main(args=None):
 
     #ot.settings(NUMBA_cache_code = True)
     hm = dd.hydro_model['demoSchism3D']
+
     ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True,
-                 field_variable_map=dict(my_field='temp'),load_fields=['my_field']
+                 # test mapping with user given maps to existing variables
+                 class_name='SCHISMreader',
+                 field_variable_map=dict(my_field='temp',
+                                         water_velocity=['hvel', 'vertical_velocity'], ),
+                 load_fields=['my_field'],  # request load user field
+                 grid_variable_map=dict(x='SCHISM_hgrid_node_x',
+                                        x_not_used='SCHISM_hgrid_node_x'),
+                 dimension_map = dict(node='nSCHISM_hgrid_node')
                  )
 
     # add a point release
@@ -60,8 +69,10 @@ def main(args=None):
     else:
         case_info_file = dd.get_case_info_name_from_params(ot.params)
 
+    if case_info_file is None:
+        print('run failed')
+        exit(-1)
     dd.compare_reference(case_info_file, args)
-
 
 
     if args.plot:

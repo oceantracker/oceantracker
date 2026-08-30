@@ -22,8 +22,10 @@ from oceantracker.util import time_util, output_util, save_state_util
 
 from oceantracker.util import json_util, setup_util
 from datetime import datetime
-import traceback
+
 from oceantracker import definitions
+import cProfile, pstats, io
+
 
 
 
@@ -40,9 +42,11 @@ class OceanTrackerParamsRunner(object):
     def run(self, user_given_params):
         self.start_date = datetime.now()
         self.start_time = perf_counter()
+        profiler = None
         case_info_file = None
         ml = si.msg_logger
         err_hint = 'check for first error above or in log file.txt or .err file '
+
 
         try:
             t0 = perf_counter()
@@ -54,6 +58,11 @@ class OceanTrackerParamsRunner(object):
             ml.msg(f'Starting user param. runner at { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
             si.block_timer('Setup', t0)
+
+            if si.settings.cProfile:
+                ml.msg('Activated cProfiler', hint='Profiling may slow code', warning=True)
+                profiler = cProfile.Profile()
+                profiler.enable()
 
             # _________ do run ____________________________
             case_info_file= self._run_case()
@@ -72,7 +81,7 @@ class OceanTrackerParamsRunner(object):
 
         except OSError as e:
             # path may already exist, but if not through other error, exit
-            si.msg_logger.msg(f'Failed to make run output dir or invalid file name', hint=err_hint, error=True )
+            si.msg_logger.msg(f'Failed to make run output dir or invalid file name', hint=err_hint, error=True)
             si.msg_logger.write_error_log_file(e,si)
 
         except Exception as e:
@@ -121,6 +130,15 @@ class OceanTrackerParamsRunner(object):
             ml.msg(f'Output in "{si.run_info.run_output_dir}"')
         ml.hori_line()
         ml.msg('')
+
+        self._write_params_as_executed(si.output_files)
+
+        # write profiler file
+        if si.settings.cProfile and profiler is not None:
+            self._write_cprofile_results(profiler)
+
+
+
         ml.close()
 
         return case_info_file
@@ -135,7 +153,7 @@ class OceanTrackerParamsRunner(object):
         setup_util.check_python_version(ml)
 
         ml.hori_line()
-        ml.msg(f'{definitions.package_fancy_name} version {definitions.version["oceantracker_version"]}  starting setup helper "main.py":')
+        ml.msg(f'{definitions.package_fancy_name} {definitions.version_str()}  starting setup helper "main.py":')
 
 
         # split params in to settings, core and class role params
@@ -171,7 +189,7 @@ class OceanTrackerParamsRunner(object):
 
         # write raw params to a file
         if not si.run_info.restarting:
-            setup_util.write_raw_user_params(si.output_files, user_given_params, si)
+            setup_util.write_params_raw_user(si.output_files, user_given_params, si)
 
         # setup numba before first import as its environment variable settings  have to be set before first import on Numba
         # set numba config environment variables, before any import of numba, eg by readers,
@@ -183,7 +201,7 @@ class OceanTrackerParamsRunner(object):
         si.class_importer._build_class_tree_ans_short_name_map()
         ml.set_screen_tag('setup')
         ml.hori_line()
-        ml.msg(f' {definitions.package_fancy_name} version {definitions.version["oceantracker_version"]} ')
+        ml.msg(f' {definitions.package_fancy_name} {definitions.version_str()} ')
 
 
         pass
@@ -250,7 +268,7 @@ class OceanTrackerParamsRunner(object):
                        caller=i,
                        hint='Release point/polygon or grid may be outside domain and or in permanently dry cells?, mismatch of release coords and hindcast, betweem meters and GPS? )')
 
-        case_info_file = self._get_case_run_info(self.start_date, self.start_time)
+        case_info_file = self._write_case_info_file(self.start_date, self.start_time)
 
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
@@ -541,7 +559,7 @@ class OceanTrackerParamsRunner(object):
     # ____________________________
 
 
-    def _get_case_run_info(self, d0, t0):
+    def _write_case_info_file(self, d0, t0):
         pgm= si.core_class_roles.particle_group_manager
         info = {}
         ml = si.msg_logger
@@ -565,7 +583,6 @@ class OceanTrackerParamsRunner(object):
              'settings' : si.settings.asdict(),
              'run_info' : info,
              'particle_status_flags': si.particle_status_flags.asdict(),
-
              'release_group_info': {},
              'scheduler_info': {},
              'core_class_roles_info': {},
@@ -590,6 +607,7 @@ class OceanTrackerParamsRunner(object):
                                                      )
                 d['output_files'][key][key2]= i2.info['output_file'] if 'output_file' in i2.info else None
                 if hasattr(i2,'scheduler_info'):
+                    #todo move scheduler to seperate json file?
                     d['scheduler_info'][key][key2] = i2.scheduler_info
 
                 # full parameters
@@ -615,6 +633,7 @@ class OceanTrackerParamsRunner(object):
                                                  update_calls= i.info['update_calls'],
                                                  time_first_update_call= i.info['time_first_update_call'] )
             if hasattr(i, 'scheduler_info'):
+                # todo move scheduler to seperate json file?
                 d['scheduler_info'][key]= i.scheduler_info
 
             d['working_params']['core_class_roles'][key] = i.params
@@ -649,6 +668,44 @@ class OceanTrackerParamsRunner(object):
         json_util.write_JSON(case_info_file, d)
         return case_info_file
 
+    def _write_scheduler_info_file(self):
+        # todo  complete?
+        pass
+
+    def _write_cprofile_results(self,profiler):
+        ml = si.msg_logger
+        profile_file_name = path.join(si.run_info.run_output_dir, 'cProfile_results')
+        ml.progress_marker(f'Saving cProfiler results to file: {profile_file_name} *.txt')
+        ml.hori_line()
+        profiler.disable()
+        # write files with different sort
+        with open(profile_file_name+"_tottime.txt", "w") as f:
+            stats = pstats.Stats(profiler, stream=f)  # Pass the stream to pstats
+            stats.sort_stats("tottime").print_stats()
+
+        with open(profile_file_name +"_cumtime.txt", "w") as f:
+            stats = pstats.Stats(profiler, stream=f)  # Pass the stream to pstats
+            stats.sort_stats("cumtime").print_stats()
+
+        with open(profile_file_name + "_calls.txt", "w") as f:
+            stats = pstats.Stats(profiler, stream=f)  # Pass the stream to pstats
+            stats.sort_stats("calls").print_stats()
+
+    def _write_params_as_executed(self,output_files):
+        fn = 'params_as_executed.json'
+        output_files['params_as_executed'] = fn
+        d= dict(settings=si.settings.asdict(),
+            core_class_roles= {key:item.params for key, item in
+                               si.core_class_roles.items()  if item is not None},
+            class_class_roles=dict()
+                )
+        for role, val in si.class_roles.items():
+            d['class_class_roles'][role] = dict()
+            for name, item in val.items():
+                d['class_class_roles'][role][name] = None if item is None else item.params
+
+        if si.run_info.run_output_dir is not None:
+            json_util.write_JSON(path.join(output_files['run_output_dir'], fn), d)
 
 
 

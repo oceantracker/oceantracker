@@ -43,7 +43,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 max_count_per_particle=PVC(None, int, min=1,
                     doc_str='Maximum number of times each particle can be counted by this stats instance. Default None = unlimited. '
                             'See also kill_when_max_counted.'),
-                kill_when_max_counted=PVC(True, bool,
+                kill_when_max_counted=PVC(False, bool,
                     doc_str='When max_count_per_particle is set: True (default) = set particle status to dead once max count is reached; '
                             'False = exclude the particle from future counting in this stats instance but leave it alive.'),
                 counting_probability=PVC(1.0, float, min=0., max=1.,
@@ -96,7 +96,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         if info['water_depth_range'][0] > info['water_depth_range'][1]:
             ml.msg(
-                f'Require water_depth_min > water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
+                f'Require water_depth_min < water_depth_max, (water_depth_min,water_depth_max) =({info["water_depth_range"][0]:.3e}, {info["water_depth_range"][1]:.3e}) ',
                 caller=self, error=True)
         # set what z values to count bewteen, or near sea bed etc in 2D counts
         self.set_z_range_for_counts()
@@ -129,7 +129,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             if params['z_min'] is not None:  info['z_range'][0] = params['z_min']
             if params['z_max'] is not None:  info['z_range'][1] = params['z_max']
             if info['z_range'][0] > info['z_range'][1]:
-                ml.msg(f'Require zmin > zmax, (z_min,z_max) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ',
+                ml.msg(f'Require z_min <= z_max, (z_min,z_max) =({info["z_range"][0]:.3e}, {info["z_range"][1]:.3e}) ',
                        error=True, caller=self,
                        hint='z=0 is mean water level, so z is mostly < 0')
 
@@ -209,7 +209,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                 si.msg_logger.msg(f'On the fly statistics  can currently only track float64 particle properties, ignoring property  "{key}", of type "{str(part_prop[key].get_dtype())}"',
                                   error=True)
             else:
-                names.append(names)
+                names.append(key)
                 self.prop_data_list.append(part_prop[key].data) # must used dataptr here
                 self.sum_prop_data_list.append(self.sum_binned_part_prop[key][:])
 

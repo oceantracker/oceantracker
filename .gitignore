@@ -18,6 +18,9 @@
 venv
 dist/
 
+# generated at package build time by generate_build_info.py
+/oceantracker/_build_info.py
+
 /dev/misc/output/
 /dev/dev_testing/root_output_dir/
 /dev/bug_hunting/

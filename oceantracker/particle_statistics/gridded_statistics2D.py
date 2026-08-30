@@ -330,7 +330,7 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
         stats_grid = self.grid
         release_groupID = part_prop['IDrelease_group'].used_buffer()
 
-        self.count_all_alive_by_age(alive, time_sec)
+        self.count_all_alive_by_age(n_time_step,time_sec, alive)
 
         p_x = part_prop['x'].used_buffer()
         p_age = part_prop['age'].used_buffer()

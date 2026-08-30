@@ -8,6 +8,8 @@ class _BaseStructuredReader(_BaseReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params(
+            required_dimensions=PLC(['row','col'], str,
+                                    doc_str='List of internal dimension_map names that must be in the hindcast'),
             dimension_map=dict(
                             row = PVC(None, str, doc_str='row dim of grid ', is_required=True),
                             col = PVC(None, str, doc_str='column dim of grid ', is_required=True),

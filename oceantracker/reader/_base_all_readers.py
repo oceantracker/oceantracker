@@ -4,6 +4,7 @@ from copy import deepcopy
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC
+
 from oceantracker.fields.reader_field import  ReaderField
 from oceantracker.util import time_util, ncdf_util, numba_util
 from datetime import datetime
@@ -27,17 +28,22 @@ class _BaseReader(ParameterBaseClass):
         self.add_default_params(
             input_dir= PVC(None, str, is_required=True),
             file_mask= PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
-            geographic_coords= PVC(False, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
+            geographic_coords= PVC(None, bool, doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
                                      expert=True),
             time_buffer_size= PVC(24, int, min=2, doc_str='This reader parameter has be removed,  now a top level setting , use  setting "time_buffer_size"', obsolete=True),
             load_fields= PLC(None, str,
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                make_list_unique=True),
+            required_feilds=PLC(['water_depth'], str,
+                                doc_str='List of internal variables that must be in the hindcast (water_velocity is deal with separately)'),
+            required_grid_variables=PLC(['time', 'x', 'y'], str,
+                                doc_str='List of internal variables that must be in the hindcast'),
+            required_dimensions=PLC([], str,    doc_str='List of internal dimension_map names that must be in the hindcast'),
+
             one_based_indices= PVC(False, bool, doc_str='File has indices starting at 1, not pythons zero, eg node numbers in triangulation/simplex'),
             EPSG_code= PVC(None, int, doc_str='integer code for coordinate transform of hydro-model, only used if setting "use_geographic_coords"= True and hindcast not in geographic coords, EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes at https://spatialreference.org/'),
             max_numb_files_to_load= PVC(10 ** 7, int, min=1,
                                         doc_str='Only read no more than this number of hindcast files, useful when setting up to speed run'),
-            variable_signature = PLC(None, str, doc_str='Variable names used to test if file is this format', is_required=True),
             grid_variable_map= dict(control_key_allow_unknown_keys=True,
                             time=PVC('time', str, doc_str='Name of time variable in hindcast',is_required=True),
                             x=PVC(None, str, doc_str='x location of nodes', is_required=True),
@@ -49,13 +55,16 @@ class _BaseReader(ParameterBaseClass):
                 water_velocity=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
                 water_velocity_depth_averaged=PLC(['not_given'], str, doc_str='maps standard internal field name to file variable name'),
                             ),
+            all_z_dims = PLC(None, str, doc_str='All z dims, used to identify  3D variables', is_required=True),
             dimension_map= dict(
                             vector2D=PVC(None, str, doc_str='name of dimension names for 2D vectors'),
                             vector3D=PVC(None, str, doc_str='name of dimension names for 3D vectors'),
                             z=PVC( None, str, doc_str='name of dimensions for z layer boundaries '),
-                            all_z_dims=PLC(None, str, doc_str='All z dims, used to identify  3D variables', is_required=True),
+
                             ),
+
         field_variables= PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
+
         drop_variables= PLC(None, str, expert=True, doc_str='List of problematic file variable names to ignore, eg non-critcal variables not present in all files/all times', make_list_unique=True),
         regrid_z_to_sigma_levels = PVC(True, bool,
                 doc_str='much faster 3D runs by re-griding hydo-model fields for S-layer or LSC vertical grids (eg. SCHISM),  into uniform sigma levels on read based on sigma most curve z_interface profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS')
@@ -68,6 +77,7 @@ class _BaseReader(ParameterBaseClass):
         self.fields ={}
 
         self.si = si
+
 
 
     # Below are required  methods for any new reader
@@ -142,9 +152,10 @@ class _BaseReader(ParameterBaseClass):
     def detect_vel_var_and_if_3D(self, dataset):
         # work out if vel or depth aver. vel is present and if these are 2D
         # hindcast is 3D if velocity has any z dim
-        fvm = self.params['field_variable_map']
-        gvm = self.params['grid_variable_map']
-        dm = self.params['dimension_map']
+        params= self.params
+        fvm = params['field_variable_map']
+        gvm = params['grid_variable_map']
+        dm = params['dimension_map']
         file_vars = dataset.info['variables']
 
         if fvm['water_velocity'][0] in file_vars:
@@ -155,25 +166,10 @@ class _BaseReader(ParameterBaseClass):
             vel_vars=None
         # see if vel has any z dimensions
         if vel_vars is not None:
-            is3D = any([d in file_vars[vel_vars[0]]['dims'] for d in dm['all_z_dims']])
+            is3D = any([d in file_vars[vel_vars[0]]['dims'] for d in params['all_z_dims']])
         else:
             is3D= False
         return vel_vars, is3D
-
-    def check_signature(self, dataset):
-        # check if required var preset
-        fvm = self.params['field_variable_map']
-        gvm = self.params['grid_variable_map']
-        dm = self.params['dimension_map']
-        file_vars = dataset.info['variables']
-        vel_var = fvm['water_velocity']
-        signature_tests = {( 'velocity' if vel_var is  None else vel_var[0]): (vel_var is not None ) and vel_var[0]  in file_vars}
-        # check if other variables in the signature are present
-        for s in self.params['variable_signature'] + [gvm['time'], gvm['x']]:
-            signature_tests[s] = s in dataset.info['variables']
-        self.info['signature_tests'] = signature_tests
-
-        return all([item for key,item, in signature_tests.items()]) # check all tests past
 
     def _build_hori_and_vert_grids(self, ):
         params = self.params
@@ -698,7 +694,12 @@ class _BaseReader(ParameterBaseClass):
         return nt_hindcast in bi['time_steps_in_buffer'] and nt_hindcast + model_dir in bi['time_steps_in_buffer']
 
     def detect_lonlat_grid(self):
-        x = self.dataset.read_variable(self.params['grid_variable_map']['x']).data
+        params = self.params
+
+        # user set geographic_coords flag
+        if params['geographic_coords'] is not None: return params['geographic_coords']
+
+        x = self.dataset.read_variable(params['grid_variable_map']['x']).data
         # look at range to see if too small to be meters grid
         islatlong=  (np.nanmax(x)- np.nanmin(x) < 360) or (np.nanmax(x)- np.nanmin(x) < 360)
 
@@ -725,16 +726,17 @@ class _BaseReader(ParameterBaseClass):
         for nt, val in self.si.node_types.items():
             nc.create_attribute(f'node_typeID_{nt}', val)
 
-
+        dm = si.dim_names
+        dm.triangle
         nc.write_variable('x', grid['x'], ('node_dim', 'vector2D'))
-        nc.write_variable('triangles', grid['triangles'], ('triangle_dim', 'vertex'))
-        nc.write_variable('triangle_area', grid['triangle_area'], ('triangle_dim',))
-        nc.write_variable('adjacency', grid['adjacency'], ('triangle_dim', 'vertex'), description='number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(si.cell_search_status_flags))
-        nc.write_variable('node_type', grid['node_type'], ('node_dim',), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
-        nc.write_variable('is_boundary_triangle', grid['is_boundary_triangle'], ('triangle_dim',))
+        nc.write_variable('triangles', grid['triangles'], (dm.triangle, 'vertex'))
+        nc.write_variable('triangle_area', grid['triangle_area'], (dm.triangle,))
+        nc.write_variable('adjacency', grid['adjacency'], (dm.triangle, 'vertex'), description='number of triangle adjacent to each face, if <0 then is a lateral boundary' + str(si.cell_search_status_flags))
+        nc.write_variable('node_type', grid['node_type'], (dm.node,), attributes={'node_types': str(si.node_types.asdict())}, description='type of node, types are' + str(si.node_types.asdict()))
+        nc.write_variable('is_boundary_triangle', grid['is_boundary_triangle'], (dm.triangle,))
         nc.write_variable('node_to_tri_map', grid['node_to_tri_map'], ('node_dim', 'max_nodes_per_tri'))
         nc.write_variable('tri_per_node', grid['tri_per_node'], ('node_dim',))
-        nc.write_variable('bc_transform', grid['bc_transform'], ('triangle_dim', 'bc_transform_rows', 'bc_transform_cols'))
+        nc.write_variable('bc_transform', grid['bc_transform'], (dm.triangle, 'bc_transform_rows', 'bc_transform_cols'))
 
         if 'water_depth' in self.fields:
             nc.write_variable('water_depth', self.fields['water_depth'].data.ravel(), ('node_dim',))

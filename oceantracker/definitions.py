@@ -11,16 +11,41 @@ from importlib.metadata import version as get_version
 version= dict()
 v = version
 v['oceantracker_version'] = get_version("oceantracker")
-v['major'],v['minor'],v['micro'],v['patch'] = [int(v) for v in v['oceantracker_version'].split('.')]
+# works for both 3 part versions eg "0.6.0" and legacy 4 part ones eg "0.5.3.7", missing/non-numeric parts = 0
+for _name, _part in zip(('major', 'minor', 'micro', 'patch'),
+                        v['oceantracker_version'].split('.') + ['0'] * 4):
+    try:
+        v[_name] = int(_part)
+    except ValueError:
+        v[_name] = 0  # eg pre-release suffix like "0rc1"
 
+def _git_output(args):
+    # silent, so pip installed versions without a git repo don't print "fatal: not a git repository" on import
+    try:
+        return subprocess.check_output(args, cwd=path.dirname(path.realpath(__file__)),
+                                       stderr=subprocess.DEVNULL, timeout=5).decode().replace('\n', '')
+    except Exception:
+        return 'unknown'
+
+version['git_commit_hash'] = _git_output(['git', 'rev-parse', 'HEAD'])
+version['date'] = _git_output(['git', 'log', '-1', '--format=%cd'])
+
+# release date is stamped into the package at build time by generate_build_info.py,
+# installs from a source checkout have no stamp and are reported as dev builds
 try:
-    version['git_commit_hash'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
-except:
-    version['git_commit_hash'] = 'unknown'
-try:
-    version['date'] = subprocess.check_output(['git', 'log', '-1', '--format=%cd'], cwd=path.dirname(path.realpath(__file__))).decode().replace('\n', '')
-except:
-    version['date'] = 'unknown'
+    from oceantracker._build_info import build_date
+    version['release_date'] = build_date
+except ImportError:
+    version['release_date'] = 'unknown'
+
+def version_str():
+    # one line version + release date used in screen/log messages
+    s = 'version ' + version['oceantracker_version']
+    if version['release_date'] != 'unknown':
+        s += ', released ' + version['release_date'][:10]
+    elif version['git_commit_hash'] != 'unknown':
+        s += f', dev build, commit {version["git_commit_hash"][:8]}'
+    return s
 
 version.update(
     python_version = sys.version,
@@ -45,6 +70,7 @@ known_readers = dict(
                 GLORYS =  'oceantracker.reader.GLORYS_reader.GLORYSreader',
                 DELFT3D_FM =  'oceantracker.reader.DELFT3DFM_reader.DELFT3DFMreader',
                 FVCOMreader =  'oceantracker.reader.FVCOM_reader.FVCOMreader',
+                SHYFEM =  'oceantracker.reader.SHYFEM_reader.SHYFEMreader',
                 # known variants of readers
                 ROMSmoanaProject = 'oceantracker.reader.ROMS_reader_variants.ROMSreaderMoanaProjectNZ',
                 SCHISM_CSIRO_CCHAPS =  'oceantracker.reader.SCHISM_reader_variants.SCHISMreader_CSIRO_CCAHPS',

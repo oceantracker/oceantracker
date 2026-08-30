@@ -3,6 +3,7 @@ from os import path
 
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC, ParameterListChecker as PLC
+from oceantracker.util.parameter_checking import  ParameterMapAlternativesChecker as PMAC, ParameterListMapAlternativesChecker as PLMAC
 import numpy as np
 from oceantracker.shared_info import shared_info as si
 from oceantracker.reader.util import reader_util
@@ -13,36 +14,34 @@ class SCHISMreader(_BaseUnstructuredReader):
     def __init__(self):
         super().__init__()  # required in children to get parent defaults and merge with give params
         self.add_default_params({
+            'all_z_dims': PLC(['nSCHISM_vgrid_layers'], str, doc_str='All z dims, used to identify  3D variables'),
             'dimension_map': dict(
-                        node=PVC('nSCHISM_hgrid_node', str, doc_str='name of nodes dimension in files'),
-                        cell=PVC('nSCHISM_hgrid_face', str, doc_str='name of cell dimension in files'),
-                        z=PVC('nSCHISM_vgrid_layers', str, doc_str='name of dimensions for z layer boundaries '),
-                        all_z_dims=PLC(['nSCHISM_vgrid_layers'], str, doc_str='All z dims, used to identify  3D variables'),
-                        vector2D=PVC('two', str, doc_str='name of dimension names for 2D vectors'),
-                        vector3D=PVC(None, str),
-                                ),
+                        node=PMAC('nSCHISM_hgrid_node',  doc_str='name of nodes dimension in files'),
+                        cell=PMAC('nSCHISM_hgrid_face',  doc_str='name of cell dimension in files'),
+                        z=PMAC('nSCHISM_vgrid_layers',  doc_str='name of dimensions for z layer boundaries '),
+                        vector2D=PMAC('two',  doc_str='name of dimension names for 2D vectors'),
+                         ),
              'grid_variable_map': dict(
-                        time=PVC('time', str, doc_str='Name of time variable in hindcast'),
-                        x = PVC('SCHISM_hgrid_node_x', str, doc_str='x location of nodes'),
-                        y = PVC('SCHISM_hgrid_node_y', str, doc_str='y location of nodes'),
-                        z_interface=PVC('zcor', str),
-                        triangles =PVC('SCHISM_hgrid_face_nodes', str),
-                        bottom_interface_index =PVC('node_bottom_index', str),
-                        is_dry_cell = PVC('wetdry_elem', str, doc_str='Time variable flag of when cell is dry, 1= is dry cell')
+                        time=PMAC(['time'],  doc_str='Name of time variable in hindcast'),
+                        x = PMAC('SCHISM_hgrid_node_x', doc_str='x location of nodes'),
+                        y = PMAC('SCHISM_hgrid_node_y', doc_str='y location of nodes'),
+                        z_interface=PMAC('zcor'),
+                        triangles =PMAC('SCHISM_hgrid_face_nodes'),
+                        bottom_interface_index =PMAC('node_bottom_index'),
+                        is_dry_cell = PMAC('wetdry_elem',  doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                         ),
-            'field_variable_map': {'water_velocity': PLC(['hvel', 'vertical_velocity'], str),
-                                'tide': PVC('elev', str,doc_str='maps standard internal field name to file variable name'),
-                                'water_depth': PVC('depth', str, doc_str='maps standard internal field name to file variable name'),
-                                'water_temperature': PVC('temp', str,doc_str='maps standard internal field name to file variable name'),
-                                'salinity': PVC('salt', str,doc_str='maps standard internal field name to file variable name'),
-                                'wind_stress': PLC(['wind_stress'], str,doc_str='maps standard internal field name to file variable name'),
-                                'bottom_stress': PLC(['bottom_stress'], str,doc_str='maps standard internal field name to file variable name'),
-                                'A_Z_profile':  PVC('diffusivity', str,doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
-                                'water_velocity_depth_averaged': PLC(['dahv'], str,
+            'field_variable_map': {'water_velocity': PLMAC(['hvel', 'vertical_velocity']),
+                                'tide': PMAC('elev',doc_str='maps standard internal field name to file variable name'),
+                                'water_depth': PMAC('depth', doc_str='maps standard internal field name to file variable name'),
+                                'water_temperature': PMAC('temp',doc_str='maps standard internal field name to file variable name'),
+                                'salinity': PMAC('salt',doc_str='maps standard internal field name to file variable name'),
+                                'wind_stress': PMAC(['wind_stress'], doc_str='maps standard internal field name to file variable name'),
+                                'bottom_stress': PLMAC(['bottom_stress'], doc_str='maps standard internal field name to file variable name'),
+                                'A_Z_profile':  PMAC('diffusivity', doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
+                                'water_velocity_depth_averaged': PLMAC(['dahv'],
                                                 doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'one_based_indices': PVC(True, bool, doc_str='Schism has indices starting at 1 not zero'),
-            'variable_signature': PLC(['elev','depth','wetdry_elem'], str, doc_str='Variable names used to test if file is this format'),
             'hgrid_file_name': PVC(None, str),
              })
 
@@ -76,14 +75,11 @@ class SCHISMreader(_BaseUnstructuredReader):
 
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['z_dim'] = dm['z']
-            info['num_z_interfaces'] = info['dims'][info['z_dim']]
-            info['all_z_dims'] = dm['all_z_dims']
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             info['vert_grid_type'] = si.vertical_grid_types.LSC if gm['bottom_interface_index'] in info['variables'] \
                                                                         else si.vertical_grid_types.Slayer
 
-        info['node_dim'] = params['dimension_map']['node']
-        info['num_nodes'] = info['dims'][info['node_dim']]
+        info['num_nodes'] = info['dims'][dm['node']]
 
 
     def read_z_interface(self, nt):

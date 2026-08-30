@@ -17,7 +17,7 @@ def ReadCoordinates(file_name, type, select_entity, msg_logger, only_select_one=
         d= fiona.open(file_name)
     except Exception as e:
         msg_logger.msg(f'cannot read file {file_name} ', hint='File tyype not recognised by "fiona" module',
-               fatal_error=True)
+               fatal_error=True, exception = e)
 
     for item in d:
         g = item['geometry']

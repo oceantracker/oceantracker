@@ -79,7 +79,7 @@ class FieldGroupManager(ParameterBaseClass):
         if si.settings.display_grid_at_start:
             from matplotlib import pyplot as plt
             from oceantracker.plot_output.plot_utilities import display_grid
-            display_grid(grid, 1)
+            display_grid(grid, 3)
             plt.show()
 
     def add_reader_field(self,name, params):
@@ -180,6 +180,7 @@ class FieldGroupManager(ParameterBaseClass):
                   'has_bottom_stress','start_time','end_time','input_dir']:
             add_info[n] = reader.info[n]
         return reader, add_info
+
     def _apply_dry_cell_boundary_condition(self, sel_hit_dry):
         # dry cell boundary
         self._move_back(sel_hit_dry)
@@ -311,8 +312,7 @@ class FieldGroupManager(ParameterBaseClass):
         sel = self.reader.grid['dry_cell_index'][ release_info['n_cell']] > 128  # those dry
         return sel
 
-    def hindcast_integrity(self):
-        setup_reader._hindcast_integrity_checks(self.reader)
+
 
     def _set_up_interpolator(self, reader):
 

@@ -29,6 +29,9 @@ jobs:
           pip install build twine
 
       # Build the distribution
+      - name: Stamp release date into package
+        run: python generate_build_info.py
+
       - name: Build distribution
         run: python -m build
 

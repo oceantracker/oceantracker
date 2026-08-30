@@ -1,4 +1,4 @@
-.PHONY: help clean clean-build clean-pyc clean-test lint test test-all coverage docs install install-dev build upload upload-test
+.PHONY: help clean clean-build clean-pyc clean-test lint test test-all coverage docs install install-dev build build-info env upload upload-test
 
 help:
 	@echo "Available commands:"
@@ -66,13 +66,16 @@ clean-pyc:
 env:
 	python generate_environment_yaml.py
 
+build-info:
+	python generate_build_info.py
+
 install: clean
 	pip install .
 
 install-dev: clean
 	pip install -e .[dev]
 
-build: clean env
+build: clean env build-info
 	python -m build
 
 # upload: clean build

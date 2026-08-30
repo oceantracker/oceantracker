@@ -158,7 +158,7 @@ class _BaseAgeStats(ParameterBaseClass):
 
 
 
-    def count_all_alive_by_age(self, alive, time_sec):
+    def count_all_alive_by_age(self,n_time_step,time_sec, alive ):
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
         self._count_all_alive_age_bins(part_prop['status'].data,
@@ -191,12 +191,8 @@ class _BaseAgeStats(ParameterBaseClass):
         # NOTE: do NOT zero count — accumulate across calls like count_all_alive_particles
 
         for nrg, rg in enumerate(si.class_roles.release_groups.values()):
-            times = rg.info['pulse_release_times']
-            if len(times) == 0:
-                continue
-            self._accumulate_pulse_demographics(
-                np.asarray(times, dtype=np.float64),
-                np.asarray(rg.info['pulse_counts'], dtype=np.int64),
+            times = rg.time_each_pulse_released
+            self._accumulate_pulse_demographics(times,  rg.number_released_each_pulse,
                 time_sec, age_bin_edges, count, nrg)
 
     @staticmethod
