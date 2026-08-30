@@ -10,10 +10,26 @@ Note: All commits that change either model in- or output in any way are labeled 
 Version '0.5.3.8 2026-xx-xx'
 ____________________________
 
+New features
+------------
+
+#. Added a SHYFEM reader, supporting triangulation via``element_index`` or a companion ``.grd`` file.
+#. Re-added the ``relative-to-{geoid,surface,bottom}`` functionality to 3D gridded stats.
+#. Added a ``cProfile`` option to run settings, and cProfile output files are now sorted
+   by cumulative time and call count to make them easier to read.
+
 Bug fixes
 ---------
 
 #. Fixed Delft3D-FM reader failing in 2D mode due to ambiguous variable selection when looking up the water depth field.
+#. Fixed z-layer hindcasts (e.g. GLORYS, DELFT3D) interpolating vertical particle
+   positions incorrectly in single-depth-layer cells at high tide.
+#. Fixed the map scale bar being broken for longitude/latitude coordinates.
+#. Fixed a significant slow-down in ``_compute_released_age_demographics`` caused by
+   unnecessary numpy ``asarray`` operations, which had made age-based particle statistics
+   much slower than they should be (introduced in bc8d33e2 in v0.5.3.6).
+#. Fixed FVCOM reader failing when using projected (x,y) coordinates while the file's
+   lat/lon coordinates were all zero.
 
 Misc.
 -----
@@ -25,10 +41,17 @@ Misc.
 #. The release date is now stamped into the package at build time (via ``generate_build_info.py``) and shown at startup, replacing the previous PyPI lookup which reported upload time and required network access. Installs from a source checkout show a "dev build, commit <hash>" line instead.
 #. Pip-installed copies without a git repository no longer print ``fatal: not a git repository`` on every import.
 #. Fixed version parsing crashing on import for standard three-part version numbers (e.g. ``0.6.0``)
+#. Message logger no longer checks for presence of a doc URL before displaying it.
+#. Dropped the ``pyarrow`` dependency.
+#. Fixed several bugs in exception handling that could mask the underlying error.
+#. Changed the default of ``kill_when_max_counted`` in particle statistics to ``False``.
 
 Tests
 -----
 #. Added a reader test for variable remapping in schism
+#. Added unit tests for the SHYFEM reader, including hindcasts for both the
+   element-index and ``.grd`` triangulation paths.
+#. Added unit tests covering the re-added ``relative-to`` gridded stats functionality.
 
 
 Version '0.5.3.7 2026-05-18'
