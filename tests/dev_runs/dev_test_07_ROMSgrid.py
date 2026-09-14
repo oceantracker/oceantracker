@@ -10,7 +10,8 @@ def main(args):
              use_A_Z_profile=False,
      )
 
-    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,)
+    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
+                 turn_on_write_particle_properties_list=['water_velocity'])
 
     #ot.settings(NUMBA_cache_code = True)
     hm = dd.hydro_model['demoROMS']

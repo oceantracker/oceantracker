@@ -96,6 +96,7 @@ rg_basic = dict( name='rg_basic',  # name used internal to refer to this release
          pulse_size=5)  # how many are released each interval
 
 tracks_writer = dict(turn_on_write_particle_properties_list=['water_velocity'])
+
 rg_release_interval0 = dict( name='release_interval0',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
          points=[[1594000, 5484200, -2]  ],
