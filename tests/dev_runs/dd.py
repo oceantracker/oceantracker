@@ -241,6 +241,13 @@ my_heat_map2D_time_runningMean = dict(
             z_min = -10.0,
             )
 
+my_heat_map_max_count= {**my_heat_map3D_time,
+                        **dict(name = "my_heat_map2D_time_runningMean_max_count",
+                               max_count_per_particle=5)}
+my_heat_map_max_count_kill= {**my_heat_map3D_time,
+                        **dict(name = "my_heat_map_max_count_kill",
+                               max_count_per_particle=5,kill_when_max_counted=True)}
+
 my_resident_in_polygon =dict(name='my_resident_in_polygon',
         class_name='ResidentInPolygon',
         #status_list=[],

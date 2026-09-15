@@ -1,5 +1,6 @@
 import numpy as np
 from oceantracker.util import basic_util, status_util, output_util
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.util.ncdf_util import NetCDFhandler
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from os import  path
@@ -11,6 +12,7 @@ from oceantracker.particle_statistics.util import stats_util
 from oceantracker.particle_properties.util import particle_comparisons_util
 from oceantracker.shared_info import shared_info as si
 from oceantracker.util.basic_util import get_role_from_base_class_file_name
+
 
 class _BaseParticleLocationStats(ParameterBaseClass):
     role_name = get_role_from_base_class_file_name(__file__)
@@ -59,8 +61,6 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                     doc_str='Write connectivity_matrix to the output file. '
                             'Set to False to reduce file size when connectivity is not needed.'),
 
-                #coords_in_lat_lon_order =  PVC(False, bool,
-                #    doc_str='Allows points to be given (lat,lon) and order will be swapped before use, only used if hydro-model coords are in degrees '),
                 status_min=PVC('stationary', str, possible_values=si.particle_status_flags.possible_values(),obsolete=True,
                                doc_str='Use parameter "status_list" to name which status values to count, eg ["on_bottom","moving"]'),
                 status_max=PVC('moving', str, possible_values=si.particle_status_flags.possible_values(),obsolete=True,
@@ -261,16 +261,25 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         Note: counting_events is incremented for all particles passed to do_counts (those selected
         and passing the probability filter), not only those that fell inside a spatial bin.'''
         params = self.params
-        if params['max_count_per_particle'] is None or sel.size == 0:
-            return
+        if params['max_count_per_particle'] is None or sel.size == 0:  return
+
         part_prop = si.class_roles.particle_properties
-        counting_events = part_prop[self.info['counting_events_prop']].data
+        #counting_events_prop = part_prop[self.info['counting_events_prop']]
+
+        stats_util._update_times_count_and_kill_if_requested(
+                                part_prop[self.info['counting_events_prop']].data,
+                                part_prop['status'].data,
+                                params['kill_when_max_counted'], params['max_count_per_particle'],sel)
+
+        return
         counting_events[sel] += 1
 
         if params['kill_when_max_counted']:
             maxed_mask = counting_events[sel] >= params['max_count_per_particle']
             if maxed_mask.any():
                 part_prop['status'].set_values(si.particle_status_flags.dead, sel[maxed_mask])
+
+
 
     def sel_depth_range(self,sel):
         # find subset of sel that meet depth range requirements
@@ -307,6 +316,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         if si.run_info.is3D_run:
             sel = self.sel_depth_range(sel)
+
         # users override this method  to further sub-select those to count
         sel = self.select_particles_to_count(sel)
         # apply internal counting filters: max_count_per_particle (exclude mode) and counting_probability

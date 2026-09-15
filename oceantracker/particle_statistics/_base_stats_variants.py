@@ -265,7 +265,6 @@ class _BaseAgeStats(ParameterBaseClass):
                                         description='edges of stats. age bins')
 
 
-
     def save_state(self, si, state_dir):
         fn = path.join(state_dir,f'stats_state_{self.params["name"]}.nc')
         nc = NetCDFhandler(fn,mode='w')
