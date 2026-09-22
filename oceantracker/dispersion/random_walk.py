@@ -107,14 +107,14 @@ class RandomWalk(_BaseDispersion):
             # pseudo-advection required by random walk to avoid accumulation
             velocity_modifier[n, 2] += A_Z_vertical_gradient[n]  # todo limit excursion by this velocity ?
 
-            # vertical raNdom walk size needs to be half-time step in the future  A_z(z+ + A'_z dt/2) V97 (eq 6)
+            # vertical raNdom walk size needs to be an advected half-time step in the future  A_z(z+ + A'_z dt/2) V97 (eq 6)
             #                                                                         A'_Z is turbulent drift  velocity
             #  also A_z(z+dz)= A_z(z) + A_z'(z)dz
             # so A_z(z+dz) = A_z(z) + A'_z dz  , assume A_z locally linear, V79 eq (11)  where dz = A'_zdt
             #  thus A_z(z+ + A'_z dt/2) = A_Z + 1/2(A'_Z)^2 dt + higher order terms
 
             az = A_Z[n]  + 0.5*timestep*A_Z_vertical_gradient[n]**2
-            az = max(0.,az) # ensure half step still gives only positive values for az
+            az = max(0.,az) # ensure advected half step still gives only positive values for az
 
             random_walk_size= np.sqrt(2. * timestep * np.abs(az))
             velocity_modifier[n, 2] += normalvariate(0.,  random_walk_size/timestep) # apply vertical walk as a velocity
