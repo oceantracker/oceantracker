@@ -211,6 +211,13 @@ class _SharedInfoClass():
         # this allows shared info to make a class importer when needed
         self.msg_logger.reset()
 
+        # run info is a process wide singleton, so rebuild its values from the class defaults,
+        # otherwise state leaks into any later run in the same process, eg "continuing" is set
+        # true when continuing a run and never cleared, which makes the next run try to reload
+        # a saved state it does not have
+        self.run_info.__init__()
+        self.saved_state_info = None
+
         # empty out roles and core roles in case of rerunning and shared info import only happens once
         for role in self.core_class_roles.possible_values():
             setattr(self.core_class_roles, role, None)

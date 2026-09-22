@@ -225,6 +225,24 @@ def config_numba_environment_and_random_seed(settings, msg_logger, caller = None
     else:
         environ['NUMBA_NUM_THREADS']  = str(max_threads)
 
+    # numba variables set above are read once, when numba_util is first imported
+    # if a module holding jit code was already imported then these options are fixed
+    # and "correct" settings cannot be applied (which breaks some of the tests)
+    if 'oceantracker.util.numba_util' in sys.modules:
+        from oceantracker.util import numba_util
+        in_use = numba_util.compile_options
+        requested = dict(cache=bool(settings['NUMBA_cache_code']),
+                         fastmath=bool(settings['NUMBA_fastmath']),
+                         parallel=max_threads > 1)
+        differs = [f'{key}= {in_use[key]}, requested {value}'
+                   for key, value in requested.items() if in_use[key] != value]
+        if len(differs) > 0:
+            msg_logger.msg('Numba compile options were fixed by an earlier import and cannot be changed for this run: '
+                           + '; '.join(differs),
+                           hint='Import Oceantracker and run it before importing any module holding Numba code, '
+                                'eg Oceantrackers "load_output_files.py" and "read_ncdf_output_files.py"',
+                           warning=True, caller=caller)
+
     from numba import njit, set_num_threads
     set_num_threads(max_threads)
     settings['processors'] = max_threads # adjust setting thread number to match max possible
