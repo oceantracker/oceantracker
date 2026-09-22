@@ -8,7 +8,7 @@ def main(args=None):
 
     ot = OceanTracker()
     ot.settings(**dd.base_settings(__file__,args))
-    ot.settings(time_step=1800,
+    ot.settings(time_step=120,
                 use_dispersion=False,
                 screen_output_time_interval=1800,
                 use_A_Z_profile=True,
