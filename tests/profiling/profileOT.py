@@ -5,6 +5,7 @@ import platform
 import argparse
 from datetime import datetime
 import numpy as np
+from copy import copy, deepcopy
 
 import oceantracker.main
 
@@ -98,6 +99,9 @@ def get_params(args):
                                         ]
                     }
 
+    params['particle_statistics'].append({**deepcopy(params['particle_statistics'][0]),
+                                                      'name':'statas1_max_count',
+                                                    'max_count_per_particle':10})
 
     return params
 
