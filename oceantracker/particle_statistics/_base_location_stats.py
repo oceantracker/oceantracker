@@ -84,7 +84,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         info = self.info
         params = self.params
 
-        self.check_part_prop_list()
+
         # to speed status check make map with trues at index of status to include in counts
         self.statuses_to_count_map = status_util.build_select_status_map(params['status_list'])
 
@@ -113,6 +113,13 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.info['counting_events_prop'] = None
 
         pass
+
+    def final_setup(self):
+        # docheck on porpet once all have been set up
+        self.check_part_prop_list()
+        self.set_up_part_prop_lists()
+
+
 
     def set_z_range_for_counts(self):
         # set particle depth and water depth limits for 2D counting of particles
@@ -154,7 +161,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         for name in params['particle_property_list']:
 
             si.msg_logger.spell_check(f'Particle property name "{name}" not recognised',
-                                      name, si.class_roles.particle_properties.keys(),
+                                      name, part_prop.keys(),
                                       hint='check parameter "particle_property_list"',
                                       caller = self)
 

@@ -58,7 +58,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                             dm.z: stats_grid['z'].size}
 
         self.create_count_variables(info['count_dims'],'time')
-        self.set_up_part_prop_lists()
+
 
     def set_z_range_for_counts(self):
         # set z range of 3D grid
