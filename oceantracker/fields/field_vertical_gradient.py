@@ -47,35 +47,57 @@ class VerticalGradient(CustomFieldBase):
 
 @njitOT
 def _calc_field_vert_grad_from_z_interfaces(field4D,z_interface,bottom_interface_index,z0,gradient_field):
-
+    # use centered differences in mid-water colum, first order top and bottom
     for nt in range(field4D.shape[0]):
         for node  in  range(field4D.shape[1]):
-            for nz in  range(bottom_interface_index[node],field4D.shape[2]-1):
+            nz_bot = bottom_interface_index[node]
+            for nz in  range(nz_bot+1,field4D.shape[2]-1):
                 dz = z_interface[nt,node,nz+1] - z_interface[nt,node,nz]
                 if dz > z0:
+                    dz_inv = 1./dz
                     for ncomp in range(field4D.shape[3]):
-                        gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp] - field4D[nt, node, nz, ncomp])/dz
+                        gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp]
+                                                             - field4D[nt, node, nz  , ncomp])*dz_inv
                 else:
                     gradient_field[nt, node, nz, :] = 0.
 
-                # top cell, assume gradient same as cell below
-                gradient_field[nt, node, -1, :] = gradient_field[nt, node, -2, :]
+            # top cell/bottom cell use first order diff.
+            dz = z_interface[nt, node, -1] - z_interface[nt, node, -2]
+            if dz > z0:
+                gradient_field[nt, node, -1, :] =(field4D[nt, node, -1, :]- field4D[nt, node, -2  , :]) / dz
+            else:
+                gradient_field[nt, node, -1, :] = 0.
+
+            dz = z_interface[nt, node, nz_bot+1] - z_interface[nt, node,nz_bot]
+            if dz > z0:
+                gradient_field[nt, node, nz_bot, :] = (field4D[nt, node, nz_bot+1, :] - field4D[nt, node, nz_bot, :]) / dz
+            else:
+                gradient_field[nt, node, nz_bot, :] = 0
 
 @njitOT
 def _calc_field_vert_grad_from_sigma_levels(field4D,sigma, tide, water_depth,bottom_interface_index,z0,gradient_field):
-
+    # use centered differences in mid-water colum, first order top and bottom
     for nt in range(field4D.shape[0]):
         for node  in  range(field4D.shape[1]):
             twd = abs(tide[nt,node,0,0] +water_depth[0,node,0,0])
-
-            for nz in  range(bottom_interface_index[node],field4D.shape[2]-1):
+            nz_bot = bottom_interface_index[node]
+            for nz in  range(nz_bot+1,field4D.shape[2]-1):
                 dz = (sigma[nz+1] - sigma[nz]) * twd
-                if dz < 0.1: dz = 0.1
                 if dz > z0:
                     for ncomp in range(field4D.shape[3]):
                         gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp] - field4D[nt, node, nz, ncomp])/dz
                 else:
                     gradient_field[nt, node, nz, :] = 0.
 
-                # top cell, assume gradient same as cell below
-                gradient_field[nt, node, -1, :] = gradient_field[nt, node, -2, :]
+            # top cell/bottom cell use first order diff.
+            dz =  (sigma[-1] - sigma[-2]) * twd
+            if dz > z0:
+                gradient_field[nt, node, -1, :] = (field4D[nt, node, -1, :] - field4D[nt, node, -2, :]) / dz
+            else:
+                gradient_field[nt, node, -1, :] = 0.
+
+            dz = (sigma[nz_bot+1] - sigma[nz_bot]) * twd
+            if dz > z0:
+                gradient_field[nt, node, nz_bot, :] = (field4D[nt, node, nz_bot + 1, :] - field4D[nt, node, nz_bot, :]) / dz
+            else:
+                gradient_field[nt, node, nz_bot, :] = 0
