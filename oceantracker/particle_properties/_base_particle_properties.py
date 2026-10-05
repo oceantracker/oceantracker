@@ -57,24 +57,18 @@ class _BaseParticleProperty(ParameterBaseClass):
         self.data = np.full(s, params['initial_value'], dtype=params['dtype'], order='c')
         info['data_shape'] = self.data.shape
 
-    def final_setup(self):
-        # stuff done after initial setup of all classes/properties
-        # set up property writes to particle track netcdf
-        params = self.params
         name = params['name']
         if si.settings.write_tracks:
             # tweak write flag if in param lists
             w = si.core_class_roles.tracks_writer
             if name in w.params['turn_off_write_particle_properties_list']: params['write'] = False
             if name in w.params['turn_on_write_particle_properties_list']:  params['write'] = True
-            if False and params['write']:
-                w.create_variable_to_write(name, is_time_varying=params['time_varying'],
-                                           is_part_prop=True,compression_level=si.settings.NCDF_compression_level,
-                                           fill_value=basic_util.fillvalue(params['dtype']),
-                                           vector_dim=params['vector_dim'],
-                                           attributes=dict(description= params['description'],
-                                                       units= params['units']),
-                                           dtype=params['dtype'])
+
+    def final_setup(self):
+        # stuff done after initial setup of all classes/properties
+        # set up property writes to particle track netcdf
+        params = self.params
+
 
 
     def initial_value_at_birth(self, new_part_IDs):

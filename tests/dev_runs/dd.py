@@ -96,6 +96,7 @@ rg_basic = dict( name='rg_basic',  # name used internal to refer to this release
          pulse_size=5)  # how many are released each interval
 
 tracks_writer = dict(turn_on_write_particle_properties_list=['water_velocity'])
+
 rg_release_interval0 = dict( name='release_interval0',  # name used internal to refer to this release
          class_name='PointRelease',  # class to use
          points=[[1594000, 5484200, -2]  ],
@@ -239,6 +240,13 @@ my_heat_map2D_time_runningMean = dict(
             status_list = ["moving"],
             z_min = -10.0,
             )
+
+my_heat_map_max_count= {**my_heat_map3D_time,
+                        **dict(name = "my_heat_map2D_time_runningMean_max_count",
+                               max_count_per_particle=5)}
+my_heat_map_max_count_kill= {**my_heat_map3D_time,
+                        **dict(name = "my_heat_map_max_count_kill",
+                               max_count_per_particle=5,kill_when_max_counted=True)}
 
 my_resident_in_polygon =dict(name='my_resident_in_polygon',
         class_name='ResidentInPolygon',

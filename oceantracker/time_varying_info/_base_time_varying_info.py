@@ -31,11 +31,7 @@ class _BaseTimeVaringInfo(ParameterBaseClass):
         s=(1,)
         self.data = np.full(s, params['initial_value'], dtype=  self.get_dtype(),order='c')
 
-        if False and si.settings.write_tracks and params['write']:
-            w = si.core_class_roles.tracks_writer
-            w.create_variable_to_write(params['name'], 'time', None, params['vector_dim'],
-                                    units=params['units'], description=params['description'],
-                      dtype=params['dtype'])
+
 
     def update(self,n_time_step, time_sec, active): pass # manual update by default
     def set_values(self, value): self.data[0]=value

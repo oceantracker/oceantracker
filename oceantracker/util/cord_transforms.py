@@ -96,10 +96,10 @@ def get_degrees_per_meter(lat, as_vector=False):
     # rough lon lat in deg,
     # todo full jacobian from pytrans and finite differences and both lat, long
 
-    dx = 1. / 111000.  # deg per m of latitude, rows of lon_lat are multiple locations
+    deg_m = 1. / 111000.  # deg per m of latitude, rows of lon_lat are multiple locations
 
-    dpm_lon = dx * np.cos(np.deg2rad(lat))
-    dpm_lat = dx *np.ones(lat.shape)
+    dpm_lon = deg_m / np.cos(np.deg2rad(lat))
+    dpm_lat = deg_m *np.ones(lat.shape)
 
     if as_vector:
         return np.stack((dpm_lon,dpm_lat),axis = lat.ndim)  # merge on last dim of lat

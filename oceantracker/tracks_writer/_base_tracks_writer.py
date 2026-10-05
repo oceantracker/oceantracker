@@ -75,7 +75,8 @@ class _BaseWriter(ParameterBaseClass):
         nc = self.nc
         nc.create_attribute('file_created', datetime.now().isoformat())
         self.setup_file_vars(nc)
-        # write non-time varing prop of those currently alive
+
+        # write non-time varying prop of those currently alive
         sel = self._select_part_to_write()
         part_prop = si.class_roles.particle_properties
         info['first_ID_in_file'] = part_prop['ID'].get_values(0)

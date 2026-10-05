@@ -1,6 +1,5 @@
 import numpy as np
 from os import environ
-import os
 
 
 import numba as nb
@@ -9,14 +8,27 @@ from numba import prange
 from time import perf_counter
 
 numba_func_info={}
+
+# Numba compile options are fixed once a module holding a jit function is imported
+# which in some pipelines may be before a run sets the environment variables in 
+# setup_util.config_numba_environment_and_random_seed. 
+environ.setdefault('OCEANTRACKER_NUMBA_CACHING', '0')        # NUMBA_cache_code default False
+environ.setdefault('NUMBA_FASTMATH', '0')                    # NUMBA_fastmath default False
+environ.setdefault('OCEANTRACKER_USE_PARALLEL_THREADS', '1') # processors defaults to > 1 core
+
+compile_options = dict(
+    cache=environ['OCEANTRACKER_NUMBA_CACHING'] == '1',
+    fastmath=environ['NUMBA_FASTMATH'] == '1',
+    parallel=environ['OCEANTRACKER_USE_PARALLEL_THREADS'] == '1',
+)
+
 def njitOT(func):
     # add ability to inspect the functions after compilation at end for SIMD code
     #num_func = njit(func, *args)
 
-    cache= 'OCEANTRACKER_NUMBA_CACHING' in os.environ and os.environ['OCEANTRACKER_NUMBA_CACHING'] == '1'
     num_func = nb.njit(func,
-                       cache=cache,
-                       fastmath =  'NUMBA_FASTMATH' not in os.environ or os.environ['NUMBA_FASTMATH'] =='1',
+                       cache=compile_options['cache'],
+                       fastmath=compile_options['fastmath'],
                        )
 
     if hasattr(func,'__name__'):
@@ -33,11 +45,10 @@ def njitOTparallel(func):
     #num_func = njit(func, *args)
 
     num_func = nb.njit(func,
-                       cache='OCEANTRACKER_NUMBA_CACHING' in os.environ and os.environ['OCEANTRACKER_NUMBA_CACHING'] == '1',
-                       parallel= 'OCEANTRACKER_USE_PARALLEL_THREADS' not in os.environ or os.environ['OCEANTRACKER_USE_PARALLEL_THREADS'] =='1',
-                       fastmath =  'NUMBA_FASTMATH' not in os.environ or os.environ['NUMBA_FASTMATH'] =='1',
+                       cache=compile_options['cache'],
+                       parallel=compile_options['parallel'],
+                       fastmath=compile_options['fastmath'],
                        nogil=True,
-                       #fastmath='NUMBA_FASTMATH' not in os.environ or os.environ['NUMBA_FASTMATH'] =='1'
                        )
 
     if hasattr(func,'__name__'):

@@ -227,8 +227,13 @@ class _BaseReader(ParameterBaseClass):
                         'When using geographic coords and hydromodel not already in geographic coords, Reader must have "EPSG_code" parameter set to do conversion',
                         hint='EPSG for New Zealand Transverse Mercator 2000 = 2193, find codes for hydro model at at https://spatialreference.org/',
                         caller=self, fatal_error=True)
-                # do conversion
+                # do conversion, as (lon, lat)
                 grid['x'] = cord_transforms.convert_cords(grid['x'], params['EPSG_code'], cord_transforms.EPSG_WGS84)
+
+            # block use if grid latitude is within 5 deg of  poles to avoid singularity
+            if np.any(np.abs(grid['x'][:,1]) > 85):
+                si.msg_logger.msg('Oceantracker can not be used for hydrodynamic grids that use geographic coords. and are within 5 deg of the poles',
+                    hint='Contact developers if you need this feature',  caller=self, fatal_error=True)
 
             si.settings.use_geographic_coords = True # make sure is now geographic
 

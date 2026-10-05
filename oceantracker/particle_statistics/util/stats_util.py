@@ -1,9 +1,10 @@
 import numpy as np
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.shared_info import shared_info as si
 
 # compile this constant into numba cod
 status_notReleased= int(si.particle_status_flags.notReleased)
+status_dead= int(si.particle_status_flags.dead)
 
 def get_dim_names(dims_dict): return [key for key in dims_dict.keys()]
 
@@ -60,3 +61,15 @@ def _sel_below_max_count(counting_events, max_count, sel, out):
             out[n_found] = n
             n_found += 1
     return out[:n_found]
+
+@njitOTparallel
+def _update_times_count_and_kill_if_requested(counting_events_prop, status,
+                                              kill_when_max_counted, max_count_per_particle, sel):
+    # update the number of times each particles is count and kill particle if requested and max count exceeded
+    for nn in prange(sel.size):
+        n = sel[nn]
+        counting_events_prop[n] += 1
+        if kill_when_max_counted and counting_events_prop[n] >= max_count_per_particle:
+            status[n] = status_dead
+
+

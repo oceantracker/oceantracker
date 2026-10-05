@@ -3,7 +3,8 @@ from oceantracker.particle_properties._base_particle_properties import CustomPar
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.particle_properties.util import particle_operations_util
 from oceantracker.shared_info import shared_info as si
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
+
 
 class DistanceTravelled(CustomParticleProperty):
 
@@ -29,8 +30,6 @@ class DistanceTravelled(CustomParticleProperty):
         part_prop = si.class_roles.particle_properties
 
         if si.settings.use_geographic_coords:
-            si.msg_logger.msg('DistanceTravelled not yet working for geographic grids', error=True,
-                          hint='check with developers')
             self.distance_from_lon_lat( part_prop['x_last_good'].data,
                                         part_prop['x'].data,
                                         part_prop['degrees_per_meter'].data,
@@ -42,18 +41,20 @@ class DistanceTravelled(CustomParticleProperty):
         pass
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def distance_from_meters(x1, x2, distance, active):
-        for n in active:
+        for nn in prange(active.size):
+            n = active[nn]
             s=0.
             for m in range(2):
                 s += (x2[n,m] - x1[n,m])**2
             distance[n] += np.sqrt(s)
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def distance_from_lon_lat(x1, x2, degrees_per_meter,distance, active):
-        for n in active:
+        for nn in prange(active.size):
+            n = active[nn]
             s = 0.
             for m in range(2):
                 s += ((x2[n, m] - x1[n, m])/degrees_per_meter[n,m]) ** 2

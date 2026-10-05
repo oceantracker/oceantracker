@@ -211,6 +211,13 @@ class _SharedInfoClass():
         # this allows shared info to make a class importer when needed
         self.msg_logger.reset()
 
+        # run info is a process wide singleton, so rebuild its values from the class defaults,
+        # otherwise state leaks into any later run in the same process, eg "continuing" is set
+        # true when continuing a run and never cleared, which makes the next run try to reload
+        # a saved state it does not have
+        self.run_info.__init__()
+        self.saved_state_info = None
+
         # empty out roles and core roles in case of rerunning and shared info import only happens once
         for role in self.core_class_roles.possible_values():
             setattr(self.core_class_roles, role, None)
@@ -249,13 +256,14 @@ class _SharedInfoClass():
         elif class_role in self.class_roles.possible_values():
             #other roles
             instanceID= len(self.class_roles[class_role])
-            if 'name' not in params or params['name'] is None:
-                # if no name in params or default param
-                params['name'] = f'{class_role}_{instanceID:04d}'
 
             i = self.class_importer.make_class_instance_from_params(class_role, params, default_classID=default_classID,
                          caller=caller,initialize=initialize,add_required_classes_and_settings=add_required_classes_and_settings)
             i.info['instanceID'] = instanceID
+
+            if 'name' not in params or params['name'] is None:
+                # if no name in params or default param
+                params['name'] = f'{class_role}_{instanceID:04d}'
 
             self.class_roles[class_role][params['name']] = i
 

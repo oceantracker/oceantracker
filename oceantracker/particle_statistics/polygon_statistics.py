@@ -39,7 +39,7 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
                        }
 
         self.create_count_variables(info['count_dims'],'time')
-        self.set_up_part_prop_lists()
+
 
     def update(self, n_time_step, time_sec, alive):
         '''Do particle counts'''
@@ -130,7 +130,6 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
 
         self.create_count_variables(info['count_dims'],'age')
 
-        self.set_up_part_prop_lists()
 
     def do_counts(self,n_time_step, time_sec, sel, alive):
 

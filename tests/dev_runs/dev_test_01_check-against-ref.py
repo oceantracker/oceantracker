@@ -8,7 +8,7 @@ def main(args=None):
 
     ot = OceanTracker()
     ot.settings(**dd.base_settings(__file__,args))
-    ot.settings(time_step=1800,
+    ot.settings(time_step=120,
                 use_dispersion=False,
                 screen_output_time_interval=1800,
                 use_A_Z_profile=True,
@@ -60,6 +60,10 @@ def main(args=None):
 
     ot.add_class('particle_statistics', **dd.my_heat_map3D_time)
     ot.add_class('particle_statistics', **dd.my_heat_map2D_time_runningMean)
+
+    ot.add_class('particle_statistics', **dd.my_heat_map_max_count)
+    ot.add_class('particle_statistics', **dd.my_heat_map_max_count_kill)
+
 
     ot.add_class('event_loggers', class_name='LogPolygonEntryAndExit',name='poly_entry_exit',
                                 polygon_list=[dict(points=hm['polygon_around_point'])])

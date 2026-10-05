@@ -7,7 +7,53 @@ Change log
 Note: All commits that change either model in- or output in any way are labeled as "breaking changes", excluding bug-fixes
 
 
-Version '0.5.3.8 2026-xx-xx'
+Version '0.5.3.9 2026-10-05'
+____________________________
+
+Bug fixes
+---------
+
+#. Fixed a major bug in the metre-to-degree conversion for runs in geographic (lon/lat) coordinates.
+   The degrees-per-metre factor for longitude was multiplied by cos(latitude) instead of divided by it,
+   The error affected east-west advection and dispersion, triangle areas, ``radius`` releases and gridded stats cell areas.
+   The bug had been present since native geographic coordinate support was added (first released in v0.5.2.0).
+   **Users who ran in geographic coordinates should re-run their simulations.**
+#. Fixed ``turn_on_write_particle_properties_list`` and ``turn_off_write_particle_properties_list``
+   being ignored for some particle properties, e.g. vector-magnitude properties.
+#. Fixed a slow-down in particle statistics when ``max_count_per_particle`` is set. Counting and killing
+   maxed-out particles is now done in parallel numba code.
+#. Fixed statistics classes ending up with a generic name (e.g. ``particle_statistics_0000``) when the
+   class sets a default ``name`` as a string.
+#. Statistics now check ``particle_property_list`` after all classes are set up. 
+   Properties added by other classes are therefore recognised.
+#. Fixed state leaking between consecutive runs in the same Python process (e.g. in the test suit or continued runs)
+#. Fixed numba compile options (fastmath, caching, parallel) depending on which modules were imported
+   first. A warning is shown if a run requests options that differ from those already in use.
+
+Breaking changes
+----------------
+
+#. The vertical random walk with an ``A_Z`` profile now evaluates the random step size at a half-step
+   advected position, following equation (6) of Visser (1997). This changes vertical particle positions
+   in 3D runs that use a vertical diffusivity profile.
+#. The default for numba ``fastmath`` when ``NUMBA_FASTMATH`` is not set in the environment changed from
+   ``True`` to ``False``. This matches what runs already used in most cases, but can change results
+   at floating-point round-off level.
+
+New features
+------------
+
+#. The ``DistanceTravelled`` particle property now works for runs in geographic coordinates. It is
+   also parallelised.
+
+Misc.
+-----
+
+#. Hydrodynamic grids in geographic coordinates that reach within 5° of a pole now raise an
+   error, because the longitude conversion is singular at the poles.
+
+
+Version '0.5.3.8 2026-08-31'
 ____________________________
 
 New features
