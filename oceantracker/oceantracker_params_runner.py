@@ -26,34 +26,32 @@ from datetime import datetime
 from oceantracker import definitions
 import cProfile, pstats, io
 
-
-
-
-
-
 # note do not import numba here as its environment  setting must ve done first, import done below
 class OceanTrackerParamsRunner(object):
     # this class runs a single case
     def __init__(self):
         # set up info/attributes
         super().__init__()  # required
-        self.si = si
+        self.si = si # alternative access to shared info
 
     def run(self, user_given_params):
+        # entry point to start run
         self.start_date = datetime.now()
         self.start_time = perf_counter()
         profiler = None
         case_info_file = None
+
+        # clear out classes from class instance of SharedInfo if running series
+        # of runs in same py script
+        si._setup_shared_info()
         ml = si.msg_logger
         err_hint = 'check for first error above or in log file.txt or .err file '
-
 
         try:
             t0 = perf_counter()
             # unpack params into working version as si.working_params
             # and set up output directory and log file
             self._do_setup(user_given_params)
-
 
             ml.msg(f'Starting user param. runner at { time_util.iso8601_str(datetime.now())}', tabs=2)
             ml.hori_line()
@@ -87,7 +85,6 @@ class OceanTrackerParamsRunner(object):
         except Exception as e:
             si.msg_logger.write_error_log_file(e, si)
             ml.msg(f' Unexpected error  ', error=True, hint=err_hint)
-
 
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
@@ -137,15 +134,12 @@ class OceanTrackerParamsRunner(object):
         if si.settings.cProfile and profiler is not None:
             self._write_cprofile_results(profiler)
 
-
-
         ml.close()
 
         return case_info_file
 
     def _do_setup(self, user_given_params):
-        # setup shared info and message logger
-        si._setup_shared_info()  # clear out classes from class instance of SharedInfo if running series of mains
+        #  message logger
 
         ml = si.msg_logger
         ml.reset()
@@ -159,13 +153,13 @@ class OceanTrackerParamsRunner(object):
         # split params in to settings, core and class role params
         si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si)
 
-        # overwrite si.setting detafault values with actual ones
+        # overwrite si.setting default values with working params
         for key in  si.settings.possible_values():
             if key in  si.working_params['settings']:
                 setattr(si.settings, key, si.working_params['settings'][key])
             else:
-                setattr(si.settings, key, None) # obsolete keys are None
-
+                # obsolete keys are not in working params None
+                setattr(si.settings, key, None)
         ml.msg(f'Started')
 
         ri = si.run_info

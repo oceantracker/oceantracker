@@ -10,7 +10,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 from oceantracker.util.parameter_checking import _ParameterBaseDataClassChecker, ParameterTimeChecker as PTC
 from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.shared_info import shared_info as si
-si._setup_shared_info()
+
 si.class_importer._build_class_tree_ans_short_name_map()
 
 from oceantracker import definitions

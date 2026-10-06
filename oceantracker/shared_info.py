@@ -202,7 +202,6 @@ class _SharedInfoClass():
                                        }
         pass
 
-
     def _setup_shared_info(self):
         # this allows shared info to make a class importer when needed
         self.msg_logger.reset()
