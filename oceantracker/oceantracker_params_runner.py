@@ -145,7 +145,7 @@ class OceanTrackerParamsRunner(object):
 
     def _do_setup(self, user_given_params):
         # setup shared info and message logger
-        si._setup()  # clear out classes from class instance of SharedInfo if running series of mains
+        si._setup_shared_info()  # clear out classes from class instance of SharedInfo if running series of mains
 
         ml = si.msg_logger
         ml.reset()

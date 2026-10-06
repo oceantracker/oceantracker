@@ -102,20 +102,19 @@ class _DefaultSettings(definitions._AttribDict):
                                            doc_str='setting "regrid_z_to_sigma_levels" has moved to be a reader parameter "regrid_z_to_sigma_levels", so set when adding reader class')
 # blocks that make up parts of shared info
 class _ClassRoles(definitions._AttribDict):
-    release_groups =[]
-    fields = []  # user fields calculated from other fields  on reading
-    particle_properties =  [] # user added particle properties, eg DistanceTraveled
-    velocity_modifiers = []  # user added velocity effects, eg TerminalVelocity
-    trajectory_modifiers = []  # change particle paths, eg. re-suspension
-    particle_statistics = []  # heat map inside polygon statistics calculated on the fly
-    nested_readers = []
-    event_loggers =  [] # writes events files ,eg PolygonEntryExit
-    time_varying_info = [] # particle info,eg. time,or  tide at at tide gauge, core example is particle time
+    release_groups = {}
+    fields = {}  # user fields calculated from other fields  on reading
+    particle_properties =  {} # user added particle properties, eg DistanceTraveled
+    velocity_modifiers = {}  # user added velocity effects, eg TerminalVelocity
+    trajectory_modifiers = {}  # change particle paths, eg. re-suspension
+    particle_statistics = {}  # heat map inside polygon statistics calculated on the fly
+    nested_readers = {}
+    event_loggers =  {} # writes events files ,eg PolygonEntryExit
+    time_varying_info = {} # particle info,eg. time,or  tide at at tide gauge, core example is particle time
 
 class _CoreClassRoles(definitions._AttribDict):
     reader = None
     interpolator = None
-    #todo below beter as None
     solver = None
     field_group_manager = None
     particle_group_manager = None
@@ -204,10 +203,7 @@ class _SharedInfoClass():
         pass
 
 
-
-        pass
-
-    def _setup(self):
+    def _setup_shared_info(self):
         # this allows shared info to make a class importer when needed
         self.msg_logger.reset()
         self.block_timers = {}
@@ -228,7 +224,7 @@ class _SharedInfoClass():
 
     def add_class(self,class_role,params={}, default_classID=None,caller=None, initialize=False,
                   add_required_classes_and_settings=True,  **kwargs):
-        #todo get rid in initialize????
+
         ml = self.msg_logger
 
         if class_role=='fields':
@@ -236,7 +232,6 @@ class _SharedInfoClass():
             ml.msg('Cannot use si.add_class() method to add fields',
                    hint='Use add_reader_field(name,  params) or si.add_custom_field(name, params, default_classID=None)',
                    fatal_error=True)
-
 
         if params is None: params ={}
         if type(params) != dict :
