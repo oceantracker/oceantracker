@@ -189,7 +189,7 @@ class _SharedInfoClass():
     run_info  = _RunInfo()
     hindcast_info = None
     msg_logger = MessageLogger()
-    block_timers={}
+
     class_importer = class_importer_util.ClassImporter(msg_logger)
     info = _UseFullInfo
     dim_names = definitions._DimensionNames()
@@ -210,6 +210,7 @@ class _SharedInfoClass():
     def _setup(self):
         # this allows shared info to make a class importer when needed
         self.msg_logger.reset()
+        self.block_timers = {}
 
         # run info is a process wide singleton, so rebuild its values from the class defaults,
         # otherwise state leaks into any later run in the same process, eg "continuing" is set
@@ -300,7 +301,7 @@ class _SharedInfoClass():
                 for key, i in r.items():
                     if i is not None:  p.append(i)
         return p
-    def block_timer(self,name,t0):
+    def block_timer(self,name, t0):
         b = self.block_timers
         if name not in b:
             b[name] = dict(time=0.,calls=0)

@@ -288,6 +288,7 @@ class OceanTrackerParamsRunner(object):
                 t = si.block_timers[name]["time"]
                 ml.msg(f'\t\t{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
 
+
         # core physics timing
         for name in ['resuspension', 'dispersion', 'tracks_writer', 'integrated_model']:
             if si.core_class_roles[name] is not None:
