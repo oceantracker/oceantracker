@@ -57,7 +57,7 @@ def _calc_field_vert_grad_from_z_interfaces(field4D,z_interface,bottom_interface
                     dz_inv = 1./dz
                     for ncomp in range(field4D.shape[3]):
                         gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp]
-                                                             - field4D[nt, node, nz  , ncomp])*dz_inv
+                                                             - field4D[nt, node, nz-1, ncomp])*dz_inv
                 else:
                     gradient_field[nt, node, nz, :] = 0.
 
@@ -84,8 +84,10 @@ def _calc_field_vert_grad_from_sigma_levels(field4D,sigma, tide, water_depth,bot
             for nz in  range(nz_bot+1,field4D.shape[2]-1):
                 dz = (sigma[nz+1] - sigma[nz]) * twd
                 if dz > z0:
+                    dz_inv = 1. / dz
                     for ncomp in range(field4D.shape[3]):
-                        gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp] - field4D[nt, node, nz, ncomp])/dz
+                        gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp] -
+                                                               field4D[nt, node, nz-1, ncomp])*dz_inv
                 else:
                     gradient_field[nt, node, nz, :] = 0.
 
