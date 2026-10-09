@@ -76,20 +76,22 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
         inside_poly_prop.update(n_time_step,time_sec,sel)
 
-        # do counts
-        self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
+        # do counts, returns the particles counted
+        return self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
                                           release_groupID, p_x, self.counts_inside_time_slice,
-                                          self.prop_data_list, self.sum_prop_data_list, sel)
+                                          self.prop_data_list, self.sum_prop_data_list, sel,
+                                          self.get_partID_buffer('counted'))
     @staticmethod
     @njitOT
     def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count,
-                                     prop_list, sum_prop_list, sel):
+                                     prop_list, sum_prop_list, sel, counted):
 
         # zero out counts in the count time slices
         count[:] = 0
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
 
+        n_counted = 0
         for n in sel:
             n_group= group_ID[n]
             n_poly = inside_polygons[n]
@@ -97,9 +99,13 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
             if n_poly == -1 : continue # in no polygon so no count
 
             count[group_ID[n], n_poly] += 1
+            counted[n_counted] = n
+            n_counted += 1
             # sum particle properties
             for m in range(len(prop_list)):
                 sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
+
+        return counted[:n_counted]
 
 class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLocationStats):
     '''
@@ -146,21 +152,23 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
         inside_poly_prop = part_prop[self.info['inside_polygon_particle_prop']]
         inside_poly_prop.update(n_time_step, time_sec, sel)
 
-        # loop over statistics polygons
-        self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
+        # loop over statistics polygons, returns the particles counted
+        return self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
                                           release_groupID, p_x, self.counts_inside_age_bins,
                                           self.prop_data_list, self.sum_prop_data_list,
-                                          sel, stats_grid['age_bin_edges'], p_age)
+                                          sel, stats_grid['age_bin_edges'], p_age,
+                                          self.get_partID_buffer('counted'))
 
 
     @staticmethod
     @njitOT
     def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count,
                                      prop_list, sum_prop_list,
-                                     sel, age_bin_edges, age):
+                                     sel, age_bin_edges, age, counted):
 
         # (no zeroing as accumulated over  whole run)
 
+        n_counted = 0
         for n in sel:
 
             na = stats_util._get_age_bin(age[n], age_bin_edges)
@@ -171,10 +179,14 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
                 if n_poly == -1: continue # in no polygon so no count
 
                 count[na, ng, n_poly] += 1
+                counted[n_counted] = n
+                n_counted += 1
 
                 # sum particle properties
                 for m in range(len(prop_list)):
                     sum_prop_list[m][na, ng, n_poly] += prop_list[m][n]
+
+        return counted[:n_counted]
 
 
 

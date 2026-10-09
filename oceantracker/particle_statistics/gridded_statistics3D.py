@@ -113,7 +113,8 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         else:  # 'bottom'
             z_rel = part_prop['water_depth'].data.ravel() + x[:, 2]     # m above sea bed, positive up
 
-        self._do_counts_and_summing_numba(
+        # returns the particles counted
+        return self._do_counts_and_summing_numba(
                             part_prop['IDrelease_group'].data,
                             x, z_rel,
                             stats_grid['x_bin_edges'],
@@ -122,12 +123,13 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                             self.counts_inside_time_slice,
                             self.prop_data_list,
                             self.sum_prop_data_list,
-                            sel)
+                            sel,
+                            self.get_partID_buffer('counted'))
 
     @staticmethod
     @njitOT
     def _do_counts_and_summing_numba(group_ID, x, z_rel, x_edges, y_edges, z_edges,
-                                     count, prop_list, sum_prop_list, sel):
+                                     count, prop_list, sum_prop_list, sel, counted):
         # z_rel is the vertical coordinate in the same reference frame as z_edges
         # Zero counts for this time slice
         count[:] = 0
@@ -135,6 +137,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
 
+        n_counted = 0
         for n in sel:
             ng = group_ID[n]
 
@@ -154,9 +157,13 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                 0 <= k < z_edges.shape[0] - 1):
 
                 count[ng, r, c, k] += 1
+                counted[n_counted] = n
+                n_counted += 1
                 # Sum particle properties
                 for m in range(len(prop_list)):
                     sum_prop_list[m][ng, r, c, k] += prop_list[m][n]
+
+        return counted[:n_counted]
 
     def info_to_write_on_file_close(self, nc):
 
