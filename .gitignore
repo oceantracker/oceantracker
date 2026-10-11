@@ -39,6 +39,7 @@ bin/
 .idea
 .vscode/
 *.code-workspace
+*.env
 
 *.py[cod]
 *.nb[ic]
