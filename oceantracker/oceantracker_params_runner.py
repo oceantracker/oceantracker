@@ -139,7 +139,7 @@ class OceanTrackerParamsRunner(object):
         return case_info_file
 
     def _do_setup(self, user_given_params):
-        #  message logger
+        #  message logger setup, build working params, output dir
 
         ml = si.msg_logger
         ml.reset()
@@ -148,7 +148,6 @@ class OceanTrackerParamsRunner(object):
 
         ml.hori_line()
         ml.msg(f'{definitions.package_fancy_name} {definitions.version_str()}  starting setup helper "main.py":')
-
 
         # split params in to settings, core and class role params
         si.working_params = setup_util._build_working_params(deepcopy(user_given_params), si)
@@ -197,10 +196,6 @@ class OceanTrackerParamsRunner(object):
         ml.hori_line()
         ml.msg(f' {definitions.package_fancy_name} {definitions.version_str()} ')
 
-
-        pass
-
-
     def _run_case(self):
         ml = si.msg_logger # shortcut for logger
 
@@ -228,7 +223,6 @@ class OceanTrackerParamsRunner(object):
         self._final_setup_all_classes()
 
         self._do_run_integrity_checks()
-
 
         # check memory usage
         mem_used = psutil.Process().memory_info().vms
@@ -628,7 +622,7 @@ class OceanTrackerParamsRunner(object):
                                                  update_calls= i.info['update_calls'],
                                                  time_first_update_call= i.info['time_first_update_call'] )
             if hasattr(i, 'scheduler_info'):
-                # todo move scheduler to seperate json file?
+                # todo move scheduler to separate json file?
                 d['scheduler_info'][key]= i.scheduler_info
 
             d['working_params']['core_class_roles'][key] = i.params

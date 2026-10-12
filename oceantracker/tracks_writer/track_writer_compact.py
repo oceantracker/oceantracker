@@ -42,7 +42,6 @@ class CompactTracksWriter(_BaseWriter):
         nc.create_dimension('time_particle_dim', None)
         nc.create_dimension('range_pair_dim', 2)
 
-
         nc.create_variable('particles_written_per_time_step', si.dim_names.time, dtype=np.int32,
                            description='Number of particles written each time step')
         nc.create_variable('particle_ID', 'time_particle_dim', dtype=np.int32, compression_level=si.settings.NCDF_compression_level,

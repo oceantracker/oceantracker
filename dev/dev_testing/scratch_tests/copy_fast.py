@@ -15,6 +15,11 @@ pyximport.install(setup_args={"include_dirs":np.get_include()},
 from  copy_array import FnD_4_copy_cython
 
 para=True
+
+@njit()
+def Fcalloverhead(x, y, index):
+    y[index[0]] = x[0]
+
 @njit(parallel=para)
 def F2D_0_current(x, y, index):
     for nn in prange(index.size):
@@ -35,6 +40,38 @@ def F3D_0_current(x, y, index):
         n = index[nn]
         for m in range(3):
             y[n,m] = x[n,m]
+
+@njit(parallel=para)
+def F2D_0_multi_copy1(x1,x2,x3,x4,y1,y2,y3,y4, index):
+    for nn in prange(index.size):
+        n = index[nn]
+        for m in range(2):
+            y1[n,m] = x1[n,m]
+        for m in range(2):
+            y2[n, m] = x2[n, m]
+        for m in range(2):
+            y3[n, m] = x3[n, m]
+        for m in range(2):
+            y4[n, m] = x4[n, m]
+
+@njit(parallel=para)
+def F2D_0_multi_copy2(x1,x2,x3,x4,y1,y2,y3,y4, index):
+    for nn in prange(index.size):
+        n = index[nn]
+        for m in range(2):
+            y1[n,m] = x1[n,m]
+    for nn in prange(index.size):
+        n = index[nn]
+        for m in range(2):
+            y2[n, m] = x2[n, m]
+    for nn in prange(index.size):
+        n = index[nn]
+        for m in range(2):
+            y3[n, m] = x3[n, m]
+    for nn in prange(index.size):
+        n = index[nn]
+        for m in range(2):
+            y4[n, m] = x4[n, m]
 
 @njit(parallel=para)
 def FnD_current(x, y, index):
@@ -94,34 +131,41 @@ def FnD_5_listcopy2(x_list, y_list, index):
                 y[n,m] = x[n,m]
 reps=100
 N=10**6
-mask =np.random.rand(N) > .2
+mask =np.random.rand(N) > .1
 index = np.flatnonzero(mask).astype(np.int32)
 dt =np.float64
-Fs=[[F2D_0_current,F2D_0_current_bounds, FnD_current ,
+Fs=[[Fcalloverhead,F2D_0_current,F2D_0_current_bounds, F2D_0_multi_copy1,F2D_0_multi_copy2, FnD_current ,
      FnD_2_copy_slice, FnD_copy_to, FnD_2_2D3D_combined,FnD_4_copy_cython,
      FnD_5_listcopy1,FnD_4_packed_vectors],
     [F3D_0_current, FnD_current, FnD_2_copy_slice, FnD_copy_to,
      FnD_2_2D3D_combined,FnD_4_copy_cython,FnD_5_listcopy1,FnD_5_listcopy2,
      FnD_4_packed_vectors]]
 
-for ndim , fs in enumerate(Fs): # loop over dims
-    x = np.random.rand(N,ndim+2 ).astype(dt)
-    y = np.random.rand(N,ndim+2 ).astype(dt)
-
-
+for ndim , fs in enumerate(Fs,start=2): # loop over dims
+    x = np.random.rand(N,ndim ).astype(dt)
+    y = np.random.rand(N,ndim ).astype(dt)
 
     for f in fs:
         if f in [FnD_5_listcopy1,FnD_5_listcopy2]:
             xx,yy = [x,x.copy(),x.copy(),x.copy()], [y,y.copy(),y.copy(),y.copy()]
+            m=4
         elif   f in [FnD_4_packed_vectors]:
             xx, yy = np.column_stack((x,x,x,x)), np.column_stack((y,y,y,y))
+            m=4
+        elif 'multi' in f.__name__:
+            x1,x2,x3,x4 = x.copy(),x.copy(),x.copy(),x.copy()
+            y1, y2, xy, y4 = y.copy(), y.copy(), y.copy(), y.copy()
+            m=4
         else:
             xx,yy = x,y
+            m=1
 
         i = mask if f in [FnD_copy_to] else index
-
-        t= timeit(lambda: f(xx,yy,i),setup=lambda: f(xx,yy,i)  ,number=reps)
-        print(f'  {t:6.3f} sec  {(t/reps)*1000:5.1f} ms  \t {f.__name__}')
+        if 'multi' in f.__name__:
+            t = timeit(lambda: f(x1,x2,x3,x4, y1, y2, xy, y4, i), setup=lambda: f(x1,x2,x3,x4, y1, y2, xy, y4, i), number=reps)
+        else:
+            t= timeit(lambda: f(xx,yy,i),setup=lambda: f(xx,yy,i)  ,number=reps)
+        print(f'  {t:6.3f} sec  {(t/reps)*1000:10.4f} ms per rep  \t {(t/reps/m)*1000:10.4f} ms per array \t {f.__name__}')
 
 
 
