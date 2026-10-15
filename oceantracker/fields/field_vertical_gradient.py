@@ -8,6 +8,10 @@ from oceantracker.shared_info import shared_info as si
 class VerticalGradient(CustomFieldBase):
     '''Add a vertical gradient field of the  "get_grad_of_field_named" param,
     as a custom field named "get_grad_of_field_named_vertical_grad"'
+    Holds the gradient of each layer, ie. the slope of the named field between the layer's two interfaces,
+    stored at the layer's lower interface. This is the exact vertical derivative of the linearly interpolated named field,
+    so particles get the value of the layer they are in (is_layer_value=True), without vertical interpolation.
+    Interpolating it vertically would give the particle the gradient from about half a layer higher.
     '''
 
     def __init__(self):
@@ -17,6 +21,8 @@ class VerticalGradient(CustomFieldBase):
                                  'time_varying': PVC(True, bool),
                                  'requires3D':  PVC(True, bool),
                                  'is3D': PVC(True, bool),
+                                 'is_layer_value': PVC(True, bool, expert=True,
+                                                       doc_str='Gradient is per layer, particles get the value of the layer they are in'),
                                  })
 
     def initial_setup(self, reader_info):
@@ -47,59 +53,35 @@ class VerticalGradient(CustomFieldBase):
 
 @njitOT
 def _calc_field_vert_grad_from_z_interfaces(field4D,z_interface,bottom_interface_index,z0,gradient_field):
-    # use centered differences in mid-water colum, first order top and bottom
+    # gradient of each layer, between its two interfaces, stored at the layer's lower interface
     for nt in range(field4D.shape[0]):
         for node  in  range(field4D.shape[1]):
-            nz_bot = bottom_interface_index[node]
-            for nz in  range(nz_bot+1,field4D.shape[2]-1):
+            for nz in  range(bottom_interface_index[node],field4D.shape[2]-1):
                 dz = z_interface[nt,node,nz+1] - z_interface[nt,node,nz]
                 if dz > z0:
                     dz_inv = 1./dz
                     for ncomp in range(field4D.shape[3]):
-                        gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp]
-                                                             - field4D[nt, node, nz-1, ncomp])*dz_inv
+                        gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp] - field4D[nt, node, nz, ncomp])*dz_inv
                 else:
                     gradient_field[nt, node, nz, :] = 0.
 
-            # top cell/bottom cell use first order diff.
-            dz = z_interface[nt, node, -1] - z_interface[nt, node, -2]
-            if dz > z0:
-                gradient_field[nt, node, -1, :] =(field4D[nt, node, -1, :]- field4D[nt, node, -2  , :]) / dz
-            else:
-                gradient_field[nt, node, -1, :] = 0.
-
-            dz = z_interface[nt, node, nz_bot+1] - z_interface[nt, node,nz_bot]
-            if dz > z0:
-                gradient_field[nt, node, nz_bot, :] = (field4D[nt, node, nz_bot+1, :] - field4D[nt, node, nz_bot, :]) / dz
-            else:
-                gradient_field[nt, node, nz_bot, :] = 0
+            # top interface is not the bottom of a layer, so is never used, give it the top layer's value
+            gradient_field[nt, node, -1, :] = gradient_field[nt, node, -2, :]
 
 @njitOT
 def _calc_field_vert_grad_from_sigma_levels(field4D,sigma, tide, water_depth,bottom_interface_index,z0,gradient_field):
-    # use centered differences in mid-water colum, first order top and bottom
+    # gradient of each layer, between its two interfaces, stored at the layer's lower interface
     for nt in range(field4D.shape[0]):
         for node  in  range(field4D.shape[1]):
             twd = abs(tide[nt,node,0,0] +water_depth[0,node,0,0])
-            nz_bot = bottom_interface_index[node]
-            for nz in  range(nz_bot+1,field4D.shape[2]-1):
+            for nz in  range(bottom_interface_index[node],field4D.shape[2]-1):
                 dz = (sigma[nz+1] - sigma[nz]) * twd
                 if dz > z0:
                     dz_inv = 1. / dz
                     for ncomp in range(field4D.shape[3]):
-                        gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp] -
-                                                               field4D[nt, node, nz-1, ncomp])*dz_inv
+                        gradient_field[nt, node, nz, ncomp] = (field4D[nt, node, nz+1, ncomp] - field4D[nt, node, nz, ncomp])*dz_inv
                 else:
                     gradient_field[nt, node, nz, :] = 0.
 
-            # top cell/bottom cell use first order diff.
-            dz =  (sigma[-1] - sigma[-2]) * twd
-            if dz > z0:
-                gradient_field[nt, node, -1, :] = (field4D[nt, node, -1, :] - field4D[nt, node, -2, :]) / dz
-            else:
-                gradient_field[nt, node, -1, :] = 0.
-
-            dz = (sigma[nz_bot+1] - sigma[nz_bot]) * twd
-            if dz > z0:
-                gradient_field[nt, node, nz_bot, :] = (field4D[nt, node, nz_bot + 1, :] - field4D[nt, node, nz_bot, :]) / dz
-            else:
-                gradient_field[nt, node, nz_bot, :] = 0
+            # top interface is not the bottom of a layer, so is never used, give it the top layer's value
+            gradient_field[nt, node, -1, :] = gradient_field[nt, node, -2, :]
