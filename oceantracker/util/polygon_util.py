@@ -184,6 +184,23 @@ def _polygon_area_numba(x,y):
     return area
 
 
+# inside test cost is ~linear in number of vertices, ~0.5 sec per million particles per 1000 vertices
+large_polygon_vertex_count = 1000
+
+def warn_if_large_polygons(polygon_list, caller):
+    # warn if any polygon dict in list has enough vertices to make inside polygon tests slow
+    from oceantracker.shared_info import shared_info as si
+    large = []
+    for n, poly in enumerate(polygon_list):
+        n_vertices = np.asarray(poly['points']).shape[0]
+        if n_vertices > large_polygon_vertex_count:
+            name = poly.get('name')
+            large.append(f'"{name if name is not None else n}" ({n_vertices} vertices)')
+    if len(large) > 0:
+        si.msg_logger.msg(f'Polygon(s) with more than {large_polygon_vertex_count} vertices: {", ".join(large)}, finding particles inside large polygons is computationally expensive and may slow the run considerably',
+                          hint='Simplify polygon(s) to fewer vertices, e.g. with shapely simplify() or in GIS software, typically a few hundred vertices is sufficient',
+                          caller=caller, warning=True)
+
 def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
     msg=[]
     polygons=[]

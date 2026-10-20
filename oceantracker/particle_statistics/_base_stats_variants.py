@@ -6,7 +6,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParameterListChecker as PLC, ParamValueChecker as PVC, merge_params_with_defaults
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParameterTimeChecker as PTC
 from oceantracker.util.ncdf_util import NetCDFhandler
-from oceantracker.util import cord_transforms, regular_grid_util
+from oceantracker.util import cord_transforms, regular_grid_util, polygon_util
 from oceantracker.particle_statistics.util import stats_util
 
 import numpy  as np
@@ -420,6 +420,8 @@ class _BasePolygonStats(ParameterBaseClass):
         if len(params['polygon_list']) == 0:
             ml.msg('Must have polygon_list parameter  with at least one polygon dictionary', caller=self,
                    fatal_error=True, hint='eg. polygon_list =[ {"points": [[2.,3.],....]} ]')
+
+        polygon_util.warn_if_large_polygons(params['polygon_list'], self)
 
         # make a particle property to hold which polygon particles are in, but need instanceID to make it unique beteen different polygon stats instances
         info['inside_polygon_particle_prop'] = f'inside_polygon_for_onfly_stats_{self.info["instanceID"]:03d}'

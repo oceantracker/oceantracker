@@ -1,5 +1,5 @@
 import numpy as np
-from oceantracker.util.polygon_util import InsidePolygon
+from oceantracker.util.polygon_util import InsidePolygon, warn_if_large_polygons
 from oceantracker.release_groups.point_release import _BaseReleaseGroup
 from oceantracker.shared_info import shared_info as si
 from oceantracker.util import cord_transforms
@@ -33,6 +33,10 @@ class PolygonRelease(_BaseReleaseGroup):
 
         self.polygon = InsidePolygon(verticies = params['points'], geographic_coords=si.settings.use_geographic_coords)
         params['points'] = self.polygon.points # polygon may have been closed
+        if 'checked_polygon_size' not in info:
+            # initial_setup is called twice for release groups, so only warn once
+            warn_if_large_polygons([params], self)
+            info['checked_polygon_size'] = True
 
         self._check_points_inside_domain(params['points'])
         self._add_bounding_box(params['points'])
