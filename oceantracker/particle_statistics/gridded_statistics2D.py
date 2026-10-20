@@ -302,12 +302,13 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
         # set up info/attributes
         super().__init__()
         # set up info/attributes
+        self._add_2D_grid_params()
+        self._add_age_params()
+
+        # must come after _add_2D_grid_params, which sets a time based output_file_base
         self.add_default_params(
             output_file_base = PVC('stats_gridded_age', str, doc_str='start of output file names'),
           )
-
-        self._add_2D_grid_params()
-        self._add_age_params()
 
     def initial_setup(self):
         # set up regular grid for  stats
