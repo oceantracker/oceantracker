@@ -230,13 +230,27 @@ def _time_sort_files(reader):
         if not item['time_varying']: continue
         if var_name == time_var : continue
         # only look at time varying variables, which are not time
-        time = np.empty((0,), dtype=np.float64)
+        item['time'] = np.concatenate([fi[fID]['time'] for fID in item['fileIDs']])
+
+    # set each file's first/last hindcast time step only from variables spanning the whole hindcast,
+    # variables only in some of the files, eg. extra outputs added part way through a run,
+    # would otherwise give file time steps counted from the first file they are in
+    n_steps = ds_info['variables'][vel_var0]['time'].size
+    partial_vars = []
+    for var_name, item in ds_info['variables'].items():
+        if not item['time_varying'] or var_name == time_var: continue
+        if item['time'].size != n_steps:
+            partial_vars.append(var_name)
+            continue
+        n0 = 0
         for fID in item['fileIDs']:
-            time = np.append(time, fi[fID]['time'])
-            fi[fID]['first_time_step_in_file'] = time.size - fi[fID]['time_steps']
-            fi[fID]['last_time_step_in_file'] = time.size - 1
-        #print('xx',var_name,  fi[fID]['first_time_step_in_file'],  fi[fID]['last_time_step_in_file'] )
-        item['time'] =  time
+            fi[fID]['first_time_step_in_file'] = n0
+            fi[fID]['last_time_step_in_file'] = n0 + fi[fID]['time_steps'] - 1
+            n0 += fi[fID]['time_steps']
+
+    if len(partial_vars) > 0:
+        si.msg_logger.msg(f'Hindcast variables only in some files, these can not be used as fields: {partial_vars}',
+                          hint='variables are missing from some hindcast files, eg. outputs switched on part way through the hydro-model run', note=True)
 
 
     # if variables in different files, eg schism v5, time may be in many files,

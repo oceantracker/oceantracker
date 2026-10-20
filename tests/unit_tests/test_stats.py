@@ -108,8 +108,9 @@ def test_gridded_3D_kernel_sign_conventions():
 
     def run_kernel(z_edges, z_rel):
         count = np.zeros((1, 4, 4, z_edges.size - 1), dtype=np.int64)
-        kernel(group_ID, x, z_rel, x_edges, y_edges, z_edges, count,
-               prop_list, sum_prop_list, sel)
+        counted = kernel(group_ID, x, z_rel, x_edges, y_edges, z_edges, count,
+                         prop_list, sum_prop_list, sel, np.zeros(sel.size, dtype=np.int32))
+        assert counted.size == count.sum()  # kernel returns exactly the particles it counted
         return count
 
     # geoid: fixed z bins, z=0 at mean water level, negative at depth
@@ -408,3 +409,36 @@ def test_grid_center(
     ot.add_class("particle_statistics", **manually_centered_stats)
     case_info_file = ot.run()
     assert case_info_file is not None
+
+
+@pytest.mark.parametrize("stats_type", ["time", "age"])
+def test_max_count_per_particle_only_uses_up_counted_particles(
+    default_stats_configuration, schism3D_release_locations, stats_type,
+):
+    """max_count_per_particle=1 counts each particle once, where it is first counted.
+
+    The release point is outside the counting polygon, so particles are only counted once
+    they drift into it. Particles outside the polygon (or outside the age bins) must not
+    use up their count, otherwise nothing would ever be counted.
+    """
+    ot = default_stats_configuration
+    if stats_type == "time":
+        stats = dict(class_name="PolygonStats2D_timeBased", update_interval=1800)
+    else:
+        stats = dict(class_name="PolygonStats2D_ageBased", update_interval=1800,
+                     min_age_to_bin=3 * 3600, max_age_to_bin=24 * 3600, age_bin_size=3600)
+    stats["polygon_list"] = schism3D_release_locations["polygons"]
+
+    ot.add_class("particle_statistics", name="limited", max_count_per_particle=1,
+                 kill_when_max_counted=False, **stats)
+    ot.add_class("particle_statistics", name="unlimited", **stats)
+    case_info_file = ot.run()
+
+    limited = load_output_files.load_stats_data(case_info_file, name="limited")
+    unlimited = load_output_files.load_stats_data(case_info_file, name="unlimited")
+    n_released = limited["number_released_each_release_group"].sum()
+
+    assert unlimited["count"].sum() > 0, "test needs particles to reach the polygon"
+    assert limited["count"].sum() > 0, "particles used up their count before reaching the polygon"
+    assert np.all(limited["count"] <= unlimited["count"])
+    assert limited["count"].sum() <= n_released, "a particle was counted more than once"

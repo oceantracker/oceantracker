@@ -1,5 +1,33 @@
 from oceantracker.main import OceanTracker
+from oceantracker.particle_properties._base_particle_properties import CustomParticleProperty
+from oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
+from oceantracker.read_output.python import load_output_files
+from oceantracker.shared_info import shared_info as si
+import numpy as np
 import pytest
+
+
+class UpdateCounter(CustomParticleProperty):
+    # counts how often update is called for each particle
+    def update(self, n_time_step, time_sec, active):
+        self.data[active] += 1
+
+
+class RecordAgeAtRelease(_BaseTrajectoryModifier):
+    # records the age trajectory modifiers see for particles released at the current time step,
+    # and whether any of them were placed in buffer slots freed by removing dead particles
+    ages_at_release = []
+    buffer_slot_reused = False
+    max_buffer_index = -1
+
+    def update(self, n_time_step, time_sec, active):
+        cls = RecordAgeAtRelease
+        part_prop = si.class_roles.particle_properties
+        new = active[part_prop["time_released"].get_values(active) == time_sec]
+        if new.size == 0: return
+        cls.ages_at_release.append(part_prop["age"].get_values(new))
+        cls.buffer_slot_reused |= bool(new.min() <= cls.max_buffer_index)
+        cls.max_buffer_index = max(cls.max_buffer_index, int(new.max()))
 
 
 @pytest.fixture
@@ -110,3 +138,23 @@ def test_water_speed(default_particle_properties_configuration):
     )
     case_info_file = ot.run()
     assert case_info_file is not None
+
+
+def test_custom_property_updated_once_per_time_step(
+    default_particle_properties_configuration, base_settings
+):
+    ot = default_particle_properties_configuration
+    ot.settings(write_tracks=True)
+    ot.add_class(
+        "particle_properties",
+        name="update_count",
+        class_name="tests.unit_tests.test_particle_properties.UpdateCounter",
+    )
+    case_info_file = ot.run()
+    assert case_info_file is not None
+
+    tracks = load_output_files.load_track_data(case_info_file)
+    age, count = tracks["age"], tracks["update_count"]
+    released = tracks["status"] >= 0
+    # one update in the time step a particle is released, then one per time step
+    np.testing.assert_array_equal(count[released], age[released] / base_settings["time_step"] + 1)

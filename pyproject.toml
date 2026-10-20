@@ -100,4 +100,5 @@ python_files = [
 markers = [
     "performance_basic: standard benchmark, run with: pytest -n0 -m performance_basic",
     "performance_extended: slow extended benchmarks (scaling, RK order, parallelization), run with: pytest -n0 -m performance_extended",
+    "validation: checks model results against reference data or physical expectations, run alone with: pytest -m validation",
 ]
