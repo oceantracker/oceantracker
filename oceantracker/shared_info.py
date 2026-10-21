@@ -64,7 +64,7 @@ class _DefaultSettings(definitions._AttribDict):
                           doc_str='Used geographic coordinated for inputs and outputs ( lon, lat ), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
                                 expert=True)
     use_A_Z_profile = PVC(False, bool,
-                doc_str='Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files')
+                doc_str='Use the hydro-model vertical turbulent diffusivity profile (A_Z_profile) for vertical dispersion in 3D runs, instead of the constant A_V of the random walk, if mapped variable is in hindcast files')
     use_bottom_stress = PVC(True, bool,
                 doc_str='Use hydro models bottom_stress variable for friction velocity calculation, if mapped variable is in files. Friction velocity is used in resuspension')
     use_dispersion = PVC(True, bool,
