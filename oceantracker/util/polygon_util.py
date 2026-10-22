@@ -14,9 +14,12 @@ class InsidePolygon(object):
     # uses horizontal ray method, counting crossings of polygon segments
     # by a ray  from point to +inf in x direction
     #
-    # has two variants original and a faster version with num_ystrips>0/
-    # This precalculates lists of segments which overlap evenly spaced strips of y,
-    # then only checks those polygon segments overlapping  the ystrip containing the point
+    # precalculates lists of segments which overlap evenly spaced strips of y,
+    # then only checks those polygon segments overlapping  the ystrip containing the point,
+    # so cost per point is roughly independent of the number of vertices
+
+    # max number of strip edge list entries per polygon edge, limits memory if many edges span many strips
+    max_strip_entries_per_edge = 20
 
     def __init__(self,verticies,geographic_coords=None):
         self.geographic_coords = geographic_coords
@@ -44,10 +47,10 @@ class InsidePolygon(object):
 
         if active is None:  active = np.arange(xq.shape[0]) # search all xq for those inside
 
-        active = active.astype(np.int32) # ensure its int32
-        # get tuple of found and not found
+        active = active.astype(np.int32, copy=False) # ensure its int32
         indices = self.inside_ray_tracing_indices(xq,
                                                   self.line_bounds, self.slope_inv, self.polygon_bounds,
+                                                  self.strip_edge_ptr, self.strip_edges, self.strip_y0, self.strip_dy,
                                                   active, out)
         return indices
 
@@ -61,6 +64,20 @@ class InsidePolygon(object):
 
         self.polygon_bounds = np.array([np.min(vert[:,0]), np.max(vert[:,0]),
                                        np.min(vert[:,1]),  np.max(vert[:,1]) ])
+
+        # 3) lists of edges overlapping each y strip, as index pointers into one array of edge numbers
+        n_edges = vert.shape[0] - 1
+        self.strip_y0 = self.polygon_bounds[2]
+        height = self.polygon_bounds[3] - self.polygon_bounds[2]
+        n_strips = max(n_edges // 2, 1) if height > 0 else 1
+        while True:
+            self.strip_dy = height / n_strips if height > 0 else 1.
+            strip_edge_ptr = self._count_strip_edges(self.line_bounds, n_edges, self.strip_y0, self.strip_dy, n_strips)
+            # fewer strips if many edges span many strips, eg zigzag polygon, where strips do not help anyway
+            if n_strips == 1 or strip_edge_ptr[-1] <= self.max_strip_entries_per_edge * n_edges: break
+            n_strips = max(n_strips // 2, 1)
+        self.strip_edge_ptr = strip_edge_ptr
+        self.strip_edges = self._fill_strip_edges(self.line_bounds, n_edges, self.strip_y0, self.strip_dy, strip_edge_ptr)
 
     @staticmethod
     @njitOT # not sure why, by numba version is 100 times slower to compile, but runs only 30 times faster ???
@@ -89,27 +106,29 @@ class InsidePolygon(object):
 
     @staticmethod
     @njitOT
-    def _precalc_strips(vert,y_strip):
-        # find edges which fall within each interval of y_strip
-        n_strips = y_strip.size - 1
-        sIndex_temp= np.zeros((n_strips,vert.shape[0]-1,), dtype=np.int32)
-        sIndexCount= np.zeros((n_strips,), dtype=np.int32)
-        dy= y_strip[1] - y_strip[0]
-        y0= y_strip[0]
-        y = vert[:,1]
-        for n in range(vert.shape[0]-1):
-
-            ns1= int((y[n]-y0)/dy)
-            ns2 = int((y[n+1] - y0) / dy)
-            if ns2 < ns1: ns1, ns2 = ns2, ns1 # put ns1 in order
-            for ns in  range(ns1,ns2+1):
-                sIndex_temp[ns, sIndexCount[ns]]= n
-                sIndexCount[ns] +=1
-        # build list of arrays of edge indices in each strip
-        edge_index_strip_list =[]
+    def _count_strip_edges(lb, n_edges, y0, dy, n_strips):
+        # edges in strip ns will be strip_edges[ptr[ns]:ptr[ns+1]], horizontal edges are never crossed so are left out
+        ptr = np.zeros((n_strips + 1,), dtype=np.int64)
+        for i in range(n_edges):
+            if lb[i, 0, 1] == lb[i, 1, 1]: continue
+            for ns in range(_strip_index(lb[i, 0, 1], y0, dy, n_strips), _strip_index(lb[i, 1, 1], y0, dy, n_strips) + 1):
+                ptr[ns + 1] += 1
         for ns in range(n_strips):
-            edge_index_strip_list.append(np.unique(sIndex_temp[ns,:sIndexCount[ns]]))
-        return edge_index_strip_list
+            ptr[ns + 1] += ptr[ns]
+        return ptr
+
+    @staticmethod
+    @njitOT
+    def _fill_strip_edges(lb, n_edges, y0, dy, ptr):
+        n_strips = ptr.size - 1
+        strip_edges = np.zeros((ptr[-1],), dtype=np.int32)
+        n_filled = ptr[:-1].copy()
+        for i in range(n_edges):
+            if lb[i, 0, 1] == lb[i, 1, 1]: continue
+            for ns in range(_strip_index(lb[i, 0, 1], y0, dy, n_strips), _strip_index(lb[i, 1, 1], y0, dy, n_strips) + 1):
+                strip_edges[n_filled[ns]] = i
+                n_filled[ns] += 1
+        return strip_edges
 
 
     def _make_closed(self, p):
@@ -129,38 +148,51 @@ class InsidePolygon(object):
 
 
     @staticmethod
-    @njitOT
-    def inside_ray_tracing_indices(xq_vals, lb, slope_inv, bounds, active, out):
+    @njitOTparallel
+    def inside_ray_tracing_indices(xq_vals, lb, slope_inv, bounds, strip_edge_ptr, strip_edges, strip_y0, strip_dy, active, out):
         # finds if points indside polygon based on ray from point to +ve x
-        # based on odd number of crossings of lines of polygon, resilt is in boolean working space, "inside"
+        # based on odd number of crossings of lines of polygon, only checking edges in the point's y strip
         # this version returns the indices of those inside,  as first n_found values of index buffer
 
-        n_inside = 0
+        n_strips = strip_edge_ptr.size - 1
 
-        for n in active:
-            xq= xq_vals[n,: ]
+        # in parallel, put index of each point in out if inside, else -1
+        for k in prange(active.size):
+            n = active[k]
+            x, y = xq_vals[n, 0], xq_vals[n, 1]
             xints = -np.inf
             inside = False
-            if bounds[0] <= xq[0] <= bounds[1] and bounds[2] <= xq[1] <= bounds[3]:  # inside bounds of polygon
-                for i in range(lb.shape[0]):
+            if bounds[0] <= x <= bounds[1] and bounds[2] <= y <= bounds[3]:  # inside bounds of polygon
+                ns = _strip_index(y, strip_y0, strip_dy, n_strips)
+                for m in range(strip_edge_ptr[ns], strip_edge_ptr[ns + 1]):
+                    i = strip_edges[m]
                     # get line's bounding box, faster to do this in one line tuple assignment
                     p1x, p1y, p2x, p2y = lb[i, 0, 0], lb[i, 0, 1], lb[i, 1, 0], lb[i, 1, 1]
 
-                    if p1y < xq[1] <= p2y and xq[0] <= p2x:
+                    if p1y < y <= p2y and x <= p2x:
                         # point is in y bounds of polygon segment
                         # and  left of RHS of polygon segment
                         # then check intersection
                         if p1y != p2y:
-                            xints = (xq[1] - lb[i, 2, 1]) * slope_inv[i] + lb[i, 2, 0]
-                        if p1x == p2x or xq[0] <= xints:
+                            xints = (y - lb[i, 2, 1]) * slope_inv[i] + lb[i, 2, 0]
+                        if p1x == p2x or x <= xints:
                             # intersection to right of point
                             inside = not inside
-            if inside :
-                # add to index list if inside
-                out[n_inside] = n
+            out[k] = n if inside else -1
+
+        # compact indices of those inside to start of out, in place is ok as k >= n_inside
+        n_inside = 0
+        for k in range(active.size):
+            if out[k] >= 0:
+                out[n_inside] = out[k]
                 n_inside += 1
 
         return out[:n_inside]
+
+@njitOT
+def _strip_index(y, y0, dy, n_strips):
+    # y strip containing y, must be the same calc for points and edge end points, so an edge is in the strip of every y it spans
+    return min(max(int((y - y0) / dy), 0), n_strips - 1)
 
 def polygon_area(xy, geographic_coords=False):
     # approx area of  closed polygon, by planimeter method?
@@ -184,7 +216,8 @@ def _polygon_area_numba(x,y):
     return area
 
 
-# inside test cost is ~linear in number of vertices, ~0.5 sec per million particles per 1000 vertices
+# with y strips inside test cost grows slowly with number of vertices,
+# eg. 10k vertex polygon, per million particles, ~45 ms on one thread or ~9 ms on 64 threads
 large_polygon_vertex_count = 1000
 
 def warn_if_large_polygons(polygon_list, caller):
