@@ -201,6 +201,45 @@ def warn_if_large_polygons(polygon_list, caller):
                           hint='Simplify polygon(s) to fewer vertices, e.g. with shapely simplify() or in GIS software, typically a few hundred vertices is sufficient',
                           caller=caller, warning=True)
 
+# overlap as fraction of the smaller polygon's area below which polygons are not treated as overlapping,
+# eg. allows for slivers between touching polygons made in GIS software
+overlap_fraction_tolerance = 1e-3
+
+def polygon_overlap_fraction(poly_a, poly_b, n_target=10**4, max_points=10**6):
+    # estimate overlap area of two InsidePolygon instances as a fraction of the smaller polygon's area,
+    # from one random point in each cell of a regular grid over the intersection of their bounding boxes,
+    # grid has ~n_target cells inside smaller polygon, touching polygons sharing edges do not overlap
+    ba, bb = poly_a.polygon_bounds, poly_b.polygon_bounds
+    x0, x1 = max(ba[0], bb[0]), min(ba[1], bb[1])
+    y0, y1 = max(ba[2], bb[2]), min(ba[3], bb[3])
+    if x1 <= x0 or y1 <= y0: return 0. # bounding boxes do not overlap
+
+    # areas in polygon coords, ie not meters if geographic, as only ratio is needed
+    min_area = min(_polygon_area_numba(poly_a.points[:, 0], poly_a.points[:, 1]),
+                   _polygon_area_numba(poly_b.points[:, 0], poly_b.points[:, 1]))
+    if min_area == 0.: return 0.
+
+    dx = max(np.sqrt(min_area / n_target), np.sqrt((x1 - x0) * (y1 - y0) / max_points))
+    # random point within each cell gives unbiased estimate for thin slivers and avoids points on axis aligned edges,
+    # local generator with fixed seed so result is repeatable and run's random numbers are unaffected
+    xg, yg = np.meshgrid(np.arange(x0, x1, dx), np.arange(y0, y1, dx))
+    xq = np.stack((xg.ravel(), yg.ravel()), axis=1)
+    xq += np.random.default_rng(0).uniform(0., dx, size=xq.shape)
+
+    in_a = poly_a.inside_indices(xq)
+    in_both = poly_b.inside_indices(xq, active=in_a)
+    return min(in_both.size * dx ** 2 / min_area, 1.)
+
+def find_overlapping_polygons(polygons, names):
+    # list of descriptions of pairs of InsidePolygon instances which overlap more than tolerance
+    overlaps = []
+    for i in range(len(polygons)):
+        for j in range(i + 1, len(polygons)):
+            f = polygon_overlap_fraction(polygons[i], polygons[j])
+            if f > overlap_fraction_tolerance:
+                overlaps.append(f'"{names[i]}" and "{names[j]}" ({100 * f:.1f}% of smaller polygon)')
+    return overlaps
+
 def set_up_list_of_polygon_instances(polygon_list,geographic_coords=False):
     msg=[]
     polygons=[]

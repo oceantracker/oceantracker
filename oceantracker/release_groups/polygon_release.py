@@ -1,5 +1,5 @@
 import numpy as np
-from oceantracker.util.polygon_util import InsidePolygon, warn_if_large_polygons
+from oceantracker.util.polygon_util import InsidePolygon, warn_if_large_polygons, polygon_overlap_fraction, overlap_fraction_tolerance
 from oceantracker.release_groups.point_release import _BaseReleaseGroup
 from oceantracker.shared_info import shared_info as si
 from oceantracker.util import cord_transforms
@@ -33,10 +33,11 @@ class PolygonRelease(_BaseReleaseGroup):
 
         self.polygon = InsidePolygon(verticies = params['points'], geographic_coords=si.settings.use_geographic_coords)
         params['points'] = self.polygon.points # polygon may have been closed
-        if 'checked_polygon_size' not in info:
+        if 'checked_polygon' not in info:
             # initial_setup is called twice for release groups, so only warn once
             warn_if_large_polygons([params], self)
-            info['checked_polygon_size'] = True
+            self._warn_if_overlaps_other_release_polygons()
+            info['checked_polygon'] = True
 
         self._check_points_inside_domain(params['points'])
         self._add_bounding_box(params['points'])
@@ -57,6 +58,20 @@ class PolygonRelease(_BaseReleaseGroup):
         info['number_released'] = 0
         info['pulseID'] = 0
         info['number_per_release'] = params['pulse_size']
+
+    def _warn_if_overlaps_other_release_polygons(self):
+        # compare with polygon releases already checked
+        overlaps = []
+        for name, rg in si.class_roles.release_groups.items():
+            if rg is self or 'checked_polygon' not in rg.info: continue
+            f = polygon_overlap_fraction(self.polygon, rg.polygon)
+            if f > overlap_fraction_tolerance:
+                overlaps.append(f'"{name}" ({100 * f:.1f}% of smaller polygon)')
+
+        if len(overlaps) > 0:
+            si.msg_logger.msg(f'Release polygon overlaps the polygon(s) of release group(s) {", ".join(overlaps)}',
+                              hint='Particle density will be higher where release polygons overlap, ignore if intended',
+                              caller=self, warning=True)
 
     def get_hori_release_locations(self, time_sec):
         release_info = self.find_enough_hori_release_locations(time_sec)
