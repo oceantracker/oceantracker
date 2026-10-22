@@ -136,6 +136,10 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
 
         self.create_count_variables(info['count_dims'],'age')
 
+    def open_output_file(self,file_name):
+        nc = super().open_output_file(file_name)
+        add_polygon_list_to_group_netcdf(nc,self.params['polygon_list'])
+        return nc
 
     def do_counts(self,n_time_step, time_sec, sel, alive):
 
