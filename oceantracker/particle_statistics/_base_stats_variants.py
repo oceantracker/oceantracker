@@ -48,8 +48,15 @@ class _BaseTimeStats(ParameterBaseClass):
 
     def count_all_currently_alive(self, alive):
         part_prop = si.class_roles.particle_properties
-        self._count_all_alive_time(part_prop['status'].used_buffer(), part_prop['IDrelease_group'].data,
-                                         self.count_all_alive_particles, alive, self.get_partID_buffer('alive_bins'))
+
+        def count_alive():
+            count = np.zeros_like(self.count_all_alive_particles)
+            self._count_all_alive_time(part_prop['status'].used_buffer(), part_prop['IDrelease_group'].data,
+                                       count, alive, self.get_partID_buffer('alive_bins'))
+            return count
+
+        # same for all time based stats, so only counted once per time step
+        self.count_all_alive_particles[:] = stats_util.shared_step_result(('count_all_alive_time',), count_alive)
     @staticmethod
     @njitOTparallel
     def _count_all_alive_time(status, release_group, count_all_alive, alive, alive_bins):
@@ -163,10 +170,18 @@ class _BaseAgeStats(ParameterBaseClass):
     def count_all_alive_by_age(self,n_time_step,time_sec, alive ):
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
-        self._count_all_alive_age_bins(part_prop['status'].data,
+
+        def count_alive():
+            count = np.zeros_like(self.count_all_alive_particles)
+            self._count_all_alive_age_bins(part_prop['status'].data,
                             part_prop['IDrelease_group'].data,
                             part_prop['age'].data,  stats_grid['age_bin_edges'],
-                            self.count_all_alive_particles, alive, self.get_partID_buffer('alive_bins'))
+                            count, alive, self.get_partID_buffer('alive_bins'))
+            return count
+
+        # same for all age based stats with the same age bins, so only counted once per time step, then accumulated over run
+        self.count_all_alive_particles += stats_util.shared_step_result(
+                            ('count_all_alive_age', stats_grid['age_bin_edges'].tobytes()), count_alive)
         self._compute_released_age_demographics(time_sec)
 
     @staticmethod

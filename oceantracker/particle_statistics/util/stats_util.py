@@ -9,6 +9,25 @@ status_dead= int(si.particle_status_flags.dead)
 
 def get_dim_names(dims_dict): return [key for key in dims_dict.keys()]
 
+# results which are the same for all stats instances at a time step, eg particles selected by status and water depth,
+# computed once by the first instance needing them, see shared_step_result()
+_shared_step_results = dict(n_time_step=None)
+
+def clear_shared_step_results():
+    # must be cleared at set up, and when a stats instance changes particle status, ie kills particles
+    _shared_step_results.clear()
+    _shared_step_results['n_time_step'] = None
+
+def shared_step_result(key, compute):
+    # returns compute() for the current time step, only calling it once per time step for each key
+    n_time_step = si.run_info.current_model_time_step
+    if _shared_step_results['n_time_step'] != n_time_step:
+        clear_shared_step_results()
+        _shared_step_results['n_time_step'] = n_time_step
+    if key not in _shared_step_results:
+        _shared_step_results[key] = compute()
+    return _shared_step_results[key]
+
 
 @njitOT
 def _sel_status_waterdepth(status, x, water_depth, statuses_to_count_map,  water_depth_range, num_in_buffer, out):

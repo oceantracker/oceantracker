@@ -84,6 +84,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         info = self.info
         params = self.params
 
+        stats_util.clear_shared_step_results() # in case of results from a previous run
 
         # to speed status check make map with trues at index of status to include in counts
         self.statuses_to_count_map = status_util.build_select_status_map(params['status_list'])
@@ -237,6 +238,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
 
     # user overload this method to subset indicies in out of particles to count
+    # sel is shared with other stats instances, so return a subset in a new array or buffer, do not change sel in place
     def select_particles_to_count(self, sel): # dummy method
         return sel
 
@@ -275,6 +277,9 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                                 part_prop['status'].data,
                                 params['kill_when_max_counted'], params['max_count_per_particle'], counted)
 
+        # killed particles must not be in other stats instances' shared selections or alive counts at this time step
+        if params['kill_when_max_counted']: stats_util.clear_shared_step_results()
+
 
     def sel_depth_range(self,sel):
         # find subset of sel that meet depth range requirements
@@ -303,11 +308,13 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         #  count alive particles in each release group (plus age for age based stats)
         # children must implement their own count_alive_particles
 
-        # first select those to count based on status and z location
-        sel = stats_util._sel_status_waterdepth(part_prop['status'].data,
+        # first select those to count based on status and z location,
+        # shared with other stats instances with the same status list and water depth range, so must not be changed in place
+        sel = stats_util.shared_step_result(('sel_status_waterdepth', self.statuses_to_count_map.tobytes(), info['water_depth_range'].tobytes()),
+                                 lambda: stats_util._sel_status_waterdepth(part_prop['status'].data,
                                     part_prop['x'].data, part_prop['water_depth'].data.ravel(),
                                     self.statuses_to_count_map, info['water_depth_range'],
-                                    num_in_buffer, self.get_partID_buffer('B1'))
+                                    num_in_buffer, self.get_partID_buffer('B1')))
 
         if si.run_info.is3D_run:
             sel = self.sel_depth_range(sel)
