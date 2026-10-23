@@ -82,7 +82,7 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
                                           self.prop_data_list, self.sum_prop_data_list, sel,
                                           self.get_partID_buffer('counted'), self.get_partID_buffer('counted_bins'))
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count,
                                      prop_list, sum_prop_list, sel, counted, counted_bins):
 
@@ -91,22 +91,14 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
 
-        n_counted = 0
-        for n in sel:
-            n_group= group_ID[n]
+        # in parallel, find flattened bin of each particle, -1 if in no polygon
+        for k in prange(sel.size):
+            n = sel[k]
             n_poly = inside_polygons[n]
+            counted_bins[k] = group_ID[n] * count.shape[1] + n_poly if n_poly >= 0 else -1
 
-            if n_poly == -1 : continue # in no polygon so no count
-
-            count[group_ID[n], n_poly] += 1
-            counted[n_counted] = n
-            counted_bins[n_counted] = n_group * count.shape[1] + n_poly
-            n_counted += 1
-
-        # sum particle properties
-        stats_util._sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
-
-        return counted[:n_counted]
+        # count and sum particle properties
+        return stats_util._accumulate_counted(sel, count, prop_list, sum_prop_list, counted, counted_bins)
 
 class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLocationStats):
     '''
@@ -166,32 +158,25 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
 
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count,
                                      prop_list, sum_prop_list,
                                      sel, age_bin_edges, age, counted, counted_bins):
 
         # (no zeroing as accumulated over  whole run)
 
-        n_counted = 0
-        for n in sel:
-
+        # in parallel, find flattened bin of each particle, -1 if outside age bins or in no polygon
+        for k in prange(sel.size):
+            n = sel[k]
             na = stats_util._get_age_bin(age[n], age_bin_edges)
-            if 0 <= na < (age_bin_edges.shape[0] - 1):
-                # only count those in age bins
-                ng= group_ID[n]
-                n_poly = inside_polygons[n]
-                if n_poly == -1: continue # in no polygon so no count
+            n_poly = inside_polygons[n]
+            if 0 <= na < (age_bin_edges.shape[0] - 1) and n_poly >= 0:
+                counted_bins[k] = (na * count.shape[1] + group_ID[n]) * count.shape[2] + n_poly
+            else:
+                counted_bins[k] = -1
 
-                count[na, ng, n_poly] += 1
-                counted[n_counted] = n
-                counted_bins[n_counted] = (na * count.shape[1] + ng) * count.shape[2] + n_poly
-                n_counted += 1
-
-        # sum particle properties
-        stats_util._sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
-
-        return counted[:n_counted]
+        # count and sum particle properties
+        return stats_util._accumulate_counted(sel, count, prop_list, sum_prop_list, counted, counted_bins)
 
 
 

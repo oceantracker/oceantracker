@@ -84,7 +84,7 @@ class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLoc
                                           self.get_partID_buffer('counted'), self.get_partID_buffer('counted_bins'))
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges,grid_spacings, count,
                                      prop_list, sum_prop_list, sel, counted, counted_bins):
         # for time based heatmaps zero counts for one time slice
@@ -93,9 +93,9 @@ class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLoc
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
 
-        n_counted = 0
-        for n in sel:
-
+        # in parallel, find flattened bin of each particle, -1 if outside grid
+        for k in prange(sel.size):
+            n = sel[k]
             ng = group_ID[n]
 
             # assumes equal spacing
@@ -103,15 +103,12 @@ class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLoc
             c = int(np.floor((x[n, 0] - x_edges[ng,0]) / grid_spacings[0]))
 
             if 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1:
-                count[ng, r, c] += 1
-                counted[n_counted] = n
-                counted_bins[n_counted] = (ng * count.shape[1] + r) * count.shape[2] + c
-                n_counted += 1
+                counted_bins[k] = (ng * count.shape[1] + r) * count.shape[2] + c
+            else:
+                counted_bins[k] = -1
 
-        # sum particle properties
-        stats_util._sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
-
-        return counted[:n_counted]
+        # count and sum particle properties
+        return stats_util._accumulate_counted(sel, count, prop_list, sum_prop_list, counted, counted_bins)
 
 
 class GriddedStats2D_timeBased_runningMean(GriddedStats2D_timeBased):
@@ -362,14 +359,15 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                                           self.get_partID_buffer('counted'), self.get_partID_buffer('counted_bins'))
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges,grid_spacings, count,
                                      prop_list, sum_prop_list,
                                      age_bin_edges, age, sel, counted, counted_bins):
         # (no zeroing as accumulated over  whole run)
 
-        n_counted = 0
-        for n in sel:
+        # in parallel, find flattened bin of each particle, -1 if outside grid or age bins
+        for k in prange(sel.size):
+            n = sel[k]
             ng = group_ID[n]
 
             #grids may have release group centers , so coods differ by release group
@@ -377,15 +375,11 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
             c = int(np.floor((x[n, 0] - x_edges[ng, 0]) / grid_spacings[0]))
             na = stats_util._get_age_bin(age[n], age_bin_edges)
 
-            if 0 <= na < (age_bin_edges.size - 1):
-                if 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1 :
-                    count[na, ng, r, c] += 1
-                    counted[n_counted] = n
-                    counted_bins[n_counted] = ((na * count.shape[1] + ng) * count.shape[2] + r) * count.shape[3] + c
-                    n_counted += 1
+            if 0 <= na < (age_bin_edges.size - 1) and 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1:
+                counted_bins[k] = ((na * count.shape[1] + ng) * count.shape[2] + r) * count.shape[3] + c
+            else:
+                counted_bins[k] = -1
 
-        # sum particle properties
-        stats_util._sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
-
-        return counted[:n_counted]
+        # count and sum particle properties
+        return stats_util._accumulate_counted(sel, count, prop_list, sum_prop_list, counted, counted_bins)
 

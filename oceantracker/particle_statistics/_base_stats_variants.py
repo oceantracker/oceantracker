@@ -11,7 +11,7 @@ from oceantracker.particle_statistics.util import stats_util
 
 import numpy  as np
 from oceantracker.shared_info import shared_info as si
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 
 # compile this constant into numba cod
 status_outside_open_boundary = int(si.particle_status_flags.outside_open_boundary)
@@ -49,16 +49,18 @@ class _BaseTimeStats(ParameterBaseClass):
     def count_all_currently_alive(self, alive):
         part_prop = si.class_roles.particle_properties
         self._count_all_alive_time(part_prop['status'].used_buffer(), part_prop['IDrelease_group'].data,
-                                         self.count_all_alive_particles, alive)
+                                         self.count_all_alive_particles, alive, self.get_partID_buffer('alive_bins'))
     @staticmethod
-    @njitOT
-    def _count_all_alive_time(status, release_group, count_all_alive, alive):
+    @njitOTparallel
+    def _count_all_alive_time(status, release_group, count_all_alive, alive, alive_bins):
         count_all_alive[:] = 0.
 
-        for nn in range(alive.size):
+        # in parallel, find bin (release group) of each particle, then count
+        for nn in prange(alive.size):
             n = alive[nn]
-            count_all_alive[release_group[n]] += status[n] >= status_outside_open_boundary
-        pass
+            alive_bins[nn] = release_group[n] if status[n] >= status_outside_open_boundary else -1
+
+        stats_util._count_in_bins(alive_bins[:alive.size], count_all_alive.reshape(-1))
 
     def _write_common_time_varying_stats(self, time_sec):
         # write nth step in file
@@ -164,19 +166,24 @@ class _BaseAgeStats(ParameterBaseClass):
         self._count_all_alive_age_bins(part_prop['status'].data,
                             part_prop['IDrelease_group'].data,
                             part_prop['age'].data,  stats_grid['age_bin_edges'],
-                            self.count_all_alive_particles, alive)
+                            self.count_all_alive_particles, alive, self.get_partID_buffer('alive_bins'))
         self._compute_released_age_demographics(time_sec)
 
     @staticmethod
-    @njitOT
-    def _count_all_alive_age_bins(status, release_group, age, age_bin_edges, count_all_alive, alive):
+    @njitOTparallel
+    def _count_all_alive_age_bins(status, release_group, age, age_bin_edges, count_all_alive, alive, alive_bins):
         da = age_bin_edges[1] - age_bin_edges[0]
 
-        for nn in range(alive.size):
+        # in parallel, find flattened (age bin, release group) bin of each particle, then count
+        for nn in prange(alive.size):
             n = alive[nn]
             na = int(np.floor((age[n] - age_bin_edges[0]) / da))
-            if 0 <= na < (age_bin_edges.size - 1):
-                count_all_alive[na, release_group[n]] += status[n] >= status_outside_open_boundary
+            if 0 <= na < (age_bin_edges.size - 1) and status[n] >= status_outside_open_boundary:
+                alive_bins[nn] = na * count_all_alive.shape[1] + release_group[n]
+            else:
+                alive_bins[nn] = -1
+
+        stats_util._count_in_bins(alive_bins[:alive.size], count_all_alive.reshape(-1))
 
     def _compute_released_age_demographics(self, time_sec):
         """Accumulate, from release group pulse history, the count of particles currently

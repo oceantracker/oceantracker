@@ -1,4 +1,5 @@
 import numpy as np
+import numba
 from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 from oceantracker.shared_info import shared_info as si
 
@@ -52,15 +53,72 @@ def _sel_z_near_seasurface(x, tide, dz, sel, out):
 def _get_age_bin(age, age_bin_edges):
     return  int(np.floor((age - age_bin_edges[0]) / (age_bin_edges[1]- age_bin_edges[0])))
 
+# count/sum arrays with up to this many bins are accumulated in parallel, each thread adding into its own copy,
+# larger arrays are accumulated serially, as zeroing and adding up the copies would cost more than is saved
+thread_local_max_bins = 4096
+
+@njitOT
+def _thread_local_layout(n_bins, n_values):
+    # number of threads, size of each thread's copy padded so copies are on separate cache lines, and values per thread
+    n_threads = numba.get_num_threads()
+    return n_threads, (n_bins // 8 + 2) * 8, (n_values + n_threads - 1) // n_threads
+
+@njitOTparallel
+def _count_in_bins(bins, count_flat):
+    # add one to flattened count array at each bin, bins < 0 are skipped
+    # takes flattened arrays, so only compiled once, not for each number of dimensions
+    n_bins = count_flat.size
+    if n_bins > thread_local_max_bins:
+        for k in range(bins.size):
+            if bins[k] >= 0: count_flat[bins[k]] += 1
+        return
+
+    n_threads, stride, chunk = _thread_local_layout(n_bins, bins.size)
+    local = np.zeros(n_threads * stride, dtype=count_flat.dtype)
+    for t in prange(n_threads):
+        for k in range(t * chunk, min((t + 1) * chunk, bins.size)):
+            if bins[k] >= 0: local[t * stride + bins[k]] += 1
+    for t in range(n_threads):
+        for i in range(n_bins): count_flat[i] += local[t * stride + i]
+
+@njitOTparallel
+def _sum_in_bins(bins, values, IDs, sum_flat):
+    # add values[IDs[k]] to flattened sum array at bins[k]
+    n_bins = sum_flat.size
+    if n_bins > thread_local_max_bins:
+        for k in range(bins.size):
+            sum_flat[bins[k]] += values[IDs[k]]
+        return
+
+    n_threads, stride, chunk = _thread_local_layout(n_bins, bins.size)
+    local = np.zeros(n_threads * stride, dtype=sum_flat.dtype)
+    for t in prange(n_threads):
+        for k in range(t * chunk, min((t + 1) * chunk, bins.size)):
+            local[t * stride + bins[k]] += values[IDs[k]]
+    for t in range(n_threads):
+        for i in range(n_bins): sum_flat[i] += local[t * stride + i]
+
 @njitOT
 def _sum_props_in_bins(prop_list, sum_prop_list, counted, counted_bins):
     # add property values of counted particles to the bin each was counted in, as index into flattened count/sum arrays
     # done after counting, as typed list access inside the particle loop is slow, ~50 ms per property per million particles
     for m in range(len(prop_list)):
-        prop = prop_list[m]
-        sum_prop = sum_prop_list[m].reshape(-1)  # view, sum arrays are C contiguous
-        for k in range(counted.size):
-            sum_prop[counted_bins[k]] += prop[counted[k]]
+        _sum_in_bins(counted_bins, prop_list[m], counted, sum_prop_list[m].reshape(-1))  # view, sum arrays are C contiguous
+
+@njitOT
+def _accumulate_counted(sel, count, prop_list, sum_prop_list, counted, counted_bins):
+    # counted_bins[k] holds flattened bin of particle sel[k], -1 if not counted,
+    # put particles counted and their bins at start of counted and counted_bins, in place is ok as k >= n_counted
+    n_counted = 0
+    for k in range(sel.size):
+        if counted_bins[k] >= 0:
+            counted[n_counted] = sel[k]
+            counted_bins[n_counted] = counted_bins[k]
+            n_counted += 1
+
+    _count_in_bins(counted_bins[:n_counted], count.reshape(-1))  # view, count arrays are C contiguous
+    _sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
+    return counted[:n_counted]
 
 @njitOT
 def _sel_below_max_count(counting_events, max_count, sel, out):

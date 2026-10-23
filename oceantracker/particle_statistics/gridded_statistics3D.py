@@ -128,7 +128,7 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                             self.get_partID_buffer('counted_bins'))
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _do_counts_and_summing_numba(group_ID, x, z_rel, x_edges, y_edges, z_edges,
                                      count, prop_list, sum_prop_list, sel, counted, counted_bins):
         # z_rel is the vertical coordinate in the same reference frame as z_edges
@@ -138,8 +138,9 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
         for m in range(len(prop_list)):
             sum_prop_list[m][:] = 0.
 
-        n_counted = 0
-        for n in sel:
+        # in parallel, find flattened bin of each particle, -1 if outside grid
+        for nn in prange(sel.size):
+            n = sel[nn]
             ng = group_ID[n]
 
             # assumes equal spacing, in meters or deg. if geographic
@@ -156,16 +157,12 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
             if (0 <= r < y_edges.shape[1] - 1 and
                 0 <= c < x_edges.shape[1] - 1 and
                 0 <= k < z_edges.shape[0] - 1):
+                counted_bins[nn] = ((ng * count.shape[1] + r) * count.shape[2] + c) * count.shape[3] + k
+            else:
+                counted_bins[nn] = -1
 
-                count[ng, r, c, k] += 1
-                counted[n_counted] = n
-                counted_bins[n_counted] = ((ng * count.shape[1] + r) * count.shape[2] + c) * count.shape[3] + k
-                n_counted += 1
-
-        # Sum particle properties
-        stats_util._sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
-
-        return counted[:n_counted]
+        # Count and sum particle properties
+        return stats_util._accumulate_counted(sel, count, prop_list, sum_prop_list, counted, counted_bins)
 
     def info_to_write_on_file_close(self, nc):
 
