@@ -53,6 +53,16 @@ def _get_age_bin(age, age_bin_edges):
     return  int(np.floor((age - age_bin_edges[0]) / (age_bin_edges[1]- age_bin_edges[0])))
 
 @njitOT
+def _sum_props_in_bins(prop_list, sum_prop_list, counted, counted_bins):
+    # add property values of counted particles to the bin each was counted in, as index into flattened count/sum arrays
+    # done after counting, as typed list access inside the particle loop is slow, ~50 ms per property per million particles
+    for m in range(len(prop_list)):
+        prop = prop_list[m]
+        sum_prop = sum_prop_list[m].reshape(-1)  # view, sum arrays are C contiguous
+        for k in range(counted.size):
+            sum_prop[counted_bins[k]] += prop[counted[k]]
+
+@njitOT
 def _sel_below_max_count(counting_events, max_count, sel, out):
     # Select particles from sel where counting_events[n] < max_count
     n_found = 0

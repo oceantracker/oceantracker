@@ -80,11 +80,11 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
         return self._do_counts_and_summing_numba(inside_poly_prop.used_buffer(),
                                           release_groupID, p_x, self.counts_inside_time_slice,
                                           self.prop_data_list, self.sum_prop_data_list, sel,
-                                          self.get_partID_buffer('counted'))
+                                          self.get_partID_buffer('counted'), self.get_partID_buffer('counted_bins'))
     @staticmethod
     @njitOT
     def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count,
-                                     prop_list, sum_prop_list, sel, counted):
+                                     prop_list, sum_prop_list, sel, counted, counted_bins):
 
         # zero out counts in the count time slices
         count[:] = 0
@@ -100,10 +100,11 @@ class PolygonStats2D_timeBased(_BaseTimeStats,_BasePolygonStats,_BaseParticleLoc
 
             count[group_ID[n], n_poly] += 1
             counted[n_counted] = n
+            counted_bins[n_counted] = n_group * count.shape[1] + n_poly
             n_counted += 1
-            # sum particle properties
-            for m in range(len(prop_list)):
-                sum_prop_list[m][n_group, n_poly] += prop_list[m][n]
+
+        # sum particle properties
+        stats_util._sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
 
         return counted[:n_counted]
 
@@ -161,14 +162,14 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
                                           release_groupID, p_x, self.counts_inside_age_bins,
                                           self.prop_data_list, self.sum_prop_data_list,
                                           sel, stats_grid['age_bin_edges'], p_age,
-                                          self.get_partID_buffer('counted'))
+                                          self.get_partID_buffer('counted'), self.get_partID_buffer('counted_bins'))
 
 
     @staticmethod
     @njitOT
     def _do_counts_and_summing_numba(inside_polygons, group_ID, x, count,
                                      prop_list, sum_prop_list,
-                                     sel, age_bin_edges, age, counted):
+                                     sel, age_bin_edges, age, counted, counted_bins):
 
         # (no zeroing as accumulated over  whole run)
 
@@ -184,11 +185,11 @@ class PolygonStats2D_ageBased(_BaseAgeStats,_BasePolygonStats, _BaseParticleLoca
 
                 count[na, ng, n_poly] += 1
                 counted[n_counted] = n
+                counted_bins[n_counted] = (na * count.shape[1] + ng) * count.shape[2] + n_poly
                 n_counted += 1
 
-                # sum particle properties
-                for m in range(len(prop_list)):
-                    sum_prop_list[m][na, ng, n_poly] += prop_list[m][n]
+        # sum particle properties
+        stats_util._sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
 
         return counted[:n_counted]
 

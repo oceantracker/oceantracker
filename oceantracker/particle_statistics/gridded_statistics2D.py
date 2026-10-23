@@ -81,12 +81,12 @@ class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLoc
                                           stats_grid['grid_spacings'],
                                           self.counts_inside_time_slice,
                                           self.prop_data_list, self.sum_prop_data_list, sel,
-                                          self.get_partID_buffer('counted'))
+                                          self.get_partID_buffer('counted'), self.get_partID_buffer('counted_bins'))
 
     @staticmethod
     @njitOT
     def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges,grid_spacings, count,
-                                     prop_list, sum_prop_list, sel, counted):
+                                     prop_list, sum_prop_list, sel, counted, counted_bins):
         # for time based heatmaps zero counts for one time slice
         count[:]=0
 
@@ -105,10 +105,11 @@ class GriddedStats2D_timeBased(_BaseTimeStats,_BaseGrid2DStats, _BaseParticleLoc
             if 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1:
                 count[ng, r, c] += 1
                 counted[n_counted] = n
+                counted_bins[n_counted] = (ng * count.shape[1] + r) * count.shape[2] + c
                 n_counted += 1
-                # sum particle properties
-                for m in range(len(prop_list)):
-                    sum_prop_list[m][ng,r,c] += prop_list[m][n]
+
+        # sum particle properties
+        stats_util._sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
 
         return counted[:n_counted]
 
@@ -358,13 +359,13 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                                           self.counts_inside_age_bins,
                                           self.prop_data_list, self.sum_prop_data_list,
                                           stats_grid['age_bin_edges'], p_age, sel,
-                                          self.get_partID_buffer('counted'))
+                                          self.get_partID_buffer('counted'), self.get_partID_buffer('counted_bins'))
 
     @staticmethod
     @njitOT
     def _do_counts_and_summing_numba(group_ID, x, x_edges, y_edges,grid_spacings, count,
                                      prop_list, sum_prop_list,
-                                     age_bin_edges, age, sel, counted):
+                                     age_bin_edges, age, sel, counted, counted_bins):
         # (no zeroing as accumulated over  whole run)
 
         n_counted = 0
@@ -380,10 +381,11 @@ class GriddedStats2D_ageBased(_BaseAgeStats,_BaseGrid2DStats, _BaseParticleLocat
                 if 0 <= r < y_edges.shape[1] - 1 and 0 <= c < x_edges.shape[1] - 1 :
                     count[na, ng, r, c] += 1
                     counted[n_counted] = n
+                    counted_bins[n_counted] = ((na * count.shape[1] + ng) * count.shape[2] + r) * count.shape[3] + c
                     n_counted += 1
-                    # sum particle properties
-                    for m in range(len(prop_list)):
-                        sum_prop_list[m][na, ng, r, c] += prop_list[m][n]
+
+        # sum particle properties
+        stats_util._sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
 
         return counted[:n_counted]
 

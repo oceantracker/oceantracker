@@ -124,12 +124,13 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
                             self.prop_data_list,
                             self.sum_prop_data_list,
                             sel,
-                            self.get_partID_buffer('counted'))
+                            self.get_partID_buffer('counted'),
+                            self.get_partID_buffer('counted_bins'))
 
     @staticmethod
     @njitOT
     def _do_counts_and_summing_numba(group_ID, x, z_rel, x_edges, y_edges, z_edges,
-                                     count, prop_list, sum_prop_list, sel, counted):
+                                     count, prop_list, sum_prop_list, sel, counted, counted_bins):
         # z_rel is the vertical coordinate in the same reference frame as z_edges
         # Zero counts for this time slice
         count[:] = 0
@@ -158,10 +159,11 @@ class GriddedStats3D_timeBased(GriddedStats2D_timeBased):
 
                 count[ng, r, c, k] += 1
                 counted[n_counted] = n
+                counted_bins[n_counted] = ((ng * count.shape[1] + r) * count.shape[2] + c) * count.shape[3] + k
                 n_counted += 1
-                # Sum particle properties
-                for m in range(len(prop_list)):
-                    sum_prop_list[m][ng, r, c, k] += prop_list[m][n]
+
+        # Sum particle properties
+        stats_util._sum_props_in_bins(prop_list, sum_prop_list, counted[:n_counted], counted_bins[:n_counted])
 
         return counted[:n_counted]
 

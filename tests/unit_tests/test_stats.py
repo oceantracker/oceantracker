@@ -109,7 +109,8 @@ def test_gridded_3D_kernel_sign_conventions():
     def run_kernel(z_edges, z_rel):
         count = np.zeros((1, 4, 4, z_edges.size - 1), dtype=np.int64)
         counted = kernel(group_ID, x, z_rel, x_edges, y_edges, z_edges, count,
-                         prop_list, sum_prop_list, sel, np.zeros(sel.size, dtype=np.int32))
+                         prop_list, sum_prop_list, sel, np.zeros(sel.size, dtype=np.int32),
+                         np.zeros(sel.size, dtype=np.int32))
         assert counted.size == count.sum()  # kernel returns exactly the particles it counted
         return count
 

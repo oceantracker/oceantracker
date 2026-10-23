@@ -382,6 +382,11 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.count_all_alive_particles = np.full(use_dims[:2], 0, np.int64)
             self.count_all_released_age_bins = np.full(use_dims[:2], 0, np.int64)
 
+        # bin each particle is counted in is held as an int32 index into the flattened count array
+        if np.prod(use_dims, dtype=np.int64) >= 2**31:
+            si.msg_logger.msg(f'Too many statistics bins, {np.prod(use_dims, dtype=np.int64):,} bins, from dimensions {dict(zip(dims.keys(), dim_sizes))}',
+                              hint='Reduce number of grid cells, layers, age bins or polygons', fatal_error=True, caller=self)
+
         if 'particle_property_list' in params:
             for p in params['particle_property_list']:
                 self.sum_binned_part_prop[p] = np.full(use_dims, 0.)  # zero for  summing
