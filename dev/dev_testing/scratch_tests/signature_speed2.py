@@ -2,51 +2,57 @@ from time import  perf_counter
 
 
 #os.environ['NUMBA_CPU_FEATURES'] = '-avx,-avx2,-sse'
-from numba import jit,njit, float64, types
+from numba import jit,njit, float64,int32, types, prange
 import numpy as np
 from timeit import timeit
 from matplotlib import pyplot as plt
 
-@njit
-def add1(x, y):
-    for n in range(x.size):
-        y[n] =  np.sin(x[n]) ** 2 + x[n] +3*x[n]**2
+para = True
+@njit(parallel=para)
+def add1(x, y, index):
+    for nn in prange(index.size):
+        n = index[nn]
+        y[n] =  x[n] #np.sin(x[n]) ** 2 + x[n] +3*x[n]**2
 
 
-@njit((float64[::1], float64[::1]))
-def add2(x, y):
-    for n in range(x.size):
-        y[n] = np.sin(x[n]) ** 2  + x[n] +3*x[n]**2
+@njit((float64[::1], float64[::1], int32[::1]), parallel=para)
+def add2(x, y, index):
+    for nn in prange(index.size):
+        n = index[nn]
+        y[n] =  x[n] #np.sin(x[n]) ** 2 + x[n] +3*x[n]**2
 
-reps = 10
+reps = 1000
 
-Ns=10**np.arange(1,9)
+Ns=10**np.arange(1,7)
 t1= np.zeros((Ns.size),dtype=np.float64, order='C')
 t2= np.zeros((Ns.size),dtype=np.float64,order='C')
 
+
 for n,N in enumerate(Ns):
+
     x = np.random.rand(N)
     y = np.random.rand(N)
+    index = np.flatnonzero(np.random.rand(N)> 0.1).astype(np.int32)
 
     t0 = perf_counter()
-    add1(x,y)
+    add1(x, y, index)
     if n==1: t1c = perf_counter() - t0
 
     t0 = perf_counter()
     for r in range(reps):
-        add1(x, y)
+        add1(x, y, index)
     t1[n] = perf_counter()-t0
 
     x = np.random.rand(N)
     y = np.random.rand(N)
 
     t0 = perf_counter()
-    add2(x, y)
+    add2(x, y, index)
     if n==1: t2c = perf_counter() - t0
 
     t0 = perf_counter()
     for r in range(reps):
-        add2(x, y)
+        add2(x, y, index)
     t2[n] = perf_counter()-t0
     pass
 
