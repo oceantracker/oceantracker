@@ -25,6 +25,11 @@ class BasicResuspension(_BaseResuspension):
     def check_requirements(self):
         self.check_class_required_fields_prop_etc(requires3D=True)
 
+        if si.settings.use_resuspension and si.settings.use_dispersion and si.settings.use_A_Z_profile:
+            si.msg_logger.msg('BasicResuspension uses the constant vertical eddy viscosity A_V of the random walk for the resuspension jump height, not the A_Z_profile used for vertical dispersion',
+                              hint='Set dispersion A_V to a value representative of the near bed diffusivity, or set use_A_Z_profile=False',
+                              warning=True, caller=self)
+
     def initial_setup(self,**kwargs): pass
 
     def update(self, nb, time, active):
