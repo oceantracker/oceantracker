@@ -213,5 +213,77 @@
       "   0.0% Update event loggers : calls 17042, 0 days 0 hrs 0 min 0 sec",
       "--- Total time 0 days 1 hrs 39 min 30 sec"
     ]
+  },
+  {
+    "timestamp": "2026-11-03T05:52:32.562264",
+    "version": "0.5.3.10",
+    "git_hash": "51e334eb",
+    "test_name": "tests/unit_tests/test_performance.py::test_run_3D_model_performance",
+    "machine": {
+      "name": "laurins-arch-desktop",
+      "processor": "",
+      "cpus_physical": 32,
+      "cpus_logical": 64,
+      "freq_mhz": 4.550859999999992,
+      "memory_gb": 134.923255808
+    },
+    "particle_count": 1000000,
+    "n_timesteps": 8520,
+    "elapsed_sec": 5946.293098689988,
+    "particles_per_sec": 168.17199949667926,
+    "time_per_particle_per_timestep": 6.979217251983555e-07,
+    "memory_gb": 18.329124864,
+    "block_timings": [
+      "  35.0% Find vertical cell : calls 51122, 0 days 0 hrs 34 min 41 sec",
+      "  21.4% Find horizontal cell : calls 51122, 0 days 0 hrs 21 min 10 sec",
+      "   8.2% Interpolate fields : calls 8521, 0 days 0 hrs 8 min 7 sec",
+      "   2.3% RK integration : calls 34080, 0 days 0 hrs 2 min 17 sec",
+      "   0.3% Velocity modifiers : calls 8520, 0 days 0 hrs 0 min 17 sec",
+      "   0.1% Reading hindcast : calls 8521, 0 days 0 hrs 0 min 3 sec",
+      "   0.0% Find initial horizontal cell : calls    2, 0 days 0 hrs 0 min 2 sec",
+      "   0.0% Setup : calls    1, 0 days 0 hrs 0 min 1 sec",
+      "   0.0% Releasing particles : calls 8520, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Update custom particle prop. : calls 8521, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Trajectory modifiers : calls 8521, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Update statistics : calls 8521, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Update event loggers : calls 8521, 0 days 0 hrs 0 min 0 sec",
+      "--- Total time 0 days 1 hrs 39 min 6 sec"
+    ]
+  },
+  {
+    "timestamp": "2026-11-03T07:32:13.715254",
+    "version": "0.5.3.10",
+    "git_hash": "51e334eb",
+    "test_name": "tests/unit_tests/test_performance.py::test_run_3D_model_with_tracks_and_stats_performance",
+    "machine": {
+      "name": "laurins-arch-desktop",
+      "processor": "",
+      "cpus_physical": 32,
+      "cpus_logical": 64,
+      "freq_mhz": 4.550859999999992,
+      "memory_gb": 134.923255808
+    },
+    "particle_count": 1000000,
+    "n_timesteps": 8520,
+    "elapsed_sec": 5975.768860229291,
+    "particles_per_sec": 167.34248318326522,
+    "time_per_particle_per_timestep": 7.013813216231562e-07,
+    "memory_gb": 24.447557632,
+    "block_timings": [
+      "  34.7% Find vertical cell : calls 51122, 0 days 0 hrs 34 min 36 sec",
+      "  21.2% Find horizontal cell : calls 51122, 0 days 0 hrs 21 min 8 sec",
+      "   8.1% Interpolate fields : calls 8521, 0 days 0 hrs 8 min 5 sec",
+      "   2.3% RK integration : calls 34080, 0 days 0 hrs 2 min 14 sec",
+      "   0.3% Velocity modifiers : calls 8520, 0 days 0 hrs 0 min 17 sec",
+      "   0.2% Update statistics : calls 8521, 0 days 0 hrs 0 min 12 sec",
+      "   0.0% Reading hindcast : calls 8521, 0 days 0 hrs 0 min 1 sec",
+      "   0.0% Setup : calls    1, 0 days 0 hrs 0 min 1 sec",
+      "   0.0% Releasing particles : calls 8520, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Update custom particle prop. : calls 8521, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Trajectory modifiers : calls 8521, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Update event loggers : calls 8521, 0 days 0 hrs 0 min 0 sec",
+      "   0.0% Find initial horizontal cell : calls    2, 0 days 0 hrs 0 min 0 sec",
+      "--- Total time 0 days 1 hrs 39 min 36 sec"
+    ]
   }
 ]
