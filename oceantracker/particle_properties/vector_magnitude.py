@@ -2,7 +2,7 @@ from oceantracker.particle_properties._base_particle_properties import CustomPar
 import numpy as np
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.shared_info import shared_info as si
-from oceantracker.util.numba_util import njitOT
+from oceantracker.util.numba_util import njitOT, njitOTparallel, prange
 
 class VectorMagnitude2D(CustomParticleProperty):
     '''
@@ -26,8 +26,9 @@ class VectorMagnitude2D(CustomParticleProperty):
         self._calc_speed(si.class_roles.particle_properties['water_velocity'].data, self.data, active)
 
     @staticmethod
-    @njitOT
+    @njitOTparallel
     def _calc_speed(v, speed, active):
-        for n in active:
+        for nn in  prange(active.size):
+            n= active[nn]
             speed[n] = np.sqrt(v[n,0]**2 + v[n,1]**2)
 

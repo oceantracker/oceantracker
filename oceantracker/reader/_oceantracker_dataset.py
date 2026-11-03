@@ -96,15 +96,21 @@ class OceanTrackerDataSet(object):
         # clip to full range
         nt_required = nt_required[ np.logical_and( nt_required >= 0, nt_required < info['time_coord'].size)]
 
+        if vi['time_step_to_fileID_map'].size != info['time_coord'].size:
+            raise ValueError(f'Variable "{file_var_name}" is only in some of the hindcast files, '
+                             f'has {vi["time_step_to_fileID_map"].size} of {info["time_coord"].size} time steps, cannot read it at hindcast time steps')
+
         files_read = 0
         while nt_required.size > 0 :
             file_no = vi['time_step_to_fileID_map'][nt_required[0]]
             fi = info['files'][file_no]
 
-            # required time steps in this file
-            nt0 = fi['first_time_step_in_file']
-            sel = np.logical_and( nt_required >= nt0, nt_required < nt0 + fi['time_steps'])
+            # required time steps in this file, from this variable's own time step to file map
+            # (not the file's first_time_step_in_file, which is shared by all variables in the file)
+            sel = vi['time_step_to_fileID_map'][nt_required] == file_no
             nt_available = nt_required[sel]
+            if nt_available.size == 0:
+                raise RuntimeError(f'No time steps of "{file_var_name}" found in file "{fi["name"]}", for hindcast time steps {nt_required}')
 
             # get mapped file offsets
             file_offsets = vi['time_step_to_file_offset_map'][nt_available]

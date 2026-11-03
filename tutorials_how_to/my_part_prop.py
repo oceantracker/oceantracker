@@ -1,5 +1,5 @@
 from oceantracker.particle_properties._base_particle_properties import (
-    _BaseParticleProperty,
+    CustomParticleProperty,
 )
 
 # to avoid accidental parameterization error we use these functions
@@ -22,7 +22,9 @@ from oceantracker.util.numba_util import (
 )  # numba decorators to make code fast
 
 
-class TimeAtStatus(_BaseParticleProperty):
+# user written particle properties have to inherit from CustomParticleProperty,
+# as only these have their update method called automatically every time step
+class TimeAtStatus(CustomParticleProperty):
     """class to calculate the time each particle spends in a given status"""
 
     # the init method is what is called during the creation of the class instance
@@ -52,7 +54,7 @@ class TimeAtStatus(_BaseParticleProperty):
     # during the model setup phase, we run this code
     def initial_setup(self):
 
-        # first we execute the "parent" (_BaseParticleProperty) "initial_setup" method again
+        # first we execute the "parent" (CustomParticleProperty) "initial_setup" method again
         super().initial_setup()
 
         # next we select, based on user input, the status set for which we will calculate this particle property

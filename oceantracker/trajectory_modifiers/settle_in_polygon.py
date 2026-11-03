@@ -1,7 +1,7 @@
 import numpy as np
 from  oceantracker.trajectory_modifiers._base_trajectory_modifers import _BaseTrajectoryModifier
 from oceantracker.util.parameter_checking import ParameterCoordsChecker as PCC, ParamValueChecker as PVC
-from oceantracker.util.polygon_util import  InsidePolygon
+from oceantracker.util.polygon_util import  InsidePolygon, warn_if_large_polygons
 
 from oceantracker.shared_info import shared_info as si
 
@@ -41,6 +41,7 @@ class SettleInPolygon(_BaseTrajectoryModifier):
             raise Exception('initialize: parameter polygon_ points must be a list of lists of coordinate pairs, eg [[p1_x1,p1_y1],[p1_x2,p1_y2],..]]')
 
         self.polygon = InsidePolygon(verticies=a)# do set up to speed inside using pre-calculation
+        warn_if_large_polygons([self.params['polygon']], self)
 
 
     # all particles checked to see if they need status changing

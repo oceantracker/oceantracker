@@ -64,7 +64,7 @@ class _DefaultSettings(definitions._AttribDict):
                           doc_str='Used geographic coordinated for inputs and outputs ( lon, lat ), normally auto detected based in hindcast coords (if True and hindcast already geographic coords, then reader must have EPGS code',
                                 expert=True)
     use_A_Z_profile = PVC(False, bool,
-                doc_str='Use the hydro-model bottom_stress variable for friction velocity calculation , where it is needed for resuspension, if variable is in hindcast files')
+                doc_str='Use the hydro-model vertical turbulent diffusivity profile (A_Z_profile) for vertical dispersion in 3D runs, instead of the constant A_V of the random walk, if mapped variable is in hindcast files')
     use_bottom_stress = PVC(True, bool,
                 doc_str='Use hydro models bottom_stress variable for friction velocity calculation, if mapped variable is in files. Friction velocity is used in resuspension')
     use_dispersion = PVC(True, bool,
@@ -102,20 +102,19 @@ class _DefaultSettings(definitions._AttribDict):
                                            doc_str='setting "regrid_z_to_sigma_levels" has moved to be a reader parameter "regrid_z_to_sigma_levels", so set when adding reader class')
 # blocks that make up parts of shared info
 class _ClassRoles(definitions._AttribDict):
-    release_groups =[]
-    fields = []  # user fields calculated from other fields  on reading
-    particle_properties =  [] # user added particle properties, eg DistanceTraveled
-    velocity_modifiers = []  # user added velocity effects, eg TerminalVelocity
-    trajectory_modifiers = []  # change particle paths, eg. re-suspension
-    particle_statistics = []  # heat map inside polygon statistics calculated on the fly
-    nested_readers = []
-    event_loggers =  [] # writes events files ,eg PolygonEntryExit
-    time_varying_info = [] # particle info,eg. time,or  tide at at tide gauge, core example is particle time
+    release_groups = {}
+    fields = {}  # user fields calculated from other fields  on reading
+    particle_properties =  {} # user added particle properties, eg DistanceTraveled
+    velocity_modifiers = {}  # user added velocity effects, eg TerminalVelocity
+    trajectory_modifiers = {}  # change particle paths, eg. re-suspension
+    particle_statistics = {}  # heat map inside polygon statistics calculated on the fly
+    nested_readers = {}
+    event_loggers =  {} # writes events files ,eg PolygonEntryExit
+    time_varying_info = {} # particle info,eg. time,or  tide at at tide gauge, core example is particle time
 
 class _CoreClassRoles(definitions._AttribDict):
     reader = None
     interpolator = None
-    #todo below beter as None
     solver = None
     field_group_manager = None
     particle_group_manager = None
@@ -189,7 +188,7 @@ class _SharedInfoClass():
     run_info  = _RunInfo()
     hindcast_info = None
     msg_logger = MessageLogger()
-    block_timers={}
+
     class_importer = class_importer_util.ClassImporter(msg_logger)
     info = _UseFullInfo
     dim_names = definitions._DimensionNames()
@@ -203,13 +202,10 @@ class _SharedInfoClass():
                                        }
         pass
 
-
-
-        pass
-
-    def _setup(self):
+    def _setup_shared_info(self):
         # this allows shared info to make a class importer when needed
         self.msg_logger.reset()
+        self.block_timers = {}
 
         # run info is a process wide singleton, so rebuild its values from the class defaults,
         # otherwise state leaks into any later run in the same process, eg "continuing" is set
@@ -227,7 +223,7 @@ class _SharedInfoClass():
 
     def add_class(self,class_role,params={}, default_classID=None,caller=None, initialize=False,
                   add_required_classes_and_settings=True,  **kwargs):
-        #todo get rid in initialize????
+
         ml = self.msg_logger
 
         if class_role=='fields':
@@ -235,7 +231,6 @@ class _SharedInfoClass():
             ml.msg('Cannot use si.add_class() method to add fields',
                    hint='Use add_reader_field(name,  params) or si.add_custom_field(name, params, default_classID=None)',
                    fatal_error=True)
-
 
         if params is None: params ={}
         if type(params) != dict :
@@ -300,7 +295,7 @@ class _SharedInfoClass():
                 for key, i in r.items():
                     if i is not None:  p.append(i)
         return p
-    def block_timer(self,name,t0):
+    def block_timer(self,name, t0):
         b = self.block_timers
         if name not in b:
             b[name] = dict(time=0.,calls=0)

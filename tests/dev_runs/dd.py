@@ -242,7 +242,7 @@ my_heat_map2D_time_runningMean = dict(
             )
 
 my_heat_map_max_count= {**my_heat_map3D_time,
-                        **dict(name = "my_heat_map2D_time_runningMean_max_count",
+                        **dict(name = "my_heat_map_max_count",
                                max_count_per_particle=5)}
 my_heat_map_max_count_kill= {**my_heat_map3D_time,
                         **dict(name = "my_heat_map_max_count_kill",

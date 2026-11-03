@@ -126,9 +126,8 @@ class ParticleGroupManager(ParameterBaseClass):
             if isinstance(i,CustomParticleProperty):
                 i.initial_value_at_birth(new_buffer_index)
 
-        # update new particles props, after finding hori and vert cell, first update hori and vert cell
-        si.core_class_roles.field_group_manager.setup_time_step(time_sec, part_prop['x'].data, new_buffer_index)
-        self.update_PartProp(n_time_step, time_sec, new_buffer_index)
+        # new particles are not updated here, as solver's pre step bookkeeping finds their cells and updates their props
+        # together with all other alive particles, updating them here as well would update custom props twice
 
         return new_buffer_index #indices of all new particles
 
@@ -160,6 +159,7 @@ class ParticleGroupManager(ParameterBaseClass):
             part_prop['status'].set_values(si.particle_status_flags.moving, new_part_buffer_indices)  # set  status of released particles
             part_prop['status_last_good'].set_values(si.particle_status_flags.moving, new_part_buffer_indices)  # set  status of released particles
             part_prop['time_released'].set_values(time_sec, new_part_buffer_indices)  # time released for each particle, needed to calculate age
+            part_prop['age'].set_values(0., new_part_buffer_indices)  # set at release, as buffer slots may hold age of a removed particle
             part_prop['ID'].set_values(info['particles_released'] + np.arange(num_released), new_part_buffer_indices)
 
         info['particles_released'] += num_released  # total released

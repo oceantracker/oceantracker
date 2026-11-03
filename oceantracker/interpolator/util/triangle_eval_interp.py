@@ -246,6 +246,78 @@ def time_dependent_3D_vector_field_ragged_bottom(n_buffer, weight_time_steps, F_
         pass
     pass
 
+# 3D layer value evaluation, for fields with one value per layer stored at the layer's lower interface, eg vertical gradients
+# particles get the value of the layer they are in, ie no vertical interpolation, only horizontal and time interpolation
+@njitOTparallel
+def time_dependent_3D_scalar_layer_value_data_in_all_layers(n_buffer, weight_time_steps, F_data,
+                                                            triangles,
+                                                            n_cell, bc_coords, nz_cell,
+                                                            F_out, active):
+    F1 = F_data[n_buffer[0], :, :, 0]
+    F2 = F_data[n_buffer[1], :, :, 0]
+
+    for nn in nb.prange(active.size):
+        n = active[nn]
+        nz = nz_cell[n]
+        F = 0.
+        n_nodes = triangles[n_cell[n], :]
+        for m in range(3):
+            F += bc_coords[n, m] * (F1[n_nodes[m], nz] * weight_time_steps[0] + F2[n_nodes[m], nz] * weight_time_steps[1])
+        F_out[n] = F
+
+@njitOTparallel
+def time_dependent_3D_vector_layer_value_data_in_all_layers(n_buffer, weight_time_steps, F_data,
+                                                            triangles,
+                                                            n_cell, bc_coords, nz_cell,
+                                                            F_out, active):
+    F1 = F_data[n_buffer[0], :, :, :]
+    F2 = F_data[n_buffer[1], :, :, :]
+
+    for nn in nb.prange(active.size):
+        n = active[nn]
+        nz = nz_cell[n]
+        for c in range(3): F_out[n, c] = 0.  # zero out for summing
+        for m in range(3):
+            node = triangles[n_cell[n], m]
+            for c in range(3):
+                F_out[n, c] += bc_coords[n, m] * (F1[node, nz, c] * weight_time_steps[0] + F2[node, nz, c] * weight_time_steps[1])
+
+@njitOTparallel
+def time_dependent_3D_scalar_layer_value_ragged_bottom(n_buffer, weight_time_steps, F_data,
+                                                       triangles, bottom_interface_index,
+                                                       n_cell, bc_coords, nz_cell,
+                                                       F_out, active):
+    F1 = F_data[n_buffer[0], :, :, 0]
+    F2 = F_data[n_buffer[1], :, :, 0]
+
+    for nn in nb.prange(active.size):
+        n = active[nn]
+        F = 0.
+        for m in range(3):
+            n_node = triangles[n_cell[n], m]
+            # vertex with bottom above particle's layer uses its bottom layer
+            nz = max(bottom_interface_index[n_node], nz_cell[n])
+            F += bc_coords[n, m] * (F1[n_node, nz] * weight_time_steps[0] + F2[n_node, nz] * weight_time_steps[1])
+        F_out[n] = F
+
+@njitOTparallel
+def time_dependent_3D_vector_layer_value_ragged_bottom(n_buffer, weight_time_steps, F_data,
+                                                       triangles, bottom_interface_index,
+                                                       n_cell, bc_coords, nz_cell,
+                                                       F_out, active):
+    F1 = F_data[n_buffer[0], :, :, :]
+    F2 = F_data[n_buffer[1], :, :, :]
+
+    for nn in nb.prange(active.size):
+        n = active[nn]
+        for c in range(3): F_out[n, c] = 0.  # zero out for summing
+        for m in range(3):
+            n_node = triangles[n_cell[n], m]
+            # vertex with bottom above particle's layer uses its bottom layer
+            nz = max(bottom_interface_index[n_node], nz_cell[n])
+            for c in range(3):
+                F_out[n, c] += bc_coords[n, m] * (F1[n_node, nz, c] * weight_time_steps[0] + F2[n_node, nz, c] * weight_time_steps[1])
+
 # below are development ideas
 #_______________________________________________
 

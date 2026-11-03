@@ -3,6 +3,7 @@ import numpy as np
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC, ParameterListChecker as PLC
 
 from oceantracker.particle_properties.util import particle_operations_util
+from oceantracker.util.polygon_util import warn_if_large_polygons
 from oceantracker.shared_info import shared_info as si
 
 class LogPolygonEntryAndExit(_BaseEventLogger):
@@ -38,6 +39,8 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
         if self.info['instanceID'] > 0 :
             #todo why only 1
             ml.msg('LogPolygonEntryAndExit: can only have one instance',fatal_error=True )
+
+        warn_if_large_polygons(self.params['polygon_list'], self)
 
 
 

@@ -7,8 +7,72 @@ Change log
 Note: All commits that change either model in- or output in any way are labeled as "breaking changes", excluding bug-fixes
 
 
+Version '0.5.3.10 2026-11-04'
+_____________________________
+
+Breaking changes
+----------------
+
+#. Overlapping polygons in polygon statistics now raise an error. 
+   Previously, particles in an overlap were only counted in the last of these polygons.
+
+New features
+------------
+
+#. Major speed-up for polygon statistics, polygon releases and other polygon classes.
+   Inside-polygon search now runs in parallel and only checks polygon edges in the particle's y-strip,
+   making it less sensitive to vertices counts. 
+#. Readers now accept hindcasts where some variables are not present throughout the full time window,
+   but drops those variables.
+#. Parallelised the vector-magnitude particle properties (e.g. velocity magnitude) and the resuspension jump.
+
+Bug fixes
+---------
+
+#. Fixed an error in the calculation of the vertical diffusivity step when a time-varying vertical diffusivity (``A_Z_profile``) is used.
+   This changes vertical particle positions in 3D runs with an ``A_Z``.
+#. The counter for ``max_count_per_particle`` being incremented to frequently, 
+   based on when a particle could have been counted, rather when it was counted.
+   Particles could use up their counts before they were counted anywhere.
+#. Fixed custom particle properties being updated twice in the release time step.
+#. Fixed unnamed age-based gridded stats being written to files with time-based file names.
+#. Fixed the order of polygons getting shuffled when loading stats with the OceanTracker output reader.
+#. Re-added the ``polygon_list`` output to age-based polygon stats files, which was accidentally dropped in v0.5.2.0.
+#. Fixed block timings adding up across successive runs in the same Python script.
+
+Misc.
+-----
+
+#. Corrected the description of the ``use_A_Z_profile`` setting.
+#. Fixed the user-written particle property in tutorial H (``my_part_prop.py``) inheriting from
+   ``_BaseParticleProperty`` instead of ``CustomParticleProperty``. As a result, its ``update`` method was never called.
+
+Tests
+-----
+
+#. Added validation tests for the vertical random walk with an ``A_Z`` profile, checking that a well-mixed water column
+   stays well-mixed (Visser 1997). These use the new ``validation`` pytest marker (``pytest -m validation``).
+#. Added unit tests for ``max_count_per_particle`` and for particle properties being updated once per time step.
+
+
 Version '0.5.3.9 2026-10-05'
 ____________________________
+
+Breaking changes
+----------------
+
+#. The vertical random walk with an ``A_Z`` profile now evaluates the random step size at a half-step
+   advected position, following equation (6) of Visser (1997). This changes vertical particle positions
+   in 3D runs that use a vertical diffusivity profile.
+#. The default for numba ``fastmath`` when ``NUMBA_FASTMATH`` is not set in the environment changed from
+   ``True`` to ``False``. This matches what runs already used in most cases, but can change results
+   at floating-point round-off level.
+
+New features
+------------
+
+#. The ``DistanceTravelled`` particle property now works for runs in geographic coordinates. It is
+   also parallelised.
 
 Bug fixes
 ---------
@@ -29,22 +93,6 @@ Bug fixes
 #. Fixed state leaking between consecutive runs in the same Python process (e.g. in the test suit or continued runs)
 #. Fixed numba compile options (fastmath, caching, parallel) depending on which modules were imported
    first. A warning is shown if a run requests options that differ from those already in use.
-
-Breaking changes
-----------------
-
-#. The vertical random walk with an ``A_Z`` profile now evaluates the random step size at a half-step
-   advected position, following equation (6) of Visser (1997). This changes vertical particle positions
-   in 3D runs that use a vertical diffusivity profile.
-#. The default for numba ``fastmath`` when ``NUMBA_FASTMATH`` is not set in the environment changed from
-   ``True`` to ``False``. This matches what runs already used in most cases, but can change results
-   at floating-point round-off level.
-
-New features
-------------
-
-#. The ``DistanceTravelled`` particle property now works for runs in geographic coordinates. It is
-   also parallelised.
 
 Misc.
 -----

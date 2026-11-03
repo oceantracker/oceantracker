@@ -44,7 +44,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
                 max_count_per_particle=PVC(None, int, min=1,
                     doc_str='Maximum number of times each particle can be counted by this stats instance. Default None = unlimited. '
-                            'See also kill_when_max_counted.'),
+                            'eg. =1 counts each particle once, in the first cell/polygon it is found in. See also kill_when_max_counted.'),
                 kill_when_max_counted=PVC(False, bool,
                     doc_str='When max_count_per_particle is set: True (default) = set particle status to dead once max count is reached; '
                             'False = exclude the particle from future counting in this stats instance but leave it alive.'),
@@ -263,29 +263,17 @@ class _BaseParticleLocationStats(ParameterBaseClass):
 
         return sel
 
-    def _post_counting_update(self, sel):
-        '''Increment counting_events for particles in sel, then kill those that reached max count.
-        Note: counting_events is incremented for all particles passed to do_counts (those selected
-        and passing the probability filter), not only those that fell inside a spatial bin.'''
+    def _post_counting_update(self, counted):
+        '''Increment counting_events for the particles do_counts() counted, ie those inside a spatial bin
+        (and age bin for age based stats), then cull those that reached max count if requested.'''
         params = self.params
-        if params['max_count_per_particle'] is None or sel.size == 0:  return
+        if params['max_count_per_particle'] is None or counted.size == 0:  return
 
         part_prop = si.class_roles.particle_properties
-        #counting_events_prop = part_prop[self.info['counting_events_prop']]
-
         stats_util._update_times_count_and_kill_if_requested(
                                 part_prop[self.info['counting_events_prop']].data,
                                 part_prop['status'].data,
-                                params['kill_when_max_counted'], params['max_count_per_particle'],sel)
-
-        return
-        counting_events[sel] += 1
-
-        if params['kill_when_max_counted']:
-            maxed_mask = counting_events[sel] >= params['max_count_per_particle']
-            if maxed_mask.any():
-                part_prop['status'].set_values(si.particle_status_flags.dead, sel[maxed_mask])
-
+                                params['kill_when_max_counted'], params['max_count_per_particle'], counted)
 
 
     def sel_depth_range(self,sel):
@@ -335,12 +323,14 @@ class _BaseParticleLocationStats(ParameterBaseClass):
         for n, name in enumerate(self.sum_binned_part_prop.keys()):
             self.prop_data_list[n]= part_prop[name].data
 
-        self.do_counts(n_time_step, time_sec, sel, alive)
+        counted = self.do_counts(n_time_step, time_sec, sel, alive)
+        if counted is None: counted = sel  # do_counts() of user classes may not return the particles they counted
+
         # increment counting_events and optionally kill particles that have reached max count
-        self._post_counting_update(sel)
+        self._post_counting_update(counted)
         self.update_count += 1
 
-        return sel  # return this so child update() methods  can act on those particles which are counted
+        return counted  # return this so child update() methods  can act on those particles which are counted
 
 
 

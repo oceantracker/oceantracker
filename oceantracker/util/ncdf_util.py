@@ -84,7 +84,7 @@ class NetCDFhandler(object):
         if output is None:  output=dict(variable_attributes=dict())
         if var_list is None:  var_list = self.var_names()
 
-        name_list = list(set(var_list + required_var))
+        name_list = list(dict.fromkeys(var_list + required_var)) # unique names, keeping file order
         for name in name_list:
             output[name] = self.read_variable(name, sel=sel)
             output['variable_attributes'][name] = self.var_attrs(name)

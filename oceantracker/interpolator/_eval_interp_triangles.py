@@ -72,7 +72,21 @@ class EvalInterpTriangles(object):
 
         F_data = field_instance.data
 
-        if self.info['mode3D'] == 1:
+        if field_instance.params['is_layer_value']:
+            # one value per layer, eg vertical gradient, use value of particle's layer, no vertical interpolation
+            if self.info['mode3D'] == 1:
+                triangle_eval_interp.time_dependent_3D_scalar_layer_value_data_in_all_layers(
+                                        current_buffer_steps, weight_time_steps, F_data, grid['triangles'],
+                                        part_prop['n_cell'].data, part_prop['bc_coords'].data, part_prop['nz_cell'].data,
+                                        output, active)
+            else:
+                triangle_eval_interp.time_dependent_3D_scalar_layer_value_ragged_bottom(
+                                        current_buffer_steps, weight_time_steps, F_data,
+                                        grid['triangles'], grid['bottom_interface_index'],
+                                        part_prop['n_cell'].data, part_prop['bc_coords'].data, part_prop['nz_cell'].data,
+                                        output, active)
+
+        elif self.info['mode3D'] == 1:
             triangle_eval_interp.time_dependent_3D_scalar_field_data_in_all_layers(
                                         current_buffer_steps, weight_time_steps,
                                                      F_data ,                                                                                 grid['triangles'],
@@ -97,7 +111,21 @@ class EvalInterpTriangles(object):
         # use z_fractions with log layer near bottom for water velocity
         z_fraction = part_prop['z_fraction_water_velocity'] if field_name == 'water_velocity' else part_prop['z_fraction']
 
-        if self.info['mode3D'] == 1:
+        if field_instance.params['is_layer_value']:
+            # one value per layer, eg vertical gradient, use value of particle's layer, no vertical interpolation
+            if self.info['mode3D'] == 1:
+                triangle_eval_interp.time_dependent_3D_vector_layer_value_data_in_all_layers(
+                                        current_buffer_steps, weight_time_steps, F_data, grid['triangles'],
+                                        part_prop['n_cell'].data, part_prop['bc_coords'].data, part_prop['nz_cell'].data,
+                                        output, active)
+            else:
+                triangle_eval_interp.time_dependent_3D_vector_layer_value_ragged_bottom(
+                                        current_buffer_steps, weight_time_steps, F_data,
+                                        grid['triangles'], grid['bottom_interface_index'],
+                                        part_prop['n_cell'].data, part_prop['bc_coords'].data, part_prop['nz_cell'].data,
+                                        output, active)
+
+        elif self.info['mode3D'] == 1:
             # these have spatially uniform and static map of z levels
             triangle_eval_interp.time_dependent_3D_vector_field_data_in_all_layers(current_buffer_steps, weight_time_steps,
                                                                 F_data, grid['triangles'], part_prop['n_cell'].data,

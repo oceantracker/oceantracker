@@ -17,6 +17,9 @@ class _BaseField(ParameterBaseClass):
                     time_varying= PVC(False, bool,doc_str='Does field vary with time', is_required=True),
                     is3D = PVC(False, bool,is_required=True,doc_str='is field 3D'),
                     is_vector= PVC(False, bool),
+                    is_layer_value = PVC(False, bool, expert=True,
+                                doc_str='3D field holds one value per layer, stored at the layer\'s lower interface, eg a vertical gradient. '
+                                        'Particles get the value of the layer they are in, without interpolating in the vertical'),
                     write_interp_particle_prop_to_tracks_file = PVC(True, bool),
                     create_particle_property_with_same_name  = PVC(True, bool),
                             )
