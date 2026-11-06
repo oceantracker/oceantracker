@@ -268,20 +268,19 @@ class OceanTrackerParamsRunner(object):
 
         # performance
         total_time = perf_counter() - self.start_time
-        ml.msg(f'Timings: total = {total_time:5.1f} sec', tabs=2)
+        ml.msg('Timings:', tabs=2)
 
-        l = max([len(s) for s in si.block_timers.keys()])
-        for name, item in si.block_timers.items():
-            if name in si.block_timers:
-                t = si.block_timers[name]["time"]
-                ml.msg(f'\t\t{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
-
-
+        timings = [('Total', total_time)]
+        timings += [(name, item['time']) for name, item in si.block_timers.items()]
         # core physics timing
         for name in ['resuspension', 'dispersion', 'tracks_writer', 'integrated_model']:
             if si.core_class_roles[name] is not None:
-                t = si.core_class_roles[name].info["time_spent_updating"]
-                ml.msg(f'\t\t{name + " " * (l - len(name))} {t:6.2f} s\t {100 * t / total_time:4.1f}%', tabs=4)
+                timings.append((name, si.core_class_roles[name].info['time_spent_updating']))
+
+        # fixed widths so columns stay aligned for runs of up to a year (31,536,000.00 s, 13 chars)
+        name_width = max(len(name) for name, _ in timings)
+        for name, t in timings:
+            ml.msg(f'{name:<{name_width}}  {t:>13,.2f} s  {100 * t / total_time:5.1f}%', tabs=3)
 
         return case_info_file
 
