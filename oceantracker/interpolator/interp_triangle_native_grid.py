@@ -3,6 +3,7 @@
 import numpy as np
 from oceantracker.interpolator._base_interp import _BaseInterp
 from time import perf_counter
+from oceantracker.util.timer_tree import timed
 from oceantracker.interpolator.util import triangle_interpolator_util as tri_interp_util ,  triangle_eval_interp
 from oceantracker.util.parameter_checking import  ParamValueChecker as PVC
 from oceantracker.shared_info import shared_info as si
@@ -135,9 +136,9 @@ class  InterpTriangularGrid(_BaseInterp):
                                 grid['triangles'],
                                 part_prop['n_cell'].data,part_prop['bc_coords'].data, active)
 
+    @timed('Find horizontal cell')
     def find_hori_cell(self,xq, active):
         # do cell walk
-        t0= perf_counter()
         info = self.info
         part_prop = si.class_roles.particle_properties
 
@@ -183,14 +184,13 @@ class  InterpTriangularGrid(_BaseInterp):
 
         si._accumulate_cell_finder_stats_in_runinfo(dict(triangle_walks_retried=triangle_walks_retried,
                                                          triangle_walks_fixed=triangle_walks_fixed))
-        si.block_timer('Find horizontal cell', t0)
 
         return IDs_need_fixing
 
+    @timed('Find vertical cell')
     def find_vertical_cell(self, fields, xq, current_buffer_steps,weight_time_steps, active):
         # locate vertical cell in place
         info = self.info
-        t0 = perf_counter()
         #todo ad to runifo cell walk  stats
         info['bad_z_fraction_count'] = self._vert_cell_finder.find_vertical_cell(fields, xq, current_buffer_steps, weight_time_steps, active)
         if info['bad_z_fraction_count'] > 0 :
@@ -199,8 +199,6 @@ class  InterpTriangularGrid(_BaseInterp):
                               + f', Should be 0. to 1.0, max and min values {zf.min():6.5f} / {zf.max():6.5f} ',
                             strong_warning=True,caller = self,
                                 hint='issue with 3D vertical grid hindcast values? reader encountered unknown variant of hindcast vertical grid?')
-
-        si.block_timer('Find vertical cell', t0)
 
     def are_points_inside_domain(self,xq):
         n_cell, bc, is_inside_domain  = self.find_initial_hori_cell_method(xq)

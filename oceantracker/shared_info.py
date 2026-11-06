@@ -5,6 +5,7 @@ from oceantracker.util.parameter_checking import ParamValueChecker as PVC, Param
 
 from oceantracker.util import class_importer_util
 from oceantracker.util.message_logger import  MessageLogger
+from oceantracker.util.timer_tree import run_timer
 
 from time import  perf_counter
 
@@ -188,6 +189,7 @@ class _SharedInfoClass():
     run_info  = _RunInfo()
     hindcast_info = None
     msg_logger = MessageLogger()
+    timer = run_timer  # call-path timer tree, see util/timer_tree.py
 
     class_importer = class_importer_util.ClassImporter(msg_logger)
     info = _UseFullInfo
@@ -205,7 +207,7 @@ class _SharedInfoClass():
     def _setup_shared_info(self):
         # this allows shared info to make a class importer when needed
         self.msg_logger.reset()
-        self.block_timers = {}
+        self.timer.reset()
 
         # run info is a process wide singleton, so rebuild its values from the class defaults,
         # otherwise state leaks into any later run in the same process, eg "continuing" is set
@@ -296,11 +298,8 @@ class _SharedInfoClass():
                     if i is not None:  p.append(i)
         return p
     def block_timer(self,name, t0):
-        b = self.block_timers
-        if name not in b:
-            b[name] = dict(time=0.,calls=0)
-        b[name]['time'] += perf_counter()-t0
-        b[name]['calls'] += 1
+        # legacy, adds time since t0 under the timer now running, use  "with si.timer(name):"  instead
+        self.timer.add_elapsed(name, t0)
 
     def _accumulate_cell_finder_stats_in_runinfo(self, new_counts :dict):
         # acumuate counts of particle numbers walk, bad etc

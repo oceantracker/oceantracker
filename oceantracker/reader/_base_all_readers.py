@@ -514,7 +514,7 @@ class _BaseReader(ParameterBaseClass):
 
         if not self.are_time_steps_in_buffer(time_sec):
 
-            self.start_update_timer()
+            self.start_update_timer(add_to_timer_tree=False)  # already timed as "Reading hindcast"
             self.fill_time_buffer(time_sec)  # get next steps into buffer if not in buffer
 
             self.stop_update_timer()

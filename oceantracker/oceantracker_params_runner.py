@@ -16,7 +16,7 @@ from oceantracker.shared_info import shared_info as si
 
 from time import  perf_counter
 from oceantracker.util.message_logger import OTinput_error, OTfatal_error, OTunexpected_error
-from oceantracker.util import profiling_util, computer_info_util
+from oceantracker.util import profiling_util, computer_info_util, timer_tree
 
 from oceantracker.util import time_util, output_util, save_state_util
 
@@ -48,14 +48,16 @@ class OceanTrackerParamsRunner(object):
         err_hint = 'check for first error above or in log file.txt or .err file '
 
         try:
-            t0 = perf_counter()
-            # unpack params into working version as si.working_params
-            # and set up output directory and log file
-            self._do_setup(user_given_params)
+            with si.timer('Setup'):
+                # unpack params into working version as si.working_params
+                # and set up output directory and log file
+                self._do_setup(user_given_params)
 
-            ml.msg(f'Starting user param. runner at { time_util.iso8601_str(datetime.now())}', tabs=2)
-            ml.hori_line()
-            si.block_timer('Setup', t0)
+                ml.msg(f'Starting user param. runner at { time_util.iso8601_str(datetime.now())}', tabs=2)
+                ml.hori_line()
+
+            # numba's environment is now set up, so can import it to time its compiles
+            si.timer.start_numba_compile_timing()
 
             if si.settings.cProfile:
                 ml.msg('Activated cProfiler', hint='Profiling may slow code', warning=True)
@@ -85,6 +87,8 @@ class OceanTrackerParamsRunner(object):
         except Exception as e:
             si.msg_logger.write_error_log_file(e, si)
             ml.msg(f' Unexpected error  ', error=True, hint=err_hint)
+
+        si.timer.stop_numba_compile_timing()
 
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
@@ -209,20 +213,21 @@ class OceanTrackerParamsRunner(object):
 
 
 # - -------- start set up---------------------------------------------------------------------
-        # must make fields first, so other claseses can add own required fields
-        self._build_field_group_manager(si.working_params)
+        with si.timer('Building classes'):
+            # must make fields first, so other claseses can add own required fields
+            self._build_field_group_manager(si.working_params)
 
-        self._make_all_class_instances_from_params(si.working_params)
-        ##raise Exception('debug -error handing check')
+            self._make_all_class_instances_from_params(si.working_params)
+            ##raise Exception('debug -error handing check')
 
-        # add release groups and find start and end times based on release groups
-        self._add_release_groups_to_get_run_start_end(si.working_params)
+            # add release groups and find start and end times based on release groups
+            self._add_release_groups_to_get_run_start_end(si.working_params)
 
-        self._initial_setup_all_classes(si.working_params)
+            self._initial_setup_all_classes(si.working_params)
 
-        self._final_setup_all_classes()
+            self._final_setup_all_classes()
 
-        self._do_run_integrity_checks()
+            self._do_run_integrity_checks()
 
         # check memory usage
         mem_used = psutil.Process().memory_info().vms
@@ -239,24 +244,27 @@ class OceanTrackerParamsRunner(object):
         si.msg_logger.msg(f'Time step {si.settings.time_step:5.1f} sec', tabs=3)
         si.msg_logger.msg(f'using: A_Z_profile = {si.settings.use_A_Z_profile}, bottom_stress = {si.settings.use_bottom_stress}', tabs=4)
         # solve
-        si.core_class_roles.solver.solve() # do time stepping
+        with si.timer('Time stepping'):
+            si.core_class_roles.solver.solve() # do time stepping
 
         # -----------done -------------------------------
-        t0_close= perf_counter()
-        si.output_files['release_groups'] = output_util.write_release_group_netcdf(si)  # write release groups
-        ml.hori_line('Closing all classes')
-        for i in si._all_class_instance_pointers_iterator(): i.close()  # close all instances, eg their files if not close etc
+        with si.timer('Close down'):
+            si.output_files['release_groups'] = output_util.write_release_group_netcdf(si)  # write release groups
+            ml.hori_line('Closing all classes')
+            with si.timer('Closing classes'):
+                for i in si._all_class_instance_pointers_iterator(): i.close()  # close all instances, eg their files if not close etc
 
-        # check for non-releases
-        # flag if some release groups did not release
-        for name, i in si.class_roles.release_groups.items():
-            if i.info['number_released'] == 0:
-                ml.msg(f'No particles were released by release_group named= "{name}"', 
-                       strong_warning=True,
-                       caller=i,
-                       hint='Release point/polygon or grid may be outside domain and or in permanently dry cells?, mismatch of release coords and hindcast, betweem meters and GPS? )')
+            # check for non-releases
+            # flag if some release groups did not release
+            for name, i in si.class_roles.release_groups.items():
+                if i.info['number_released'] == 0:
+                    ml.msg(f'No particles were released by release_group named= "{name}"',
+                           strong_warning=True,
+                           caller=i,
+                           hint='Release point/polygon or grid may be outside domain and or in permanently dry cells?, mismatch of release coords and hindcast, betweem meters and GPS? )')
 
-        case_info_file = self._write_case_info_file(self.start_date, self.start_time)
+            with si.timer('Write case info file'):
+                case_info_file = self._write_case_info_file(self.start_date, self.start_time)
 
         # ----- wrap up ---------------------------------
         ml.set_screen_tag('end')
@@ -264,25 +272,30 @@ class OceanTrackerParamsRunner(object):
         
         # write a summary of errors etc
         ml.msg(f'Finished "{si.run_info.tag}"')
-        si.block_timer('Close down', t0_close)
-
-        # performance
-        total_time = perf_counter() - self.start_time
-        ml.msg('Timings:', tabs=2)
-
-        timings = [('Total', total_time)]
-        timings += [(name, item['time']) for name, item in si.block_timers.items()]
-        # core physics timing
-        for name in ['resuspension', 'dispersion', 'tracks_writer', 'integrated_model']:
-            if si.core_class_roles[name] is not None:
-                timings.append((name, si.core_class_roles[name].info['time_spent_updating']))
-
-        # fixed widths so columns stay aligned for runs of up to a year (31,536,000.00 s, 13 chars)
-        name_width = max(len(name) for name, _ in timings)
-        for name, t in timings:
-            ml.msg(f'{name:<{name_width}}  {t:>13,.2f} s  {100 * t / total_time:5.1f}%', tabs=3)
+        self._print_timings()
 
         return case_info_file
+
+    @staticmethod
+    def _timer_snapshot():
+        # timer tree with all numba compile time, wherever it was triggered, moved into setup
+        snapshot = si.timer.snapshot()
+        return timer_tree.move_timer_under(snapshot, timer_tree.numba_compile_name, 'Setup')
+
+    def _print_timings(self):
+        # timer tree, with time not covered by a timer's displayed children as "Other"
+        ml = si.msg_logger
+        snapshot = self._timer_snapshot()
+        total_time = max(snapshot['time'], 1e-9)
+        # class instance timers are named by the instance's name, eg "water_velocity", show these in the same style as the others
+        rows = [('    ' * depth + name[:1].upper() + name[1:].replace('_', ' '), t)
+                for depth, name, t in si.timer.table_rows(snapshot, min_fraction=0.001)]
+
+        # fixed widths so columns stay aligned for runs of up to a year (31,536,000.00 s, 13 chars)
+        name_width = max(len(name) for name, _ in rows)
+        ml.msg('Timings:', tabs=1)
+        for name, t in rows:
+            ml.msg(f'{name:<{name_width}}  {t:>13,.2f} s  {100 * t / total_time:5.1f}%', tabs=2)
 
     def _make_all_class_instances_from_params(self, working_params):
 
@@ -638,17 +651,19 @@ class OceanTrackerParamsRunner(object):
         for n in np.argsort(np.asarray(times))[::-1]:
             d['performance']['function_timers'][keys[n]]= profiling_util.func_timings[keys[n]]
 
-        # block timings in time order
-        b = si.block_timers
-        times = np.asarray( [item['time'] for key, item in b.items()])
-        order = np.argsort(times)[::-1]
-        for key in [list(b.keys())[i] for i in order]:
+        # timer tree, timers still running, eg "Close down", have their time so far
+        snapshot = self._timer_snapshot()
+        d['performance']['timer_tree'] = snapshot
+
+        # block timings, ie. each timer summed over all places it occurs, in time order
+        b = si.timer.totals_by_name(snapshot)
+        for key in sorted(b.keys(), key=lambda k: b[k]['time'], reverse=True):
             l = f' {100*b[key]["time"]/elapsed_time_sec:5.1f}% {key} : calls {b[key]["calls"]:4d}, {time_util.seconds_to_pretty_duration_string(b[key]["time"])}'
             d['performance']['block_timings'].append(l)
         d['performance']['block_timings'].append(f'--- Total time {time_util.seconds_to_pretty_duration_string(elapsed_time_sec)}')
 
         # check numba code for SIMD
-        if True:
+        with si.timer('Numba code info'):
             from oceantracker.util import numba_util
             d['numba_code_info'] = numba_util.get_numba_func_info()
 

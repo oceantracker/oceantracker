@@ -227,23 +227,21 @@ class ParticleGroupManager(ParameterBaseClass):
         particle_operations_util.set_value_and_add(part_prop['age'].used_buffer(), time_sec,
                                                    part_prop['time_released'].used_buffer(), active, scale= -1.)
 
-        t0 = perf_counter()
         # first interpolate to give particle properties from reader derived fields
-        for name,i in cr.particle_properties.items():
-            if isinstance(i, FieldParticleProperty):
-                i.timed_update(n_time_step, time_sec, active)
-        si.block_timer('Interpolate fields', t0)
+        with si.timer('Interpolate fields'):
+            for name,i in cr.particle_properties.items():
+                if isinstance(i, FieldParticleProperty):
+                    i.timed_update(n_time_step, time_sec, active)
 
         # NOTE classes based on ManuallyUpdatedParticleProperty are ignored here,
         # as other classes/code call their upadte when needed
         # eg classes with schedular only call up date of a ManuallyUpdatedParticleProperty when they need it to compute ot write
 
-        t0 = perf_counter()
         # user/custom particle prop are updated after reader based prop. , as reader prop.  may be need for their update
-        for name, i in cr.particle_properties.items():
-            if isinstance(i, CustomParticleProperty):
-                i.timed_update(n_time_step, time_sec, active)
-        si.block_timer('Update custom particle prop.',t0)
+        with si.timer('Update custom particle prop.'):
+            for name, i in cr.particle_properties.items():
+                if isinstance(i, CustomParticleProperty):
+                    i.timed_update(n_time_step, time_sec, active)
 
 
     def status_counts_and_kill_old_particles(self, t):

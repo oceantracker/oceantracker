@@ -129,7 +129,8 @@ class CompactTracksWriter(_BaseWriter):
     def write_all_time_varying_prop_and_data(self):
         # write particle data at current time step, if none then a forced write
         # write time vary info , eg "time"
-        self.start_update_timer()
+        # timed by the caller's start/stop_update_timer,
+        # starting it again here would overwrite the caller's start time
         info = self.info
         part_prop = si.class_roles.particle_properties
         time_varying_info = si.class_roles.time_varying_info
@@ -152,7 +153,6 @@ class CompactTracksWriter(_BaseWriter):
 
         info['time_steps_written_to_current_file'] += 1  # time steps in current file
         self.info['total_time_steps_written'] += 1  # time steps written since the start
-        self.stop_update_timer()
 
     def _close_file(self):
 

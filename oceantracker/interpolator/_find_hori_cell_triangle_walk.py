@@ -3,6 +3,7 @@ import numpy as np
 import numba as nb
 from oceantracker.shared_info import shared_info as si
 from time import perf_counter
+from oceantracker.util.timer_tree import timed
 from oceantracker.util import numpy_util
 from oceantracker.interpolator.util import triangle_interpolator_util,  find_initial_cell
 
@@ -71,11 +72,10 @@ class FindHoriCellTriangleWalk(object):
         info['number_of_triangles_walked'] = 0
 
 
+    @timed('Find initial horizontal cell')
     def find_initial_hori_cell(self, xq):
         # find nearest cell to xq
-        t0 = perf_counter()
         n_cell, bc, is_inside_domain= find_initial_cell.find_hori_cellKDtree(xq, self.grid, self.KDtree, self.params['bc_walk_tol'])
-        si.block_timer('Find initial horizontal cell', t0)
         return n_cell, bc, is_inside_domain
 
     def find_cell(self,xq, active):

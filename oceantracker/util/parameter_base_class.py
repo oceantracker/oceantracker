@@ -125,12 +125,18 @@ class ParameterBaseClass(_RootParameterBaseClass):
 
     def update(self, n_time_step, time_sec, alive) :pass
 
+    def _timer_name(self):
+        # name of this instance in the run's timer tree
+        name = self.params.get('name')
+        return self.__class__.__name__ if name is None else name
+
     def timed_update(self, n_time_step, time_sec, alive=None):
         t0 = perf_counter()
-        if alive is None:
-            self.update(n_time_step, time_sec) # legacy code
-        else:
-            self.update(n_time_step, time_sec, alive)
+        with si.timer(self._timer_name()):
+            if alive is None:
+                self.update(n_time_step, time_sec) # legacy code
+            else:
+                self.update(n_time_step, time_sec, alive)
 
         info = self.info
         dt = perf_counter() - t0
@@ -142,10 +148,15 @@ class ParameterBaseClass(_RootParameterBaseClass):
 
         pass
 
-    def start_update_timer(self): self.update_timer_t0 = perf_counter()
+    def start_update_timer(self, add_to_timer_tree=True):
+        # add_to_timer_tree=False when the caller already has its own timer in the tree
+        self._update_timer_in_tree = add_to_timer_tree
+        if add_to_timer_tree: si.timer.start(self._timer_name())
+        self.update_timer_t0 = perf_counter()
 
     def stop_update_timer(self):
         dt= perf_counter() -  self.update_timer_t0
+        if self._update_timer_in_tree: si.timer.stop()
         self.info['time_spent_updating'] += dt
         self.info['update_calls'] += 1
 

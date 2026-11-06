@@ -10,6 +10,7 @@ from oceantracker.util.parameter_base_class import ParameterBaseClass
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC
 from oceantracker.solver.util import solver_util
 from oceantracker.shared_info import shared_info as si
+from oceantracker.util.timer_tree import timed
 from oceantracker.util.basic_util import get_role_from_base_class_file_name
 
 class Solver(ParameterBaseClass):
@@ -83,9 +84,8 @@ class Solver(ParameterBaseClass):
         ml.hori_line()
 
         # initial buffer fill
-        tr0 = perf_counter()
-        fgm.update_readers(model_times[0])
-        si.block_timer('Reading hindcast', tr0)
+        with si.timer('Reading hindcast'):
+            fgm.update_readers(model_times[0])
 
 
         # run forwards through model time variable, which for backtracking are backwards in time
@@ -105,7 +105,8 @@ class Solver(ParameterBaseClass):
             self._load_saved_state()
         else:
             # normal start
-            new_particle_indices = pgm.release_particles(nt1,t1 )
+            with si.timer('Releasing particles'):
+                new_particle_indices = pgm.release_particles(nt1,t1 )
             self._pre_step_bookkeeping(nt1, t1, new_particle_indices)
 
         ri.time_steps_completed = nt1
@@ -127,25 +128,23 @@ class Solver(ParameterBaseClass):
         for n_time_step  in range(nt1, model_times.size-1):
 
             t0_step = perf_counter()
-            self.start_update_timer()
+            self.start_update_timer(add_to_timer_tree=False) # time stepping is already timed by the runner
             t1 = model_times[n_time_step]
             # record info for any error dump
             info['time_sec'] = t1
 
-            tr0 = perf_counter()
-            fgm.update_readers(t1)
-            si.block_timer('Reading hindcast', tr0)
+            with si.timer('Reading hindcast'):
+                fgm.update_readers(t1)
 
 
             # do integration step only for moving particles should this only be moving particles, with vel modifications and random walk
             is_moving = part_prop['status'].compare_all_to_a_value('eq', si.particle_status_flags.moving,  out=self.get_partID_buffer('B1'))
 
             # update particle velocity modification prior to integration
-            t0v= perf_counter()
-            part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
-            for name, i in si.class_roles.velocity_modifiers.items():
-                i.timed_update(n_time_step, t1, is_moving)
-            si.block_timer('Velocity modifiers', t0v)
+            with si.timer('Velocity modifiers'):
+                part_prop['velocity_modifier'].set_values(0., is_moving)  # zero out  modifier, to add in current values
+                for name, i in si.class_roles.velocity_modifiers.items():
+                    i.timed_update(n_time_step, t1, is_moving)
 
             # dispersion is done by random walk
             # by adding to velocity modifier prior to integration step
@@ -163,9 +162,8 @@ class Solver(ParameterBaseClass):
             t2 = model_times[nt2]
 
             # release particles
-            tr0 = perf_counter()
-            new_particle_indices = pgm.release_particles(nt2, t2)
-            si.block_timer('Releasing particles', tr0)
+            with si.timer('Releasing particles'):
+                new_particle_indices = pgm.release_particles(nt2, t2)
 
             # do stats etc updates and write tracks at new time step
             self._pre_step_bookkeeping(nt2, t2, new_particle_indices)
@@ -218,6 +216,7 @@ class Solver(ParameterBaseClass):
         ri.computation_duration = datetime.now() -computation_started
 
 
+    @timed('Bookkeeping')
     def _pre_step_bookkeeping(self, n_time_step,time_sec,
                               new_particle_indices=np.full((0,),0,dtype=np.int32)):
         part_prop = si.class_roles.particle_properties
@@ -241,10 +240,9 @@ class Solver(ParameterBaseClass):
         #fgm.interp_field_at_particle_locations('water_depth', alive, output=part_prop['water_depth'].data)
 
         # trajectory modifiers
-        t0 = perf_counter()
-        for name, i in si.class_roles.trajectory_modifiers.items():
-            i.timed_update(n_time_step, time_sec, alive)
-        si.block_timer('Trajectory modifiers', t0)
+        with si.timer('Trajectory modifiers'):
+            for name, i in si.class_roles.trajectory_modifiers.items():
+                i.timed_update(n_time_step, time_sec, alive)
 
         alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.outside_open_boundary, out=self.get_partID_buffer('B1'))
 
@@ -264,7 +262,7 @@ class Solver(ParameterBaseClass):
 
         # update integrated models, eg LCS
         if si.core_class_roles.integrated_model is not None :
-            si.core_class_roles.integrated_model.update(n_time_step, time_sec)
+            si.core_class_roles.integrated_model.timed_update(n_time_step, time_sec)
 
         # write tracks
         if si.settings.write_tracks:
@@ -288,6 +286,7 @@ class Solver(ParameterBaseClass):
             i = si.core_class_roles.resuspension
             i.timed_update(n_time_step, time_sec, alive)
 
+    @timed('RK integration')
     def do_time_step(self, time_sec, is_moving):
 
         fgm = si.core_class_roles.field_group_manager
@@ -329,12 +328,12 @@ class Solver(ParameterBaseClass):
         fgm.setup_time_step(time_sec, x1, is_moving)
 
         if RK_order==1:
-            fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=water_velocity)
+            self._interp_water_velocity(is_moving, water_velocity)
             self._euler_substep(x1, water_velocity, velocity_modifier, dt, is_moving, x2)
             return
 
         # do first half step location from RK1 to update values
-        fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
+        self._interp_water_velocity(is_moving, v_temp)
 
         self._euler_substep(x1, v_temp, velocity_modifier, dt2, is_moving, x2)
         particle_operations_util.scale_and_copy(water_velocity, v_temp, is_moving, scale=1.0 / 6.0)   # accumulate RK velocity to reduce space taken by temporary working variables
@@ -346,11 +345,11 @@ class Solver(ParameterBaseClass):
         fgm.setup_time_step(t2, x2, is_moving)
 
         if RK_order==2:
-            fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=water_velocity)
+            self._interp_water_velocity(is_moving, water_velocity)
             self._euler_substep(x1, water_velocity, velocity_modifier, dt, is_moving, x2)
             return
 
-        fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
+        self._interp_water_velocity(is_moving, v_temp)
         self._euler_substep(x1, v_temp, velocity_modifier, dt2, is_moving, x2)
         particle_operations_util.add_to(water_velocity, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity step 2
 
@@ -358,14 +357,14 @@ class Solver(ParameterBaseClass):
         # step 3, a second half step
         t2 = time_sec + 0.5 * dt
         fgm.setup_time_step(t2, x2, is_moving)
-        fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
+        self._interp_water_velocity(is_moving, v_temp)
         self._euler_substep(x1, v_temp, velocity_modifier, dt, is_moving, x2)  # improve half step position values
         particle_operations_util.add_to(water_velocity, v_temp, is_moving, scale=2.0 / 6.0)  # next accumulation of velocity from step 3
 
         # step 4, full step
         t2 = time_sec + dt
         fgm.setup_time_step(t2,  x2, is_moving)
-        fgm.interp_field_at_particle_locations('water_velocity', is_moving, output=v_temp)
+        self._interp_water_velocity(is_moving, v_temp)
         particle_operations_util.add_to(water_velocity, v_temp, is_moving, scale=1.0 / 6.0)  # last accumulation of velocity for v4
 
         # final location using  accumulation in "v"
@@ -376,9 +375,13 @@ class Solver(ParameterBaseClass):
 
         pass
 
+    @timed('Interpolate water velocity')
+    def _interp_water_velocity(self, is_moving, output):
+        si.core_class_roles.field_group_manager.interp_field_at_particle_locations('water_velocity', is_moving, output=output)
+
+    @timed('Euler substeps')
     def _euler_substep(self, xold, water_velocity, velocity_modifier, dt, active, xnew):
         part_prop = si.class_roles.particle_properties
-        t0 = perf_counter()
         if si.run_info.is3D_run:
             if si.settings.use_geographic_coords:
                 solver_util.euler_substep_geographic3D(part_prop['degrees_per_meter'].data,
@@ -391,7 +394,6 @@ class Solver(ParameterBaseClass):
                                                        xold, water_velocity, velocity_modifier, dt, active, xnew)
             else:
                 solver_util.euler_substep2D(xold, water_velocity, velocity_modifier, dt, active, xnew)
-        si.block_timer('RK integration', t0)
 
     def _screen_output(self, nt, time_sec,t0_model, t_step):
         ri = si.run_info
@@ -415,26 +417,21 @@ class Solver(ParameterBaseClass):
         s += f' step time = { t_step * 1000:4.1f} ms'
         si.msg_logger.msg(s)
 
+    @timed('Update statistics')
     def _update_stats(self,n_time_step, time_sec, alive):
         # update and write stats
-        t0 = perf_counter()
         for name, i in si.class_roles.particle_statistics.items():
             if i.schedulers['count_scheduler'].do_task(n_time_step) and i.params['write']:
                 i.open_file_if_needed()
                 i.timed_update(n_time_step, time_sec, alive)
 
-        si.block_timer('Update statistics', t0)
 
 
-
+    @timed('Update event loggers')
     def _update_events(self, n_time_step,  time_sec):
         # write events
-
-        t0 = perf_counter()
         for name, i in si.class_roles.event_loggers.items():
             i.timed_update(n_time_step,time_sec)
-
-        si.block_timer('Update event loggers', t0)
 
 
 
@@ -442,6 +439,7 @@ class Solver(ParameterBaseClass):
         pass
 
 
+    @timed('Save state')
     def _save_state(self, n_time_step, time_sec,state_dir):
 
         si.msg_logger.msg(f'save_state_for_restart at: {time_util.seconds_to_isostr(time_sec)}, time step= {n_time_step}'
@@ -494,6 +492,7 @@ class Solver(ParameterBaseClass):
             file.write("State Save complete.\n")
 
 
+    @timed('Load saved state')
     def _load_saved_state(self):
 
         rsi = si.saved_state_info
