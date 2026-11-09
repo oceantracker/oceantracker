@@ -8,7 +8,8 @@ def main(args):
     ot.settings(time_step=1800,
                 use_dispersion=False,
              use_A_Z_profile=False,
-                NUMBA_cache_code=True,
+            NUMBA_cache_code=True,
+            cache_hindcast_catalog=True,
             )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False)
@@ -32,7 +33,10 @@ def main(args):
 
     ot.add_class('particle_statistics', **dd.my_poly_stats_time,
                  polygon_list=[dict(points=hm['polygon'])])
-
+    ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False,
+                 turn_on_write_particle_properties_list=['nz_cell','z_fraction_water_velocity','z_fraction','water_velocity'],
+               time_steps_per_per_file= None if args.reference_case else 10  # dont split files ref case to test reading split files
+                 )
     case_info_file = ot.run()
 
     dd.compare_reference(case_info_file, args)

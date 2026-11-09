@@ -16,10 +16,11 @@ from oceantracker.util.parameter_checking import ParamValueChecker, ParameterLis
 
 def make_a_reader_from_params(users_reader_params):
 
-    _check_input_dir(users_reader_params)
-    dataset = OceanTrackerDataSet(users_reader_params)
+    file_list = _get_file_list(users_reader_params)
+    dataset = OceanTrackerDataSet(file_list)
+    dataset.build_catalog()
 
-    # detect reader format and add clas_name to params
+    # detect reader format and add class_name to params
     reader = _detect_hydro_file_format(users_reader_params, dataset)
     reader_params = reader.params # params may have changed
 
@@ -37,7 +38,7 @@ def make_a_reader_from_params(users_reader_params):
     # sort out which velocity variable to use
     # ie.  water_velocity field if present, otherwise try depth average velocity if present
     fvm = reader.params['field_variable_map']
-    file_vars = dataset.info['variables']
+    file_vars = dataset.catalog['variables']
 
     if fvm['water_velocity'][0] not in file_vars and fvm['water_velocity_depth_averaged'] is not None:
         fvm['water_velocity'] = fvm['water_velocity_depth_averaged']  # map to  depth average
@@ -54,7 +55,7 @@ def make_a_reader_from_params(users_reader_params):
     _make_variable_time_step_to_fileID_map(reader)
 
     info = reader.info
-    info.update(reader.dataset.info) # make data set and reader info the same
+    info.update(reader.dataset.catalog) # make data set and reader info the same
 
     # additional info on is D, vert grid type, node dim etc needed to size field buffers etc
     _standard_needed_info(reader) # common to all readers
@@ -103,7 +104,7 @@ def _standard_needed_info(reader):
     # info need to size the field reader buffers etc
     params= reader.params
     info = reader.info
-    ds_info = reader.dataset.info
+    ds_info = reader.dataset.catalog
     file_vars = ds_info['variables']
     dm = params['dimension_map']
     fvm = params['field_variable_map']
@@ -128,7 +129,7 @@ def _detect_hydro_file_format(reader_params, dataset):
         # look for reader amongst known readers
         readers_to_check = definitions.known_readers
 
-    ds_info = dataset.info
+    ds_info = dataset.catalog
     readers=[]
     is_format = []
     for name, class_name in readers_to_check.items():
@@ -162,7 +163,7 @@ def _detect_hydro_file_format(reader_params, dataset):
                error = True)
 
     # make and merge defaults for found reader
-    reader = readers[is_format.index(True)]
+    reader = readers[is_format.inde x(True)]
 
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
@@ -182,20 +183,20 @@ def _import_reader(reader_params, dataset):
 
 def _time_sort_files(reader):
     # sort variable fileIDs by time, now all files are read
-    ds_info= reader.dataset.info
+    cat= reader.dataset.catalog
 
-    ds_info['time_var'] = reader.params['grid_variable_map']['time']
+    cat['time_var'] = reader.params['grid_variable_map']['time']
 
-    time_var = ds_info['time_var']
-    time_var_info = ds_info['variables'][ time_var]
-    ds_info['time_dim'] = list(time_var_info['dims'].keys())[0]
+    time_var = cat['time_var']
+    time_var_info = cat['variables'][ time_var]
+    cat['time_dim'] = list(time_var_info['dims'].keys())[0]
 
     # add times to each files info
     # first read start times of all files
-    fi = ds_info['files']  # file names etc
-    for ID, f in enumerate(ds_info['files']):
+    file_info = cat['file_info']
+    for ID, f in enumerate(file_info):
         ds = reader.dataset._open_file(f['name'])
-        f['has_time'] =  ds_info['time_var'] in ds.variables
+        f['has_time'] =  cat['time_var'] in ds.variables
         if f['has_time']:
             time = ds[time_var].compute()
             time = np.round(reader.decode_time(time),3) # round to milli seconds
@@ -209,44 +210,42 @@ def _time_sort_files(reader):
             f['end_date'] = time_util.seconds_to_isostr(f['end_time'])
 
     # sort variable fileIDs into time order
-    for v_name, item in ds_info['variables'].items():
-        item['time_varying'] = ds_info['time_dim'] in item['dims']
+    for v_name, item in cat['variables'].items():
+        item['time_varying'] = cat['time_dim'] in item['dims']
         if  item['time_varying']:
             item['fileIDs'] = np.asarray(item['fileIDs'])
-            start_times = np.asarray([fi[x]['start_time'] for x in item['fileIDs']])
+            start_times = np.asarray([v['start_time'] for v in file_info])
             file_order = np.argsort(start_times)
             item['fileIDs'] = item['fileIDs'][file_order]
         else:
             item['fileIDs'] = item['fileIDs'][0]  # todo keep as list??
-
-
 
     #  build a time for every variables
     #  note time may appear in many files if variables are split between file, eg schsim v5 than once in each file
     # so must do this for all variables to ensure all files are covered, with some unnecessary repeats when more than one variable in same file
     #   time is not done as done a below as a "coordinate"
     vel_var0 = reader.params['field_variable_map']['water_velocity'][0]
-    for var_name, item in ds_info['variables'].items():
+    for var_name, item in cat['variables'].items():
         if not item['time_varying']: continue
         if var_name == time_var : continue
         # only look at time varying variables, which are not time
-        item['time'] = np.concatenate([fi[fID]['time'] for fID in item['fileIDs']])
+        item['time'] = np.concatenate([file_info[fID]['time'] for fID in item['fileIDs']])
 
     # set each file's first/last hindcast time step only from variables spanning the whole hindcast,
     # variables only in some of the files, eg. extra outputs added part way through a run,
     # would otherwise give file time steps counted from the first file they are in
-    n_steps = ds_info['variables'][vel_var0]['time'].size
+    n_steps = cat['variables'][vel_var0]['time'].size
     partial_vars = []
-    for var_name, item in ds_info['variables'].items():
+    for var_name, item in cat['variables'].items():
         if not item['time_varying'] or var_name == time_var: continue
         if item['time'].size != n_steps:
             partial_vars.append(var_name)
             continue
         n0 = 0
         for fID in item['fileIDs']:
-            fi[fID]['first_time_step_in_file'] = n0
-            fi[fID]['last_time_step_in_file'] = n0 + fi[fID]['time_steps'] - 1
-            n0 += fi[fID]['time_steps']
+            file_info[fID]['first_time_step_in_file'] = n0
+            file_info[fID]['last_time_step_in_file'] = n0 + file_info[fID]['time_steps'] - 1
+            n0 += file_info[fID]['time_steps']
 
     if len(partial_vars) > 0:
         si.msg_logger.msg(f'Hindcast variables only in some files, these can not be used as fields: {partial_vars}',
@@ -256,24 +255,40 @@ def _time_sort_files(reader):
     # if variables in different files, eg schism v5, time may be in many files,
     #  only use file IDs for the ones for the first water velocity variable, which must always be in hindcasts
     vel_var0= reader.params['field_variable_map']['water_velocity'][0]
-    time =  ds_info['variables'][vel_var0]['time']
-    ds_info['time_coord'] = time
+    time =  cat['variables'][vel_var0]['time']
+    cat['time_coord'] = time
 
     if time.size < 2:
         si.msg_logger.msg('Velocity variable in hydro files has less than 2 time steps', hint = 'need at least 2 steps for particle tracking', fatal_error=True)
 
    # hindcast start and ends times from time_coord
-    ds_info['start_time'] = time[0]
-    ds_info['end_time'] = time[-1]
-    ds_info['duration'] = time[-1] - time[0]
-    ds_info['total_time_steps'] =  time.size
-    ds_info['time_step'] = np.median(np.diff(time)) # tim syep but try to aviod glitched is hindcast times due to missing files
+    cat['start_time'] = time[0]
+    cat['end_time'] = time[-1]
+    cat['duration'] = time[-1] - time[0]
+    cat['total_time_steps'] =  time.size
+    cat['time_step'] = np.median(np.diff(time)) # tim syep but try to aviod glitched is hindcast times due to missing files
 
-    ds_info['start_date'] = time_util.seconds_to_isostr(ds_info['start_time'])
-    ds_info['end_date'] = time_util.seconds_to_isostr(ds_info['end_time'])
-    ds_info['dates'] = time_util.seconds_to_isostr( time)
+    cat['start_date'] = time_util.seconds_to_isostr(cat['start_time'])
+    cat['end_date'] = time_util.seconds_to_isostr(cat['end_time'])
+    cat['dates'] = time_util.seconds_to_isostr( time)
 
     pass
+
+def _find_all_variables_and_times(reader_params):
+    ml = si.msg_logger
+
+    # work out which reader class names need to be checked to find time variable
+
+    if 'class_name' in reader_params:
+        ml.progress_marker(f'Using given reader parameter class_name = "{reader_params["class_name"]}"')
+        readers_to_check = dict(user_named_reader=reader_params[ 'class_name'] )
+    else:
+        # look for reader amongst known readers
+        readers_to_check = definitions.known_readers
+
+
+
+    return
 
 def _catalog_fields(reader):
     # categorise field variables
@@ -348,7 +363,7 @@ def _catalog_fields(reader):
     info['field_info'] = reader_field_vars_map
 
 
-def _check_input_dir(reader_params):
+def _get_file_list(reader_params):
     ml = si.msg_logger
 
     # check params and folders exists
@@ -360,22 +375,28 @@ def _check_input_dir(reader_params):
         ml.msg(f'Could not find input dir "{reader_params["input_dir"]}"',
                hint='Check reader parameter "input_dir"', fatal_error=True)
 
-    # file mask is optional
-    if 'file_mask' not in reader_params: reader_params['file_mask'] = None
+    mask = path.join(reader_params['input_dir'], '**', reader_params['file_mask'])  # add subdir search
+    file_list = glob(mask, recursive=True)
+    if len(file_list) == 0:
+        si.msg_logger.msg(f'No files found in input_dir, or its sub-dirs matching mask "{mask}"',
+                          hint=f'searching with "gob" mask "{mask}"', fatal_error=True)
 
+    ml.progress_marker(f'Found {len(file_list)} files in dir and sub-dirs of "{reader_params["input_dir"]}"')
+
+    return file_list
 
 def _make_variable_time_step_to_fileID_map(reader):
 
     # make time step to fileID map and file offset map for every time step, accounting for each variable's file order
-    info = reader.dataset.info
-    for v_name, item in info['variables'].items():
+    cat = reader.dataset.catalog
+    for v_name, item in cat['variables'].items():
         if not item['time_varying']: continue
 
         time_step_fileID_map = np.zeros((0,),dtype=np.int32)
         time_step_file_offset_map = np.zeros((0,), dtype=np.int32)
 
         for fileID in  item['fileIDs']: #IDs have aleady been time sorted
-            fi = info['files'][fileID]
+            fi = cat['file_info'][fileID]
             time_step_fileID_map =  np.append(time_step_fileID_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
             time_step_file_offset_map = np.append(time_step_file_offset_map,  np.arange(fi['time_steps'], dtype=np.int32))
             pass
@@ -388,7 +409,8 @@ def _make_variable_time_step_to_fileID_map(reader):
 def hindcast_variable_integrity_report(reader):
     # use readers map checker to find which ones are in the file
     ds = reader.dataset
-    file_vars = ds.info['variables']
+    cat=ds.catalog
+    file_vars = cat['variables']
     params= reader.params
     ml = si.msg_logger
 
@@ -400,7 +422,7 @@ def hindcast_variable_integrity_report(reader):
 
         for key, val in dp.items():
             if key.startswith('control_key'): continue
-            file_names = ds.info['dims'] if map_type == 'dimension_map' else file_vars
+            file_names = cat['dims'] if map_type == 'dimension_map' else file_vars
 
             if not isinstance(val,(ParameterMapAlternativesChecker,ParameterListMapAlternativesChecker)) :
                 # legacy variable maps with PCC and PLC, check if variable/param value  (or first if list of variables) in the file
@@ -414,7 +436,7 @@ def hindcast_variable_integrity_report(reader):
             # new alternatives mappings
             if p[key] is None: # no user value given
                 # choose from alternatives
-                available = ds.info['dims'] if map_type == 'dimension_map' else ds.info['variables']
+                available = cat['dims'] if map_type == 'dimension_map' else cat['variables']
                 p[key] = dp[key].choose_alternative(available) # already have a default or user given value  for var
 
             if type(val) == ParameterMapAlternativesChecker:

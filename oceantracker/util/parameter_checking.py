@@ -313,12 +313,12 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
 
         return value
 
-# specilsed checkser for hindcast variable maps
+# specialised checkers for hindcast variable maps, where there may be more than one option in map
 class ParameterMapAlternativesChecker(object):
-    # checks maps, if no user value given seeks map amonst avaible alternatives
+    # checks maps, if no user value given seeks map amongst available alternatives in file
     # used in  field, dimension and grid  maps to hindcast file variables
-    # reqruires manual/external of class  code to check against alteratices
-    # if user value/map given, then this is assues this is correct and does not look at alternatives
+    # requires manual/external of class  code to check against alteratices
+    # if user value/map given, then this is assuming this is correct and does not look at alternatives
     def __init__(self,alternatives,data_type=str, doc_str :str =None):
 
         if type(alternatives) == data_type:
@@ -331,7 +331,7 @@ class ParameterMapAlternativesChecker(object):
 
     def check_value(self, key, value, msg_logger, caller):
         if type(value) != self.data_type:
-            msg_logger.msg(f'Parameter {key} must be type {self.data_type}, got vale {str(v)} of type {str(type(v))}', caller=caller, error = True,
+            msg_logger.msg(f'Parameter {key} must be type {self.data_type}, got value {str(value)} of type {str(type(value))}', caller=caller, error = True,
                        hint=f'Given key values are,  {key} = {str(value)}')
         return value
 
