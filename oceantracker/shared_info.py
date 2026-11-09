@@ -71,6 +71,9 @@ class _DefaultSettings(definitions._AttribDict):
                 doc_str='Include random walk, allows it to be turned off if needed for applications like Lagrangian coherent structures')
     use_resuspension = PVC(True, bool,
                 doc_str='Allow particles to resuspend')
+    cache_hindcast_catalog= PVC(False, bool,
+                doc_str='Speed startup by writing copy of hindcast catalog to reuse future runs')
+
     cProfile =  PVC(False, bool,  doc_str='Use cProfile to debug code performance and write results to output dir. Only use for debugging as profiling slows code execution')
     processors= PVC(None, int, min=1,
                  doc_str='Maximum number of threads to use in parallelization, default = number of physical computer cores. Use a smaller value to reduce load to enable other prgrams to run better during particle tracking')

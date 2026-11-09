@@ -156,7 +156,7 @@ class _BaseReader(ParameterBaseClass):
         fvm = params['field_variable_map']
         gvm = params['grid_variable_map']
         dm = params['dimension_map']
-        file_vars = dataset.info['variables']
+        file_vars = dataset.catalog['variables']
 
         if fvm['water_velocity'][0] in file_vars:
             vel_vars = fvm['water_velocity']
@@ -584,7 +584,7 @@ class _BaseReader(ParameterBaseClass):
         bi['time_steps_in_buffer'] = nt_available.tolist()
         num_read = nt_available.size
         bi['buffer_available'] -= num_read
-        si.msg_logger.progress_marker(f' read {num_read:3d} time steps in  {perf_counter() - t0:3.1f} sec, from {info["input_dir"]} ', tabs=2)
+        si.msg_logger.progress_marker(f' read {num_read:3d} time steps in  {perf_counter() - t0:3.1f} sec, from {params["input_dir"]} ', tabs=2)
 
 
     def read_field_data(self, name, field, nt_index=None):

@@ -39,7 +39,8 @@ def setup_output_dir(si):
                     caseInfo_file= 'caseInfo.json',
                     saved_state_dir='saved_state',
                     completion_state_dir='completion_state',
-                    grid = [] # may be more than one grid if nested
+                    grid = [], # may be more than one grid if nested
+                    oceantracker_cache=path.basename(run_output_dir) # cache beside output folder
                     )
     if si.settings.restart_interval is not None \
             and path.isdir(output_files['saved_state_dir'])  \

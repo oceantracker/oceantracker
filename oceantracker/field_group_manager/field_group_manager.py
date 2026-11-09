@@ -38,7 +38,7 @@ class FieldGroupManager(ParameterBaseClass):
         self.reader, add_info = self._make_a_reader(reader_params)
         # write catalog
         json_util.write_JSON(path.join(si.run_info.run_output_dir, f'hindcast_catalog{info["gridID"]:03d}'),
-                             self.reader.dataset.info)
+                             self.reader.dataset.catalog)
         self.interpolator = self._set_up_interpolator( self.reader)
 
         if gridID == 0:
@@ -163,7 +163,6 @@ class FieldGroupManager(ParameterBaseClass):
             # 2D run
             self.interpolator.update_tide_waterdepth(fields,info['current_buffer_steps'], info['weight_time_steps'],
                                                      active)
-
     def _make_a_reader(self, reader_params):
         # build a readers
         reader = setup_reader.make_a_reader_from_params(reader_params)
@@ -177,7 +176,7 @@ class FieldGroupManager(ParameterBaseClass):
         # tag field group as 3D etc
         add_info= {}
         for n in ['is3D', 'geographic_coords','has_A_Z_profile','has_open_boundary',
-                  'has_bottom_stress','start_time','end_time','input_dir']:
+                  'has_bottom_stress','start_time','end_time']:
             add_info[n] = reader.info[n]
         return reader, add_info
 
