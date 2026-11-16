@@ -5,6 +5,8 @@ from dataclasses import  dataclass, field
 from _datetime import datetime
 from typing import List, ClassVar
 import numpy as np
+from typing_extensions import Reader
+
 from oceantracker.util import  time_util, basic_util
 
 crumb_seperator= ' >> '
@@ -38,7 +40,11 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None):
         msg =f'Parameter "{key}"'
         if key not in params: params[key] = None  # add None /not given if not present
 
-        if isinstance(item,(_ParameterBaseDataClassChecker,ParameterMapAlternativesChecker)):
+        if isinstance(item,ReaderMapAlternativesChecker):
+            continue  # if not user given, delay merge till variables in file are known, tp check against alternatines
+
+        elif isinstance(item,_ParameterBaseDataClassChecker):
+            # do merge with defaults
             params[key] = item.get_value(key, params[key], msg_logger, caller)
 
         elif type(item) == dict:
@@ -314,7 +320,7 @@ class ParameterCoordsChecker(_ParameterBaseDataClassChecker):
         return value
 
 # specialised checkers for hindcast variable maps, where there may be more than one option in map
-class ParameterMapAlternativesChecker(object):
+class ReaderMapAlternativesChecker(object):
     # checks maps, if no user value given seeks map amongst available alternatives in file
     # used in  field, dimension and grid  maps to hindcast file variables
     # requires manual/external of class  code to check against alteratices
@@ -354,7 +360,10 @@ class ParameterMapAlternativesChecker(object):
                 return a
         return  None
 
-class ParameterListMapAlternativesChecker(ParameterMapAlternativesChecker):
+    def get_default(self):
+        return [] if self.alternatives is None else self.alternatives
+
+class ReaderListMapAlternativesChecker(ReaderMapAlternativesChecker):
 
     def __init__(self,alternatives,data_type=str, doc_str :str =None):
 

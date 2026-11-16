@@ -35,7 +35,7 @@ class _BaseReader(ParameterBaseClass):
                                doc_str=' A list of names of any additional variables to read and interplolate to give particle values, eg. a concentration field (water_veloctiy, tide and water_depth fields are always loaded). If a given name is in field_variable_map, then the mapped file variables will be used internally and in output. If not the given file variable name will be used internally and in particle property output. For any additional vector fields user must supply a file variable map in the "field_variable_map" parameter',
                                make_list_unique=True),
             required_feilds=PLC(['water_depth'], str,
-                                doc_str='List of internal variables that must be in the hindcast (water_velocity is deal with separately)'),
+                                doc_str='List of internal variables that must be in the hindcast (water_velocity is dealt with separately)'),
             required_grid_variables=PLC(['time', 'x', 'y'], str,
                                 doc_str='List of internal variables that must be in the hindcast'),
             required_dimensions=PLC([], str,    doc_str='List of internal dimension_map names that must be in the hindcast'),
@@ -149,24 +149,23 @@ class _BaseReader(ParameterBaseClass):
 
     def final_setup(self):      pass
 
-    def detect_vel_var_and_if_3D(self, dataset):
+    def detect_vel_var_and_if_3D(self, var_info, dim_info):
         # work out if vel or depth aver. vel is present and if these are 2D
         # hindcast is 3D if velocity has any z dim
         params= self.params
         fvm = params['field_variable_map']
         gvm = params['grid_variable_map']
         dm = params['dimension_map']
-        file_vars = dataset.catalog['variables']
 
-        if fvm['water_velocity'][0] in file_vars:
+        if fvm['water_velocity'][0] in var_info:
             vel_vars = fvm['water_velocity']
-        elif fvm['water_velocity_depth_averaged'][0] in file_vars:
+        elif fvm['water_velocity_depth_averaged'][0] in var_info:
             vel_vars =fvm['water_velocity_depth_averaged']
         else:
             vel_vars=None
         # see if vel has any z dimensions
         if vel_vars is not None:
-            is3D = any([d in file_vars[vel_vars[0]]['dims'] for d in params['all_z_dims']])
+            is3D = any([d in var_info[vel_vars[0]]['dims'] for d in params['all_z_dims']])
         else:
             is3D= False
         return vel_vars, is3D

@@ -13,29 +13,25 @@ class OceanTrackerDataSet(object):
     Copes with variables being held in different files
     assumes - all files with variables with t time dimension have time in same file
     '''
-    def __init__(self, file_list):
+    def __init__(self,reader, file_info, var_info, dim_info):
+        # construct catalog
 
-        self.catalog=dict(variables={},  dims={}, attributes={},
-            file_info = [dict(name=  name) for name in  file_list])
+        cat = dict( file_attrs=dict(),
+                    time_var=reader.params['grid_variable_map']['time'],
+                    variables=var_info, dims=dim_info,
+                    file_info=file_info)
 
-    def build_catalog(self):
-        cat=self.catalog
-        vars = cat['variables']
+        # check time dim is all variables
+        cat['time_dim'] = list(var_info[cat['time_var']]['dims'])[0]
+        for name, var in var_info.items():
+            var['time_varying'] =  cat['time_dim']  in var['dims']
 
-        for fileID, fn in enumerate(cat['file_info']):
-            ds = xr.open_dataset(fn['name'], decode_times=False)
-            cat['dims'].update(dict(ds.sizes)) # all dims found
+        # add full list of attributes
+        for f in file_info:
+            cat['file_attrs'].update(f['attrs'])
 
-            for name, var in ds.variables.items():
-                if name not in vars:
-                    vars[name] = dict( dims={key:ds.sizes[key]  for key in var.dims},
-                                       fileIDs=[], attrs = var.attrs,
-                                       #encoding = var.encoding,
-                                       shape= copy(var.shape),
-                                       dtype = var.dtype)
+        self.catalog = cat
 
-                cat['variables'][name]['fileIDs'].append(fileID)
-            cat['attributes'].update(ds.attrs)
 
     def time_steps_available(self, nt):
         # which of  time steps are in the data set

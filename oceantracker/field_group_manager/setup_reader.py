@@ -10,113 +10,68 @@ from oceantracker.shared_info import shared_info as si
 from oceantracker import definitions
 from oceantracker.util import  time_util, json_util,basic_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
-from oceantracker.util.parameter_checking import ParameterMapAlternativesChecker, ParameterListMapAlternativesChecker
+from oceantracker.util.parameter_checking import ReaderMapAlternativesChecker, ReaderListMapAlternativesChecker
 from oceantracker.util.parameter_checking import ParamValueChecker, ParameterListChecker
-
+from oceantracker.field_group_manager import get_file_info
+import tempfile
 
 def make_a_reader_from_params(users_reader_params):
 
-    file_list = _get_file_list(users_reader_params)
-    dataset = OceanTrackerDataSet(file_list)
-    dataset.build_catalog()
+    file_info, var_info, dim_info = get_file_info.build_hindcast_info(users_reader_params)
+
+    #todo check sizes variable names consistent between files after reader decided?
 
     # detect reader format and add class_name to params
-    reader = _detect_hydro_file_format(users_reader_params, dataset)
-    reader_params = reader.params # params may have changed
+    reader = _detect_hydro_file_format(users_reader_params, var_info, dim_info)
 
-    # discard problematic variables
-    for file_var in reader_params['drop_variables']:
-        if file_var in reader.dataset.info['variables']:
-            del reader.dataset.info['variables'][file_var]
+    # discard problematic variables given by user
+    for file_var in reader.params['drop_variables']:
+        if file_var in reader.dataset.catalog['variables']:
+            del var_info[file_var]
         else:
-            si.msg_logger.msg(f'Cannot drop file variable {file_var}, not in file', warning=True, caller = reader)
+            si.msg_logger.msg(f'Cannot drop file variable {file_var}, not in files', warning=True, caller=reader)
+
+
+    # assemble dataset and its  catalog dataset.catalog
+    reader.dataset = OceanTrackerDataSet( reader, file_info, var_info, dim_info)
+
+
+    reader.add_hindcast_info()  # any tweaks for specific reader
+
+    _make_variable_time_step_to_fileID_map(reader, file_info)
+
+    _catalog_fields(reader) # work out if mapped fields are  time varying , 2D, 3D etc
+
 
     if reader.development:
         si.msg_logger.msg(f'Class "{reader.__class__.__name__}" under development, it may not work in all cases',
                            hint=f' contact developer with any unexpected issues', warning=True)
 
-    # sort out which velocity variable to use
-    # ie.  water_velocity field if present, otherwise try depth average velocity if present
-    fvm = reader.params['field_variable_map']
-    file_vars = dataset.catalog['variables']
-
-    if fvm['water_velocity'][0] not in file_vars and fvm['water_velocity_depth_averaged'] is not None:
-        fvm['water_velocity'] = fvm['water_velocity_depth_averaged']  # map to  depth average
-
-    if  fvm['water_velocity'][0] not in file_vars: # no velocity found
-        si.msg_logger.msg(f'No velocity variable  in files, could not find  {str(fvm["water_velocity"][0])}. nor  depth average vel. {str(fvm["water_velocity_depth_averaged"])}',
-                          hint=f'file variables ={str(list(file_vars))}', fatal_error=True)
 
     # sort files into time order and add info to reader builder on if 3D hindcast and mapped field
     # uses times in files containing the velocity variable
-    _time_sort_files(reader)
+    _time_sort_files(reader,file_info)
 
+    _determine_vertical_grid_regridding(reader)
 
-    _make_variable_time_step_to_fileID_map(reader)
-
+    # sort out use of A-z profile in vertival random walk, bottom stress in friction velocity calc.
     info = reader.info
-    info.update(reader.dataset.catalog) # make data set and reader info the same
-
-    # additional info on is D, vert grid type, node dim etc needed to size field buffers etc
-    _standard_needed_info(reader) # common to all readers
-
-    reader.add_hindcast_info() # any tweaks for specific reader
-
-
-    # todo check all required fields are set
-    if info['vert_grid_type'] is not None and info['vert_grid_type'] not in si.vertical_grid_types.possible_values():
-        si.msg_logger.msg(f'Coding error, dont recognise vert_grid_type grid type, got {info["vert_grid_type"]}, must be one of [None , "Slayer_or_LSC","Zlayer","Sigma"]',
-                hint=f'check reader codes  get_hindcast_info() ', error=True)
-
-    _catalog_fields(reader)
-
-    # set working vertical grid type,if remapping to sigma grids
-    vgt = si.vertical_grid_types
-
-    info['vert_grid_type_in_files'] = copy(info['vert_grid_type'])
-
-    if info['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and reader_params['regrid_z_to_sigma_levels']:
-        info['vert_grid_type'] = vgt.Sigma
-        reader_params['regrid_z_to_sigma_levels'] = True
-
-    elif info['vert_grid_type'] in [vgt.Slayer, vgt.LSC]  and not reader_params['regrid_z_to_sigma_levels']:
-        reader_params['regrid_z_to_sigma_levels'] = False
-
-    elif info['vert_grid_type'] in [vgt.Sigma, vgt.Zfixed]:
-        reader_params['regrid_z_to_sigma_levels'] = False
-
-    elif info['is3D']:
-        si.msg_logger.msg(f'Unknown grid vertical type "{info["vert_grid_type"]}"',
-                       hint=f'must be one of {str(vgt.possible_values())}',
-                       fatal_error=True)
-
     info['has_A_Z_profile'] = 'A_Z_profile' in info['field_info']
     info['has_bottom_stress'] = 'bottom_stress' in info['field_info']
 
-    # work out in 3D run from water velocity
+    # work out if in geographic coords
     info['geographic_coords'] = reader.detect_lonlat_grid()
     info['time_buffer_size'] = si.settings.time_buffer_size
 
-
+    # copy catalog into reader info
+    info.update(reader.dataset.catalog) # make data set and reader info the same
     return reader
 
-def _standard_needed_info(reader):
-    # info need to size the field reader buffers etc
-    params= reader.params
-    info = reader.info
-    ds_info = reader.dataset.catalog
-    file_vars = ds_info['variables']
-    dm = params['dimension_map']
-    fvm = params['field_variable_map']
-    gm = params['grid_variable_map']
 
 
-    # set default z dim info to that for 2D, add_hindcast_info changes them for  3D
-    info['num_z_interfaces'] = 1
-    info['vert_grid_type'] = None
 
 
-def _detect_hydro_file_format(reader_params, dataset):
+def _detect_hydro_file_format(reader_params, var_info, dim_info):
     # detect hindcast format and add reader class_name to params if missing
     # return reader class_name if given
     #todo show which tests passed for each reader
@@ -129,14 +84,13 @@ def _detect_hydro_file_format(reader_params, dataset):
         # look for reader amongst known readers
         readers_to_check = definitions.known_readers
 
-    ds_info = dataset.catalog
     readers=[]
     is_format = []
     for name, class_name in readers_to_check.items():
         # first check if essential variables are in the file
         p = deepcopy(reader_params)
         p['class_name'] = class_name
-        r, isf =  _import_reader(p, dataset)
+        r, isf =  _import_reader(p, var_info, dim_info)
 
         # break if all testes passed as found reader
         readers.append(r)
@@ -157,55 +111,48 @@ def _detect_hydro_file_format(reader_params, dataset):
 
         ml.msg (f'Could not set up reader, as could not detect file format  as not all expected variables are present, may be an unknown format , or unexpected differences in variable names',
                  )
-        ml.msg(f'Found variables {list(ds_info["variables"].keys())}', tabs=3)
-        ml.msg(f'Found dimensions {list(ds_info["dims"].keys())}',tabs=3)
+        ml.msg(f'Found variables {list(var_info.keys())}', tabs=3)
+        ml.msg(f'Found dimensions {list(dim_info.keys())}',tabs=3)
         ml.msg(f'Check file variable/dims., ' , hint='Adjust reader field/grid/dims maps to match file variables/dims',
                error = True)
 
     # make and merge defaults for found reader
-    reader = readers[is_format.inde x(True)]
+    reader = readers[is_format.index(True)]
 
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
 
-def _import_reader(reader_params, dataset):
+def _import_reader(reader_params, var_info, dim_info):
     reader = si.class_importer.make_class_instance_from_params('reader', reader_params)
-    reader.dataset = dataset
-    report = hindcast_variable_integrity_report(reader)
+    report = _do_hindcast_variables_match_format_report(reader, var_info, dim_info)
 
     # ensure vel params are correct
     if report['is_format'] and 'water_velocity' in reader.params['field_variable_map']:
-        vel_vars, reader.info['is3D'] =  reader.detect_vel_var_and_if_3D(dataset)
+        vel_vars, reader.info['is3D'] =  reader.detect_vel_var_and_if_3D(var_info, dim_info)
         if vel_vars is not None:
             reader_params['field_variable_map']['water_velocity'] = vel_vars
     reader.info['hindcast_integrity_report'] = report
     return reader,report['is_format']
 
-def _time_sort_files(reader):
+
+def _time_sort_files(reader, file_info):
     # sort variable fileIDs by time, now all files are read
-    cat= reader.dataset.catalog
-
-    cat['time_var'] = reader.params['grid_variable_map']['time']
-
-    time_var = cat['time_var']
-    time_var_info = cat['variables'][ time_var]
-    cat['time_dim'] = list(time_var_info['dims'].keys())[0]
-
+    cat = reader.dataset.catalog
+    time_var =  cat['time_var']
     # add times to each files info
-    # first read start times of all files
-    file_info = cat['file_info']
+
+    # first read start times of all files from pre-read time variables and convert to 1970 time
     for ID, f in enumerate(file_info):
-        ds = reader.dataset._open_file(f['name'])
-        f['has_time'] =  cat['time_var'] in ds.variables
-        if f['has_time']:
-            time = ds[time_var].compute()
-            time = np.round(reader.decode_time(time),3) # round to milli seconds
+
+        if f['time'] is not None:
+            time = f['time']
+            time = np.round(reader.decode_time(time),3) # round unversal time to milli seconds
             f['start_time'] = float(time[0])
             f['end_time'] = float(time[-1])
             f['time_steps'] = time.size
             f['ID'] = ID
-            f['time'] = time
-            f['time_attrs'] = ds[time_var].attrs
+            f['time'] = time # save  universal time
+            f['time_attrs'] = f['variables'][time_var]['attrs']
             f['start_date'] = time_util.seconds_to_isostr( f['start_time'])
             f['end_date'] = time_util.seconds_to_isostr(f['end_time'])
 
@@ -274,45 +221,73 @@ def _time_sort_files(reader):
 
     pass
 
-def _find_all_variables_and_times(reader_params):
-    ml = si.msg_logger
+def _make_variable_time_step_to_fileID_map(reader,file_info):
+    cat = reader.dataset.catalog
+    # make time step to fileID map and file offset map for every time step, accounting for each variable's file order
 
-    # work out which reader class names need to be checked to find time variable
+    for v_name, item in cat['variables'].items():
+        if not item['time_varying']: continue
 
-    if 'class_name' in reader_params:
-        ml.progress_marker(f'Using given reader parameter class_name = "{reader_params["class_name"]}"')
-        readers_to_check = dict(user_named_reader=reader_params[ 'class_name'] )
+        time_step_fileID_map = np.zeros((0,),dtype=np.int32)
+        time_step_file_offset_map = np.zeros((0,), dtype=np.int32)
+
+        for fileID in  item['fileIDs']: #IDs have aleady been time sorted
+            fi = file_info[fileID]
+            n_time_steps = fi['time'].size # time steps in this file
+            time_step_fileID_map =  np.append(time_step_fileID_map,fi['ID']*np.ones(( n_time_steps ,), dtype=np.int32))
+            time_step_file_offset_map = np.append(time_step_file_offset_map,  np.arange(n_time_steps, dtype=np.int32))
+
+        item['time_step_to_fileID_map'] = time_step_fileID_map
+        item['time_step_to_file_offset_map'] = time_step_file_offset_map
+    pass
+
+def _determine_vertical_grid_regridding(reader):
+    #sort out if regridding vertical grid
+    info = reader.info
+    params= reader.params
+
+    # set default z dim info to that for 2D, add_hindcast_info changes them for  3D
+
+    if not info['is3D']:
+        info['num_z_interfaces'] = 1
+        info['vert_grid_type'] = None
+        params['regrid_z_to_sigma_levels'] = False
+        return
+
+    # set working vertical grid type,if remapping to sigma grids
+    vgt = si.vertical_grid_types
+
+    info['vert_grid_type_in_files'] = copy(info['vert_grid_type'])
+
+    if info['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and params['regrid_z_to_sigma_levels']:
+        info['vert_grid_type'] = vgt.Sigma
+        params['regrid_z_to_sigma_levels'] = True
+
+    elif info['vert_grid_type'] in [vgt.Slayer, vgt.LSC] and not params['regrid_z_to_sigma_levels']:
+        params['regrid_z_to_sigma_levels'] = False
+
+    elif info['vert_grid_type'] in [vgt.Sigma, vgt.Zfixed]:
+        params['regrid_z_to_sigma_levels'] = False
     else:
-        # look for reader amongst known readers
-        readers_to_check = definitions.known_readers
-
-
-
-    return
+        si.msg_logger.msg(f'Unknown grid vertical type "{info["vert_grid_type"]}"',
+                          hint=f'must be one of {str(vgt.possible_values())}',
+                          fatal_error=True)
+### old below _________________
 
 def _catalog_fields(reader):
     # categorise field variables
     params = reader.params
     info = reader.info
+    cat = reader.dataset.catalog
 
-    file_vars = info['variables']
+    file_vars = cat['variables']
     reader_field_vars_map = {}
 
     # loop over mapped variables and loaded variables
     mapped_fields = params['field_variable_map']
-    for name in list(set(params['load_fields'] + list(mapped_fields.keys()))):
-        # if named var not in map, try to use is name as a map,
-        # ie load named field is a file varaiable name
-        if name not in mapped_fields:
-            mapped_fields[name] = name
-            if name not in info['variables']:
-                si.msg_logger.msg(
-                    f' No  field_variable_map to load variable named "{name}" and no variable in file matching this name, so can not load this field',
-                    hint=f'Add a map for this variable readers "field_variable_map"  param or check spelling loaded variable name matches a file variable, current map is {str(mapped_fields)}',
-                    fatal_error=True)
+    for name in  params['field_variable_map']:
 
         # decompose variable list
-
         var_list = mapped_fields[name]
         if var_list is None: continue # no default
         if type(var_list) != list: var_list = [var_list]  # ensure it is a list
@@ -321,7 +296,8 @@ def _catalog_fields(reader):
         # use first variable to get basic info
         v1 = var_list[0]
 
-        if v1 not in file_vars: continue
+        if v1 not in file_vars:
+            continue
 
         field_params = dict(time_varying=file_vars[v1]['time_varying'],
                             is3D=any(x in params['all_z_dims'] for x in file_vars[v1]['dims']),  )
@@ -332,7 +308,7 @@ def _catalog_fields(reader):
 
         dm = params['dimension_map']
         for n_var, v in enumerate(var_list):
-            if v not in file_vars: continue  # listed var not in file, eg vecotion variable has npo vertical velocity
+            if v not in file_vars: continue  # listed var not in file, eg vector variable has no vertical velocity
 
             if dm['vector2D'] is not None and dm['vector2D'] in file_vars[v]['dims']:
                 n_comp = 2
@@ -363,57 +339,16 @@ def _catalog_fields(reader):
     info['field_info'] = reader_field_vars_map
 
 
-def _get_file_list(reader_params):
-    ml = si.msg_logger
 
-    # check params and folders exists
-    if 'input_dir' not in reader_params or 'file_mask' not in reader_params:
-        ml.msg('Reader class requires settings, "input_dir" and "file_mask" to read the hindcast',
-               fatal_error=True)
-    # check input dir exists
-    if not path.isdir(reader_params['input_dir']):
-        ml.msg(f'Could not find input dir "{reader_params["input_dir"]}"',
-               hint='Check reader parameter "input_dir"', fatal_error=True)
-
-    mask = path.join(reader_params['input_dir'], '**', reader_params['file_mask'])  # add subdir search
-    file_list = glob(mask, recursive=True)
-    if len(file_list) == 0:
-        si.msg_logger.msg(f'No files found in input_dir, or its sub-dirs matching mask "{mask}"',
-                          hint=f'searching with "gob" mask "{mask}"', fatal_error=True)
-
-    ml.progress_marker(f'Found {len(file_list)} files in dir and sub-dirs of "{reader_params["input_dir"]}"')
-
-    return file_list
-
-def _make_variable_time_step_to_fileID_map(reader):
-
-    # make time step to fileID map and file offset map for every time step, accounting for each variable's file order
-    cat = reader.dataset.catalog
-    for v_name, item in cat['variables'].items():
-        if not item['time_varying']: continue
-
-        time_step_fileID_map = np.zeros((0,),dtype=np.int32)
-        time_step_file_offset_map = np.zeros((0,), dtype=np.int32)
-
-        for fileID in  item['fileIDs']: #IDs have aleady been time sorted
-            fi = cat['file_info'][fileID]
-            time_step_fileID_map =  np.append(time_step_fileID_map,fi['ID']*np.ones(( fi['time_steps'] ,), dtype=np.int32))
-            time_step_file_offset_map = np.append(time_step_file_offset_map,  np.arange(fi['time_steps'], dtype=np.int32))
-            pass
-
-        item['time_step_to_fileID_map'] = time_step_fileID_map
-        item['time_step_to_file_offset_map'] = time_step_file_offset_map
-        pass
-    pass
-
-def hindcast_variable_integrity_report(reader):
+def _do_hindcast_variables_match_format_report(reader, var_info, dim_info):
     # use readers map checker to find which ones are in the file
-    ds = reader.dataset
-    cat=ds.catalog
-    file_vars = cat['variables']
+
+    file_vars = list(var_info.keys())
+    dims= list(dim_info.keys())
     params= reader.params
     ml = si.msg_logger
 
+    #todo simlpify, below is esstially a merge with altertives if present, do as a reader merge??
     report=dict(is_format=False, class_name = reader.params['class_name'],)
     for map_type in ['grid_variable_map','field_variable_map','dimension_map']:
         if map_type not in report: report[map_type] = dict( in_file = dict(),alternatives = dict())
@@ -422,31 +357,29 @@ def hindcast_variable_integrity_report(reader):
 
         for key, val in dp.items():
             if key.startswith('control_key'): continue
-            file_names = cat['dims'] if map_type == 'dimension_map' else file_vars
+            file_var_names = dims if map_type == 'dimension_map' else file_vars
 
-            if not isinstance(val,(ParameterMapAlternativesChecker,ParameterListMapAlternativesChecker)) :
+            if not isinstance(val, (ReaderMapAlternativesChecker, ReaderListMapAlternativesChecker)) :
                 # legacy variable maps with PCC and PLC, check if variable/param value  (or first if list of variables) in the file
                 if map_type =='dimension_map' and type(p[key]) != list:
-                    report[map_type]['in_file'][key] = p[key] in file_names
+                    report[map_type]['in_file'][key] = p[key] in file_var_names
                 elif type(val) == ParamValueChecker:
-                    report[map_type]['in_file'][key]= p[key] in file_names
+                    report[map_type]['in_file'][key]= p[key] in file_var_names
                 elif type(val) == ParameterListChecker:
-                    report[map_type]['in_file'][key] = (p[key][0] in file_names) if len(p[key]) >0 else False
+                    report[map_type]['in_file'][key] = (p[key][0] in file_var_names) if len(p[key]) >0 else False
                 continue
             # new alternatives mappings
             if p[key] is None: # no user value given
                 # choose from alternatives
-                available = cat['dims'] if map_type == 'dimension_map' else cat['variables']
+                available = dims if map_type == 'dimension_map' else file_vars
                 p[key] = dp[key].choose_alternative(available) # already have a default or user given value  for var
 
-            if type(val) == ParameterMapAlternativesChecker:
-                report[map_type]['in_file'][key] = p[key] in file_names
-            elif type(val) == ParameterListMapAlternativesChecker:
-                report[map_type]['in_file'][key] = (p[key][0] in file_names) if len(p[key]) > 0 else False
+            if type(val) == ReaderMapAlternativesChecker:
+                report[map_type]['in_file'][key] = p[key] in file_var_names
+            elif type(val) == ReaderListMapAlternativesChecker:
+                report[map_type]['in_file'][key] = (p[key][0] in file_var_names) if len(p[key]) > 0 else False
 
-            report[map_type]['alternatives'][key] = dp[key].alternatives
-
-    # check ir required variables present
+    # check if required variables present
     req = dict()
     req['fields'] =   {key: report['field_variable_map']['in_file'][key] for key in params['required_feilds']}
     req['fields']['water_velocity'] =  (report['field_variable_map']['in_file']['water_velocity']

@@ -1,8 +1,8 @@
 from oceantracker.reader._base_structured_reader import  _BaseStructuredReader
 from oceantracker.reader.util import reader_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
-from oceantracker.util.parameter_checking import  ParameterMapAlternativesChecker as PMAC
-from oceantracker.util.parameter_checking import  ParameterListMapAlternativesChecker as PLMAC
+from oceantracker.util.parameter_checking import  ReaderMapAlternativesChecker as RMAC
+from oceantracker.util.parameter_checking import  ReaderListMapAlternativesChecker as RLMAC
 import  oceantracker.util.time_util as time_util
 import numpy as np
 from datetime import  datetime
@@ -37,8 +37,8 @@ class GLORYSreader(_BaseStructuredReader):
             all_z_dims=PLC(['depth'], str, doc_str='All z dims used to identify  3D variables'),
             dimension_map= dict(
                         z=PVC('depth', str, doc_str='name of dimensions for z layer boundaries '),
-                        row=PMAC(['lat','latitude'], doc_str='row dim of grid'),
-                        col=PMAC(['lon','longitude'], doc_str='column dim of grid'),
+                        row=RMAC(['lat','latitude'], doc_str='row dim of grid'),
+                        col=RMAC(['lon','longitude'], doc_str='column dim of grid'),
                         ),
             grid_variable_map= dict(
                         time=PVC('time', str, doc_str='Name of time variable in hindcast'),

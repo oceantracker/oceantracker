@@ -64,17 +64,17 @@ class ROMSreader(_BaseStructuredReader):
     def add_hindcast_info(self):
         params = self.params
         info = self.info
-        ds_info = self.dataset.info
+        ds_info = self.dataset.catalog
         dm = params['dimension_map']
         fvm = params['field_variable_map']
         gm = params['grid_variable_map']
 
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['num_z_interfaces'] = info['dims'][dm['z']]
+            info['num_z_interfaces'] = ds_info['dims'][dm['z']]
             info['vert_grid_type'] = si.vertical_grid_types.Sigma  # Slayer uses zero bottom cell, so treated the dame
 
-        dims = info['dims']
+        dims = ds_info['dims']
         info['num_nodes'] = dims[params['dimension_map']['row']] * dims[params['dimension_map']['col']]
 
     def build_hori_grid(self, grid):

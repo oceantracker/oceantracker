@@ -2,8 +2,8 @@ from numba.core.cgutils import false_bit
 
 from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReader
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC,ParameterListChecker as PLC
-from oceantracker.util.parameter_checking import  ParameterMapAlternativesChecker as PMAC
-from oceantracker.util.parameter_checking import  ParameterListMapAlternativesChecker as PLMAC
+from oceantracker.util.parameter_checking import  ReaderMapAlternativesChecker as RMAC
+from oceantracker.util.parameter_checking import  ReaderListMapAlternativesChecker as RLMAC
 from  oceantracker.util import time_util, numpy_util, basic_util
 import numpy as np
 from oceantracker.util.triangle_utilities import split_quad_cells
@@ -41,16 +41,16 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
             all_z_dims=PLC(['mesh2d_nInterfaces', 'mesh2d_nLayers','nmesh2d_layer', 'nmesh2d_interface'], str,
                            doc_str='All z dims, used to identify  3D variables'),
             dimension_map=dict(
-                        z = PMAC([ 'mesh2d_nInterfaces','nmesh2d_interface'], doc_str='z dim for interfaces'),
-                        z_layer=PMAC(['mesh2d_nLayers', 'nmesh2d_layer'], doc_str='z dim for layers between interfaces'),
+                        z = RMAC([ 'mesh2d_nInterfaces','nmesh2d_interface'], doc_str='z dim for interfaces'),
+                        z_layer=RMAC(['mesh2d_nLayers', 'nmesh2d_layer'], doc_str='z dim for layers between interfaces'),
                         time=PVC('time', str, doc_str='name of time dimension in files'),
-                        node=PMAC(['mesh2d_nNodes','mesh2d_nNodes','nmesh2d_node'], doc_str='name of node  dimension in files'),
+                        node=RMAC(['mesh2d_nNodes','mesh2d_nNodes','nmesh2d_node'], doc_str='name of node  dimension in files'),
                          ),
             field_variable_map= {#'water_velocity': PLC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1'], str, fixed_len=3),
-                                 'water_velocity': PLMAC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1']),
-                        'tide': PMAC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
+                                 'water_velocity': RLMAC(['mesh2d_ucx', 'mesh2d_ucy', 'mesh2d_ww1']),
+                        'tide': RMAC('mesh2d_s1', str, doc_str='maps standard internal field name to file variable name'),
                         # 'water_depth': PVC('mesh2d_node_z', str, doc_str='maps standard internal field name to file variable name'),
-                        'water_depth': PMAC(['mesh2d_bldepth','mesh2d_node_z'],   doc_str='maps standard internal field name to file variable name'),
+                        'water_depth': RMAC(['mesh2d_bldepth','mesh2d_node_z'],   doc_str='maps standard internal field name to file variable name'),
                         'water_temperature': PVC('mesh2d_tem1', str, doc_str='maps standard internal field name to file variable name'),
                         'salinity': PVC('mesh2d_sa1', str, doc_str='maps standard internal field name to file variable name'),
                         'wind_stress': PLC(None, str, doc_str='maps standard internal field name to file variable name'),
@@ -77,7 +77,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         super().initial_setup()
 
     def add_hindcast_info(self):
-        ds_info =  self.dataset.info
+        ds_info =  self.dataset.catalog
         params = self.params
         dm = params['dimension_map']
         fvm= params['field_variable_map']
@@ -286,7 +286,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         return data
 
     def setup_water_depth_field(self):
-        file_vars = self.dataset.info['variables']
+        file_vars = self.dataset.catalog['variables']
         i = self._add_a_reader_field('water_depth')
         i.data = self.read_field_data('water_depth', i)
         if 'mesh2d_node_z' in self.info['field_info']['water_depth']['file_vars_info']:
