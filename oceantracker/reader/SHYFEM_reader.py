@@ -27,8 +27,8 @@ from oceantracker.reader._base_unstructured_reader import _BaseUnstructuredReade
 from oceantracker.reader.util import reader_util
 from oceantracker.reader.util import hydromodel_grid_transforms as hg_trans
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterListChecker as PLC
-from oceantracker.util.parameter_checking import ParameterMapAlternativesChecker as PMAC
-from oceantracker.util.parameter_checking import ParameterListMapAlternativesChecker as PLMAC
+from oceantracker.util.parameter_checking import ReaderMapAlternativesChecker as RMAC
+from oceantracker.util.parameter_checking import ReaderListMapAlternativesChecker as RLMAC
 from oceantracker.shared_info import shared_info as si
 
 
@@ -46,24 +46,24 @@ class SHYFEMreader(_BaseUnstructuredReader):
                     doc_str='Not used, SHYFEM output is on a fixed z grid which is not regridded to sigma levels'),
             load_fields=PLC(['water_depth'], str, doc_str='always load tide and water depth, needed for dry cells'),
             grid_variable_map=dict(
-                    time=PMAC('time', doc_str='Name of time variable in hindcast'),
-                    x=PMAC('longitude', doc_str='x location of nodes'),
-                    y=PMAC('latitude', doc_str='y location of nodes'),
-                    z_layer_bottom=PMAC('level', doc_str='depth, positive down, of the bottom of each layer'),
-                    triangles=PMAC('element_index', doc_str='nodes of each element, only in some SHYFEM output'),
+                    time=RMAC('time', doc_str='Name of time variable in hindcast'),
+                    x=RMAC('longitude', doc_str='x location of nodes'),
+                    y=RMAC('latitude', doc_str='y location of nodes'),
+                    z_layer_bottom=RMAC('level', doc_str='depth, positive down, of the bottom of each layer'),
+                    triangles=RMAC('element_index', doc_str='nodes of each element, only in some SHYFEM output'),
                     ),
             all_z_dims=PLC(['level'], str, doc_str='All z dims, used to identify  3D variables'),
             dimension_map=dict(
-                    node=PMAC('node', doc_str='name of node dimension in files'),
-                    z=PMAC('level', doc_str='name of the layer dimension in files'),
-                    time=PMAC('time', doc_str='name of time dimension in files'),
+                    node=RMAC('node', doc_str='name of node dimension in files'),
+                    z=RMAC('level', doc_str='name of the layer dimension in files'),
+                    time=RMAC('time', doc_str='name of time dimension in files'),
                     ),
             field_variable_map={
-                    'water_velocity': PLMAC(['u_velocity', 'v_velocity']),
-                    'tide': PMAC('water_level', doc_str='maps standard internal field name to file variable name'),
-                    'water_depth': PMAC('total_depth', doc_str='maps standard internal field name to file variable name'),
-                    'water_temperature': PMAC('temperature', doc_str='maps standard internal field name to file variable name'),
-                    'salinity': PMAC('salinity', doc_str='maps standard internal field name to file variable name'),
+                    'water_velocity': RLMAC(['u_velocity', 'v_velocity']),
+                    'tide': RMAC('water_level', doc_str='maps standard internal field name to file variable name'),
+                    'water_depth': RMAC('total_depth', doc_str='maps standard internal field name to file variable name'),
+                    'water_temperature': RMAC('temperature', doc_str='maps standard internal field name to file variable name'),
+                    'salinity': RMAC('salinity', doc_str='maps standard internal field name to file variable name'),
                     },
             )
 

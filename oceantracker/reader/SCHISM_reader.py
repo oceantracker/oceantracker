@@ -3,7 +3,7 @@ from os import path
 
 from oceantracker.util import time_util
 from oceantracker.util.parameter_checking import ParamValueChecker as PVC, ParameterTimeChecker as PTC, ParameterListChecker as PLC
-from oceantracker.util.parameter_checking import  ParameterMapAlternativesChecker as PMAC, ParameterListMapAlternativesChecker as PLMAC
+from oceantracker.util.parameter_checking import  ReaderMapAlternativesChecker as RMAC, ReaderListMapAlternativesChecker as RLMAC
 import numpy as np
 from oceantracker.shared_info import shared_info as si
 from oceantracker.reader.util import reader_util
@@ -16,29 +16,29 @@ class SCHISMreader(_BaseUnstructuredReader):
         self.add_default_params({
             'all_z_dims': PLC(['nSCHISM_vgrid_layers'], str, doc_str='All z dims, used to identify  3D variables'),
             'dimension_map': dict(
-                        node=PMAC('nSCHISM_hgrid_node',  doc_str='name of nodes dimension in files'),
-                        cell=PMAC('nSCHISM_hgrid_face',  doc_str='name of cell dimension in files'),
-                        z=PMAC('nSCHISM_vgrid_layers',  doc_str='name of dimensions for z layer boundaries '),
-                        vector2D=PMAC('two',  doc_str='name of dimension names for 2D vectors'),
+                        node=RMAC('nSCHISM_hgrid_node',  doc_str='name of nodes dimension in files'),
+                        cell=RMAC('nSCHISM_hgrid_face',  doc_str='name of cell dimension in files'),
+                        z=RMAC('nSCHISM_vgrid_layers',  doc_str='name of dimensions for z layer boundaries '),
+                        vector2D=RMAC('two',  doc_str='name of dimension names for 2D vectors'),
                          ),
              'grid_variable_map': dict(
-                        time=PMAC(['time'],  doc_str='Name of time variable in hindcast'),
-                        x = PMAC('SCHISM_hgrid_node_x', doc_str='x location of nodes'),
-                        y = PMAC('SCHISM_hgrid_node_y', doc_str='y location of nodes'),
-                        z_interface=PMAC('zcor'),
-                        triangles =PMAC('SCHISM_hgrid_face_nodes'),
-                        bottom_interface_index =PMAC('node_bottom_index'),
-                        is_dry_cell = PMAC('wetdry_elem',  doc_str='Time variable flag of when cell is dry, 1= is dry cell')
+                        time=RMAC(['time'],  doc_str='Name of time variable in hindcast'),
+                        x = RMAC('SCHISM_hgrid_node_x', doc_str='x location of nodes'),
+                        y = RMAC('SCHISM_hgrid_node_y', doc_str='y location of nodes'),
+                        z_interface=RMAC('zcor'),
+                        triangles =RMAC('SCHISM_hgrid_face_nodes'),
+                        bottom_interface_index =RMAC('node_bottom_index'),
+                        is_dry_cell = RMAC('wetdry_elem',  doc_str='Time variable flag of when cell is dry, 1= is dry cell')
                         ),
-            'field_variable_map': {'water_velocity': PLMAC(['hvel', 'vertical_velocity']),
-                                'tide': PMAC('elev',doc_str='maps standard internal field name to file variable name'),
-                                'water_depth': PMAC('depth', doc_str='maps standard internal field name to file variable name'),
-                                'water_temperature': PMAC('temp',doc_str='maps standard internal field name to file variable name'),
-                                'salinity': PMAC('salt',doc_str='maps standard internal field name to file variable name'),
-                                'wind_stress': PMAC(['wind_stress'], doc_str='maps standard internal field name to file variable name'),
-                                'bottom_stress': PLMAC(['bottom_stress'], doc_str='maps standard internal field name to file variable name'),
-                                'A_Z_profile':  PMAC('diffusivity', doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
-                                'water_velocity_depth_averaged': PLMAC(['dahv'],
+            'field_variable_map': {'water_velocity': RLMAC(['hvel', 'vertical_velocity']),
+                                'tide': RMAC('elev',doc_str='maps standard internal field name to file variable name'),
+                                'water_depth': RMAC('depth', doc_str='maps standard internal field name to file variable name'),
+                                'water_temperature': RMAC('temp',doc_str='maps standard internal field name to file variable name'),
+                                'salinity': RMAC('salt',doc_str='maps standard internal field name to file variable name'),
+                                'wind_stress': RMAC(['wind_stress'], doc_str='maps standard internal field name to file variable name'),
+                                'bottom_stress': RLMAC(['bottom_stress'], doc_str='maps standard internal field name to file variable name'),
+                                'A_Z_profile':  RMAC('diffusivity', doc_str='maps standard internal field name to file variable name for turbulent eddy viscosity, used if present in files'),
+                                'water_velocity_depth_averaged': RLMAC(['dahv'],
                                                 doc_str='maps standard internal field name to file variable names for depth averaged velocity components, used if 3D "water_velocity" variables not available')
                                    },
             'one_based_indices': PVC(True, bool, doc_str='Schism has indices starting at 1 not zero'),
