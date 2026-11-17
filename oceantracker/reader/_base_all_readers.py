@@ -174,6 +174,7 @@ class _BaseReader(ParameterBaseClass):
         params = self.params
         grid = self.grid
         info = self.info
+
         self.build_hori_grid(grid)
         self._construct_hori_grid_variables()
         si.msg_logger.hori_line('Hindcast info')

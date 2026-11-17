@@ -64,7 +64,7 @@ class ROMSreader(_BaseStructuredReader):
     def add_hindcast_info(self):
         params = self.params
         info = self.info
-        ds_info = self.dataset.catalog
+
         dm = params['dimension_map']
         fvm = params['field_variable_map']
         gm = params['grid_variable_map']

@@ -93,8 +93,8 @@ class FVCOMreader(_BaseUnstructuredReader):
 
 
     def detect_lonlat_grid(self):
-        ds = self.dataset
-        a= ds.info['attributes'] # global attributes
+        info = self.info
+        a= info['file_attrs'] # global attributes of hindcast
         params= self.params
         ml = si.msg_logger
 

@@ -77,7 +77,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         super().initial_setup()
 
     def add_hindcast_info(self):
-        ds_info =  self.dataset.catalog
+
         params = self.params
         dm = params['dimension_map']
         fvm= params['field_variable_map']
@@ -286,7 +286,7 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         return data
 
     def setup_water_depth_field(self):
-        file_vars = self.dataset.catalog['variables']
+        file_vars = self.info['variables']
         i = self._add_a_reader_field('water_depth')
         i.data = self.read_field_data('water_depth', i)
         if 'mesh2d_node_z' in self.info['field_info']['water_depth']['file_vars_info']:

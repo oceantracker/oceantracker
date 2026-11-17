@@ -38,7 +38,7 @@ class FieldGroupManager(ParameterBaseClass):
         self.reader, add_info = self._make_a_reader(reader_params)
         # write catalog
         json_util.write_JSON(path.join(si.run_info.run_output_dir, f'hindcast_catalog{info["gridID"]:03d}'),
-                             self.reader.dataset.catalog)
+                             self.reader.info)
         self.interpolator = self._set_up_interpolator( self.reader)
 
         if gridID == 0:

@@ -23,18 +23,20 @@ def make_a_reader_from_params(users_reader_params):
 
     # detect reader format and add class_name to params
     reader = _detect_hydro_file_format(users_reader_params, var_info, dim_info)
+    info = reader.info
 
     # discard problematic variables given by user
     for file_var in reader.params['drop_variables']:
-        if file_var in reader.dataset.catalog['variables']:
+        if file_var in reader.info['variables']:
             del var_info[file_var]
         else:
             si.msg_logger.msg(f'Cannot drop file variable {file_var}, not in files', warning=True, caller=reader)
 
+    # put required hindcast info into reader info
+    _add_file_var_dim_info_to_reader_info(reader, file_info, var_info, dim_info)
 
-    # assemble dataset and its  catalog dataset.catalog
-    reader.dataset = OceanTrackerDataSet( reader, file_info, var_info, dim_info)
-
+    # assemble dataset share reader info with it
+    reader.dataset = OceanTrackerDataSet(reader.info)
 
     reader.add_hindcast_info()  # any tweaks for specific reader
 
@@ -55,7 +57,7 @@ def make_a_reader_from_params(users_reader_params):
     _determine_vertical_grid_regridding(reader)
 
     # sort out use of A-z profile in vertival random walk, bottom stress in friction velocity calc.
-    info = reader.info
+
     info['has_A_Z_profile'] = 'A_Z_profile' in info['field_info']
     info['has_bottom_stress'] = 'bottom_stress' in info['field_info']
 
@@ -63,11 +65,11 @@ def make_a_reader_from_params(users_reader_params):
     info['geographic_coords'] = reader.detect_lonlat_grid()
     info['time_buffer_size'] = si.settings.time_buffer_size
 
-    # copy catalog into reader info
-    info.update(reader.dataset.catalog) # make data set and reader info the same
+    # hindcast integrity checks
+    _check_variable_consistency(reader)
+    _check_time_consistency(reader)
+
     return reader
-
-
 
 
 
@@ -137,11 +139,11 @@ def _import_reader(reader_params, var_info, dim_info):
 
 def _time_sort_files(reader, file_info):
     # sort variable fileIDs by time, now all files are read
-    cat = reader.dataset.catalog
-    time_var =  cat['time_var']
+    info = reader.info
+    time_var =  info['time_var']
     # add times to each files info
 
-    # first read start times of all files from pre-read time variables and convert to 1970 time
+    # first get start times of all files from pre-read time variables and convert to 1970 time
     for ID, f in enumerate(file_info):
 
         if f['time'] is not None:
@@ -157,39 +159,38 @@ def _time_sort_files(reader, file_info):
             f['end_date'] = time_util.seconds_to_isostr(f['end_time'])
 
     # sort variable fileIDs into time order
-    for v_name, item in cat['variables'].items():
-        item['time_varying'] = cat['time_dim'] in item['dims']
-        if  item['time_varying']:
-            item['fileIDs'] = np.asarray(item['fileIDs'])
-            start_times = np.asarray([v['start_time'] for v in file_info])
+    for name, var in info['variables'].items():
+        var['time_varying'] = info['time_dim'] in var['dims']
+        if  var['time_varying']:
+            start_times = np.asarray([file_info[ID]['start_time'] for ID in var['fileIDs']])
             file_order = np.argsort(start_times)
-            item['fileIDs'] = item['fileIDs'][file_order]
+            var['fileIDs'] = var['fileIDs'][file_order]
         else:
-            item['fileIDs'] = item['fileIDs'][0]  # todo keep as list??
+            var['fileIDs'] = var['fileIDs'][0]  # todo keep as list??
 
     #  build a time for every variables
     #  note time may appear in many files if variables are split between file, eg schsim v5 than once in each file
     # so must do this for all variables to ensure all files are covered, with some unnecessary repeats when more than one variable in same file
     #   time is not done as done a below as a "coordinate"
     vel_var0 = reader.params['field_variable_map']['water_velocity'][0]
-    for var_name, item in cat['variables'].items():
-        if not item['time_varying']: continue
+    for var_name, var in info['variables'].items():
+        if not var['time_varying']: continue
         if var_name == time_var : continue
         # only look at time varying variables, which are not time
-        item['time'] = np.concatenate([file_info[fID]['time'] for fID in item['fileIDs']])
+        var['time'] = np.concatenate([file_info[fID]['time'] for fID in var['fileIDs']])
 
     # set each file's first/last hindcast time step only from variables spanning the whole hindcast,
     # variables only in some of the files, eg. extra outputs added part way through a run,
     # would otherwise give file time steps counted from the first file they are in
-    n_steps = cat['variables'][vel_var0]['time'].size
+    n_steps = info['variables'][vel_var0]['time'].size
     partial_vars = []
-    for var_name, item in cat['variables'].items():
-        if not item['time_varying'] or var_name == time_var: continue
-        if item['time'].size != n_steps:
+    for var_name, var in info['variables'].items():
+        if not var['time_varying'] or var_name == time_var: continue
+        if var['time'].size != n_steps:
             partial_vars.append(var_name)
             continue
         n0 = 0
-        for fID in item['fileIDs']:
+        for fID in var['fileIDs']:
             file_info[fID]['first_time_step_in_file'] = n0
             file_info[fID]['last_time_step_in_file'] = n0 + file_info[fID]['time_steps'] - 1
             n0 += file_info[fID]['time_steps']
@@ -202,43 +203,44 @@ def _time_sort_files(reader, file_info):
     # if variables in different files, eg schism v5, time may be in many files,
     #  only use file IDs for the ones for the first water velocity variable, which must always be in hindcasts
     vel_var0= reader.params['field_variable_map']['water_velocity'][0]
-    time =  cat['variables'][vel_var0]['time']
-    cat['time_coord'] = time
+    time =  info['variables'][vel_var0]['time']
+    info['time_coord'] = time
 
     if time.size < 2:
         si.msg_logger.msg('Velocity variable in hydro files has less than 2 time steps', hint = 'need at least 2 steps for particle tracking', fatal_error=True)
 
    # hindcast start and ends times from time_coord
-    cat['start_time'] = time[0]
-    cat['end_time'] = time[-1]
-    cat['duration'] = time[-1] - time[0]
-    cat['total_time_steps'] =  time.size
-    cat['time_step'] = np.median(np.diff(time)) # tim syep but try to aviod glitched is hindcast times due to missing files
+    info['start_time'] = time[0]
+    info['end_time'] = time[-1]
+    info['duration'] = time[-1] - time[0]
+    info['total_time_steps'] =  time.size
 
-    cat['start_date'] = time_util.seconds_to_isostr(cat['start_time'])
-    cat['end_date'] = time_util.seconds_to_isostr(cat['end_time'])
-    cat['dates'] = time_util.seconds_to_isostr( time)
+    info['time_step'] = np.median(np.diff(time)) # todo should this be mode?
+
+    info['start_date'] = time_util.seconds_to_isostr(info['start_time'])
+    info['end_date'] = time_util.seconds_to_isostr(info['end_time'])
+    info['dates'] = time_util.seconds_to_isostr( time)
 
     pass
 
-def _make_variable_time_step_to_fileID_map(reader,file_info):
-    cat = reader.dataset.catalog
+def _make_variable_time_step_to_fileID_map(reader, file_info):
+    info= reader.info
     # make time step to fileID map and file offset map for every time step, accounting for each variable's file order
 
-    for v_name, item in cat['variables'].items():
-        if not item['time_varying']: continue
+    for v_name, var in info['variables'].items():
+        if not var['time_varying']: continue
 
         time_step_fileID_map = np.zeros((0,),dtype=np.int32)
         time_step_file_offset_map = np.zeros((0,), dtype=np.int32)
 
-        for fileID in  item['fileIDs']: #IDs have aleady been time sorted
+        for fileID in  var['fileIDs']: #IDs have aleady been time sorted
             fi = file_info[fileID]
             n_time_steps = fi['time'].size # time steps in this file
             time_step_fileID_map =  np.append(time_step_fileID_map,fi['ID']*np.ones(( n_time_steps ,), dtype=np.int32))
             time_step_file_offset_map = np.append(time_step_file_offset_map,  np.arange(n_time_steps, dtype=np.int32))
 
-        item['time_step_to_fileID_map'] = time_step_fileID_map
-        item['time_step_to_file_offset_map'] = time_step_file_offset_map
+        var['time_step_to_fileID_map'] = time_step_fileID_map
+        var['time_step_to_file_offset_map'] = time_step_file_offset_map
     pass
 
 def _determine_vertical_grid_regridding(reader):
@@ -251,6 +253,7 @@ def _determine_vertical_grid_regridding(reader):
     if not info['is3D']:
         info['num_z_interfaces'] = 1
         info['vert_grid_type'] = None
+        info['vert_grid_type_in_files'] = None
         params['regrid_z_to_sigma_levels'] = False
         return
 
@@ -272,15 +275,14 @@ def _determine_vertical_grid_regridding(reader):
         si.msg_logger.msg(f'Unknown grid vertical type "{info["vert_grid_type"]}"',
                           hint=f'must be one of {str(vgt.possible_values())}',
                           fatal_error=True)
-### old below _________________
+
 
 def _catalog_fields(reader):
     # categorise field variables
     params = reader.params
     info = reader.info
-    cat = reader.dataset.catalog
 
-    file_vars = cat['variables']
+    file_vars = info['variables']
     reader_field_vars_map = {}
 
     # loop over mapped variables and loaded variables
@@ -339,7 +341,6 @@ def _catalog_fields(reader):
     info['field_info'] = reader_field_vars_map
 
 
-
 def _do_hindcast_variables_match_format_report(reader, var_info, dim_info):
     # use readers map checker to find which ones are in the file
 
@@ -390,16 +391,42 @@ def _do_hindcast_variables_match_format_report(reader, var_info, dim_info):
     report['required'] = req
     return report
 
+def _add_file_var_dim_info_to_reader_info(reader, file_info, var_info, dim_info):
+        # construct catalog
+        info = reader.info
+        info['file_info'] = file_info
+        info['variables'] = var_info
+        info['dims'] = dim_info
+        info['time_var'] = reader.params['grid_variable_map']['time']
+
+        # check if time dim is in each variable
+        info['time_dim'] = list(var_info[info['time_var']]['dims'])[0]
+        for name, var in var_info.items():
+            var['time_varying'] =  info['time_dim']  in var['dims']
+
+        # add full list of attributes
+        info['file_attrs'] =dict()
+        for f in file_info:
+            info['file_attrs'].update(f['attrs'])
+
+
+def _check_variable_consistency(reader):
+    # check if all variables have same numer of time steps
+    info =reader.info
+
+    for v_name, item in info['variables'].items():
+        pass
+
 def _check_time_consistency(reader):
     # check all variables have same time_step_to_fileID_map, and save one version of it
     #todo do not currently used, reactivate?
     info= reader.info
     ml = si.msg_logger
 
-    dt = np.abs( np.diff(reader.info['time_coord']))
+    dt = np.diff(info['time_coord'])
 
     # look for repeated time steps, eg, from  data servive which repeats last step in next file as first in next file
-    sel = dt < 0.1 * reader.info['time_step']
+    sel = dt < 0.1 * info['time_step']
     if False and  np.any(sel):
         for name, v in  info['variables'].items():
 
@@ -412,19 +439,19 @@ def _check_time_consistency(reader):
         sel = np.flatnonzero(sel)
         t1 = reader.info['time_coord'][sel]
         t2 = reader.info['time_coord'][sel + 1]
-        si.msg_logger.msg(f'Hindcasts has repeated time steps, space as les tha .8*time_step, ignoring repeats,  eg. at {time_util.seconds_to_isostr(t1[0])}',
+        si.msg_logger.msg(f'Hindcasts has repeated time steps, space as les tha .1*time_step, ignoring repeats,  eg. at {time_util.seconds_to_isostr(t1[0])}',
                           hint=' see hindcast_info.json for list of repeats. Used a hindcast download service?,\n it may repeat last time step in file as first tim step in next file  ',
                           warning = True)
 
         reader.info['time_step_repeats'] = [[time_util.seconds_to_isostr(a), time_util.seconds_to_isostr(b)] for a, b in zip(t1, t2)]
 
-    sel = np.flatnonzero( dt > 3 * reader.info['time_step'])
+    sel = np.flatnonzero( dt > 3 * info['time_step'])
     if np.any(sel):
         t1 = reader.info['time_coord'][sel]
         t2 = reader.info['time_coord'][sel+1]
 
         si.msg_logger.msg('Some hindcast time steps are longer than 3 average time steps',fatal_error=True,
-                        hint = f'Hindcast may be missing files or othe time error, eg at {time_util. seconds_to_isostr(t1[0])} to {time_util. seconds_to_isostr(t2[0])}, see hindcast_info.json for full list of dates', warning=True)
+           hint = f'Hindcast may be missing files or othe time error, eg at {time_util. seconds_to_isostr(t1[0])} to {time_util. seconds_to_isostr(t2[0])}, see hindcast_info.json for full list of dates', warning=True)
 
         for d1,d2  in [ [time_util. seconds_to_isostr(a),time_util. seconds_to_isostr(b) ] for a,b in zip(t1,t2) ]:
             si.msg_logger.msg(f'Gap from {d1}  to {d2}' , error=True, tabs=2)
