@@ -466,7 +466,8 @@ def get_case(n):
                    ]
             reader ='oceantracker.reader.dummy_data_reader.DummyDataReader'
         case _:
-            raise(Exception(f'Unknown case number= {n}'))
+
+            return None, None
 
     params['release_groups'][0]['points'] = x0
 
@@ -513,6 +514,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--test', default=None, type= int)
     parser.add_argument('--group', default=None, type=str)
+    parser.add_argument('-all', action='store_true')
     parser.add_argument('-nativez', action='store_true')
     parser.add_argument('-gridplot', action='store_true')
     parser.add_argument('-plot', action='store_true')
@@ -534,10 +536,15 @@ if __name__ == '__main__':
     else:
         tests=[args.test]
     if args.group:
+        # run one group of tests
         tests= test_groups[args.group]
+    if args.all:
+        # run all tests
+        tests = [item for key, sublist in test_groups.items() for item in sublist]
 
     for n in tests:
         params, plot_opt= get_case(n)
+        if params is None: continue
         params.update( root_output_dir = root_output_dir,
 
                     dev_debug_plots = args.debug_plots,

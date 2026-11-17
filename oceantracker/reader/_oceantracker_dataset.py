@@ -13,40 +13,25 @@ class OceanTrackerDataSet(object):
     Copes with variables being held in different files
     assumes - all files with variables with t time dimension have time in same file
     '''
-    def __init__(self,reader, file_info, var_info, dim_info):
-        # construct catalog
-
-        cat = dict( file_attrs=dict(),
-                    time_var=reader.params['grid_variable_map']['time'],
-                    variables=var_info, dims=dim_info,
-                    file_info=file_info)
-
-        # check time dim is all variables
-        cat['time_dim'] = list(var_info[cat['time_var']]['dims'])[0]
-        for name, var in var_info.items():
-            var['time_varying'] =  cat['time_dim']  in var['dims']
-
-        # add full list of attributes
-        for f in file_info:
-            cat['file_attrs'].update(f['attrs'])
-
-        self.catalog = cat
+    def __init__(self,reader_info):
+        #  catalog is shared with reader.info
+        self.info =reader_info
 
 
     def time_steps_available(self, nt):
         # which of  time steps are in the data set
         # used to calculate buffer index
-        sel =  np.logical_and( nt >= 0, nt < self.catalog['time_coord'].size)
+        sel =  np.logical_and( nt >= 0, nt < self.info['time_coord'].size)
         nt_available = nt[sel]
         return nt_available
 
     def read_data(self, file_var_name: str, nt=None):
         return self.read_variable(file_var_name, nt=nt).data
-    def read_variable(self, file_var_name: str, nt=None):
 
+    def read_variable(self, file_var_name: str, nt=None):
         # read simple variable
-        cat = self.catalog
-        vi = cat['variables'][file_var_name]
+        info = self.info
+        vi = info['variables'][file_var_name]
         if vi['time_varying']:
             out = self._read_time_varying_variable(file_var_name, nt)
         else:
@@ -54,9 +39,9 @@ class OceanTrackerDataSet(object):
         return out
 
     def _read_non_time_varying_variable(self, file_var_name: str):
-        cat = self.catalog
-        vi = cat['variables'][file_var_name]
-        fi = cat['file_info'][vi['fileIDs']]
+        info = self.info
+        vi = info['variables'][file_var_name]
+        fi = info['file_info'][vi['fileIDs']]
 
         ds = self._open_file(fi['name'])
         out = ds[file_var_name].compute()
@@ -65,10 +50,10 @@ class OceanTrackerDataSet(object):
     def _read_time_varying_variable(self,file_var_name:str, nt):
         # get data at "nt" model integer time steps
 
-        cat = self.catalog
-        vi = cat['variables'][file_var_name]
+        info = self.info
+        vi = info['variables'][file_var_name]
 
-        time_dim =cat['time_dim']
+        time_dim =info['time_dim']
 
         if nt is None: nt = np.arange(vi['dims'][time_dim],dtype=np.int32)
 
@@ -76,16 +61,16 @@ class OceanTrackerDataSet(object):
         nt_required = nt.copy()
 
         # clip to full range
-        nt_required = nt_required[ np.logical_and( nt_required >= 0, nt_required < cat['time_coord'].size)]
+        nt_required = nt_required[ np.logical_and( nt_required >= 0, nt_required < info['time_coord'].size)]
 
-        if vi['time_step_to_fileID_map'].size != cat['time_coord'].size:
+        if vi['time_step_to_fileID_map'].size != info['time_coord'].size:
             raise ValueError(f'Variable "{file_var_name}" is only in some of the hindcast files, '
-                             f'has {vi["time_step_to_fileID_map"].size} of {cat["time_coord"].size} time steps, cannot read it at hindcast time steps')
+                             f'has {vi["time_step_to_fileID_map"].size} of {info["time_coord"].size} time steps, cannot read it at hindcast time steps')
 
         files_read = 0
         while nt_required.size > 0 :
             file_no = vi['time_step_to_fileID_map'][nt_required[0]]
-            fi = cat['file_info'][file_no]
+            fi = info['file_info'][file_no]
 
             # required time steps in this file, from this variable's own time step to file map
             # (not the file's first_time_step_in_file, which is shared by all variables in the file)
@@ -125,8 +110,8 @@ class OceanTrackerDataSet(object):
 
     def get_time_step(self,time, backtracking):
         #round down/up to time step for forward/backwards
-        cat = self.catalog
-        nt = (cat['total_time_steps']-1)*abs(time-cat['start_time'])/abs(cat['end_time']-cat['start_time'])
+        info = self.info
+        nt = (info['total_time_steps']-1)*abs(time-info['start_time'])/abs(info['end_time']-info['start_time'])
         nt = np.ceil(nt) if backtracking else np.floor(nt)
         return int(nt)
 

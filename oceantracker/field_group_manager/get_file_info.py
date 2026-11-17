@@ -4,6 +4,8 @@
 from os import path
 from copy import deepcopy, copy
 from glob import glob
+
+import numpy as np
 import xarray as xr
 
 
@@ -17,8 +19,8 @@ def build_hindcast_info(users_reader_params):
     file_list = _get_file_list(users_reader_params)
     time_vars = _get_possible_time_variable_names(users_reader_params)
 
-    file_info, var_info, dims_info =  _get_file_var_dim_info(file_list, time_vars)
-
+    file_info =  _get_file_info(file_list, time_vars)
+    var_info, dims_info = _get_var_dim_info(file_info)
 
     return file_info, var_info, dims_info
 
@@ -82,17 +84,16 @@ def _get_possible_time_variable_names(user_reader_params):
 
     return list(set(time_vars)) # make list unique
 
-def _get_file_var_dim_info(file_list, time_vars):
+def _get_file_info(file_list, time_vars):
     # build a list of dict containing file variable info and time values
 
     file_info =[]
-    var_info = {}
-    dim_info={}
+
     for fileID, fn in enumerate(file_list):
         ds = xr.open_dataset(fn, decode_times=False)
         fi = dict(ID = fileID, name = fn , attrs = {key:ds.attrs[key]  for key in ds.attrs},
                   dims={key:ds.sizes[key]  for key in ds.sizes}, variables=dict())
-        dim_info.update(fi['dims'])
+
         for name, var in ds.variables.items():
             fi['variables'][name] = dict(
                                     dims={key:var.sizes[key]  for key in var.dims},
@@ -100,10 +101,6 @@ def _get_file_var_dim_info(file_list, time_vars):
                                     shape= copy(var.shape),
                                     dtype = var.dtype, #encoding = var.encoding,
                                     )
-            if name not in var_info:
-                var_info[name] = dict(fi['variables'][name], fileIDs=[]) # get dims etc based og first occurrence
-            var_info[name]['fileIDs'].append(fileID)  # build list of file IDs for each variable, not in time order
-
         tv = list(set(time_vars) & set(list(ds.variables))) # find variables in possible time variables
         if len(tv)== 1:
             fi['time'] = ds.variables[tv[0]] # copy time data
@@ -112,12 +109,27 @@ def _get_file_var_dim_info(file_list, time_vars):
                               hint= 'Rebuild hindcast with only one time variable per file?')
         else:
             fi['time'] = None
+
         ds.close()
+
         file_info.append(fi)
 
-    return file_info, var_info, dim_info
+    return file_info
 
-def _get_variable_info(file_info):
-    # get dict of all variables and dims, based on last occurrence in files
-    var_info = {name: v for name, v in file_info.items()}
-    return var_info
+def _get_var_dim_info(file_list):
+    var_info = {}
+    dim_info={}
+    for fileID, fi in enumerate(file_list):
+        for name, vi in fi['variables'].items():
+            if name not in var_info:
+                var_info[name] = dict(fi['variables'][name], fileIDs=[])  # get dims etc based og first occurrence
+
+            var_info[name]['fileIDs'].append(fileID)  # build list of file IDs for each variable, not in time order
+            dim_info.update(fi['dims'])
+
+
+    # convert fileIDs to array to allow time sorting
+    for name, vi in var_info.items():
+        vi['fileIDs'] = np.asarray(vi['fileIDs']).astype(np.int32)
+
+    return var_info, dim_info
