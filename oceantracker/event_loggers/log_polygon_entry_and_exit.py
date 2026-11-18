@@ -74,6 +74,11 @@ class LogPolygonEntryAndExit(_BaseEventLogger):
         event_polygon = part_prop['event_polygon']
         current_polygon_for_event_logging = part_prop['current_polygon_for_event_logging']
 
+        # find which polygon alive particles are inside, as it is a manually updated property
+        alive = part_prop['status'].compare_all_to_a_value('gteq', si.particle_status_flags.outside_open_boundary,
+                                                            out=self.get_partID_buffer('event_alive'))
+        current_polygon_for_event_logging.update(n_time_step, time_sec, alive)
+
         # find where polygon number has changed due to entry or exit
         IDs_event_began, IDs_event_ended = self.find_events(current_polygon_for_event_logging.used_buffer() >= 0)
 
