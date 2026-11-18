@@ -57,12 +57,9 @@ def get_case(n):
     show_grid = False
     geo_cords= False
 
-
-  
-
     match n:
         case 100:
-            root_input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20\2022\01'
+            root_input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20'
             output_file_base = 'NZnational'
             file_mask = 'NZfinite*.nc'
 
@@ -483,6 +480,7 @@ def get_case(n):
                     max_run_duration= max_days*24*3600, time_step= time_step, use_open_boundary=use_open_boundary )
     params['reader'].update(input_dir=root_input_dir, regrid_z_to_sigma_levels = not args.nativez,
                             file_mask=file_mask,
+                            hindcast_catalog_cache_file= path.join(r'F:\temp\OTcache', path.basename(root_input_dir))+'_cat.pkl' if args.cache else None,
                             class_name=reader)
     if water_depth_file is not None:
         params['reader']['water_depth_file'] = water_depth_file
@@ -515,6 +513,8 @@ if __name__ == '__main__':
     parser.add_argument('--test', default=None, type= int)
     parser.add_argument('--group', default=None, type=str)
     parser.add_argument('-all', action='store_true')
+    parser.add_argument('-cache', action='store_true') # cahe hidcast catalog
+
     parser.add_argument('-nativez', action='store_true')
     parser.add_argument('-gridplot', action='store_true')
     parser.add_argument('-plot', action='store_true')

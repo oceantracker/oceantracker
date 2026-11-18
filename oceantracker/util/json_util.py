@@ -17,12 +17,10 @@ def read_JSON(file_name):
         with open(file_name, 'r') as fp:
             d=json.load(fp)
     except Exception as e:
-        print( 'Oeantracker: Error>> Could not read json file, may not be a valid json' + file_name)
+        print( 'Oeantracker: Error>> Could not read json file, may not be a valid json,or file location does not exist' + file_name)
         raise(e)
 
     return d
-
-
 
 #Store as JSON a numpy.ndarray or any nested-list composition.
 class MyEncoder(json.JSONEncoder):
@@ -111,7 +109,7 @@ def write_JSON(file_name,d, indent=4):
             json.dump(d, fp, cls=MyEncoder, indent=indent)
 
     except Exception as e:
-        print('Error>>  Failed to write json file ="' + file_name +'"')
+        print('Error>>  Failed to write json file ="' + file_name +'", file location does not exist?')
         raise(e)
     pass
 

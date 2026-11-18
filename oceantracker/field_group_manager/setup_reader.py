@@ -3,26 +3,47 @@ import numpy as np
 from copy import copy, deepcopy
 from scipy import stats
 from time import perf_counter
-
+from operator import itemgetter
+from os import path, makedirs
+from pathlib import Path
 from numba.core.typing import signature
-
+import pickle
 from oceantracker.shared_info import shared_info as si
 from oceantracker import definitions
+from oceantracker.util import json_util
 from oceantracker.util import  time_util, json_util,basic_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 from oceantracker.util.parameter_checking import ReaderMapAlternativesChecker, ReaderListMapAlternativesChecker
 from oceantracker.util.parameter_checking import ParamValueChecker, ParameterListChecker
 from oceantracker.field_group_manager import get_file_info
-import tempfile
 
-def make_a_reader_from_params(users_reader_params):
+
+def make_a_reader_from_params(reader_params):
     t0 = perf_counter()
     ml = si.msg_logger
 
-    file_info, var_info, dim_info = get_file_info.build_hindcast_info(users_reader_params)
+    # get  file_info, var_info, dim_info from cataloging hindcast or reading cached version
+    use_cache = 'hindcast_catalog_cache_file' in reader_params and  reader_params['hindcast_catalog_cache_file'] is not None
+
+    # params not merged yet so check what's given
+    if use_cache and path.isfile(reader_params['hindcast_catalog_cache_file']):
+        # read old version
+        with open(reader_params['hindcast_catalog_cache_file'], "rb") as f:
+            loaded_ds = pickle.load(f)
+        file_info, var_info, dim_info = itemgetter("file_info", "var_info", "dim_info")(loaded_ds)
+    else:
+        # create new catalog
+        file_info, var_info, dim_info = get_file_info.build_hindcast_info(reader_params)
+        if use_cache and not path.isfile(reader_params['hindcast_catalog_cache_file']):
+            # save the catalog if file not there
+            dir_name=path.dirname(reader_params['hindcast_catalog_cache_file'])
+            if not path.isdir(dir_name): makedirs(dir_name)
+            ds =  dict(file_info=file_info, var_info=var_info, dim_info=dim_info)
+            with open(reader_params['hindcast_catalog_cache_file'], "wb") as f:
+                pickle.dump(ds, f, protocol=-1)
 
     # detect reader format and add class_name to params
-    reader = _detect_hydro_file_format(users_reader_params, var_info, dim_info)
+    reader = _detect_hydro_file_format(reader_params, var_info, dim_info)
     info = reader.info
 
     # discard problematic variables given by user
