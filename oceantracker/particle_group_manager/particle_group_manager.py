@@ -147,6 +147,14 @@ class ParticleGroupManager(ParameterBaseClass):
 
         part_prop = si.class_roles.particle_properties
 
+        # first set manually updated properties to their initial value in the new buffer slots, as slots may hold
+        # zeros from buffer expansion, or values of a particle removed from the buffer after it died.
+        # Done before copying release data, so values given by the release, and core values set below, take precedence.
+        # (field and custom properties are given their initial values at birth in release_particles)
+        for name, prop in part_prop.items():
+            if isinstance(prop, ManuallyUpdatedParticleProperty):
+                prop.initial_value_at_birth(new_part_buffer_indices)
+
         # copy over release data to new part props
         for name in release_data.keys():
             part_prop[name].set_values(release_data[name], new_part_buffer_indices)
