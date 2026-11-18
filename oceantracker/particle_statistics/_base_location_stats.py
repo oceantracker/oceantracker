@@ -46,7 +46,7 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                     doc_str='Maximum number of times each particle can be counted by this stats instance. Default None = unlimited. '
                             'eg. =1 counts each particle once, in the first cell/polygon it is found in. See also kill_when_max_counted.'),
                 kill_when_max_counted=PVC(False, bool,
-                    doc_str='When max_count_per_particle is set: True (default) = set particle status to dead once max count is reached; '
+                    doc_str='When max_count_per_particle is set: True = set particle status to dead once max count is reached; '
                             'False = exclude the particle from future counting in this stats instance but leave it alive.'),
                 counting_probability=PVC(1.0, float, min=0., max=1.,
                     doc_str='Probability [0,1] that an eligible particle is counted at each update interval. '
@@ -56,7 +56,12 @@ class _BaseParticleLocationStats(ParameterBaseClass):
                     doc_str='Denominator used to compute connectivity_matrix written to the output file. '
                             '"all_alive" (default): divide by count_all_alive_particles (particles alive at each time step / age bin). '
                             '"all_released": divide by count_all_released_age_bins (age-based) or num_released (time-based), '
-                            'i.e. total unique particles released — useful for settlement-probability-style connectivity.'),
+                            'i.e. total unique particles released — useful for settlement-probability-style connectivity. '
+                            'Age-based stats with max_count_per_particle set: count only counts each particle up to max_count_per_particle times, '
+                            'so the denominator is count_unique_alive_age_bins ("all_alive") or count_unique_released_age_bins ("all_released"), '
+                            'which count each particle at most once per age bin. With max_count_per_particle=1 the connectivity_matrix is then the '
+                            'fraction of particles first counted in each cell/polygon at that age. Note with kill_when_max_counted=True, '
+                            'counted particles die, so "all_alive" gives a rate conditional on not yet being counted.'),
                 write_connectivity=PVC(True, bool,
                     doc_str='Write connectivity_matrix to the output file. '
                             'Set to False to reduce file size when connectivity is not needed.'),
@@ -381,6 +386,10 @@ class _BaseParticleLocationStats(ParameterBaseClass):
             self.counts_inside_age_bins = np.full(use_dims, 0, np.int64)
             self.count_all_alive_particles = np.full(use_dims[:2], 0, np.int64)
             self.count_all_released_age_bins = np.full(use_dims[:2], 0, np.int64)
+            # each particle counted at most once per age bin, used as denominators when max_count_per_particle is set
+            self.count_unique_alive_age_bins = np.full(use_dims[:2], 0, np.int64)
+            self.count_unique_released_age_bins = np.full(use_dims[:2], 0, np.int64)
+            self.last_update_time = None  # time of previous age-based count, to detect age bin entry
 
         if 'particle_property_list' in params:
             for p in params['particle_property_list']:
