@@ -71,10 +71,10 @@ class ROMSreader(_BaseStructuredReader):
 
         if info['is3D']:
             # sort out z dim and vertical grid size
-            info['num_z_interfaces'] = ds_info['dims'][dm['z']]
+            info['num_z_interfaces'] = info['dims'][dm['z']]
             info['vert_grid_type'] = si.vertical_grid_types.Sigma  # Slayer uses zero bottom cell, so treated the dame
 
-        dims = ds_info['dims']
+        dims = info['dims']
         info['num_nodes'] = dims[params['dimension_map']['row']] * dims[params['dimension_map']['col']]
 
     def build_hori_grid(self, grid):

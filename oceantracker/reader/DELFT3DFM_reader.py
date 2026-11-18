@@ -84,7 +84,6 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
         gm = params['grid_variable_map']
         info = self.info
         dims = info['dims']
-        filevars = ds_info['variables']
 
         # tweak variations in dims and variable names
         if info['is3D']:
@@ -98,13 +97,13 @@ class DELFT3DFMreader(_BaseUnstructuredReader):
 
             info['num_z_interfaces'] = dims[dm['z']]
 
-            if 'mesh2d_layer_sigma' in ds_info['variables']:
+            if 'mesh2d_layer_sigma' in info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Sigma
 
-            elif 'mesh2d_layer_z' in  ds_info['variables']:
+            elif 'mesh2d_layer_z' in  info['variables']:
                 info['vert_grid_type'] = si.vertical_grid_types.Zfixed
 
-            elif 'mesh2d_flowelem_zcc' in  ds_info['variables']:
+            elif 'mesh2d_flowelem_zcc' in  info['variables']:
                 # mixed sigma, tide moving z levels, ie LSC type grid
                 info['vert_grid_type'] = si.vertical_grid_types.LSC
                 if params['regrid_z_to_sigma_levels']:
