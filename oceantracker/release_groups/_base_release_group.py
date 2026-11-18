@@ -92,7 +92,6 @@ class _BaseReleaseGroup(ParameterBaseClass):
         # add release IDs as full arrays
         n = release_info['x'].shape[0]
         release_info['IDrelease_group'] = np.full((n,), info['instanceID'], dtype=np.int32)
-        release_info['IDpulse'] = np.full((n,), info['pulseID'], dtype=np.int32)
         release_info['user_release_groupID'] = np.full((n,), self.params['user_release_groupID'], dtype=np.int32)
         return release_info
 
@@ -116,6 +115,8 @@ class _BaseReleaseGroup(ParameterBaseClass):
     def get_release_locations(self,n_time_step, time_sec):
         info = self.info
         release_info= self.get_hori_release_locations(time_sec)
+
+        release_info['IDpulse'] = np.full((release_info['x'].shape[0],), info['pulseID'], dtype=np.int32)
 
         if si.run_info.is3D_run:
             self._add_vertical_release(release_info)
