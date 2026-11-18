@@ -149,26 +149,7 @@ class _BaseReader(ParameterBaseClass):
 
     def final_setup(self):      pass
 
-    def detect_vel_var_and_if_3D(self, var_info, dim_info):
-        # work out if vel or depth aver. vel is present and if these are 2D
-        # hindcast is 3D if velocity has any z dim
-        params= self.params
-        fvm = params['field_variable_map']
-        gvm = params['grid_variable_map']
-        dm = params['dimension_map']
 
-        if fvm['water_velocity'][0] in var_info:
-            vel_vars = fvm['water_velocity']
-        elif fvm['water_velocity_depth_averaged'][0] in var_info:
-            vel_vars =fvm['water_velocity_depth_averaged']
-        else:
-            vel_vars=None
-        # see if vel has any z dimensions
-        if vel_vars is not None:
-            is3D = any([d in var_info[vel_vars[0]]['dims'] for d in params['all_z_dims']])
-        else:
-            is3D= False
-        return vel_vars, is3D
 
     def _build_hori_and_vert_grids(self, ):
         params = self.params

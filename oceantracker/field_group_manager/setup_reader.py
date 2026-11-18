@@ -1,8 +1,8 @@
 import xarray as xr
 import numpy as np
 from copy import copy, deepcopy
-from os import path
-from glob import  glob
+from scipy import stats
+from time import perf_counter
 
 from numba.core.typing import signature
 
@@ -16,10 +16,10 @@ from oceantracker.field_group_manager import get_file_info
 import tempfile
 
 def make_a_reader_from_params(users_reader_params):
+    t0 = perf_counter()
+    ml = si.msg_logger
 
     file_info, var_info, dim_info = get_file_info.build_hindcast_info(users_reader_params)
-
-    #todo check sizes variable names consistent between files after reader decided?
 
     # detect reader format and add class_name to params
     reader = _detect_hydro_file_format(users_reader_params, var_info, dim_info)
@@ -30,7 +30,7 @@ def make_a_reader_from_params(users_reader_params):
         if file_var in reader.info['variables']:
             del var_info[file_var]
         else:
-            si.msg_logger.msg(f'Cannot drop file variable {file_var}, not in files', warning=True, caller=reader)
+            ml.msg(f'Cannot drop file variable {file_var}, not in files', warning=True, caller=reader)
 
     # put required hindcast info into reader info
     _add_file_var_dim_info_to_reader_info(reader, file_info, var_info, dim_info)
@@ -46,7 +46,7 @@ def make_a_reader_from_params(users_reader_params):
 
 
     if reader.development:
-        si.msg_logger.msg(f'Class "{reader.__class__.__name__}" under development, it may not work in all cases',
+        ml.msg(f'Class "{reader.__class__.__name__}" under development, it may not work in all cases',
                            hint=f' contact developer with any unexpected issues', warning=True)
 
 
@@ -56,8 +56,7 @@ def make_a_reader_from_params(users_reader_params):
 
     _determine_vertical_grid_regridding(reader)
 
-    # sort out use of A-z profile in vertival random walk, bottom stress in friction velocity calc.
-
+    # sort out use of A-z profile in vertical random walk, bottom stress in friction velocity calc.
     info['has_A_Z_profile'] = 'A_Z_profile' in info['field_info']
     info['has_bottom_stress'] = 'bottom_stress' in info['field_info']
 
@@ -66,12 +65,11 @@ def make_a_reader_from_params(users_reader_params):
     info['time_buffer_size'] = si.settings.time_buffer_size
 
     # hindcast integrity checks
-    _check_variable_consistency(reader)
+    _check_file_variables_have_same_time_and_dim_sizes(reader)
     _check_time_consistency(reader)
 
+    ml.progress_marker('made reader from its params. and time sorted files', start_time=t0, tabs = 1)
     return reader
-
-
 
 def _detect_hydro_file_format(reader_params, var_info, dim_info):
     # detect hindcast format and add reader class_name to params if missing
@@ -130,7 +128,7 @@ def _import_reader(reader_params, var_info, dim_info):
 
     # ensure vel params are correct
     if report['is_format'] and 'water_velocity' in reader.params['field_variable_map']:
-        vel_vars, reader.info['is3D'] =  reader.detect_vel_var_and_if_3D(var_info, dim_info)
+        vel_vars, reader.info['is3D'] =  _detect_vel_var_and_if_3D(reader, var_info, dim_info)
         if vel_vars is not None:
             reader_params['field_variable_map']['water_velocity'] = vel_vars
     reader.info['hindcast_integrity_report'] = report
@@ -227,7 +225,7 @@ def _make_variable_time_step_to_fileID_map(reader, file_info):
     info= reader.info
     # make time step to fileID map and file offset map for every time step, accounting for each variable's file order
 
-    for v_name, var in info['variables'].items():
+    for name, var in info['variables'].items():
         if not var['time_varying']: continue
 
         time_step_fileID_map = np.zeros((0,),dtype=np.int32)
@@ -349,7 +347,7 @@ def _do_hindcast_variables_match_format_report(reader, var_info, dim_info):
     params= reader.params
     ml = si.msg_logger
 
-    #todo simlpify, below is esstially a merge with altertives if present, do as a reader merge??
+    #todo simplify, below is essentially a merge with alternatives if present, do as a reader merge??
     report=dict(is_format=False, class_name = reader.params['class_name'],)
     for map_type in ['grid_variable_map','field_variable_map','dimension_map']:
         if map_type not in report: report[map_type] = dict( in_file = dict(),alternatives = dict())
@@ -410,12 +408,32 @@ def _add_file_var_dim_info_to_reader_info(reader, file_info, var_info, dim_info)
             info['file_attrs'].update(f['attrs'])
 
 
-def _check_variable_consistency(reader):
-    # check if all variables have same numer of time steps
+def _check_file_variables_have_same_time_and_dim_sizes(reader):
+    # check if all variables have same number of time steps
     info =reader.info
+    ml = si.msg_logger
 
-    for v_name, item in info['variables'].items():
-        pass
+    # check all variables have same number of time steps
+    var_time_steps = {name: var['time'].size for name, var in  info['variables'].items() if 'time' in var}
+    result = stats.mode([n for name,n in var_time_steps.items()])
+    if result.count > 1:
+        bad_vars= { name: n for name,n in var_time_steps.items() if n != result.mode}
+        if len(bad_vars)>0:
+            ml.msg("Hindcast errors, some variables have different number of time steps from the most common number ",
+                   hint=f"Hindcast may be missing some files containing variables and time steps are:\n{str(bad_vars)} \n use reader param. drop_variables to ignore these?",
+                   error=True)
+
+    # check dims sizes the same in all files
+    for name, dim in  info['dims'].items():
+        sizes= np.asarray([ fi['dims'][name] if name in fi['dims'] else  0 for fi in info['file_info']])
+        result = stats.mode(sizes[sizes>0])
+        if result.count > 1:
+            bad_files = np.logical_and(sizes != result.mode, sizes > 0)
+            if np.any(bad_files):
+                fn = [ f['name'] for n, f in enumerate(info['file_info']) if bad_files[n]]
+                ml.msg(f'Some files have different dimension sizes for dim. "{name}", expected size {int(result.mode)} \n bad files? {str(fn)}',
+                    hint=f"Downloaded data with different settings? repeat download with consistent settings?",
+                    error=True)
 
 def _check_time_consistency(reader):
     # check all variables have same time_step_to_fileID_map, and save one version of it
@@ -459,6 +477,25 @@ def _check_time_consistency(reader):
         si.msg_logger.msg('Hindcast must have all time steps', fatal_error=True,
                             hint=f'Find missing files, check al time steps are in all files, covering above time gaps')
 
-
-
     return
+
+def _detect_vel_var_and_if_3D(reader, var_info, dim_info):
+    # work out if hincast id 3D by checking if vel is 3D and assign water_velovity vars
+
+    params= reader.params
+    fvm = params['field_variable_map']
+    gvm = params['grid_variable_map']
+    dm = params['dimension_map']
+
+    if fvm['water_velocity'][0] in var_info:
+        vel_vars = fvm['water_velocity']
+    elif fvm['water_velocity_depth_averaged'][0] in var_info:
+        vel_vars =fvm['water_velocity_depth_averaged']
+    else:
+        vel_vars=None
+    # see if vel has any z dimensions
+    if vel_vars is not None:
+        is3D = any([d in var_info[vel_vars[0]]['dims'] for d in params['all_z_dims']])
+    else:
+        is3D= False
+    return vel_vars, is3D
