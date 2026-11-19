@@ -2,7 +2,6 @@ from psutil import  cpu_count, cpu_freq , virtual_memory
 import platform
 from oceantracker import  definitions
 
-import  subprocess
 from os import path
 
 
@@ -26,10 +25,7 @@ def get_computer_info():
     return d
 
 def get_git_commit():
-
-    try:
-        # Run the git command to get the full commit hash
-        commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).strip().decode('utf-8')
-        return commit_hash
-    except Exception as e:
-        return "Unknown"
+    # oceantracker's own commit, found once at import from the package dir with git's stderr silenced,
+    # running git here from the cwd printed "fatal: not a git repository" outside a repo
+    # and recorded the hash of whatever repo the run was launched from
+    return definitions.version['git_commit_hash']

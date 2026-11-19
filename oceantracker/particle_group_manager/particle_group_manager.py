@@ -86,6 +86,7 @@ class ParticleGroupManager(ParameterBaseClass):
 
         info['num_alive'] = 0
         info['particles_released'] = 0
+        info['particles_not_released_max_particles'] = 0 # particles in pulses not released as max_particles reached
 
         info['current_particle_buffer_size'] = si.settings.particle_buffer_initial_size
         self.status_count_array_per_thread= np.zeros((si.settings.processors, si.particle_status_flags.moving-si.particle_status_flags.notReleased+1),
@@ -135,8 +136,12 @@ class ParticleGroupManager(ParameterBaseClass):
         # release one pulse of particles from given group
         info= self.info
         # check if buffer needs expanding
-        smax = si.run_info.particles_in_buffer + release_data['x'].shape[0]
-        if smax > si.settings.max_particles: return # no more can be released
+        num_in_pulse = release_data['x'].shape[0]
+        smax = si.run_info.particles_in_buffer + num_in_pulse
+        if smax > si.settings.max_particles:
+            # no more can be released, skip this pulse
+            self._max_particles_reached(num_in_pulse)
+            return np.zeros((0,), np.int32) # no new particles
 
         if smax > self.info['current_particle_buffer_size']:
             self._expand_particle_buffers(smax)
@@ -146,6 +151,14 @@ class ParticleGroupManager(ParameterBaseClass):
         num_released = new_part_buffer_indices.size
 
         part_prop = si.class_roles.particle_properties
+
+        # first set manually updated properties to their initial value in the new buffer slots, as slots may hold
+        # zeros from buffer expansion, or values of a particle removed from the buffer after it died.
+        # Done before copying release data, so values given by the release, and core values set below, take precedence.
+        # (field and custom properties are given their initial values at birth in release_particles)
+        for name, prop in part_prop.items():
+            if isinstance(prop, ManuallyUpdatedParticleProperty):
+                prop.initial_value_at_birth(new_part_buffer_indices)
 
         # copy over release data to new part props
         for name in release_data.keys():
@@ -167,6 +180,17 @@ class ParticleGroupManager(ParameterBaseClass):
 
 
         return new_part_buffer_indices
+
+    def _max_particles_reached(self, num_not_released):
+        info = self.info
+        if info['particles_not_released_max_particles'] == 0:
+            # only warn on first pulse not released, to avoid a warning every release
+            si.msg_logger.msg(f'Reached max_particles = {si.settings.max_particles:,d}, a pulse of {num_not_released:,d} particles was not released,'
+                              f' {si.run_info.particles_in_buffer:,d} particles in buffer. Later pulses which would exceed max_particles will also not be released',
+                              hint='Increase setting "max_particles". Total number not released is in case info file, '
+                                   'core_class_roles_info > particle_group_manager > particles_not_released_max_particles',
+                              strong_warning=True)
+        info['particles_not_released_max_particles'] += num_not_released
 
     def _expand_particle_buffers(self,num_particles):
         info = self.info

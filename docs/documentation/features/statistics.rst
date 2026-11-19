@@ -285,3 +285,16 @@ where:
 * :math:`t - T_i` is the age of particles from pulse :math:`i` at update time :math:`t`
 
 This counts the total number of particle–timestep samples where a particle from group :math:`g` (alive or dead) was in age bin :math:`a`, and is directly comparable to the numerator :math:`c_{a,g,i,j}` which accumulates the same way.
+When ``max_count_per_particle`` is set, the numerator :math:`c_{a,g,i,j}` counts each particle at most ``max_count_per_particle`` times,
+rather than at every update it spends in the cell.
+The connectivity then uses denominators that count each particle at most once per age bin:
+
+.. math::
+
+   N_{a,g}^{\text{released, unique}} = \sum_{i \in \mathcal{I}_g} N_{g,i} \cdot \mathbb{1}_{\{\exists\, t \in \mathcal{T}:\ t - T_i \in \text{B}_a\}}
+
+written as ``count_unique_released_age_bins`` (``connectivity_denominator="all_released"``), and the equivalent count of distinct alive particles,
+``count_unique_alive_age_bins`` (``connectivity_denominator="all_alive"``).
+With ``max_count_per_particle=1``, :math:`\mathcal{C}_{a,g,i,j}` is then the fraction of particles first counted in cell :math:`(i,j)` at age :math:`a`.
+With ``kill_when_max_counted=True`` counted particles die, so the ``"all_alive"`` connectivity is conditional on a particle not having been counted at a younger age.
+The variable used is recorded in the ``connectivity_denominator_variable`` attribute of the statistics file.

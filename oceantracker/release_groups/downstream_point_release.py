@@ -36,31 +36,16 @@ class DownstreamPointRelease(PointRelease):
         info = self.info
         info["release_type"] = "downstream_point"
 
-    def get_release_locations(self,n_time_step, time_sec):
+    def get_hori_release_locations(self, time_sec):
         """
-        Overrides default method to first find normal horizontal release location
-        and vertical location, then adjust horizontal location to be downstream
-        of original point by the specified distance.
+        Overrides PointRelease method to move the filtered and cloned horizontal
+        release locations downstream by the specified distance.
+        Vertical release and pulse bookkeeping are left to the base class get_release_locations.
         """
-        info = self.info
-        release_info= self.get_hori_release_locations(time_sec)
-
-        if si.run_info.is3D_run:
-            release_info = self._add_vertical_release(release_info)
-
+        release_info = super().get_hori_release_locations(time_sec)
         release_info = self.move_hori_release_locations_downstream(release_info, time_sec, self.params['downstream_distance'])
-
-        # do i need to do this here?
-        # # apply user filter
-        # use_points = self.user_release_point_filter(release_info, time_sec=time_sec)
-        # release_info = self._retain_release_locations(release_info, use_points)
-        # <<<<<<<<< copy from _apply_dry_cell_[...] in _base_release_group.py
-        
-        info['pulseID'] += 1
-        info['number_released'] += release_info['x'].shape[0]  # count number released in this group
-
         return release_info
-    
+
     def move_hori_release_locations_downstream(self, release_info, time_sec, distance):
         # get a unit vector pointing downstream at each release location
         downstream_vector_norm = self._get_downstream_vector(release_info, time_sec)

@@ -161,39 +161,56 @@ class _BaseAgeStats(ParameterBaseClass):
     def count_all_alive_by_age(self,n_time_step,time_sec, alive ):
         part_prop = si.class_roles.particle_properties
         stats_grid = self.grid
+        prev_time = self.last_update_time
+        has_prev = prev_time is not None
         self._count_all_alive_age_bins(part_prop['status'].data,
                             part_prop['IDrelease_group'].data,
-                            part_prop['age'].data,  stats_grid['age_bin_edges'],
-                            self.count_all_alive_particles, alive)
-        self._compute_released_age_demographics(time_sec)
+                            part_prop['age'].data, part_prop['time_released'].data,
+                            stats_grid['age_bin_edges'],
+                            self.count_all_alive_particles, self.count_unique_alive_age_bins,
+                            alive, prev_time if has_prev else 0., has_prev)
+        self._compute_released_age_demographics(time_sec, prev_time)
+        self.last_update_time = time_sec
 
     @staticmethod
     @njitOT
-    def _count_all_alive_age_bins(status, release_group, age, age_bin_edges, count_all_alive, alive):
+    def _count_all_alive_age_bins(status, release_group, age, time_released, age_bin_edges,
+                                  count_all_alive, count_unique_alive, alive, prev_time_sec, has_prev):
+        # count_all_alive: +1 for each alive particle in its age bin at every update (particle-updates)
+        # count_unique_alive: +1 only at the first update a particle is seen alive in an age bin,
+        #   ie. its age bin at the previous update differed, or it was released since the previous update.
+        #   Stateless (uses time_released), so is unaffected by particle buffer slot reuse.
+        n_age_bins = age_bin_edges.size - 1
         da = age_bin_edges[1] - age_bin_edges[0]
 
         for nn in range(alive.size):
             n = alive[nn]
             na = int(np.floor((age[n] - age_bin_edges[0]) / da))
-            if 0 <= na < (age_bin_edges.size - 1):
-                count_all_alive[na, release_group[n]] += status[n] >= status_outside_open_boundary
+            if 0 <= na < n_age_bins:
+                is_alive = status[n] >= status_outside_open_boundary
+                count_all_alive[na, release_group[n]] += is_alive
+                if is_alive:
+                    if has_prev and stats_util._get_age_bin(prev_time_sec - time_released[n], age_bin_edges) == na:
+                        continue # was already in this age bin at previous update
+                    count_unique_alive[na, release_group[n]] += 1
 
-    def _compute_released_age_demographics(self, time_sec):
-        """Accumulate, from release group pulse history, the count of particles currently
-        in each age bin into count_all_released_age_bins.
-
-        Mirrors _count_all_alive_age_bins exactly — each call adds the instantaneous
-        demographic snapshot (each pulse placed in its single current age bin) to the
-        running total, so the result is directly comparable to count_all_alive_particles.
+    def _compute_released_age_demographics(self, time_sec, prev_time_sec):
+        """From release group pulse history (so includes particles that have since died), update
+        count_all_released_age_bins: adds each pulse's size to its current age bin at every update,
+            ie. particle-updates, directly comparable to count_all_alive_particles
+        count_unique_released_age_bins: adds each pulse's size to an age bin only at the first update
+            the pulse is seen in that bin, ie. each released particle counted at most once per age bin
         """
         age_bin_edges = self.grid['age_bin_edges']
-        count = self.count_all_released_age_bins
-        # NOTE: do NOT zero count — accumulate across calls like count_all_alive_particles
+        # NOTE: do NOT zero counts — accumulated across calls
+        has_prev = prev_time_sec is not None
 
         for nrg, rg in enumerate(si.class_roles.release_groups.values()):
-            times = rg.time_each_pulse_released
-            self._accumulate_pulse_demographics(times,  rg.number_released_each_pulse,
-                time_sec, age_bin_edges, count, nrg)
+            self._accumulate_pulse_demographics(rg.time_each_pulse_released,  rg.number_released_each_pulse,
+                time_sec, age_bin_edges, self.count_all_released_age_bins, nrg)
+            self._accumulate_unique_pulse_entries(rg.time_each_pulse_released, rg.number_released_each_pulse,
+                time_sec, prev_time_sec if has_prev else 0., has_prev,
+                age_bin_edges, self.count_unique_released_age_bins, nrg)
 
     @staticmethod
     @njitOT
@@ -209,6 +226,33 @@ class _BaseAgeStats(ParameterBaseClass):
             if 0 <= na < n_age_bins:
                 count[na, nrg] += pulse_counts[i]
 
+    @staticmethod
+    @njitOT
+    def _accumulate_unique_pulse_entries(pulse_times, pulse_counts, time_sec, prev_time_sec, has_prev,
+                                         age_bin_edges, count_unique, nrg):
+        # add each pulse's count to its current age bin only if it was not in that bin at the previous update.
+        # Age is monotonic so a pulse can not re-enter a bin. A pulse released after the previous update has
+        # an age of the "wrong" sign at the previous update, so its previous bin is < 0, ie. counted as new.
+        # Works for backtracking as both ages and age_bin_edges are negative. Unreleased (pre-allocated) pulses have zero count.
+        n_age_bins = age_bin_edges.size - 1
+        for i in range(pulse_times.size):
+            na = stats_util._get_age_bin(time_sec - pulse_times[i], age_bin_edges)
+            if not (0 <= na < n_age_bins): continue
+            if has_prev and stats_util._get_age_bin(prev_time_sec - pulse_times[i], age_bin_edges) == na: continue
+            count_unique[na, nrg] += pulse_counts[i]
+
+    def _get_connectivity_denominator(self):
+        # returns denominator array and its variable name
+        # with max_count_per_particle, count only counts each particle a limited number of times,
+        # so must divide by counts of unique particles in each age bin, not particle-updates
+        params = self.params
+        unique = params['max_count_per_particle'] is not None
+        if params['connectivity_denominator'] == 'all_released':
+            name = 'count_unique_released_age_bins' if unique else 'count_all_released_age_bins'
+        else:
+            name = 'count_unique_alive_age_bins' if unique else 'count_all_alive_particles'
+        return getattr(self, name), name
+
     def info_to_write_on_file_close(self, nc):
         # write variables whole
         stats_grid = self.grid
@@ -216,25 +260,33 @@ class _BaseAgeStats(ParameterBaseClass):
 
         dim_names =  stats_util.get_dim_names(self.info['count_dims'])
         nc.write_variable('count', counts_inside_age_bins, dim_names,
-                          description='counts of particles in each stats bin at given ages, for each release group')
+                          description='counts of particles in each stats bin at given ages, for each release group, '
+                                      'summed over every update, ie. particle-updates unless max_count_per_particle is set')
 
         nc.write_variable('count_all_alive_particles', self.count_all_alive_particles, dim_names[:2],
-                          description='cumulative counts of alive particles per age bin and release group '
+                          description='counts of alive particles per age bin and release group summed over every update, ie. particle-updates '
                                       '(includes those at open boundaries, excludes dead/outside-domain)')
 
         nc.write_variable('count_all_released_age_bins', self.count_all_released_age_bins, dim_names[:2],
-                          description='unique count of released particles that have entered each age bin '
-                                      '(including dead; each particle counted once per bin via age-bin transition detection)')
+                          description='counts of released particles (including dead) per age bin and release group summed over every update, '
+                                      'ie. particle-updates, comparable to count_all_alive_particles')
+
+        nc.write_variable('count_unique_alive_age_bins', self.count_unique_alive_age_bins, dim_names[:2],
+                          description='number of distinct alive particles seen in each age bin, ie. each particle counted at most once per age bin '
+                                      '(includes those at open boundaries), denominator for all_alive connectivity when max_count_per_particle is set')
+
+        nc.write_variable('count_unique_released_age_bins', self.count_unique_released_age_bins, dim_names[:2],
+                          description='number of released particles (including dead) seen in each age bin, ie. each particle counted at most once per age bin, '
+                                      'denominator for all_released connectivity when max_count_per_particle is set')
+
+        if self.last_update_time is not None:
+            nc.create_attribute('last_update_time', float(self.last_update_time))
 
         # Compute and write connectivity_matrix using the chosen denominator
         params = self.params
         if params['write_connectivity']:
-            if params['connectivity_denominator'] == 'all_released':
-                denominator = self.count_all_released_age_bins
-                denom_desc = 'count_all_released_age_bins'
-            else:
-                denominator = self.count_all_alive_particles
-                denom_desc = 'count_all_alive_particles'
+            denominator, denom_desc = self._get_connectivity_denominator()
+            nc.create_attribute('connectivity_denominator_variable', denom_desc)
 
             s = list(counts_inside_age_bins.shape[:2]) + (counts_inside_age_bins.ndim - 2) * [1]
             with np.errstate(divide='ignore', invalid='ignore'):
@@ -280,6 +332,11 @@ class _BaseAgeStats(ParameterBaseClass):
         self.counts_inside_age_bins = nc.read_variable('count')
         self.count_all_alive_particles = nc.read_variable('count_all_alive_particles')
         self.count_all_released_age_bins = nc.read_variable('count_all_released_age_bins')
+        if nc.is_var('count_unique_alive_age_bins'):
+            self.count_unique_alive_age_bins = nc.read_variable('count_unique_alive_age_bins')
+            self.count_unique_released_age_bins = nc.read_variable('count_unique_released_age_bins')
+        if nc.is_attr('last_update_time'):
+            self.last_update_time = float(nc.attr('last_update_time'))
 
         # copy in summed properties, to preserve references in sum_prop_data_list that is used inside numba
         for name, s in self.sum_binned_part_prop.items():

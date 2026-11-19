@@ -7,6 +7,24 @@ Change log
 Note: All commits that change either model in- or output in any way are labeled as "breaking changes", excluding bug-fixes
 
 
+Version '0.5.3.11 2026-11-19'
+_____________________________
+
+Bug fixes
+---------
+
+#. Fixed the connectivity of age-based statistics with ``max_count_per_particle`` being too small by a factor ``age_bin_size/update_interval``.
+   The connectivity now uses the new unique-per-age-bin counts as denominators when ``max_count_per_particle`` is set.
+#. Manually updated particle properties were not set to their initial value when a particle was released.
+   New particles were given zeros (after a particle buffer expansion) or the values of a particle removed from the buffer after it died.
+   This affected e.g. ``max_count_per_particle`` in statistics (new particles could inherit a count and never be counted), event logger flags,
+   ``SettleInPolygon``, and properties drawn at release.
+#. ``TerminalVelocity`` with a ``variance`` gave every particle a terminal velocity of zero, as the individual values were never drawn.
+#. ``LogPolygonEntryAndExit`` never updated which polygon particles are inside, so it only logged spurious entries into the first polygon.
+#. ``DownstreamPointRelease`` did not record its release pulses, so the age-based "released" counts were zero for these release groups.
+#. Runs crashed when the ``max_particles`` setting was reached, now the release pulses which would exceed ``max_particles``
+   are not released, with a strong warning when the first pulse is not released.
+
 Version '0.5.3.10 2026-11-04'
 _____________________________
 
