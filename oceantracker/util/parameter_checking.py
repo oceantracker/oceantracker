@@ -11,12 +11,16 @@ crumb_seperator= ' >> '
 
 
 
-def merge_params_with_defaults(params, default_params, msg_logger, caller=None):
-    # merge nested parameters with defaults,
-     # default dict. items must be one of 3 types
-    # 1)  ParamDictValueChecker class instance
-    # 2)   ParamDictListChecker class instance
+def merge_params_with_defaults(params, default_params, msg_logger, caller=None, check_keys=True):
+    '''Merge nested parameters with defaults.
 
+    Default dict items must be a parameter checker instance or a nested param dict.
+    With check_keys=True (default) the given keys, including those of nested param dicts, are checked first:
+    unknown keys and obsolete parameters are errors, deprecated parameters give a strong warning.
+    A nested default dict containing control_key_allow_unknown_keys=True accepts keys it does not define.
+    check_keys=False skips all key checks, eg while trying out candidate readers,
+    the caller must then call check_param_keys on the given params itself.
+    '''
     if params is None : params ={}
     given_params = deepcopy(params)
     if type(params) not in[dict, int] :
@@ -26,10 +30,15 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None):
         msg_logger.msg(f'Default_params must be a dictionary,  got type={str(type(default_params))}',
                        error= True,caller=caller)
 
+    # check given keys before merging, so a misspelled required parameter is reported
+    # as a misspelling, rather than as a missing required parameter
+    # nested param dicts are checked here too, so nested merges below do not check again
+    if check_keys and type(params) == dict:
+        check_param_keys(given_params, default_params, msg_logger, caller=caller)
+
     # find which keys/params are obsolete and the remainder
     obsolete_params = [key for key, item in default_params.items() if isinstance(item, _ParameterBaseDataClassChecker) and item.obsolete]
     possible_params = [key for key, item in default_params.items() if key not in obsolete_params]
-    deprecated_params = [key for key, item in default_params.items() if isinstance(item, _ParameterBaseDataClassChecker) and item.deprecated]
 
     # loop over non-obsolete default keys
     for key in possible_params:
@@ -43,7 +52,7 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None):
 
         elif type(item) == dict:
             # nested param dict
-            params[key] = merge_params_with_defaults(params[key], item,   msg_logger)
+            params[key] = merge_params_with_defaults(params[key], item,   msg_logger, caller=caller, check_keys=False)
 
         elif type(item) == list:
             # a nested list of  param dict
@@ -53,21 +62,41 @@ def merge_params_with_defaults(params, default_params, msg_logger, caller=None):
             msg_logger.msg(f'{msg},merge_params_with_defaults items in default dictionary can be ParamDictValueChecker, ParameterListChecker, or a nested param dict',
                           error = True, caller=caller)
 
-    # check if any keys in base or case params are not in defaults
-    if 'control_key_allow_unknown_keys' in params and params['control_key_allow_unknown_keys']:
-        for key in list(given_params.keys()):
-            msg = f'Parameter "{key}"'
-            if  key not in default_params:
-                # get possible values without obsolete params
-                msg_logger.spell_check(msg + ' is not recognised', key,possible_params,caller=caller)
-            elif key in obsolete_params:
-               msg_logger.msg(msg + ' is obsolete ',  hint=default_params[key].doc_str, error=True, caller=caller)
-               params['key'] = None
-            elif key in deprecated_params:
-                msg_logger.msg(msg + ' is deprecated and will be deleted in future versions',
-                               hint=default_params[key].doc_str, strong_warning=True, caller=caller)
-
     return params
+
+def check_param_keys(given_params, default_params, msg_logger, caller=None, crumbs=''):
+    '''Check the keys of user given params, and those of their nested param dicts, against default_params.
+    Unknown keys and obsolete parameters are errors, deprecated parameters given a value give a strong warning.
+    A nested default dict containing control_key_allow_unknown_keys=True accepts keys it does not define.
+    '''
+    if type(given_params) != dict or type(default_params) != dict: return
+
+    allow_unknown_keys = default_params.get('control_key_allow_unknown_keys', False) is True
+
+    # possible values to suggest for unknown keys, without obsolete, deprecated or control keys
+    known = [key for key, item in default_params.items()
+             if not str(key).startswith('control_key')
+             and not (isinstance(item, _ParameterBaseDataClassChecker) and (item.obsolete or item.deprecated))]
+
+    for key, value in given_params.items():
+        msg = f'Parameter "{crumbs}{key}"'
+        item = default_params.get(key)
+        if key not in default_params or str(key).startswith('control_key'):
+            # control keys are only set in defaults, never by users
+            if not allow_unknown_keys or str(key).startswith('control_key'):
+                msg_logger.spell_check(msg + ' is not recognised', str(key), known, caller=caller)
+
+        elif isinstance(item, _ParameterBaseDataClassChecker) and item.obsolete:
+            msg_logger.msg(msg + ' is obsolete', hint=item.doc_str, error=True, caller=caller)
+
+        elif isinstance(item, _ParameterBaseDataClassChecker) and item.deprecated:
+            # merged params hold every deprecated key with its default, so only warn if a value is given
+            if value is not None:
+                msg_logger.msg(msg + ' is deprecated and will be deleted in future versions',
+                               hint=item.doc_str, strong_warning=True, caller=caller)
+
+        elif type(item) == dict:
+            check_param_keys(value, item, msg_logger, caller=caller, crumbs=f'{crumbs}{key}{crumb_seperator}')
 
 @dataclass
 class _ParameterBaseDataClassChecker():

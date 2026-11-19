@@ -11,7 +11,7 @@ from oceantracker import definitions
 from oceantracker.util import  time_util, json_util,basic_util
 from oceantracker.reader._oceantracker_dataset import OceanTrackerDataSet
 from oceantracker.util.parameter_checking import ParameterMapAlternativesChecker, ParameterListMapAlternativesChecker
-from oceantracker.util.parameter_checking import ParamValueChecker, ParameterListChecker
+from oceantracker.util.parameter_checking import ParamValueChecker, ParameterListChecker, check_param_keys
 
 
 def make_a_reader_from_params(users_reader_params):
@@ -143,6 +143,14 @@ def _detect_hydro_file_format(reader_params, dataset):
         if isf:  break
 
     if not any(is_format):
+        # a misspelled reader param, eg field_variable_map, can be why detection failed,
+        # so first report top level params not known to any of the tried readers
+        # (nested maps differ between readers, so their keys are not checked here)
+        known_to_any = {}
+        for r in readers:
+            known_to_any.update({key: None if type(item) == dict else item for key, item in r.default_params.items()})
+        check_param_keys(reader_params, known_to_any, ml, caller=readers[0] if len(readers) == 1 else None)
+
         ml.msg(f' In detecting file format, not all tests against known file format variables were passed')
         for r in readers:
             params= r.params
@@ -164,11 +172,16 @@ def _detect_hydro_file_format(reader_params, dataset):
     # make and merge defaults for found reader
     reader = readers[is_format.index(True)]
 
+    # candidates were made without key checks, so check the user's reader params against the found reader
+    check_param_keys(reader_params, reader.default_params, ml, caller=reader)
+
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
 
 def _import_reader(reader_params, dataset):
-    reader = si.class_importer.make_class_instance_from_params('reader', reader_params)
+    # candidate readers are given all the user's reader params, including those
+    # specific to another reader, eg hgrd_file_name, so check keys only once the reader is known
+    reader = si.class_importer.make_class_instance_from_params('reader', reader_params, check_keys=False)
     reader.dataset = dataset
     report = hindcast_variable_integrity_report(reader)
 
@@ -310,7 +323,6 @@ def _catalog_fields(reader):
 
         field_params = dict(time_varying=file_vars[v1]['time_varying'],
                             is3D=any(x in params['all_z_dims'] for x in file_vars[v1]['dims']),  )
-        field_params['zlevels'] = info['num_z_interfaces'] if field_params['is3D'] else 1
 
         # work out if variable is a vector field
         file_vars_info = {}

@@ -242,7 +242,7 @@ class GLORYSreader(_BaseStructuredReader):
         # assume no tide, so create a dummy zero tide reader field
         i = self._add_a_reader_field(
             'tide',
-            dict(is3D=False,time_varying=True, initial_value=0.),
+            dict(is3D=False,time_varying=True),
             dummy=True)
         return i
 
@@ -650,7 +650,7 @@ class GLORYSreader_deprecated(_BaseStructuredReader):
 
     def setup_tide_field(self):
         # assume no tide, so create a dummy zero tide reader field
-        i = self._add_a_reader_field('tide',dict(is3D=False,time_varying=True, initial_value=0.), dummy=True)
+        i = self._add_a_reader_field('tide',dict(is3D=False,time_varying=True), dummy=True)
         return i
 
     def update_tide_field(self, buffer_index, nt):
