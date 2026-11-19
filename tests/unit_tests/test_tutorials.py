@@ -36,10 +36,8 @@ def execute_notebook(notebook_path, timeout=300):
         return True, ""
             
     except CellExecutionError as e:
-        # This exception contains detailed cell execution info
-        error_msg = f"Error in cell {e.cellnum}:\n"
-        error_msg += f"{e.traceback}\n"
-        return False, error_msg
+        # str(e) contains the failing cell's source and the kernel traceback
+        return False, f"{e.ename}: {e.evalue}\n{e}\n"
         
     except TimeoutError as e:
         return False, f"Notebook execution timed out after {timeout} seconds"
