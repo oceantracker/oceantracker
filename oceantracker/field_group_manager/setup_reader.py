@@ -192,22 +192,22 @@ def _time_sort_files(reader, file_info):
     # so must do this for all variables to ensure all files are covered, with some unnecessary repeats when more than one variable in same file
     #   time is not done as done a below as a "coordinate"
     vel_var0 = reader.params['field_variable_map']['water_velocity'][0]
-    for var_name, var in info['variables'].items():
+    for name, var in info['variables'].items():
         if not var['time_varying']: continue
-        if var_name == time_var : continue
+        if name == time_var : continue
         # only look at time varying variables, which are not time
-        var['time'] = np.concatenate([file_info[fID]['time'] for fID in var['fileIDs']])
+        #var['time'] = np.concatenate([file_info[fID]['time'] for fID in var['fileIDs']])
 
     # set each file's first/last hindcast time step only from variables spanning the whole hindcast,
     # variables only in some of the files, eg. extra outputs added part way through a run,
     # would otherwise give file time steps counted from the first file they are in
-    n_steps = info['variables'][vel_var0]['time'].size
+    #n_steps = info['variables'][vel_var0]['time'].size
     partial_vars = []
-    for var_name, var in info['variables'].items():
-        if not var['time_varying'] or var_name == time_var: continue
-        if var['time'].size != n_steps:
-            partial_vars.append(var_name)
-            continue
+    for name, var in info['variables'].items():
+        if not var['time_varying'] or name == time_var: continue
+        #if var['time'].size != n_steps:
+        #    partial_vars.append(name)
+        #    continue
         n0 = 0
         for fID in var['fileIDs']:
             file_info[fID]['first_time_step_in_file'] = n0
@@ -218,28 +218,30 @@ def _time_sort_files(reader, file_info):
         si.msg_logger.msg(f'Hindcast variables only in some files, these can not be used as fields: {partial_vars}',
                           hint='variables are missing from some hindcast files, eg. outputs switched on part way through the hydro-model run', note=True)
 
+    # assemble global time coord from time sorted time variable
+    time_coord = np.zeros((0,),dtype=np.float64)
+    for ID in info['variables'][time_var]['fileIDs']:
+        time_coord = np.append(time_coord, file_info[ID]['time'])
 
     # if variables in different files, eg schism v5, time may be in many files,
     #  only use file IDs for the ones for the first water velocity variable, which must always be in hindcasts
     vel_var0= reader.params['field_variable_map']['water_velocity'][0]
-    time =  info['variables'][vel_var0]['time']
-    info['time_coord'] = time
+    #time =  info['variables'][vel_var0]['time']
+    info['time_coord'] = time_coord
 
-    if time.size < 2:
-        si.msg_logger.msg('Velocity variable in hydro files has less than 2 time steps', hint = 'need at least 2 steps for particle tracking', fatal_error=True)
+    if time_coord.size < 2:
+        si.msg_logger.msg('Hindcast has les than 2 time steps', hint = 'need at least 2 steps for particle tracking', fatal_error=True)
 
    # hindcast start and ends times from time_coord
-    info['start_time'] = time[0]
-    info['end_time'] = time[-1]
-    info['duration'] = time[-1] - time[0]
-    info['total_time_steps'] =  time.size
+    info['start_time'] = time_coord[0]
+    info['end_time'] = time_coord[-1]
+    info['duration'] = time_coord[-1] - time_coord[0]
+    info['total_time_steps'] =  time_coord.size
 
-    info['time_step'] = np.median(np.diff(time)) # todo should this be mode?
+    info['time_step'] = np.median(np.diff(time_coord)) # todo should this be mode?
 
     info['start_date'] = time_util.seconds_to_isostr(info['start_time'])
     info['end_date'] = time_util.seconds_to_isostr(info['end_time'])
-    info['dates'] = time_util.seconds_to_isostr( time)
-
     pass
 
 def _make_variable_time_step_to_fileID_map(reader, file_info):
