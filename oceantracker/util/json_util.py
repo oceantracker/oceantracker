@@ -98,11 +98,17 @@ class MyEncoder(json.JSONEncoder):
             print(' JSON encode error- oceantracker ignoring object type ' + str(type(obj)) + ' value=' + str(obj))
             return f'Bad json value, unencodable type {str(type(obj))}  values= {str(obj)}'
 
+def json_file_name(file_name):
+    # name write_JSON writes to, ie. with ".json" added if the name does not end with it
+    # (not just ".json" anywhere in the path, which matches dir names containing ".json")
+    return file_name if file_name.lower().endswith('.json') else file_name + '.json'
+
 def write_JSON(file_name,d, indent=4):
     # aviod changing given file name
 
     dir_name = path.dirname(file_name)
-    if not path.isdir(dir_name):
+    # dir_name is '' for a file name without a dir, ie. in the current dir
+    if dir_name != '' and not path.isdir(dir_name):
         try:
             makedirs(dir_name)
 
@@ -110,11 +116,7 @@ def write_JSON(file_name,d, indent=4):
             print(f'Error>>  Could not create dir to write json file "{file_name}", dir location or drive does not exist?')
             raise (e)
 
-
-    if '.json' in file_name.lower():
-        fn = file_name
-    else:
-        fn=file_name+'.json'
+    fn = json_file_name(file_name)
     try:
         with open(fn, mode='w') as fp:
             json.dump(d, fp, cls=MyEncoder, indent=indent)

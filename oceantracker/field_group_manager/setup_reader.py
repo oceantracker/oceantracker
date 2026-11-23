@@ -26,6 +26,8 @@ def make_a_reader_from_params(reader_params):
 
     # get  file_info, var_info, dim_info from cataloging hindcast or reading cached version
     cache_file  = reader_params['hindcast_catalog_cache_file']  if 'hindcast_catalog_cache_file' in reader_params else None
+    # write_JSON adds ".json" if not in the name, so look for the cache under the name it was written to
+    if cache_file is not None: cache_file = json_util.json_file_name(cache_file)
 
     t1 = perf_counter()
     ml.msg('Building hindcast file catalog')

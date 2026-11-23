@@ -58,15 +58,9 @@ def _read_tracks(run_output_dir):
         return {name: ds[name].values for name in ds.data_vars}
 
 
-@pytest.mark.parametrize("reader_fixture, locations_fixture, location_key", READERS)
-def test_cached_catalog_reproduces_run(request, monkeypatch, tmp_path, base_settings, basic_point_release,
-                                       default_run_output_dir, reader_fixture, locations_fixture, location_key):
-    reader = request.getfixturevalue(reader_fixture)
-    release = {**basic_point_release, "points": request.getfixturevalue(locations_fixture)[location_key]}
-
-    # cache file in a dir that does not exist yet, which writing the cache must create
-    cache_file = str(tmp_path / "catalog_cache" / "hindcast_catalog.json")
-
+def _check_cache_built_then_reused(monkeypatch, base_settings, reader, release, run_output_dir,
+                                   cache_file, written_cache_file):
+    # written_cache_file, where the cache is expected to be written given cache_file
     # count how often the hindcast files are cataloged
     n_catalogs_built = []
     build_hindcast_info = get_file_info.build_hindcast_info
@@ -78,17 +72,17 @@ def test_cached_catalog_reproduces_run(request, monkeypatch, tmp_path, base_sett
     monkeypatch.setattr(get_file_info, "build_hindcast_info", counting_build_hindcast_info)
 
     # first run, no cache yet, so catalogs the files and writes the cache
-    built_dir = path.join(default_run_output_dir, "catalog_built")
+    built_dir = path.join(run_output_dir, "catalog_built")
     _run(base_settings, reader, release, built_dir, cache_file)
     assert len(n_catalogs_built) == 1
-    assert path.isfile(cache_file), "cache file was not written"
-    cache_modified = path.getmtime(cache_file)
+    assert path.isfile(written_cache_file), "cache file was not written"
+    cache_modified = path.getmtime(written_cache_file)
 
     # second run reads the cache, without cataloging the files or rewriting the cache
-    cached_dir = path.join(default_run_output_dir, "catalog_cached")
+    cached_dir = path.join(run_output_dir, "catalog_cached")
     _run(base_settings, reader, release, cached_dir, cache_file)
     assert len(n_catalogs_built) == 1, "files were cataloged again although the cache file exists"
-    assert path.getmtime(cache_file) == cache_modified, "existing cache file was rewritten"
+    assert path.getmtime(written_cache_file) == cache_modified, "existing cache file was rewritten"
 
     # same reader setup
     assert _read_reader_info(cached_dir) == _read_reader_info(built_dir)
@@ -99,3 +93,29 @@ def test_cached_catalog_reproduces_run(request, monkeypatch, tmp_path, base_sett
     assert built_tracks.keys() == cached_tracks.keys()
     for name in built_tracks:
         np.testing.assert_array_equal(cached_tracks[name], built_tracks[name], err_msg=f'track variable "{name}"')
+
+
+@pytest.mark.parametrize("reader_fixture, locations_fixture, location_key", READERS)
+def test_cached_catalog_reproduces_run(request, monkeypatch, tmp_path, base_settings, basic_point_release,
+                                       default_run_output_dir, reader_fixture, locations_fixture, location_key):
+    reader = request.getfixturevalue(reader_fixture)
+    release = {**basic_point_release, "points": request.getfixturevalue(locations_fixture)[location_key]}
+
+    # cache file in a dir that does not exist yet, which writing the cache must create
+    cache_file = str(tmp_path / "catalog_cache" / "hindcast_catalog.json")
+    _check_cache_built_then_reused(monkeypatch, base_settings, reader, release, default_run_output_dir,
+                                   cache_file, cache_file)
+
+
+@pytest.mark.parametrize("cache_name, written_name", [
+    # no dir, ie. in the current dir, where there is no dir to create
+    ("hindcast_catalog.json", "hindcast_catalog.json"),
+    # no ".json", which write_JSON adds, so must be looked for with it added
+    ("hindcast_catalog", "hindcast_catalog.json"),
+])
+def test_cache_file_names(monkeypatch, tmp_path, base_settings, basic_point_release, default_run_output_dir,
+                          reader_schism3D, schism3D_release_locations, cache_name, written_name):
+    monkeypatch.chdir(tmp_path)
+    release = {**basic_point_release, "points": schism3D_release_locations["deep_point"]}
+    _check_cache_built_then_reused(monkeypatch, base_settings, reader_schism3D, release, default_run_output_dir,
+                                   cache_name, str(tmp_path / written_name))

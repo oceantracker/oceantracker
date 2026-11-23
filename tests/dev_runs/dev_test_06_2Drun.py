@@ -9,7 +9,6 @@ def main(args):
                 use_dispersion=False,
              use_A_Z_profile=False,
             NUMBA_cache_code=True,
-            cache_hindcast_catalog=True,
             )
 
     ot.add_class('tracks_writer',update_interval = 1*3600, write_dry_cell_flag=False)
