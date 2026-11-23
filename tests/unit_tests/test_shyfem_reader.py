@@ -41,9 +41,11 @@ def reader_shyfem3D_grd():
     return dict(input_dir=SHYFEM_GRD_DIR, file_mask='*.nc', grd_file_name=GRD_FILE)
 
 
-def _run(settings, reader_params, output_file_base, points=RELEASE_POINTS, **extra):
+def _run(settings, reader_params, run_name, points=RELEASE_POINTS, **extra):
+    # each run gets its own sub dir of the test's output dir, "run_output_dir" takes precedence over
+    # "output_file_base", so two runs in one test would otherwise share, and delete, one dir
     ot = OceanTracker()
-    ot.settings(**{**settings, 'output_file_base': output_file_base,
+    ot.settings(**{**settings, 'run_output_dir': path.join(settings['run_output_dir'], run_name),
                    'write_tracks': True, 'use_dispersion': False,
                    'time_step': 600, 'max_run_duration': 2 * 3600, **extra})
     ot.add_class('reader', **reader_params)
@@ -55,8 +57,10 @@ def _run(settings, reader_params, output_file_base, points=RELEASE_POINTS, **ext
 
 
 def _tracks(case_info_file):
+    assert case_info_file is not None, 'OceanTracker run failed, see its log above'
     run_dir = path.dirname(case_info_file)
-    return xr.open_dataset(path.join(run_dir, 'tracks_rectangular_000.nc'), decode_timedelta=False)
+    # load into memory and close the file, an open file blocks deleting the run dir on Windows
+    return xr.load_dataset(path.join(run_dir, 'tracks_rectangular_000.nc'), decode_timedelta=False)
 
 
 # ".grd" file reading
