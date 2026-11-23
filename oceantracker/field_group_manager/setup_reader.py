@@ -1,6 +1,8 @@
 import xarray as xr
 import numpy as np
 from copy import copy, deepcopy
+
+from numba.np.arraymath import np_asarray
 from scipy import stats
 from time import perf_counter
 from operator import itemgetter
@@ -23,24 +25,36 @@ def make_a_reader_from_params(reader_params):
     ml = si.msg_logger
 
     # get  file_info, var_info, dim_info from cataloging hindcast or reading cached version
-    use_cache = 'hindcast_catalog_cache_file' in reader_params and  reader_params['hindcast_catalog_cache_file'] is not None
+    cache_file  = reader_params['hindcast_catalog_cache_file']  if 'hindcast_catalog_cache_file' in reader_params else None
 
+    t1 = perf_counter()
+    ml.msg('Building hindcast file catalog')
     # params not merged yet so check what's given
-    if use_cache and path.isfile(reader_params['hindcast_catalog_cache_file']):
+    if cache_file is not None and path.isfile(cache_file):
         # read old version
-        with open(reader_params['hindcast_catalog_cache_file'], "rb") as f:
-            loaded_ds = pickle.load(f)
-        file_info, var_info, dim_info = itemgetter("file_info", "var_info", "dim_info")(loaded_ds)
+        ml.msg(f'Reading cached hindcast catalog: "{cache_file}"',tabs=2)
+        ds = json_util.read_JSON(cache_file)
+        file_info, var_info, dim_info = itemgetter("file_info", "var_info", "dim_info")(ds)
+        # rebuild xarray of times in each file from json
+        for f in ds['file_info']:
+            if f['time'] is None: continue
+            f['time'] = xr.DataArray(data = np.asarray(f['time']),dims = f['time_dim'],attrs=f['time_attr'])
+
     else:
         # create new catalog
         file_info, var_info, dim_info = get_file_info.build_hindcast_info(reader_params)
-        if use_cache and not path.isfile(reader_params['hindcast_catalog_cache_file']):
-            # save the catalog if file not there
-            dir_name=path.dirname(reader_params['hindcast_catalog_cache_file'])
-            if not path.isdir(dir_name): makedirs(dir_name)
-            ds =  dict(file_info=file_info, var_info=var_info, dim_info=dim_info)
-            with open(reader_params['hindcast_catalog_cache_file'], "wb") as f:
-                pickle.dump(ds, f, protocol=-1)
+        if cache_file is not None and not path.isfile(cache_file):
+            # save the catalog if file not already there
+            ml.msg(f'Saving new cached hindcast json catalog "{cache_file}"',tabs=1)
+            ds =  dict(file_info=deepcopy(file_info), var_info=var_info, dim_info=dim_info)
+            # convert file_info times in dict info to load later  for json
+            for f in ds['file_info']:
+                if f['time'] is None: continue
+                f['time_dim'] = f['time'].dims[0]
+                f['time_attr'] = f['time'].attrs
+                f['time'] = f['time'].data # make a numpy array
+            json_util.write_JSON(cache_file,ds)
+    ml.progress_marker('Built catalog', start_time=t1, tabs=1)
 
     # detect reader format and add class_name to params
     reader = _detect_hydro_file_format(reader_params, var_info, dim_info)
@@ -140,7 +154,7 @@ def _detect_hydro_file_format(reader_params, var_info, dim_info):
     # make and merge defaults for found reader
     reader = readers[is_format.index(True)]
 
-    ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
+    ml.msg(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"',tabs=1)
     return reader
 
 def _import_reader(reader_params, var_info, dim_info):
@@ -183,20 +197,10 @@ def _time_sort_files(reader, file_info):
         if  var['time_varying']:
             start_times = np.asarray([file_info[ID]['start_time'] for ID in var['fileIDs']])
             file_order = np.argsort(start_times)
-            var['fileIDs'] = var['fileIDs'][file_order]
+            var['fileIDs'] = [var['fileIDs'][o] for o in file_order]
         else:
             var['fileIDs'] = var['fileIDs'][0]  # todo keep as list??
 
-    #  build a time for every variables
-    #  note time may appear in many files if variables are split between file, eg schsim v5 than once in each file
-    # so must do this for all variables to ensure all files are covered, with some unnecessary repeats when more than one variable in same file
-    #   time is not done as done a below as a "coordinate"
-    vel_var0 = reader.params['field_variable_map']['water_velocity'][0]
-    for name, var in info['variables'].items():
-        if not var['time_varying']: continue
-        if name == time_var : continue
-        # only look at time varying variables, which are not time
-        #var['time'] = np.concatenate([file_info[fID]['time'] for fID in var['fileIDs']])
 
     # set each file's first/last hindcast time step only from variables spanning the whole hindcast,
     # variables only in some of the files, eg. extra outputs added part way through a run,
@@ -218,28 +222,27 @@ def _time_sort_files(reader, file_info):
         si.msg_logger.msg(f'Hindcast variables only in some files, these can not be used as fields: {partial_vars}',
                           hint='variables are missing from some hindcast files, eg. outputs switched on part way through the hydro-model run', note=True)
 
-    # assemble global time coord from time sorted time variable
+    # assemble global time coord from files with warter velocity
+    u_vel_var = reader.params['field_variable_map']['water_velocity'][0] # only look at first vel. component
     time_coord = np.zeros((0,),dtype=np.float64)
-    for ID in info['variables'][time_var]['fileIDs']:
+    for ID in info['variables'][u_vel_var]['fileIDs']:
         time_coord = np.append(time_coord, file_info[ID]['time'])
 
-    # if variables in different files, eg schism v5, time may be in many files,
-    #  only use file IDs for the ones for the first water velocity variable, which must always be in hindcasts
-    vel_var0= reader.params['field_variable_map']['water_velocity'][0]
-    #time =  info['variables'][vel_var0]['time']
-    info['time_coord'] = time_coord
+    # remove time variable, as for formats with variables in different files,
+    # as time may be every file, so too many in fileIDs mapped
+    del info['variables'][time_var]
 
     if time_coord.size < 2:
-        si.msg_logger.msg('Hindcast has les than 2 time steps', hint = 'need at least 2 steps for particle tracking', fatal_error=True)
+        si.msg_logger.msg('Hindcast has less than 2 time steps', hint = 'need at least 2 steps for particle tracking', fatal_error=True)
 
    # hindcast start and ends times from time_coord
+    info['time_coord'] = time_coord
     info['start_time'] = time_coord[0]
     info['end_time'] = time_coord[-1]
     info['duration'] = time_coord[-1] - time_coord[0]
     info['total_time_steps'] =  time_coord.size
 
     info['time_step'] = np.median(np.diff(time_coord)) # todo should this be mode?
-
     info['start_date'] = time_util.seconds_to_isostr(info['start_time'])
     info['end_date'] = time_util.seconds_to_isostr(info['end_time'])
     pass
@@ -437,7 +440,7 @@ def _check_file_variables_have_same_time_and_dim_sizes(reader):
     ml = si.msg_logger
 
     # check all variables have same number of time steps
-    var_time_steps = {name: var['time'].size for name, var in  info['variables'].items() if 'time' in var}
+    var_time_steps = {name: var['time_step_to_fileID_map'].size for name, var in  info['variables'].items() if 'time_step_to_fileID_map' in var}
     result = stats.mode([n for name,n in var_time_steps.items()])
     if result.count > 1:
         bad_vars= { name: n for name,n in var_time_steps.items() if n != result.mode}
@@ -448,6 +451,7 @@ def _check_file_variables_have_same_time_and_dim_sizes(reader):
 
     # check dims sizes the same in all files
     for name, dim in  info['dims'].items():
+        if name == info['time_dim']: continue # files may differ in number of time steps
         sizes= np.asarray([ fi['dims'][name] if name in fi['dims'] else  0 for fi in info['file_info']])
         result = stats.mode(sizes[sizes>0])
         if result.count > 1:
@@ -486,24 +490,27 @@ def _check_time_consistency(reader):
 
         reader.info['time_step_repeats'] = [[time_util.seconds_to_isostr(a), time_util.seconds_to_isostr(b)] for a, b in zip(t1, t2)]
 
-    sel = np.flatnonzero( dt > 3 * info['time_step'])
+    sel = np.flatnonzero( dt > 4 * info['time_step'])
     if np.any(sel):
+        # show where errors are
         t1 = reader.info['time_coord'][sel]
         t2 = reader.info['time_coord'][sel+1]
+        s = ''
+        for d1, d2 in [[time_util.seconds_to_isostr(a), time_util.seconds_to_isostr(b)] for a, b in zip(t1, t2)]:
+            s += f'\t\t Gap from: {d1}  to {d2},\n'
 
-        si.msg_logger.msg('Some hindcast time steps are longer than 3 average time steps',fatal_error=True,
-           hint = f'Hindcast may be missing files or othe time error, eg at {time_util. seconds_to_isostr(t1[0])} to {time_util. seconds_to_isostr(t2[0])}, see hindcast_info.json for full list of dates', warning=True)
+        si.msg_logger.msg('Some hindcast time steps are longer than 4 average time steps',fatal_error=True,
+           hint = f'Hindcast may be missing files or other time error, see hindcast_info.json for full list of dates\n'+s,
+                          continue_after_error=True)
 
-        for d1,d2  in [ [time_util. seconds_to_isostr(a),time_util. seconds_to_isostr(b) ] for a,b in zip(t1,t2) ]:
-            si.msg_logger.msg(f'Gap from {d1}  to {d2}' , error=True, tabs=2)
-
-        si.msg_logger.msg('Hindcast must have all time steps', fatal_error=True,
-                            hint=f'Find missing files, check al time steps are in all files, covering above time gaps')
-
+        si.msg_logger.msg('Hindcast must have all time steps, or set reader param "ignore_time_gaps=True"',
+                            fatal_error=True,
+                            continue_after_error=reader.params['ignore_time_gaps'])
+        pass
     return
 
 def _detect_vel_var_and_if_3D(reader, var_info, dim_info):
-    # work out if hincast id 3D by checking if vel is 3D and assign water_velovity vars
+    # work out if hindcast id 3D by checking if vel is 3D and assign water_velovity vars
 
     params= reader.params
     fvm = params['field_variable_map']

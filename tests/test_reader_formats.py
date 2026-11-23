@@ -1,3 +1,5 @@
+from matplotlib.pyplot import title
+
 from oceantracker.main import run
 from oceantracker.plot_output import plot_tracks
 from oceantracker.read_output.python import load_output_files
@@ -37,7 +39,7 @@ def default_params():
 
     return  params
 
-def get_case(n):
+def get_case(n_case, args):
     max_days = 5
     ax = None
 
@@ -51,13 +53,12 @@ def get_case(n):
     is3D=True
     water_depth_file = None
     poly_points=None
-    title = ''
 
     params= default_params()
     show_grid = False
     geo_cords= False
 
-    match n:
+    match n_case:
         case 100:
             root_input_dir = r'Z:\Hindcasts\NZ_region\2024_OceanNumNZ-2022-06-20'
             output_file_base = 'NZnational'
@@ -85,9 +86,9 @@ def get_case(n):
         case 141:
             #schism v5,
             root_input_dir = r'D:\Hindcast_reader_tests\Schimsv5\WHOI_calvin\SCHISM_v5'
-            output_file_base = 'Xlavin Schim v5'
+            output_file_base = 'Calvin Schim v5'
             file_mask = '*.nc'
-
+            title= 'SCHISM_v5 calvin'
             x0 = [[-155, 20],
                   [-160, 21.5],
                   [-158, 20]
@@ -146,7 +147,7 @@ def get_case(n):
                   ]
             x0 = cord_transforms.WGS84_to_NZTM(np.flip(np.asarray(x0), axis=1)).tolist()
             ax = None  # Auck
-            title = 'test_pelorus'
+            title = 'SCHISM pelorus'
 
         case 154:
             root_input_dir = r'D:\Hindcast_reader_tests\Schimsv5\Schism_CSIRO_all_Aust_chapps'
@@ -209,7 +210,7 @@ def get_case(n):
             x0 = np.flip(np.asarray(x0), axis=1)
             file_mask  =  'DopAnV2R3-ini2007_da_his.nc'
             output_file_base= 'ROMS'
-            title = 'ROMS test'
+            title = 'ROMS DopAnV2R3'
             show_grid = True
             geo_cords=True
 
@@ -241,7 +242,7 @@ def get_case(n):
             x0 = np.flip(np.asarray(x0),axis=1)
             file_mask  =  'nz5km_his*.nc'
             output_file_base= 'ROMS_moana'
-            title = 'ROMS test'
+            title = 'ROMS Moana'
             show_grid = True
             geo_cords = True
         case 400:
@@ -263,7 +264,7 @@ def get_case(n):
             x0=[[230372.0534805571, 7581341.601568772]]
             file_mask = 'Exmouth_FlowFM*.nc'
             output_file_base = 'DELF3D-FM_Exmouth'
-            title = 'DELF3D-FM test'
+            title = 'DELF3D-FM Exmouth'
             is3D = False
             show_grid = False
             time_step = 10 * 60
@@ -274,7 +275,7 @@ def get_case(n):
             x0=[[230372.0534805571, 7581341.601568772]]
             file_mask = 'FlowFM_map*.nc'
             output_file_base = 'DELF3D-FM-sigma'
-            title = 'DELF3D-FM sigma'
+            title = 'DELF3D-FM AIMS sigma'
 
             show_grid = True
 
@@ -312,7 +313,7 @@ def get_case(n):
 
             file_mask = 'CircQuay*_map.nc'
             output_file_base = 'CircQuay'
-            title = 'CircQuay'
+            title = 'DELFT3D CircQuay'
             #reader = 'oceantracker.reader.dev_delft_fm.DELFTFM'
             is3D = True
             show_grid = True
@@ -341,7 +342,7 @@ def get_case(n):
             root_input_dir = r'D:\Hindcast_reader_tests\Delft3D\DEFT3D-2D-ashmore_reef_camille'
             file_mask = 'FlowFM_map.nc'  # hydrodynamic file name
 
-            title = 'Delft3D\Perth_ashmore_reef_camille'
+            title = 'Delft3D Perth_ashmore_reef_camille'
             is3D = False
             show_grid = True
             time_step = 10 * 60
@@ -372,7 +373,7 @@ def get_case(n):
 
             file_mask = '*.nc'
             output_file_base = 'GLORYS'
-            title = 'GLORYS test'
+            title = 'GLORYS baltic test'
             root_input_dir = r'D:\Hindcast_reader_tests\Glorys\BalticSea'
             use_open_boundary = True
             max_days =10
@@ -395,7 +396,7 @@ def get_case(n):
                   ]
 
             output_file_base = 'GLORYS3D'
-            title = 'GLORYS 3D test'
+            title = 'GLORYS 3D seaspurge '
             use_open_boundary = True
             max_days =10
             time_step = 1800.
@@ -445,7 +446,7 @@ def get_case(n):
                     ]
                 x0 = np.flip(np.asarray(x0), axis=1)
 
-                title = 'nested test'
+                title = 'nested  NZ schism Whangarei'
                 nested_readers= [dict(name='nest1',
                         input_dir = r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\schism_standard_variables\Existing_Sep2012_temp',
                         hgrid_file_name=r'D:\Hindcasts\NorthIsland\2023WhangareiHarbour2012\schism_standard_variables\hgrid.gr3',
@@ -462,6 +463,7 @@ def get_case(n):
             x0 = [[20000, 10000],
                    ]
             reader ='oceantracker.reader.dummy_data_reader.DummyDataReader'
+            title ='Dummy test  bed'
         case _:
 
             return None, None
@@ -480,7 +482,8 @@ def get_case(n):
                     max_run_duration= max_days*24*3600, time_step= time_step, use_open_boundary=use_open_boundary )
     params['reader'].update(input_dir=root_input_dir, regrid_z_to_sigma_levels = not args.nativez,
                             file_mask=file_mask,
-                            hindcast_catalog_cache_file= path.join(r'F:\temp\OTcache', path.basename(root_input_dir))+'_cat.pkl' if args.cache else None,
+                            ignore_time_gaps = True if n_case in [100,] else False, # these cae have issues
+                            hindcast_catalog_cache_file=  path.join(r'F:\temp\OTcache', title.replace(' ','_'))+'_cat.json' if args.cache else None,
                             class_name=reader)
     if water_depth_file is not None:
         params['reader']['water_depth_file'] = water_depth_file
@@ -513,7 +516,7 @@ if __name__ == '__main__':
     parser.add_argument('--test', default=None, type= int)
     parser.add_argument('--group', default=None, type=str)
     parser.add_argument('-all', action='store_true')
-    parser.add_argument('-cache', action='store_true') # cahe hidcast catalog
+    parser.add_argument('-cache', action='store_true') # cache hidcast catalog
 
     parser.add_argument('-nativez', action='store_true')
     parser.add_argument('-gridplot', action='store_true')
@@ -542,11 +545,13 @@ if __name__ == '__main__':
         # run all tests
         tests = [item for key, sublist in test_groups.items() for item in sublist]
 
+    tests= list(set(tests)) # make unique
+    tests.sort()
+
     for n in tests:
-        params, plot_opt= get_case(n)
+        params, plot_opt= get_case(n, args)
         if params is None: continue
         params.update( root_output_dir = root_output_dir,
-
                     dev_debug_plots = args.debug_plots,
                     use_A_Z_profile = False,
                     debug=True,

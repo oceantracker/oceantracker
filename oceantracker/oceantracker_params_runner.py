@@ -3,7 +3,7 @@ import sys
 from copy import deepcopy, copy
 from os import path
 import numpy as np
-
+import traceback
 
 # import shared info, but force a fresh import to avoid contamination between runs of shared variable
 # must be done before other ot imports

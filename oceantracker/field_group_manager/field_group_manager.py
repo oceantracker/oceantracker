@@ -37,7 +37,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         self.reader, add_info = self._make_a_reader(reader_params)
         # write catalog
-        json_util.write_JSON(path.join(si.run_info.run_output_dir, f'hindcast_catalog{info["gridID"]:03d}'),
+        json_util.write_JSON(path.join(si.run_info.run_output_dir, f'reader_info_{info["gridID"]:03d}'),
                              self.reader.info)
         self.interpolator = self._set_up_interpolator( self.reader)
 
@@ -117,7 +117,7 @@ class FieldGroupManager(ParameterBaseClass):
 
         # set buffer index from this time and next inside stepinfo
         # get next two buffer time steps around the given time in reader ring buffer
-        # plus global time step locations and time ftactions od timre step and put results in interpolators step info numpy structure
+        # plus global time step locations and time fractions od timre step and put results in interpolators step info numpy structure
         info = self.info
         grid =self.reader.grid
         info['current_hydro_model_step'], info['current_buffer_steps'], info['weight_time_steps'] = self.reader._time_step_and_buffer_offsets(time_sec)

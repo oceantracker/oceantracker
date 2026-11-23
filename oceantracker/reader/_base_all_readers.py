@@ -29,10 +29,10 @@ class _BaseReader(ParameterBaseClass):
             input_dir= PVC(None, str, is_required=True),
             file_mask= PVC(None, str, is_required=True, doc_str='Mask for file names, eg "scout*.nc", finds all files matching in  "input_dir" and its sub dirs that match the file_mask pattern'),
             hindcast_catalog_cache_file=PVC(None, str,expert=True,
-                    doc_str='Speed startup by reading a hindcast files/variable catalog created from a pickle file in a prior run, must give full dir and name, eg C:\temp\my_hindcast_catalog.pkl'),
+                    doc_str='Speed startup by reading a hindcast files/variable catalog json file, if found otherwise create catalog for future runs. Must give full dir and name, eg C:\temp\my_hindcast_catalog.json, if issues delete catalog file to rebuild it or set this param=None'),
 
             geographic_coords= PVC(None, bool, expert=True ,
-                    doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-dectect fails',
+                    doc_str='Read file coords as geographic values,normaly auto-detects if in geographic coords, using this setting  forces reading as geograraphic coord if auto-detect fails',
                                     ),
             time_buffer_size= PVC(24, int, min=2, doc_str='This reader parameter has be removed,  now a top level setting , use  setting "time_buffer_size"', obsolete=True),
             load_fields= PLC(None, str, make_list_unique=True,
@@ -67,8 +67,8 @@ class _BaseReader(ParameterBaseClass):
                             ),
 
         field_variables= PLC(None, str, obsolete=True, doc_str=' parameter obsolete, use "load_fields" parameter, with field_variable_map if needed', make_list_unique=True),
-
         drop_variables= PLC(None, str, expert=True, doc_str='List of problematic file variable names to ignore, eg non-critcal variables not present in all files/all times', make_list_unique=True),
+        ignore_time_gaps=PVC(False, bool,doc_str='Keep running even if gaps due to missing time steps/files are found'),
         regrid_z_to_sigma_levels = PVC(True, bool,
                 doc_str='much faster 3D runs by re-griding hydo-model fields for S-layer or LSC vertical grids (eg. SCHISM),  into uniform sigma levels on read based on sigma most curve z_interface profile. Some hydo-model are already uniform sigma, so this param is ignored, eg ROMS')
 
@@ -125,11 +125,6 @@ class _BaseReader(ParameterBaseClass):
     # core reader processes
 
     def initial_setup(self):
-        # build data set from reader builder catalog
-
-        # map variable internal names to names in NETCDF file
-        # set update default value and vector variables map  based on given list
-        # first build data set
 
         self._build_hori_and_vert_grids()
 
@@ -252,7 +247,7 @@ class _BaseReader(ParameterBaseClass):
         grid = self.grid
 
         msg_logger = si.msg_logger
-        msg_logger.progress_marker('Starting grid setup',tabs=0)
+        msg_logger.msg('Starting grid setup',tabs=1)
 
         # node to cell map
         t0 = perf_counter()

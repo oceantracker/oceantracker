@@ -1,7 +1,7 @@
 from  copy import deepcopy, copy
 import numpy as np
 import json, math
-from os import path
+from os import path, makedirs
 from datetime import datetime,date, timedelta
 import traceback
 
@@ -100,6 +100,17 @@ class MyEncoder(json.JSONEncoder):
 
 def write_JSON(file_name,d, indent=4):
     # aviod changing given file name
+
+    dir_name = path.dirname(file_name)
+    if not path.isdir(dir_name):
+        try:
+            makedirs(dir_name)
+
+        except Exception as e:
+            print(f'Error>>  Could not create dir to write json file "{file_name}", dir location or drive does not exist?')
+            raise (e)
+
+
     if '.json' in file_name.lower():
         fn = file_name
     else:
@@ -109,7 +120,7 @@ def write_JSON(file_name,d, indent=4):
             json.dump(d, fp, cls=MyEncoder, indent=indent)
 
     except Exception as e:
-        print('Error>>  Failed to write json file ="' + file_name +'", file location does not exist?')
+        print(f'Error>>  Failed to write json file ="{file_name}", file location does not exist or other error?')
         raise(e)
     pass
 

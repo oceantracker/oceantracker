@@ -63,7 +63,7 @@ class MessageLogger(object ):
     def msg(self, msg_text, note=False,
             hint=None, tag=None, tabs=0, link=None,caller=None,wrap=False,
             warning=False,strong_warning=False, error=False, fatal_error=False,exception=None,
-            dev=False):
+            dev=False,continue_after_error=False):
 
         error = error or fatal_error
 
@@ -96,7 +96,7 @@ class MessageLogger(object ):
 
         # write message
         self._print_msg(m)
-        if error:  raise OTinput_error('Fatal error cannot continue, check first error above')
+        if error and not continue_after_error:  raise OTinput_error('Fatal error cannot continue, check first error above')
 
     def hori_line(self, text=None):
         if text is None:

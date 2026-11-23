@@ -4,7 +4,7 @@
 from os import path
 from copy import deepcopy, copy
 from glob import glob
-
+from time import perf_counter
 import numpy as np
 import xarray as xr
 
@@ -14,13 +14,20 @@ from oceantracker import definitions
 
 def build_hindcast_info(users_reader_params):
     # make list of files with a dict of variables and time values
-
+    ml = si.msg_logger
+    t0 = perf_counter()
+    ml.msg('Cataloging hindcast files variables and reading times from files', tabs=1)
 
     file_list = _get_file_list(users_reader_params)
+    ml.progress_marker(f'Found {len(file_list)} files in dir and sub-dirs of "{users_reader_params["input_dir"]}"', tabs=1)
+
     time_vars = _get_possible_time_variable_names(users_reader_params)
 
     file_info =  _get_file_info(file_list, time_vars)
+
     var_info, dims_info = _get_var_dim_info(file_info)
+
+    ml.progress_marker('Full list of file variables and times complete', start_time=t0, tabs=1)
 
     return file_info, var_info, dims_info
 
@@ -43,7 +50,7 @@ def _get_file_list(reader_params):
         si.msg_logger.msg(f'No files found in input_dir, or its sub-dirs matching mask "{mask}"',
                           hint=f'searching with "gob" mask "{mask}"', fatal_error=True)
 
-    ml.progress_marker(f'Found {len(file_list)} files in dir and sub-dirs of "{reader_params["input_dir"]}"')
+
 
     return file_list
 
@@ -126,10 +133,5 @@ def _get_var_dim_info(file_list):
 
             var_info[name]['fileIDs'].append(fileID)  # build list of file IDs for each variable, not in time order
             dim_info.update(fi['dims'])
-
-
-    # convert fileIDs to array to allow time sorting
-    for name, vi in var_info.items():
-        vi['fileIDs'] = np.asarray(vi['fileIDs']).astype(np.int32)
 
     return var_info, dim_info

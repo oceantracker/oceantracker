@@ -17,7 +17,7 @@ def main(args):
     #ot.settings(NUMBA_cache_code = True)
     hm = dd.hydro_model['demoSchism2D']
     hm['reader'].update( file_mask='Random_order*.nc',
-                         hindcast_catalog_cache_file=r'F:\temp\OTcache\catalog_dev_test01.pkl'
+                         hindcast_catalog_cache_file=r'F:\temp\OTcache\catalog_dev_test01.json'
                          )
     ot.add_class('reader', **hm['reader'])
 
