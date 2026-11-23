@@ -89,7 +89,7 @@
      - RK4
      - RK4, RK45, Explicit Euler; extensible interface for custom advection methods
      - RK2 (Runge-Kutta 2nd order), Euler forward
-     - RK4
+     - RK2 (default), RK4, Euler forward
      - RK4 (Adv_RK4_2D, Adv_RK4_3D)
      - ODE solvers via DifferentialEquations.jl (e.g., Tsit5)
    * - **Diffusion Method**

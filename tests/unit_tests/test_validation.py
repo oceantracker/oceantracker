@@ -37,7 +37,9 @@ def test_schism_validation_run_small(
 ):
     ot = OceanTracker()
     ot.settings(
-        **{**base_settings, "write_tracks": True},
+        # time step halved from the base 1800 s with the switch from RK4 to the RK2 default (v0.5.3.12),
+        # keeping the number of velocity interpolations per run the same
+        **{**base_settings, "write_tracks": True, "time_step": 900},
         use_A_Z_profile=True, # do we need this for the base reference test?
     )
     ot.add_class(

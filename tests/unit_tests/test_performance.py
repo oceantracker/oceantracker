@@ -2,7 +2,9 @@ import pytest
 from oceantracker.main import OceanTracker
 
 # Shared settings for all performance tests
-_PERF_SETTINGS = {"time_step": 30, "use_dispersion": True}
+# time_step was 30 s with RK4 up to v0.5.3.11, halved with the switch to the RK2 default
+# so the number of velocity interpolations, and so timings, stay comparable across versions
+_PERF_SETTINGS = {"time_step": 15, "use_dispersion": True}
 _FIXED_PARTICLES = 1_000_000  # shared across non-scaling tests
 
 
@@ -17,10 +19,10 @@ def test_run_3D_model_performance(
     schism3D_release_locations,
     record_performance,
 ):
-    """Standard single-point benchmark (RK4, 1M particles, 1 processor).
+    """Standard single-point benchmark (RK2, 1M particles, 1 processor).
 
     This is also the processors=1 baseline for the parallelization chart
-    and the RK4 baseline for the RK-order chart.
+    and the RK2 baseline for the RK-order chart.
     """
     ot = OceanTracker()
     ot.settings(**{**(base_settings | _PERF_SETTINGS)}, processors=1)
@@ -47,7 +49,7 @@ def test_run_3D_model_with_tracks_and_stats_performance(
     gridded_2D_ageBased,
     record_performance,
 ):
-    """Benchmark with tracks and time/age-based gridded stats enabled (RK4, 1M particles, 1 processor).
+    """Benchmark with tracks and time/age-based gridded stats enabled (RK2, 1M particles, 1 processor).
 
     Writing tracks and computing stats adds overhead beyond the bare
     particle-tracking baseline in test_run_3D_model_performance.
@@ -91,7 +93,7 @@ def test_run_3D_model_scaling(
     particle_count,
     record_performance,
 ):
-    """Throughput vs particle count (RK4, 1 processor).
+    """Throughput vs particle count (RK2, 1 processor).
 
     1M particle case is omitted — covered by test_run_3D_model_performance.
     """
@@ -112,7 +114,7 @@ def test_run_3D_model_scaling(
 
 
 @pytest.mark.performance_extended
-@pytest.mark.parametrize("RK_order", [1, 2])
+@pytest.mark.parametrize("RK_order", [1, 4])
 def test_scaling_with_RK_order(
     base_settings,
     reader_schism3D,
@@ -122,7 +124,7 @@ def test_scaling_with_RK_order(
 ):
     """Wall time vs RK integration order.
 
-    RK4 baseline is sourced from test_run_3D_model_performance.
+    RK2 baseline (the default) is sourced from test_run_3D_model_performance.
     """
     ot = OceanTracker()
     ot.settings(**{**(base_settings | _PERF_SETTINGS)}, processors=1)
@@ -149,7 +151,7 @@ def test_parallelization_scaling(
     processors,
     record_performance,
 ):
-    """Wall time vs processor count (RK4, 1M particles).
+    """Wall time vs processor count (RK2, 1M particles).
 
     processors=1 baseline is sourced from test_run_3D_model_performance.
     """

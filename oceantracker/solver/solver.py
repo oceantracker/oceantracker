@@ -21,7 +21,9 @@ class Solver(ParameterBaseClass):
         super().__init__()  # required in children to get parent defaults
 
         self.add_default_params({
-                        'RK_order':  PVC(4, int, possible_values=[1, 2, 4]),
+                        'RK_order':  PVC(2, int, possible_values=[1, 2, 4],
+                                         doc_str='Order of the Runge-Kutta time integration: 1 = Euler forward, 2 = RK2 (midpoint method), 4 = RK4. '
+                                                 'Default changed from 4 to 2 in version 0.5.3.12, set to 4 to reproduce earlier results'),
                         'n_sub_steps': PVC(None, int, obsolete=True,  doc_str ='use shared_parameter "time_step", run may not have required time step'),
                         'screen_output_step_count': PVC(None, int, obsolete=True,  doc_str='use main setting "screen_output_time_interval" in seconds. ie not a solver setting')
                             })

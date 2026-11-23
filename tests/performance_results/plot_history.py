@@ -218,6 +218,19 @@ def plot_rk_order(history):
         key = (r["version"], machine_label(r["machine"]))
         groups[key].append((_rk(r["test_name"]), r["elapsed_sec"]))
 
+    # the default RK order is not parametrized, its point is the default benchmark,
+    # which ran RK4 up to v0.5.3.11 and RK2 (the new default) after
+    default_baseline = {
+        (r["version"], machine_label(r["machine"])): r["elapsed_sec"]
+        for r in history
+        if "test_run_3D_model_performance" in r.get("test_name", "")
+        and r.get("elapsed_sec") is not None
+    }
+    for key, points in groups.items():
+        default_rk = 4 if version_sort_key(key[0]) <= (0, 5, 3, 11) else 2
+        if default_rk not in {o for o, _ in points} and key in default_baseline:
+            points.append((default_rk, default_baseline[key]))
+
     fig, ax = plt.subplots(figsize=(8, 5))
     colors = _color_cycle(len(groups))
 
@@ -251,8 +264,8 @@ def plot_rk_order(history):
 def plot_parallelization(history):
     """Elapsed time and parallel speedup vs processor count.
 
-    The processors=1 baseline is borrowed from test_run_3D_model_scaling[1000000],
-    which shares the same config (RK4, 1M particles).
+    The processors=1 baseline is borrowed from test_run_3D_model_performance,
+    which shares the same config (default RK order, 1M particles).
     """
     records = [
         r for r in history
@@ -267,7 +280,7 @@ def plot_parallelization(history):
         return int(m.group(1)) if m else None
 
     # Build a lookup of serial baselines: (version, machine_label) -> elapsed_sec
-    # sourced from the default benchmark (processors=1, RK4, 1M particles)
+    # sourced from the default benchmark (processors=1, default RK order, 1M particles)
     serial_baseline = {
         (r["version"], machine_label(r["machine"])): r["elapsed_sec"]
         for r in history

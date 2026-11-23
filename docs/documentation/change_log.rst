@@ -7,6 +7,19 @@ Change log
 Note: All commits that change either model in- or output in any way are labeled as "breaking changes", excluding bug-fixes
 
 
+Version '0.5.3.12 (unreleased)'
+_______________________________
+
+Breaking changes
+----------------
+
+#. The default time integration is now second order Runge-Kutta (RK2), previously fourth order (RK4).
+   RK2 needs half the velocity interpolations and cell searches per time step, and with linearly interpolated velocity fields RK4 does not improve accuracy over RK2.
+   `Mørk, Nordam and Rühs (2025) <https://doi.org/10.5194/gmd-18-7831-2025>`_ showed that RK4 with linear interpolation only reaches second-order accuracy,
+   and the `KELP v1.0 <https://doi.org/10.48550/arXiv.2611.18528>`_ preprint (Kuznetsov et al., 2026) found RK2 and RK4 gave the same error with linear time interpolation,
+   and uses RK2 as its default. See :doc:`integration methods </documentation/features/integration_methods>`.
+   To reproduce results of earlier versions set the solver parameter ``RK_order=4``.
+
 Version '0.5.3.11 2026-11-19'
 _____________________________
 
