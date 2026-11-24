@@ -135,14 +135,18 @@ def _detect_hydro_file_format(reader_params, dataset):
         # first check if essential variables are in the file
         p = deepcopy(reader_params)
         p['class_name'] = class_name
-        r, isf =  _import_reader(p, dataset)
+        r, isf =  _import_reader(p, dataset,check_keys=False)
 
         # break if all testes passed as found reader
         readers.append(r)
         is_format.append(isf)
         if isf:  break
 
-    if not any(is_format):
+    if any(is_format):
+        # make and merge defaults for found reader by reimporting
+        reader_params['class_name'] = class_name
+        reader,isf = _import_reader(reader_params, dataset,check_keys=True)
+    else:
         # a misspelled reader param, eg field_variable_map, can be why detection failed,
         # so first report top level params not known to any of the tried readers
         # (nested maps differ between readers, so their keys are not checked here)
@@ -169,8 +173,7 @@ def _detect_hydro_file_format(reader_params, dataset):
         ml.msg(f'Check file variable/dims., ' , hint='Adjust reader field/grid/dims maps to match file variables/dims',
                error = True)
 
-    # make and merge defaults for found reader
-    reader = readers[is_format.index(True)]
+
 
     # candidates were made without key checks, so check the user's reader params against the found reader
     check_param_keys(reader_params, reader.default_params, ml, caller=reader)
@@ -178,10 +181,10 @@ def _detect_hydro_file_format(reader_params, dataset):
     ml.progress_marker(f'Detected reader class_name = "{reader.__class__.__module__}.{reader.__class__.__name__}"')
     return reader
 
-def _import_reader(reader_params, dataset):
+def _import_reader(reader_params, dataset, check_keys=True):
     # candidate readers are given all the user's reader params, including those
     # specific to another reader, eg hgrd_file_name, so check keys only once the reader is known
-    reader = si.class_importer.make_class_instance_from_params('reader', reader_params, check_keys=False)
+    reader = si.class_importer.make_class_instance_from_params('reader', reader_params, check_keys=check_keys)
     reader.dataset = dataset
     report = hindcast_variable_integrity_report(reader)
 
