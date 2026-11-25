@@ -30,8 +30,7 @@ def main(args=None):
 
     ot.add_class('reader', **hm['reader'], regrid_z_to_sigma_levels=True,
                  # test mapping with user given maps to existing variables
-                 class_name='SCHISMreader',
-
+                 #class_name='SCHISMreader',
                  field_variable_map=dict(my_field='temp',
                                          water_velocity=['hvel', 'vertical_velocity'], ),
                  load_fields=['my_field'],  # request load user field

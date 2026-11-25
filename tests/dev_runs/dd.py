@@ -32,8 +32,8 @@ def base_settings(fn,args,label=None):
             time_step=600.,  # 10 min time step
             use_random_seed = True,
             debug=True,
-
-            )
+            NUMBA_cache_code=True,
+              )
     return d
 
 image_dir= 'output'
